@@ -100,9 +100,6 @@ public class DevicePolicyManager {
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
 
-    private static final String REMOTE_EXCEPTION_MESSAGE =
-            "Failed to talk with device policy manager service";
-
     private DevicePolicyManager(Context context, boolean parentInstance) {
         this(context,
                 IDevicePolicyManager.Stub.asInterface(
@@ -989,7 +986,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isAdminActive(admin, userId);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1004,7 +1001,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isRemovingAdmin(admin, userId);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1029,7 +1026,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getActiveAdmins(userId);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -1054,7 +1051,7 @@ public class DevicePolicyManager {
             try {
                 return mService.packageHasActiveAdmins(packageName, userId);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1074,7 +1071,7 @@ public class DevicePolicyManager {
             try {
                 mService.removeActiveAdmin(admin, myUserId());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1093,7 +1090,7 @@ public class DevicePolicyManager {
             try {
                 return mService.hasGrantedPolicy(admin, usesPolicy, myUserId());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1109,7 +1106,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isSeparateProfileChallengeAllowed(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1227,7 +1224,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordQuality(admin, quality, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1254,7 +1251,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordQuality(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return PASSWORD_QUALITY_UNSPECIFIED;
@@ -1291,7 +1288,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumLength(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1319,7 +1316,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumLength(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1357,7 +1354,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumUpperCase(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1391,7 +1388,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumUpperCase(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1429,7 +1426,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumLowerCase(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1463,7 +1460,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumLowerCase(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1500,7 +1497,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumLetters(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1533,7 +1530,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumLetters(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1570,7 +1567,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumNumeric(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1603,7 +1600,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumNumeric(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1640,7 +1637,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumSymbols(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1672,7 +1669,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumSymbols(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1709,7 +1706,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordMinimumNonLetter(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1742,7 +1739,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordMinimumNonLetter(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1780,7 +1777,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordHistoryLength(admin, length, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1816,7 +1813,7 @@ public class DevicePolicyManager {
             try {
                 mService.setPasswordExpirationTimeout(admin, timeout, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1840,7 +1837,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordExpirationTimeout(admin, myUserId(), mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1864,7 +1861,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordExpiration(admin, myUserId(), mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1893,7 +1890,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPasswordHistoryLength(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -1931,7 +1928,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isActivePasswordSufficient(myUserId(), mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1951,7 +1948,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isProfileActivePasswordSufficientForParent(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1988,7 +1985,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getCurrentFailedPasswordAttempts(userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return -1;
@@ -2005,7 +2002,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getDoNotAskCredentialsOnBoot();
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2039,7 +2036,7 @@ public class DevicePolicyManager {
             try {
                 mService.setMaximumFailedPasswordsForWipe(admin, num, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2068,7 +2065,7 @@ public class DevicePolicyManager {
                 return mService.getMaximumFailedPasswordsForWipe(
                         admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -2087,7 +2084,7 @@ public class DevicePolicyManager {
                 return mService.getProfileWithMinimumFailedPasswordsForWipe(
                         userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return UserHandle.USER_NULL;
@@ -2155,7 +2152,7 @@ public class DevicePolicyManager {
             try {
                 return mService.resetPassword(password, flags);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2183,7 +2180,7 @@ public class DevicePolicyManager {
             try {
                 mService.setMaximumTimeToLock(admin, timeMs, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2212,7 +2209,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getMaximumTimeToLock(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -2235,7 +2232,7 @@ public class DevicePolicyManager {
             try {
                 mService.lockNow(mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2272,7 +2269,7 @@ public class DevicePolicyManager {
             try {
                 mService.wipeData(flags);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2342,7 +2339,7 @@ public class DevicePolicyManager {
                 }
                 return mService.setGlobalProxy(admin, hostSpec, exclSpec);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -2370,7 +2367,7 @@ public class DevicePolicyManager {
             try {
                 mService.setRecommendedGlobalProxy(admin, proxyInfo);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2386,7 +2383,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getGlobalProxyAdmin(myUserId());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -2515,7 +2512,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setStorageEncryption(admin, encrypt);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return ENCRYPTION_STATUS_UNSUPPORTED;
@@ -2535,7 +2532,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getStorageEncryption(admin, myUserId());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2570,7 +2567,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getStorageEncryptionStatus(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return ENCRYPTION_STATUS_UNSUPPORTED;
@@ -2591,7 +2588,7 @@ public class DevicePolicyManager {
             try {
                 return mService.installCaCert(admin, certBuffer);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2612,7 +2609,7 @@ public class DevicePolicyManager {
             } catch (CertificateException e) {
                 Log.w(TAG, "Unable to parse certificate", e);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2640,7 +2637,7 @@ public class DevicePolicyManager {
                     }
                 }
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return certs;
@@ -2659,7 +2656,7 @@ public class DevicePolicyManager {
                 mService.uninstallCaCerts(admin, new TrustedCertificateStore().userAliases()
                         .toArray(new String[0]));
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -2677,7 +2674,7 @@ public class DevicePolicyManager {
                 mService.enforceCanManageCaCerts(admin);
                 return getCaCertAlias(certBuffer) != null;
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             } catch (CertificateException ce) {
                 Log.w(TAG, "Could not parse certificate", ce);
             }
@@ -2737,7 +2734,7 @@ public class DevicePolicyManager {
                     .getKeySpec(privKey, PKCS8EncodedKeySpec.class).getEncoded();
             return mService.installKeyPair(admin, pkcs8Key, pemCert, alias, requestAccess);
         } catch (RemoteException e) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            throw e.rethrowFromSystemServer();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             Log.w(TAG, "Failed to obtain private key material", e);
         } catch (CertificateException | IOException e) {
@@ -2759,9 +2756,8 @@ public class DevicePolicyManager {
         try {
             return mService.removeKeyPair(admin, alias);
         } catch (RemoteException e) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -2800,7 +2796,7 @@ public class DevicePolicyManager {
             try {
                 mService.setCertInstallerPackage(admin, installerPackage);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2818,7 +2814,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getCertInstallerPackage(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -2845,7 +2841,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setAlwaysOnVpnPackage(admin, vpnPackage);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2865,7 +2861,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getAlwaysOnVpnPackage(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -2890,7 +2886,7 @@ public class DevicePolicyManager {
             try {
                 mService.setCameraDisabled(admin, disabled);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2911,7 +2907,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getCameraDisabled(admin, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2933,7 +2929,7 @@ public class DevicePolicyManager {
             try {
                 return mService.requestBugreport(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -2970,7 +2966,7 @@ public class DevicePolicyManager {
             try {
                 mService.setScreenCaptureDisabled(admin, disabled);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2991,7 +2987,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getScreenCaptureDisabled(admin, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3014,7 +3010,7 @@ public class DevicePolicyManager {
             try {
                 mService.setAutoTimeRequired(admin, required);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3027,7 +3023,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getAutoTimeRequired();
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3052,7 +3048,7 @@ public class DevicePolicyManager {
             try {
                 mService.setForceEphemeralUsers(admin, forceEphemeralUsers);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3066,7 +3062,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getForceEphemeralUsers(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3115,7 +3111,7 @@ public class DevicePolicyManager {
             try {
                 mService.setKeyguardDisabledFeatures(admin, which, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3144,7 +3140,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getKeyguardDisabledFeatures(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return KEYGUARD_DISABLE_FEATURES_NONE;
@@ -3159,7 +3155,7 @@ public class DevicePolicyManager {
             try {
                 mService.setActiveAdmin(policyReceiver, refreshing, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3179,7 +3175,7 @@ public class DevicePolicyManager {
             try {
                 mService.getRemoveWarning(admin, result, myUserId());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3194,7 +3190,7 @@ public class DevicePolicyManager {
                 mService.setActivePasswordState(quality, length, letters, uppercase, lowercase,
                         numbers, symbols, nonletter, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3207,7 +3203,7 @@ public class DevicePolicyManager {
             try {
                 mService.reportFailedPasswordAttempt(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3220,7 +3216,7 @@ public class DevicePolicyManager {
             try {
                 mService.reportSuccessfulPasswordAttempt(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3233,7 +3229,7 @@ public class DevicePolicyManager {
             try {
                 mService.reportFailedFingerprintAttempt(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3246,7 +3242,7 @@ public class DevicePolicyManager {
             try {
                 mService.reportSuccessfulFingerprintAttempt(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3260,7 +3256,7 @@ public class DevicePolicyManager {
             try {
                 mService.reportKeyguardDismissed(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3274,7 +3270,7 @@ public class DevicePolicyManager {
             try {
                 mService.reportKeyguardSecured(userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3327,7 +3323,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setDeviceOwner(who, ownerName, userId);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3409,7 +3405,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getDeviceOwnerComponent(callingUserOnly);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3428,7 +3424,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getDeviceOwnerUserId();
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return UserHandle.USER_NULL;
@@ -3448,7 +3444,7 @@ public class DevicePolicyManager {
             try {
                 mService.clearDeviceOwner(packageName);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -3491,7 +3487,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getDeviceOwnerName();
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3544,7 +3540,7 @@ public class DevicePolicyManager {
                 mService.setActiveAdmin(admin, false, myUserId);
                 return mService.setProfileOwner(admin, ownerName, myUserId);
             } catch (RemoteException re) {
-                throw new IllegalArgumentException("Couldn't set profile owner.", re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3564,7 +3560,7 @@ public class DevicePolicyManager {
             try {
                 mService.clearProfileOwner(admin);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -3578,7 +3574,7 @@ public class DevicePolicyManager {
             try {
                 return mService.hasUserSetupCompleted();
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return true;
@@ -3609,8 +3605,7 @@ public class DevicePolicyManager {
                 }
                 return mService.setProfileOwner(admin, ownerName, userHandle);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-                throw new IllegalArgumentException("Couldn't set profile owner.", re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3638,7 +3633,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setDeviceOwnerLockScreenInfo(admin, info);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3652,7 +3647,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getDeviceOwnerLockScreenInfo();
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3680,7 +3675,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setPackagesSuspended(admin, packageNames, suspended);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return packageNames;
@@ -3699,7 +3694,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPackageSuspended(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3718,7 +3713,7 @@ public class DevicePolicyManager {
             try {
                 mService.setProfileEnabled(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3739,7 +3734,7 @@ public class DevicePolicyManager {
             try {
                 mService.setProfileName(admin, profileName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3759,7 +3754,7 @@ public class DevicePolicyManager {
                 return profileOwner != null
                         && profileOwner.getPackageName().equals(packageName);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3785,9 +3780,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getProfileOwner(userId);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-                throw new IllegalArgumentException(
-                        "Requested profile owner for invalid userId", re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3804,9 +3797,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getProfileOwnerName(Process.myUserHandle().getIdentifier());
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-                throw new IllegalArgumentException(
-                        "Requested profile owner for invalid userId", re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3825,9 +3816,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getProfileOwnerName(userId);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-                throw new IllegalArgumentException(
-                        "Requested profile owner for invalid userId", re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3856,7 +3845,7 @@ public class DevicePolicyManager {
             try {
                 mService.addPersistentPreferredActivity(admin, filter, activity);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3877,7 +3866,7 @@ public class DevicePolicyManager {
             try {
                 mService.clearPackagePersistentPreferredActivities(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3903,7 +3892,7 @@ public class DevicePolicyManager {
             try {
                 mService.setApplicationRestrictionsManagingPackage(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -3921,7 +3910,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getApplicationRestrictionsManagingPackage(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -3937,7 +3926,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isCallerApplicationRestrictionsManagingPackage();
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -3982,7 +3971,7 @@ public class DevicePolicyManager {
             try {
                 mService.setApplicationRestrictions(admin, packageName, settings);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4012,7 +4001,7 @@ public class DevicePolicyManager {
             try {
                 mService.setTrustAgentConfiguration(admin, target, configuration);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4043,7 +4032,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getTrustAgentConfiguration(admin, agent, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return new ArrayList<PersistableBundle>(); // empty list
@@ -4064,7 +4053,7 @@ public class DevicePolicyManager {
             try {
                 mService.setCrossProfileCallerIdDisabled(admin, disabled);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4083,7 +4072,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getCrossProfileCallerIdDisabled(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4100,7 +4089,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getCrossProfileCallerIdDisabledForUser(userHandle.getIdentifier());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4122,7 +4111,7 @@ public class DevicePolicyManager {
             try {
                 mService.setCrossProfileContactsSearchDisabled(admin, disabled);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4141,7 +4130,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getCrossProfileContactsSearchDisabled(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4160,7 +4149,7 @@ public class DevicePolicyManager {
                 return mService
                         .getCrossProfileContactsSearchDisabledForUser(userHandle.getIdentifier());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4178,7 +4167,7 @@ public class DevicePolicyManager {
                 mService.startManagedQuickContact(actualLookupKey, actualContactId,
                         isContactIdIgnored, directoryId, originalIntent);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4212,7 +4201,7 @@ public class DevicePolicyManager {
             try {
                 mService.setBluetoothContactSharingDisabled(admin, disabled);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4234,7 +4223,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getBluetoothContactSharingDisabled(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return true;
@@ -4254,7 +4243,7 @@ public class DevicePolicyManager {
                 return mService.getBluetoothContactSharingDisabledForUser(userHandle
                         .getIdentifier());
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return true;
@@ -4276,7 +4265,7 @@ public class DevicePolicyManager {
             try {
                 mService.addCrossProfileIntentFilter(admin, filter, flags);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4292,7 +4281,7 @@ public class DevicePolicyManager {
             try {
                 mService.clearCrossProfileIntentFilters(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4324,7 +4313,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setPermittedAccessibilityServices(admin, packageNames);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4344,7 +4333,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPermittedAccessibilityServices(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4367,7 +4356,7 @@ public class DevicePolicyManager {
                 return mService.isAccessibilityServicePermittedByAdmin(admin, packageName,
                         userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4391,7 +4380,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPermittedAccessibilityServicesForUser(userId);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4425,7 +4414,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setPermittedInputMethods(admin, packageNames);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4446,7 +4435,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPermittedInputMethods(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4468,7 +4457,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isInputMethodPermittedByAdmin(admin, packageName, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4491,7 +4480,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPermittedInputMethodsForCurrentUser();
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4511,7 +4500,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getKeepUninstalledPackages(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4534,7 +4523,7 @@ public class DevicePolicyManager {
             try {
                 mService.setKeepUninstalledPackages(admin, packageNames);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4639,9 +4628,8 @@ public class DevicePolicyManager {
         try {
             return mService.createAndManageUser(admin, name, profileOwner, adminExtras, flags);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -4656,8 +4644,7 @@ public class DevicePolicyManager {
         try {
             return mService.removeUser(admin, userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -4674,8 +4661,7 @@ public class DevicePolicyManager {
         try {
             return mService.switchUser(admin, userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -4701,7 +4687,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getApplicationRestrictions(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4723,7 +4709,7 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestriction(admin, key, true);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4744,7 +4730,7 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestriction(admin, key, false);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4771,7 +4757,7 @@ public class DevicePolicyManager {
             try {
                 ret = mService.getUserRestrictions(admin, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return ret == null ? new Bundle() : ret;
@@ -4793,7 +4779,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setApplicationHidden(admin, packageName, hidden);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4811,7 +4797,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isApplicationHidden(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -4829,7 +4815,7 @@ public class DevicePolicyManager {
             try {
                 mService.enableSystemApp(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4848,7 +4834,7 @@ public class DevicePolicyManager {
             try {
                 return mService.enableSystemAppWithIntent(admin, intent);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return 0;
@@ -4879,7 +4865,7 @@ public class DevicePolicyManager {
             try {
                 mService.setAccountManagementDisabled(admin, accountType, disabled);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4907,7 +4893,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getAccountTypesWithManagementDisabledAsUser(userId);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -4938,7 +4924,7 @@ public class DevicePolicyManager {
             try {
                 mService.setLockTaskPackages(admin, packages);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4954,7 +4940,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getLockTaskPackages(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -4970,7 +4956,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isLockTaskPermitted(pkg);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -5017,7 +5003,7 @@ public class DevicePolicyManager {
             try {
                 mService.setGlobalSetting(admin, setting, value);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -5045,7 +5031,7 @@ public class DevicePolicyManager {
             try {
                 mService.setSecureSetting(admin, setting, value);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -5066,7 +5052,7 @@ public class DevicePolicyManager {
             try {
                 mService.setRestrictionsProvider(admin, provider);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -5082,7 +5068,7 @@ public class DevicePolicyManager {
             try {
                 mService.setMasterVolumeMuted(admin, on);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -5098,7 +5084,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isMasterVolumeMuted(admin);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -5118,7 +5104,7 @@ public class DevicePolicyManager {
             try {
                 mService.setUninstallBlocked(admin, packageName, uninstallBlocked);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -5142,7 +5128,7 @@ public class DevicePolicyManager {
             try {
                 return mService.isUninstallBlocked(admin, packageName);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -5170,7 +5156,7 @@ public class DevicePolicyManager {
             try {
                 return mService.addCrossProfileWidgetProvider(admin, packageName);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -5198,7 +5184,7 @@ public class DevicePolicyManager {
             try {
                 return mService.removeCrossProfileWidgetProvider(admin, packageName);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -5222,7 +5208,7 @@ public class DevicePolicyManager {
                     return providers;
                 }
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return Collections.emptyList();
@@ -5238,7 +5224,7 @@ public class DevicePolicyManager {
         try {
             mService.setUserIcon(admin, icon);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5258,7 +5244,7 @@ public class DevicePolicyManager {
             try {
                 mService.setSystemUpdatePolicy(admin, policy);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -5273,7 +5259,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getSystemUpdatePolicy();
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -5297,8 +5283,7 @@ public class DevicePolicyManager {
         try {
             return mService.setKeyguardDisabled(admin, disabled);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5317,8 +5302,7 @@ public class DevicePolicyManager {
         try {
             return mService.setStatusBarDisabled(admin, disabled);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5337,7 +5321,7 @@ public class DevicePolicyManager {
             try {
                 mService.notifyPendingSystemUpdate(updateReceivedTime);
             } catch (RemoteException re) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+                throw re.rethrowFromSystemServer();
             }
         }
     }
@@ -5363,7 +5347,7 @@ public class DevicePolicyManager {
         try {
             mService.setPermissionPolicy(admin, policy);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5377,7 +5361,7 @@ public class DevicePolicyManager {
         try {
             return mService.getPermissionPolicy(admin);
         } catch (RemoteException re) {
-            return PERMISSION_POLICY_PROMPT;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5414,8 +5398,7 @@ public class DevicePolicyManager {
         try {
             return mService.setPermissionGrantState(admin, packageName, permission, grantState);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5441,8 +5424,7 @@ public class DevicePolicyManager {
         try {
             return mService.getPermissionGrantState(admin, packageName, permission);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return PERMISSION_GRANT_STATE_DEFAULT;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5460,8 +5442,7 @@ public class DevicePolicyManager {
         try {
             return mService.isProvisioningAllowed(action);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5477,8 +5458,7 @@ public class DevicePolicyManager {
         try {
             return mService.isManagedProfile(admin);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5493,8 +5473,7 @@ public class DevicePolicyManager {
         try {
             return mService.isSystemOnlyUser(admin);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5510,8 +5489,7 @@ public class DevicePolicyManager {
         try {
             return mService.getWifiMacAddress();
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return null;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5522,7 +5500,7 @@ public class DevicePolicyManager {
         try {
             mService.reboot(admin);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5552,7 +5530,7 @@ public class DevicePolicyManager {
             try {
                 mService.setShortSupportMessage(admin, message);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -5569,7 +5547,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getShortSupportMessage(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -5595,7 +5573,7 @@ public class DevicePolicyManager {
             try {
                 mService.setLongSupportMessage(admin, message);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -5612,7 +5590,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getLongSupportMessage(admin);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -5632,7 +5610,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getShortSupportMessageForUser(admin, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -5653,7 +5631,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getLongSupportMessageForUser(admin, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return null;
@@ -5674,8 +5652,7 @@ public class DevicePolicyManager {
             }
             return new DevicePolicyManager(mContext, true);
         } catch (RemoteException e) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -5697,7 +5674,7 @@ public class DevicePolicyManager {
         try {
             mService.setDeviceLoggingEnabled(admin, enabled);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5714,8 +5691,7 @@ public class DevicePolicyManager {
         try {
             return mService.getDeviceLoggingEnabled(admin);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5743,8 +5719,7 @@ public class DevicePolicyManager {
                 return null;
             }
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return null;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5784,8 +5759,7 @@ public class DevicePolicyManager {
             ParceledListSlice<SecurityEvent> list = mService.retrievePreviousDeviceLogs(admin);
             return list.getList();
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return Collections.<SecurityEvent>emptyList();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5804,7 +5778,7 @@ public class DevicePolicyManager {
         try {
             mService.setOrganizationColor(admin, color);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5823,7 +5797,7 @@ public class DevicePolicyManager {
         try {
             mService.setOrganizationColorForUser(color, userId);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5838,8 +5812,7 @@ public class DevicePolicyManager {
         try {
             return mService.getOrganizationColor(admin);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return 0;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5854,8 +5827,7 @@ public class DevicePolicyManager {
         try {
             return mService.getOrganizationColorForUser(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return 0;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5874,7 +5846,7 @@ public class DevicePolicyManager {
         try {
             mService.setOrganizationName(admin, title);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5889,8 +5861,7 @@ public class DevicePolicyManager {
         try {
             return mService.getOrganizationName(admin);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
-            return null;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5906,8 +5877,7 @@ public class DevicePolicyManager {
         try {
             return mService.getOrganizationNameForUser(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
-            return null;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -5923,7 +5893,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getUserProvisioningState();
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return STATE_USER_UNMANAGED;
@@ -5941,7 +5911,7 @@ public class DevicePolicyManager {
             try {
                 mService.setUserProvisioningState(state, userHandle);
             } catch (RemoteException e) {
-                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -5968,7 +5938,7 @@ public class DevicePolicyManager {
         try {
             mService.setAffiliationIds(admin, new ArrayList<String>(ids));
         } catch (RemoteException e) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -5983,8 +5953,7 @@ public class DevicePolicyManager {
         try {
             return mService != null && mService.isAffiliatedUser();
         } catch (RemoteException e) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -5999,8 +5968,7 @@ public class DevicePolicyManager {
         try {
             return mService.isUninstallInQueue(packageName);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -6012,7 +5980,7 @@ public class DevicePolicyManager {
         try {
             mService.uninstallPackageWithActiveAdmins(packageName);
         } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 }
