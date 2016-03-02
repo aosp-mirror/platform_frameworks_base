@@ -20,8 +20,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Path;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
@@ -441,11 +441,13 @@ public class TaskStackAnimationHelper {
         TaskStackViewScroller stackScroller = mStackView.getScroller();
         TaskStack stack = mStackView.getStack();
 
+        final float curScroll = stackScroller.getStackScroll();
         final float newScroll = stackLayout.getStackScrollForTask(newFocusedTask);
-        boolean willScrollToFront = newScroll > stackScroller.getStackScroll();
-        boolean willScroll = Float.compare(newScroll, stackScroller.getStackScroll()) != 0;
+        boolean willScrollToFront = newScroll > curScroll;
+        boolean willScroll = Float.compare(newScroll, curScroll) != 0;
 
         // Get the current set of task transforms
+        int taskViewCount = mStackView.getTaskViews().size();
         ArrayList<Task> stackTasks = stack.getStackTasks();
         mStackView.getCurrentTaskTransforms(stackTasks, mTmpCurrentTaskTransforms);
 
@@ -463,6 +465,13 @@ public class TaskStackAnimationHelper {
 
         // Focus the task view
         TaskView newFocusedTaskView = mStackView.getChildViewForTask(newFocusedTask);
+        if (newFocusedTaskView == null) {
+            // Log the error if we have no task view, and skip the animation
+            Log.e("TaskStackAnimationHelper", "b/27389156 null-task-view prebind:" + taskViewCount +
+                    " postbind:" + mStackView.getTaskViews().size() + " prescroll:" + curScroll +
+                    " postscroll: " + newScroll);
+            return false;
+        }
         newFocusedTaskView.setFocusedState(true, requestViewFocus);
 
         // Setup the end listener to return all the hidden views to the view pool after the
@@ -476,7 +485,7 @@ public class TaskStackAnimationHelper {
         });
 
         List<TaskView> taskViews = mStackView.getTaskViews();
-        int taskViewCount = taskViews.size();
+        taskViewCount = taskViews.size();
         int newFocusTaskViewIndex = taskViews.indexOf(newFocusedTaskView);
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
