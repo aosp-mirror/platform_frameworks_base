@@ -335,7 +335,7 @@ public class Main {
                 .setNavigation(Navigation.NONAV);
 
         SessionParams params = getSessionParams(parser, customConfigGenerator,
-                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar.Fullscreen", false,
                 RenderingMode.V_SCROLL, 22);
 
         renderAndVerify(params, "expand_vert_layout.png");
@@ -348,7 +348,7 @@ public class Main {
         parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
                 "expand_horz_layout.xml");
         params = getSessionParams(parser, customConfigGenerator,
-                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar.Fullscreen", false,
                 RenderingMode.H_SCROLL, 22);
 
         renderAndVerify(params, "expand_horz_layout.png");
