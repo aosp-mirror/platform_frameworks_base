@@ -1093,6 +1093,14 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public Drawable getManagedUserBadgedDrawableForDensity(Drawable drawable, Rect badgeLocation,
+            int badgeDensity) {
+        Drawable badgeDrawable = getDrawableForDensity(badgeDensity,
+                com.android.internal.R.drawable.ic_corp_badge);
+        return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
+    }
+
+    @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
         final int badgeResId = getBadgeResIdForUser(user.getIdentifier());
         if (badgeResId == 0) {
@@ -1124,14 +1132,18 @@ public class ApplicationPackageManager extends PackageManager {
                 com.android.internal.R.drawable.ic_corp_badge_no_background);
     }
 
+    private Drawable getDrawableForDensity(int density, int drawableId) {
+        if (density <= 0) {
+            density = mContext.getResources().getDisplayMetrics().densityDpi;
+        }
+        return Resources.getSystem().getDrawableForDensity(drawableId, density);
+    }
+
     private Drawable getManagedProfileIconForDensity(UserHandle user, int density,
             int drawableId) {
         UserInfo userInfo = getUserIfProfile(user.getIdentifier());
         if (userInfo != null && userInfo.isManagedProfile()) {
-            if (density <= 0) {
-                density = mContext.getResources().getDisplayMetrics().densityDpi;
-            }
-            return Resources.getSystem().getDrawableForDensity(drawableId, density);
+            return getDrawableForDensity(density, drawableId);
         }
         return null;
     }
