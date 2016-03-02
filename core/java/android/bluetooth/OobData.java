@@ -23,6 +23,7 @@ import android.util.Log;
 
 /**
  * Out Of Band Data for Bluetooth device.
+ * @hide
  */
 public class OobData implements Parcelable {
     private byte[] securityManagerTk;
