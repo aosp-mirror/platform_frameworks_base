@@ -194,6 +194,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // public mode, private notifications, etc
     private boolean mLockscreenPublicMode = false;
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
+    private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
 
     private UserManager mUserManager;
     private int mDensity;
@@ -1302,6 +1303,26 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
+     * Has the given user chosen to allow notifications to be shown even when the lockscreen is in
+     * "public" (secure & locked) mode?
+     */
+    public boolean userAllowsNotificationsInPublic(int userHandle) {
+        if (userHandle == UserHandle.USER_ALL) {
+            return true;
+        }
+
+        if (mUsersAllowingNotifications.indexOfKey(userHandle) < 0) {
+            final boolean allowed = 0 != Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, userHandle);
+            mUsersAllowingNotifications.append(userHandle, allowed);
+            return allowed;
+        }
+
+        return mUsersAllowingNotifications.get(userHandle);
+    }
+
+    /**
      * Has the given user chosen to allow their private (full) notifications to be shown even
      * when the lockscreen is in "public" (secure & locked) mode?
      */
@@ -1333,13 +1354,30 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
-     * Returns true if we're on a secure lockscreen and the user wants to hide "sensitive"
-     * notification data. If so, private notifications should show their (possibly
-     * auto-generated) publicVersion, and secret notifications should be totally invisible.
+     * Returns true if we're on a secure lockscreen and the user wants to hide notification data.
+     * If so, notifications should be hidden.
      */
     @Override  // NotificationData.Environment
-    public boolean shouldHideSensitiveContents(int userid) {
-        return isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(userid);
+    public boolean shouldHideNotifications(int userid) {
+        return isLockscreenPublicMode() && !userAllowsNotificationsInPublic(userid);
+    }
+
+    /**
+     * Returns true if we're on a secure lockscreen and the user wants to hide notifications via
+     * package-specific override.
+     */
+    @Override // NotificationDate.Environment
+    public boolean shouldHideNotifications(String key) {
+        return isLockscreenPublicMode()
+                && mNotificationData.getVisibilityOverride(key) == Notification.VISIBILITY_SECRET;
+    }
+
+    /**
+     * Returns true if we're on a secure lockscreen.
+     */
+    @Override  // NotificationData.Environment
+    public boolean onSecureLockScreen() {
+        return isLockscreenPublicMode();
     }
 
     public void onNotificationClear(StatusBarNotification notification) {

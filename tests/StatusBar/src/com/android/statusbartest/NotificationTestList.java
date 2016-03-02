@@ -93,11 +93,7 @@ public class NotificationTestList extends TestActivity
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Min priority")
                             .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
                             .setPriority(Notification.PRIORITY_MIN)
-                            .setFullScreenIntent(makeIntent2(), false)
                             .build();
                     mNM.notify(7000, n);
                 }
@@ -125,11 +121,7 @@ public class NotificationTestList extends TestActivity
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Low priority")
                             .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
                             .setPriority(Notification.PRIORITY_LOW)
-                            .setFullScreenIntent(makeIntent2(), false)
                             .build();
                     mNM.notify(7002, n);
                 }
@@ -141,11 +133,7 @@ public class NotificationTestList extends TestActivity
                             .setSmallIcon(R.drawable.icon2)
                             .setContentTitle("Default priority")
                             .setLights(0xff0000ff, 1, 0)
-                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
-                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                                    getPackageName() + "/raw/ringer"))
                             .setPriority(Notification.PRIORITY_DEFAULT)
-                            .setFullScreenIntent(makeIntent2(), false)
                             .build();
                     mNM.notify(7004, n);
                 }
@@ -161,7 +149,6 @@ public class NotificationTestList extends TestActivity
                             .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
                                     getPackageName() + "/raw/ringer"))
                             .setPriority(Notification.PRIORITY_HIGH)
-                            .setFullScreenIntent(makeIntent2(), false)
                             .build();
                     mNM.notify(7006, n);
                 }
@@ -179,7 +166,7 @@ public class NotificationTestList extends TestActivity
                             .setPriority(Notification.PRIORITY_MAX)
                             .setFullScreenIntent(makeIntent2(), false)
                             .build();
-                    mNM.notify(7008, n);
+                    mNM.notify(7007, n);
                 }
             },
             new Test("Max priority with delay") {
@@ -200,6 +187,64 @@ public class NotificationTestList extends TestActivity
                             .setFullScreenIntent(makeIntent2(), false)
                             .build();
                     mNM.notify(7008, n);
+                }
+            },
+            new Test("public notification") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("public notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
+                    mNM.notify(7009, n);
+                }
+            },
+            new Test("private notification, no public") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("private only notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PRIVATE)
+                            .build();
+                    mNM.notify(7010, n);
+                }
+            },
+            new Test("private notification, has public") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("private version of notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PRIVATE)
+                            .setPublicVersion(new Notification.Builder(NotificationTestList.this)
+                                    .setSmallIcon(R.drawable.icon2)
+                                    .setContentTitle("public notification of private notification")
+                                    .setPriority(Notification.PRIORITY_DEFAULT)
+                                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                                    .build())
+                            .build();
+                    mNM.notify(7011, n);
+                }
+            },
+            new Test("secret notification") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("secret notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_SECRET)
+                            .build();
+                    mNM.notify(7012, n);
                 }
             },
         new Test("Off") {
