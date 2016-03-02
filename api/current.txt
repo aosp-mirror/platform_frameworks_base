@@ -36426,7 +36426,7 @@ package android.telecom {
     method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);
     method public boolean isInCall();
     method public boolean isVoiceMailNumber(android.telecom.PhoneAccountHandle, java.lang.String);
-    method public void launchManageBlockedNumbersActivity();
+    method public deprecated void launchManageBlockedNumbersActivity();
     method public void placeCall(android.net.Uri, android.os.Bundle);
     method public void registerPhoneAccount(android.telecom.PhoneAccount);
     method public void showInCallScreen(boolean);
