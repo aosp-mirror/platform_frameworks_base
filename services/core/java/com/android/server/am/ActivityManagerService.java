@@ -9493,7 +9493,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      *                      docked stack. Pass {@code null} to use default bounds.
      */
     @Override
-    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
+    public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToDockedStack()");
         synchronized (this) {
@@ -9502,7 +9502,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToDockedStack: moving task=" + taskId
                         + " to createMode=" + createMode + " toTop=" + toTop);
                 mWindowManager.setDockedStackCreateState(createMode, initialBounds);
-                mStackSupervisor.moveTaskToStackLocked(taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS,
+                return mStackSupervisor.moveTaskToStackLocked(
+                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS,
                         "moveTaskToDockedStack", animate);
             } finally {
                 Binder.restoreCallingIdentity(ident);
