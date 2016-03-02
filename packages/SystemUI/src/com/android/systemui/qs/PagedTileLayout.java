@@ -77,7 +77,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public int getOffsetTop(TileRecord tile) {
-        return ((ViewGroup) tile.tileView.getParent()).getTop() + getTop();
+        final ViewGroup parent = (ViewGroup) tile.tileView.getParent();
+        if (parent == null) return 0;
+        return parent.getTop() + getTop();
     }
 
     @Override
