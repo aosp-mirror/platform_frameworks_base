@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <math.h>
 #include <SkPaintDefaults.h>
+#include <SkPathOps.h>
 
 namespace android {
 namespace uirenderer {
@@ -527,6 +528,12 @@ void BakedOpDispatcher::onOvalOp(BakedOpRenderer& renderer, const OvalOp& op, co
         SkPath path;
         SkRect rect = getBoundsOfFill(op);
         path.addOval(rect);
+
+        if (state.computedState.localProjectionPathMask != nullptr) {
+            // Mask the ripple path by the local space projection mask in local space.
+            // Note that this can create CCW paths.
+            Op(path, *state.computedState.localProjectionPathMask, kIntersect_SkPathOp, &path);
+        }
         renderConvexPath(renderer, state, path, *(op.paint));
     }
 }

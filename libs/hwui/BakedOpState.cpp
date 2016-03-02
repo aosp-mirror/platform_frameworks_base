@@ -63,9 +63,22 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
         clipState = nullptr;
         clippedBounds.setEmpty();
     } else {
-        // Not rejected! compute true clippedBounds and clipSideFlags
+        // Not rejected! compute true clippedBounds, clipSideFlags, and path mask
         clipSideFlags = computeClipSideFlags(clipRect, clippedBounds);
         clippedBounds.doIntersect(clipRect);
+
+        if (CC_UNLIKELY(snapshot.projectionPathMask)) {
+            // map projection path mask from render target space into op space,
+            // so intersection with op geometry is possible
+            Matrix4 inverseTransform;
+            inverseTransform.loadInverse(transform);
+            SkMatrix skInverseTransform;
+            inverseTransform.copyTo(skInverseTransform);
+
+            auto localMask = allocator.create<SkPath>();
+            snapshot.projectionPathMask->transform(skInverseTransform, localMask);
+            localProjectionPathMask = localMask;
+        }
     }
 }
 
@@ -73,13 +86,15 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
         : transform(*snapshot.transform)
         , clipState(snapshot.mutateClipArea().serializeClip(allocator))
         , clippedBounds(clipState->rect)
-        , clipSideFlags(OpClipSideFlags::Full) {}
+        , clipSideFlags(OpClipSideFlags::Full)
+        , localProjectionPathMask(nullptr) {}
 
 ResolvedRenderState::ResolvedRenderState(const ClipRect* clipRect, const Rect& dstRect)
         : transform(Matrix4::identity())
         , clipState(clipRect)
         , clippedBounds(dstRect)
-        , clipSideFlags(computeClipSideFlags(clipRect->rect, dstRect)) {
+        , clipSideFlags(computeClipSideFlags(clipRect->rect, dstRect))
+        , localProjectionPathMask(nullptr) {
     clippedBounds.doIntersect(clipRect->rect);
 }
 

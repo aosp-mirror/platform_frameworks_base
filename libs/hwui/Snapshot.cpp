@@ -146,6 +146,9 @@ void Snapshot::resetTransform(float x, float y, float z) {
 }
 
 void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("not supported - not needed by new ops");
+#else
     // build (reverse ordered) list of the stack of snapshots, terminated with a NULL
     Vector<const Snapshot*> snapshotList;
     snapshotList.push(nullptr);
@@ -171,6 +174,7 @@ void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
             outTransform->multiply(*(current->transform));
         }
     }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,15 +227,19 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
 }
 
 void Snapshot::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
+#if HWUI_NEW_OPS
+    // TODO: remove allocator param for HWUI_NEW_OPS
+    projectionPathMask = path;
+#else
     if (path) {
         ProjectionPathMask* mask = new (allocator) ProjectionPathMask;
         mask->projectionMask = path;
         buildScreenSpaceTransform(&(mask->projectionMaskTransform));
-
         projectionPathMask = mask;
     } else {
         projectionPathMask = nullptr;
     }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
