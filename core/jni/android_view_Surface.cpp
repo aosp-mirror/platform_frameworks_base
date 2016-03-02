@@ -411,22 +411,27 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
         return 0;
     }
 
+    android::view::Surface surfaceShim;
+
+    // Calling code in Surface.java has already read the name of the Surface
+    // from the Parcel
+    surfaceShim.readFromParcel(parcel, /*nameAlreadyRead*/true);
+
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
-    sp<IBinder> binder(parcel->readStrongBinder());
 
     // update the Surface only if the underlying IGraphicBufferProducer
     // has changed.
-    if (self != NULL
-            && (IInterface::asBinder(self->getIGraphicBufferProducer()) == binder)) {
+    if (self != nullptr
+            && (IInterface::asBinder(self->getIGraphicBufferProducer()) ==
+                    IInterface::asBinder(surfaceShim.graphicBufferProducer))) {
         // same IGraphicBufferProducer, return ourselves
         return jlong(self.get());
     }
 
     sp<Surface> sur;
-    sp<IGraphicBufferProducer> gbp(interface_cast<IGraphicBufferProducer>(binder));
-    if (gbp != NULL) {
+    if (surfaceShim.graphicBufferProducer != nullptr) {
         // we have a new IGraphicBufferProducer, create a new Surface for it
-        sur = new Surface(gbp, true);
+        sur = new Surface(surfaceShim.graphicBufferProducer, true);
         // and keep a reference before passing to java
         sur->incStrong(&sRefBaseOwner);
     }
@@ -447,7 +452,13 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         return;
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
-    parcel->writeStrongBinder( self != 0 ? IInterface::asBinder(self->getIGraphicBufferProducer()) : NULL);
+    android::view::Surface surfaceShim;
+    if (self != nullptr) {
+        surfaceShim.graphicBufferProducer = self->getIGraphicBufferProducer();
+    }
+    // Calling code in Surface.java has already written the name of the Surface
+    // to the Parcel
+    surfaceShim.writeToParcel(parcel, /*nameAlreadyWritten*/true);
 }
 
 static jint nativeGetWidth(JNIEnv* env, jclass clazz, jlong nativeObject) {

@@ -33,14 +33,14 @@ import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.ReprocessFormatsMap;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.hardware.camera2.utils.CameraBinderDecorator;
-import android.hardware.camera2.utils.CameraRuntimeException;
-import android.hardware.camera2.utils.LongParcelable;
+import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.utils.SurfaceUtils;
+import android.hardware.ICameraService;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -70,7 +70,7 @@ public class CameraDeviceImpl extends CameraDevice {
     private static final int REQUEST_ID_NONE = -1;
 
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
-    private ICameraDeviceUser mRemoteDevice;
+    private ICameraDeviceUserWrapper mRemoteDevice;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
@@ -267,7 +267,7 @@ public class CameraDeviceImpl extends CameraDevice {
             // If setRemoteFailure already called, do nothing
             if (mInError) return;
 
-            mRemoteDevice = CameraBinderDecorator.newInstance(remoteDevice);
+            mRemoteDevice = new ICameraDeviceUserWrapper(remoteDevice);
 
             mDeviceHandler.post(mCallOnOpened);
             mDeviceHandler.post(mCallOnUnconfigured);
@@ -280,28 +280,29 @@ public class CameraDeviceImpl extends CameraDevice {
      * <p>This places the camera device in the error state and informs the callback.
      * Use in place of setRemoteDevice() when startup fails.</p>
      */
-    public void setRemoteFailure(final CameraRuntimeException failure) {
+    public void setRemoteFailure(final ServiceSpecificException failure) {
         int failureCode = StateCallback.ERROR_CAMERA_DEVICE;
         boolean failureIsError = true;
 
-        switch (failure.getReason()) {
-            case CameraAccessException.CAMERA_IN_USE:
+        switch (failure.errorCode) {
+            case ICameraService.ERROR_CAMERA_IN_USE:
                 failureCode = StateCallback.ERROR_CAMERA_IN_USE;
                 break;
-            case CameraAccessException.MAX_CAMERAS_IN_USE:
+            case ICameraService.ERROR_MAX_CAMERAS_IN_USE:
                 failureCode = StateCallback.ERROR_MAX_CAMERAS_IN_USE;
                 break;
-            case CameraAccessException.CAMERA_DISABLED:
+            case ICameraService.ERROR_DISABLED:
                 failureCode = StateCallback.ERROR_CAMERA_DISABLED;
                 break;
-            case CameraAccessException.CAMERA_DISCONNECTED:
+            case ICameraService.ERROR_DISCONNECTED:
                 failureIsError = false;
                 break;
-            case CameraAccessException.CAMERA_ERROR:
+            case ICameraService.ERROR_INVALID_OPERATION:
                 failureCode = StateCallback.ERROR_CAMERA_DEVICE;
                 break;
             default:
-                Log.wtf(TAG, "Unknown failure in opening camera device: " + failure.getReason());
+                Log.e(TAG, "Unexpected failure in opening camera device: " + failure.errorCode +
+                        failure.getMessage());
                 break;
         }
         final int code = failureCode;
@@ -430,27 +431,20 @@ public class CameraDeviceImpl extends CameraDevice {
                     }
                 }
 
-                try {
-                    mRemoteDevice.endConfigure(isConstrainedHighSpeed);
-                }
-                catch (IllegalArgumentException e) {
-                    // OK. camera service can reject stream config if it's not supported by HAL
-                    // This is only the result of a programmer misusing the camera2 api.
-                    Log.w(TAG, "Stream configuration failed");
-                    return false;
-                }
+                mRemoteDevice.endConfigure(isConstrainedHighSpeed);
 
                 success = true;
-            } catch (CameraRuntimeException e) {
-                if (e.getReason() == CAMERA_IN_USE) {
-                    throw new IllegalStateException("The camera is currently busy." +
-                            " You must wait until the previous operation completes.");
-                }
-
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
+            } catch (IllegalArgumentException e) {
+                // OK. camera service can reject stream config if it's not supported by HAL
+                // This is only the result of a programmer misusing the camera2 api.
+                Log.w(TAG, "Stream configuration failed due to: " + e.getMessage());
                 return false;
+            } catch (CameraAccessException e) {
+                if (e.getReason() == CameraAccessException.CAMERA_IN_USE) {
+                    throw new IllegalStateException("The camera is currently busy." +
+                            " You must wait until the previous operation completes.", e);
+                }
+                throw e;
             } finally {
                 if (success && outputs.size() > 0) {
                     mDeviceHandler.post(mCallOnIdle);
@@ -594,12 +588,7 @@ public class CameraDeviceImpl extends CameraDevice {
                 configureSuccess = configureStreamsChecked(inputConfig, outputConfigurations,
                         isConstrainedHighSpeed);
                 if (configureSuccess == true && inputConfig != null) {
-                    input = new Surface();
-                    try {
-                        mRemoteDevice.getInputSurface(/*out*/input);
-                    } catch (CameraRuntimeException e) {
-                        e.asChecked();
-                    }
+                    input = mRemoteDevice.getInputSurface();
                 }
             } catch (CameraAccessException e) {
                 configureSuccess = false;
@@ -608,9 +597,6 @@ public class CameraDeviceImpl extends CameraDevice {
                 if (DEBUG) {
                     Log.v(TAG, "createCaptureSession - failed with exception ", e);
                 }
-            } catch (RemoteException e) {
-                // impossible
-                return;
             }
 
             List<Surface> outSurfaces = new ArrayList<>(outputConfigurations.size());
@@ -655,16 +641,9 @@ public class CameraDeviceImpl extends CameraDevice {
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
-            CameraMetadataNative templatedRequest = new CameraMetadataNative();
+            CameraMetadataNative templatedRequest = null;
 
-            try {
-                mRemoteDevice.createDefaultRequest(templateType, /*out*/templatedRequest);
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return null;
-            }
+            templatedRequest = mRemoteDevice.createDefaultRequest(templateType);
 
             CaptureRequest.Builder builder = new CaptureRequest.Builder(
                     templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
@@ -701,14 +680,8 @@ public class CameraDeviceImpl extends CameraDevice {
             if (streamId == -1) {
                 throw new IllegalArgumentException("Surface is not part of this session");
             }
-            try {
-                mRemoteDevice.prepare(streamId);
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return;
-            }
+
+            mRemoteDevice.prepare(streamId);
         }
     }
 
@@ -728,14 +701,8 @@ public class CameraDeviceImpl extends CameraDevice {
             if (streamId == -1) {
                 throw new IllegalArgumentException("Surface is not part of this session");
             }
-            try {
-                mRemoteDevice.prepare2(maxCount, streamId);
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return;
-            }
+
+            mRemoteDevice.prepare2(maxCount, streamId);
         }
     }
 
@@ -753,14 +720,8 @@ public class CameraDeviceImpl extends CameraDevice {
             if (streamId == -1) {
                 throw new IllegalArgumentException("Surface is not part of this session");
             }
-            try {
-                mRemoteDevice.tearDown(streamId);
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return;
-            }
+
+            mRemoteDevice.tearDown(streamId);
         }
     }
 
@@ -875,45 +836,37 @@ public class CameraDeviceImpl extends CameraDevice {
 
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
-            int requestId;
-
             if (repeating) {
                 stopRepeating();
             }
 
-            LongParcelable lastFrameNumberRef = new LongParcelable();
-            try {
-                requestId = mRemoteDevice.submitRequestList(requestList, repeating,
-                        /*out*/lastFrameNumberRef);
-                if (DEBUG) {
-                    Log.v(TAG, "last frame number " + lastFrameNumberRef.getNumber());
-                }
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return -1;
+            SubmitInfo requestInfo;
+
+            CaptureRequest[] requestArray = requestList.toArray(new CaptureRequest[requestList.size()]);
+            requestInfo = mRemoteDevice.submitRequestList(requestArray, repeating);
+            if (DEBUG) {
+                Log.v(TAG, "last frame number " + requestInfo.getLastFrameNumber());
             }
 
             if (callback != null) {
-                mCaptureCallbackMap.put(requestId, new CaptureCallbackHolder(callback,
-                        requestList, handler, repeating, mNextSessionId - 1));
+                mCaptureCallbackMap.put(requestInfo.getRequestId(),
+                        new CaptureCallbackHolder(
+                            callback, requestList, handler, repeating, mNextSessionId - 1));
             } else {
                 if (DEBUG) {
-                    Log.d(TAG, "Listen for request " + requestId + " is null");
+                    Log.d(TAG, "Listen for request " + requestInfo.getRequestId() + " is null");
                 }
             }
 
-            long lastFrameNumber = lastFrameNumberRef.getNumber();
-
             if (repeating) {
                 if (mRepeatingRequestId != REQUEST_ID_NONE) {
-                    checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
+                    checkEarlyTriggerSequenceComplete(mRepeatingRequestId,
+                            requestInfo.getLastFrameNumber());
                 }
-                mRepeatingRequestId = requestId;
+                mRepeatingRequestId = requestInfo.getRequestId();
             } else {
-                mRequestLastFrameNumbersList.add(new RequestLastFrameNumbersHolder(requestList,
-                        requestId, lastFrameNumber));
+                mRequestLastFrameNumbersList.add(
+                    new RequestLastFrameNumbersHolder(requestList, requestInfo));
             }
 
             if (mIdle) {
@@ -921,7 +874,7 @@ public class CameraDeviceImpl extends CameraDevice {
             }
             mIdle = false;
 
-            return requestId;
+            return requestInfo.getRequestId();
         }
     }
 
@@ -949,19 +902,9 @@ public class CameraDeviceImpl extends CameraDevice {
                 int requestId = mRepeatingRequestId;
                 mRepeatingRequestId = REQUEST_ID_NONE;
 
-                try {
-                    LongParcelable lastFrameNumberRef = new LongParcelable();
-                    mRemoteDevice.cancelRequest(requestId, /*out*/lastFrameNumberRef);
-                    long lastFrameNumber = lastFrameNumberRef.getNumber();
+                long lastFrameNumber = mRemoteDevice.cancelRequest(requestId);
 
-                    checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
-
-                } catch (CameraRuntimeException e) {
-                    throw e.asChecked();
-                } catch (RemoteException e) {
-                    // impossible
-                    return;
-                }
+                checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
             }
         }
     }
@@ -974,14 +917,8 @@ public class CameraDeviceImpl extends CameraDevice {
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
                 throw new IllegalStateException("Active repeating request ongoing");
             }
-            try {
-                mRemoteDevice.waitUntilIdle();
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return;
-            }
+
+            mRemoteDevice.waitUntilIdle();
         }
     }
 
@@ -997,19 +934,11 @@ public class CameraDeviceImpl extends CameraDevice {
                 mDeviceHandler.post(mCallOnIdle);
                 return;
             }
-            try {
-                LongParcelable lastFrameNumberRef = new LongParcelable();
-                mRemoteDevice.flush(/*out*/lastFrameNumberRef);
-                if (mRepeatingRequestId != REQUEST_ID_NONE) {
-                    long lastFrameNumber = lastFrameNumberRef.getNumber();
-                    checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
-                    mRepeatingRequestId = REQUEST_ID_NONE;
-                }
-            } catch (CameraRuntimeException e) {
-                throw e.asChecked();
-            } catch (RemoteException e) {
-                // impossible
-                return;
+
+            long lastFrameNumber = mRemoteDevice.flush();
+            if (mRepeatingRequestId != REQUEST_ID_NONE) {
+                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
+                mRepeatingRequestId = REQUEST_ID_NONE;
             }
         }
     }
@@ -1021,14 +950,8 @@ public class CameraDeviceImpl extends CameraDevice {
                 return;
             }
 
-            try {
-                if (mRemoteDevice != null) {
-                    mRemoteDevice.disconnect();
-                }
-            } catch (CameraRuntimeException e) {
-                Log.e(TAG, "Exception while closing: ", e.asChecked());
-            } catch (RemoteException e) {
-                // impossible
+            if (mRemoteDevice != null) {
+                mRemoteDevice.disconnect();
             }
 
             // Only want to fire the onClosed callback once;
@@ -1297,14 +1220,14 @@ public class CameraDeviceImpl extends CameraDevice {
          * Create a request-last-frame-numbers holder with a list of requests, request ID, and
          * the last frame number returned by camera service.
          */
-        public RequestLastFrameNumbersHolder(List<CaptureRequest> requestList, int requestId,
-                long lastFrameNumber) {
+        public RequestLastFrameNumbersHolder(List<CaptureRequest> requestList, SubmitInfo requestInfo) {
             long lastRegularFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
             long lastReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
-            long frameNumber = lastFrameNumber;
+            long frameNumber = requestInfo.getLastFrameNumber();
 
-            if (lastFrameNumber < requestList.size() - 1) {
-                throw new IllegalArgumentException("lastFrameNumber: " + lastFrameNumber +
+            if (requestInfo.getLastFrameNumber() < requestList.size() - 1) {
+                throw new IllegalArgumentException(
+                        "lastFrameNumber: " + requestInfo.getLastFrameNumber() +
                         " should be at least " + (requestList.size() - 1) + " for the number of " +
                         " requests in the list: " + requestList.size());
             }
@@ -1330,7 +1253,7 @@ public class CameraDeviceImpl extends CameraDevice {
 
             mLastRegularFrameNumber = lastRegularFrameNumber;
             mLastReprocessFrameNumber = lastReprocessFrameNumber;
-            mRequestId = requestId;
+            mRequestId = requestInfo.getRequestId();
         }
 
         /**

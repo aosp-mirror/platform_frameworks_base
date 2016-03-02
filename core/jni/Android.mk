@@ -190,7 +190,6 @@ LOCAL_C_INCLUDES += \
     $(call include-path-for, bluedroid) \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
-    $(TOP)/frameworks/av/include \
     $(TOP)/frameworks/base/media/jni \
     $(TOP)/system/core/base/include \
     $(TOP)/system/core/include \

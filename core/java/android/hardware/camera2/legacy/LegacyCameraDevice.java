@@ -26,14 +26,13 @@ import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.ArrayUtils;
-import android.hardware.camera2.utils.CameraBinderDecorator;
-import android.hardware.camera2.utils.LongParcelable;
+import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
@@ -45,7 +44,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static android.hardware.camera2.legacy.LegacyExceptionUtils.*;
-import static android.hardware.camera2.utils.CameraBinderDecorator.*;
 import static com.android.internal.util.Preconditions.*;
 
 /**
@@ -357,9 +355,9 @@ public class LegacyCameraDevice implements AutoCloseable {
         if (success) {
             mConfiguredSurfaces = outputs != null ? new ArrayList<>(outputs) : null;
         } else {
-            return CameraBinderDecorator.INVALID_OPERATION;
+            return LegacyExceptionUtils.INVALID_OPERATION;
         }
-        return CameraBinderDecorator.NO_ERROR;
+        return LegacyExceptionUtils.NO_ERROR;
     }
 
     /**
@@ -367,17 +365,16 @@ public class LegacyCameraDevice implements AutoCloseable {
      *
      * @param requestList a list of capture requests to execute.
      * @param repeating {@code true} if this burst is repeating.
-     * @param frameNumber an output argument that contains either the frame number of the last frame
-     *                    that will be returned for this request, or the frame number of the last
-     *                    frame that will be returned for the current repeating request if this
-     *                    burst is set to be repeating.
-     * @return the request id.
+     * @return the submission info, including the new request id, and the last frame number, which
+     *   contains either the frame number of the last frame that will be returned for this request,
+     *   or the frame number of the last frame that will be returned for the current repeating
+     *   request if this burst is set to be repeating.
      */
-    public int submitRequestList(List<CaptureRequest> requestList, boolean repeating,
-            /*out*/LongParcelable frameNumber) {
-        if (requestList == null || requestList.isEmpty()) {
+    public SubmitInfo submitRequestList(CaptureRequest[] requestList, boolean repeating) {
+        if (requestList == null || requestList.length == 0) {
             Log.e(TAG, "submitRequestList - Empty/null requests are not allowed");
-            return BAD_VALUE;
+            throw new ServiceSpecificException(BAD_VALUE,
+                    "submitRequestList - Empty/null requests are not allowed");
         }
 
         List<Long> surfaceIds = (mConfiguredSurfaces == null) ? new ArrayList<Long>() :
@@ -388,28 +385,33 @@ public class LegacyCameraDevice implements AutoCloseable {
             if (request.getTargets().isEmpty()) {
                 Log.e(TAG, "submitRequestList - "
                         + "Each request must have at least one Surface target");
-                return BAD_VALUE;
+                throw new ServiceSpecificException(BAD_VALUE,
+                        "submitRequestList - "
+                        + "Each request must have at least one Surface target");
             }
 
             for (Surface surface : request.getTargets()) {
                 if (surface == null) {
                     Log.e(TAG, "submitRequestList - Null Surface targets are not allowed");
-                    return BAD_VALUE;
+                    throw new ServiceSpecificException(BAD_VALUE,
+                            "submitRequestList - Null Surface targets are not allowed");
                 } else if (mConfiguredSurfaces == null) {
                     Log.e(TAG, "submitRequestList - must configure " +
                             " device with valid surfaces before submitting requests");
-                    return INVALID_OPERATION;
+                    throw new ServiceSpecificException(INVALID_OPERATION,
+                            "submitRequestList - must configure " +
+                            " device with valid surfaces before submitting requests");
                 } else if (!containsSurfaceId(surface, surfaceIds)) {
                     Log.e(TAG, "submitRequestList - cannot use a surface that wasn't configured");
-                    return BAD_VALUE;
+                    throw new ServiceSpecificException(BAD_VALUE,
+                            "submitRequestList - cannot use a surface that wasn't configured");
                 }
             }
         }
 
         // TODO: further validation of request here
         mIdle.close();
-        return mRequestThreadManager.submitCaptureRequests(requestList, repeating,
-                frameNumber);
+        return mRequestThreadManager.submitCaptureRequests(requestList, repeating);
     }
 
     /**
@@ -417,17 +419,14 @@ public class LegacyCameraDevice implements AutoCloseable {
      *
      * @param request the capture request to execute.
      * @param repeating {@code true} if this request is repeating.
-     * @param frameNumber an output argument that contains either the frame number of the last frame
-     *                    that will be returned for this request, or the frame number of the last
-     *                    frame that will be returned for the current repeating request if this
-     *                    request is set to be repeating.
-     * @return the request id.
+     * @return the submission info, including the new request id, and the last frame number, which
+     *   contains either the frame number of the last frame that will be returned for this request,
+     *   or the frame number of the last frame that will be returned for the current repeating
+     *   request if this burst is set to be repeating.
      */
-    public int submitRequest(CaptureRequest request, boolean repeating,
-            /*out*/LongParcelable frameNumber) {
-        ArrayList<CaptureRequest> requestList = new ArrayList<CaptureRequest>();
-        requestList.add(request);
-        return submitRequestList(requestList, repeating, frameNumber);
+    public SubmitInfo submitRequest(CaptureRequest request, boolean repeating) {
+        CaptureRequest[] requestList = { request };
+        return submitRequestList(requestList, repeating);
     }
 
     /**
@@ -493,7 +492,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     protected void finalize() throws Throwable {
         try {
             close();
-        } catch (CameraRuntimeException e) {
+        } catch (ServiceSpecificException e) {
             Log.e(TAG, "Got error while trying to finalize, ignoring: " + e.getMessage());
         } finally {
             super.finalize();

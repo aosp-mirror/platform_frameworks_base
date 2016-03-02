@@ -64,7 +64,6 @@ LOCAL_C_INCLUDES += \
     frameworks/av/media/mtp \
     frameworks/native/include/media/openmax \
     $(call include-path-for, libhardware)/hardware \
-    system/media/camera/include \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE)
 

@@ -35,10 +35,10 @@ public class BurstHolder {
      *
      * @param requestId id of the burst request.
      * @param repeating true if this burst is repeating.
-     * @param requests a {@link List} of {@link CaptureRequest}s in this burst.
+     * @param requests the array of {@link CaptureRequest}s for this burst.
      * @param jpegSurfaceIds a {@link Collection} of IDs for the surfaces that have jpeg outputs.
      */
-    public BurstHolder(int requestId, boolean repeating, List<CaptureRequest> requests,
+    public BurstHolder(int requestId, boolean repeating, CaptureRequest[] requests,
                        Collection<Long> jpegSurfaceIds) {
         mRequestBuilders = new ArrayList<>();
         int i = 0;

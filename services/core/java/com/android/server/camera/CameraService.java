@@ -60,10 +60,6 @@ public class CameraService extends SystemService
 
     public static final String CAMERA_SERVICE_PROXY_BINDER_NAME = "media.camera.proxy";
 
-    // Event arguments to use with the camera service notifySystemEvent call:
-    public static final int NO_EVENT = 0; // NOOP
-    public static final int USER_SWITCHED = 1; // User changed, argument is the new user handle
-
     // State arguments to use with the notifyCameraState call from camera service:
     public static final int CAMERA_STATE_OPEN = 0;
     public static final int CAMERA_STATE_ACTIVE = 1;
@@ -224,7 +220,7 @@ public class CameraService extends SystemService
         if (mEnabledCameraUsers == null || !mEnabledCameraUsers.equals(currentUserHandles)) {
             // Some user handles have been added or removed, update mediaserver.
             mEnabledCameraUsers = currentUserHandles;
-            notifyMediaserverLocked(USER_SWITCHED, currentUserHandles);
+            notifyMediaserverLocked(ICameraService.EVENT_USER_SWITCHED, currentUserHandles);
         }
     }
 
@@ -244,7 +240,7 @@ public class CameraService extends SystemService
             if (mEnabledCameraUsers == null) {
                 return;
             }
-            if (notifyMediaserverLocked(USER_SWITCHED, mEnabledCameraUsers)) {
+            if (notifyMediaserverLocked(ICameraService.EVENT_USER_SWITCHED, mEnabledCameraUsers)) {
                 retries = 0;
             }
         }
