@@ -28,6 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.Objects;
 
@@ -72,7 +73,7 @@ public class WifiSignalController extends
     }
 
     @Override
-    public void notifyListeners() {
+    public void notifyListeners(SignalCallback callback) {
         // only show wifi in the cluster if connected or if wifi-only
         boolean wifiVisible = mCurrentState.enabled
                 && (mCurrentState.connected || !mHasMobileData);
@@ -83,7 +84,7 @@ public class WifiSignalController extends
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
         IconState qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconId(),
                 contentDescription);
-        mCallbackHandler.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
+        callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
                 wifiDesc);
     }

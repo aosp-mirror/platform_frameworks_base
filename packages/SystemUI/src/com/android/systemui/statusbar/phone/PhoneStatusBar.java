@@ -995,7 +995,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         SignalClusterView signalCluster =
                 (SignalClusterView) containerView.findViewById(R.id.signal_cluster);
         if (signalCluster != null) {
-            mNetworkController.addSignalCallback(signalCluster);
             signalCluster.setSecurityController(mSecurityController);
             signalCluster.setNetworkController(mNetworkController);
         }
