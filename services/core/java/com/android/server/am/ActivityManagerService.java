@@ -1294,6 +1294,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mAlwaysFinishActivities = false;
     boolean mLenientBackgroundCheck = false;
     boolean mForceResizableActivities;
+    boolean mSupportsMultiWindow;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
     Rect mDefaultPinnedStackBounds;
@@ -12336,6 +12337,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean supportsPictureInPicture =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
+        final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow();
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
@@ -12362,8 +12364,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             mLenientBackgroundCheck = lenientBackgroundCheck;
             mForceResizableActivities = forceResizable;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
-            mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
-            mSupportsPictureInPicture = supportsPictureInPicture || forceResizable;
+            if (supportsMultiWindow || forceResizable) {
+                mSupportsMultiWindow = true;
+                mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
+                mSupportsPictureInPicture = supportsPictureInPicture || forceResizable;
+            } else {
+                mSupportsMultiWindow = false;
+                mSupportsFreeformWindowManagement = false;
+                mSupportsPictureInPicture = false;
+            }
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
             updateConfigurationLocked(configuration, null, true);
