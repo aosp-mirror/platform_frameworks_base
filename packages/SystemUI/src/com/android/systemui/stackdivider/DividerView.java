@@ -66,6 +66,8 @@ import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.stackdivider.events.StartedDragingEvent;
+import com.android.systemui.stackdivider.events.StoppedDragingEvent;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 
@@ -281,6 +283,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mWindowManager.setSlippery(false);
             liftBackground();
         }
+        EventBus.getDefault().send(new StartedDragingEvent());
         return mDockSide != WindowManager.DOCKED_INVALID;
     }
 
@@ -439,6 +442,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mDockSide = WindowManager.DOCKED_INVALID;
                 mCurrentAnimator = null;
                 mEntranceAnimationRunning = false;
+                EventBus.getDefault().send(new StoppedDragingEvent());
             }
         });
         mCurrentAnimator = anim;

@@ -101,7 +101,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
@@ -151,6 +153,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
+import static com.android.server.am.ActivityManagerService.NOTIFY_FORCED_RESIZABLE_MSG;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
@@ -1304,7 +1307,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo,
             String resultWho, int requestCode, int callingPid, int callingUid,
             String callingPackage, boolean ignoreTargetSecurity, ProcessRecord callerApp,
-            ActivityRecord resultRecord, ActivityStack resultStack) {
+            ActivityRecord resultRecord, ActivityStack resultStack, ActivityOptions options) {
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
                 callingUid);
         if (startAnyPerm ==  PERMISSION_GRANTED) {
@@ -1358,6 +1361,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, message);
             return false;
         }
+        if (options != null && options.getLaunchTaskId() != -1) {
+            final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
+                    callingPid, callingUid);
+            if (startInTaskPerm != PERMISSION_GRANTED) {
+                final String msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with launchTaskId="
+                        + options.getLaunchTaskId();
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        }
+
         return true;
     }
 
@@ -1788,6 +1804,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
+
+        showNonResizeableDockToastIfNeeded(task, INVALID_STACK_ID, task.stack.mStackId);
     }
 
     boolean canUseActivityOptionsLaunchBounds(ActivityOptions options, int launchStackId) {
@@ -3309,10 +3327,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        if (!task.canGoInDockedStack() || task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
-            // Display warning toast if we tried to put a non-dockable task in the docked stack or
-            // the task was forced to be resizable by the system.
+        if (!task.canGoInDockedStack()) {
+            // Display a warning toast that we tried to put a non-dockable task in the docked stack.
             mWindowManager.scheduleShowNonResizeableDockToast(task.taskId);
+        } else if (task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
+            String packageName = task.getTopActivity() != null
+                    ? task.getTopActivity().appInfo.packageName : null;
+            mService.mHandler.obtainMessage(NOTIFY_FORCED_RESIZABLE_MSG, task.taskId, 0,
+                    packageName).sendToTarget();
         }
     }
 

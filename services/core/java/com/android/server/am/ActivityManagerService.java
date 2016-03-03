@@ -1471,6 +1471,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 64;
     static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 65;
     static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 66;
+    static final int NOTIFY_FORCED_RESIZABLE_MSG = 67;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2011,6 +2012,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             // Make a one-way callback to the listener
                             mTaskStackListeners.getBroadcastItem(i).onPinnedStackAnimationEnded();
+                        } catch (RemoteException e){
+                            // Handled by the RemoteCallbackList
+                        }
+                    }
+                    mTaskStackListeners.finishBroadcast();
+                }
+                break;
+            }
+            case NOTIFY_FORCED_RESIZABLE_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
+                        try {
+                            // Make a one-way callback to the listener
+                            mTaskStackListeners.getBroadcastItem(i).onActivityForcedResizable(
+                                    (String) msg.obj, msg.arg1);
                         } catch (RemoteException e){
                             // Handled by the RemoteCallbackList
                         }

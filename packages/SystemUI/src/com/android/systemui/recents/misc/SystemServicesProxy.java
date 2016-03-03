@@ -141,6 +141,7 @@ public class SystemServicesProxy {
         public void onActivityPinned() { }
         public void onPinnedActivityRestartAttempt() { }
         public void onPinnedStackAnimationEnded() { }
+        public void onActivityForcedResizable(String packageName, int taskId) { }
     }
 
     /**
@@ -172,10 +173,17 @@ public class SystemServicesProxy {
             mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_ENDED);
             mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_ENDED);
         }
+
+        @Override
+        public void onActivityForcedResizable(String packageName, int taskId)
+                throws RemoteException {
+            mHandler.obtainMessage(H.ON_ACTIVITY_FORCED_RESIZABLE, taskId, 0, packageName)
+                    .sendToTarget();
+        }
     };
 
     /**
-     * List of {@link TaskStackListener} registered from {@link registerTaskStackListener}.
+     * List of {@link TaskStackListener} registered from {@link #registerTaskStackListener}.
      */
     private List<TaskStackListener> mTaskStackListeners = new ArrayList<>();
 
@@ -1050,6 +1058,7 @@ public class SystemServicesProxy {
         private static final int ON_ACTIVITY_PINNED = 2;
         private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 3;
         private static final int ON_PINNED_STACK_ANIMATION_ENDED = 4;
+        private static final int ON_ACTIVITY_FORCED_RESIZABLE = 5;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1075,6 +1084,13 @@ public class SystemServicesProxy {
                 case ON_PINNED_STACK_ANIMATION_ENDED: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
+                    }
+                    break;
+                }
+                case ON_ACTIVITY_FORCED_RESIZABLE: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onActivityForcedResizable(
+                                (String) msg.obj, msg.arg1);
                     }
                     break;
                 }

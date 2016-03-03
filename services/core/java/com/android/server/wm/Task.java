@@ -140,41 +140,7 @@ class Task implements DimLayer.DimLayerUser {
             final String text =
                     mService.mContext.getString(R.string.dock_non_resizeble_failed_to_dock_text);
             mService.mH.obtainMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST, 0, 0, text).sendToTarget();
-            return;
         }
-
-        final int dockSide = mStack.getDockSide();
-        if (mResizeMode != RESIZE_MODE_FORCE_RESIZEABLE || dockSide == DOCKED_INVALID) {
-            return;
-        }
-
-        int xOffset = 0;
-        int yOffset = 0;
-        mStack.getBounds(mTmpRect);
-
-        if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
-            // The toast was originally placed at the bottom and centered. To place it at the
-            // bottom-center of the stack, we offset it horizontally by the diff between the center
-            // of the stack bounds vs. the center of the screen.
-            displayContent.getLogicalDisplayRect(mTmpRect2);
-            xOffset = mTmpRect.centerX() - mTmpRect2.centerX();
-        } else if (dockSide == DOCKED_TOP) {
-            // The toast was originally placed at the bottom and centered. To place it at the bottom
-            // center of the top stack, we offset it vertically by the diff between the bottom of
-            // the stack bounds vs. the bottom of the content rect.
-            //
-            // Note here we use the content rect instead of the display rect, as we want the toast's
-            // distance to the dock divider (when it's placed at the top half) to be the same as
-            // it's distance to the top of the navigation bar (when it's placed at the bottom).
-
-            // We don't adjust for DOCKED_BOTTOM case since it's already at the bottom.
-            displayContent.getContentRect(mTmpRect2);
-            yOffset = mTmpRect2.bottom - mTmpRect.bottom;
-        }
-        final String text =
-                mService.mContext.getString(R.string.dock_forced_resizable);
-        mService.mH.obtainMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST,
-                xOffset, yOffset, text).sendToTarget();
     }
 
     void addAppToken(int addPos, AppWindowToken wtoken, int resizeMode, boolean homeTask) {
