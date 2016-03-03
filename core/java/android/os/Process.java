@@ -975,6 +975,31 @@ public class Process {
             throws IllegalArgumentException, SecurityException;
 
     /**
+     * On some devices, the foreground process may have one or more CPU
+     * cores exclusively reserved for it. This method can be used to
+     * retrieve which cores that are (if any), so the calling process
+     * can then use sched_setaffinity() to lock a thread to these cores.
+     * Note that the calling process must currently be running in the
+     * foreground for this method to return any cores.
+     *
+     * The CPU core(s) exclusively reserved for the foreground process will
+     * stay reserved for as long as the process stays in the foreground.
+     *
+     * As soon as a process leaves the foreground, those CPU cores will
+     * no longer be reserved for it, and will most likely be reserved for
+     * the new foreground process. It's not necessary to change the affinity
+     * of your process when it leaves the foreground (if you had previously
+     * set it to use a reserved core); the OS will automatically take care
+     * of resetting the affinity at that point.
+     *
+     * @return an array of integers, indicating the CPU cores exclusively
+     * reserved for this process. The array will have length zero if no
+     * CPU cores are exclusively reserved for this process at this point
+     * in time.
+     */
+    public static final native int[] getExclusiveCores();
+
+    /**
      * Set the priority of the calling thread, based on Linux priorities.  See
      * {@link #setThreadPriority(int, int)} for more information.
      * 

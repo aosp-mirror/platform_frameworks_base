@@ -17,6 +17,8 @@
 
 #define LOG_TAG "Process"
 
+// To make sure cpu_set_t is included from sched.h
+#define _GNU_SOURCE 1
 #include <utils/Log.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -286,6 +288,139 @@ jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
         signalExceptionForGroupError(env, errno);
     }
     return (int) sp;
+}
+
+#ifdef ENABLE_CPUSETS
+/** Sample CPUset list format:
+ *  0-3,4,6-8
+ */
+static void parse_cpuset_cpus(char *cpus, cpu_set_t *cpu_set) {
+    unsigned int start, end, matched, i;
+    char *cpu_range = strtok(cpus, ",");
+    while (cpu_range != NULL) {
+        start = end = 0;
+        matched = sscanf(cpu_range, "%u-%u", &start, &end);
+        cpu_range = strtok(NULL, ",");
+        if (start >= CPU_SETSIZE) {
+            ALOGE("parse_cpuset_cpus: ignoring CPU number larger than %d.", CPU_SETSIZE);
+            continue;
+        } else if (end >= CPU_SETSIZE) {
+            ALOGE("parse_cpuset_cpus: ignoring CPU numbers larger than %d.", CPU_SETSIZE);
+            end = CPU_SETSIZE - 1;
+        }
+        if (matched == 1) {
+            CPU_SET(start, cpu_set);
+        } else if (matched == 2) {
+            for (i = start; i <= end; i++) {
+                CPU_SET(i, cpu_set);
+            }
+        } else {
+            ALOGE("Failed to match cpus");
+        }
+    }
+    return;
+}
+
+/**
+ * Stores the CPUs assigned to the cpuset corresponding to the
+ * SchedPolicy in the passed in cpu_set.
+ */
+static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
+{
+    FILE *file;
+    const char *filename;
+
+    CPU_ZERO(cpu_set);
+
+    switch (policy) {
+        case SP_BACKGROUND:
+            filename = "/dev/cpuset/background/cpus";
+            break;
+        case SP_FOREGROUND:
+        case SP_AUDIO_APP:
+        case SP_AUDIO_SYS:
+            filename = "/dev/cpuset/foreground/cpus";
+            break;
+        case SP_TOP_APP:
+            filename = "/dev/cpuset/top-app/cpus";
+            break;
+        default:
+            filename = NULL;
+    }
+
+    if (!filename) return;
+
+    file = fopen(filename, "re");
+    if (file != NULL) {
+        // Parse cpus string
+        char *line = NULL;
+        size_t len = 0;
+        ssize_t num_read = getline(&line, &len, file);
+        fclose (file);
+        if (num_read > 0) {
+            parse_cpuset_cpus(line, cpu_set);
+        } else {
+            ALOGE("Failed to read %s", filename);
+        }
+        free(line);
+    }
+    return;
+}
+#endif
+
+
+/**
+ * Determine CPU cores exclusively assigned to the
+ * cpuset corresponding to the SchedPolicy and store
+ * them in the passed in cpu_set_t
+ */
+void get_exclusive_cpuset_cores(SchedPolicy policy, cpu_set_t *cpu_set) {
+#ifdef ENABLE_CPUSETS
+    int i;
+    cpu_set_t tmp_set;
+    get_cpuset_cores_for_policy(policy, cpu_set);
+    for (i = 0; i < SP_CNT; i++) {
+        if ((SchedPolicy) i == policy) continue;
+        get_cpuset_cores_for_policy((SchedPolicy)i, &tmp_set);
+        // First get cores exclusive to one set or the other
+        CPU_XOR(&tmp_set, cpu_set, &tmp_set);
+        // Then get the ones only in cpu_set
+        CPU_AND(cpu_set, cpu_set, &tmp_set);
+    }
+#else
+    (void) policy;
+    CPU_ZERO(cpu_set);
+#endif
+    return;
+}
+
+jintArray android_os_Process_getExclusiveCores(JNIEnv* env, jobject clazz) {
+    SchedPolicy sp;
+    cpu_set_t cpu_set;
+    jintArray cpus;
+    int pid = getpid();
+    if (get_sched_policy(pid, &sp) != 0) {
+        signalExceptionForGroupError(env, errno);
+        return NULL;
+    }
+    get_exclusive_cpuset_cores(sp, &cpu_set);
+    int num_cpus = CPU_COUNT(&cpu_set);
+    cpus = env->NewIntArray(num_cpus);
+    if (cpus == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+
+    jint* cpu_elements = env->GetIntArrayElements(cpus, 0);
+    int count = 0;
+    for (int i = 0; i < CPU_SETSIZE && count < num_cpus; i++) {
+        if (CPU_ISSET(i, &cpu_set)) {
+            cpu_elements[count++] = i;
+        }
+    }
+
+    env->ReleaseIntArrayElements(cpus, cpu_elements, 0);
+    return cpus;
 }
 
 static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, jboolean bgOk) {
@@ -1053,6 +1188,7 @@ static const JNINativeMethod methods[] = {
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
     {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
     {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
+    {"getExclusiveCores",   "()[I", (void*)android_os_Process_getExclusiveCores},
     {"setSwappiness",   "(IZ)Z", (void*)android_os_Process_setSwappiness},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},
