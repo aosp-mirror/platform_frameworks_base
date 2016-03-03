@@ -4909,6 +4909,9 @@ public final class ActivityThread {
             DdmVmInternal.enableRecentAllocations(true);
         }
 
+        // Note when this process has started.
+        Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
+
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);

@@ -29059,6 +29059,8 @@ package android.os {
     ctor public Process();
     method public static final long getElapsedCpuTime();
     method public static final int getGidForName(java.lang.String);
+    method public static final long getStartElapsedRealtime();
+    method public static final long getStartUptimeMillis();
     method public static final int getThreadPriority(int) throws java.lang.IllegalArgumentException;
     method public static final int getUidForName(java.lang.String);
     method public static final boolean is64Bit();
