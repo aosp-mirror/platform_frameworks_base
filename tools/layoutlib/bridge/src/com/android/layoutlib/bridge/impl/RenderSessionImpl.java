@@ -60,6 +60,7 @@ import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
+import android.os.Looper;
 import android.preference.Preference_Delegate;
 import android.view.AttachInfo_Accessor;
 import android.view.BridgeInflater;
@@ -1398,6 +1399,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     public void dispose() {
+        boolean createdLooper = false;
+        if (Looper.myLooper() == null) {
+            // Detaching the root view from the window will try to stop any running animations.
+            // The stop method checks that it can run in the looper so, if there is no current
+            // looper, we create a temporary one to complete the shutdown.
+            Bridge.prepareThread();
+            createdLooper = true;
+        }
         AttachInfo_Accessor.detachFromWindow(mViewRoot);
         if (mCanvas != null) {
             mCanvas.release();
@@ -1412,5 +1421,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         mImage = null;
         mViewRoot = null;
         mContentRoot = null;
+
+        if (createdLooper) {
+            Bridge.cleanupThread();
+        }
     }
 }

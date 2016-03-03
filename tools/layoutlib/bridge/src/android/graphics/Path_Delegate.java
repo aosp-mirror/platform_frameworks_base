@@ -572,7 +572,7 @@ public final class Path_Delegate {
         return null;
     }
 
-    private static void addPath(long destPath, long srcPath, AffineTransform transform) {
+    public static void addPath(long destPath, long srcPath, AffineTransform transform) {
         Path_Delegate destPathDelegate = sManager.getDelegate(destPath);
         if (destPathDelegate == null) {
             return;
@@ -630,7 +630,7 @@ public final class Path_Delegate {
      * Fills the given {@link RectF} with the path bounds.
      * @param bounds the RectF to be filled.
      */
-    private void fillBounds(RectF bounds) {
+    public void fillBounds(RectF bounds) {
         Rectangle2D rect = mPath.getBounds2D();
         bounds.left = (float)rect.getMinX();
         bounds.right = (float)rect.getMaxX();
@@ -644,7 +644,7 @@ public final class Path_Delegate {
      * @param x The x-coordinate of the start of a new contour
      * @param y The y-coordinate of the start of a new contour
      */
-    private void moveTo(float x, float y) {
+    public void moveTo(float x, float y) {
         mPath.moveTo(mLastX = x, mLastY = y);
     }
 
@@ -658,7 +658,7 @@ public final class Path_Delegate {
      * @param dy The amount to add to the y-coordinate of the end of the
      *           previous contour, to specify the start of a new contour
      */
-    private void rMoveTo(float dx, float dy) {
+    public void rMoveTo(float dx, float dy) {
         dx += mLastX;
         dy += mLastY;
         mPath.moveTo(mLastX = dx, mLastY = dy);
@@ -672,7 +672,7 @@ public final class Path_Delegate {
      * @param x The x-coordinate of the end of a line
      * @param y The y-coordinate of the end of a line
      */
-    private void lineTo(float x, float y) {
+    public void lineTo(float x, float y) {
         if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
@@ -689,7 +689,7 @@ public final class Path_Delegate {
      * @param dy The amount to add to the y-coordinate of the previous point on
      *           this contour, to specify a line
      */
-    private void rLineTo(float dx, float dy) {
+    public void rLineTo(float dx, float dy) {
         if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
@@ -714,7 +714,7 @@ public final class Path_Delegate {
      * @param x2 The x-coordinate of the end point on a quadratic curve
      * @param y2 The y-coordinate of the end point on a quadratic curve
      */
-    private void quadTo(float x1, float y1, float x2, float y2) {
+    public void quadTo(float x1, float y1, float x2, float y2) {
         mPath.quadTo(x1, y1, mLastX = x2, mLastY = y2);
     }
 
@@ -732,7 +732,7 @@ public final class Path_Delegate {
      * @param dy2 The amount to add to the y-coordinate of the last point on
      *            this contour, for the end point of a quadratic curve
      */
-    private void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
+    public void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
         if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
@@ -755,7 +755,7 @@ public final class Path_Delegate {
      * @param x3 The x-coordinate of the end point on a cubic curve
      * @param y3 The y-coordinate of the end point on a cubic curve
      */
-    private void cubicTo(float x1, float y1, float x2, float y2,
+    public void cubicTo(float x1, float y1, float x2, float y2,
                         float x3, float y3) {
         if (!hasPoints()) {
             mPath.moveTo(0, 0);
@@ -768,7 +768,7 @@ public final class Path_Delegate {
      * current point on this contour. If there is no previous point, then a
      * moveTo(0,0) is inserted automatically.
      */
-    private void rCubicTo(float dx1, float dy1, float dx2, float dy2,
+    public void rCubicTo(float dx1, float dy1, float dx2, float dy2,
                          float dx3, float dy3) {
         if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
@@ -798,7 +798,7 @@ public final class Path_Delegate {
      *                    mod 360.
      * @param forceMoveTo If true, always begin a new contour with the arc
      */
-    private void arcTo(float left, float top, float right, float bottom, float startAngle,
+    public void arcTo(float left, float top, float right, float bottom, float startAngle,
             float sweepAngle,
             boolean forceMoveTo) {
         Arc2D arc = new Arc2D.Float(left, top, right - left, bottom - top, -startAngle,
@@ -812,7 +812,7 @@ public final class Path_Delegate {
      * Close the current contour. If the current point is not equal to the
      * first point of the contour, a line segment is automatically added.
      */
-    private void close() {
+    public void close() {
         mPath.closePath();
     }
 
@@ -831,7 +831,7 @@ public final class Path_Delegate {
      * @param bottom The bottom of a rectangle to add to the path
      * @param dir    The direction to wind the rectangle's contour
      */
-    private void addRect(float left, float top, float right, float bottom,
+    public void addRect(float left, float top, float right, float bottom,
                         int dir) {
         moveTo(left, top);
 

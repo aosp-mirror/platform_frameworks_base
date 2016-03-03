@@ -24,7 +24,6 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import android.annotation.NonNull;
 import android.graphics.Path_Delegate;
 
-import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -52,8 +51,16 @@ public class PathParser_Delegate {
     @NonNull
     private PathDataNode[] mPathDataNodes;
 
+    public static PathParser_Delegate getDelegate(long nativePtr) {
+        return sManager.getDelegate(nativePtr);
+    }
+
     private PathParser_Delegate(@NonNull PathDataNode[] nodes) {
         mPathDataNodes = nodes;
+    }
+
+    public PathDataNode[] getPathDataNodes() {
+        return mPathDataNodes;
     }
 
     @LayoutlibDelegate
@@ -64,7 +71,7 @@ public class PathParser_Delegate {
             return false;
         }
         assert pathString.length() == stringLength;
-        PathDataNode.nodesToPath(createNodesFromPathData(pathString), path_delegate.getJavaShape());
+        PathDataNode.nodesToPath(createNodesFromPathData(pathString), path_delegate);
         return true;
     }
 
@@ -75,7 +82,7 @@ public class PathParser_Delegate {
         if (source == null || path_delegate == null) {
             return;
         }
-        PathDataNode.nodesToPath(source.mPathDataNodes, path_delegate.getJavaShape());
+        PathDataNode.nodesToPath(source.mPathDataNodes, path_delegate);
     }
 
     @LayoutlibDelegate
@@ -124,8 +131,11 @@ public class PathParser_Delegate {
             out.mPathDataNodes = new PathDataNode[length];
         }
         for (int i = 0; i < length; i++) {
+            if (out.mPathDataNodes[i] == null) {
+                out.mPathDataNodes[i] = new PathDataNode(from.mPathDataNodes[i]);
+            }
             out.mPathDataNodes[i].interpolatePathDataNode(from.mPathDataNodes[i],
-                    to.mPathDataNodes[i], fraction);
+                        to.mPathDataNodes[i], fraction);
         }
         return true;
     }
@@ -137,9 +147,13 @@ public class PathParser_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static boolean nCanMorph(long fromDataPtr, long toDataPtr) {
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED, "morphing path data isn't " +
-                "supported", null, null);
-        return false;
+        PathParser_Delegate fromPath = PathParser_Delegate.getDelegate(fromDataPtr);
+        PathParser_Delegate toPath = PathParser_Delegate.getDelegate(toDataPtr);
+        if (fromPath == null || toPath == null || fromPath.getPathDataNodes() == null || toPath
+                .getPathDataNodes() == null) {
+            return true;
+        }
+        return PathParser_Delegate.canMorph(fromPath.getPathDataNodes(), toPath.getPathDataNodes());
     }
 
     @LayoutlibDelegate
@@ -158,7 +172,7 @@ public class PathParser_Delegate {
      * @return an array of the PathDataNode.
      */
     @NonNull
-    private static PathDataNode[] createNodesFromPathData(@NonNull String pathData) {
+    public static PathDataNode[] createNodesFromPathData(@NonNull String pathData) {
         int start = 0;
         int end = 1;
 
@@ -186,12 +200,51 @@ public class PathParser_Delegate {
      * @return a deep copy of the <code>source</code>.
      */
     @NonNull
-    private static PathDataNode[] deepCopyNodes(@NonNull PathDataNode[] source) {
+    public static PathDataNode[] deepCopyNodes(@NonNull PathDataNode[] source) {
         PathDataNode[] copy = new PathDataNode[source.length];
         for (int i = 0; i < source.length; i++) {
             copy[i] = new PathDataNode(source[i]);
         }
         return copy;
+    }
+
+    /**
+     * @param nodesFrom The source path represented in an array of PathDataNode
+     * @param nodesTo The target path represented in an array of PathDataNode
+     * @return whether the <code>nodesFrom</code> can morph into <code>nodesTo</code>
+     */
+    public static boolean canMorph(PathDataNode[] nodesFrom, PathDataNode[] nodesTo) {
+        if (nodesFrom == null || nodesTo == null) {
+            return false;
+        }
+
+        if (nodesFrom.length != nodesTo.length) {
+            return false;
+        }
+
+        for (int i = 0; i < nodesFrom.length; i ++) {
+            if (nodesFrom[i].mType != nodesTo[i].mType
+                    || nodesFrom[i].mParams.length != nodesTo[i].mParams.length) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Update the target's data to match the source.
+     * Before calling this, make sure canMorph(target, source) is true.
+     *
+     * @param target The target path represented in an array of PathDataNode
+     * @param source The source path represented in an array of PathDataNode
+     */
+    public static void updateNodes(PathDataNode[] target, PathDataNode[] source) {
+        for (int i = 0; i < source.length; i ++) {
+            target[i].mType = source[i].mType;
+            for (int j = 0; j < source[i].mParams.length; j ++) {
+                target[i].mParams[j] = source[i].mParams[j];
+            }
+        }
     }
 
     private static int nextStart(@NonNull String s, int end) {
@@ -330,7 +383,7 @@ public class PathParser_Delegate {
      * Each PathDataNode represents one command in the "d" attribute of the svg file. An array of
      * PathDataNode can represent the whole "d" attribute.
      */
-    private static class PathDataNode {
+    public static class PathDataNode {
         private char mType;
         @NonNull
         private float[] mParams;
@@ -355,12 +408,13 @@ public class PathParser_Delegate {
         }
 
         /**
-         * Convert an array of PathDataNode to Path.
+         * Convert an array of PathDataNode to Path. Reset the passed path as needed before
+         * calling this method.
          *
          * @param node The source array of PathDataNode.
          * @param path The target Path object.
          */
-        private static void nodesToPath(@NonNull PathDataNode[] node, @NonNull Path2D path) {
+        public static void nodesToPath(@NonNull PathDataNode[] node, @NonNull Path_Delegate path) {
             float[] current = new float[6];
             char previousCommand = 'm';
             //noinspection ForLoopReplaceableByForEach
@@ -387,24 +441,32 @@ public class PathParser_Delegate {
         }
 
         @SuppressWarnings("PointlessArithmeticExpression")
-        private static void addCommand(@NonNull Path2D path, float[] current, char cmd,
-                char lastCmd, @NonNull float[] val) {
+        private static void addCommand(@NonNull Path_Delegate path, float[] current,
+                char previousCmd, char cmd, @NonNull float[] val) {
 
             int incr = 2;
-
-            float cx = current[0];
-            float cy = current[1];
-            float cpx = current[2];
-            float cpy = current[3];
-            float loopX = current[4];
-            float loopY = current[5];
+            float currentX = current[0];
+            float currentY = current[1];
+            float ctrlPointX = current[2];
+            float ctrlPointY = current[3];
+            float currentSegmentStartX = current[4];
+            float currentSegmentStartY = current[5];
+            float reflectiveCtrlPointX;
+            float reflectiveCtrlPointY;
 
             switch (cmd) {
                 case 'z':
                 case 'Z':
-                    path.closePath();
-                    cx = loopX;
-                    cy = loopY;
+                    path.close();
+                    // Path is closed here, but we need to move the pen to the
+                    // closed position. So we cache the segment's starting position,
+                    // and restore it here.
+                    currentX = currentSegmentStartX;
+                    currentY = currentSegmentStartY;
+                    ctrlPointX = currentSegmentStartX;
+                    ctrlPointY = currentSegmentStartY;
+                    path.moveTo(currentX, currentY);
+                    break;
                 case 'm':
                 case 'M':
                 case 'l':
@@ -432,185 +494,206 @@ public class PathParser_Delegate {
                 case 'a':
                 case 'A':
                     incr = 7;
+                    break;
             }
 
             for (int k = 0; k < val.length; k += incr) {
-                boolean reflectCtrl;
-                float tempReflectedX, tempReflectedY;
-
                 switch (cmd) {
-                    case 'm':
-                        cx += val[k + 0];
-                        cy += val[k + 1];
+                    case 'm': // moveto - Start a new sub-path (relative)
+                        currentX += val[k + 0];
+                        currentY += val[k + 1];
+
                         if (k > 0) {
                             // According to the spec, if a moveto is followed by multiple
                             // pairs of coordinates, the subsequent pairs are treated as
                             // implicit lineto commands.
-                            path.lineTo(cx, cy);
+                            path.rLineTo(val[k + 0], val[k + 1]);
                         } else {
-                            path.moveTo(cx, cy);
-                            loopX = cx;
-                            loopY = cy;
+                            path.rMoveTo(val[k + 0], val[k + 1]);
+                            currentSegmentStartX = currentX;
+                            currentSegmentStartY = currentY;
                         }
                         break;
-                    case 'M':
-                        cx = val[k + 0];
-                        cy = val[k + 1];
+                    case 'M': // moveto - Start a new sub-path
+                        currentX = val[k + 0];
+                        currentY = val[k + 1];
+
                         if (k > 0) {
                             // According to the spec, if a moveto is followed by multiple
                             // pairs of coordinates, the subsequent pairs are treated as
                             // implicit lineto commands.
-                            path.lineTo(cx, cy);
+                            path.lineTo(val[k + 0], val[k + 1]);
                         } else {
-                            path.moveTo(cx, cy);
-                            loopX = cx;
-                            loopY = cy;
+                            path.moveTo(val[k + 0], val[k + 1]);
+                            currentSegmentStartX = currentX;
+                            currentSegmentStartY = currentY;
                         }
                         break;
-                    case 'l':
-                        cx += val[k + 0];
-                        cy += val[k + 1];
-                        path.lineTo(cx, cy);
+                    case 'l': // lineto - Draw a line from the current point (relative)
+                        path.rLineTo(val[k + 0], val[k + 1]);
+                        currentX += val[k + 0];
+                        currentY += val[k + 1];
                         break;
-                    case 'L':
-                        cx = val[k + 0];
-                        cy = val[k + 1];
-                        path.lineTo(cx, cy);
+                    case 'L': // lineto - Draw a line from the current point
+                        path.lineTo(val[k + 0], val[k + 1]);
+                        currentX = val[k + 0];
+                        currentY = val[k + 1];
                         break;
-                    case 'z':
-                    case 'Z':
-                        path.closePath();
-                        cx = loopX;
-                        cy = loopY;
+                    case 'h': // horizontal lineto - Draws a horizontal line (relative)
+                        path.rLineTo(val[k + 0], 0);
+                        currentX += val[k + 0];
                         break;
-                    case 'h':
-                        cx += val[k + 0];
-                        path.lineTo(cx, cy);
+                    case 'H': // horizontal lineto - Draws a horizontal line
+                        path.lineTo(val[k + 0], currentY);
+                        currentX = val[k + 0];
                         break;
-                    case 'H':
-                        path.lineTo(val[k + 0], cy);
-                        cx = val[k + 0];
+                    case 'v': // vertical lineto - Draws a vertical line from the current point (r)
+                        path.rLineTo(0, val[k + 0]);
+                        currentY += val[k + 0];
                         break;
-                    case 'v':
-                        cy += val[k + 0];
-                        path.lineTo(cx, cy);
+                    case 'V': // vertical lineto - Draws a vertical line from the current point
+                        path.lineTo(currentX, val[k + 0]);
+                        currentY = val[k + 0];
                         break;
-                    case 'V':
-                        path.lineTo(cx, val[k + 0]);
-                        cy = val[k + 0];
-                        break;
-                    case 'c':
-                        path.curveTo(cx + val[k + 0], cy + val[k + 1], cx + val[k + 2],
-                                cy + val[k + 3], cx + val[k + 4], cy + val[k + 5]);
-                        cpx = cx + val[k + 2];
-                        cpy = cy + val[k + 3];
-                        cx += val[k + 4];
-                        cy += val[k + 5];
-                        break;
-                    case 'C':
-                        path.curveTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3],
+                    case 'c': // curveto - Draws a cubic Bézier curve (relative)
+                        path.rCubicTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3],
                                 val[k + 4], val[k + 5]);
-                        cx = val[k + 4];
-                        cy = val[k + 5];
-                        cpx = val[k + 2];
-                        cpy = val[k + 3];
-                        break;
-                    case 's':
-                        reflectCtrl = (lastCmd == 'c' || lastCmd == 's' || lastCmd == 'C' ||
-                                lastCmd == 'S');
-                        path.curveTo(reflectCtrl ? 2 * cx - cpx : cx, reflectCtrl ? 2
-                                * cy - cpy : cy, cx + val[k + 0], cy + val[k + 1], cx
-                                + val[k + 2], cy + val[k + 3]);
 
-                        cpx = cx + val[k + 0];
-                        cpy = cy + val[k + 1];
-                        cx += val[k + 2];
-                        cy += val[k + 3];
+                        ctrlPointX = currentX + val[k + 2];
+                        ctrlPointY = currentY + val[k + 3];
+                        currentX += val[k + 4];
+                        currentY += val[k + 5];
+
                         break;
-                    case 'S':
-                        reflectCtrl = (lastCmd == 'c' || lastCmd == 's' || lastCmd == 'C' ||
-                                lastCmd == 'S');
-                        path.curveTo(reflectCtrl ? 2 * cx - cpx : cx, reflectCtrl ? 2
-                                        * cy - cpy : cy, val[k + 0], val[k + 1], val[k + 2],
-                                val[k + 3]);
-                        cpx = (val[k + 0]);
-                        cpy = (val[k + 1]);
-                        cx = val[k + 2];
-                        cy = val[k + 3];
+                    case 'C': // curveto - Draws a cubic Bézier curve
+                        path.cubicTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3],
+                                val[k + 4], val[k + 5]);
+                        currentX = val[k + 4];
+                        currentY = val[k + 5];
+                        ctrlPointX = val[k + 2];
+                        ctrlPointY = val[k + 3];
                         break;
-                    case 'q':
-                        path.quadTo(cx + val[k + 0], cy + val[k + 1], cx + val[k + 2],
-                                cy + val[k + 3]);
-                        cpx = cx + val[k + 0];
-                        cpy = cy + val[k + 1];
-                        // Note that we have to update cpx first, since cx will be updated here.
-                        cx += val[k + 2];
-                        cy += val[k + 3];
+                    case 's': // smooth curveto - Draws a cubic Bézier curve (reflective cp)
+                        reflectiveCtrlPointX = 0;
+                        reflectiveCtrlPointY = 0;
+                        if (previousCmd == 'c' || previousCmd == 's'
+                                || previousCmd == 'C' || previousCmd == 'S') {
+                            reflectiveCtrlPointX = currentX - ctrlPointX;
+                            reflectiveCtrlPointY = currentY - ctrlPointY;
+                        }
+                        path.rCubicTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
+                                val[k + 0], val[k + 1],
+                                val[k + 2], val[k + 3]);
+
+                        ctrlPointX = currentX + val[k + 0];
+                        ctrlPointY = currentY + val[k + 1];
+                        currentX += val[k + 2];
+                        currentY += val[k + 3];
                         break;
-                    case 'Q':
+                    case 'S': // shorthand/smooth curveto Draws a cubic Bézier curve(reflective cp)
+                        reflectiveCtrlPointX = currentX;
+                        reflectiveCtrlPointY = currentY;
+                        if (previousCmd == 'c' || previousCmd == 's'
+                                || previousCmd == 'C' || previousCmd == 'S') {
+                            reflectiveCtrlPointX = 2 * currentX - ctrlPointX;
+                            reflectiveCtrlPointY = 2 * currentY - ctrlPointY;
+                        }
+                        path.cubicTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
+                                val[k + 0], val[k + 1], val[k + 2], val[k + 3]);
+                        ctrlPointX = val[k + 0];
+                        ctrlPointY = val[k + 1];
+                        currentX = val[k + 2];
+                        currentY = val[k + 3];
+                        break;
+                    case 'q': // Draws a quadratic Bézier (relative)
+                        path.rQuadTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3]);
+                        ctrlPointX = currentX + val[k + 0];
+                        ctrlPointY = currentY + val[k + 1];
+                        currentX += val[k + 2];
+                        currentY += val[k + 3];
+                        break;
+                    case 'Q': // Draws a quadratic Bézier
                         path.quadTo(val[k + 0], val[k + 1], val[k + 2], val[k + 3]);
-                        cx = val[k + 2];
-                        cy = val[k + 3];
-                        cpx = val[k + 0];
-                        cpy = val[k + 1];
+                        ctrlPointX = val[k + 0];
+                        ctrlPointY = val[k + 1];
+                        currentX = val[k + 2];
+                        currentY = val[k + 3];
                         break;
-                    case 't':
-                        reflectCtrl = (lastCmd == 'q' || lastCmd == 't' || lastCmd == 'Q' ||
-                                lastCmd == 'T');
-                        tempReflectedX = reflectCtrl ? 2 * cx - cpx : cx;
-                        tempReflectedY = reflectCtrl ? 2 * cy - cpy : cy;
-                        path.quadTo(tempReflectedX, tempReflectedY, cx + val[k + 0],
-                                cy + val[k + 1]);
-                        cpx = tempReflectedX;
-                        cpy = tempReflectedY;
-                        cx += val[k + 0];
-                        cy += val[k + 1];
+                    case 't': // Draws a quadratic Bézier curve(reflective control point)(relative)
+                        reflectiveCtrlPointX = 0;
+                        reflectiveCtrlPointY = 0;
+                        if (previousCmd == 'q' || previousCmd == 't'
+                                || previousCmd == 'Q' || previousCmd == 'T') {
+                            reflectiveCtrlPointX = currentX - ctrlPointX;
+                            reflectiveCtrlPointY = currentY - ctrlPointY;
+                        }
+                        path.rQuadTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
+                                val[k + 0], val[k + 1]);
+                        ctrlPointX = currentX + reflectiveCtrlPointX;
+                        ctrlPointY = currentY + reflectiveCtrlPointY;
+                        currentX += val[k + 0];
+                        currentY += val[k + 1];
                         break;
-                    case 'T':
-                        reflectCtrl = (lastCmd == 'q' || lastCmd == 't' || lastCmd == 'Q' ||
-                                lastCmd == 'T');
-                        tempReflectedX = reflectCtrl ? 2 * cx - cpx : cx;
-                        tempReflectedY = reflectCtrl ? 2 * cy - cpy : cy;
-                        path.quadTo(tempReflectedX, tempReflectedY, val[k + 0], val[k + 1]);
-                        cx = val[k + 0];
-                        cy = val[k + 1];
-                        cpx = tempReflectedX;
-                        cpy = tempReflectedY;
+                    case 'T': // Draws a quadratic Bézier curve (reflective control point)
+                        reflectiveCtrlPointX = currentX;
+                        reflectiveCtrlPointY = currentY;
+                        if (previousCmd == 'q' || previousCmd == 't'
+                                || previousCmd == 'Q' || previousCmd == 'T') {
+                            reflectiveCtrlPointX = 2 * currentX - ctrlPointX;
+                            reflectiveCtrlPointY = 2 * currentY - ctrlPointY;
+                        }
+                        path.quadTo(reflectiveCtrlPointX, reflectiveCtrlPointY,
+                                val[k + 0], val[k + 1]);
+                        ctrlPointX = reflectiveCtrlPointX;
+                        ctrlPointY = reflectiveCtrlPointY;
+                        currentX = val[k + 0];
+                        currentY = val[k + 1];
                         break;
-                    case 'a':
+                    case 'a': // Draws an elliptical arc
                         // (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
-                        drawArc(path, cx, cy, val[k + 5] + cx, val[k + 6] + cy,
-                                val[k + 0], val[k + 1], val[k + 2], val[k + 3] != 0,
+                        drawArc(path,
+                                currentX,
+                                currentY,
+                                val[k + 5] + currentX,
+                                val[k + 6] + currentY,
+                                val[k + 0],
+                                val[k + 1],
+                                val[k + 2],
+                                val[k + 3] != 0,
                                 val[k + 4] != 0);
-                        cx += val[k + 5];
-                        cy += val[k + 6];
-                        cpx = cx;
-                        cpy = cy;
-
+                        currentX += val[k + 5];
+                        currentY += val[k + 6];
+                        ctrlPointX = currentX;
+                        ctrlPointY = currentY;
                         break;
-                    case 'A':
-                        drawArc(path, cx, cy, val[k + 5], val[k + 6], val[k + 0],
-                                val[k + 1], val[k + 2], val[k + 3] != 0,
+                    case 'A': // Draws an elliptical arc
+                        drawArc(path,
+                                currentX,
+                                currentY,
+                                val[k + 5],
+                                val[k + 6],
+                                val[k + 0],
+                                val[k + 1],
+                                val[k + 2],
+                                val[k + 3] != 0,
                                 val[k + 4] != 0);
-                        cx = val[k + 5];
-                        cy = val[k + 6];
-                        cpx = cx;
-                        cpy = cy;
+                        currentX = val[k + 5];
+                        currentY = val[k + 6];
+                        ctrlPointX = currentX;
+                        ctrlPointY = currentY;
                         break;
-
                 }
-                lastCmd = cmd;
+                previousCmd = cmd;
             }
-            current[0] = cx;
-            current[1] = cy;
-            current[2] = cpx;
-            current[3] = cpy;
-            current[4] = loopX;
-            current[5] = loopY;
-
+            current[0] = currentX;
+            current[1] = currentY;
+            current[2] = ctrlPointX;
+            current[3] = ctrlPointY;
+            current[4] = currentSegmentStartX;
+            current[5] = currentSegmentStartY;
         }
 
-        private static void drawArc(@NonNull Path2D p, float x0, float y0, float x1,
+        private static void drawArc(@NonNull Path_Delegate p, float x0, float y0, float x1,
                 float y1, float a, float b, float theta, boolean isMoreThanHalf,
                 boolean isPositiveArc) {
 
@@ -707,7 +790,7 @@ public class PathParser_Delegate {
          * @param start The start angle of the arc on the ellipse
          * @param sweep The angle (positive or negative) of the sweep of the arc on the ellipse
          */
-        private static void arcToBezier(@NonNull Path2D p, double cx, double cy, double a,
+        private static void arcToBezier(@NonNull Path_Delegate p, double cx, double cy, double a,
                 double b, double e1x, double e1y, double theta, double start,
                 double sweep) {
             // Taken from equations at:
@@ -744,8 +827,12 @@ public class PathParser_Delegate {
                 double q2x = e2x - alpha * ep2x;
                 double q2y = e2y - alpha * ep2y;
 
-                p.curveTo((float) q1x, (float) q1y, (float) q2x, (float) q2y,
-                        (float) e2x, (float) e2y);
+                p.cubicTo((float) q1x,
+                        (float) q1y,
+                        (float) q2x,
+                        (float) q2y,
+                        (float) e2x,
+                        (float) e2y);
                 eta1 = eta2;
                 e1x = e2x;
                 e1y = e2y;
