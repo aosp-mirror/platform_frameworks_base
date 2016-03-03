@@ -117,6 +117,16 @@ public class EditText extends TextView {
         Selection.extendSelection(getText(), index);
     }
 
+    /**
+     * Causes words in the text that are longer than the view's width to be ellipsized instead of
+     * broken in the middle. {@link TextUtils.TruncateAt#MARQUEE
+     * TextUtils.TruncateAt#MARQUEE} is not supported.
+     *
+     * @param ellipsis Type of ellipsis to be applied.
+     * @throws IllegalArgumentException When the value of <code>ellipsis</code> parameter is
+     *      {@link TextUtils.TruncateAt#MARQUEE}.
+     * @see TextView#setEllipsize(TextUtils.TruncateAt)
+     */
     @Override
     public void setEllipsize(TextUtils.TruncateAt ellipsis) {
         if (ellipsis == TextUtils.TruncateAt.MARQUEE) {
