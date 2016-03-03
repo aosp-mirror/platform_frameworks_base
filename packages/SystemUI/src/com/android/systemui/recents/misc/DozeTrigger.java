@@ -30,7 +30,7 @@ public class DozeTrigger {
     @ViewDebug.ExportedProperty(category="recents")
     boolean mIsDozing;
     @ViewDebug.ExportedProperty(category="recents")
-    boolean mHasTriggered;
+    boolean mIsAsleep;
     @ViewDebug.ExportedProperty(category="recents")
     int mDozeDurationMilliseconds;
     Runnable mOnSleepRunnable;
@@ -40,7 +40,7 @@ public class DozeTrigger {
         @Override
         public void run() {
             mIsDozing = false;
-            mHasTriggered = true;
+            mIsAsleep = true;
             mOnSleepRunnable.run();
         }
     };
@@ -56,7 +56,7 @@ public class DozeTrigger {
      */
     public void startDozing() {
         forcePoke();
-        mHasTriggered = false;
+        mIsAsleep = false;
     }
 
     /**
@@ -65,6 +65,7 @@ public class DozeTrigger {
     public void stopDozing() {
         mHandler.removeCallbacks(mDozeRunnable);
         mIsDozing = false;
+        mIsAsleep = false;
     }
 
     /**
@@ -99,12 +100,7 @@ public class DozeTrigger {
     }
 
     /** Returns whether the trigger has fired at least once. */
-    public boolean hasTriggered() {
-        return mHasTriggered;
-    }
-
-    /** Resets the doze trigger state. */
-    public void resetTrigger() {
-        mHasTriggered = false;
+    public boolean isAsleep() {
+        return mIsAsleep;
     }
 }

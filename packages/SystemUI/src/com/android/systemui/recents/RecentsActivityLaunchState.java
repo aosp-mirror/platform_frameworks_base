@@ -28,7 +28,8 @@ package com.android.systemui.recents;
 public class RecentsActivityLaunchState {
 
     public boolean launchedWithAltTab;
-    public boolean launchedFromAppWithThumbnail;
+    public boolean launchedFromApp;
+    public boolean launchedFromAppDocked;
     public boolean launchedFromHome;
     public boolean launchedFromSearchHome;
     public boolean launchedReuseTaskStackViews;
@@ -42,7 +43,8 @@ public class RecentsActivityLaunchState {
     public void reset() {
         launchedFromHome = false;
         launchedFromSearchHome = false;
-        launchedFromAppWithThumbnail = false;
+        launchedFromApp = false;
+        launchedFromAppDocked = false;
         launchedToTaskId = -1;
         launchedWithAltTab = false;
         launchedHasConfigurationChanged = false;
@@ -67,7 +69,7 @@ public class RecentsActivityLaunchState {
     public int getInitialFocusTaskIndex(int numTasks) {
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        if (launchedFromAppWithThumbnail) {
+        if (launchedFromApp) {
             if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
                 // If fast toggling, focus the front most task so that the next tap will focus the
                 // N-1 task

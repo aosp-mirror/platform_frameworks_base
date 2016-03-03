@@ -292,6 +292,9 @@
     <!-- The amount to allow the stack to overscroll. -->
     <dimen name="recents_stack_overscroll">24dp</dimen>
 
+    <!-- The size of the initial peek area at the top of the stack (below the status bar). -->
+    <dimen name="recents_initial_top_peek_size">8dp</dimen>
+
     <!-- The size of the peek area at the top of the stack (below the status bar). -->
     <dimen name="recents_layout_focused_top_peek_size">@dimen/recents_history_button_height</dimen>
 

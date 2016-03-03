@@ -77,6 +77,24 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     /**
      * The dim overlay is generally calculated from the task progress, but occasionally (like when
+     * launching) needs to be animated independently of the task progress.  This call is only used
+     * when animating the task into Recents, when the header dim is already applied
+     */
+    public static final Property<TaskView, Float> DIM_ALPHA_WITHOUT_HEADER =
+            new FloatProperty<TaskView>("dimAlphaWithoutHeader") {
+                @Override
+                public void setValue(TaskView tv, float dimAlpha) {
+                    tv.setDimAlphaWithoutHeader(dimAlpha);
+                }
+
+                @Override
+                public Float get(TaskView tv) {
+                    return tv.getDimAlpha();
+                }
+            };
+
+    /**
+     * The dim overlay is generally calculated from the task progress, but occasionally (like when
      * launching) needs to be animated independently of the task progress.
      */
     public static final Property<TaskView, Float> DIM_ALPHA =
@@ -388,21 +406,17 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Sets the current dim.
      */
     public void setDimAlpha(float dimAlpha) {
-        RecentsConfiguration config = Recents.getConfiguration();
-
-        int dimAlphaInt = (int) (dimAlpha * 255);
         mDimAlpha = dimAlpha;
-        if (config.useHardwareLayers) {
-            // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
-            if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
-                mDimColorFilter.setColor(Color.argb(dimAlphaInt, 0, 0, 0));
-                mDimLayerPaint.setColorFilter(mDimColorFilter);
-                mContent.setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
-            }
-        } else {
-            mThumbnailView.setDimAlpha(dimAlpha);
-            mHeaderView.setDimAlpha(dimAlpha);
-        }
+        mThumbnailView.setDimAlpha(dimAlpha);
+        mHeaderView.setDimAlpha(dimAlpha);
+    }
+
+    /**
+     * Sets the current dim without updating the header's dim.
+     */
+    public void setDimAlphaWithoutHeader(float dimAlpha) {
+        mDimAlpha = dimAlpha;
+        mThumbnailView.setDimAlpha(dimAlpha);
     }
 
     /**
@@ -410,25 +424,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      */
     public float getDimAlpha() {
         return mDimAlpha;
-    }
-
-    /**
-     * Animates the dim to the given value.
-     */
-    void animateDimAlpha(float toDimAlpha, AnimationProps animation) {
-        // Animate the dim into view as well
-        if (Float.compare(toDimAlpha, getDimAlpha()) != 0) {
-            Animator anim = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
-                    DIM_ALPHA, getDimAlpha(), toDimAlpha));
-            if (animation.getListener() != null) {
-                anim.addListener(animation.getListener());
-            }
-            anim.start();
-        } else {
-            if (animation.getListener() != null) {
-                animation.getListener().onAnimationEnd(null);
-            }
-        }
     }
 
     /**
@@ -517,18 +512,20 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onPrepareLaunchTargetForEnterAnimation() {
         // These values will be animated in when onStartLaunchTargetEnterAnimation() is called
-        setDimAlpha(0);
+        setDimAlphaWithoutHeader(0);
         mActionButtonView.setAlpha(0f);
     }
 
     @Override
-    public void onStartLaunchTargetEnterAnimation(int duration, boolean screenPinningEnabled,
-            ReferenceCountedTrigger postAnimationTrigger) {
-        // Un-dim the view before/while launching the target
-        AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT)
-                .setListener(postAnimationTrigger.decrementOnAnimationEnd());
+    public void onStartLaunchTargetEnterAnimation(TaskViewTransform transform, int duration,
+            boolean screenPinningEnabled, ReferenceCountedTrigger postAnimationTrigger) {
+        // Dim the view after the app window transitions down into recents
         postAnimationTrigger.increment();
-        animateDimAlpha(0, animation);
+        AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
+        Animator anim = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+                DIM_ALPHA_WITHOUT_HEADER, getDimAlpha(), transform.dimAlpha));
+        anim.addListener(postAnimationTrigger.decrementOnAnimationEnd());
+        anim.start();
 
         if (screenPinningEnabled) {
             showActionButton(true /* fadeIn */, duration /* fadeInDuration */);
@@ -540,7 +537,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             ReferenceCountedTrigger postAnimationTrigger) {
         // Un-dim the view before/while launching the target
         AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
-        animateDimAlpha(0, animation);
+        Animator anim = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+                DIM_ALPHA, getDimAlpha(), 0));
+        anim.start();
 
         postAnimationTrigger.increment();
         hideActionButton(true /* fadeOut */, duration,
