@@ -882,6 +882,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             wallpaper = mLockWallpaperMap.get(userId);
             if (wallpaper == null) {
                 // It's already gone; we're done.
+                if (DEBUG) {
+                    Slog.i(TAG, "Lock wallpaper already cleared");
+                }
                 return;
             }
         } else {
@@ -902,14 +905,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 wallpaper.wallpaperFile.delete();
                 wallpaper.cropFile.delete();
                 if (which == FLAG_SET_LOCK) {
+                    mLockWallpaperMap.remove(userId);
                     final IWallpaperManagerCallback cb = mKeyguardListener;
                     if (cb != null) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Notifying keyguard of lock wallpaper clear");
+                        }
                         try {
                             cb.onWallpaperChanged();
                         } catch (RemoteException e) {
                             // Oh well it went away; no big deal
                         }
                     }
+                    saveSettingsLocked(userId);
                     return;
                 }
             }
