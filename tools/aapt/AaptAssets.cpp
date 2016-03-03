@@ -373,7 +373,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
 void AaptLocaleValue::initFromResTable(const ResTable_config& config) {
     config.unpackLanguage(language);
     config.unpackRegion(region);
-    if (config.localeScriptWasProvided) {
+    if (config.localeScript[0] && !config.localeScriptWasComputed) {
         memcpy(script, config.localeScript, sizeof(config.localeScript));
     }
 
@@ -388,10 +388,10 @@ void AaptLocaleValue::writeTo(ResTable_config* out) const {
 
     if (script[0]) {
         memcpy(out->localeScript, script, sizeof(out->localeScript));
-        out->localeScriptWasProvided = true;
+        out->localeScriptWasComputed = false;
     } else {
         out->computeScript();
-        out->localeScriptWasProvided = false;
+        out->localeScriptWasComputed = true;
     }
 
     if (variant[0]) {
