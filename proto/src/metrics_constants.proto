@@ -1798,38 +1798,56 @@ message MetricsEvent {
 
     // ACTION: User tapped notification action to cancel a bug report
     // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL = 296;
 
     // ACTION: User tapped notification action to launch bug report details screen
     // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS = 297;
 
     // ACTION: User tapped notification action to take adition screenshot on bug report
     // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT = 298;
 
     // ACTION: User tapped notification to share bug report
     // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE = 299;
 
     // ACTION: User changed bug report name using the details screen
     // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_DETAILS_NAME_CHANGED = 300;
 
     // ACTION: User changed bug report title using the details screen
     // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_DETAILS_TITLE_CHANGED = 301;
 
     // ACTION: User changed bug report description using the details screen
     // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED = 302;
 
     // ACTION: User tapped Save in the bug report details screen.
     // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_DETAILS_SAVED = 303;
 
     // ACTION: User tapped Cancel in the bug report details screen.
     // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_DETAILS_CANCELED = 304;
 
     // Tuner: Open/close calibrate dialog.
