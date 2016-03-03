@@ -1029,8 +1029,16 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
 
     @Override
     public void resume() {
-        if (mPaused) {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be resumed from the same " +
+                    "thread that the animator was started on");
+        }
+        if (mPaused && !mResumed) {
             mResumed = true;
+            if (mPauseTime > 0) {
+                AnimationHandler handler = AnimationHandler.getInstance();
+                handler.addAnimationFrameCallback(this, 0);
+            }
         }
         super.resume();
     }
@@ -1235,9 +1243,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
         mLastFrameTime = frameTime;
         if (mPaused) {
-            if (mPauseTime < 0) {
-                mPauseTime = frameTime;
-            }
+            mPauseTime = frameTime;
+            handler.removeCallback(this);
             return;
         } else if (mResumed) {
             mResumed = false;
