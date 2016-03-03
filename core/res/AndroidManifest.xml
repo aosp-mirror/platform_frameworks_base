@@ -87,6 +87,7 @@
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_WHITELIST_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED" />
+    <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED_INTERNAL" />
 
     <protected-broadcast android:name="android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED" />
 
@@ -265,6 +266,7 @@
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_SCAN" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.START_PNO" />
     <protected-broadcast android:name="com.android.server.WifiManager.action.DELAYED_DRIVER_STOP" />
+    <protected-broadcast android:name="com.android.server.WifiManager.action.DEVICE_IDLE" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_STATE_CHANGED" />
@@ -374,7 +376,10 @@
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_FAILED" />
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
     <protected-broadcast android:name="com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION" />
+
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_ADDED" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_REMOVED" />
 
     <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_STATE_CHANGED" />
     <protected-broadcast android:name="android.content.jobscheduler.JOB_DELAY_EXPIRED" />
@@ -432,7 +437,6 @@
     <protected-broadcast android:name="android.intent.action.DYNAMIC_SENSOR_CHANGED" />
 
     <protected-broadcast android:name="android.intent.action.ACTION_RADIO_OFF" />
-    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />
 
     <protected-broadcast android:name="android.accounts.LOGIN_ACCOUNTS_CHANGED" />
     <protected-broadcast android:name="com.android.sync.SYNC_CONN_STATUS_CHANGED" />
@@ -449,6 +453,10 @@
     <protected-broadcast android:name="android.bluetooth.input.profile.action.REPORT" />
 
     <protected-broadcast android:name="android.intent.action.TWILIGHT_CHANGED" />
+
+    <protected-broadcast android:name="com.android.server.fingerprint.ACTION_LOCKOUT_RESET" />
+    <protected-broadcast android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" />
+    <protected-broadcast android:name="com.android.server.notification.CountdownConditionProvider" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
