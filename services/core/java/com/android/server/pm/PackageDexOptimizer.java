@@ -113,15 +113,6 @@ class PackageDexOptimizer {
     }
 
     /**
-     * Determine whether the package should be skipped for the given instruction set. A return
-     * value of true means the package will be skipped. A return value of false means that the
-     * package will be further investigated, and potentially compiled.
-     */
-    protected boolean shouldSkipBasedOnISA(PackageParser.Package pkg, String instructionSet) {
-        return pkg.mDexOptPerformed.contains(instructionSet);
-    }
-
-    /**
      * Adjust the given dexopt-needed value. Can be overridden to influence the decision to
      * optimize or not (and in what way).
      */
@@ -134,13 +125,6 @@ class PackageDexOptimizer {
      */
     protected int adjustDexoptFlags(int dexoptFlags) {
         return dexoptFlags;
-    }
-
-    /**
-     * Update the package status after a successful compilation.
-     */
-    protected void recordSuccessfulDexopt(PackageParser.Package pkg, String instructionSet) {
-        pkg.mDexOptPerformed.add(instructionSet);
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
@@ -159,11 +143,6 @@ class PackageDexOptimizer {
         boolean performedDexOpt = false;
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            if (!useProfiles && shouldSkipBasedOnISA(pkg, dexCodeInstructionSet)) {
-                // Skip only if we do not use profiles since they might trigger a recompilation.
-                continue;
-            }
-
             for (String path : paths) {
                 if (useProfiles && isUsedByOtherApps(path)) {
                     // We cannot use profile guided compilation if the apk was used by another app.
@@ -172,35 +151,44 @@ class PackageDexOptimizer {
                 int dexoptNeeded;
 
                 try {
-                    dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
-                            dexCodeInstructionSet, /* defer */false);
+                    int compilationTypeMask = 0;
+                    if (extractOnly) {
+                        // For extract only, any type of compilation is good.
+                        compilationTypeMask = DexFile.COMPILATION_TYPE_FULL
+                            | DexFile.COMPILATION_TYPE_PROFILE_GUIDE
+                            | DexFile.COMPILATION_TYPE_EXTRACT_ONLY;
+                    } else {
+                        // Branch taken for profile guide and full compilation.
+                        // Profile guide compilation should only recompile a previous
+                        // profile compiled/extract only file and should not be attempted if the
+                        // apk is already fully compiled. So test against a full compilation type.
+                        compilationTypeMask = DexFile.COMPILATION_TYPE_FULL;
+                    }
+                    dexoptNeeded = DexFile.getDexOptNeeded(path,
+                            dexCodeInstructionSet, compilationTypeMask);
                 } catch (IOException ioe) {
                     Slog.w(TAG, "IOException reading apk: " + path, ioe);
                     return DEX_OPT_FAILED;
                 }
                 dexoptNeeded = adjustDexoptNeeded(dexoptNeeded);
 
-                if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
-                    if (useProfiles) {
-                        // Profiles may trigger re-compilation. The final decision is taken in
-                        // installd.
-                        dexoptNeeded = DexFile.DEX2OAT_NEEDED;
-                    } else {
-                        // No dexopt needed and we don't use profiles. Nothing to do.
-                        continue;
-                    }
-                }
                 final String dexoptType;
                 String oatDir = null;
-                if (dexoptNeeded == DexFile.DEX2OAT_NEEDED) {
-                    dexoptType = "dex2oat";
-                    oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
-                } else if (dexoptNeeded == DexFile.PATCHOAT_NEEDED) {
-                    dexoptType = "patchoat";
-                } else if (dexoptNeeded == DexFile.SELF_PATCHOAT_NEEDED) {
-                    dexoptType = "self patchoat";
-                } else {
-                    throw new IllegalStateException("Invalid dexopt needed: " + dexoptNeeded);
+                switch (dexoptNeeded) {
+                    case DexFile.NO_DEXOPT_NEEDED:
+                        continue;
+                    case DexFile.DEX2OAT_NEEDED:
+                        dexoptType = "dex2oat";
+                        oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
+                        break;
+                    case DexFile.PATCHOAT_NEEDED:
+                        dexoptType = "patchoat";
+                        break;
+                    case DexFile.SELF_PATCHOAT_NEEDED:
+                        dexoptType = "self patchoat";
+                        break;
+                    default:
+                        throw new IllegalStateException("Invalid dexopt:" + dexoptNeeded);
                 }
 
 
@@ -225,15 +213,6 @@ class PackageDexOptimizer {
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
                 }
-            }
-
-            if (!extractOnly) {
-                // At this point we haven't failed dexopt and we haven't deferred dexopt. We must
-                // either have either succeeded dexopt, or have had getDexOptNeeded tell us
-                // it isn't required. We therefore mark that this package doesn't need dexopt unless
-                // it's forced. performedDexOpt will tell us whether we performed dex-opt or skipped
-                // it.
-                recordSuccessfulDexopt(pkg, dexCodeInstructionSet);
             }
         }
 
@@ -314,12 +293,6 @@ class PackageDexOptimizer {
 
         public ForcedUpdatePackageDexOptimizer(PackageDexOptimizer from) {
             super(from);
-        }
-
-        @Override
-        protected boolean shouldSkipBasedOnISA(Package pkg, String instructionSet) {
-            // Forced compilation, never skip.
-            return false;
         }
 
         @Override
