@@ -138,7 +138,7 @@ class WindowSurfaceController {
 
     void destroyInTransaction() {
         //        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-        Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(4));
+        Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(8));
         //        }
         try {
             if (mSurfaceControl != null) {
