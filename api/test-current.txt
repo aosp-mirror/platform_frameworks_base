@@ -58036,6 +58036,54 @@ package java.util {
     method public abstract void update(java.util.Observable, java.lang.Object);
   }
 
+  public final class Optional {
+    method public static java.util.Optional<T> empty();
+    method public java.util.Optional<T> filter(java.util.function.Predicate<? super T>);
+    method public java.util.Optional<U> flatMap(java.util.function.Function<? super T, java.util.Optional<U>>);
+    method public T get();
+    method public void ifPresent(java.util.function.Consumer<? super T>);
+    method public boolean isPresent();
+    method public java.util.Optional<U> map(java.util.function.Function<? super T, ? extends U>);
+    method public static java.util.Optional<T> of(T);
+    method public static java.util.Optional<T> ofNullable(T);
+    method public T orElse(T);
+    method public T orElseGet(java.util.function.Supplier<? extends T>);
+    method public T orElseThrow(java.util.function.Supplier<? extends X>) throws java.lang.Throwable;
+  }
+
+  public final class OptionalDouble {
+    method public static java.util.OptionalDouble empty();
+    method public double getAsDouble();
+    method public void ifPresent(java.util.function.DoubleConsumer);
+    method public boolean isPresent();
+    method public static java.util.OptionalDouble of(double);
+    method public double orElse(double);
+    method public double orElseGet(java.util.function.DoubleSupplier);
+    method public double orElseThrow(java.util.function.Supplier<X>) throws java.lang.Throwable;
+  }
+
+  public final class OptionalInt {
+    method public static java.util.OptionalInt empty();
+    method public int getAsInt();
+    method public void ifPresent(java.util.function.IntConsumer);
+    method public boolean isPresent();
+    method public static java.util.OptionalInt of(int);
+    method public int orElse(int);
+    method public int orElseGet(java.util.function.IntSupplier);
+    method public int orElseThrow(java.util.function.Supplier<X>) throws java.lang.Throwable;
+  }
+
+  public final class OptionalLong {
+    method public static java.util.OptionalLong empty();
+    method public long getAsLong();
+    method public void ifPresent(java.util.function.LongConsumer);
+    method public boolean isPresent();
+    method public static java.util.OptionalLong of(long);
+    method public long orElse(long);
+    method public long orElseGet(java.util.function.LongSupplier);
+    method public long orElseThrow(java.util.function.Supplier<X>) throws java.lang.Throwable;
+  }
+
   public class PriorityQueue extends java.util.AbstractQueue implements java.io.Serializable {
     ctor public PriorityQueue();
     ctor public PriorityQueue(int);
