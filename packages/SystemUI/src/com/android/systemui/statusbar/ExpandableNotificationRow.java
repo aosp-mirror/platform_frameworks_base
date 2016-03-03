@@ -105,7 +105,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mClearable;
     private ExpansionLogger mLogger;
     private String mLoggingKey;
-    private boolean mWasReset;
     private NotificationSettingsIconRow mSettingsIconRow;
     private NotificationGuts mGuts;
     private NotificationData.Entry mEntry;
@@ -615,20 +614,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mShowingPublicInitialized = false;
         mIsSystemExpanded = false;
         mOnKeyguard = false;
-        mPublicLayout.reset(mIsHeadsUp);
-        mPrivateLayout.reset(mIsHeadsUp);
+        mPublicLayout.reset();
+        mPrivateLayout.reset();
         resetHeight();
         resetTranslation();
         logExpansionEvent(false, wasExpanded);
     }
 
     public void resetHeight() {
-        if (mIsHeadsUp) {
-            resetActualHeight();
-        }
         mMaxExpandHeight = 0;
         mHeadsUpHeight = 0;
-        mWasReset = true;
         onHeightReset();
         requestLayout();
     }
@@ -964,18 +959,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mStatusBarNotification != null && mStatusBarNotification.isClearable();
     }
 
-    /**
-     * Apply an expansion state to the layout.
-     */
-    public void applyExpansionToLayout() {
-        boolean expand = isExpanded();
-        if (expand && mExpandable) {
-            setActualHeight(mMaxExpandHeight);
-        } else {
-            setActualHeight(getMinHeight());
-        }
-    }
-
     @Override
     public int getIntrinsicHeight() {
         if (isUserLocked()) {
@@ -1057,12 +1040,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        boolean updateExpandHeight = mMaxExpandHeight == 0 && !mWasReset;
         updateMaxHeights();
-        if (updateExpandHeight) {
-            applyExpansionToLayout();
-        }
-        mWasReset = false;
     }
 
     private void updateMaxHeights() {
