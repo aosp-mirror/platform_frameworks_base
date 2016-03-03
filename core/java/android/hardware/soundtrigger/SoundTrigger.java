@@ -689,12 +689,19 @@ public class SoundTrigger {
                 return false;
             if (triggerInData != other.triggerInData)
                 return false;
-            if (captureFormat.getSampleRate() != other.captureFormat.getSampleRate())
-                return false;
-            if (captureFormat.getEncoding() != other.captureFormat.getEncoding())
-                return false;
-            if (captureFormat.getChannelMask() != other.captureFormat.getChannelMask())
-                return false;
+            if (captureFormat == null) {
+                if (other.captureFormat != null)
+                    return false;
+            } else {
+                if (other.captureFormat == null)
+                    return false;
+                if (captureFormat.getSampleRate() != other.captureFormat.getSampleRate())
+                    return false;
+                if (captureFormat.getEncoding() != other.captureFormat.getEncoding())
+                    return false;
+                if (captureFormat.getChannelMask() != other.captureFormat.getChannelMask())
+                    return false;
+            }
             return true;
         }
 
@@ -1002,10 +1009,10 @@ public class SoundTrigger {
                 int encoding = in.readInt();
                 int channelMask = in.readInt();
                 captureFormat = (new AudioFormat.Builder())
-                        .setChannelMask(channelMask)
-                        .setEncoding(encoding)
-                        .setSampleRate(sampleRate)
-                        .build();
+                    .setChannelMask(channelMask)
+                    .setEncoding(encoding)
+                    .setSampleRate(sampleRate)
+                    .build();
             }
             byte[] data = in.readBlob();
             KeyphraseRecognitionExtra[] keyphraseExtras =
