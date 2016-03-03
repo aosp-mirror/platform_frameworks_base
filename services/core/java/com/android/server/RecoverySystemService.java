@@ -17,6 +17,8 @@
 package com.android.server;
 
 import android.content.Context;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.os.IRecoverySystem;
 import android.os.IRecoverySystemProgressListener;
 import android.os.RecoverySystem;
@@ -26,9 +28,11 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Slog;
 
-import java.io.BufferedReader;
+import libcore.io.IoUtils;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -43,10 +47,10 @@ public final class RecoverySystemService extends SystemService {
     private static final String TAG = "RecoverySystemService";
     private static final boolean DEBUG = false;
 
-    // A pipe file to monitor the uncrypt progress.
-    private static final String UNCRYPT_STATUS_FILE = "/cache/recovery/uncrypt_status";
-    // Temporary command file to communicate between the system server and uncrypt.
-    private static final String COMMAND_FILE = "/cache/recovery/command";
+    // The socket at /dev/socket/uncrypt to communicate with uncrypt.
+    private static final String UNCRYPT_SOCKET = "uncrypt";
+
+    private static final int SOCKET_CONNECTION_MAX_RETRY = 30;
 
     private Context mContext;
 
@@ -79,60 +83,63 @@ public final class RecoverySystemService extends SystemService {
                 return false;
             }
 
-            // Create the status pipe file to communicate with uncrypt.
-            new File(UNCRYPT_STATUS_FILE).delete();
-            try {
-                Os.mkfifo(UNCRYPT_STATUS_FILE, 0600);
-            } catch (ErrnoException e) {
-                Slog.e(TAG, "ErrnoException when creating named pipe \"" + UNCRYPT_STATUS_FILE +
-                        "\": " + e.getMessage());
-                return false;
-            }
-
             // Trigger uncrypt via init.
             SystemProperties.set("ctl.start", "uncrypt");
 
-            // Read the status from the pipe.
-            try (BufferedReader reader = new BufferedReader(new FileReader(UNCRYPT_STATUS_FILE))) {
+            // Connect to the uncrypt service socket.
+            LocalSocket socket = connectService();
+            if (socket == null) {
+                Slog.e(TAG, "Failed to connect to uncrypt socket");
+                return false;
+            }
+
+            // Read the status from the socket.
+            try (DataInputStream dis = new DataInputStream(socket.getInputStream());
+                    DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
                 int lastStatus = Integer.MIN_VALUE;
                 while (true) {
-                    String str = reader.readLine();
-                    try {
-                        int status = Integer.parseInt(str);
+                    int status = dis.readInt();
+                    // Avoid flooding the log with the same message.
+                    if (status == lastStatus && lastStatus != Integer.MIN_VALUE) {
+                        continue;
+                    }
+                    lastStatus = status;
 
-                        // Avoid flooding the log with the same message.
-                        if (status == lastStatus && lastStatus != Integer.MIN_VALUE) {
-                            continue;
-                        }
-                        lastStatus = status;
-
-                        if (status >= 0 && status <= 100) {
-                            // Update status
-                            Slog.i(TAG, "uncrypt read status: " + status);
-                            if (listener != null) {
-                                try {
-                                    listener.onProgress(status);
-                                } catch (RemoteException unused) {
-                                    Slog.w(TAG, "RemoteException when posting progress");
-                                }
+                    if (status >= 0 && status <= 100) {
+                        // Update status
+                        Slog.i(TAG, "uncrypt read status: " + status);
+                        if (listener != null) {
+                            try {
+                                listener.onProgress(status);
+                            } catch (RemoteException unused) {
+                                Slog.w(TAG, "RemoteException when posting progress");
                             }
-                            if (status == 100) {
-                                Slog.i(TAG, "uncrypt successfully finished.");
-                                break;
-                            }
-                        } else {
-                            // Error in /system/bin/uncrypt.
-                            Slog.e(TAG, "uncrypt failed with status: " + status);
-                            return false;
                         }
-                    } catch (NumberFormatException unused) {
-                        Slog.e(TAG, "uncrypt invalid status received: " + str);
+                        if (status == 100) {
+                            Slog.i(TAG, "uncrypt successfully finished.");
+                            // Ack receipt of the final status code. uncrypt
+                            // waits for the ack so the socket won't be
+                            // destroyed before we receive the code.
+                            dos.writeInt(0);
+                            dos.flush();
+                            break;
+                        }
+                    } else {
+                        // Error in /system/bin/uncrypt.
+                        Slog.e(TAG, "uncrypt failed with status: " + status);
+                        // Ack receipt of the final status code. uncrypt waits
+                        // for the ack so the socket won't be destroyed before
+                        // we receive the code.
+                        dos.writeInt(0);
+                        dos.flush();
                         return false;
                     }
                 }
-            } catch (IOException unused) {
-                Slog.e(TAG, "IOException when reading \"" + UNCRYPT_STATUS_FILE + "\".");
+            } catch (IOException e) {
+                Slog.e(TAG, "IOException when reading status: " + e);
                 return false;
+            } finally {
+                IoUtils.closeQuietly(socket);
             }
 
             return true;
@@ -150,29 +157,35 @@ public final class RecoverySystemService extends SystemService {
             return setupOrClearBcb(true, command);
         }
 
-        private boolean setupOrClearBcb(boolean isSetup, String command) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
-
-            if (isSetup) {
-                // Set up the command file to be read by uncrypt.
-                try (FileWriter commandFile = new FileWriter(COMMAND_FILE)) {
-                    commandFile.write(command + "\n");
-                } catch (IOException e) {
-                    Slog.e(TAG, "IOException when writing \"" + COMMAND_FILE +
-                            "\": " + e.getMessage());
-                    return false;
+        private LocalSocket connectService() {
+            LocalSocket socket = new LocalSocket();
+            boolean done = false;
+            // The uncrypt socket will be created by init upon receiving the
+            // service request. It may not be ready by this point. So we will
+            // keep retrying until success or reaching timeout.
+            for (int retry = 0; retry < SOCKET_CONNECTION_MAX_RETRY; retry++) {
+                try {
+                    socket.connect(new LocalSocketAddress(UNCRYPT_SOCKET,
+                            LocalSocketAddress.Namespace.RESERVED));
+                    done = true;
+                    break;
+                } catch (IOException unused) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Slog.w(TAG, "Interrupted: " + e);
+                    }
                 }
             }
-
-            // Create the status pipe file to communicate with uncrypt.
-            new File(UNCRYPT_STATUS_FILE).delete();
-            try {
-                Os.mkfifo(UNCRYPT_STATUS_FILE, 0600);
-            } catch (ErrnoException e) {
-                Slog.e(TAG, "ErrnoException when creating named pipe \"" +
-                        UNCRYPT_STATUS_FILE + "\": " + e.getMessage());
-                return false;
+            if (!done) {
+                Slog.e(TAG, "Timed out connecting to uncrypt socket");
+                return null;
             }
+            return socket;
+        }
+
+        private boolean setupOrClearBcb(boolean isSetup, String command) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
 
             if (isSetup) {
                 SystemProperties.set("ctl.start", "setup-bcb");
@@ -180,34 +193,45 @@ public final class RecoverySystemService extends SystemService {
                 SystemProperties.set("ctl.start", "clear-bcb");
             }
 
-            // Read the status from the pipe.
-            try (BufferedReader reader = new BufferedReader(new FileReader(UNCRYPT_STATUS_FILE))) {
-                while (true) {
-                    String str = reader.readLine();
-                    try {
-                        int status = Integer.parseInt(str);
-
-                        if (status == 100) {
-                            Slog.i(TAG, "uncrypt " + (isSetup ? "setup" : "clear") +
-                                    " bcb successfully finished.");
-                            break;
-                        } else {
-                            // Error in /system/bin/uncrypt.
-                            Slog.e(TAG, "uncrypt failed with status: " + status);
-                            return false;
-                        }
-                    } catch (NumberFormatException unused) {
-                        Slog.e(TAG, "uncrypt invalid status received: " + str);
-                        return false;
-                    }
-                }
-            } catch (IOException unused) {
-                Slog.e(TAG, "IOException when reading \"" + UNCRYPT_STATUS_FILE + "\".");
+            // Connect to the uncrypt service socket.
+            LocalSocket socket = connectService();
+            if (socket == null) {
+                Slog.e(TAG, "Failed to connect to uncrypt socket");
                 return false;
             }
 
-            // Delete the command file as we don't need it anymore.
-            new File(COMMAND_FILE).delete();
+            try (DataInputStream dis = new DataInputStream(socket.getInputStream());
+                    DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
+                // Send the BCB commands if it's to setup BCB.
+                if (isSetup) {
+                    dos.writeInt(command.length());
+                    dos.writeBytes(command);
+                    dos.flush();
+                }
+
+                // Read the status from the socket.
+                int status = dis.readInt();
+
+                // Ack receipt of the status code. uncrypt waits for the ack so
+                // the socket won't be destroyed before we receive the code.
+                dos.writeInt(0);
+                dos.flush();
+
+                if (status == 100) {
+                    Slog.i(TAG, "uncrypt " + (isSetup ? "setup" : "clear") +
+                            " bcb successfully finished.");
+                } else {
+                    // Error in /system/bin/uncrypt.
+                    Slog.e(TAG, "uncrypt failed with status: " + status);
+                    return false;
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "IOException when getting output stream: " + e);
+                return false;
+            } finally {
+                IoUtils.closeQuietly(socket);
+            }
+
             return true;
         }
     }
