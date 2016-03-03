@@ -1,4 +1,4 @@
-page.title=N Developer Preview Implicit Broadcast Restrictions
+page.title=N Developer Preview Background Optimizations
 page.metaDescription=New restrictions to implicit broadcasts.
 page.keywords="android N", "implicit broadcasts", "job scheduler"
 @jd:body
