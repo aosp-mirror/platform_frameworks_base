@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -45,6 +46,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import static android.graphics.Canvas.CLIP_SAVE_FLAG;
 import static android.graphics.Canvas.MATRIX_SAVE_FLAG;
@@ -69,14 +71,6 @@ public class VectorDrawable_Delegate {
     private static final DelegateManager<VNativeObject> sPathManager =
             new DelegateManager<>(VNativeObject.class);
 
-    private static <T> T getDelegate(long nativePtr) {
-        //noinspection unchecked
-        T object = (T) sPathManager.getDelegate(nativePtr);
-        assert object != null;
-
-        return object;
-    }
-
     /**
      * Obtains styled attributes from the theme, if available, or unstyled resources if the theme is
      * null.
@@ -98,21 +92,21 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateRenderer(long rootGroupPtr) {
-        VGroup_Delegate rootGroup = getDelegate(rootGroupPtr);
+        VGroup_Delegate rootGroup = VNativeObject.getDelegate(rootGroupPtr);
         return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rootGroup));
     }
 
     @LayoutlibDelegate
     static void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
             float viewportHeight) {
-        VPathRenderer_Delegate nativePathRenderer = getDelegate(rendererPtr);
+        VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
         nativePathRenderer.mViewportWidth = viewportWidth;
         nativePathRenderer.mViewportHeight = viewportHeight;
     }
 
     @LayoutlibDelegate
     static boolean nSetRootAlpha(long rendererPtr, float alpha) {
-        VPathRenderer_Delegate nativePathRenderer = getDelegate(rendererPtr);
+        VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
         nativePathRenderer.setRootAlpha(alpha);
 
         return true;
@@ -120,7 +114,7 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static float nGetRootAlpha(long rendererPtr) {
-        VPathRenderer_Delegate nativePathRenderer = getDelegate(rendererPtr);
+        VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
 
         return nativePathRenderer.getRootAlpha();
     }
@@ -133,8 +127,7 @@ public class VectorDrawable_Delegate {
     @LayoutlibDelegate
     static void nDraw(long rendererPtr, long canvasWrapperPtr,
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache) {
-        VPathRenderer_Delegate nativePathRenderer =
-                getDelegate(rendererPtr);
+        VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
 
         nativePathRenderer.draw(canvasWrapperPtr, colorFilterPtr, bounds.width(), bounds.height());
     }
@@ -146,7 +139,7 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateFullPath(long nativeFullPathPtr) {
-        VFullPath_Delegate original = getDelegate(nativeFullPathPtr);
+        VFullPath_Delegate original = VNativeObject.getDelegate(nativeFullPathPtr);
 
         return sPathManager.addNewDelegate(new VFullPath_Delegate(original));
     }
@@ -154,7 +147,7 @@ public class VectorDrawable_Delegate {
     @LayoutlibDelegate
     static boolean nGetFullPathProperties(long pathPtr, byte[] propertiesData,
             int length) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
 
         ByteBuffer properties = ByteBuffer.wrap(propertiesData);
         properties.order(ByteOrder.nativeOrder());
@@ -181,7 +174,7 @@ public class VectorDrawable_Delegate {
             int strokeColor, float strokeAlpha, int fillColor, float fillAlpha, float trimPathStart,
             float trimPathEnd, float trimPathOffset, float strokeMiterLimit, int strokeLineCap,
             int strokeLineJoin) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
 
         path.setStrokeWidth(strokeWidth);
         path.setStrokeColor(strokeColor);
@@ -213,7 +206,7 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateClipPath(long clipPathPtr) {
-        VClipPath_Delegate original = getDelegate(clipPathPtr);
+        VClipPath_Delegate original = VNativeObject.getDelegate(clipPathPtr);
         return sPathManager.addNewDelegate(new VClipPath_Delegate(original));
     }
 
@@ -224,21 +217,21 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateGroup(long groupPtr) {
-        VGroup_Delegate original = getDelegate(groupPtr);
+        VGroup_Delegate original = VNativeObject.getDelegate(groupPtr);
         return sPathManager.addNewDelegate(
                 new VGroup_Delegate(original, new ArrayMap<String, Object>()));
     }
 
     @LayoutlibDelegate
     static void nSetName(long nodePtr, String name) {
-        VNativeObject group = getDelegate(nodePtr);
+        VNativeObject group = VNativeObject.getDelegate(nodePtr);
         group.setName(name);
     }
 
     @LayoutlibDelegate
     static boolean nGetGroupProperties(long groupPtr, float[] propertiesData,
             int length) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
 
         FloatBuffer properties = FloatBuffer.wrap(propertiesData);
 
@@ -255,7 +248,7 @@ public class VectorDrawable_Delegate {
     @LayoutlibDelegate
     static void nUpdateGroupProperties(long groupPtr, float rotate, float pivotX,
             float pivotY, float scaleX, float scaleY, float translateX, float translateY) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
 
         group.setRotation(rotate);
         group.setPivotX(pivotX);
@@ -268,13 +261,13 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static void nAddChild(long groupPtr, long nodePtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
-        group.mChildren.add(getDelegate(nodePtr));
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
+        group.mChildren.add(VNativeObject.getDelegate(nodePtr));
     }
 
     @LayoutlibDelegate
     static void nSetPathString(long pathPtr, String pathString, int length) {
-        VPath_Delegate path = getDelegate(pathPtr);
+        VPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setPathData(PathParser_Delegate.createNodesFromPathData(pathString));
     }
 
@@ -287,187 +280,187 @@ public class VectorDrawable_Delegate {
     // Setters and getters during animation.
     @LayoutlibDelegate
     static float nGetRotation(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getRotation();
     }
 
     @LayoutlibDelegate
     static void nSetRotation(long groupPtr, float rotation) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setRotation(rotation);
     }
 
     @LayoutlibDelegate
     static float nGetPivotX(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getPivotX();
     }
 
     @LayoutlibDelegate
     static void nSetPivotX(long groupPtr, float pivotX) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setPivotX(pivotX);
     }
 
     @LayoutlibDelegate
     static float nGetPivotY(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getPivotY();
     }
 
     @LayoutlibDelegate
     static void nSetPivotY(long groupPtr, float pivotY) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setPivotY(pivotY);
     }
 
     @LayoutlibDelegate
     static float nGetScaleX(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getScaleX();
     }
 
     @LayoutlibDelegate
     static void nSetScaleX(long groupPtr, float scaleX) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setScaleX(scaleX);
     }
 
     @LayoutlibDelegate
     static float nGetScaleY(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getScaleY();
     }
 
     @LayoutlibDelegate
     static void nSetScaleY(long groupPtr, float scaleY) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setScaleY(scaleY);
     }
 
     @LayoutlibDelegate
     static float nGetTranslateX(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getTranslateX();
     }
 
     @LayoutlibDelegate
     static void nSetTranslateX(long groupPtr, float translateX) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setTranslateX(translateX);
     }
 
     @LayoutlibDelegate
     static float nGetTranslateY(long groupPtr) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         return group.getTranslateY();
     }
 
     @LayoutlibDelegate
     static void nSetTranslateY(long groupPtr, float translateY) {
-        VGroup_Delegate group = getDelegate(groupPtr);
+        VGroup_Delegate group = VNativeObject.getDelegate(groupPtr);
         group.setTranslateY(translateY);
     }
 
     @LayoutlibDelegate
     static void nSetPathData(long pathPtr, long pathDataPtr) {
-        VPath_Delegate path = getDelegate(pathPtr);
+        VPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setPathData(PathParser_Delegate.getDelegate(pathDataPtr).getPathDataNodes());
     }
 
     @LayoutlibDelegate
     static float nGetStrokeWidth(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getStrokeWidth();
     }
 
     @LayoutlibDelegate
     static void nSetStrokeWidth(long pathPtr, float width) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setStrokeWidth(width);
     }
 
     @LayoutlibDelegate
     static int nGetStrokeColor(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getStrokeColor();
     }
 
     @LayoutlibDelegate
     static void nSetStrokeColor(long pathPtr, int strokeColor) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setStrokeColor(strokeColor);
     }
 
     @LayoutlibDelegate
     static float nGetStrokeAlpha(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getStrokeAlpha();
     }
 
     @LayoutlibDelegate
     static void nSetStrokeAlpha(long pathPtr, float alpha) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setStrokeAlpha(alpha);
     }
 
     @LayoutlibDelegate
     static int nGetFillColor(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getFillColor();
     }
 
     @LayoutlibDelegate
     static void nSetFillColor(long pathPtr, int fillColor) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setFillColor(fillColor);
     }
 
     @LayoutlibDelegate
     static float nGetFillAlpha(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getFillAlpha();
     }
 
     @LayoutlibDelegate
     static void nSetFillAlpha(long pathPtr, float fillAlpha) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setFillAlpha(fillAlpha);
     }
 
     @LayoutlibDelegate
     static float nGetTrimPathStart(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getTrimPathStart();
     }
 
     @LayoutlibDelegate
     static void nSetTrimPathStart(long pathPtr, float trimPathStart) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setTrimPathStart(trimPathStart);
     }
 
     @LayoutlibDelegate
     static float nGetTrimPathEnd(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getTrimPathEnd();
     }
 
     @LayoutlibDelegate
     static void nSetTrimPathEnd(long pathPtr, float trimPathEnd) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setTrimPathEnd(trimPathEnd);
     }
 
     @LayoutlibDelegate
     static float nGetTrimPathOffset(long pathPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         return path.getTrimPathOffset();
     }
 
     @LayoutlibDelegate
     static void nSetTrimPathOffset(long pathPtr, float trimPathOffset) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
         path.setTrimPathOffset(trimPathOffset);
     }
 
@@ -479,7 +472,16 @@ public class VectorDrawable_Delegate {
      *     not need it
      * </ol>
      */
-    private interface VNativeObject {
+    interface VNativeObject {
+        @NonNull
+        static <T> T getDelegate(long nativePtr) {
+            //noinspection unchecked
+            T vNativeObject = (T) sPathManager.getDelegate(nativePtr);
+
+            assert vNativeObject != null;
+            return vNativeObject;
+        }
+
         void setName(String name);
     }
 
@@ -520,7 +522,7 @@ public class VectorDrawable_Delegate {
         }
     }
 
-    private static class VFullPath_Delegate extends VPath_Delegate {
+    static class VFullPath_Delegate extends VPath_Delegate {
         // These constants need to be kept in sync with their values in VectorDrawable.VFullPath
         private static final int STROKE_WIDTH_INDEX = 0;
         private static final int STROKE_COLOR_INDEX = 1;
@@ -541,6 +543,38 @@ public class VectorDrawable_Delegate {
         private static final int LINEJOIN_MITER = 0;
         private static final int LINEJOIN_ROUND = 1;
         private static final int LINEJOIN_BEVEL = 2;
+
+        @NonNull
+        public Consumer<Float> getFloatPropertySetter(int propertyIdx) {
+            switch (propertyIdx) {
+                case STROKE_ALPHA_INDEX:
+                    return this::setStrokeAlpha;
+                case FILL_ALPHA_INDEX:
+                    return this::setFillAlpha;
+                case TRIM_PATH_START_INDEX:
+                    return this::setTrimPathStart;
+                case TRIM_PATH_END_INDEX:
+                    return this::setTrimPathEnd;
+                case TRIM_PATH_OFFSET_INDEX:
+                    return this::setTrimPathOffset;
+            }
+
+            throw new IllegalArgumentException("Invalid VFullPath_Delegate property index "
+                    + propertyIdx);
+        }
+
+        @NonNull
+        public Consumer<Integer> getIntPropertySetter(int propertyIdx) {
+            switch (propertyIdx) {
+                case STROKE_COLOR_INDEX:
+                    return this::setStrokeColor;
+                case FILL_COLOR_INDEX:
+                    return this::setFillColor;
+            }
+
+            throw new IllegalArgumentException("Invalid VFullPath_Delegate property index "
+                    + propertyIdx);
+        }
 
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
@@ -646,7 +680,7 @@ public class VectorDrawable_Delegate {
             return mStrokeColor;
         }
 
-                private void setStrokeColor(int strokeColor) {
+        private void setStrokeColor(int strokeColor) {
             mStrokeColor = strokeColor;
         }
 
@@ -715,7 +749,7 @@ public class VectorDrawable_Delegate {
         }
     }
 
-    private static class VGroup_Delegate implements VNativeObject {
+    static class VGroup_Delegate implements VNativeObject {
         // This constants need to be kept in sync with their definitions in VectorDrawable.Group
         private static final int ROTATE_INDEX = 0;
         private static final int PIVOT_X_INDEX = 1;
@@ -724,6 +758,28 @@ public class VectorDrawable_Delegate {
         private static final int SCALE_Y_INDEX = 4;
         private static final int TRANSLATE_X_INDEX = 5;
         private static final int TRANSLATE_Y_INDEX = 6;
+
+        public Consumer<Float> getPropertySetter(int propertyIdx) {
+            switch (propertyIdx) {
+                case ROTATE_INDEX:
+                    return this::setRotation;
+                case PIVOT_X_INDEX:
+                    return this::setPivotX;
+                case PIVOT_Y_INDEX:
+                    return this::setPivotY;
+                case SCALE_X_INDEX:
+                    return this::setScaleX;
+                case SCALE_Y_INDEX:
+                    return this::setScaleY;
+                case TRANSLATE_X_INDEX:
+                    return this::setTranslateX;
+                case TRANSLATE_Y_INDEX:
+                    return this::setTranslateY;
+            }
+
+            throw new IllegalArgumentException("Invalid VGroup_Delegate property index "
+                    + propertyIdx);
+        }
 
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
@@ -923,7 +979,7 @@ public class VectorDrawable_Delegate {
         }
     }
 
-    private static class VPathRenderer_Delegate implements VNativeObject {
+    static class VPathRenderer_Delegate implements VNativeObject {
         /* Right now the internal data structure is organized as a tree.
          * Each node can be a group node, or a path.
          * A group node can have groups or paths as children, but a path node has
@@ -959,7 +1015,7 @@ public class VectorDrawable_Delegate {
             return mRootAlpha;
         }
 
-        private void setRootAlpha(float alpha) {
+        void setRootAlpha(float alpha) {
             mRootAlpha = alpha;
         }
 
