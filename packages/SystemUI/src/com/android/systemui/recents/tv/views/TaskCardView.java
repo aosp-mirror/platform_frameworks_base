@@ -16,20 +16,20 @@
 package com.android.systemui.recents.tv.views;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
+import com.android.systemui.recents.model.Task;
 
-public class TaskCardView extends RelativeLayout {
+public class TaskCardView extends LinearLayout {
 
     private ImageView mThumbnailView;
     private TextView mTitleTextView;
-    private TextView mContentTextView;
     private ImageView mBadgeView;
     private Task mTask;
 
@@ -52,7 +52,6 @@ public class TaskCardView extends RelativeLayout {
     protected void onFinishInflate() {
         mThumbnailView = (ImageView) findViewById(R.id.card_view_thumbnail);
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
-        mContentTextView = (TextView) findViewById(R.id.card_content_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
     }
 
@@ -60,11 +59,27 @@ public class TaskCardView extends RelativeLayout {
         mTask = task;
         mThumbnailView.setImageBitmap(task.thumbnail);
         mTitleTextView.setText(task.title);
-        mContentTextView.setText(task.contentDescription);
         mBadgeView.setImageDrawable(task.icon);
     }
 
     public Task getTask() {
         return mTask;
+    }
+
+    @Override
+    public void getFocusedRect(Rect r) {
+        mThumbnailView.getFocusedRect(r);
+    }
+
+    public Rect getFocusedRect() {
+        Rect r = new Rect();
+        getFocusedRect(r);
+        return r;
+    }
+
+    public Rect getGlobalRect() {
+        Rect r = new Rect();
+        getGlobalVisibleRect(r);
+        return r;
     }
 }

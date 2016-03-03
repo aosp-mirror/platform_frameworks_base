@@ -16,7 +16,6 @@
 package com.android.systemui.recents.tv.views;
 
 import android.app.Activity;
-import android.app.ActivityManagerNative;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,15 +23,20 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
 import com.android.systemui.recents.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 public class TaskStackHorizontalViewAdapter extends
         RecyclerView.Adapter<TaskStackHorizontalViewAdapter.ViewHolder> {
 
-    private static final String TAG = "TaskStackHorizontalViewAdapter";
+    //Full class name is 30 characters
+    private static final String TAG = "TaskStackViewAdapter";
     private List<Task> mTaskList;
 
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -54,7 +58,8 @@ public class TaskStackHorizontalViewAdapter extends
         @Override
         public void onClick(View v) {
             try {
-                ActivityManagerNative.getDefault().startActivityFromRecents(mTask.key.id, null);
+                EventBus.getDefault().send(new LaunchTvTaskEvent(mTaskCardView, mTask,
+                        null, INVALID_STACK_ID));
                 ((Activity)(v.getContext())).finish();
             } catch (Exception e) {
                 Log.e(TAG, v.getContext()
@@ -73,11 +78,12 @@ public class TaskStackHorizontalViewAdapter extends
         mTaskList.addAll(tasks);
         notifyDataSetChanged();
     }
+
     @Override
     public TaskStackHorizontalViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
             int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recents_task_card_view, parent, false);
+                .inflate(R.layout.recents_tv_task_card_view, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
