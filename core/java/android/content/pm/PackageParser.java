@@ -4690,9 +4690,6 @@ public class PackageParser {
         // preferred up order.
         public int mPreferredOrder = 0;
 
-        // For use by package manager to keep track of where it needs to do dexopt.
-        public final ArraySet<String> mDexOptPerformed = new ArraySet<>(4);
-
         // For use by package manager to keep track of when a package was last used.
         public long mLastPackageUsageTimeInMills;
 

@@ -499,11 +499,11 @@ public class ZygoteInit {
 
         try {
             for (String classPathElement : classPathElements) {
+                // System server is fully AOTed and never profiled
+                // for profile guided compilation.
                 final int dexoptNeeded = DexFile.getDexOptNeeded(
-                        classPathElement, "*", instructionSet, false /* defer */);
+                        classPathElement, instructionSet, DexFile.COMPILATION_TYPE_FULL);
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                    // System server is fully AOTed and never profiled
-                    // for profile guided compilation.
                     installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
                             dexoptNeeded, 0 /*dexFlags*/, null /*volumeUuid*/,
                             false /*useProfiles*/);
