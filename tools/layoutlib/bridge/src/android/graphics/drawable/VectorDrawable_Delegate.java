@@ -16,7 +16,6 @@
 
 package android.graphics.drawable;
 
-import com.android.internal.R;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
@@ -136,7 +135,21 @@ public class VectorDrawable_Delegate {
         VPathRenderer_Delegate nativePathRenderer =
                 getDelegate(rendererPtr);
 
+        Canvas_Delegate.native_save(canvasWrapperPtr, MATRIX_SAVE_FLAG | CLIP_SAVE_FLAG);
+        Canvas_Delegate.native_translate(canvasWrapperPtr, bounds.left, bounds.top);
+
+        if (needsMirroring) {
+            Canvas_Delegate.native_translate(canvasWrapperPtr, bounds.width(), 0);
+            Canvas_Delegate.native_scale(canvasWrapperPtr, -1.0f, 1.0f);
+        }
+
+        // At this point, canvas has been translated to the right position.
+        // And we use this bound for the destination rect for the drawBitmap, so
+        // we offset to (0, 0);
+        bounds.offsetTo(0, 0);
         nativePathRenderer.draw(canvasWrapperPtr, colorFilterPtr, bounds.width(), bounds.height());
+
+        Canvas_Delegate.native_restore(canvasWrapperPtr, true);
     }
 
     @LayoutlibDelegate
@@ -490,28 +503,6 @@ public class VectorDrawable_Delegate {
 
         private VClipPath_Delegate(VClipPath_Delegate copy) {
             super(copy);
-        }
-
-        public void inflate(Resources r, AttributeSet attrs, Theme theme) {
-            final TypedArray a = obtainAttributes(r, theme, attrs,
-                    R.styleable.VectorDrawableClipPath);
-            updateStateFromTypedArray(a);
-            a.recycle();
-        }
-
-        private void updateStateFromTypedArray(TypedArray a) {
-            // Account for any configuration changes.
-            mChangingConfigurations |= a.getChangingConfigurations();
-
-            final String pathName = a.getString(R.styleable.VectorDrawableClipPath_name);
-            if (pathName != null) {
-                mPathName = pathName;
-            }
-
-            final String pathData = a.getString(R.styleable.VectorDrawableClipPath_pathData);
-            if (pathData != null) {
-                mNodes = PathParser_Delegate.createNodesFromPathData(pathData);
-            }
         }
 
         @Override
