@@ -1788,7 +1788,8 @@ public final class ActivityThread {
     }
 
     /**
-     * Creates the top level resources for the given package.
+     * Creates the top level resources for the given package. Will return an existing
+     * Resources if one has already been created.
      */
     Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
             String[] libDirs, int displayId, Configuration overrideConfiguration,
@@ -1796,6 +1797,19 @@ public final class ActivityThread {
         return mResourcesManager.getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
                 displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo(),
                 pkgInfo.getClassLoader());
+    }
+
+    /**
+     * Creates a new top level resources for the given package. Will always create a new
+     * Resources, regardless if one has already been created.
+     */
+    Resources getNewTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
+            String[] libDirs, int displayId, Configuration overrideConfiguration,
+            LoadedApk pkgInfo) {
+        mResourcesManager.removeTopLevelResources(
+                resDir, displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo());
+        return getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
+                displayId, overrideConfiguration, pkgInfo);
     }
 
     final Handler getHandler() {
@@ -4749,29 +4763,87 @@ public final class ActivityThread {
 
     final void handleDispatchPackageBroadcast(int cmd, String[] packages) {
         boolean hasPkgInfo = false;
-        if (packages != null) {
-            synchronized (mResourcesManager) {
-                for (int i=packages.length-1; i>=0; i--) {
-                    //Slog.i(TAG, "Cleaning old package: " + packages[i]);
-                    if (!hasPkgInfo) {
-                        WeakReference<LoadedApk> ref;
-                        ref = mPackages.get(packages[i]);
-                        if (ref != null && ref.get() != null) {
+        switch (cmd) {
+            case IApplicationThread.PACKAGE_REMOVED:
+            case IApplicationThread.PACKAGE_REMOVED_DONT_KILL:
+            {
+                final boolean killApp = cmd == IApplicationThread.PACKAGE_REMOVED;
+                if (packages == null) {
+                    break;
+                }
+                synchronized (mResourcesManager) {
+                    for (int i = packages.length - 1; i >= 0; i--) {
+                        if (!hasPkgInfo) {
+                            WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
+                            if (ref != null && ref.get() != null) {
+                                hasPkgInfo = true;
+                            } else {
+                                ref = mResourcePackages.get(packages[i]);
+                                if (ref != null && ref.get() != null) {
+                                    hasPkgInfo = true;
+                                }
+                            }
+                        }
+                        if (killApp) {
+                            mPackages.remove(packages[i]);
+                            mResourcePackages.remove(packages[i]);
+                        }
+                    }
+                }
+                break;
+            }
+            case IApplicationThread.PACKAGE_REPLACED:
+            {
+                if (packages == null) {
+                    break;
+                }
+                synchronized (mResourcesManager) {
+                    for (int i = packages.length - 1; i >= 0; i--) {
+                        WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
+                        LoadedApk pkgInfo = ref != null ? ref.get() : null;
+                        if (pkgInfo != null) {
                             hasPkgInfo = true;
                         } else {
                             ref = mResourcePackages.get(packages[i]);
-                            if (ref != null && ref.get() != null) {
+                            pkgInfo = ref != null ? ref.get() : null;
+                            if (pkgInfo != null) {
                                 hasPkgInfo = true;
                             }
                         }
+                        // If the package is being replaced, yet it still has a valid
+                        // LoadedApk object, the package was updated with _DONT_KILL.
+                        // Adjust it's internal references to the application info and
+                        // resources.
+                        if (pkgInfo != null) {
+                            try {
+                                final String packageName = packages[i];
+                                final ApplicationInfo aInfo =
+                                        sPackageManager.getApplicationInfo(
+                                                packageName,
+                                                0 /*flags*/,
+                                                UserHandle.myUserId());
+
+                                if (mActivities.size() > 0) {
+                                    for (ActivityClientRecord ar : mActivities.values()) {
+                                        if (ar.activityInfo.applicationInfo.packageName
+                                                .equals(packageName)) {
+                                            ar.activityInfo.applicationInfo = aInfo;
+                                            ar.packageInfo = pkgInfo;
+                                        }
+                                    }
+                                }
+                                final List<String> oldPaths =
+                                        sPackageManager.getPreviousCodePaths(packageName);
+                                pkgInfo.updateApplicationInfo(aInfo, oldPaths);
+                            } catch (RemoteException e) {
+                            }
+                        }
                     }
-                    mPackages.remove(packages[i]);
-                    mResourcePackages.remove(packages[i]);
                 }
+                break;
             }
         }
-        ApplicationPackageManager.handlePackageBroadcast(cmd, packages,
-                hasPkgInfo);
+        ApplicationPackageManager.handlePackageBroadcast(cmd, packages, hasPkgInfo);
     }
 
     final void handleLowMemory() {
