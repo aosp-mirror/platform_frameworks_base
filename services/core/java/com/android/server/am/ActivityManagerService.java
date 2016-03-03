@@ -18719,6 +18719,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
                                 } else if (clientAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     adj = clientAdj;
                                 } else {
