@@ -654,7 +654,7 @@ public final class BroadcastQueue {
         }
 
         final boolean callerForeground = receiverRecord.callerApp != null
-                ? receiverRecord.callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE
+                ? receiverRecord.callerApp.setSchedGroup != ProcessList.SCHED_GROUP_BACKGROUND
                 : true;
 
         // Show a permission review UI only for explicit broadcast from a foreground app
