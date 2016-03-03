@@ -62,6 +62,13 @@ public class NetworkUtils {
     public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
 
     /**
+     * Attaches a socket filter that accepts ICMP6 router advertisement packets to the given socket.
+     * @param fd the socket's {@link FileDescriptor}.
+     * @param packetType the hardware address type, one of ARPHRD_*.
+     */
+    public native static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException;
+
+    /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
      * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this
