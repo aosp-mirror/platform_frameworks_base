@@ -26,6 +26,8 @@ import android.widget.Space;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.SignalState;
 import com.android.systemui.qs.QSTile.State;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +36,8 @@ import java.util.Collection;
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
  */
 public class QuickQSPanel extends QSPanel {
+
+    public static final String NUM_QUICK_TILES = "sysui_qqs_count";
 
     private int mMaxTiles;
     private QSPanel mFullPanel;
@@ -49,6 +53,18 @@ public class QuickQSPanel extends QSPanel {
         }
         mTileLayout = new HeaderTileLayout(context);
         addView((View) mTileLayout, 1 /* Between brightness and footer */);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        TunerService.get(mContext).addTunable(mNumTiles, NUM_QUICK_TILES);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        TunerService.get(mContext).removeTunable(mNumTiles);
     }
 
     @Override
@@ -86,6 +102,7 @@ public class QuickQSPanel extends QSPanel {
 
     public void setMaxTiles(int maxTiles) {
         mMaxTiles = maxTiles;
+        setTiles(mHost.getTiles());
     }
 
     @Override
@@ -112,6 +129,17 @@ public class QuickQSPanel extends QSPanel {
             }
         }
         super.setTiles(quickTiles);
+    }
+
+    private final Tunable mNumTiles = new Tunable() {
+        @Override
+        public void onTuningChanged(String key, String newValue) {
+            setMaxTiles(getNumQuickTiles(mContext));
+        }
+    };
+
+    public static int getNumQuickTiles(Context context) {
+        return TunerService.get(context).getValue(NUM_QUICK_TILES, 5);
     }
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
