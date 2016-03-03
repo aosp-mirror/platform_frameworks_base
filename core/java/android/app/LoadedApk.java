@@ -399,8 +399,9 @@ public final class LoadedApk {
             // as this is early and necessary.
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
 
-            mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, isBundledApp,
-                    librarySearchPath, libraryPermittedPath, mBaseClassLoader);
+            mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
+                    mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
+                    libraryPermittedPath, mBaseClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);
             return mClassLoader;
