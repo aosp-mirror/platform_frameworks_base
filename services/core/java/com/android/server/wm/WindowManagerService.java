@@ -2147,12 +2147,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void removeWindowLocked(WindowState win) {
         win.mWindowRemovalAllowed = true;
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG,
+                "removeWindowLocked: " + win + " callers=" + Debug.getCallers(4));
+
         final boolean startingWindow = win.mAttrs.type == TYPE_APPLICATION_STARTING;
         if (startingWindow) {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG_WM, "Starting window removed " + win);
         }
 
-        if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && win==mCurrentFocus) Slog.v(
+        if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && win == mCurrentFocus) Slog.v(
                 TAG_WM, "Remove " + win + " client="
                 + Integer.toHexString(System.identityHashCode(win.mClient.asBinder()))
                 + ", surfaceController=" + win.mWinAnimator.mSurfaceController + " Callers="
