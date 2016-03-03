@@ -21119,7 +21119,6 @@ package android.net.wifi {
     method public boolean reconnect();
     method public boolean removeNetwork(int);
     method public boolean saveConfiguration();
-    method public boolean setMetered(int, boolean);
     method public void setTdlsEnabled(java.net.InetAddress, boolean);
     method public void setTdlsEnabledWithMacAddress(java.lang.String, boolean);
     method public boolean setWifiEnabled(boolean);

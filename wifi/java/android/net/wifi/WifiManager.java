@@ -885,24 +885,6 @@ public class WifiManager {
     }
 
     /**
-     * Sets whether or not the given network is metered from a network policy
-     * point of view. A network should be classified as metered when the user is
-     * sensitive to heavy data usage on that connection due to monetary costs,
-     * data limitations or battery/performance issues. A typical example would
-     * be a wifi connection where the user was being charged for usage.
-     * @param netId the integer that identifies the network configuration
-     * to the supplicant.
-     * @param isMetered True to mark the network as metered.
-     * @return {@code true} if the operation succeeded.
-     * @hide
-     */
-    @SystemApi
-    public boolean setMetered(int netId, boolean isMetered) {
-        // TODO(jjoslin): Implement
-        return false;
-    }
-
-    /**
      * Remove the specified network from the list of configured networks.
      * This may result in the asynchronous delivery of state change
      * events.
