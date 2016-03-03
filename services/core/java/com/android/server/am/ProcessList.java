@@ -124,6 +124,13 @@ final class ProcessList {
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4*1024;
 
+    // Activity manager's version of Process.THREAD_GROUP_BG_NONINTERACTIVE
+    static final int SCHED_GROUP_BACKGROUND = 0;
+    // Activity manager's version of Process.THREAD_GROUP_DEFAULT
+    static final int SCHED_GROUP_DEFAULT = 1;
+    // Activity manager's version of Process.THREAD_GROUP_TOP_APP
+    static final int SCHED_GROUP_TOP_APP = 2;
+
     // The minimum number of cached apps we want to be able to keep around,
     // without empty apps being able to push them out of memory.
     static final int MIN_CACHED_APPS = 2;
