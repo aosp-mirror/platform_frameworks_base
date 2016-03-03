@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.graphics.Paint;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UProperty;
 import android.view.KeyEvent;
@@ -24,6 +25,8 @@ import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
 import android.text.style.ReplacementSpan;
 import android.widget.TextView;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.text.BreakIterator;
 import java.util.Arrays;
@@ -44,6 +47,11 @@ import java.util.HashSet;
 public abstract class BaseKeyListener extends MetaKeyKeyListener
         implements KeyListener {
     /* package */ static final Object OLD_SEL_START = new NoCopySpan.Concrete();
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    static Paint sCachedPaint = null;
 
     /**
      * Performs the action that happens when you press the {@link KeyEvent#KEYCODE_DEL} key in
@@ -258,20 +266,15 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
     }
 
     // Returns the end offset to be deleted by a forward delete key from the given offset.
-    private static int getOffsetForForwardDeleteKey(CharSequence text, int offset) {
+    private static int getOffsetForForwardDeleteKey(CharSequence text, int offset, Paint paint) {
         final int len = text.length();
 
         if (offset >= len - 1) {
             return len;
         }
 
-        int codePoint = Character.codePointAt(text, offset);
-        offset += Character.charCount(codePoint);
-        if (offset == len) {
-            return len;
-        }
-
-        // TODO: Handle emoji, combining chars, etc.
+        offset = paint.getTextRunCursor(text, offset, len, Paint.DIRECTION_LTR /* not used */,
+                offset, Paint.CURSOR_AFTER);
 
         return adjustReplacementSpan(text, offset, false /* move to the end */);
     }
@@ -311,7 +314,18 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         final int start = Selection.getSelectionEnd(content);
         final int end;
         if (isForwardDelete) {
-            end = getOffsetForForwardDeleteKey(content, start);
+            final Paint paint;
+            if (view instanceof TextView) {
+                paint = ((TextView)view).getPaint();
+            } else {
+                synchronized (mLock) {
+                    if (sCachedPaint == null) {
+                        sCachedPaint = new Paint();
+                    }
+                    paint = sCachedPaint;
+                }
+            }
+            end = getOffsetForForwardDeleteKey(content, start, paint);
         } else {
             end = getOffsetForBackspaceKey(content, start);
         }
