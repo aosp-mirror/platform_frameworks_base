@@ -383,6 +383,9 @@ public class Process {
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
 
+    private static long sStartElapsedRealtime;
+    private static long sStartUptimeMillis;
+
     /**
      * State for communicating with the zygote process.
      *
@@ -770,6 +773,26 @@ public class Process {
      * @return  Returns the number of milliseconds this process has return.
      */
     public static final native long getElapsedCpuTime();
+
+    /**
+     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started.
+     */
+    public static final long getStartElapsedRealtime() {
+        return sStartElapsedRealtime;
+    }
+
+    /**
+     * Return the {@link SystemClock#uptimeMillis()} at which this process was started.
+     */
+    public static final long getStartUptimeMillis() {
+        return sStartUptimeMillis;
+    }
+
+    /** @hide */
+    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis) {
+        sStartElapsedRealtime = elapsedRealtime;
+        sStartUptimeMillis = uptimeMillis;
+    }
 
     /**
      * Returns true if the current process is a 64-bit runtime.
