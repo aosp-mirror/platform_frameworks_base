@@ -138,7 +138,7 @@ public final class GpsStatus {
     // For API-compat a public ctor() is not available
     GpsStatus() {}
 
-    private void setStatus(int svCount, int[] svidWithFlags, float[] snrs, float[] elevations,
+    private void setStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
             float[] azimuths) {
         clearSatellites();
         for (int i = 0; i < svCount; i++) {
@@ -158,7 +158,7 @@ public final class GpsStatus {
                 }
 
                 satellite.mValid = true;
-                satellite.mSnr = snrs[i];
+                satellite.mSnr = cn0s[i];
                 satellite.mElevation = elevations[i];
                 satellite.mAzimuth = azimuths[i];
                 satellite.mHasEphemeris =
@@ -179,7 +179,7 @@ public final class GpsStatus {
      */
     void setStatus(GnssStatus status, int timeToFirstFix) {
         mTimeToFirstFix = timeToFirstFix;
-        setStatus(status.mSvCount, status.mSvidWithFlags, status.mSnrs, status.mElevations,
+        setStatus(status.mSvCount, status.mSvidWithFlags, status.mCn0DbHz, status.mElevations,
                 status.mAzimuths);
     }
 

@@ -32,7 +32,7 @@ import java.security.InvalidParameterException;
 public final class GnssNavigationMessageEvent implements Parcelable {
     /** The status of GPS measurements event. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GPS_LOCATION_DISABLED})
+    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GNSS_LOCATION_DISABLED})
     public @interface GnssNavigationMessageStatus {}
 
     /**
@@ -50,7 +50,7 @@ public final class GnssNavigationMessageEvent implements Parcelable {
     /**
      * GPS provider or Location is disabled, updated will not be received until they are enabled.
      */
-    public static final int STATUS_GPS_LOCATION_DISABLED = 2;
+    public static final int STATUS_GNSS_LOCATION_DISABLED = 2;
 
     private final GnssNavigationMessage mNavigationMessage;
 
