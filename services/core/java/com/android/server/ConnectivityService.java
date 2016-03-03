@@ -125,6 +125,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.PermissionMonitor;
+import com.android.server.connectivity.ApfFilter;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
@@ -352,6 +353,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * obj = NetworkRequestInfo
      */
     private static final int EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT = 31;
+
+    /**
+     * used to push APF program to NetworkAgent
+     * replyTo = NetworkAgent message handler
+     * obj = byte[] of APF program
+     */
+    private static final int EVENT_PUSH_APF_PROGRAM_TO_NETWORK = 32;
 
     /** Handler thread used for both of the handlers below. */
     @VisibleForTesting
@@ -2190,6 +2198,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mKeepaliveTracker.handleStopAllKeepalives(nai,
                     ConnectivityManager.PacketKeepalive.ERROR_INVALID_NETWORK);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
+            if (nai.apfFilter != null) nai.apfFilter.shutdown();
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
             synchronized (mNetworkForNetId) {
@@ -2404,6 +2413,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 accept ? 1 : 0, always ? 1: 0, network));
     }
 
+    public void pushApfProgramToNetwork(NetworkAgentInfo nai, byte[] program) {
+        enforceConnectivityInternalPermission();
+        Message msg = mHandler.obtainMessage(EVENT_PUSH_APF_PROGRAM_TO_NETWORK, program);
+        msg.replyTo = nai.messenger;
+        mHandler.sendMessage(msg);
+    }
+
     private void handleSetAcceptUnvalidated(Network network, boolean accept, boolean always) {
         if (DBG) log("handleSetAcceptUnvalidated network=" + network +
                 " accept=" + accept + " always=" + always);
@@ -2551,6 +2567,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON: {
                     handleMobileDataAlwaysOn();
+                    break;
+                }
+                case EVENT_PUSH_APF_PROGRAM_TO_NETWORK: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_PUSH_APF_PROGRAM_TO_NETWORK from unknown NetworkAgent");
+                    } else {
+                         nai.asyncChannel.sendMessage(NetworkAgent.CMD_PUSH_APF_PROGRAM,
+                                 (byte[]) msg.obj);
+                    }
                     break;
                 }
                 // Sent by KeepaliveTracker to process an app request on the state machine thread.
@@ -4067,6 +4093,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // we do anything else, make sure its LinkProperties are accurate.
         if (networkAgent.clatd != null) {
             networkAgent.clatd.fixupLinkProperties(oldLp);
+        }
+        if (networkAgent.apfFilter != null) {
+            networkAgent.apfFilter.updateFilter();
         }
 
         updateInterfaces(newLp, oldLp, netId);

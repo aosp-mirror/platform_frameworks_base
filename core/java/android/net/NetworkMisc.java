@@ -56,6 +56,22 @@ public class NetworkMisc implements Parcelable {
      */
     public String subscriberId;
 
+    /**
+     * Version of APF instruction set supported for packet filtering. 0 indicates no support for
+     * packet filtering using APF programs.
+     */
+    public int apfVersionSupported;
+
+    /**
+     * Maximum size of APF program allowed.
+     */
+    public int maximumApfProgramSize;
+
+    /**
+     * Format of packets passed to APF filter. Should be one of ARPHRD_*
+     */
+    public int apfPacketFormat;
+
     public NetworkMisc() {
     }
 
@@ -65,6 +81,9 @@ public class NetworkMisc implements Parcelable {
             explicitlySelected = nm.explicitlySelected;
             acceptUnvalidated = nm.acceptUnvalidated;
             subscriberId = nm.subscriberId;
+            apfVersionSupported = nm.apfVersionSupported;
+            maximumApfProgramSize = nm.maximumApfProgramSize;
+            apfPacketFormat = nm.apfPacketFormat;
         }
     }
 
@@ -79,6 +98,9 @@ public class NetworkMisc implements Parcelable {
         out.writeInt(explicitlySelected ? 1 : 0);
         out.writeInt(acceptUnvalidated ? 1 : 0);
         out.writeString(subscriberId);
+        out.writeInt(apfVersionSupported);
+        out.writeInt(maximumApfProgramSize);
+        out.writeInt(apfPacketFormat);
     }
 
     public static final Creator<NetworkMisc> CREATOR = new Creator<NetworkMisc>() {
@@ -89,6 +111,9 @@ public class NetworkMisc implements Parcelable {
             networkMisc.explicitlySelected = in.readInt() != 0;
             networkMisc.acceptUnvalidated = in.readInt() != 0;
             networkMisc.subscriberId = in.readString();
+            networkMisc.apfVersionSupported = in.readInt();
+            networkMisc.maximumApfProgramSize = in.readInt();
+            networkMisc.apfPacketFormat = in.readInt();
             return networkMisc;
         }
 
