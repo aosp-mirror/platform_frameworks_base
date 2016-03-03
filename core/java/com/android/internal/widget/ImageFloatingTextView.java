@@ -65,6 +65,8 @@ public class ImageFloatingTextView extends TextView {
                 .setTextDirection(getTextDirectionHeuristic())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
                 .setIncludePad(getIncludeFontPadding())
+                .setEllipsize(shouldEllipsize ? effectiveEllipsize : null)
+                .setEllipsizedWidth(ellipsisWidth)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
         // we set the endmargin on the first 2 lines. this works just in our case but that's

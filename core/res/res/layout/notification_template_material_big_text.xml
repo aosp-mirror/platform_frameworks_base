@@ -39,7 +39,7 @@
         <com.android.internal.widget.ImageFloatingTextView android:id="@+id/big_text"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="1.5dp"
+            android:layout_marginTop="1dp"
             android:paddingBottom="@dimen/notification_content_margin_bottom"
             android:textAppearance="@style/TextAppearance.Material.Notification"
             android:singleLine="false"
