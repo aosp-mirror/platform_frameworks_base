@@ -92,6 +92,9 @@ public class RenameDocumentFragment extends DialogFragment {
 
         final AlertDialog dialog = builder.create();
 
+        // Workaround for the problem - virtual keyboard doesn't show on the phone.
+        Shared.ensureKeyboardPresent(context, dialog);
+
         mEditText.setOnEditorActionListener(
                 new OnEditorActionListener() {
                     @Override

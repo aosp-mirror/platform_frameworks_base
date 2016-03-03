@@ -17,9 +17,12 @@
 package com.android.documentsui;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.view.WindowManager;
+import android.app.AlertDialog;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -155,4 +158,15 @@ public final class Shared {
 
         return sCollator.compare(lhs, rhs);
     }
+
+    public static boolean isHardwareKeyboardAvailable(Context context) {
+        return context.getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS;
+    }
+
+    public static void ensureKeyboardPresent(Context context, AlertDialog dialog) {
+        if (!isHardwareKeyboardAvailable(context)) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+    }
+
 }
