@@ -145,11 +145,11 @@ public class LocaleStore {
             return mLangScriptKey;
         }
 
-        String getLabel() {
-            if (getParent() == null || this.isSuggestionOfType(SUGGESTION_TYPE_SIM)) {
-                return getFullNameNative();
-            } else {
+        String getLabel(boolean countryMode) {
+            if (countryMode) {
                 return getFullCountryNameNative();
+            } else {
+                return getFullNameNative();
             }
         }
 
@@ -311,9 +311,7 @@ public class LocaleStore {
             if (level == 2) {
                 if (parent != null) { // region selection
                     if (parentId.equals(li.getParent().toLanguageTag())) {
-                        if (!li.isSuggestionOfType(LocaleInfo.SUGGESTION_TYPE_SIM)) {
-                            result.add(li);
-                        }
+                        result.add(li);
                     }
                 } else { // language selection
                     if (li.isSuggestionOfType(LocaleInfo.SUGGESTION_TYPE_SIM)) {
