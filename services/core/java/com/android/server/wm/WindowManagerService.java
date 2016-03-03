@@ -2340,6 +2340,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mTokenMap.remove(token.token);
             } else if (atoken != null) {
                 atoken.firstWindowDrawn = false;
+                atoken.allDrawn = false;
             }
         }
 
@@ -4251,6 +4252,28 @@ public class WindowManagerService extends IWindowManager.Stub
                         TAG_WM, "No longer Stopped: " + wtoken);
                 wtoken.mAppStopped = false;
                 wtoken.setWindowsExiting(false);
+                mOpeningApps.add(wtoken);
+                wtoken.startingMoved = false;
+
+                // If the token is currently hidden (should be the
+                // common case), then we need to set up to wait for
+                // its windows to be ready.
+                if (wtoken.hidden) {
+                    wtoken.allDrawn = false;
+                    wtoken.deferClearAllDrawn = false;
+                    wtoken.waitingToShow = true;
+
+                    if (wtoken.clientHidden) {
+                        // In the case where we are making an app visible
+                        // but holding off for a transition, we still need
+                        // to tell the client to make its windows visible so
+                        // they get drawn.  Otherwise, we will wait on
+                        // performing the transition until all windows have
+                        // been drawn, they never will be, and we are sad.
+                        wtoken.clientHidden = false;
+                        wtoken.sendAppVisibilityToClients();
+                    }
+                }
             }
 
             // If we are preparing an app transition, then delay changing
@@ -4268,29 +4291,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 wtoken.inPendingTransaction = true;
                 if (visible) {
-                    mOpeningApps.add(wtoken);
-                    wtoken.startingMoved = false;
                     wtoken.mEnteringAnimation = true;
-
-                    // If the token is currently hidden (should be the
-                    // common case), then we need to set up to wait for
-                    // its windows to be ready.
-                    if (wtoken.hidden) {
-                        wtoken.allDrawn = false;
-                        wtoken.deferClearAllDrawn = false;
-                        wtoken.waitingToShow = true;
-
-                        if (wtoken.clientHidden) {
-                            // In the case where we are making an app visible
-                            // but holding off for a transition, we still need
-                            // to tell the client to make its windows visible so
-                            // they get drawn.  Otherwise, we will wait on
-                            // performing the transition until all windows have
-                            // been drawn, they never will be, and we are sad.
-                            wtoken.clientHidden = false;
-                            wtoken.sendAppVisibilityToClients();
-                        }
-                    }
                 } else {
                     wtoken.setWindowsExiting(true);
                     mClosingApps.add(wtoken);
@@ -9636,8 +9637,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void notifyAppRelaunching(IBinder token) {
         synchronized (mWindowMap) {
             AppWindowToken appWindow = findAppWindowToken(token);
-            if (canFreezeBounds(appWindow)) {
-                appWindow.freezeBounds();
+            if (appWindow != null) {
+                appWindow.startRelaunching();
             }
         }
     }
@@ -9645,18 +9646,10 @@ public class WindowManagerService extends IWindowManager.Stub
     public void notifyAppRelaunchingFinished(IBinder token) {
         synchronized (mWindowMap) {
             AppWindowToken appWindow = findAppWindowToken(token);
-            if (canFreezeBounds(appWindow)) {
-                appWindow.unfreezeBounds();
+            if (appWindow != null) {
+                appWindow.finishRelaunching();
             }
         }
-    }
-
-    private boolean canFreezeBounds(AppWindowToken appWindow) {
-
-        // For freeform windows, we can't freeze the bounds at the moment because this would make
-        // the resizing unresponsive.
-        return appWindow != null && appWindow.mTask != null
-                && !appWindow.mTask.inFreeformWorkspace();
     }
 
     @Override
