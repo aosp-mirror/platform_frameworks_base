@@ -1094,6 +1094,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     public void onGearDisplayed(ExpandableNotificationRow row) {
+        MetricsLogger.action(mContext, MetricsEvent.ACTION_REVEAL_GEAR,
+                row.getStatusBarNotification().getPackageName());
         mNotificationGearDisplayed = row;
     }
 
