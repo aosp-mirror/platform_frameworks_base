@@ -375,6 +375,7 @@ class AppWindowToken extends WindowToken {
     // The application has stopped, so destroy any surfaces which were keeping alive
     // in case they were still being used.
     void notifyAppStopped() {
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: " + this);
         mAppStopped = true;
         destroySurfaces();
 
@@ -472,7 +473,7 @@ class AppWindowToken extends WindowToken {
                 winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
             WindowState win = allAppWindows.get(winNdx);
             if (win.mAppDied) {
-                if (DEBUG_WINDOW_MOVEMENT) {
+                if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
                     Slog.w(TAG, "removeAllDeadWindows: " + win);
                 }
                 // Set mDestroying, we don't want any animation or delayed removal here.
