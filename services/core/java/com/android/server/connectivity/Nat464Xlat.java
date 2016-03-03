@@ -16,13 +16,11 @@
 
 package com.android.server.connectivity;
 
-import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.ConnectivityManager.TYPE_WIFI;
-
 import java.net.Inet4Address;
 
 import android.content.Context;
 import android.net.InterfaceConfiguration;
+import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
@@ -34,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.net.BaseNetworkObserver;
+import com.android.internal.util.ArrayUtils;
 
 /**
  * @hide
@@ -45,6 +44,13 @@ public class Nat464Xlat extends BaseNetworkObserver {
 
     // This must match the interface prefix in clatd.c.
     private static final String CLAT_PREFIX = "v4-";
+
+    // The network types we will start clatd on.
+    private static final int[] NETWORK_TYPES = {
+            ConnectivityManager.TYPE_MOBILE,
+            ConnectivityManager.TYPE_WIFI,
+            ConnectivityManager.TYPE_ETHERNET,
+    };
 
     private final INetworkManagementService mNMService;
 
@@ -90,7 +96,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 (nai.linkProperties != null) ? nai.linkProperties.hasIPv4Address() : false;
         // Only support clat on mobile and wifi for now, because these are the only IPv6-only
         // networks we can connect to.
-        return connected && !hasIPv4Address && (netType == TYPE_MOBILE || netType == TYPE_WIFI);
+        return connected && !hasIPv4Address && ArrayUtils.contains(NETWORK_TYPES, netType);
     }
 
     /**
@@ -221,7 +227,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
     }
 
     private void maybeSetIpv6NdOffload(String iface, boolean on) {
-        if (mNetwork.networkInfo.getType() != TYPE_WIFI) {
+        if (mNetwork.networkInfo.getType() != ConnectivityManager.TYPE_WIFI) {
             return;
         }
         try {
