@@ -240,6 +240,7 @@ $(call add-clean-step, rm -f $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framewo
 $(call add-clean-step, rm -f $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/media/java/android/media/IRemoteControlDisplay.*)
 $(call add-clean-step, rm -f $(OUT_DIR)/target/common/obj/APPS/FeatureSplit1_intermediates/src/com/android/test/split/feature/R.java)
 $(call add-clean-step, rm -f $(OUT_DIR)/target/common/obj/APPS/FeatureSplit2_intermediates/src/com/android/test/split/feature/R.java)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/hardware)
 
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
