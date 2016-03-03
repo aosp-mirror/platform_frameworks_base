@@ -40086,6 +40086,7 @@ package android.util {
     method public int describeContents();
     method public static android.util.LocaleList forLanguageTags(java.lang.String);
     method public java.util.Locale get(int);
+    method public static android.util.LocaleList getAdjustedDefault();
     method public static android.util.LocaleList getDefault();
     method public static android.util.LocaleList getEmptyLocaleList();
     method public java.util.Locale getFirstMatch(java.lang.String[]);
