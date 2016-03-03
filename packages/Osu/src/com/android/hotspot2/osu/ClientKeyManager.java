@@ -85,14 +85,8 @@ public class ClientKeyManager implements X509KeyManager {
                 return null;
             }
             try {
-                List<X509Certificate> certs = new ArrayList<>();
-                for (Certificate certificate :
-                        mKeyStore.getCertificateChain(mAliasMap.get(OSUCertType.Client))) {
-                    if (certificate instanceof X509Certificate) {
-                        certs.add((X509Certificate) certificate);
-                    }
-                }
-                return certs.toArray(new X509Certificate[certs.size()]);
+                Certificate cert = mKeyStore.getCertificate(alias);
+                return new X509Certificate[] {(X509Certificate) cert};
             } catch (KeyStoreException kse) {
                 Log.w(OSUManager.TAG, "Failed to retrieve certificates: " + kse);
                 return null;

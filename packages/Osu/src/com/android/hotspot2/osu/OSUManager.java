@@ -98,6 +98,7 @@ public class OSUManager {
     private final SubscriptionTimer mSubscriptionTimer;
     private final Set<String> mOSUSSIDs = new HashSet<>();
     private final Map<OSUProvider, OSUInfo> mOSUMap = new HashMap<>();
+    private final File mKeyStoreFile;
     private final KeyStore mKeyStore;
     private volatile RedirectListener mRedirectListener;
     private final AtomicInteger mOSUSequence = new AtomicInteger();
@@ -115,11 +116,12 @@ public class OSUManager {
         mWifiNetworkAdapter = new WifiNetworkAdapter(context, this);
         mSubscriptionTimer = new SubscriptionTimer(this, mWifiNetworkAdapter, context);
         mOSUCache = new OSUCache();
+        mKeyStoreFile = new File(context.getFilesDir(), KEYSTORE_FILE);
+        Log.d(TAG, "KS file: " + mKeyStoreFile.getPath());
         KeyStore ks = null;
         try {
             //ks = loadKeyStore(KEYSTORE_FILE, readCertsFromDisk(WFA_CA_LOC));
-            ks = loadKeyStore(new File(context.getFilesDir(), KEYSTORE_FILE),
-                    OSUSocketFactory.buildCertSet());
+            ks = loadKeyStore(mKeyStoreFile, OSUSocketFactory.buildCertSet());
         } catch (IOException e) {
             Log.e(TAG, "Failed to initialize Passpoint keystore, OSU disabled", e);
         }
@@ -462,7 +464,15 @@ public class OSUManager {
         }
     }
 
-    public void networkConfigChange(WifiConfiguration configuration) {
+    public void networkDeleted(WifiConfiguration configuration) {
+        Log.d("ZXZ", "Network deleted: " + configuration.FQDN);
+        HomeSP homeSP = mWifiNetworkAdapter.getHomeSP(configuration);
+        if (homeSP != null) {
+            spDeleted(homeSP.getFQDN());
+        }
+    }
+
+    public void networkChanged(WifiConfiguration configuration) {
         mWifiNetworkAdapter.networkConfigChange(configuration);
     }
 
@@ -657,7 +667,7 @@ public class OSUManager {
         FlowWorker flowWorker = new FlowWorker(network, url, this,
                 getKeyManager(homeSP, mKeyStore), homeSP, FlowType.Remediation);
 
-        if (wifiInfo.getNetworkId() == mActiveNetwork.netId) {
+        if (mActiveNetwork != null && wifiInfo.getNetworkId() == mActiveNetwork.netId) {
             startOsuFlow(flowWorker);
         } else {
             mRemediationFlow = flowWorker;
@@ -786,15 +796,15 @@ public class OSUManager {
                 Set<X509Certificate> rootCerts = OSUSocketFactory.getRootCerts(mKeyStore);
                 X509Certificate remCert = getCert(certs, OSUCertType.Remediation);
                 X509Certificate polCert = getCert(certs, OSUCertType.Policy);
+                int newCerts = 0;
                 if (privateKey != null) {
                     X509Certificate cltCert = getCert(certs, OSUCertType.Client);
                     mKeyStore.setKeyEntry(CERT_CLT_KEY_ALIAS + homeSP.getFQDN(),
-                            privateKey.getEncoded(),
-                            new X509Certificate[]{cltCert});
-                    mKeyStore.setCertificateEntry(CERT_CLT_CERT_ALIAS, cltCert);
+                            privateKey, null, new X509Certificate[]{cltCert});
+                    mKeyStore.setCertificateEntry(CERT_CLT_CERT_ALIAS + homeSP.getFQDN(), cltCert);
+                    newCerts++;
                 }
                 boolean usingShared = false;
-                int newCerts = 0;
                 if (remCert != null) {
                     if (!rootCerts.contains(remCert)) {
                         if (remCert.equals(polCert)) {
@@ -817,8 +827,9 @@ public class OSUManager {
                     }
                 }
 
+                Log.d("ZXZ", "Got " + newCerts + " new certs.");
                 if (newCerts > 0) {
-                    try (FileOutputStream out = new FileOutputStream(KEYSTORE_FILE)) {
+                    try (FileOutputStream out = new FileOutputStream(mKeyStoreFile)) {
                         mKeyStore.store(out, null);
                     }
                 }
@@ -845,6 +856,8 @@ public class OSUManager {
         int count = deleteCerts(mKeyStore, fqdn,
                 CERT_REM_ALIAS, CERT_POLICY_ALIAS, CERT_SHARED_ALIAS, CERT_CLT_CERT_ALIAS);
 
+        Log.d(TAG, "Passpoint network deleted, removing " + count + " key store entries");
+
         try {
             if (mKeyStore.getKey(CERT_CLT_KEY_ALIAS + fqdn, null) != null) {
                 mKeyStore.deleteEntry(CERT_CLT_KEY_ALIAS + fqdn);
@@ -854,7 +867,7 @@ public class OSUManager {
         }
 
         if (count > 0) {
-            try (FileOutputStream out = new FileOutputStream(KEYSTORE_FILE)) {
+            try (FileOutputStream out = new FileOutputStream(mKeyStoreFile)) {
                 mKeyStore.store(out, null);
             } catch (IOException | GeneralSecurityException e) {
                 Log.w(TAG, "Failed to remove certs from key store: " + e);

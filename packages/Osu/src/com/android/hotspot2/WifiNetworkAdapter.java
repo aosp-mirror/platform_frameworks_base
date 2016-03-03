@@ -82,6 +82,7 @@ public class WifiNetworkAdapter {
     }
 
     public void networkConfigChange(WifiConfiguration configuration) {
+        // !!! Watch out for changed r2 configs - remove the MO.
         loadAllSps();
     }
 
@@ -100,6 +101,7 @@ public class WifiNetworkAdapter {
             }
         }
         Log.d(OSUManager.TAG, "Loaded " + count + " SPs");
+        // !!! Detect adds/deletes
     }
 
     public Collection<HomeSP> getLoadedSPs() {
@@ -183,6 +185,14 @@ public class WifiNetworkAdapter {
     public WifiConfiguration getWifiConfig(HomeSP homeSP) {
         PasspointConfig passpointConfig = mPasspointConfigs.get(homeSP.getFQDN());
         return passpointConfig != null ? passpointConfig.getWifiConfiguration() : null;
+    }
+
+    public HomeSP getHomeSP(WifiConfiguration configuration) {
+        if (configuration.isPasspoint()) {
+            PasspointConfig config = mPasspointConfigs.get(configuration.FQDN);
+            return config != null ? config.getHomeSP() : null;
+        }
+        return null;
     }
 
     public HomeSP getCurrentSP() {
