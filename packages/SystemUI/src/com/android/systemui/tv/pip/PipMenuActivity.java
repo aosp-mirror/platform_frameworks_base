@@ -50,6 +50,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private TextView mPlayPauseDescriptionTextView;
     private View mCloseButtonView;
     private View mCloseDescriptionView;
+    private boolean mMovePipToFullscreen;
 
     private MediaController.Callback mMediaControllerCallback = new MediaController.Callback() {
         @Override
@@ -69,6 +70,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
             @Override
             public void onClick(View v) {
                 mPipManager.movePipToFullscreen();
+                mMovePipToFullscreen = true;
                 finish();
             }
         });
@@ -167,7 +169,9 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     }
 
     private void restorePipAndFinish() {
-        mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
+        if (!mMovePipToFullscreen) {
+            mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
+        }
         finish();
     }
 
@@ -221,7 +225,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     @Override
     public void finish() {
         super.finish();
-        if (mPipManager.isRecentsShown()) {
+        if (mPipManager.isRecentsShown() && !mMovePipToFullscreen) {
             SystemUI[] services = ((SystemUIApplication) getApplication()).getServices();
             for (int i = services.length - 1; i >= 0; i--) {
                 if (services[i] instanceof Recents) {
