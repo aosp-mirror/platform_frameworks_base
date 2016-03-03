@@ -1320,7 +1320,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public int getImportance(String pkg, int uid) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("Caller not system or systemui");
             return mRankingHelper.getImportance(pkg, uid);
         }
 
