@@ -773,6 +773,11 @@
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
 
+    <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
+    <string name="enabled_by_admin">Enabled by administrator</string>
+    <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
+    <string name="disabled_by_admin">Disabled by administrator</string>
+
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
     <string name="home">Home</string>
 
