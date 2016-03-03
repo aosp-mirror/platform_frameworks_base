@@ -324,6 +324,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
     };
+    private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -359,7 +360,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
         mFalsingManager = FalsingManager.getInstance(context);
-        mBackgroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
 
     @Override
@@ -425,6 +425,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
+    }
+
+    public void setDrawBackgroundAsSrc(boolean asSrc) {
+        mBackgroundPaint.setXfermode(asSrc ? mSrcMode : null);
+        invalidate();
     }
 
     private void notifyHeightChangeListener(ExpandableView view) {

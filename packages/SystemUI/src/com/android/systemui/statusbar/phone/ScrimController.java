@@ -30,7 +30,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
@@ -75,8 +74,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private long mAnimationDelay;
     private Runnable mOnAnimationFinished;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
-    private BackDropView mBackDropView;
-    private boolean mScrimSrcEnabled;
     private boolean mDozing;
     private float mDozeInFrontAlpha;
     private float mDozeBehindAlpha;
@@ -90,14 +87,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mSkipFirstFrame;
     private boolean mDontAnimateBouncerChanges;
 
-    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
-            boolean scrimSrcEnabled) {
+    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mHeadsUpScrim = headsUpScrim;
         final Context context = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
-        mScrimSrcEnabled = scrimSrcEnabled;
         updateHeadsUpScrim(false);
     }
 
@@ -378,19 +373,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         return scrim.getTag(TAG_KEY_ANIM) != null;
     }
 
-    public void setBackDropView(BackDropView backDropView) {
-        mBackDropView = backDropView;
-        mBackDropView.setOnVisibilityChangedRunnable(new Runnable() {
-            @Override
-            public void run() {
-                updateScrimBehindDrawingMode();
-            }
-        });
-        updateScrimBehindDrawingMode();
-    }
-
-    private void updateScrimBehindDrawingMode() {
-        boolean asSrc = mBackDropView.getVisibility() != View.VISIBLE && mScrimSrcEnabled;
+    public void setDrawBehindAsSrc(boolean asSrc) {
         mScrimBehind.setDrawAsSrc(asSrc);
     }
 
