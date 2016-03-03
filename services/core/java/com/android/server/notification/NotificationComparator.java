@@ -28,15 +28,23 @@ public class NotificationComparator
         final int leftImportance = left.getImportance();
         final int rightImportance = right.getImportance();
         if (leftImportance != rightImportance) {
-            // by priority, high to low
+            // by importance, high to low
             return -1 * Integer.compare(leftImportance, rightImportance);
         }
 
+        // Whether or not the notification can bypass DND.
         final int leftPackagePriority = left.getPackagePriority();
         final int rightPackagePriority = right.getPackagePriority();
         if (leftPackagePriority != rightPackagePriority) {
             // by priority, high to low
             return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
+        }
+
+        final int leftPriority = left.sbn.getNotification().priority;
+        final int rightPriority = right.sbn.getNotification().priority;
+        if (leftPriority != rightPriority) {
+            // by priority, high to low
+            return -1 * Integer.compare(leftPriority, rightPriority);
         }
 
         final float leftPeople = left.getContactAffinity();
