@@ -76,26 +76,26 @@ public class ViewTransformationHelper implements TransformableView {
         });
         mViewTransformationAnimation.setInterpolator(Interpolators.LINEAR);
         mViewTransformationAnimation.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        if (endRunnable != null) {
-            mViewTransformationAnimation.addListener(new AnimatorListenerAdapter() {
-                public boolean mCancelled;
+        mViewTransformationAnimation.addListener(new AnimatorListenerAdapter() {
+            public boolean mCancelled;
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    endRunnable.run();
-                    if (!mCancelled) {
-                        setVisible(false);
-                    } else {
-                        abortTransformations();
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!mCancelled) {
+                    if (endRunnable != null) {
+                        endRunnable.run();
                     }
+                    setVisible(false);
+                } else {
+                    abortTransformations();
                 }
+            }
 
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    mCancelled = true;
-                }
-            });
-        }
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mCancelled = true;
+            }
+        });
         mViewTransformationAnimation.start();
     }
 
