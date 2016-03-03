@@ -1,6 +1,7 @@
 page.title=Program Overview
 page.metaDescription=Welcome to the Android M Developer Preview, a program that gives you everything you need to test and optimize your apps for the next version of Android.
-page.image=images/cards/card-preview_16-9_2x.png
+page.image=images/cards/card-n-overview_2x.png
+meta.tags="preview", "developer", "android"
 page.tags="preview", "developer", "android"
 
 @jd:body

@@ -1,6 +1,8 @@
 page.title=Behavior Changes
 page.keywords=preview,sdk,compatibility
-sdk.platform.apiLevel=MNC
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
 @jd:body
 
 <div id="qv-wrapper">

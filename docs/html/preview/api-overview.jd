@@ -1,8 +1,7 @@
-page.title=API Overview
-page.keywords=preview,sdk,compatibility
-page.tags=previewresources, androidm
-sdk.platform.apiLevel=22-mnc
-page.image=images/cards/card-api-overview_16-9_2x.png
+page.title=Android N APIs &amp; Features
+meta.tags="preview", "androidn"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-overview_2x.png
 @jd:body
 
 

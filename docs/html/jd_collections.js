@@ -16,8 +16,8 @@ var RESOURCE_COLLECTIONS = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=Pms0pcyPbAM",
       "http://www.youtube.com/watch?v=9m6MoBM-sFI",
+      "http://www.youtube.com/watch?v=Pms0pcyPbAM",
       "http://www.youtube.com/watch?v=e7t3svG9PTk",
       "http://www.youtube.com/watch?v=J3IvOfvH1ys"
     ]
@@ -133,6 +133,18 @@ var RESOURCE_COLLECTIONS = {
       "https://www.youtube.com/watch?v=JLLnhwtDoHw&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=2I6fuD20qlY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
+    ]
+  },
+  "preview/landing/resources": {
+    "title": "",
+    "resources": [
+      "preview/overview.html",
+      "preview/api-overview.html",
+      "preview/behavior-changes.html",
+      "preview/download.html",
+      "preview/samples.html",
+      "preview/setup-sdk.html",
+      "preview/support.html"
     ]
   },
   "google/landing/services": {

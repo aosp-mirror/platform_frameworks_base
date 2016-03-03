@@ -1,28 +1,24 @@
 page.title=Android N Developer Preview
-page.tags="preview",
-meta.tags="preview, devpreview", androidm
+page.tags="preview","developer"
+meta.tags="preview", "android"
 fullpage=true
 forcelocalnav=true
 header.hide=1
 footer.hide=1
 @jd:body
 
-<section class="dac-expand dac-hero dac-light" >
-  <div class="wrap">
-    <div class="cols dac-hero-content">
-      <div class="col-9of16 col-push-7of16 dac-hero-figure">
-        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png"
-             srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
-             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
-      </div>
-      <div class="col-7of16 col-pull-9of16">
+<section class="dac-expand dac-hero dac-light" style="background-color:#B2DFDB">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
+    <div class="cols dac-hero-content" style="padding-bottom:1em;">
+
+      <div class="col-7of16 col-push-9of16">
         <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
-          <strong>Get your apps ready for the next version of Android.</strong>
-          Test on Nexus 5, 6, 9, and
-          Player. Explore what's new &mdash; <strong>multiwindow UI</strong>,
-          <strong>Doze Lite</strong> and <strong>Background Check</strong> power-saving features, new
-          <strong>notification</strong> capabilities, and more.
+          Get ready for Android N!
+          <strong>Test your apps</strong> on Nexus and other devices. Support new system
+          behaviors to <strong>save power and memory</strong>.
+          Extend your apps with <strong>multiwindow UI</strong>,
+          <strong>direct reply notifications</strong> and more.
         </p>
 
         <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
@@ -33,6 +29,11 @@ footer.hide=1
           <span class="dac-sprite dac-auto-chevron"></span>
           Update to Developer Preview (final SDK)
         </a><br>-->
+      </div>
+      <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:2em;">
+        <img class="dac-hero-image" src="{@docRoot}images/home/n-preview-hero.png"
+             srcset="{@docRoot}images/home/n-preview-hero.png 1x,
+             {@docRoot}images/home/n-preview-hero_2x.png 2x">
       </div>
     </div>
     <div class="dac-section dac-small">
@@ -62,7 +63,7 @@ footer.hide=1
           Report Issues
         </a>
       </li>
-      <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
+      <li class="dac-section-link"><a href="http://developer.android.com/preview/dev-community">
         <span class="dac-sprite dac-auto-chevron"></span>
         Join G+ Community
         </a>
