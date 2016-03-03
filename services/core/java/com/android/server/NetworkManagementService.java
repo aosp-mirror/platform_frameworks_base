@@ -22,8 +22,10 @@ import static android.Manifest.permission.SHUTDOWN;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_NONE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NONE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.FIREWALL_TYPE_BLACKLIST;
@@ -43,7 +45,6 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
-
 import android.annotation.NonNull;
 import android.app.ActivityManagerNative;
 import android.content.Context;
@@ -226,6 +227,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     @GuardedBy("mQuotaLock")
     private SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
+    /**
+     * Set of UIDs that are to be blocked/allowed by firewall controller.  This set of Ids matches
+     * to device on power-save mode.
+     */
+    @GuardedBy("mQuotaLock")
+    private SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mQuotaLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
@@ -620,6 +627,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
             if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE)) {
                 setFirewallChainEnabled(FIREWALL_CHAIN_DOZABLE, true);
+            }
+
+            size = mUidFirewallPowerSaveRules.size();
+            if (size > 0) {
+                Slog.d(TAG, "Pushing " + size + " active firewall powersave UID rules");
+                final SparseIntArray uidFirewallRules = mUidFirewallPowerSaveRules;
+                mUidFirewallPowerSaveRules = new SparseIntArray();
+                for (int i = 0; i < uidFirewallRules.size(); i++) {
+                    setFirewallUidRuleInternal(FIREWALL_CHAIN_POWERSAVE, uidFirewallRules.keyAt(i),
+                            uidFirewallRules.valueAt(i));
+                }
+            }
+            if (mFirewallChainStates.get(FIREWALL_CHAIN_POWERSAVE)) {
+                setFirewallChainEnabled(FIREWALL_CHAIN_POWERSAVE, true);
             }
         }
     }
@@ -2023,6 +2044,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     case FIREWALL_CHAIN_DOZABLE:
                         chainName = FIREWALL_CHAIN_NAME_DOZABLE;
                         break;
+                    case FIREWALL_CHAIN_POWERSAVE:
+                        chainName = FIREWALL_CHAIN_NAME_POWERSAVE;
+                        break;
                     default:
                         throw new IllegalArgumentException("Bad child chain: " + chain);
                 }
@@ -2038,6 +2062,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             case FIREWALL_CHAIN_STANDBY:
                 return FIREWALL_TYPE_BLACKLIST;
             case FIREWALL_CHAIN_DOZABLE:
+                return FIREWALL_TYPE_WHITELIST;
+            case FIREWALL_CHAIN_POWERSAVE:
                 return FIREWALL_TYPE_WHITELIST;
             default:
                 return isFirewallEnabled() ? FIREWALL_TYPE_WHITELIST : FIREWALL_TYPE_BLACKLIST;
@@ -2138,6 +2164,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return mUidFirewallStandbyRules;
             case FIREWALL_CHAIN_DOZABLE:
                 return mUidFirewallDozableRules;
+            case FIREWALL_CHAIN_POWERSAVE:
+                return mUidFirewallPowerSaveRules;
             case FIREWALL_CHAIN_NONE:
                 return mUidFirewallRules;
             default:
@@ -2151,6 +2179,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return FIREWALL_CHAIN_NAME_STANDBY;
             case FIREWALL_CHAIN_DOZABLE:
                 return FIREWALL_CHAIN_NAME_DOZABLE;
+            case FIREWALL_CHAIN_POWERSAVE:
+                return FIREWALL_CHAIN_NAME_POWERSAVE;
             case FIREWALL_CHAIN_NONE:
                 return FIREWALL_CHAIN_NAME_NONE;
             default:
@@ -2271,43 +2301,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         synchronized (mUidFirewallRules) {
-            pw.print("UID firewall rule: [");
-            final int size = mUidFirewallRules.size();
-            for (int i = 0; i < size; i++) {
-                pw.print(mUidFirewallRules.keyAt(i));
-                pw.print(":");
-                pw.print(mUidFirewallRules.valueAt(i));
-                if (i < size - 1) pw.print(",");
-            }
-            pw.println("]");
+            dumpUidFirewallRule(pw, "", mUidFirewallRules);
         }
 
         pw.println("UID firewall standby chain enabled: " +
                 mFirewallChainStates.get(FIREWALL_CHAIN_STANDBY));
         synchronized (mUidFirewallStandbyRules) {
-            pw.print("UID firewall standby rule: [");
-            final int size = mUidFirewallStandbyRules.size();
-            for (int i = 0; i < size; i++) {
-                pw.print(mUidFirewallStandbyRules.keyAt(i));
-                pw.print(":");
-                pw.print(mUidFirewallStandbyRules.valueAt(i));
-                if (i < size - 1) pw.print(",");
-            }
-            pw.println("]");
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_STANDBY, mUidFirewallStandbyRules);
         }
 
         pw.println("UID firewall dozable chain enabled: " +
                 mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE));
         synchronized (mUidFirewallDozableRules) {
-            pw.print("UID firewall dozable rule: [");
-            final int size = mUidFirewallDozableRules.size();
-            for (int i = 0; i < size; i++) {
-                pw.print(mUidFirewallDozableRules.keyAt(i));
-                pw.print(":");
-                pw.print(mUidFirewallDozableRules.valueAt(i));
-                if (i < size - 1) pw.print(",");
-            }
-            pw.println("]");
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_DOZABLE, mUidFirewallDozableRules);
+        }
+
+        pw.println("UID firewall powersave chain enabled: " +
+                mFirewallChainStates.get(FIREWALL_CHAIN_POWERSAVE));
+        synchronized (mUidFirewallPowerSaveRules) {
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_POWERSAVE, mUidFirewallPowerSaveRules);
         }
 
         synchronized (mIdleTimerLock) {
@@ -2322,6 +2334,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
+    }
+
+    private void dumpUidFirewallRule(PrintWriter pw, String name, SparseIntArray rules) {
+        pw.print("UID firewall");
+        pw.print(name);
+        pw.print(" rule: [");
+        final int size = rules.size();
+        for (int i = 0; i < size; i++) {
+            pw.print(rules.keyAt(i));
+            pw.print(":");
+            pw.print(rules.valueAt(i));
+            if (i < size - 1) pw.print(",");
+        }
+        pw.println("]");
     }
 
     @Override

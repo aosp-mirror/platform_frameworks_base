@@ -68,10 +68,12 @@ public class NetworkPolicyManager {
     public static final int FIREWALL_CHAIN_NONE = 0;
     public static final int FIREWALL_CHAIN_DOZABLE = 1;
     public static final int FIREWALL_CHAIN_STANDBY = 2;
+    public static final int FIREWALL_CHAIN_POWERSAVE = 3;
 
     public static final String FIREWALL_CHAIN_NAME_NONE = "none";
     public static final String FIREWALL_CHAIN_NAME_DOZABLE = "dozable";
     public static final String FIREWALL_CHAIN_NAME_STANDBY = "standby";
+    public static final String FIREWALL_CHAIN_NAME_POWERSAVE = "powersave";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
