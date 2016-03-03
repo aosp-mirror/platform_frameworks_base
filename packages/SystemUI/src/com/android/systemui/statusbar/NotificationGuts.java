@@ -130,7 +130,12 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             importanceSlider.setVisibility(View.VISIBLE);
             importanceButtons.setVisibility(View.GONE);
         } else {
-            bindToggles(importanceButtons, sbn, systemApp);
+            int userImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+            try {
+                userImportance =
+                        mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
+            } catch (RemoteException e) {}
+            bindToggles(importanceButtons, userImportance, systemApp);
             importanceButtons.setVisibility(View.VISIBLE);
             importanceSlider.setVisibility(View.GONE);
         }
@@ -144,7 +149,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             if (mBlock.isChecked()) {
                 progress = NotificationListenerService.Ranking.IMPORTANCE_NONE;
             } else if (mSilent.isChecked()) {
-                progress = NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
+                progress = NotificationListenerService.Ranking.IMPORTANCE_LOW;
             } else {
                 progress = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
             }
@@ -158,7 +163,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         }
     }
 
-    private void bindToggles(final View importanceButtons, final StatusBarNotification sbn,
+    private void bindToggles(final View importanceButtons, final int importance,
             final boolean systemApp) {
         mBlock = (RadioButton) importanceButtons.findViewById(R.id.block_importance);
         mSilent = (RadioButton) importanceButtons.findViewById(R.id.silent_importance);
@@ -169,7 +174,11 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         } else {
             mReset.setText(mContext.getString(R.string.do_not_silence_block));
         }
-        mReset.setChecked(true);
+        if (importance == NotificationListenerService.Ranking.IMPORTANCE_LOW) {
+            mSilent.setChecked(true);
+        } else {
+            mReset.setChecked(true);
+        }
     }
 
     private void bindSlider(final View importanceSlider, final StatusBarNotification sbn,
