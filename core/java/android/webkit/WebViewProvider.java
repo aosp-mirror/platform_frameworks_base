@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.print.PrintDocumentAdapter;
 import android.view.DragEvent;
@@ -387,10 +386,6 @@ public interface WebViewProvider {
         public void onFinishTemporaryDetach();
 
         public void onActivityResult(int requestCode, int resultCode, Intent data);
-
-        public Handler getHandler(Handler originalHandler);
-
-        public View findFocus(View originalFocusedView);
     }
 
     interface ScrollDelegate {
