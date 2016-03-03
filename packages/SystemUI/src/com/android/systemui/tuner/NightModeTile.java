@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.provider.Settings;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Prefs;
+import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.NightModeController;
@@ -43,6 +45,12 @@ public class NightModeTile extends QSTile<QSTile.State> implements NightModeCont
     public NightModeTile(Host host) {
         super(host);
         mNightModeController = host.getNightModeController();
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return Prefs.getBoolean(mContext, Key.QS_NIGHT_ADDED, false)
+                && TunerService.isTunerEnabled(mContext);
     }
 
     @Override
