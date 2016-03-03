@@ -82,6 +82,9 @@ public class CreateDirectoryFragment extends DialogFragment {
         builder.setNegativeButton(android.R.string.cancel, null);
         final AlertDialog dialog = builder.create();
 
+        // Workaround for the problem - virtual keyboard doesn't show on the phone.
+        Shared.ensureKeyboardPresent(context, dialog);
+
         editText.setOnEditorActionListener(
                 new OnEditorActionListener() {
                     @Override
