@@ -171,6 +171,16 @@ public interface IActivityManager extends IInterface {
     public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds,
             Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) throws RemoteException;
+    /**
+     * Resizes the pinned stack.
+     *
+     * @param pinnedBounds The bounds for the pinned stack.
+     * @param tempPinnedTaskBounds The temporary bounds for the tasks in the pinned stack, which
+     *                             might be different from the stack bounds to allow more
+     *                             flexibility while resizing, or {@code null} if they should be the
+     *                             same as the stack bounds.
+     */
+    public void resizePinnedStack(Rect pinnedBounds, Rect tempPinnedTaskBounds) throws RemoteException;
     public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
     public StackInfo getStackInfo(int stackId) throws RemoteException;
@@ -982,4 +992,5 @@ public interface IActivityManager extends IInterface {
     int REMOVE_STACK = IBinder.FIRST_CALL_TRANSACTION + 367;
     int SET_LENIENT_BACKGROUND_CHECK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+368;
     int GET_MEMORY_TRIM_LEVEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+369;
+    int RESIZE_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 370;
 }

@@ -54,7 +54,8 @@ public class BoundsAnimationController {
         private final AnimateBoundsUser mTarget;
         private final Rect mFrom;
         private final Rect mTo;
-        private final Rect mTmpRect;
+        private final Rect mTmpRect = new Rect();
+        private final Rect mTmpTaskBounds = new Rect();
         private final boolean mMoveToFullScreen;
         // True if this this animation was cancelled and will be replaced the another animation from
         // the same {@link #AnimateBoundsUser} target.
@@ -63,17 +64,40 @@ public class BoundsAnimationController {
         // {@link #AnimateBoundsUser} target.
         private final boolean mReplacement;
 
+        // Depending on whether we are animating from
+        // a smaller to a larger size
+        private final int mFrozenTaskWidth;
+        private final int mFrozenTaskHeight;
+
         BoundsAnimator(AnimateBoundsUser target, Rect from, Rect to,
                 boolean moveToFullScreen, boolean replacement) {
             super();
             mTarget = target;
             mFrom = from;
             mTo = to;
-            mTmpRect = new Rect();
             mMoveToFullScreen = moveToFullScreen;
             mReplacement = replacement;
             addUpdateListener(this);
             addListener(this);
+
+            // If we are animating from smaller to larger, we want to change the task bounds
+            // to their final size immediately so we can use scaling to make the window
+            // larger. Likewise if we are going from bigger to smaller, we want to wait until
+            // the end so we don't have to upscale from the smaller finished size.
+            if (animatingToLargerSize()) {
+                mFrozenTaskWidth = mTo.width();
+                mFrozenTaskHeight = mTo.height();
+            } else {
+                mFrozenTaskWidth = mFrom.width();
+                mFrozenTaskHeight = mFrom.height();
+            }
+        }
+
+        boolean animatingToLargerSize() {
+            if (mFrom.width() * mFrom.height() > mTo.width() * mTo.height()) {
+                return false;
+            }
+            return true;
         }
 
         @Override
@@ -87,7 +111,13 @@ public class BoundsAnimationController {
             if (DEBUG) Slog.d(TAG, "animateUpdate: mTarget=" + mTarget + " mBounds="
                     + mTmpRect + " from=" + mFrom + " mTo=" + mTo + " value=" + value
                     + " remains=" + remains);
-            if (!mTarget.setSize(mTmpRect)) {
+
+            if (remains != 0) {
+                mTmpTaskBounds.set(mTmpRect.left, mTmpRect.top,
+                        mTmpRect.left + mFrozenTaskWidth, mTmpRect.top + mFrozenTaskHeight);
+            }
+
+            if (!mTarget.setPinnedStackSize(mTmpRect, remains != 0 ? mTmpTaskBounds : null)) {
                 // Whoops, the target doesn't feel like animating anymore. Let's immediately finish
                 // any further animation.
                 animation.cancel();
@@ -99,6 +129,10 @@ public class BoundsAnimationController {
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mReplacement=" + mReplacement);
+            if (animatingToLargerSize()) {
+                mTarget.setPinnedStackSize(mFrom, mTo);
+            }
+
             if (!mReplacement) {
                 mTarget.onAnimationStart();
             }
@@ -108,6 +142,7 @@ public class BoundsAnimationController {
         public void onAnimationEnd(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
                     + " mMoveToFullScreen=" + mMoveToFullScreen + " mWillReplace=" + mWillReplace);
+
             finishAnimation();
             if (mMoveToFullScreen && !mWillReplace) {
                 mTarget.moveToFullscreen();
@@ -159,6 +194,12 @@ public class BoundsAnimationController {
          * from the hierarchy and is not valid anymore.
          */
         boolean setSize(Rect bounds);
+        /**
+         * Behaves as setSize, but freezes the bounds of any tasks in the target at taskBounds,
+         * to allow for more flexibility during resizing. Only
+         * works for the pinned stack at the moment.
+         */
+        boolean setPinnedStackSize(Rect bounds, Rect taskBounds);
 
         void onAnimationStart();
 

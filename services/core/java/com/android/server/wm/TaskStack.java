@@ -111,6 +111,17 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private float mMinimizeAmount;
     private final int mDockedStackMinimizeThickness;
 
+    // If this is true, the task will be down or upscaled
+    // to perfectly fit the region it would have been cropped
+    // to.
+    private boolean mForceScaleToCrop = false;
+    // By default, movement animations are applied to all
+    // window movement. If this is true, animations will not
+    // be applied within this stack. This is useful for example
+    // if the windows are moving as the result of a stack animation,
+    // in which case a second window animation would cause jitter.
+    private boolean mFreezeMovementAnimations = false;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
@@ -1128,17 +1139,38 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return true;
     }
 
+    public boolean setPinnedStackSize(Rect bounds, Rect tempTaskBounds) {
+        synchronized (mService.mWindowMap) {
+            if (mDisplayContent == null) {
+                return false;
+            }
+            if (mStackId != PINNED_STACK_ID) {
+                Slog.w(TAG_WM, "Attempt to use pinned stack resize animation helper on"
+                        + "non pinned stack");
+                return false;
+            }
+        }
+        try {
+            mService.mActivityManager.resizePinnedStack(bounds, tempTaskBounds);
+        } catch (RemoteException e) {
+            // I don't believe you.
+        }
+        return true;
+    }
+
     @Override  // AnimatesBounds
     public void onAnimationStart() {
         synchronized (mService.mWindowMap) {
-            setDragResizingLocked(true);
+            mFreezeMovementAnimations = true;
+            mForceScaleToCrop = true;
         }
     }
 
     @Override  // AnimatesBounds
     public void onAnimationEnd() {
         synchronized (mService.mWindowMap) {
-            setDragResizingLocked(false);
+            mFreezeMovementAnimations = false;
+            mForceScaleToCrop = false;
             mService.requestTraversal();
         }
         if (mStackId == PINNED_STACK_ID) {
@@ -1162,5 +1194,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
     @Override
     public void getFullScreenBounds(Rect bounds) {
         getDisplayContent().getContentRect(bounds);
+    }
+
+    public boolean getFreezeMovementAnimations() {
+        return mFreezeMovementAnimations;
+    }
+
+    public boolean getForceScaleToCrop() {
+        return mForceScaleToCrop;
     }
 }
