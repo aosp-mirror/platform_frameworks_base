@@ -53,10 +53,10 @@
         <ImageView
                 android:id="@+id/restricted_padlock"
                 android:layout_width="@dimen/qs_detail_item_secondary_text_size"
-                android:layout_height="@dimen/qs_detail_item_secondary_text_size"
-                android:src="@drawable/ic_settings_lock_outline"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:src="@drawable/ic_info"
                 android:layout_marginLeft="@dimen/restricted_padlock_pading"
-                android:baselineAlignBottom="true"
                 android:scaleType="centerInside"
                 android:visibility="gone" />
     </LinearLayout>
