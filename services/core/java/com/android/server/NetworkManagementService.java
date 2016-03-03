@@ -286,8 +286,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         Watchdog.getInstance().addMonitor(this);
     }
 
-    static NetworkManagementService create(Context context,
-            String socket) throws InterruptedException {
+    static NetworkManagementService create(Context context, String socket)
+            throws InterruptedException {
         final NetworkManagementService service = new NetworkManagementService(context, socket);
         final CountDownLatch connectedSignal = service.mConnectedSignal;
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
@@ -303,8 +303,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public void systemReady() {
-        prepareNativeDaemon();
-        if (DBG) Slog.d(TAG, "Prepared");
+        if (DBG) {
+            final long start = System.currentTimeMillis();
+            prepareNativeDaemon();
+            final long delta = System.currentTimeMillis() - start;
+            Slog.d(TAG, "Prepared in " + delta + "ms");
+            return;
+        } else {
+            prepareNativeDaemon();
+        }
     }
 
     private IBatteryStats getBatteryStats() {
@@ -339,8 +346,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).interfaceStatusChanged(iface, up);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -358,8 +364,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).interfaceLinkStateChanged(iface, up);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -376,8 +381,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).interfaceAdded(iface);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -399,8 +403,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).interfaceRemoved(iface);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -417,8 +420,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).limitReached(limitName, iface);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -476,8 +478,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     try {
                         mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
                                 Integer.toString(type), isActive, tsNanos);
-                    } catch (RemoteException e) {
-                    } catch (RuntimeException e) {
+                    } catch (RemoteException | RuntimeException e) {
                     }
                 }
             } finally {
@@ -520,7 +521,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 Log.wtf(TAG, "problem enabling bandwidth controls", e);
             }
         } else {
-            Slog.d(TAG, "not enabling bandwidth control");
+            Slog.i(TAG, "not enabling bandwidth control");
         }
 
         SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
@@ -543,7 +544,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         synchronized (mQuotaLock) {
             int size = mActiveQuotas.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active quota rules");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active quota rules");
                 final HashMap<String, Long> activeQuotas = mActiveQuotas;
                 mActiveQuotas = Maps.newHashMap();
                 for (Map.Entry<String, Long> entry : activeQuotas.entrySet()) {
@@ -553,7 +554,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mActiveAlerts.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active alert rules");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active alert rules");
                 final HashMap<String, Long> activeAlerts = mActiveAlerts;
                 mActiveAlerts = Maps.newHashMap();
                 for (Map.Entry<String, Long> entry : activeAlerts.entrySet()) {
@@ -563,7 +564,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mUidRejectOnQuota.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active UID rules");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active UID rules");
                 final SparseBooleanArray uidRejectOnQuota = mUidRejectOnQuota;
                 mUidRejectOnQuota = new SparseBooleanArray();
                 for (int i = 0; i < uidRejectOnQuota.size(); i++) {
@@ -573,7 +574,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mUidCleartextPolicy.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active UID cleartext policies");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active UID cleartext policies");
                 final SparseIntArray local = mUidCleartextPolicy;
                 mUidCleartextPolicy = new SparseIntArray();
                 for (int i = 0; i < local.size(); i++) {
@@ -585,7 +586,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mUidFirewallRules.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active firewall UID rules");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall UID rules");
                 final SparseIntArray uidFirewallRules = mUidFirewallRules;
                 mUidFirewallRules = new SparseIntArray();
                 for (int i = 0; i < uidFirewallRules.size(); i++) {
@@ -596,7 +597,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mUidFirewallStandbyRules.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active firewall standby UID rules");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall standby UID rules");
                 final SparseIntArray uidFirewallRules = mUidFirewallStandbyRules;
                 mUidFirewallStandbyRules = new SparseIntArray();
                 for (int i = 0; i < uidFirewallRules.size(); i++) {
@@ -610,7 +611,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mUidFirewallDozableRules.size();
             if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active firewall dozable UID rules");
+                if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall dozable UID rules");
                 final SparseIntArray uidFirewallRules = mUidFirewallDozableRules;
                 mUidFirewallDozableRules = new SparseIntArray();
                 for (int i = 0; i < uidFirewallRules.size(); i++) {
@@ -633,8 +634,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).addressUpdated(iface, address);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -651,8 +651,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mObservers.getBroadcastItem(i).addressRemoved(iface, address);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -670,8 +669,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 try {
                     mObservers.getBroadcastItem(i).interfaceDnsServerInfo(iface, lifetime,
                         addresses);
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -692,8 +690,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     } else {
                         mObservers.getBroadcastItem(i).routeRemoved(route);
                     }
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
@@ -1210,7 +1207,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // TODO: remove from aidl if nobody calls externally
         mContext.enforceCallingOrSelfPermission(SHUTDOWN, TAG);
 
-        Slog.d(TAG, "Shutting down");
+        Slog.i(TAG, "Shutting down");
     }
 
     @Override
@@ -2225,8 +2222,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int i = 0; i < length; i++) {
                 try {
                     mNetworkActivityListeners.getBroadcastItem(i).onNetworkActive();
-                } catch (RemoteException e) {
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {

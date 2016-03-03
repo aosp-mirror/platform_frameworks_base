@@ -68,6 +68,7 @@ import static android.net.wifi.WifiManager.EXTRA_NETWORK_INFO;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_CONFIGURATION;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_INFO;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -1254,8 +1255,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             if (LOGD) {
-                Slog.d(TAG, "applying policy " + policy.toString() + " to ifaces "
-                        + Arrays.toString(ifaces));
+                Slog.d(TAG, "applying policy " + policy + " to ifaces " + Arrays.toString(ifaces));
             }
 
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
@@ -2454,6 +2454,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link #mRestrictPower}, or {@link #mDeviceIdleMode} value.
      */
     void updateRulesForGlobalChangeLocked(boolean restrictedNetworksChanged) {
+        long start;
+        if (LOGD) start = System.currentTimeMillis();
+
         final PackageManager pm = mContext.getPackageManager();
 
         updateRulesForDeviceIdleLocked();
@@ -2465,8 +2468,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS
                         | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
 
-        for (UserInfo user : users) {
-            for (ApplicationInfo app : apps) {
+        final int usersSize = users.size();
+        final int appsSize = apps.size();
+        for (int i = 0; i < usersSize; i++) {
+            final UserInfo user = users.get(i);
+            for (int j = 0; j < appsSize; j++) {
+                final ApplicationInfo app = apps.get(j);
                 final int uid = UserHandle.getUid(user.id, app.uid);
                 updateRulesForUidLocked(uid);
             }
@@ -2481,13 +2488,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             normalizePoliciesLocked();
             updateNetworkRulesLocked();
         }
+        if (LOGD) {
+          final long delta = System.currentTimeMillis() - start;
+          Slog.d(TAG, "updateRulesForGlobalChangeLocked(" + restrictedNetworksChanged + ") took "
+                  + delta + "ms");
+        }
     }
 
     void updateRulesForTempWhitelistChangeLocked() {
         final List<UserInfo> users = mUserManager.getUsers();
-        for (UserInfo user : users) {
-            for (int i = mPowerSaveTempWhitelistAppIds.size() - 1; i >= 0; i--) {
-                int appId = mPowerSaveTempWhitelistAppIds.keyAt(i);
+        for (int i = 0; i < users.size(); i++) {
+            final UserInfo user = users.get(i);
+            for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; i--) {
+                int appId = mPowerSaveTempWhitelistAppIds.keyAt(j);
                 int uid = UserHandle.getUid(user.id, appId);
                 updateRuleForAppIdleLocked(uid);
                 updateRuleForDeviceIdleLocked(uid);
