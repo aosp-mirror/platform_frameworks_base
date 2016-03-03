@@ -375,13 +375,11 @@ const ClipBase* ClipArea::serializeClip(LinearAllocator& allocator) {
             serialization->rect.set(mClipRegion.getBounds());
             break;
         }
+        // TODO: this is only done for draw time, should eventually avoid for record time
+        serialization->rect.snapToPixelBoundaries();
         mLastSerialization = serialization;
     }
     return mLastSerialization;
-}
-
-inline static const Rect& getRect(const ClipBase* scb) {
-    return reinterpret_cast<const ClipRect*>(scb)->rect;
 }
 
 inline static const RectangleList& getRectList(const ClipBase* scb) {
@@ -425,9 +423,10 @@ const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
                 && recordedClip->mode == ClipMode::Rectangle
                 && recordedClipTransform.rectToRect())) {
             // common case - result is a single rectangle
-            auto rectClip = allocator.create<ClipRect>(getRect(recordedClip));
+            auto rectClip = allocator.create<ClipRect>(recordedClip->rect);
             recordedClipTransform.mapRect(rectClip->rect);
             rectClip->rect.doIntersect(mClipRect);
+            rectClip->rect.snapToPixelBoundaries();
             mLastResolutionResult = rectClip;
         } else if (CC_UNLIKELY(mMode == ClipMode::Region
                 || recordedClip->mode == ClipMode::Region
@@ -438,11 +437,11 @@ const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
             case ClipMode::Rectangle:
                 if (CC_LIKELY(recordedClipTransform.rectToRect())) {
                     // simple transform, skip creating SkPath
-                    Rect resultClip(getRect(recordedClip));
+                    Rect resultClip(recordedClip->rect);
                     recordedClipTransform.mapRect(resultClip);
                     other.setRect(resultClip.toSkIRect());
                 } else {
-                    SkPath transformedRect = pathFromTransformedRectangle(getRect(recordedClip),
+                    SkPath transformedRect = pathFromTransformedRectangle(recordedClip->rect,
                             recordedClipTransform);
                     other.setPath(transformedRect, createViewportRegion());
                 }
@@ -474,6 +473,7 @@ const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
                 regionClip->region.op(mClipRegion, other, SkRegion::kIntersect_Op);
                 break;
             }
+            // Don't need to snap, since region's in int bounds
             regionClip->rect.set(regionClip->region.getBounds());
             mLastResolutionResult = regionClip;
         } else {
@@ -484,7 +484,7 @@ const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
             }
 
             if (recordedClip->mode == ClipMode::Rectangle) {
-                rectList.intersectWith(getRect(recordedClip), recordedClipTransform);
+                rectList.intersectWith(recordedClip->rect, recordedClipTransform);
             } else {
                 const RectangleList& other = getRectList(recordedClip);
                 for (int i = 0; i < other.getTransformedRectanglesCount(); i++) {
@@ -495,6 +495,7 @@ const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
                 }
             }
             rectListClip->rect = rectList.calculateBounds();
+            rectListClip->rect.snapToPixelBoundaries();
             mLastResolutionResult = rectListClip;
         }
     }
@@ -505,7 +506,7 @@ void ClipArea::applyClip(const ClipBase* clip, const Matrix4& transform) {
     if (!clip) return; // nothing to do
 
     if (CC_LIKELY(clip->mode == ClipMode::Rectangle)) {
-        clipRectWithTransform(getRect(clip), &transform, SkRegion::kIntersect_Op);
+        clipRectWithTransform(clip->rect, &transform, SkRegion::kIntersect_Op);
     } else if (CC_LIKELY(clip->mode == ClipMode::RectangleList)) {
         auto&& rectList = getRectList(clip);
         for (int i = 0; i < rectList.getTransformedRectanglesCount(); i++) {
