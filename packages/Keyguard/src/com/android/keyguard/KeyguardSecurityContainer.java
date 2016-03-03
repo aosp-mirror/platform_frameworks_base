@@ -519,6 +519,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     @Override
     public void showPromptReason(int reason) {
         if (mCurrentSecuritySelection != SecurityMode.None) {
+            if (reason != PROMPT_REASON_NONE) {
+                Log.i(TAG, "Strong auth required, reason: " + reason);
+            }
             getSecurityView(mCurrentSecuritySelection).showPromptReason(reason);
         }
     }
