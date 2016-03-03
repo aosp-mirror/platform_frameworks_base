@@ -1356,6 +1356,7 @@ public class WifiConfiguration implements Parcelable {
                 append(" PROVIDER-NAME: ").append(this.providerFriendlyName).
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN)
                 .append(" PRIO: ").append(this.priority)
+                .append(" HIDDEN: ").append(this.hiddenSSID)
                 .append('\n');
 
 
