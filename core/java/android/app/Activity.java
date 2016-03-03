@@ -6604,7 +6604,8 @@ public class Activity extends ContextThemeWrapper
         if (isAppDebuggable || isDlwarningEnabled) {
             String dlwarning = getDlWarning();
             if (dlwarning != null) {
-                String appName = getString(mApplication.getApplicationInfo().labelRes);
+                String appName = getApplicationInfo().loadLabel(getPackageManager())
+                        .toString();
                 String warning = "Detected problems with app native libraries\n" +
                                  "(please consult log for detail):\n" + dlwarning;
                 if (isAppDebuggable) {
