@@ -1312,6 +1312,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1;
 
     /**
@@ -1321,6 +1322,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_VERIFICATION_FAILURE = -1;
 
     /**
@@ -4731,8 +4733,8 @@ public abstract class PackageManager {
 
     /**
      * Allows a package listening to the
-     * {@link Intent#ACTION_INTENT_FILTER_NEEDS_VERIFICATION intent filter verification
-     * broadcast} to respond to the package manager. The response must include
+     * {@link Intent#ACTION_INTENT_FILTER_NEEDS_VERIFICATION} intent filter verification
+     * broadcast to respond to the package manager. The response must include
      * the {@code verificationCode} which is one of
      * {@link PackageManager#INTENT_FILTER_VERIFICATION_SUCCESS} or
      * {@link PackageManager#INTENT_FILTER_VERIFICATION_FAILURE}.
@@ -4741,7 +4743,7 @@ public abstract class PackageManager {
      *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra.
      * @param verificationCode either {@link PackageManager#INTENT_FILTER_VERIFICATION_SUCCESS}
      *            or {@link PackageManager#INTENT_FILTER_VERIFICATION_FAILURE}.
-     * @param outFailedDomains a list of failed domains if the verificationCode is
+     * @param failedDomains a list of failed domains if the verificationCode is
      *            {@link PackageManager#INTENT_FILTER_VERIFICATION_FAILURE}, otherwise null;
      * @throws SecurityException if the caller does not have the
      *            INTENT_FILTER_VERIFICATION_AGENT permission.
@@ -4750,7 +4752,7 @@ public abstract class PackageManager {
      */
     @SystemApi
     public abstract void verifyIntentFilter(int verificationId, int verificationCode,
-            List<String> outFailedDomains);
+            List<String> failedDomains);
 
     /**
      * Get the status of a Domain Verification Result for an IntentFilter. This is

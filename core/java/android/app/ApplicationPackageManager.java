@@ -1543,9 +1543,9 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains) {
+    public void verifyIntentFilter(int id, int verificationCode, List<String> failedDomains) {
         try {
-            mPM.verifyIntentFilter(id, verificationCode, outFailedDomains);
+            mPM.verifyIntentFilter(id, verificationCode, failedDomains);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
