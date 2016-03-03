@@ -68,16 +68,18 @@ public class SettingsDrawerActivity extends Activity {
 
         long startTime = System.currentTimeMillis();
 
-        getWindow().addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getWindow().addFlags(LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        TypedArray theme = getTheme().obtainStyledAttributes(android.R.styleable.Theme);
+        if (!theme.getBoolean(android.R.styleable.Theme_windowNoTitle, false)) {
+            getWindow().addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().addFlags(LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
         super.setContentView(R.layout.settings_with_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.action_bar);
-        TypedArray theme = getTheme().obtainStyledAttributes(android.R.styleable.Theme);
         if (theme.getBoolean(android.R.styleable.Theme_windowNoTitle, false)) {
             toolbar.setVisibility(View.GONE);
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
