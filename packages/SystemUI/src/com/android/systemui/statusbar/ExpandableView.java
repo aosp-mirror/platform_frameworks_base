@@ -283,6 +283,20 @@ public abstract class ExpandableView extends FrameLayout {
     public void setBelowSpeedBump(boolean below) {
     }
 
+    /**
+     * Sets the translation of the view.
+     */
+    public void setTranslation(float translation) {
+        setTranslationX(translation);
+    }
+
+    /**
+     * Gets the translation of the view.
+     */
+    public float getTranslation() {
+        return getTranslationX();
+    }
+
     public void onHeightReset() {
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onReset(this);
