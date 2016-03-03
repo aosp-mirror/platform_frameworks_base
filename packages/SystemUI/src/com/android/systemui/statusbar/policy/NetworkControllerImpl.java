@@ -322,16 +322,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     public void addSignalCallback(SignalCallback cb) {
-        mCallbackHandler.setListening(cb, true);
-        mCallbackHandler.setSubs(mCurrentSubscriptions);
-        mCallbackHandler.setIsAirplaneMode(new IconState(mAirplaneMode,
+        cb.setSubs(mCurrentSubscriptions);
+        cb.setIsAirplaneMode(new IconState(mAirplaneMode,
                 TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
-        mCallbackHandler.setNoSims(mHasNoSims);
-        mWifiSignalController.notifyListeners();
-        mEthernetSignalController.notifyListeners();
+        cb.setNoSims(mHasNoSims);
+        mWifiSignalController.notifyListeners(cb);
+        mEthernetSignalController.notifyListeners(cb);
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
-            mobileSignalController.notifyListeners();
+            mobileSignalController.notifyListeners(cb);
         }
+        mCallbackHandler.setListening(cb, true);
     }
 
     @Override

@@ -34,6 +34,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
 
@@ -198,7 +199,7 @@ public class MobileSignalController extends SignalController<
     }
 
     @Override
-    public void notifyListeners() {
+    public void notifyListeners(SignalCallback callback) {
         MobileIconGroup icons = getIcons();
 
         String contentDescription = getStringIfExists(getContentDescription());
@@ -231,7 +232,7 @@ public class MobileSignalController extends SignalController<
                 || mCurrentState.iconGroup == TelephonyIcons.ROAMING
                 || mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
-        mCallbackHandler.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+        callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
                 mSubscriptionInfo.getSubscriptionId());
     }
