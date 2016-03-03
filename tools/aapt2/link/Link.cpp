@@ -278,6 +278,7 @@ static std::unique_ptr<ResourceFile> loadFileExportHeader(const Source& source,
 
 struct ResourceFileFlattenerOptions {
     bool noAutoVersion = false;
+    bool noVersionVectors = false;
     bool keepRawValues = false;
     bool doNotCompressAnything = false;
     std::vector<std::string> extensionsToNotCompress;
@@ -297,14 +298,13 @@ private:
         io::IFile* fileToCopy;
         std::unique_ptr<xml::XmlResource> xmlToFlatten;
         std::string dstPath;
+        bool skipVersion = false;
     };
 
     uint32_t getCompressionFlags(const StringPiece& str);
 
-    std::unique_ptr<xml::XmlResource> linkAndVersionXmlFile(const ResourceEntry* entry,
-                                                            const ResourceFile& fileDesc,
-                                                            io::IFile* file,
-                                                            ResourceTable* table);
+    bool linkAndVersionXmlFile(const ResourceEntry* entry, const ResourceFile& fileDesc,
+                               io::IFile* file, ResourceTable* table, FileOperation* outFileOp);
 
     ResourceFileFlattenerOptions mOptions;
     IAaptContext* mContext;
@@ -324,11 +324,11 @@ uint32_t ResourceFileFlattener::getCompressionFlags(const StringPiece& str) {
     return ArchiveEntry::kCompress;
 }
 
-std::unique_ptr<xml::XmlResource> ResourceFileFlattener::linkAndVersionXmlFile(
-        const ResourceEntry* entry,
-        const ResourceFile& fileDesc,
-        io::IFile* file,
-        ResourceTable* table) {
+bool ResourceFileFlattener::linkAndVersionXmlFile(const ResourceEntry* entry,
+                                                  const ResourceFile& fileDesc,
+                                                  io::IFile* file,
+                                                  ResourceTable* table,
+                                                  FileOperation* outFileOp) {
     const StringPiece srcPath = file->getSource().path;
     if (mContext->verbose()) {
         mContext->getDiagnostics()->note(DiagMessage() << "linking " << srcPath);
@@ -337,51 +337,67 @@ std::unique_ptr<xml::XmlResource> ResourceFileFlattener::linkAndVersionXmlFile(
     std::unique_ptr<io::IData> data = file->openAsData();
     if (!data) {
         mContext->getDiagnostics()->error(DiagMessage(file->getSource()) << "failed to open file");
-        return {};
+        return false;
     }
 
-    std::unique_ptr<xml::XmlResource> xmlRes;
     if (util::stringEndsWith<char>(srcPath, ".flat")) {
-        xmlRes = loadBinaryXmlSkipFileExport(file->getSource(), data->data(), data->size(),
-                                             mContext->getDiagnostics());
+        outFileOp->xmlToFlatten = loadBinaryXmlSkipFileExport(file->getSource(),
+                                                              data->data(), data->size(),
+                                                              mContext->getDiagnostics());
     } else {
-        xmlRes = xml::inflate(data->data(), data->size(), mContext->getDiagnostics(),
-                              file->getSource());
+        outFileOp->xmlToFlatten = xml::inflate(data->data(), data->size(),
+                                               mContext->getDiagnostics(),
+                                               file->getSource());
     }
 
-    if (!xmlRes) {
-        return {};
+    if (!outFileOp->xmlToFlatten) {
+        return false;
     }
 
     // Copy the the file description header.
-    xmlRes->file = fileDesc;
+    outFileOp->xmlToFlatten->file = fileDesc;
 
     XmlReferenceLinker xmlLinker;
-    if (!xmlLinker.consume(mContext, xmlRes.get())) {
-        return {};
+    if (!xmlLinker.consume(mContext, outFileOp->xmlToFlatten.get())) {
+        return false;
     }
 
-    if (!proguard::collectProguardRules(xmlRes->file.source, xmlRes.get(), mKeepSet)) {
-        return {};
+    if (!proguard::collectProguardRules(outFileOp->xmlToFlatten->file.source,
+                                        outFileOp->xmlToFlatten.get(), mKeepSet)) {
+        return false;
     }
 
     if (!mOptions.noAutoVersion) {
+        if (mOptions.noVersionVectors) {
+            // Skip this if it is a vector or animated-vector.
+            xml::Element* el = xml::findRootElement(outFileOp->xmlToFlatten.get());
+            if (el && el->namespaceUri.empty()) {
+                if (el->name == u"vector" || el->name == u"animated-vector") {
+                    // We are NOT going to version this file.
+                    outFileOp->skipVersion = true;
+                    return true;
+                }
+            }
+        }
+
         // Find the first SDK level used that is higher than this defined config and
         // not superseded by a lower or equal SDK level resource.
         for (int sdkLevel : xmlLinker.getSdkLevels()) {
-            if (sdkLevel > xmlRes->file.config.sdkVersion) {
-                if (!shouldGenerateVersionedResource(entry, xmlRes->file.config, sdkLevel)) {
+            if (sdkLevel > outFileOp->xmlToFlatten->file.config.sdkVersion) {
+                if (!shouldGenerateVersionedResource(entry, outFileOp->xmlToFlatten->file.config,
+                                                     sdkLevel)) {
                     // If we shouldn't generate a versioned resource, stop checking.
                     break;
                 }
 
-                ResourceFile versionedFileDesc = xmlRes->file;
+                ResourceFile versionedFileDesc = outFileOp->xmlToFlatten->file;
                 versionedFileDesc.config.sdkVersion = (uint16_t) sdkLevel;
 
                 if (mContext->verbose()) {
                     mContext->getDiagnostics()->note(DiagMessage(versionedFileDesc.source)
                                                      << "auto-versioning resource from config '"
-                                                     << xmlRes->file.config << "' -> '"
+                                                     << outFileOp->xmlToFlatten->file.config
+                                                     << "' -> '"
                                                      << versionedFileDesc.config << "'");
                 }
 
@@ -395,13 +411,13 @@ std::unique_ptr<xml::XmlResource> ResourceFileFlattener::linkAndVersionXmlFile(
                                                                  file,
                                                                  mContext->getDiagnostics());
                 if (!added) {
-                    return {};
+                    return false;
                 }
                 break;
             }
         }
     }
-    return xmlRes;
+    return true;
 }
 
 /**
@@ -445,9 +461,7 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
                         fileDesc.config = configValue->config;
                         fileDesc.name = ResourceName(pkg->name, type->type, entry->name);
                         fileDesc.source = fileRef->getSource();
-                        fileOp.xmlToFlatten = linkAndVersionXmlFile(entry.get(), fileDesc,
-                                                                    file, table);
-                        if (!fileOp.xmlToFlatten) {
+                        if (!linkAndVersionXmlFile(entry.get(), fileDesc, file, table, &fileOp)) {
                             error = true;
                             continue;
                         }
@@ -477,7 +491,7 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
 
                 if (fileOp.xmlToFlatten) {
                     Maybe<size_t> maxSdkLevel;
-                    if (!mOptions.noAutoVersion) {
+                    if (!mOptions.noAutoVersion && !fileOp.skipVersion) {
                         maxSdkLevel = std::max<size_t>(config.sdkVersion, 1u);
                     }
 
@@ -1215,6 +1229,7 @@ public:
         fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
         fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
         fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
+        fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
         ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, &proguardKeepSet);
 
         if (!fileFlattener.flatten(&mFinalTable, archiveWriter.get())) {
@@ -1222,7 +1237,7 @@ public:
             return 1;
         }
 
-        if (!mOptions.staticLib && !mOptions.noAutoVersion) {
+        if (!mOptions.noAutoVersion) {
             AutoVersioner versioner;
             if (!versioner.consume(mContext, &mFinalTable)) {
                 mContext->getDiagnostics()->error(DiagMessage() << "failed versioning styles");
@@ -1503,6 +1518,12 @@ int link(const std::vector<StringPiece>& args) {
             return 1;
         }
         options.tableSplitterOptions.preferredDensity = preferredDensityConfig.density;
+    }
+
+    // Turn off auto versioning for static-libs.
+    if (options.staticLib) {
+        options.noAutoVersion = true;
+        options.noVersionVectors = true;
     }
 
     LinkCommand cmd(&context, options);

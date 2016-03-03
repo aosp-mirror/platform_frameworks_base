@@ -24,4 +24,5 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     AaptTestStaticLibOne \
     AaptTestStaticLibTwo
+LOCAL_AAPT_FLAGS := --no-version-vectors
 include $(BUILD_PACKAGE)
