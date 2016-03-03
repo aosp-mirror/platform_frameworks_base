@@ -918,15 +918,14 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject t
     sp<VendorTagDescriptor> desc = new VendorTagDescriptor();
     binder::Status res = cameraService->getCameraVendorTagDescriptor(/*out*/desc.get());
 
-    if (res.serviceSpecificErrorCode() == hardware::ICameraService::ERROR_DEPRECATED_HAL) {
-        ALOGW("%s: Camera HAL too old; does not support vendor tags", __FUNCTION__);
+    if (res.serviceSpecificErrorCode() == hardware::ICameraService::ERROR_DISCONNECTED) {
+        // No camera module available, not an error on devices with no cameras
         VendorTagDescriptor::clearGlobalVendorTagDescriptor();
-
         return OK;
     } else if (!res.isOk()) {
-        ALOGE("%s: Failed to setup vendor tag descriptors: %s: %s",
-                __FUNCTION__, res.serviceSpecificErrorCode(),
-                res.toString8().string());
+        VendorTagDescriptor::clearGlobalVendorTagDescriptor();
+        ALOGE("%s: Failed to setup vendor tag descriptors: %s",
+                __FUNCTION__, res.toString8().string());
         return res.serviceSpecificErrorCode();
     }
 
