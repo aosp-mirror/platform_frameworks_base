@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -806,8 +807,10 @@ class AppErrors {
                     if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
                         if (r.persistent) {
                             firstPids.add(pid);
+                            if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
                         } else {
                             lastPids.put(pid, Boolean.TRUE);
+                            if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
                         }
                     }
                 }
