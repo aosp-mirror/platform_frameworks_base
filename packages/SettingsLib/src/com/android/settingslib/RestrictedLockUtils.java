@@ -49,9 +49,9 @@ public class RestrictedLockUtils {
      * @return drawables for displaying with settings that are locked by a device admin.
      */
     public static Drawable getRestrictedPadlock(Context context) {
-        Drawable restrictedPadlock = context.getDrawable(R.drawable.ic_settings_lock_outline);
+        Drawable restrictedPadlock = context.getDrawable(R.drawable.ic_info);
         final int iconSize = context.getResources().getDimensionPixelSize(
-                R.dimen.restricted_lock_icon_size);
+                R.dimen.restricted_icon_size);
         restrictedPadlock.setBounds(0, 0, iconSize, iconSize);
         return restrictedPadlock;
     }
