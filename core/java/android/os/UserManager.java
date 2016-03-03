@@ -1658,7 +1658,7 @@ public class UserManager {
      * android.graphics.drawable.Drawable, UserHandle, android.graphics.Rect, int)}.
      * <p>
      * If the original drawable is a BitmapDrawable and the backing bitmap is
-     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the bading
+     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the badging
      * is performed in place and the original drawable is returned.
      * </p>
      *
@@ -1681,17 +1681,17 @@ public class UserManager {
      * badge to be used.
      * <p>
      * If the original drawable is a BitmapDrawable and the backing bitmap is
-     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the bading
+     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the badging
      * is performed in place and the original drawable is returned.
      * </p>
      *
      * @param badgedDrawable The drawable to badge.
      * @param user The target user.
      * @param badgeLocation Where in the bounds of the badged drawable to place
-     *         the badge. If not provided, the badge is applied on top of the entire
+     *         the badge. If it's {@code null}, the badge is applied on top of the entire
      *         drawable being badged.
      * @param badgeDensity The optional desired density for the badge as per
-     *         {@link android.util.DisplayMetrics#densityDpi}. If not provided,
+     *         {@link android.util.DisplayMetrics#densityDpi}. If it's not positive,
      *         the density of the display is used.
      * @return A drawable that combines the original drawable and a badge as
      *         determined by the system.
