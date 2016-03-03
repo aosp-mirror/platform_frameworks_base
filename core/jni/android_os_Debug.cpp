@@ -262,7 +262,13 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
             }
             name = line + name_pos;
             nameLen = strlen(name);
-
+            // Trim the end of the line if it is " (deleted)".
+            const char* deleted_str = " (deleted)";
+            if (nameLen > (int)strlen(deleted_str) &&
+                strcmp(name+nameLen-strlen(deleted_str), deleted_str) == 0) {
+                nameLen -= strlen(deleted_str);
+                name[nameLen] = '\0';
+            }
             if ((strstr(name, "[heap]") == name)) {
                 whichHeap = HEAP_NATIVE;
             } else if (strncmp(name, "[anon:libc_malloc]", 18) == 0) {
