@@ -116,7 +116,8 @@ status_t JMediaDataSource::getSize(off64_t* size) {
         return UNKNOWN_ERROR;
     }
     if (mSizeIsCached) {
-        return mCachedSize;
+        *size = mCachedSize;
+        return OK;
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
