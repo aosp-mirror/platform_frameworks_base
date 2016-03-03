@@ -15,16 +15,25 @@
  */
 
 #include <poll.h>
-#include <android/dlext.h>
+
+#include <string>
 
 #include "core_jni_helpers.h"
+
+extern "C" void android_dlwarning(void*, void (*)(void*, const char*));
 
 namespace android
 {
 
 static jstring getDlWarning_native(JNIEnv* env, jobject) {
-    const char* text = android_dlwarning();
-    return text == nullptr ? nullptr : env->NewStringUTF(text);
+    std::string msg;
+    android_dlwarning(&msg, [](void* obj, const char* msg) {
+        if (msg != nullptr) {
+            *reinterpret_cast<std::string*>(obj) = msg;
+        }
+    });
+
+    return msg.empty() ? nullptr : env->NewStringUTF(msg.c_str());
 }
 
 static const JNINativeMethod g_methods[] = {
