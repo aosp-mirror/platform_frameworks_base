@@ -125,10 +125,10 @@ TEST(ConfigLocaleTest, packAndUnpack3LetterRegion) {
 
      if (script != NULL) {
          memcpy(out->localeScript, script, 4);
-         out->localeScriptWasProvided = true;
+         out->localeScriptWasComputed = false;
      } else {
          out->computeScript();
-         out->localeScriptWasProvided = false;
+         out->localeScriptWasComputed = true;
      }
 
      if (variant != NULL) {
@@ -182,7 +182,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('n', test.language[1]);
     EXPECT_EQ('U', test.country[0]);
     EXPECT_EQ('S', test.country[1]);
-    EXPECT_FALSE(test.localeScriptWasProvided);
+    EXPECT_TRUE(test.localeScriptWasComputed);
     EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
     EXPECT_EQ(0, test.localeVariant[0]);
 
@@ -203,7 +203,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('e', test.language[0]);
     EXPECT_EQ('n', test.language[1]);
     EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
-    EXPECT_TRUE(test.localeScriptWasProvided);
+    EXPECT_FALSE(test.localeScriptWasComputed);
     memset(out, 1, 4);
     test.unpackRegion(out);
     EXPECT_EQ('4', out[0]);
@@ -216,7 +216,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('d', out[0]);
     EXPECT_EQ('e', out[1]);
     EXPECT_EQ('\0', out[2]);
-    EXPECT_FALSE(test.localeScriptWasProvided);
+    EXPECT_TRUE(test.localeScriptWasComputed);
     EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
     memset(out, 1, 4);
     test.unpackRegion(out);
@@ -229,7 +229,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('d', out[0]);
     EXPECT_EQ('e', out[1]);
     EXPECT_EQ('\0', out[2]);
-    EXPECT_TRUE(test.localeScriptWasProvided);
+    EXPECT_FALSE(test.localeScriptWasComputed);
     EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
     memset(out, 1, 4);
     test.unpackRegion(out);
@@ -270,11 +270,11 @@ TEST(ConfigLocaleTest, getBcp47Locale_script) {
     fillIn("en", NULL, "Latn", NULL, &config);
 
     char out[RESTABLE_MAX_LOCALE_LEN];
-    config.localeScriptWasProvided = true;
+    config.localeScriptWasComputed = false;
     config.getBcp47Locale(out);
     EXPECT_EQ(0, strcmp("en-Latn", out));
 
-    config.localeScriptWasProvided = false;
+    config.localeScriptWasComputed = true;
     config.getBcp47Locale(out);
     EXPECT_EQ(0, strcmp("en", out));
 }
@@ -379,7 +379,7 @@ TEST(ConfigLocaleTest, match_emptyScript) {
 
     // emulate packages built with older AAPT
     memset(supported.localeScript, '\0', 4);
-    supported.localeScriptWasProvided = false;
+    supported.localeScriptWasComputed = false;
 
     EXPECT_TRUE(supported.match(requested));
 }
