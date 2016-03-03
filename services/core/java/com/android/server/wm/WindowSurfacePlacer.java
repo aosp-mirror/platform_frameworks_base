@@ -651,6 +651,7 @@ class WindowSurfacePlacer {
 
             for (int i = windows.size() - 1; i >= 0; i--) {
                 WindowState w = windows.get(i);
+                final Task task = w.getTask();
                 final boolean obscuredChanged = w.mObscured != mObscured;
 
                 // Update effect.
@@ -683,7 +684,8 @@ class WindowSurfacePlacer {
                     final boolean adjustedForMinimizedDockedStack = w.getTask() != null &&
                             w.getTask().mStack.isAdjustedForMinimizedDockedStack();
                     if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                            && !w.isDragResizing() && !adjustedForMinimizedDockedStack) {
+                            && !w.isDragResizing() && !adjustedForMinimizedDockedStack
+                            && (task == null || !w.getTask().mStack.getFreezeMovementAnimations())) {
                         winAnimator.setMoveAnimation(left, top);
                     }
 

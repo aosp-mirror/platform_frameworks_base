@@ -2034,6 +2034,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 || tempOtherTaskInsetBounds != null);
     }
 
+    void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
+        final ActivityStack stack = getStack(PINNED_STACK_ID);
+        if (stack == null) {
+            Slog.w(TAG, "resizePinnedStackLocked: pinned stack not found");
+            return;
+        }
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizePinnedStack");
+        mWindowManager.deferSurfaceLayout();
+        try {
+            ActivityRecord r = stack.topRunningActivityLocked();
+            resizeStackUncheckedLocked(stack, pinnedBounds, tempPinnedTaskBounds,
+                    null);
+            ensureConfigurationAndResume(stack, r, false);
+        } finally {
+            mWindowManager.continueSurfaceLayout();
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
     boolean resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
         if (!task.isResizeable()) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
