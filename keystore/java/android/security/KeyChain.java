@@ -547,11 +547,8 @@ public final class KeyChain {
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
         intent.setComponent(comp);
-        boolean isBound = context.bindServiceAsUser(intent,
-                                                    keyChainServiceConnection,
-                                                    Context.BIND_AUTO_CREATE,
-                                                    user);
-        if (!isBound) {
+        if (comp == null || !context.bindServiceAsUser(
+                intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user)) {
             throw new AssertionError("could not bind to KeyChainService");
         }
         return new KeyChainConnection(context, keyChainServiceConnection, q.take());
