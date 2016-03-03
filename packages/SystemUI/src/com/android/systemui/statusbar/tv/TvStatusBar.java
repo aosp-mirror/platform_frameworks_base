@@ -125,7 +125,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected boolean isPanelFullyCollapsed() {
+    public boolean isPanelFullyCollapsed() {
         return false;
     }
 
