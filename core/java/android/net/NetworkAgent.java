@@ -200,6 +200,14 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 15;
 
+    /**
+     * Sent by ConnectivityService to the NetworkAgent to install an APF program in the network
+     * chipset for use to filter packets.
+     *
+     * obj = byte[] containing the APF program bytecode.
+     */
+    public static final int CMD_PUSH_APF_PROGRAM = BASE + 16;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -317,6 +325,10 @@ public abstract class NetworkAgent extends Handler {
             }
             case CMD_PREVENT_AUTOMATIC_RECONNECT: {
                 preventAutomaticReconnect();
+                break;
+            }
+            case CMD_PUSH_APF_PROGRAM: {
+                installPacketFilter((byte[]) msg.obj);
                 break;
             }
         }
@@ -492,6 +504,15 @@ public abstract class NetworkAgent extends Handler {
      * after the {@code unwanted} call.
      */
     protected void preventAutomaticReconnect() {
+    }
+
+    /**
+     * Install a packet filter.
+     * @param filter an APF program to filter incoming packets.
+     * @return {@code true} if filter successfully installed, {@code false} otherwise.
+     */
+    protected boolean installPacketFilter(byte[] filter) {
+        return false;
     }
 
     protected void log(String s) {

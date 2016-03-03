@@ -26,10 +26,13 @@
 #include <net/if.h>
 #include <linux/filter.h>
 #include <linux/if.h>
+#include <linux/if_arp.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <net/if_ether.h>
+#include <netinet/icmp6.h>
 #include <netinet/ip.h>
+#include <netinet/ip6.h>
 #include <netinet/udp.h>
 #include <cutils/properties.h>
 
@@ -64,10 +67,9 @@ static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz,
 
 static void android_net_utils_attachDhcpFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
     uint32_t ip_offset = sizeof(ether_header);
     uint32_t proto_offset = ip_offset + offsetof(iphdr, protocol);
-    uint32_t flags_offset = ip_offset +  offsetof(iphdr, frag_off);
+    uint32_t flags_offset = ip_offset + offsetof(iphdr, frag_off);
     uint32_t dport_indirect_offset = ip_offset + offsetof(udphdr, dest);
     struct sock_filter filter_code[] = {
         // Check the protocol is UDP.
@@ -94,6 +96,45 @@ static void android_net_utils_attachDhcpFilter(JNIEnv *env, jobject clazz, jobje
         filter_code,
     };
 
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
+        jniThrowExceptionFmt(env, "java/net/SocketException",
+                "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
+    }
+}
+
+static void android_net_utils_attachRaFilter(JNIEnv *env, jobject clazz, jobject javaFd,
+        jint hardwareAddressType)
+{
+    if (hardwareAddressType != ARPHRD_ETHER) {
+        jniThrowExceptionFmt(env, "java/net/SocketException",
+                "attachRaFilter only supports ARPHRD_ETHER");
+        return;
+    }
+
+    uint32_t ipv6_offset = sizeof(ether_header);
+    uint32_t ipv6_next_header_offset = ipv6_offset + offsetof(ip6_hdr, ip6_nxt);
+    uint32_t icmp6_offset = ipv6_offset + sizeof(ip6_hdr);
+    uint32_t icmp6_type_offset = icmp6_offset + offsetof(icmp6_hdr, icmp6_type);
+    struct sock_filter filter_code[] = {
+        // Check IPv6 Next Header is ICMPv6.
+        BPF_STMT(BPF_LD  | BPF_B   | BPF_ABS,  ipv6_next_header_offset),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,    IPPROTO_ICMPV6, 0, 3),
+
+        // Check ICMPv6 type is Router Advertisement.
+        BPF_STMT(BPF_LD  | BPF_B   | BPF_ABS,  icmp6_type_offset),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,    ND_ROUTER_ADVERT, 0, 1),
+
+        // Accept or reject.
+        BPF_STMT(BPF_RET | BPF_K,              0xffff),
+        BPF_STMT(BPF_RET | BPF_K,              0)
+    };
+    struct sock_fprog filter = {
+        sizeof(filter_code) / sizeof(filter_code[0]),
+        filter_code,
+    };
+
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
     if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
                 "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
@@ -148,6 +189,7 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },
     { "queryUserAccess", "(II)Z", (void*)android_net_utils_queryUserAccess },
     { "attachDhcpFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDhcpFilter },
+    { "attachRaFilter", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_attachRaFilter },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
