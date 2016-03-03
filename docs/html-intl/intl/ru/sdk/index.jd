@@ -60,133 +60,135 @@ page.metaDescription=Загрузите официальные средства 
 <h2 class="norule">Положения и условия</h2>
 Данный документ представляет собой Лицензионное соглашение на использование набора средств разработки программного обеспечения Android
 
-<h3>1. Введение</h3>
-1.1. Лицензия на набор средств разработки программного обеспечения Android (далее по тексту настоящего Лицензионного соглашения – «SDK»), в состав которого входят системные файлы Android, пакеты API и надстройки в виде API Google, передается в соответствии с положениями настоящего Лицензионного соглашения. Настоящее Лицензионное соглашение является юридически обязывающим договором между компанией Google и любым лицом, использующим SDK.
 
-1.2. В настоящем Лицензионном соглашении термин «Android» означает набор программного обеспечения Android для устройств, предлагаемый к использованию в рамках проекта Android Open Source Project, который доступен на веб-сайте http://source.android.com/ (сведения, размещенные на этом сайте, могут периодически обновляться).
+<h3>1. Introduction</h3>
+1.1 The Android Software Development Kit (referred to in the License Agreement as the "SDK" and specifically including the Android system files, packaged APIs, and Google APIs add-ons) is licensed to you subject to the terms of the License Agreement. The License Agreement forms a legally binding contract between you and Google in relation to your use of the SDK.
 
-1.3. Под термином «Google» понимается корпорация Google Inc., главный офис которой находится по адресу 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States (США).
+1.2 "Android" means the Android software stack for devices, as made available under the Android Open Source Project, which is located at the following URL: http://source.android.com/, as updated from time to time.
 
+1.3 A "compatible implementation" means any Android device that (i) complies with the Android Compatibility Definition document, which can be found at the Android compatibility website (http://source.android.com/compatibility) and which may be updated from time to time; and (ii) successfully passes the Android Compatibility Test Suite (CTS).
 
-<h3>2. Принятие условий настоящего Лицензионного соглашения</h3>
-2.1. Использование SDK возможно только после принятия условий настоящего Лицензионного соглашения. Запрещается использовать SDK, если вы не согласны с указанными в настоящем документе условиями и положениями.
-
-2.2. Нажатие кнопки принятия условий означает, что вы согласны с положениями настоящего Лицензионного соглашения.
-
-2.3. Вы не вправе использовать SDK и принимать условия данного Лицензионного соглашения, если по законам США или иных стран, включая страну вашего проживания или использования SDK, запрещается передавать SDK в ваш адрес.
-
-2.4. Если вы согласны взять на себя обязательства по соблюдению настоящего Лицензионного соглашения от имени своего работодателя или другого юридического лица, вы тем самым подтверждаете и гарантируете, что обладаете полными юридическими полномочиями связать вашего работодателя или иное подобное юридическое лицо обязательствами по настоящему Лицензионному соглашению. Если вы не обладаете требуемыми полномочиями, вы не вправе принимать указанные в настоящем документе условия и положения или использовать SDK от имени вашего работодателя или другого юридического лица.
+1.4 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
 
 
-<h3>3. Лицензия на SDK от Google</h3>
-3.1. В соответствии с условиями настоящего Лицензионного соглашения Google предоставляет вам ограниченную, бесплатную и неэксклюзивную лицензию, действующую во всем мире, на использование SDK исключительно в целях разработки приложений для платформы Android.
+<h3>2. Accepting this License Agreement</h3>
+2.1 In order to use the SDK, you must first agree to the License Agreement. You may not use the SDK if you do not accept the License Agreement.
 
-3.2. Вы соглашаетесь с тем, что Google или третьим сторонам принадлежат все юридические и имущественные права, а также правовой интерес в отношении SDK, в том числе любые права на объекты интеллектуальной собственности, которые имеются в SDK. Термин «Права на интеллектуальную собственность» означает все возможные права в рамках патентного права, авторского права, закона о коммерческой тайне, закона о товарных знаках, а также иные возможные имущественные права. Google оставляет за собой все права, не предоставленные вам в явном виде.
+2.2 By clicking to accept, you hereby agree to the terms of the License Agreement.
 
-3.3. Вам запрещается использовать SDK в любых целях, которые однозначно не определены в настоящем Лицензионном соглашении.  За исключением случаев, предусмотренных применимыми сторонними лицензиями, вам запрещается: (a) копировать (за исключением резервного копирования), изменять, адаптировать, повторно распространять, декомпилировать, осуществлять инженерный анализ, деассемблировать или создавать производные элементы SDK или иной его части; а также (b) загружать любую часть SDK в мобильные телефоны или иные устройства, помимо персонального компьютера, объединять любые части SDK с другим программным обеспечением, распространять любое программное обеспечение или устройства, содержащие части SDK.
+2.3 You may not use the SDK and may not accept the License Agreement if you are a person barred from receiving the SDK under the laws of the United States or other countries, including the country in which you are resident or from which you use the SDK.
 
-3.4. Вы соглашаетесь с тем, что не будете предпринимать никаких действий, которые прямо или косвенно могут привести к фрагментированию платформы Android, включая помимо прочего распространение набора средств разработки программного обеспечения, полученных из SDK, участие в создании таких средств и содействие их продвижению в любой форме.
-
-3.5. Использование, воспроизведение и распространение компонентов SDK, на которые распространяется лицензия на программное обеспечение с открытым исходным кодом, регулируются исключительно положениями и условиями такой лицензии на программное обеспечение с открытым исходным кодом, а не настоящим Лицензионным соглашением.
-
-3.6. Вы соглашаетесь с тем, что форма и содержание SDK, предоставляемого Google, могут быть изменены без предварительного уведомления, а также с тем, что будущие версии SDK могут оказаться несовместимыми с приложениями, разработанными в предыдущих версиях SDK. Вы соглашаетесь с тем, что Google вправе на свое собственное усмотрение и без предварительного уведомления прекратить (временно или навсегда) предоставление SDK (или любых функций в составе SDK) вам или пользователям.
-
-3.7. Ни одна из частей настоящего Лицензионного соглашения не предусматривает предоставления вам права использовать любые торговые наименования, товарные знаки, знаки обслуживания, логотипы, имена доменов или иные отличительные фирменные знаки, принадлежащие Google.
-
-3.8. Вы соглашаетесь с тем, что обязуетесь не удалять, не скрывать или не изменять любые уведомления об имущественных правах (включая уведомления об авторских правах и товарных знаках), которые могут сопровождать SDK или содержаться в нем.
+2.4 If you are agreeing to be bound by the License Agreement on behalf of your employer or other entity, you represent and warrant that you have full legal authority to bind your employer or such entity to the License Agreement. If you do not have the requisite authority, you may not accept the License Agreement or use the SDK on behalf of your employer or other entity.
 
 
-<h3>4. Использование вами SDK</h3>
-4.1. Компания Google выражает согласие с тем, что по настоящему Лицензионному соглашению не получает от вас (или ваших лицензиаров) каких-либо юридических и имущественных прав, а также правового интереса в отношении любых программных приложений, разработанных вами с помощью SDK, включая любые права на объекты интеллектуальной собственности, которые имеются в таких приложениях.
+<h3>3. SDK License from Google</h3>
+3.1 Subject to the terms of the License Agreement, Google grants you a limited, worldwide, royalty-free, non-assignable, non-exclusive, and non-sublicensable license to use the SDK solely to develop applications for compatible implementations of Android.
 
-4.2. Вы соглашаетесь использовать SDK и создавать приложения исключительно в целях, предусмотренных (a) настоящим Лицензионным соглашением и (b) любым применимым законом, нормативным актом или общепринятыми правилами или рекомендациями в соответствующей юрисдикции (включая любые законы, касающиеся экспорта данных или программного обеспечения из США или иных соответствующих стран, а также импорта в них).
+3.2 You may not use this SDK to develop applications for other platforms (including non-compatible implementations of Android) or to develop another SDK. You are of course free to develop applications for other platforms, including non-compatible implementations of Android, provided that this SDK is not used for that purpose.
 
-4.3. Вы соглашаетесь с тем, что при использовании SDK для разработки приложений для неопределенного круга пользователей вы обязуетесь обеспечивать конфиденциальность данных и защищать юридические права таких пользователей. В случае если пользователи предоставляют вам свои имена, пароли или иные данные для входа либо свои персональные сведения, вы обязуетесь уведомить пользователей о том, что такая информация будет присутствовать в вашем приложении, и вы также обязуетесь предоставить таким пользователям юридически соответствующие уведомление о конфиденциальности и средства правовой защиты. Если в вашем приложении хранится персональная или конфиденциальная информация, предоставленная пользователями, вы обязуетесь обеспечить ее надлежащую защиту. Если пользователь предоставляет в вашем приложении сведения о своей учетной записи Google, то ваше приложение может использовать такую информацию для доступа к учетной записи Google пользователя только тогда, когда пользователь предоставил вам разрешение на это, и только в тех целях, которые обозначил пользователь.
+3.3 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
 
-4.4. Вы соглашаетесь с тем, что обязуетесь не использовать SDK для любого рода деятельности, в том числе для разработки или распространения приложений, в целях нарушения работы и повреждения серверов, сетей или иной собственности или служб любой третьей стороны, включая помимо прочего собственность Google или иного оператора мобильной связи, равно как и в целях несанкционированного доступа к таким ресурсам.
+3.4 You may not use the SDK for any purpose not expressly permitted by the License Agreement.  Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
 
-4.5. Вы соглашаетесь с тем, что несете единоличную ответственность (и признаете, что компания Google не несет ответственности ни перед вами, ни перед любой третьей стороной) за любые данные, содержимое или ресурсы, которые вы создаете, передаете или демонстрируете посредством Android и/или приложений для Android, а также за любые последствия ваших действий, связанных с этим (в том числе за любые убытки и любой ущерб, которые могут быть причинены Google).
+3.5 Use, reproduction and distribution of components of the SDK licensed under an open source software license are governed solely by the terms of that open source software license and not the License Agreement.
 
-4.6. Вы соглашаетесь с тем, что несете единоличную ответственность (и признаете, что компания Google не несет ответственности ни перед вами, ни перед любой третьей стороной) за любое несоблюдение обязательств по настоящему Лицензионному соглашению, обязательств по любому применимому договору с третьей стороной или предусмотренных Условиями и положениями, за нарушение любых применимых законов или нормативных актов, а также за любые последствия ваших действий, связанных с таким нарушением (в том числе за любые убытки и любой ущерб, которые могут быть причинены Google).
+3.6 You agree that the form and nature of the SDK that Google provides may change without prior notice to you and that future versions of the SDK may be incompatible with applications developed on previous versions of the SDK. You agree that Google may stop (permanently or temporarily) providing the SDK (or any features within the SDK) to you or to users generally at Google's sole discretion, without prior notice to you.
 
+3.7 Nothing in the License Agreement gives you a right to use any of Google's trade names, trademarks, service marks, logos, domain names, or other distinctive brand features.
 
-<h3>5. Ваши учетные данные разработчика</h3>
-5.1. Вы соглашаетесь с тем, что несете ответственность за обеспечение конфиденциальности любых учетных данных разработчика, которые компания Google может вам предоставить или которые вы можете самостоятельно выбрать, а также с тем, что вы несете единоличную ответственность за все приложения, разработанные с использованием ваших учетных данных разработчика.
-
-
-<h3>6. Конфиденциальность и личная информация</h3>
-6.1. В целях постоянного совершенствования и улучшения SDK компания Google вправе собирать определенные статистические данные об использовании программного обеспечения, включая помимо прочего уникальный идентификатор, связанный IP-адрес, номер версии программного обеспечения, а также сведения об используемых в SDK инструментах и/или службах и способах их применения. Перед тем как любые из таких данных будут отправлены в Google, в SDK отобразится соответствующее уведомление с просьбой дать свое согласие. В случае вашего отказа предоставить такие сведения соответствующие данные собираться не будут.
-
-6.2. Собранные данные изучаются в обобщенном виде с целью улучшения SDK и хранятся в соответствии с Политикой конфиденциальности Google.
+3.8 You agree that you will not remove, obscure, or alter any proprietary rights notices (including copyright and trademark notices) that may be affixed to or contained within the SDK.
 
 
-<h3>7. Сторонние приложения</h3>
-7.1. Если вы используете SDK для запуска приложений, разработанных третьими сторонами или получающих доступ к данным, содержимому или ресурсам, предоставляемым третьей стороной, вы соглашаетесь с тем, что Google не несет ответственности за такие приложения, данные, содержимое или ресурсы. Вы осознаете, что единоличную ответственность за все данные, содержимое или ресурсы, доступ к которым вы можете получить посредством таких приложений третьих сторон, несет лицо, предоставившее их, а также то, что Google не несет ответственности за любые убытки или любой ущерб, которые могут возникнуть в результате использования вами любых таких сторонних приложений, данных, содержимого или ресурсов и в результате обращения к ним.
+<h3>4. Use of the SDK by You</h3>
+4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under the License Agreement in or to any software applications that you develop using the SDK, including any intellectual property rights that subsist in those applications.
 
-7.2. Вы должны быть осведомлены о том, что данные, содержимое и ресурсы, предоставляемые вам посредством таких сторонних приложений, могут быть защищены правами на объекты интеллектуальной собственности, принадлежащие предоставляющим их лицам (или иным лицам либо компаниям от их имени). Вам запрещается изменять, сдавать в аренду, передавать, продавать, распространять такие данные, содержимое или ресурсы (полностью или частично), а также создавать на их основе производные элементы, если у вас нет на это разрешения от соответствующих владельцев.
+4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a) the License Agreement and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions (including any laws regarding the export of data or software to and from the United States or other relevant countries).
 
-7.3. Вы осознаете, что использование вами таких сторонних приложений, данных или ресурсов может регулироваться отдельными условиями, заключенными между вами и соответствующей третьей стороной. В этом случае настоящее Лицензионное соглашение не влияет на такие юридические отношения между вами и третьими сторонами.
+4.3 You agree that if you use the SDK to develop applications for general public users, you will protect the privacy and legal rights of those users. If the users provide you with user names, passwords, or other login information or personal information, you must make the users aware that the information will be available to your application, and you must provide legally adequate privacy notice and protection for those users. If your application stores personal or sensitive information provided by users, it must do so securely. If the user provides your application with Google Account information, your application may only use that information to access the user's Google Account when, and for the limited purposes for which, the user has given you permission to do so.
 
+4.4 You agree that you will not engage in any activity with the SDK, including the development or distribution of an application, that interferes with, disrupts, damages, or accesses in an unauthorized manner the servers, networks, or other properties or services of any third party including, but not limited to, Google or any mobile communications carrier.
 
-<h3>8. Использование API-интерфейсов Android</h3>
-8.1. API-интерфейсы для получения данных Google.
+4.5 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any data, content, or resources that you create, transmit or display through Android and/or applications for Android, and for the consequences of your actions (including any loss or damage which Google may suffer) by doing so.
 
-8.1.1. В случае использования вами любых API для получения данных из Google вы осознаете, что такие данные могут быть защищены правами на объекты интеллектуальной собственности, принадлежащие Google или предоставляющим их сторонам (или иным лицам либо компаниям от их имени). Использование вами подобных API может регулироваться дополнительными Условиями использования. Вам запрещается изменять, сдавать в аренду, передавать, продавать, распространять такие данные (полностью или частично), а также создавать на их основе производные элементы, если это не разрешено соответствующими Условиями использования.
-
-8.1.2. Если вы используете какие-либо API-интерфейсы для получения данных пользователя из Google, вы осознаете и соглашаетесь с тем, что вы обязуетесь получать такие данные исключительно с прямого согласия пользователя и только в тех целях, которые обозначил пользователь.
+4.6 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any breach of your obligations under the License Agreement, any applicable third party contract or Terms of Service, or any applicable law or regulation, and for the consequences (including any loss or damage which Google or any third party may suffer) of any such breach.
 
 
-<h3>9. Прекращение действия настоящего Лицензионного соглашения</h3>
-9.1. Настоящее Лицензионное соглашение остается в силе до тех пор, пока его действие не будет прекращено вами или Google, как указано ниже.
-
-9.2. Если вы желаете прекратить действие настоящего Лицензионного соглашения, вы вправе сделать это, прекратив использование SDK и любых соответствующих учетных данных разработчика.
-
-9.3. Google вправе в любое время прекратить действие настоящего Лицензионного соглашения в случае, если вы:
-(A) нарушили любое положение настоящего Лицензионного соглашения; либо
-(B) компания Google обязана сделать это по требованиям законодательства; либо
-(C) партнер Google, который передал вам определенные части SDK (например, API), прекратил сотрудничество с компанией Google или прекратил предоставление вам определенных частей SDK; либо
-(D) компания Google прекращает предоставление SDK или определенных частей SDK пользователям в той стране, в которой вы проживаете или используете услуги компании, либо если предоставление вам SDK или определенных услуг SDK становится нерентабельным с точки зрения компании Google.
-
-9.4. Когда срок действия настоящего Лицензионного соглашения подошел к концу, все юридические права, обязательства и меры ответственности, которые действовали в отношении вас и компании Google (или которые были получены, пока настоящее Лицензионное соглашение было в силе), а также те, для которых в настоящем соглашении оговорен неограниченный срок действия, не будут затронуты прекращением действия настоящего Лицензионного соглашения, при этом положения, изложенные в пункте 14.7, будут и в дальнейшем применяться к этим правам, обязательствам и мерам ответственности без ограничения по времени.
+<h3>5. Your Developer Credentials</h3>
+5.1 You agree that you are responsible for maintaining the confidentiality of any developer credentials that may be issued to you by Google or which you may choose yourself and that you will be solely responsible for all applications that are developed under your developer credentials.
 
 
-<h3>10. ОТКАЗ ОТ ГАРАНТИЙ</h3>
-10.1. ВЫ ЧЕТКО ОСОЗНАЕТЕ И БЕЗОГОВОРОЧНО СОГЛАШАЕТЕСЬ С ТЕМ, ЧТО ВЫ ИСПОЛЬЗУЕТЕ SDK ИСКЛЮЧИТЕЛЬНО НА СВОЙ СТРАХ И РИСК И ЧТО SDK ПРЕДОСТАВЛЯЕТСЯ ВАМ НА УСЛОВИЯХ «КАК ЕСТЬ» И «КАК ДОСТУПНО» БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ СО СТОРОНЫ КОМПАНИИ GOOGLE.
+<h3>6. Privacy and Information</h3>
+6.1 In order to continually innovate and improve the SDK, Google may collect certain usage statistics from the software including but not limited to a unique identifier, associated IP address, version number of the software, and information on which tools and/or services in the SDK are being used and how they are being used. Before any of this information is collected, the SDK will notify you and seek your consent. If you withhold consent, the information will not be collected.
 
-10.2 ИСПОЛЬЗОВАНИЕ ВАМИ SDK И ЗАГРУЗКА ЛЮБЫХ МАТЕРИАЛОВ И ИХ ПОЛУЧЕНИЕ ИНЫМ СПОСОБОМ С ПОМОЩЬЮ SDK ВЫПОЛНЯЕТСЯ ПО ВАШЕМУ СОБСТВЕННОМУ УСМОТРЕНИЮ НА СВОЙ СТРАХ И РИСК. ВСЯ ОТВЕТСТВЕННОСТЬ ЗА ЛЮБОЙ УЩЕРБ, ПРИЧИНЕННЫЙ ВАШЕЙ ВЫЧИСЛИТЕЛЬНОЙ СИСТЕМЕ ИЛИ ДРУГОМУ ОБОРУДОВАНИЮ, А ТАКЖЕ ЗА ПОТЕРЮ ДАННЫХ, ВЫЗВАННУЮ ПОДОБНЫМ ИСПОЛЬЗОВАНИЕМ, ВОЗЛАГАЕТСЯ НА ВАС.
-
-10.3. КОМПАНИЯ GOOGLE БЕЗОГОВОРОЧНО ОТКАЗЫВАЕТСЯ ОТ ЯВНЫХ И НЕЯВНЫХ ГАРАНТИЙ И УСЛОВИЙ ЛЮБОГО РОДА, ВКЛЮЧАЯ ПОМИМО ПРОЧЕГО НЕЯВНЫЕ ГАРАНТИИ И УСЛОВИЯ ТОВАРНОГО СОСТОЯНИЯ, ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЕННОЙ ЦЕЛИ И ОТСУТСТВИЯ НАРУШЕНИЙ ПРАВ СОБСТВЕННОСТИ.
+6.2 The data collected is examined in the aggregate to improve the SDK and is maintained in accordance with Google's Privacy Policy.
 
 
-<h3>11. ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h3>
-11.1. ВЫ ЧЕТКО ОСОЗНАЕТЕ И БЕЗОГОВОРОЧНО СОГЛАШАЕТЕСЬ С ТЕМ, ЧТО КОМПАНИЯ GOOGLE, ЕЕ ДОЧЕРНИЕ И АФФИЛИРОВАННЫЕ КОМПАНИИ И ЛИЦЕНЗИАРЫ НЕ НЕСУТ ПЕРЕД ВАМИ ОТВЕТСТВЕННОСТИ, НЕЗАВИСИМО ОТ ЕЕ ПРИЧИНЫ И ВИДА, ЗА КАКИЕ-ЛИБО ПРЯМЫЕ, КОСВЕННЫЕ, СЛУЧАЙНЫЕ, СПЕЦИАЛЬНЫЕ, ОПОСРЕДОВАННЫЕ И ШТРАФНЫЕ УБЫТКИ, ПОНЕСЕННЫЕ ВАМИ, ВКЛЮЧАЯ ПОМИМО ПРОЧЕГО ПОТЕРЮ ДАННЫХ, ВНЕ ЗАВИСИМОСТИ ОТ ТОГО, БЫЛА ЛИ КОМПАНИЯ GOOGLE ИЛИ ЕЕ ПРЕДСТАВИТЕЛИ ИЗВЕЩЕНЫ О ВОЗМОЖНОСТИ ТАКОГО УЩЕРБА.
+<h3>7. Third Party Applications</h3>
+7.1 If you use the SDK to run applications developed by a third party or that access data, content or resources provided by a third party, you agree that Google is not responsible for those applications, data, content, or resources. You understand that all data, content or resources which you may access through such third party applications are the sole responsibility of the person from which they originated and that Google is not liable for any loss or damage that you may experience as a result of the use or access of any of those third party applications, data, content, or resources.
+
+7.2 You should be aware the data, content, and resources presented to you through such a third party application may be protected by intellectual property rights which are owned by the providers (or by other persons or companies on their behalf). You may not modify, rent, lease, loan, sell, distribute or create derivative works based on these data, content, or resources (either in whole or in part) unless you have been specifically given permission to do so by the relevant owners.
+
+7.3 You acknowledge that your use of such third party applications, data, content, or resources may be subject to separate terms between you and the relevant third party. In that case, the License Agreement does not affect your legal relationship with these third parties.
 
 
-<h3>12. Освобождение от ответственности</h3>
-12.1. В максимально допустимой законом степени вы соглашаетесь защищать, освобождать от ответственности и возможных претензий компанию Google, ее аффилированные компании и их соответствующих руководителей, служащих, сотрудников и агентов от всех возможных правовых требований, действий, судебных исков или разбирательств, а также от всех возможных убытков, обязательств, ущерба, издержек и расходов (включая обоснованные вознаграждения для адвокатов), возникающих в связи (a) с использованием вами SDK, (b) любыми приложениями, разрабатываемыми вами с помощью SDK и нарушающими любые авторские права, закон о товарных знаках, закон о коммерческой тайне, закон в отношении фирменного стиля, патентные права или иные права на объекты интеллектуальной собственности любого лица, а также порочащие любое лицо либо нарушающие права таких лиц на публичность и конфиденциальность, а также (c) в связи с любым несоблюдением вами положений настоящего Лицензионного соглашения.
+<h3>8. Using Android APIs</h3>
+8.1 Google Data APIs
+
+8.1.1 If you use any API to retrieve data from Google, you acknowledge that the data may be protected by intellectual property rights which are owned by Google or those parties that provide the data (or by other persons or companies on their behalf). Your use of any such API may be subject to additional Terms of Service. You may not modify, rent, lease, loan, sell, distribute or create derivative works based on this data (either in whole or in part) unless allowed by the relevant Terms of Service.
+
+8.1.2 If you use any API to retrieve a user's data from Google, you acknowledge and agree that you shall retrieve data only with the user's explicit consent and only when, and for the limited purposes for which, the user has given you permission to do so.
 
 
-<h3>13. Изменения в Лицензионном соглашении</h3>
-13.1. Компания Google вправе вносить изменения в настоящее Лицензионное соглашение по мере выхода новых версий SDK. При внесении изменений Google создает новую версию Лицензионного соглашения и размещает ее на веб-сайте, на котором размещен SDK.
+<h3>9. Terminating this License Agreement</h3>
+9.1 The License Agreement will continue to apply until terminated by either you or Google as set out below.
+
+9.2 If you want to terminate the License Agreement, you may do so by ceasing your use of the SDK and any relevant developer credentials.
+
+9.3 Google may at any time, terminate the License Agreement with you if:
+(A) you have breached any provision of the License Agreement; or
+(B) Google is required to do so by law; or
+(C) the partner with whom Google offered certain parts of SDK (such as APIs) to you has terminated its relationship with Google or ceased to offer certain parts of the SDK to you; or
+(D) Google decides to no longer provide the SDK or certain parts of the SDK to users in the country in which you are resident or from which you use the service, or the provision of the SDK or certain SDK services to you by Google is, in Google's sole discretion, no longer commercially viable.
+
+9.4 When the License Agreement comes to an end, all of the legal rights, obligations and liabilities that you and Google have benefited from, been subject to (or which have accrued over time whilst the License Agreement has been in force) or which are expressed to continue indefinitely, shall be unaffected by this cessation, and the provisions of paragraph 14.7 shall continue to apply to such rights, obligations and liabilities indefinitely.
 
 
-<h3>14. Общие правовые условия</h3>
-14.1. Настоящее Лицензионное соглашение составляет полный текст юридического соглашения между вами и компанией Google, регулирует использование вами SDK (за исключением услуг, которые Google предоставляет на основании отдельного письменного соглашения) и полностью заменяет собой все предыдущие соглашения между вами и компанией Google в отношении SDK.
+<h3>10. DISCLAIMER OF WARRANTIES</h3>
+10.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SDK IS AT YOUR SOLE RISK AND THAT THE SDK IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND FROM GOOGLE.
 
-14.2. Вы соглашаетесь с тем, что отсутствие каких-либо действий или судебных исков со стороны Google, направленных на соблюдение каких-либо правовых норм или исполнение средств правовой защиты, установленных настоящим Лицензионным соглашением (или которыми Google обладает в соответствии с каким-либо действующим законом), не означает отказ компании Google от своих прав и не препятствует компании Google использовать эти права или средства защиты.
+10.2 YOUR USE OF THE SDK AND ANY MATERIAL DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE SDK IS AT YOUR OWN DISCRETION AND RISK AND YOU ARE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR OTHER DEVICE OR LOSS OF DATA THAT RESULTS FROM SUCH USE.
 
-14.3. Если какой-либо судебный орган, уполномоченный рассматривать этот вопрос, признает недействительность какого-либо положения данного Лицензионного соглашения, то соответствующее положение будет исключено из Лицензионного соглашения с сохранением действия всех остальных его положений. Остальные положения Лицензионного соглашения по-прежнему будут действовать, и их соблюдение может обеспечиваться в судебном порядке.
-
-14.4. Вы признаете и соглашаетесь с тем, что все участники группы компаний, среди которых Google является материнской компанией, являются сторонними бенефициарами данного Лицензионного соглашения и что эти компании имеют право пользоваться привилегиями (или правами), предоставляемыми по данному Лицензионному соглашению, и напрямую требовать их соблюдения в судебном порядке. Все остальные физические и юридические лица не являются сторонними бенефициарами данного Лицензионного соглашения.
-
-14.5. ОГРАНИЧЕНИЯ НА ЭКСПОРТ. ИСПОЛЬЗОВАНИЕ SDK РЕГУЛИРУЕТСЯ ЗАКОНАМИ И НОРМАТИВНЫМИ АКТАМИ США, КАСАЮЩИМИСЯ ЭКСПОРТА. ВЫ ОБЯЗУЕТЕСЬ СОБЛЮДАТЬ ВСЕ НАЦИОНАЛЬНЫЕ И МЕЖДУНАРОДНЫЕ ЗАКОНЫ ОБ ЭКСПОРТЕ, ПРИМЕНИМЫЕ К SDK. ДАННЫЕ ЗАКОНЫ НАЛАГАЮТ ОГРАНИЧЕНИЯ НА РЕГИОНЫ, КРУГ ЛИЦ И СПОСОБ КОНЕЧНОГО ИСПОЛЬЗОВАНИЯ.
-
-14.6. Ни вы, ни компания Google не вправе переуступать либо передавать права, предоставляемые по настоящему Лицензионному соглашению, без предварительного письменного согласия другой стороны. Ни вы, ни компания Google не вправе делегировать свои полномочия или обязательства по настоящему Лицензионному соглашению без предварительного письменного согласия другой стороны.
-
-14.7. Лицензионное соглашение, а также взаимоотношения между вами и компанией Google в рамках настоящего Лицензионного соглашения регулируются законодательством штата Калифорния за исключением его норм коллизионного права. Вы и компания Google признаете, что урегулирование любых правовых вопросов, связанных с данным Лицензионным соглашением, относится исключительно к юрисдикции судов округа Санта-Клара, штат Калифорния. Несмотря на это, вы соглашаетесь с тем, что компания Google по-прежнему имеет право обращаться за наложением судебного запрета (или за получением аналогичного вида неотложной судебной защиты) в суды любой юрисдикции.
+10.3 GOOGLE FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
 
 
-<em>13 ноября 2012 г.</em>
+<h3>11. LIMITATION OF LIABILITY</h3>
+11.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT GOOGLE, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS SHALL NOT BE LIABLE TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES THAT MAY BE INCURRED BY YOU, INCLUDING ANY LOSS OF DATA, WHETHER OR NOT GOOGLE OR ITS REPRESENTATIVES HAVE BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING.
+
+
+<h3>12. Indemnification</h3>
+12.1 To the maximum extent permitted by law, you agree to defend, indemnify and hold harmless Google, its affiliates and their respective directors, officers, employees and agents from and against any and all claims, actions, suits or proceedings, as well as any and all losses, liabilities, damages, costs and expenses (including reasonable attorneys fees) arising out of or accruing from (a) your use of the SDK, (b) any application you develop on the SDK that infringes any copyright, trademark, trade secret, trade dress, patent or other intellectual property right of any person or defames any person or violates their rights of publicity or privacy, and (c) any non-compliance by you with the License Agreement.
+
+
+<h3>13. Changes to the License Agreement</h3>
+13.1 Google may make changes to the License Agreement as it distributes new versions of the SDK. When these changes are made, Google will make a new version of the License Agreement available on the website where the SDK is made available.
+
+
+<h3>14. General Legal Terms</h3>
+14.1 The License Agreement constitutes the whole legal agreement between you and Google and governs your use of the SDK (excluding any services which Google may provide to you under a separate written agreement), and completely replaces any prior agreements between you and Google in relation to the SDK.
+
+14.2 You agree that if Google does not exercise or enforce any legal right or remedy which is contained in the License Agreement (or which Google has the benefit of under any applicable law), this will not be taken to be a formal waiver of Google's rights and that those rights or remedies will still be available to Google.
+
+14.3 If any court of law, having the jurisdiction to decide on this matter, rules that any provision of the License Agreement is invalid, then that provision will be removed from the License Agreement without affecting the rest of the License Agreement. The remaining provisions of the License Agreement will continue to be valid and enforceable.
+
+14.4 You acknowledge and agree that each member of the group of companies of which Google is the parent shall be third party beneficiaries to the License Agreement and that such other companies shall be entitled to directly enforce, and rely upon, any provision of the License Agreement that confers a benefit on (or rights in favor of) them. Other than this, no other person or company shall be third party beneficiaries to the License Agreement.
+
+14.5 EXPORT RESTRICTIONS. THE SDK IS SUBJECT TO UNITED STATES EXPORT LAWS AND REGULATIONS. YOU MUST COMPLY WITH ALL DOMESTIC AND INTERNATIONAL EXPORT LAWS AND REGULATIONS THAT APPLY TO THE SDK. THESE LAWS INCLUDE RESTRICTIONS ON DESTINATIONS, END USERS AND END USE.
+
+14.6 The rights granted in the License Agreement may not be assigned or transferred by either you or Google without the prior written approval of the other party. Neither you nor Google shall be permitted to delegate their responsibilities or obligations under the License Agreement without the prior written approval of the other party.
+
+14.7 The License Agreement, and your relationship with Google under the License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from the License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
+
+<em>November 20, 2015</em>
 </div>
 
 
