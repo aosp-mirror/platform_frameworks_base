@@ -81,9 +81,6 @@ struct ResourceName {
     ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e);
 
     bool isValid() const;
-    bool operator<(const ResourceName& rhs) const;
-    bool operator==(const ResourceName& rhs) const;
-    bool operator!=(const ResourceName& rhs) const;
     std::u16string toString() const;
 };
 
@@ -109,10 +106,6 @@ struct ResourceNameRef {
 
     ResourceName toResourceName() const;
     bool isValid() const;
-
-    bool operator<(const ResourceNameRef& rhs) const;
-    bool operator==(const ResourceNameRef& rhs) const;
-    bool operator!=(const ResourceNameRef& rhs) const;
 };
 
 /**
@@ -138,17 +131,11 @@ struct ResourceId {
     uint8_t packageId() const;
     uint8_t typeId() const;
     uint16_t entryId() const;
-    bool operator<(const ResourceId& rhs) const;
-    bool operator==(const ResourceId& rhs) const;
 };
 
 struct SourcedResourceName {
     ResourceName name;
     size_t line;
-
-    inline bool operator==(const SourcedResourceName& rhs) const {
-        return name == rhs.name && line == rhs.line;
-    }
 };
 
 struct ResourceFile {
@@ -227,16 +214,23 @@ inline uint16_t ResourceId::entryId() const {
     return static_cast<uint16_t>(id);
 }
 
-inline bool ResourceId::operator<(const ResourceId& rhs) const {
-    return id < rhs.id;
+inline bool operator<(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id < rhs.id;
 }
 
-inline bool ResourceId::operator==(const ResourceId& rhs) const {
-    return id == rhs.id;
+inline bool operator>(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id > rhs.id;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-        const ResourceId& resId) {
+inline bool operator==(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id == rhs.id;
+}
+
+inline bool operator!=(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id != rhs.id;
+}
+
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceId& resId) {
     std::ios_base::fmtflags oldFlags = out.flags();
     char oldFill = out.fill();
     out << "0x" << std::internal << std::setfill('0') << std::setw(8)
@@ -266,27 +260,19 @@ inline bool ResourceName::isValid() const {
     return !package.empty() && !entry.empty();
 }
 
-inline bool ResourceName::operator<(const ResourceName& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator<(const ResourceName& lhs, const ResourceName& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             < std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool operator<(const ResourceName& lhs, const ResourceNameRef& b) {
-    return ResourceNameRef(lhs) < b;
-}
-
-inline bool ResourceName::operator==(const ResourceName& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator==(const ResourceName& lhs, const ResourceName& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             == std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceName::operator!=(const ResourceName& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator!=(const ResourceName& lhs, const ResourceName& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             != std::tie(rhs.package, rhs.type, rhs.entry);
-}
-
-inline bool operator!=(const ResourceName& lhs, const ResourceNameRef& rhs) {
-    return ResourceNameRef(lhs) != rhs;
 }
 
 inline std::u16string ResourceName::toString() const {
@@ -333,18 +319,18 @@ inline bool ResourceNameRef::isValid() const {
     return !package.empty() && !entry.empty();
 }
 
-inline bool ResourceNameRef::operator<(const ResourceNameRef& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator<(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             < std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceNameRef::operator==(const ResourceNameRef& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator==(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             == std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceNameRef::operator!=(const ResourceNameRef& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator!=(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             != std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
@@ -353,6 +339,18 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNameRef& na
         out << name.package << ":";
     }
     return out << name.type << "/" << name.entry;
+}
+
+inline bool operator<(const ResourceName& lhs, const ResourceNameRef& b) {
+    return ResourceNameRef(lhs) < b;
+}
+
+inline bool operator!=(const ResourceName& lhs, const ResourceNameRef& rhs) {
+    return ResourceNameRef(lhs) != rhs;
+}
+
+inline bool operator==(const SourcedResourceName& lhs, const SourcedResourceName& rhs) {
+    return lhs.name == rhs.name && lhs.line == rhs.line;
 }
 
 } // namespace aapt
