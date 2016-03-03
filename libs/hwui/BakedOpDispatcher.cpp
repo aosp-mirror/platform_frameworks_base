@@ -61,7 +61,10 @@ void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
     for (size_t i = 0; i < opList.count; i++) {
         const BakedOpState& state = *(opList.states[i]);
         TextureVertex* rectVerts = &vertices[i * 4];
-        Rect opBounds = state.computedState.clippedBounds;
+
+        // calculate unclipped bounds, since they'll determine texture coordinates
+        Rect opBounds = state.op->unmappedBounds;
+        state.computedState.transform.mapRect(opBounds);
         if (CC_LIKELY(state.computedState.transform.isPureTranslate())) {
             // pure translate, so snap (same behavior as onBitmapOp)
             opBounds.snapToPixelBoundaries();
