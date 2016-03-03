@@ -32,6 +32,7 @@ LOCAL_SRC_FILES:= \
     com_android_internal_content_NativeLibraryHelper.cpp \
     com_google_android_gles_jni_EGLImpl.cpp \
     com_google_android_gles_jni_GLImpl.cpp.arm \
+    android_app_ApplicationLoaders.cpp \
     android_app_NativeActivity.cpp \
     android_opengl_EGL14.cpp \
     android_opengl_EGLExt.cpp \
