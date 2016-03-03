@@ -1151,9 +1151,13 @@ struct ResTable_config
         uint32_t screenConfig2;
     };
 
-    // If true, it means that the script of the locale was explicitly provided.
-    // If false, it means that the script was automatically computed.
-    bool localeScriptWasProvided;
+    // If false and localeScript is set, it means that the script of the locale
+    // was explicitly provided.
+    //
+    // If true, it means that localeScript was automatically computed.
+    // localeScript may still not be set in this case, which means that we
+    // tried but could not compute a script.
+    bool localeScriptWasComputed;
 
     void copyFromDeviceNoSwap(const ResTable_config& o);
     
@@ -1233,7 +1237,7 @@ struct ResTable_config
 
     inline void clearLocale() {
         locale = 0;
-        localeScriptWasProvided = false;
+        localeScriptWasComputed = false;
         memset(localeScript, 0, sizeof(localeScript));
         memset(localeVariant, 0, sizeof(localeVariant));
     }
