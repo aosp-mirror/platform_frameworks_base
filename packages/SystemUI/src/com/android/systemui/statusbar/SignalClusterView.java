@@ -221,6 +221,7 @@ public class SignalClusterView
 
         apply();
         applyIconTint();
+        mNC.addSignalCallback(this);
     }
 
     @Override

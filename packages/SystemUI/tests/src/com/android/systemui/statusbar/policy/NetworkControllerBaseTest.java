@@ -32,6 +32,7 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
 import org.mockito.ArgumentCaptor;
@@ -100,7 +101,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
         // changes from default state).
-        mNetworkController.addSignalCallback(null);
+        mNetworkController.addSignalCallback(mock(SignalCallback.class));
         mNetworkController.addEmergencyListener(null);
     }
 
