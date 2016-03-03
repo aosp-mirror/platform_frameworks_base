@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -683,6 +684,10 @@ class Task implements DimLayer.DimLayerUser {
         final DisplayContent displayContent = getDisplayContent();
         return displayContent != null && displayContent.getDockedStackLocked() != null
                 && mStack != null && StackId.isTaskResizeableByDockedStack(mStack.mStackId);
+    }
+
+    boolean isFloating() {
+        return StackId.tasksAreFloating(mStack.mStackId);
     }
 
     /**
