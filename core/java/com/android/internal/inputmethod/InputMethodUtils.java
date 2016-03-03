@@ -547,23 +547,25 @@ public class InputMethodUtils {
         LocaleUtils.filterByLanguage(keyboardSubtypes, sSubtypeToLocale, systemLocales,
                 applicableSubtypes);
 
-        boolean hasAsciiCapableKeyboard = false;
-        final int numApplicationSubtypes = applicableSubtypes.size();
-        for (int i = 0; i < numApplicationSubtypes; ++i) {
-            final InputMethodSubtype subtype = applicableSubtypes.get(i);
-            if (subtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
-                hasAsciiCapableKeyboard = true;
-                break;
+        if (!applicableSubtypes.isEmpty()) {
+            boolean hasAsciiCapableKeyboard = false;
+            final int numApplicationSubtypes = applicableSubtypes.size();
+            for (int i = 0; i < numApplicationSubtypes; ++i) {
+                final InputMethodSubtype subtype = applicableSubtypes.get(i);
+                if (subtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
+                    hasAsciiCapableKeyboard = true;
+                    break;
+                }
             }
-        }
-        if (!hasAsciiCapableKeyboard) {
-            final int numKeyboardSubtypes = keyboardSubtypes.size();
-            for (int i = 0; i < numKeyboardSubtypes; ++i) {
-                final InputMethodSubtype subtype = keyboardSubtypes.get(i);
-                final String mode = subtype.getMode();
-                if (SUBTYPE_MODE_KEYBOARD.equals(mode) && subtype.containsExtraValueKey(
-                        TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE)) {
-                    applicableSubtypes.add(subtype);
+            if (!hasAsciiCapableKeyboard) {
+                final int numKeyboardSubtypes = keyboardSubtypes.size();
+                for (int i = 0; i < numKeyboardSubtypes; ++i) {
+                    final InputMethodSubtype subtype = keyboardSubtypes.get(i);
+                    final String mode = subtype.getMode();
+                    if (SUBTYPE_MODE_KEYBOARD.equals(mode) && subtype.containsExtraValueKey(
+                            TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE)) {
+                        applicableSubtypes.add(subtype);
+                    }
                 }
             }
         }
