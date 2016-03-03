@@ -70,6 +70,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
     private static final Locale LOCALE_TH_TH_TH = new Locale("ht", "TH", "TH");
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
+    private static final String SUBTYPE_MODE_HANDWRITING = "handwriting";
     private static final String SUBTYPE_MODE_ANY = null;
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_ASCII_CAPABLE = "AsciiCapable";
@@ -215,6 +216,12 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         final InputMethodSubtype nonAutoJa = createDummyInputMethodSubtype("ja",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
+        final InputMethodSubtype nonAutoHi = createDummyInputMethodSubtype("hi",
+                SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
+                !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
+        final InputMethodSubtype nonAutoHandwritingEn = createDummyInputMethodSubtype("en",
+                SUBTYPE_MODE_HANDWRITING, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
+                !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype =
                 createDummyInputMethodSubtype("zz", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                         !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
@@ -347,6 +354,57 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             verifyEquality(nonAutoJa, result.get(0));
             verifyEquality(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, result.get(1));
             verifyEquality(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype2, result.get(2));
+        }
+
+        // Make sure that if there is no subtype that matches the language requested, then we just
+        // use the first keyboard subtype.
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+            subtypes.add(nonAutoHi);
+            subtypes.add(nonAutoEnUS);
+            subtypes.add(nonAutoHandwritingEn);
+            subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
+            final InputMethodInfo imi = createDummyInputMethodInfo(
+                    "com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes);
+            final ArrayList<InputMethodSubtype> result =
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            getResourcesForLocales(LOCALE_JA_JP), imi);
+            assertEquals(1, result.size());
+            verifyEquality(nonAutoHi, result.get(0));
+        }
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+            subtypes.add(nonAutoEnUS);
+            subtypes.add(nonAutoHi);
+            subtypes.add(nonAutoHandwritingEn);
+            subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
+            final InputMethodInfo imi = createDummyInputMethodInfo(
+                    "com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes);
+            final ArrayList<InputMethodSubtype> result =
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            getResourcesForLocales(LOCALE_JA_JP), imi);
+            assertEquals(1, result.size());
+            verifyEquality(nonAutoEnUS, result.get(0));
+        }
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+            subtypes.add(nonAutoHandwritingEn);
+            subtypes.add(nonAutoEnUS);
+            subtypes.add(nonAutoHi);
+            subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
+            final InputMethodInfo imi = createDummyInputMethodInfo(
+                    "com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes);
+            final ArrayList<InputMethodSubtype> result =
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            getResourcesForLocales(LOCALE_JA_JP), imi);
+            assertEquals(1, result.size());
+            verifyEquality(nonAutoEnUS, result.get(0));
         }
 
         // Make sure that 3-letter language code can be handled.
