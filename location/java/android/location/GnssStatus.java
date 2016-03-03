@@ -27,19 +27,19 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class GnssStatus {
     /** Unknown constellation type. */
-    public static final byte CONSTELLATION_UNKNOWN = 0;
+    public static final int CONSTELLATION_UNKNOWN = 0;
     /** Constellation type constant for GPS. */
-    public static final byte CONSTELLATION_GPS = 1;
+    public static final int CONSTELLATION_GPS = 1;
     /** Constellation type constant for SBAS. */
-    public static final byte CONSTELLATION_SBAS = 2;
+    public static final int CONSTELLATION_SBAS = 2;
     /** Constellation type constant for Glonass. */
-    public static final byte CONSTELLATION_GLONASS = 3;
+    public static final int CONSTELLATION_GLONASS = 3;
     /** Constellation type constant for QZSS. */
-    public static final byte CONSTELLATION_QZSS = 4;
+    public static final int CONSTELLATION_QZSS = 4;
     /** Constellation type constant for Beidou. */
-    public static final byte CONSTELLATION_BEIDOU = 5;
+    public static final int CONSTELLATION_BEIDOU = 5;
     /** Constellation type constant for Galileo. */
-    public static final byte CONSTELLATION_GALILEO = 6;
+    public static final int CONSTELLATION_GALILEO = 6;
 
     /** Constellation type. */
     @Retention(RetentionPolicy.SOURCE)
@@ -66,16 +66,16 @@ public final class GnssStatus {
 
     /* These package private values are modified by the LocationManager class */
     /* package */ int[] mSvidWithFlags;
-    /* package */ float[] mSnrs;
+    /* package */ float[] mCn0DbHz;
     /* package */ float[] mElevations;
     /* package */ float[] mAzimuths;
     /* package */ int mSvCount;
 
-    GnssStatus(int svCount, int[] svidWithFlags, float[] snrs, float[] elevations,
+    GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
             float[] azimuths) {
         mSvCount = svCount;
         mSvidWithFlags = svidWithFlags;
-        mSnrs = snrs;
+        mCn0DbHz = cn0s;
         mElevations = elevations;
         mAzimuths = azimuths;
     }
@@ -92,8 +92,8 @@ public final class GnssStatus {
      * @param satIndex the index of the satellite in the list.
      */
     @ConstellationType
-    public byte getConstellationType(int satIndex) {
-        return (byte) ((mSvidWithFlags[satIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
+    public int getConstellationType(int satIndex) {
+        return ((mSvidWithFlags[satIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
                 & CONSTELLATION_TYPE_MASK);
     }
 
@@ -109,15 +109,15 @@ public final class GnssStatus {
      * Retrieves the signal-noise ration of the satellite at the specified position.
      * @param satIndex the index of the satellite in the list.
      */
-    public float getSnr(int satIndex) {
-        return mSnrs[satIndex];
+    public float getCn0DbHz(int satIndex) {
+        return mCn0DbHz[satIndex];
     }
 
     /**
      * Retrieves the elevation of the satellite at the specified position.
      * @param satIndex the index of the satellite in the list.
      */
-    public float getElevation(int satIndex) {
+    public float getElevationDegrees(int satIndex) {
         return 0f;
     }
 
@@ -125,7 +125,7 @@ public final class GnssStatus {
      * Retrieves the azimuth the satellite at the specified position.
      * @param satIndex the index of the satellite in the list.
      */
-    public float getAzimuth(int satIndex) {
+    public float getAzimuthDegrees(int satIndex) {
         return mAzimuths[satIndex];
     }
 

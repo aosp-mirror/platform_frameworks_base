@@ -75,7 +75,7 @@ abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGnssStatus
     public void onSvStatusChanged(
             final int svCount,
             final int[] prnWithFlags,
-            final float[] snrs,
+            final float[] cn0s,
             final float[] elevations,
             final float[] azimuths) {
         Operation operation = new Operation() {
@@ -84,7 +84,7 @@ abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGnssStatus
                 listener.onSvStatusChanged(
                         svCount,
                         prnWithFlags,
-                        snrs,
+                        cn0s,
                         elevations,
                         azimuths);
             }
