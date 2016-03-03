@@ -5530,7 +5530,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(packageName, "packageName is null");
         final int callingUid = mInjector.binderGetCallingUid();
         try {
-            int uid = mContext.getPackageManager().getPackageUidAsUser(packageName, 0);
+            int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
+                    UserHandle.getUserId(callingUid));
             if (uid != callingUid) {
                 throw new SecurityException("Invalid packageName");
             }
