@@ -129,6 +129,7 @@ class AppWindowToken extends WindowToken {
     boolean mAlwaysFocusable;
 
     boolean mAppStopped;
+    int mPendingRelaunchCount;
 
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
 
@@ -531,6 +532,26 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    boolean isRelaunching() {
+        return mPendingRelaunchCount > 0;
+    }
+
+    void startRelaunching() {
+        if (canFreezeBounds()) {
+            freezeBounds();
+        }
+        mPendingRelaunchCount++;
+    }
+
+    void finishRelaunching() {
+        if (canFreezeBounds()) {
+            unfreezeBounds();
+        }
+        if (mPendingRelaunchCount > 0) {
+            mPendingRelaunchCount--;
+        }
+    }
+
     void addWindow(WindowState w) {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState candidate = allAppWindows.get(i);
@@ -579,20 +600,26 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    private boolean canFreezeBounds() {
+        // For freeform windows, we can't freeze the bounds at the moment because this would make
+        // the resizing unresponsive.
+        return mTask != null && !mTask.inFreeformWorkspace();
+    }
+
     /**
      * Freezes the task bounds. The size of this task reported the app will be fixed to the bounds
      * freezed by {@link Task#prepareFreezingBounds} until {@link #unfreezeBounds} gets called, even
      * if they change in the meantime. If the bounds are already frozen, the bounds will be frozen
      * with a queue.
      */
-    void freezeBounds() {
+    private void freezeBounds() {
         mFrozenBounds.offer(new Rect(mTask.mPreparedFrozenBounds));
     }
 
     /**
      * Unfreezes the previously frozen bounds. See {@link #freezeBounds}.
      */
-    void unfreezeBounds() {
+    private void unfreezeBounds() {
         mFrozenBounds.remove();
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
@@ -658,7 +685,10 @@ class AppWindowToken extends WindowToken {
                     pw.print(" startingMoved="); pw.println(startingMoved);
         }
         if (!mFrozenBounds.isEmpty()) {
-            pw.print(prefix); pw.print("mFrozenBounds="); pw.print(mFrozenBounds);
+            pw.print(prefix); pw.print("mFrozenBounds="); pw.println(mFrozenBounds);
+        }
+        if (mPendingRelaunchCount != 0) {
+            pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);
         }
     }
 

@@ -1278,7 +1278,12 @@ class WindowSurfacePlacer {
                         "Check opening app=" + wtoken + ": allDrawn="
                         + wtoken.allDrawn + " startingDisplayed="
                         + wtoken.startingDisplayed + " startingMoved="
-                        + wtoken.startingMoved);
+                        + wtoken.startingMoved + " isRelaunching()="
+                        + wtoken.isRelaunching());
+
+                if (wtoken.isRelaunching()) {
+                    return false;
+                }
 
                 final boolean drawnBeforeRestoring = wtoken.allDrawn;
                 wtoken.restoreSavedSurfaces();
