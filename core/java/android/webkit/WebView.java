@@ -32,7 +32,6 @@ import android.net.http.SslCertificate;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
@@ -2615,16 +2614,6 @@ public class WebView extends AbsoluteLayout
     public void onFinishTemporaryDetach() {
         super.onFinishTemporaryDetach();
         mProvider.getViewDelegate().onFinishTemporaryDetach();
-    }
-
-    @Override
-    public Handler getHandler() {
-        return mProvider.getViewDelegate().getHandler(super.getHandler());
-    }
-
-    @Override
-    public View findFocus() {
-        return mProvider.getViewDelegate().findFocus(super.findFocus());
     }
 
     /**
