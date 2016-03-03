@@ -305,6 +305,12 @@ public final class BridgeTypedArray extends TypedArray {
         return defValue;
     }
 
+    @Override
+    public ComplexColor getComplexColor(int index) {
+        // TODO: Support GradientColor
+        return getColorStateList(index);
+    }
+
     /**
      * Retrieve the ColorStateList for the attribute at <var>index</var>.
      * The value may be either a single solid color or a reference to
