@@ -156,7 +156,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
                 TextView text = (TextView) convertView.findViewById(R.id.locale);
                 LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
-                text.setText(item.getLabel());
+                text.setText(item.getLabel(mCountryMode));
                 text.setTextLocale(item.getLocale());
                 if (mCountryMode) {
                     int layoutDir = TextUtils.getLayoutDirectionFromLocale(item.getParent());
@@ -171,6 +171,9 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     }
 
     private boolean showHeaders() {
+        if (mCountryMode) { // never show suggestions in country mode
+            return false;
+        }
         return mSuggestionCount != 0 && mSuggestionCount != mLocaleOptions.size();
     }
 
