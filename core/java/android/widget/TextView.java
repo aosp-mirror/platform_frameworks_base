@@ -20,6 +20,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import android.R;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -5835,8 +5836,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int layoutDirection = getLayoutDirection();
         final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-        if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
-                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
+        if (isMarqueeFadeEnabled()) {
             if (!mSingleLine && getLineCount() == 1 && canMarquee() &&
                     (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
                 final int width = mRight - mLeft;
@@ -8616,76 +8616,57 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getLeftFadingEdgeStrength() {
-        if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
-                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
-            if (mMarquee != null && !mMarquee.isStopped()) {
-                final Marquee marquee = mMarquee;
-                if (marquee.shouldDrawLeftFade()) {
-                    final float scroll = marquee.getScroll();
-                    return scroll / getHorizontalFadingEdgeLength();
-                } else {
-                    return 0.0f;
-                }
-            } else if (getLineCount() == 1) {
-                final int layoutDirection = getLayoutDirection();
-                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-                    case Gravity.LEFT:
-                        return 0.0f;
-                    case Gravity.RIGHT:
-                        return (mLayout.getLineRight(0) - (mRight - mLeft) -
-                                getCompoundPaddingLeft() - getCompoundPaddingRight() -
-                                mLayout.getLineLeft(0)) / getHorizontalFadingEdgeLength();
-                    case Gravity.CENTER_HORIZONTAL:
-                    case Gravity.FILL_HORIZONTAL:
-                        final int textDirection = mLayout.getParagraphDirection(0);
-                        if (textDirection == Layout.DIR_LEFT_TO_RIGHT) {
-                            return 0.0f;
-                        } else {
-                            return (mLayout.getLineRight(0) - (mRight - mLeft) -
-                                getCompoundPaddingLeft() - getCompoundPaddingRight() -
-                                mLayout.getLineLeft(0)) / getHorizontalFadingEdgeLength();
-                        }
-                }
+        if (isMarqueeFadeEnabled() && mMarquee != null && !mMarquee.isStopped()) {
+            final Marquee marquee = mMarquee;
+            if (marquee.shouldDrawLeftFade()) {
+                return getHorizontalFadingEdgeStrength(marquee.getScroll(), 0.0f);
+            } else {
+                return 0.0f;
             }
+        } else if (getLineCount() == 1) {
+            final float lineLeft = getLayout().getLineLeft(0);
+            if(lineLeft > mScrollX) return 0.0f;
+            return getHorizontalFadingEdgeStrength(mScrollX, lineLeft);
         }
         return super.getLeftFadingEdgeStrength();
     }
 
     @Override
     protected float getRightFadingEdgeStrength() {
-        if (mEllipsize == TextUtils.TruncateAt.MARQUEE &&
-                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
-            if (mMarquee != null && !mMarquee.isStopped()) {
-                final Marquee marquee = mMarquee;
-                final float maxFadeScroll = marquee.getMaxFadeScroll();
-                final float scroll = marquee.getScroll();
-                return (maxFadeScroll - scroll) / getHorizontalFadingEdgeLength();
-            } else if (getLineCount() == 1) {
-                final int layoutDirection = getLayoutDirection();
-                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-                    case Gravity.LEFT:
-                        final int textWidth = (mRight - mLeft) - getCompoundPaddingLeft() -
-                                getCompoundPaddingRight();
-                        final float lineWidth = mLayout.getLineWidth(0);
-                        return (lineWidth - textWidth) / getHorizontalFadingEdgeLength();
-                    case Gravity.RIGHT:
-                        return 0.0f;
-                    case Gravity.CENTER_HORIZONTAL:
-                    case Gravity.FILL_HORIZONTAL:
-                        final int textDirection = mLayout.getParagraphDirection(0);
-                        if (textDirection == Layout.DIR_RIGHT_TO_LEFT) {
-                            return 0.0f;
-                        } else {
-                            return (mLayout.getLineWidth(0) - ((mRight - mLeft) -
-                                getCompoundPaddingLeft() - getCompoundPaddingRight())) /
-                                getHorizontalFadingEdgeLength();
-                        }
-                }
-            }
+        if (isMarqueeFadeEnabled() && mMarquee != null && !mMarquee.isStopped()) {
+            final Marquee marquee = mMarquee;
+            return getHorizontalFadingEdgeStrength(marquee.getMaxFadeScroll(), marquee.getScroll());
+        } else if (getLineCount() == 1) {
+            final float rightEdge = mScrollX + (getWidth() - getCompoundPaddingLeft() -
+                    getCompoundPaddingRight());
+            final float lineRight = getLayout().getLineRight(0);
+            if(lineRight < rightEdge) return 0.0f;
+            return getHorizontalFadingEdgeStrength(rightEdge, lineRight);
         }
         return super.getRightFadingEdgeStrength();
+    }
+
+    /**
+     * Calculates the fading edge strength as the ratio of the distance between two
+     * horizontal positions to {@link View#getHorizontalFadingEdgeLength()}. Uses the absolute
+     * value for the distance calculation.
+     *
+     * @param position1 A horizontal position.
+     * @param position2 A horizontal position.
+     * @return Fading edge strength between [0.0f, 1.0f].
+     */
+    @FloatRange(from=0.0, to=1.0)
+    private final float getHorizontalFadingEdgeStrength(float position1, float position2) {
+        final int horizontalFadingEdgeLength = getHorizontalFadingEdgeLength();
+        if(horizontalFadingEdgeLength == 0) return 0.0f;
+        final float diff = Math.abs(position1 - position2);
+        if(diff > horizontalFadingEdgeLength) return 1.0f;
+        return diff / horizontalFadingEdgeLength;
+    }
+
+    private final boolean isMarqueeFadeEnabled() {
+        return mEllipsize == TextUtils.TruncateAt.MARQUEE &&
+                mMarqueeFadeMode != MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS;
     }
 
     @Override
