@@ -568,6 +568,22 @@ public final class DocumentsContract {
          * @hide
          */
         public static final int FLAG_HAS_SETTINGS = 1 << 17;
+
+        /**
+         * Flag indicating that this root is on removable SD card storage.
+         *
+         * @see #COLUMN_FLAGS
+         * @hide
+         */
+        public static final int FLAG_REMOVABLE_SD = 1 << 18;
+
+        /**
+         * Flag indicating that this root is on removable USB storage.
+         *
+         * @see #COLUMN_FLAGS
+         * @hide
+         */
+        public static final int FLAG_REMOVABLE_USB = 1 << 19;
     }
 
     /**

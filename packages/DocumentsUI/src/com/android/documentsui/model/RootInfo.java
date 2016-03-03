@@ -16,6 +16,7 @@
 
 package com.android.documentsui.model;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.compareToIgnoreCaseNullable;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
@@ -31,6 +32,7 @@ import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
@@ -47,6 +49,8 @@ import java.util.Objects;
  * Representation of a {@link Root}.
  */
 public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
+
+    private static final String TAG = "RootInfo";
     private static final int VERSION_INIT = 1;
     private static final int VERSION_DROP_TYPE = 2;
 
@@ -59,6 +63,8 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
             TYPE_DOWNLOADS,
             TYPE_LOCAL,
             TYPE_MTP,
+            TYPE_SD,
+            TYPE_USB,
             TYPE_OTHER
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -70,7 +76,9 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
     public static final int TYPE_DOWNLOADS = 5;
     public static final int TYPE_LOCAL = 6;
     public static final int TYPE_MTP = 7;
-    public static final int TYPE_OTHER = 8;
+    public static final int TYPE_SD = 8;
+    public static final int TYPE_USB = 9;
+    public static final int TYPE_OTHER = 10;
 
     public String authority;
     public String rootId;
@@ -185,33 +193,40 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
     private void deriveFields() {
         derivedMimeTypes = (mimeTypes != null) ? mimeTypes.split("\n") : null;
 
-        // TODO: remove these special case icons
         if (isHome()) {
+            derivedType = TYPE_LOCAL;
             derivedIcon = R.drawable.ic_root_documents;
-            derivedType = TYPE_LOCAL;
-        } else if (isExternalStorage()) {
-            derivedIcon = R.drawable.ic_root_smartphone;
-            derivedType = TYPE_LOCAL;
-            // TODO: Apply SD card icon to SD devices.
-        } else if (isDownloads()) {
-            derivedIcon = R.drawable.ic_root_download;
-            derivedType = TYPE_DOWNLOADS;
-        } else if (isImages()) {
-            derivedIcon = R.drawable.ic_doc_image;
-            derivedType = TYPE_IMAGES;
-        } else if (isVideos()) {
-            derivedIcon = R.drawable.ic_doc_video;
-            derivedType = TYPE_VIDEO;
-        } else if (isAudio()) {
-            derivedIcon = R.drawable.ic_doc_audio;
-            derivedType = TYPE_AUDIO;
-        } else if (isRecents()) {
-            derivedType = TYPE_RECENTS;
         } else if (isMtp()) {
             derivedType = TYPE_MTP;
+            derivedIcon = R.drawable.ic_usb_storage;
+        } else if (isUsb()) {
+            derivedType = TYPE_USB;
+            derivedIcon = R.drawable.ic_usb_storage;
+        } else if (isSd()) {
+            derivedType = TYPE_SD;
+            derivedIcon = R.drawable.ic_sd_storage;
+        } else if (isExternalStorage()) {
+            derivedType = TYPE_LOCAL;
+            derivedIcon = R.drawable.ic_root_smartphone;
+        } else if (isDownloads()) {
+            derivedType = TYPE_DOWNLOADS;
+            derivedIcon = R.drawable.ic_root_download;
+        } else if (isImages()) {
+            derivedType = TYPE_IMAGES;
+            derivedIcon = R.drawable.ic_doc_image;
+        } else if (isVideos()) {
+            derivedType = TYPE_VIDEO;
+            derivedIcon = R.drawable.ic_doc_video;
+        } else if (isAudio()) {
+            derivedType = TYPE_AUDIO;
+            derivedIcon = R.drawable.ic_doc_audio;
+        } else if (isRecents()) {
+            derivedType = TYPE_RECENTS;
         } else {
             derivedType = TYPE_OTHER;
         }
+
+        if (DEBUG) Log.d(TAG, "Finished deriving fields: " + this);
     }
 
     public Uri getUri() {
@@ -291,6 +306,14 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
         return (flags & Root.FLAG_EMPTY) != 0;
     }
 
+    public boolean isSd() {
+        return (flags & Root.FLAG_REMOVABLE_SD) != 0;
+    }
+
+    public boolean isUsb() {
+        return (flags & Root.FLAG_REMOVABLE_USB) != 0;
+    }
+
     public Drawable loadIcon(Context context) {
         if (derivedIcon != 0) {
             return context.getDrawable(derivedIcon);
@@ -358,7 +381,14 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
 
     @Override
     public String toString() {
-        return "Root{authority=" + authority + ", rootId=" + rootId + ", title=" + title + "}";
+        return "Root{"
+                + "authority=" + authority
+                + ", rootId=" + rootId
+                + ", title=" + title
+                + ", isUsb=" + isUsb()
+                + ", isSd=" + isSd()
+                + ", isMtp=" + isMtp()
+                + "}";
     }
 
     public String getDirectoryString() {
