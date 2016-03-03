@@ -655,10 +655,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             userState.mUiAutomationServiceOwner = owner;
             userState.mUiAutomationServiceClient = serviceClient;
             userState.mUiAutomationFlags = flags;
-            userState.mIsAccessibilityEnabled = true;
             userState.mInstalledServices.add(accessibilityServiceInfo);
             if ((flags & UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES) == 0) {
-                // Set the temporary state.
+                // Set the temporary state, and use it instead of settings
                 userState.mIsTouchExplorationEnabled = false;
                 userState.mIsEnhancedWebAccessibilityEnabled = false;
                 userState.mIsDisplayMagnificationEnabled = false;
@@ -709,7 +708,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return;
             }
 
-            userState.mIsAccessibilityEnabled = true;
             userState.mIsTouchExplorationEnabled = touchExplorationEnabled;
             userState.mIsEnhancedWebAccessibilityEnabled = false;
             userState.mIsDisplayMagnificationEnabled = false;
@@ -1245,17 +1243,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
-    private void manageServicesLocked(UserState userState) {
+    private void updateServicesLocked(UserState userState) {
         Map<ComponentName, Service> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
         boolean isUnlocked = mContext.getSystemService(UserManager.class)
                 .isUserUnlocked(userState.mUserId);
-        boolean isEnabled = userState.mIsAccessibilityEnabled;
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
             ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
+
             Service service = componentNameToServiceMap.get(componentName);
 
             // Ignore non-encryption-aware services until user is unlocked
@@ -1264,45 +1262,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 continue;
             }
 
-            if (isEnabled) {
-                // Wait for the binding if it is in process.
-                if (userState.mBindingServices.contains(componentName)) {
+            // Wait for the binding if it is in process.
+            if (userState.mBindingServices.contains(componentName)) {
+                continue;
+            }
+            if (userState.mEnabledServices.contains(componentName)) {
+                if (service == null) {
+                    service = new Service(userState.mUserId, componentName, installedService);
+                } else if (userState.mBoundServices.contains(service)) {
                     continue;
                 }
-                if (userState.mEnabledServices.contains(componentName)) {
-                    if (service == null) {
-                        service = new Service(userState.mUserId, componentName, installedService);
-                    } else if (userState.mBoundServices.contains(service)) {
-                        continue;
-                    }
-                    service.bindLocked();
-                } else {
-                    if (service != null) {
-                        service.unbindLocked();
-                    }
-                }
+                service.bindLocked();
             } else {
                 if (service != null) {
                     service.unbindLocked();
-                } else {
-                    userState.mBindingServices.remove(componentName);
                 }
             }
         }
 
-        // No enabled installed services => disable accessibility to avoid
-        // sending accessibility events with no recipient across processes.
-        if (isEnabled && isUnlocked && userState.mBoundServices.isEmpty()
-                && userState.mBindingServices.isEmpty()) {
-            userState.mIsAccessibilityEnabled = false;
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
+        updateAccessibilityEnabledSetting(userState);
     }
 
     private void scheduleUpdateClientsIfNeededLocked(UserState userState) {
@@ -1329,7 +1307,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
             }
             // Touch exploration without accessibility makes no sense.
-            if (userState.mIsAccessibilityEnabled && userState.mIsTouchExplorationEnabled) {
+            if (userState.isHandlingAccessibilityEvents()
+                    && userState.mIsTouchExplorationEnabled) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
             }
             if (userState.mIsFilterKeyEventsEnabled) {
@@ -1468,25 +1447,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void updateWindowsForAccessibilityCallbackLocked(UserState userState) {
-        if (userState.mIsAccessibilityEnabled) {
-            // We observe windows for accessibility only if there is at least
-            // one bound service that can retrieve window content that specified
-            // it is interested in accessing such windows. For services that are
-            // binding we do an update pass after each bind event, so we run this
-            // code and register the callback if needed.
-            boolean boundServiceCanRetrieveInteractiveWindows = false;
+        // We observe windows for accessibility only if there is at least
+        // one bound service that can retrieve window content that specified
+        // it is interested in accessing such windows. For services that are
+        // binding we do an update pass after each bind event, so we run this
+        // code and register the callback if needed.
 
-            List<Service> boundServices = userState.mBoundServices;
-            final int boundServiceCount = boundServices.size();
-            for (int i = 0; i < boundServiceCount; i++) {
-                Service boundService = boundServices.get(i);
-                if (boundService.canRetrieveInteractiveWindowsLocked()) {
-                    boundServiceCanRetrieveInteractiveWindows = true;
-                    break;
-                }
-            }
-
-            if (boundServiceCanRetrieveInteractiveWindows) {
+        List<Service> boundServices = userState.mBoundServices;
+        final int boundServiceCount = boundServices.size();
+        for (int i = 0; i < boundServiceCount; i++) {
+            Service boundService = boundServices.get(i);
+            if (boundService.canRetrieveInteractiveWindowsLocked()) {
                 if (mWindowsForAccessibilityCallback == null) {
                     mWindowsForAccessibilityCallback = new WindowsForAccessibilityCallback();
                     mWindowManagerService.setWindowsForAccessibilityCallback(
@@ -1554,37 +1525,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         userState.mIsFilterKeyEventsEnabled = false;
     }
 
-    private void updateServicesLocked(UserState userState) {
-        if (userState.mIsAccessibilityEnabled) {
-            manageServicesLocked(userState);
-        } else {
-            unbindAllServicesLocked(userState);
-        }
-    }
-
     private boolean readConfigurationForUserStateLocked(UserState userState) {
-        boolean somthingChanged = readAccessibilityEnabledSettingLocked(userState);
-        somthingChanged |= readInstalledAccessibilityServiceLocked(userState);
-        somthingChanged |= readEnabledAccessibilityServicesLocked(userState);
-        somthingChanged |= readTouchExplorationGrantedAccessibilityServicesLocked(userState);
-        somthingChanged |= readTouchExplorationEnabledSettingLocked(userState);
-        somthingChanged |= readHighTextContrastEnabledSettingLocked(userState);
-        somthingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
-        somthingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
-        somthingChanged |= readAutoclickEnabledSettingLocked(userState);
-        somthingChanged |= readDisplayColorAdjustmentSettingsLocked(userState);
-        return somthingChanged;
+        boolean somethingChanged = readInstalledAccessibilityServiceLocked(userState);
+        somethingChanged |= readEnabledAccessibilityServicesLocked(userState);
+        somethingChanged |= readTouchExplorationGrantedAccessibilityServicesLocked(userState);
+        somethingChanged |= readTouchExplorationEnabledSettingLocked(userState);
+        somethingChanged |= readHighTextContrastEnabledSettingLocked(userState);
+        somethingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
+        somethingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
+        somethingChanged |= readAutoclickEnabledSettingLocked(userState);
+        somethingChanged |= readDisplayColorAdjustmentSettingsLocked(userState);
+
+        return somethingChanged;
     }
 
-    private boolean readAccessibilityEnabledSettingLocked(UserState userState) {
-        final boolean accessibilityEnabled = Settings.Secure.getIntForUser(
-               mContext.getContentResolver(),
-               Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId) == 1;
-        if (accessibilityEnabled != userState.mIsAccessibilityEnabled) {
-            userState.mIsAccessibilityEnabled = accessibilityEnabled;
-            return true;
+    private void updateAccessibilityEnabledSetting(UserState userState) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_ENABLED,
+                    userState.isHandlingAccessibilityEvents() ? 0 : 1,
+                    userState.mUserId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        return false;
     }
 
     private boolean readTouchExplorationEnabledSettingLocked(UserState userState) {
@@ -1809,7 +1773,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Check whether any Accessibility Services are still enabled and, if not, remove flag
             // requesting no soft keyboard
             final boolean accessibilityRequestingNoIme = userState.mSoftKeyboardShowMode == 1;
-            if (accessibilityRequestingNoIme && !userState.mIsAccessibilityEnabled) {
+            if (accessibilityRequestingNoIme && !userState.isHandlingAccessibilityEvents()) {
                 // No active Accessibility Services can be requesting the soft keyboard to be hidden
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
@@ -1853,7 +1817,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 UserState userState = mUserStates.valueAt(i);
                 pw.append("User state[attributes:{id=" + userState.mUserId);
                 pw.append(", currentUser=" + (userState.mUserId == mCurrentUserId));
-                pw.append(", accessibilityEnabled=" + userState.mIsAccessibilityEnabled);
                 pw.append(", touchExplorationEnabled=" + userState.mIsTouchExplorationEnabled);
                 pw.append(", displayMagnificationEnabled="
                         + userState.mIsDisplayMagnificationEnabled);
@@ -2003,7 +1966,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private void announceNewUserIfNeeded() {
             synchronized (mLock) {
                 UserState userState = getCurrentUserStateLocked();
-                if (userState.mIsAccessibilityEnabled) {
+                if (userState.isHandlingAccessibilityEvents()) {
                     UserManager userManager = (UserManager) mContext.getSystemService(
                             Context.USER_SERVICE);
                     String message = mContext.getString(R.string.user_switched,
@@ -4061,7 +4024,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public int mSoftKeyboardShowMode = 0;
 
-        public boolean mIsAccessibilityEnabled;
         public boolean mIsTouchExplorationEnabled;
         public boolean mIsTextHighContrastEnabled;
         public boolean mIsEnhancedWebAccessibilityEnabled;
@@ -4096,17 +4058,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public int getClientState() {
             int clientState = 0;
-            if (mIsAccessibilityEnabled) {
+            if (isHandlingAccessibilityEvents()) {
                 clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
             }
             // Touch exploration relies on enabled accessibility.
-            if (mIsAccessibilityEnabled && mIsTouchExplorationEnabled) {
+            if (isHandlingAccessibilityEvents() && mIsTouchExplorationEnabled) {
                 clientState |= AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
             }
             if (mIsTextHighContrastEnabled) {
                 clientState |= AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
             }
             return clientState;
+        }
+
+        public boolean isHandlingAccessibilityEvents() {
+            return !mBoundServices.isEmpty() || !mBoundServices.isEmpty();
         }
 
         public void onSwitchToAnotherUser() {
@@ -4128,7 +4094,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // Clear state persisted in settings.
             mEnabledServices.clear();
             mTouchExplorationGrantedServices.clear();
-            mIsAccessibilityEnabled = false;
             mIsTouchExplorationEnabled = false;
             mIsEnhancedWebAccessibilityEnabled = false;
             mIsDisplayMagnificationEnabled = false;
@@ -4154,9 +4119,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private final class AccessibilityContentObserver extends ContentObserver {
-
-        private final Uri mAccessibilityEnabledUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_ENABLED);
 
         private final Uri mTouchExplorationEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.TOUCH_EXPLORATION_ENABLED);
@@ -4199,8 +4161,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public void register(ContentResolver contentResolver) {
-            contentResolver.registerContentObserver(mAccessibilityEnabledUri,
-                    false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mTouchExplorationEnabledUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mDisplayMagnificationEnabledUri,
@@ -4240,11 +4200,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return;
                 }
 
-                if (mAccessibilityEnabledUri.equals(uri)) {
-                    if (readAccessibilityEnabledSettingLocked(userState)) {
-                        onUserStateChangedLocked(userState);
-                    }
-                } else if (mTouchExplorationEnabledUri.equals(uri)) {
+                if (mTouchExplorationEnabledUri.equals(uri)) {
                     if (readTouchExplorationEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
