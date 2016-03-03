@@ -284,6 +284,7 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
@@ -5091,8 +5092,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     int num = firstPids.size();
                     for (int i = 0; i < num; i++) {
                         synchronized (observer) {
+                            if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid "
+                                    + firstPids.get(i));
+                            final long sime = SystemClock.elapsedRealtime();
                             Process.sendSignal(firstPids.get(i), Process.SIGNAL_QUIT);
-                            observer.wait(200);  // Wait for write-close, give up after 200msec
+                            observer.wait(1000);  // Wait for write-close, give up after 1 sec
+                            if (DEBUG_ANR) Slog.d(TAG, "Done with pid " + firstPids.get(i)
+                                    + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                         }
                     }
                 } catch (InterruptedException e) {
@@ -5105,7 +5111,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 int[] pids = Process.getPidsForCommands(nativeProcs);
                 if (pids != null) {
                     for (int pid : pids) {
+                        if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
+                        final long sime = SystemClock.elapsedRealtime();
                         Debug.dumpNativeBacktraceToFile(pid, tracesPath);
+                        if (DEBUG_ANR) Slog.d(TAG, "Done with native pid " + pid
+                                + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                     }
                 }
             }
@@ -5132,13 +5142,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                         numProcs++;
                         try {
                             synchronized (observer) {
+                                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid "
+                                        + stats.pid);
+                                final long stime = SystemClock.elapsedRealtime();
                                 Process.sendSignal(stats.pid, Process.SIGNAL_QUIT);
-                                observer.wait(200);  // Wait for write-close, give up after 200msec
+                                observer.wait(1000);  // Wait for write-close, give up after 1 sec
+                                if (DEBUG_ANR) Slog.d(TAG, "Done with extra pid " + stats.pid
+                                        + " in " + (SystemClock.elapsedRealtime()-stime) + "ms");
                             }
                         } catch (InterruptedException e) {
                             Slog.wtf(TAG, e);
                         }
-
+                    } else if (DEBUG_ANR) {
+                        Slog.d(TAG, "Skipping next CPU consuming process, not a java proc: "
+                                + stats.pid);
                     }
                 }
             }
@@ -10784,12 +10801,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mAppErrors.appNotResponding(host, null, null, false, "ContentProvider not responding");
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAppErrors.appNotResponding(host, null, null, false,
+                        "ContentProvider not responding");
+            }
+        });
     }
 
     public final void installSystemProviders() {
