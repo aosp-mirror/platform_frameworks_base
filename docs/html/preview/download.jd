@@ -7,8 +7,9 @@ page.image=images/cards/card-download_16-9_2x.png
 
   <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
 
-    <p class="sdk-terms-intro">Before downloading and installing components of the Android Preview
-      SDK, you must agree to the following terms and conditions.</p>
+    <p class="sdk-terms-intro">Before downloading and installing components of
+      the Android Preview SDK, you must agree to the following terms and
+      conditions.</p>
 
     <h2 class="norule">Terms and Conditions</h2>
 
@@ -164,44 +165,37 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#sdk">Android 6.0 SDK</a></li>
+        <li><a href="#sdk">Preview SDK</a></li>
         <li><a href="#docs">Developer Documentation</a></li>
         <li><a href="#images">Hardware System Images</a></li>
       </ol>
-
-     <h2>Legacy downloads</h2>
-        <ol>
-           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview Archive</a></li>
-        </ol>
   </div>
 </div>
 
 
 <p>
-  The Android M Preview SDK includes development tools, Android system images, and library files to
-  help you test your app and the new APIs coming in the next release of the platform. This document
-  describes how to get the downloadable components of the preview for testing your app.
+  The Android N Preview SDK includes development tools, Android system images,
+  and library files to help you test your app and the new APIs coming in the
+  next release of the platform. This document describes how to get the
+  downloadable components of the preview for testing your app.
 </p>
 
 
-<h2 id="sdk">Android 6.0 SDK</h2>
+<h2 id="sdk">Preview SDK</h2>
 
 <p>
-  With Developer Preview 3, the official Android 6.0 SDK is now available for download through the <a href=
-  "{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>. For more information on
-  downloading and configuring the SDK, see <a href=
-  "{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the SDK</a>.
+  The Preview SDK is available for download through the
+  <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.
+  For more information on downloading and configuring the SDK, see
+  <a href="{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the SDK</a>.
 </p>
 
 
 <h2 id="docs">Developer Documentation</h2>
 
 <p>
-  The developer documentation for Developer Preview 3 is released as Android 6.0 (API level 23) and
-  is available online, including the <a href="{@docRoot}reference/packages.html">API level 23
-  reference</a> and <a href="{@docRoot}sdk/api_diff/23/changes.html">diff report</a>. The following
-  developer documentation download package provides additional, incremental difference reports
-  between the preview releases.
+  This download package provides detailed API reference
+  information and an API difference report for the preview.
 </p>
 
 <table>
@@ -210,11 +204,11 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     <th scope="col">Download / Checksums</th>
   </tr>
   <tr id="docs-dl">
-    <td>Android M Preview 3<br>Developer Docs</td>
+    <td>Android N Preview 1<br>Developer Docs</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-3-developer-docs.zip</a><br>
-      MD5: d99b14b0c06d31c8dfecb25072654ca3<br>
-      SHA-1: 9cefeeda07676130da606a1796e1c00fffc667c1
+      >n-preview-1-developer-docs.zip</a><br>
+      MD5: xxxx<br>
+      SHA-1: xxxx
     </td>
   </tr>
 <table>
@@ -223,20 +217,22 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h2 id="images">Hardware System Images</h2>
 
 <p>
-  These system images allow you to install a preview version of the platform on a physical device for
-  testing. By configuring a device with one of these images, you can install and test your app to
-  see how it performs on the next version of the platform. The process of installing a system image
-  on a device <em>removes all data from the device</em>, so you should backup your data before
-  installing a system image.
+  These system images allow you to install a preview version of the platform on
+  a physical device for testing. By configuring a device with one of these
+  images, you can install and test your app to see how it performs on the next
+  version of the platform. The process of installing a system image on a device
+  <em>removes all data from the device</em>, so you should back up your data
+  before installing a system image.
 </p>
 
 <p class="warning">
-  <b>Warning:</b> The following Android system images are previews and are subject to change. Your
-  use of these system images is governed by the Android SDK Preview License Agreement. The Android
-  preview system images are not stable releases, and may contain errors and defects that can result
-  in damage to your computer systems, devices, and data. The preview Android system images are not
-  subject to the same testing as the factory OS and can cause your phone and installed services and
-  applications to stop working.
+  <b>Warning:</b> The following Android system images are previews and are
+  subject to change. Your use of these system images is governed by the Android
+  SDK Preview License Agreement. The Android preview system images are not
+  stable releases, and may contain errors and defects that can result in damage
+  to your computer systems, devices, and data. The preview Android system
+  images are not subject to the same testing as the factory OS and can cause
+  your phone and installed services and applications to stop working.
 </p>
 
 <table>
@@ -244,37 +240,40 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     <th scope="col">Device</th>
     <th scope="col">Download / Checksums</th>
   </tr>
+
   <tr id="hammerhead">
-    <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
+    <td>Nexus 5X <br>"bullhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPA44I-preview-2ebbc049.tgz</a><br>
-      MD5: 91a924fb0c9f8e716e3b4c9954fd0dbb<br>
-      SHA-1: 2ebbc049b68c4da8baeee3e42bb94d7a965ba4a3
+      >bullhead-Nxxxx-preview-xxxxxxx.tgz</a><br>
+      MD5: xxxxxxx<br>
+      SHA-1: xxxxxxx
     </td>
   </tr>
+
   <tr id="shamu">
-    <td>Nexus 6 <br>"shamu"</td>
+    <td>Nexus 6P <br>"angler"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPA44I-preview-62b9c486.tgz</a><br>
-      MD5: ac6e58da86125073d9c395257fd42664<br>
-      SHA-1: 62b9c486fd7a5020e228d53ca5acd5c1857e48ff
+      >angler-Nxxxx-preview-xxxxxxx.tgz</a><br>
+      MD5: xxxxxxx<br>
+      SHA-1: xxxxxxx
     </td>
   </tr>
+
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPA44I-preview-5c30a6e2.tgz</a><br>
-      MD5: 7f83768757913d3fea945a661020d185<br>
-      SHA-1: 5c30a6e2acd11a81f4105b12d23ff654f534f699
+      >volantis-Nxxxx-preview-xxxxxxx.tgz</a><br>
+      MD5: xxxxxxx<br>
+      SHA-1: xxxxxxx
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPA44I-preview-2860040a.tgz</a><br>
-      MD5: 438da8d37da9e341a69cfb16a4001ac5<br>
-      SHA-1: 2860040a326582f1ff5f702bf9a1ef002717fc98
+      >fugu-Nxxxx-preview-xxxxxxx.tgz</a><br>
+      MD5: xxxxxxx<br>
+      SHA-1: xxxxxxx
     </td>
   </tr>
 
@@ -283,35 +282,37 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h3 id="install-image">Install an Image to a Device</h3>
 
 <p>
-  In order to use a device image for testing, you must install it on a compatible device. Follow
-  the instructions below to install a system image:
+  In order to use a device image for testing, you must install it on a
+  compatible device. Follow the instructions below to install a system image:
 </p>
 
 <ol>
   <li>Download and uncompress one of the system image packages listed here.</li>
   <li>Backup any data you want to preserve from the device.</li>
   <li>Follow the instructions at
-  <a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
-  to flash the image onto your device.</li>
+    <a href="https://developers.google.com/android/nexus/images#instructions">
+    developers.google.com/android</a> to flash the image onto your device.</li>
 </ol>
 
 <h3 id="update-image">Updating a Device with the Preview</h3>
 
 <p>
-  Once you have installed a preview system image on a development device, the device is upgraded
-  automatically with the next preview release through over-the-air (OTA) updates. When the update
-  is available, the device displays notification that an update is available and allows you to
-  install it. You can also manually install the next preview image by repeating the procedure in
-  the previous section.
+  Once you have installed a preview system image on a development device, the
+  device is upgraded automatically with the next preview release through
+  over-the-air (OTA) updates. When the update is available, the device displays
+  a notification that an update is available and allows you to install it. You
+  can also manually install the next preview image by repeating the procedure
+  in the previous section.
 </p>
 
 <h3 id="revertDevice">Revert a Device to Factory Specifications</h3>
 
 <p>
-  If you want to uninstall the preview and revert the device to factory specifications, go to
-  <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a> and
-  download the image you want to flash to for your device. Follow the instructions on that page to
-  flash the image to your device.
+  If you want to uninstall the preview and revert the device to factory
+  specifications, go to
+  <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a>
+  and download the image you want to flash to for your device. Follow the
+  instructions on that page to flash the image to your device.
 </p>
 
   </div><!-- landing -->
