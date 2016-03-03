@@ -4339,6 +4339,32 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
+     * Returns a managed-user-style badged copy of the given drawable allowing the user to
+     * distinguish it from the original drawable.
+     * The caller can specify the location in the bounds of the drawable to be
+     * badged where the badge should be applied as well as the density of the
+     * badge to be used.
+     * <p>
+     * If the original drawable is a BitmapDrawable and the backing bitmap is
+     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the badging
+     * is performed in place and the original drawable is returned.
+     * </p>
+     *
+     * @param drawable The drawable to badge.
+     * @param badgeLocation Where in the bounds of the badged drawable to place
+     *         the badge. If it's {@code null}, the badge is applied on top of the entire
+     *         drawable being badged.
+     * @param badgeDensity The optional desired density for the badge as per
+     *         {@link android.util.DisplayMetrics#densityDpi}. If it's not positive,
+     *         the density of the display is used.
+     * @return A drawable that combines the original drawable and a badge as
+     *         determined by the system.
+     * @hide
+     */
+    public abstract Drawable getManagedUserBadgedDrawable(Drawable drawable, Rect badgeLocation,
+        int badgeDensity);
+
+    /**
      * If the target user is a managed profile of the calling user or if the
      * target user is the caller and is itself a managed profile, then this
      * returns a badged copy of the given icon to be able to distinguish it from
@@ -4367,17 +4393,17 @@ public abstract class PackageManager {
      * badge to be used.
      * <p>
      * If the original drawable is a BitmapDrawable and the backing bitmap is
-     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the bading
+     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the badging
      * is performed in place and the original drawable is returned.
      * </p>
      *
      * @param drawable The drawable to badge.
      * @param user The target user.
      * @param badgeLocation Where in the bounds of the badged drawable to place
-     *         the badge. If not provided, the badge is applied on top of the entire
+     *         the badge. If it's {@code null}, the badge is applied on top of the entire
      *         drawable being badged.
      * @param badgeDensity The optional desired density for the badge as per
-     *         {@link android.util.DisplayMetrics#densityDpi}. If not provided,
+     *         {@link android.util.DisplayMetrics#densityDpi}. If it's not positive,
      *         the density of the display is used.
      * @return A drawable that combines the original drawable and a badge as
      *         determined by the system.

@@ -1093,6 +1093,14 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public Drawable getManagedUserBadgedDrawable(Drawable drawable, Rect badgeLocation,
+            int badgeDensity) {
+        Drawable badgeDrawable = getDrawableForDensity(
+            com.android.internal.R.drawable.ic_corp_badge, badgeDensity);
+        return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
+    }
+
+    @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
         final int badgeResId = getBadgeResIdForUser(user.getIdentifier());
         if (badgeResId == 0) {
@@ -1114,24 +1122,27 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public Drawable getUserBadgeForDensity(UserHandle user, int density) {
-        return getManagedProfileIconForDensity(user, density,
-                com.android.internal.R.drawable.ic_corp_badge);
+        return getManagedProfileIconForDensity(user, com.android.internal.R.drawable.ic_corp_badge,
+                density);
     }
 
     @Override
     public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
-        return getManagedProfileIconForDensity(user, density,
-                com.android.internal.R.drawable.ic_corp_badge_no_background);
+        return getManagedProfileIconForDensity(user,
+                com.android.internal.R.drawable.ic_corp_badge_no_background, density);
     }
 
-    private Drawable getManagedProfileIconForDensity(UserHandle user, int density,
-            int drawableId) {
+    private Drawable getDrawableForDensity(int drawableId, int density) {
+        if (density <= 0) {
+            density = mContext.getResources().getDisplayMetrics().densityDpi;
+        }
+        return Resources.getSystem().getDrawableForDensity(drawableId, density);
+    }
+
+    private Drawable getManagedProfileIconForDensity(UserHandle user, int drawableId, int density) {
         UserInfo userInfo = getUserIfProfile(user.getIdentifier());
         if (userInfo != null && userInfo.isManagedProfile()) {
-            if (density <= 0) {
-                density = mContext.getResources().getDisplayMetrics().densityDpi;
-            }
-            return Resources.getSystem().getDrawableForDensity(drawableId, density);
+            return getDrawableForDensity(drawableId, density);
         }
         return null;
     }
