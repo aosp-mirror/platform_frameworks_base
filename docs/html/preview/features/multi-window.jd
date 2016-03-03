@@ -52,9 +52,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   </li>
 
   <li>On Nexus Player running the N Developer Preview, apps can put themselves
-  in picture-in-picture mode, allowing them to continue showing content
-  while the user browses or interacts with other apps. For more information,
-  see <a href="picture-in-picture.html">Picture-in-picture</a>.
+  in <a href="picture-in-picture.html">picture-in-picture mode</a>, allowing
+  them to continue showing content while the user browses or interacts with
+  other apps.
   </li>
 
   <li>Manufacturers of larger devices can choose to enable freeform
@@ -84,9 +84,15 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   <li>If the user performs a long press on the Overview button, the device puts
   the current activity in multi-window mode, and opens the Overview screen to
   let the user choose another activity to share the screen.
-  <!-- ***TODO: screenshot*** -->
   </li>
 </ul>
+
+<p>
+  Users can <a href="{@docRoot}guide/topics/ui/drag-drop.html">drag and
+  drop</a> data from one activity to another while the activities are sharing
+  the screen. (Previously, users could only drag and drop data within a single
+  activity.)
+</p>
 
 <h2 id="lifecycle">Multi-Window Lifecycle</h2>
 
@@ -285,8 +291,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   The following new methods have been added to the {@link android.app.Activity}
   class to support multi-window display. For details on each method, see the
-  <!--TODO: Add link to preview download page-->
-   N Preview SDK Reference.
+  <a href="{@docRoot}preview/download.html#docs">N Preview SDK Reference</a>
 </p>
 
 <dl>
@@ -306,7 +311,7 @@ android:supportsPictureInPicture=["true" | "false"]
     Call to find out if the activity is in picture-in-picture mode.
 
     <p class="note">
-      <strong>Note:</strong> Picture-in-Picture mode is a special case of
+      <strong>Note:</strong> Picture-in-picture mode is a special case of
       multi-window mode. If <code>myActivity.inPictureInPicture()</code>
       returns true, then <code>myActivity.inMultiWindow()</code> also returns
       true.
@@ -341,14 +346,13 @@ android:supportsPictureInPicture=["true" | "false"]
   methods, for example <code>Fragment.inMultiWindow()</code>.
 </p>
 
-<h3 id="entering-pip">Entering Picture-in-Picture Mode</h3>
+<h3 id="entering-pip">Entering picture-in-picture mode</h3>
 
 <p>
   To put an activity in picture-in-picture mode, call the new method
   <code>Activity.enterPictureInPicture()</code>. This method has no effect if
   the device does not support picture-in-picture mode. For more information,
-  see <!-- TODO: Link to new N-Preview PIP doc-->
-  Picture-in-Picture Mode.
+  see the <a href="picture-in-picture.html">Picture-in-Picture</a> documentation.
 </p>
 
 <h3 id="launch">Launch New Activities in Multi-Window Mode</h3>
@@ -385,6 +389,70 @@ android:supportsPictureInPicture=["true" | "false"]
   multi-window properties. If you want to launch the new activity as a separate
   window in multi-window mode, you must launch it in a new task stack.
 </p>
+
+<h3 id="dnd">Supporting drag and drop</h3>
+
+<p>
+  Users can <a href="{@docRoot}guide/topics/ui/drag-drop.html">drag and
+  drop</a> data from one activity to another while the two activities are
+  sharing the screen. (Previously, users could only drag and drop data within a
+  single activity.) For this reason, you may want to add drag and drop
+  functionality to your app if your app does not currently support it.
+</p>
+
+<p>
+  The N Preview SDK extends the <a href=
+  "{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
+  package to support cross-app drag and drop. For details on the following
+  classes and methods, see the <a href="{@docRoot}preview/download.html#docs">N
+  Preview SDK Reference</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>android.view.DropPermissions</code>
+  </dt>
+
+  <dd>
+    Token object responsible for specifying the permissions granted to the app
+    that receives a drop.
+  </dd>
+
+  <dt>
+    <code>View.startDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    New alias for {@link android.view.View#startDrag View.startDrag()}.
+  </dd>
+
+  <dt>
+    <code>View.cancelDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Cancels a drag operation currently in progress. Can only be called by the
+    app that originated the drag operation.
+  </dd>
+
+  <dt>
+    <code>View.updateDragShadow()</code>
+  </dt>
+
+  <dd>
+    Replaces the drag shadow for a drag operation currently in progress. Can
+    only be called by the app that originated the drag operation.
+  </dd>
+
+  <dt>
+    <code>Activity.requestDropPermissions()</code>
+  </dt>
+
+  <dd>
+    Requests the permissions for the content URIs passed with the {@link
+    android.content.ClipData} contained in a {@link android.view.DragEvent}.
+  </dd>
+</dl>
 
 <h2 id="testing">Testing Your App's Multi-Window Support</h2>
 
