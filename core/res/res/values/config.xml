@@ -409,6 +409,9 @@
     <!-- Boolean indicating whether or not wifi firmware debugging is enabled -->
     <bool translatable="false" name="config_wifi_enable_wifi_firmware_debugging">true</bool>
 
+    <!-- Integer size limit, in KB, for a single WifiLogger ringbuffer -->
+    <integer translatable="false" name="config_wifi_logger_ring_buffer_size_limit_kb">32</integer>
+
     <!-- Boolean indicating whether or not wifi should turn off when emergency call is made -->
     <bool translatable="false" name="config_wifi_turn_off_during_emergency_call">false</bool>
 
