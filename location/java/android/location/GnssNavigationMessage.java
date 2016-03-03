@@ -34,58 +34,57 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /** The type of the GPS Clock. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MESSAGE_TYPE_UNKNOWN, MESSAGE_TYPE_GPS_L1CA, MESSAGE_TYPE_GPS_L2CNAV,
-        MESSAGE_TYPE_GPS_L5CNAV, MESSAGE_TYPE_GPS_CNAV2, MESSAGE_TYPE_GLO_L1CA, MESSAGE_TYPE_BDS_D1,
-        MESSAGE_TYPE_BDS_D2, MESSAGE_TYPE_GAL_I, MESSAGE_TYPE_GAL_F})
+    @IntDef({TYPE_UNKNOWN, TYPE_GPS_L1CA, TYPE_GPS_L2CNAV, TYPE_GPS_L5CNAV, TYPE_GPS_CNAV2,
+        TYPE_GLO_L1CA, TYPE_BDS_D1, TYPE_BDS_D2, TYPE_GAL_I, TYPE_GAL_F})
     public @interface GnssNavigationMessageType {}
 
     // The following enumerations must be in sync with the values declared in gps.h
 
     /** Message type unknown */
-    public static final short MESSAGE_TYPE_UNKNOWN = 0;
+    public static final int TYPE_UNKNOWN = 0;
     /** GPS L1 C/A message contained in the structure.  */
-    public static final short MESSAGE_TYPE_GPS_L1CA = 0x0101;
+    public static final int TYPE_GPS_L1CA = 0x0101;
     /** GPS L2-CNAV message contained in the structure. */
-    public static final short MESSAGE_TYPE_GPS_L2CNAV = 0x0102;
+    public static final int TYPE_GPS_L2CNAV = 0x0102;
     /** GPS L5-CNAV message contained in the structure. */
-    public static final short MESSAGE_TYPE_GPS_L5CNAV = 0x0103;
+    public static final int TYPE_GPS_L5CNAV = 0x0103;
     /** GPS CNAV-2 message contained in the structure. */
-    public static final short MESSAGE_TYPE_GPS_CNAV2 = 0x0104;
+    public static final int TYPE_GPS_CNAV2 = 0x0104;
     /** Glonass L1 CA message contained in the structure. */
-    public static final short MESSAGE_TYPE_GLO_L1CA = 0x0301;
+    public static final int TYPE_GLO_L1CA = 0x0301;
     /** Beidou D1 message contained in the structure. */
-    public static final short MESSAGE_TYPE_BDS_D1 = 0x0501;
+    public static final int TYPE_BDS_D1 = 0x0501;
     /** Beidou D2 message contained in the structure. */
-    public static final short MESSAGE_TYPE_BDS_D2 = 0x0502;
+    public static final int TYPE_BDS_D2 = 0x0502;
     /** Galileo I/NAV message contained in the structure. */
-    public static final short MESSAGE_TYPE_GAL_I = 0x0601;
+    public static final int TYPE_GAL_I = 0x0601;
     /** Galileo F/NAV message contained in the structure. */
-    public static final short MESSAGE_TYPE_GAL_F = 0x0602;
+    public static final int TYPE_GAL_F = 0x0602;
 
     /**
      * The Navigation Message Status is 'unknown'.
      */
-    public static final short STATUS_UNKNOWN = 0;
+    public static final int STATUS_UNKNOWN = 0;
 
     /**
      * The Navigation Message was received without any parity error in its navigation words.
      */
-    public static final short STATUS_PARITY_PASSED = (1<<0);
+    public static final int STATUS_PARITY_PASSED = (1<<0);
 
     /**
      * The Navigation Message was received with words that failed parity check, but the receiver was
      * able to correct those words.
      */
-    public static final short STATUS_PARITY_REBUILT = (1<<1);
+    public static final int STATUS_PARITY_REBUILT = (1<<1);
 
     // End enumerations in sync with gps.h
 
-    private short mType;
-    private short mSvid;
-    private short mMessageId;
-    private short mSubmessageId;
+    private int mType;
+    private int mSvid;
+    private int mMessageId;
+    private int mSubmessageId;
     private byte[] mData;
-    private short mStatus;
+    private int mStatus;
 
     GnssNavigationMessage() {
         initialize();
@@ -114,14 +113,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * Gets the type of the navigation message contained in the object.
      */
     @GnssNavigationMessageType
-    public short getType() {
+    public int getType() {
         return mType;
     }
 
     /**
      * Sets the type of the navigation message.
      */
-    public void setType(@GnssNavigationMessageType short value) {
+    public void setType(@GnssNavigationMessageType int value) {
         mType = value;
     }
 
@@ -131,25 +130,25 @@ public final class GnssNavigationMessage implements Parcelable {
      */
     private String getTypeString() {
         switch (mType) {
-            case MESSAGE_TYPE_UNKNOWN:
+            case TYPE_UNKNOWN:
                 return "Unknown";
-            case MESSAGE_TYPE_GPS_L1CA:
+            case TYPE_GPS_L1CA:
                 return "GPS L1 C/A";
-            case MESSAGE_TYPE_GPS_L2CNAV:
+            case TYPE_GPS_L2CNAV:
                 return "GPS L2-CNAV";
-            case MESSAGE_TYPE_GPS_L5CNAV:
+            case TYPE_GPS_L5CNAV:
                 return "GPS L5-CNAV";
-            case MESSAGE_TYPE_GPS_CNAV2:
+            case TYPE_GPS_CNAV2:
                 return "GPS CNAV2";
-            case MESSAGE_TYPE_GLO_L1CA:
+            case TYPE_GLO_L1CA:
                 return "Glonass L1 C/A";
-            case MESSAGE_TYPE_BDS_D1:
+            case TYPE_BDS_D1:
                 return "Beidou D1";
-            case MESSAGE_TYPE_BDS_D2:
+            case TYPE_BDS_D2:
                 return "Beidou D2";
-            case MESSAGE_TYPE_GAL_I:
+            case TYPE_GAL_I:
                 return "Galileo I";
-            case MESSAGE_TYPE_GAL_F:
+            case TYPE_GAL_F:
                 return "Galileo F";
             default:
                 return "<Invalid:" + mType + ">";
@@ -160,14 +159,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * Gets the Pseudo-random number.
      * Range: [1, 32].
      */
-    public short getSvid() {
+    public int getSvid() {
         return mSvid;
     }
 
     /**
      * Sets the Pseud-random number.
      */
-    public void setSvid(short value) {
+    public void setSvid(int value) {
         mSvid = value;
     }
 
@@ -177,14 +176,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * subframe 4 and 5, this value corresponds to the 'frame id' of the navigation message.
      * Subframe 1, 2, 3 does not contain a 'frame id' and this might be reported as -1.
      */
-    public short getMessageId() {
+    public int getMessageId() {
         return mMessageId;
     }
 
     /**
      * Sets the Message Identifier.
      */
-    public void setMessageId(short value) {
+    public void setMessageId(int value) {
         mMessageId = value;
     }
 
@@ -194,14 +193,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * (or frame) that is being transmitted. i.e. for L1 C/A the sub-message identifier corresponds
      * to the sub-frame Id of the navigation message.
      */
-    public short getSubmessageId() {
+    public int getSubmessageId() {
         return mSubmessageId;
     }
 
     /**
      * Sets the Sub-message identifier.
      */
-    public void setSubmessageId(short value) {
+    public void setSubmessageId(int value) {
         mSubmessageId = value;
     }
 
@@ -228,14 +227,14 @@ public final class GnssNavigationMessage implements Parcelable {
     /**
      * Gets the Status of the navigation message contained in the object.
      */
-    public short getStatus() {
+    public int getStatus() {
         return mStatus;
     }
 
     /**
      * Sets the status of the navigation message.
      */
-    public void setStatus(short value) {
+    public void setStatus(int value) {
         mStatus = value;
     }
 
@@ -262,10 +261,10 @@ public final class GnssNavigationMessage implements Parcelable {
         public GnssNavigationMessage createFromParcel(Parcel parcel) {
             GnssNavigationMessage navigationMessage = new GnssNavigationMessage();
 
-            navigationMessage.setType((short) parcel.readInt());
-            navigationMessage.setSvid((short) parcel.readInt());
-            navigationMessage.setMessageId((short) parcel.readInt());
-            navigationMessage.setSubmessageId((short) parcel.readInt());
+            navigationMessage.setType(parcel.readInt());
+            navigationMessage.setSvid(parcel.readInt());
+            navigationMessage.setMessageId(parcel.readInt());
+            navigationMessage.setSubmessageId(parcel.readInt());
 
             int dataLength = parcel.readInt();
             byte[] data = new byte[dataLength];
@@ -274,7 +273,7 @@ public final class GnssNavigationMessage implements Parcelable {
 
             if (parcel.dataAvail() >= Integer.SIZE) {
                 int status = parcel.readInt();
-                navigationMessage.setStatus((short) status);
+                navigationMessage.setStatus(status);
             } else {
                 navigationMessage.setStatus(STATUS_UNKNOWN);
             }
@@ -328,7 +327,7 @@ public final class GnssNavigationMessage implements Parcelable {
     }
 
     private void initialize() {
-        mType = MESSAGE_TYPE_UNKNOWN;
+        mType = TYPE_UNKNOWN;
         mSvid = 0;
         mMessageId = -1;
         mSubmessageId = -1;

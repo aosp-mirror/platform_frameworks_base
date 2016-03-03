@@ -1559,11 +1559,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to update SV info
      */
     private void reportSvStatus() {
-        int svCount = native_read_sv_status(mSvidWithFlags, mSnrs, mSvElevations, mSvAzimuths);
+        int svCount = native_read_sv_status(mSvidWithFlags, mCn0s, mSvElevations, mSvAzimuths);
         mListenerHelper.onSvStatusChanged(
                 svCount,
                 mSvidWithFlags,
-                mSnrs,
+                mCn0s,
                 mSvElevations,
                 mSvAzimuths);
 
@@ -1578,7 +1578,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
             if (VERBOSE) {
                 Log.v(TAG, "svid: " + (mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
-                        " snr: " + mSnrs[i]/10 +
+                        " cn0: " + mCn0s[i]/10 +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
@@ -2402,7 +2402,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     // preallocated arrays, to avoid memory allocation in reportStatus()
     private int mSvidWithFlags[] = new int[MAX_SVS];
-    private float mSnrs[] = new float[MAX_SVS];
+    private float mCn0s[] = new float[MAX_SVS];
     private float mSvElevations[] = new float[MAX_SVS];
     private float mSvAzimuths[] = new float[MAX_SVS];
     private int mSvCount;
@@ -2424,7 +2424,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private native void native_delete_aiding_data(int flags);
     // returns number of SVs
     // mask[0] is ephemeris mask and mask[1] is almanac mask
-    private native int native_read_sv_status(int[] prnWithFlags, float[] snrs, float[] elevations,
+    private native int native_read_sv_status(int[] prnWithFlags, float[] cn0s, float[] elevations,
             float[] azimuths);
     private native int native_read_nmea(byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
