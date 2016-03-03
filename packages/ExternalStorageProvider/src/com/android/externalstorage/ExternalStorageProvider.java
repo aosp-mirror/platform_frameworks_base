@@ -41,6 +41,7 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.provider.DocumentArchiveHelper;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -62,6 +63,7 @@ import java.util.List;
 public class ExternalStorageProvider extends DocumentsProvider {
     private static final String TAG = "ExternalStorage";
 
+    private static final boolean DEBUG = false;
     private static final boolean LOG_INOTIFY = false;
 
     public static final String AUTHORITY = "com.android.externalstorage.documents";
@@ -136,10 +138,25 @@ public class ExternalStorageProvider extends DocumentsProvider {
             if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
                 // We currently only support a single emulated volume mounted at
                 // a time, and it's always considered the primary
+                if (DEBUG) Log.d(TAG, "Found primary volume: " + volume);
                 rootId = ROOT_ID_PRIMARY_EMULATED;
+
                 if (VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
-                    title = getContext().getString(R.string.root_internal_storage);
+                    // This is basically the user's primary device storage.
+                    // Use device name for the volume since this is likely same thing
+                    // the user sees when they mount their phone on another device.
+                    String deviceName = Settings.Global.getString(
+                            getContext().getContentResolver(), Settings.Global.DEVICE_NAME);
+
+                    // Device name should always be set. In case it isn't, though,
+                    // fall back to a localized "Internal Storage" string.
+                    title = !TextUtils.isEmpty(deviceName)
+                            ? deviceName
+                            : getContext().getString(R.string.root_internal_storage);
                 } else {
+                    // This should cover all other storage devices, like an SD card
+                    // or USB OTG drive plugged in. Using getBestVolumeDescription()
+                    // will give us a nice string like "Samsung SD card" or "SanDisk USB drive"
                     final VolumeInfo privateVol = mStorageManager.findPrivateForEmulated(volume);
                     title = mStorageManager.getBestVolumeDescription(privateVol);
                 }
@@ -192,8 +209,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
             }
         }
 
-        // Finally, if primary storage is available we add the "Home" directory,
-        // creating it as needed.
+        // Finally, if primary storage is available we add the "Documents" directory.
+        // If I recall correctly the actual directory is created on demand
+        // by calling either getPathForUser, or getInternalPathForUser.
         if (primaryVolume != null && primaryVolume.isVisible()) {
             final RootInfo root = new RootInfo();
             root.rootId = ROOT_ID_HOME;
@@ -210,8 +228,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 root.flags |= Root.FLAG_SUPPORTS_CREATE;
             }
 
-            // Create the "Home" directory on disk, but don't the localized root.title
-            // since the directories shouldn't be localized.
+            // Create the "Documents" directory on disk (don't use the localized title).
             root.visiblePath = new File(
                     primaryVolume.getPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
             root.path = new File(
