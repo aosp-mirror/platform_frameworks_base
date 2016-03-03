@@ -684,7 +684,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mTranslateableViews.remove(mGutsStub);
     }
 
-    public void setTranslationForOutline(float translationX) {
+    private void setTranslationForOutline(float translationX) {
         setOutlineRect(false, translationX, getTop(), getRight() + translationX, getBottom());
     }
 
@@ -704,6 +704,46 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }
+        mTranslateAnim = (AnimatorSet) getTranslateViewAnimator(leftTarget,
+                null /* updateListener */);
+        if (mTranslateAnim != null) {
+            mTranslateAnim.start();
+        }
+    }
+
+    @Override
+    public void setTranslation(float translationX) {
+        if (areGutsExposed()) {
+            // Don't translate if guts are showing.
+            return;
+        }
+        // Translate the group of views
+        for (int i = 0; i < mTranslateableViews.size(); i++) {
+            if (mTranslateableViews.get(i) != null) {
+                mTranslateableViews.get(i).setTranslationX(translationX);
+            }
+        }
+        setTranslationForOutline(translationX);
+        if (mSettingsIconRow != null) {
+            mSettingsIconRow.updateSettingsIcons(translationX, getMeasuredWidth());
+        }
+    }
+
+    @Override
+    public float getTranslation() {
+        if (mTranslateableViews != null && mTranslateableViews.size() > 0) {
+            // All of the views in the list should have same translation, just use first one.
+            return mTranslateableViews.get(0).getTranslationX();
+        }
+        return 0;
+    }
+
+    public Animator getTranslateViewAnimator(final float leftTarget,
+            AnimatorUpdateListener listener) {
+        if (areGutsExposed()) {
+            // No translation if guts are exposed.
+            return null;
+        }
         AnimatorSet set = new AnimatorSet();
         if (mTranslateableViews != null) {
             for (int i = 0; i < mTranslateableViews.size(); i++) {
@@ -715,8 +755,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
                             setTranslationForOutline((float) animation.getAnimatedValue());
+                            if (mSettingsIconRow != null) {
+                                mSettingsIconRow.updateSettingsIcons(
+                                        (float) animation.getAnimatedValue(), getMeasuredWidth());
+                            }
                         }
                     });
+                    if (listener != null) {
+                        translateAnim.addUpdateListener(listener);
+                    }
                 }
                 translateAnim.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -730,8 +777,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 set.play(translateAnim);
             }
         }
-        mTranslateAnim = set;
-        set.start();
+        return set;
     }
 
     public float getSpaceForGear() {
@@ -746,10 +792,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mSettingsIconRowStub.inflate();
         }
         return mSettingsIconRow;
-    }
-
-    public ArrayList<View> getContentViews() {
-        return mTranslateableViews;
     }
 
     public void inflateGuts() {
@@ -1167,6 +1209,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public int getMaxExpandHeight() {
         return mMaxExpandHeight;
+    }
+
+    public boolean areGutsExposed() {
+        return (mGuts != null && mGuts.areGutsExposed());
     }
 
     @Override
