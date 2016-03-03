@@ -144,7 +144,9 @@ public class SwipeHelper implements Gefingerpoken {
     protected Animator getViewTranslationAnimator(View v, float target,
             AnimatorUpdateListener listener) {
         ObjectAnimator anim = createTranslationAnimation(v, target);
-        anim.addUpdateListener(listener);
+        if (listener != null) {
+            anim.addUpdateListener(listener);
+        }
         return anim;
     }
 
@@ -370,6 +372,9 @@ public class SwipeHelper implements Gefingerpoken {
         };
 
         Animator anim = getViewTranslationAnimator(animView, newPos, updateListener);
+        if (anim == null) {
+            return;
+        }
         if (useAccelerateInterpolator) {
             anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
         } else {
@@ -411,6 +416,9 @@ public class SwipeHelper implements Gefingerpoken {
         };
 
         Animator anim = getViewTranslationAnimator(animView, targetLeft, updateListener);
+        if (anim == null) {
+            return;
+        }
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
         anim.addListener(new AnimatorListenerAdapter() {
