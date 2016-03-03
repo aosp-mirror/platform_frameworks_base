@@ -19209,4 +19209,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     boolean isHistoricalPackageUsageAvailable() {
         return mPackageUsage.isHistoricalPackageUsageAvailable();
     }
+
+    /**
+     * Return a <b>copy</b> of the collection of packages known to the package manager.
+     * @return A copy of the values of mPackages.
+     */
+    Collection<PackageParser.Package> getPackages() {
+        synchronized (mPackages) {
+            return new ArrayList<>(mPackages.values());
+        }
+    }
 }
