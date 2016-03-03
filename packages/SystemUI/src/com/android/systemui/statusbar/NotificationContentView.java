@@ -92,7 +92,14 @@ public class NotificationContentView extends FrameLayout {
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
-            mAnimate = true;
+            // We need to post since we don't want the notification to animate on the very first
+            // frame
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    mAnimate = true;
+                }
+            });
             getViewTreeObserver().removeOnPreDrawListener(this);
             return true;
         }
