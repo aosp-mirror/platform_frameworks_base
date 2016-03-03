@@ -18,9 +18,10 @@
     android:id="@+id/recents_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/recents_tv_background_gradient"
     android:clipChildren="false"
-    android:clipToPadding="false" >
-
+    android:clipToPadding="false"
+    android:layoutDirection="rtl">
     <com.android.systemui.recents.tv.views.TaskStackHorizontalGridView
         android:id="@+id/task_list"
         android:layout_width="wrap_content"

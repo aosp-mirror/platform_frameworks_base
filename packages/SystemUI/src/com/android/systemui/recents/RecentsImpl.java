@@ -66,6 +66,7 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewScroller;

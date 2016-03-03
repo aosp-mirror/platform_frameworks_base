@@ -59,6 +59,8 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.tv.pip.PipManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The main TV recents activity started by the RecentsImpl.
@@ -156,11 +158,13 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
 
         mRecentsView.setTaskStack(stack);
+        List stackTasks = stack.getStackTasks();
+        Collections.reverse(stackTasks);
         if (mTaskStackViewAdapter == null) {
-            mTaskStackViewAdapter = new TaskStackHorizontalViewAdapter(stack.getStackTasks());
+            mTaskStackViewAdapter = new TaskStackHorizontalViewAdapter(stackTasks);
             mRecentsView.setTaskStackViewAdapter(mTaskStackViewAdapter);
         } else {
-            mTaskStackViewAdapter.setNewStackTasks(stack.getStackTasks());
+            mTaskStackViewAdapter.setNewStackTasks(stackTasks);
         }
 
         if (launchState.launchedToTaskId != -1) {

@@ -695,6 +695,37 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns a banner used on TV for the specified Activity.
+     */
+    public Drawable getActivityBanner(ActivityInfo info) {
+        if (mPm == null) return null;
+
+        // If we are mocking, then return a mock banner
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
+            return new ColorDrawable(0xFF666666);
+        }
+
+        Drawable banner = info.loadBanner(mPm);
+        return banner;
+    }
+
+    /**
+     * Returns a logo used on TV for the specified Activity.
+     */
+    public Drawable getActivityLogo(ActivityInfo info) {
+        if (mPm == null) return null;
+
+        // If we are mocking, then return a mock logo
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
+            return new ColorDrawable(0xFF666666);
+        }
+
+        Drawable logo = info.loadLogo(mPm);
+        return logo;
+    }
+
+
+    /**
      * Returns the given label for a user, badging if necessary.
      */
     private String getBadgedLabel(String label, int userId) {

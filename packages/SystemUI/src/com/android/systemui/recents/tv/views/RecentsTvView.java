@@ -17,6 +17,7 @@ package com.android.systemui.recents.tv.views;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +32,7 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
-import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
+import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
@@ -53,7 +54,8 @@ public class RecentsTvView extends FrameLayout {
     private View mEmptyView;
     private boolean mAwaitingFirstLayout = true;
     private Rect mSystemInsets = new Rect();
-
+    private RecentsTvTransitionHelper mTransitionHelper;
+    private Handler mHandler;
 
     public RecentsTvView(Context context) {
         this(context, null);
@@ -75,6 +77,8 @@ public class RecentsTvView extends FrameLayout {
         LayoutInflater inflater = LayoutInflater.from(context);
         mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
+        mHandler = new Handler();
+        mTransitionHelper = new RecentsTvTransitionHelper(mContext, mHandler);
     }
 
     public void setTaskStack(TaskStack stack) {
@@ -208,6 +212,11 @@ public class RecentsTvView extends FrameLayout {
     }
 
     /**** EventBus Events ****/
+
+    public final void onBusEvent(LaunchTvTaskEvent event) {
+        mTransitionHelper.launchTaskFromRecents(mStack, event.task, mTaskStackHorizontalView,
+                event.taskView, event.targetTaskBounds, event.targetTaskStack);
+    }
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         // If we are going home, cancel the previous task's window transition
