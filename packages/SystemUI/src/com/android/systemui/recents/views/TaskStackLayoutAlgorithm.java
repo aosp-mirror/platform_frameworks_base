@@ -29,6 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.FreePathInterpolator;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
@@ -36,6 +37,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Used to describe a visible range that can be normalized to [0, 1].
@@ -220,6 +222,10 @@ public class TaskStackLayoutAlgorithm {
     private Range mUnfocusedRange;
     private Range mFocusedRange;
 
+    // The initial offset from the top of the stack
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mInitialTopPeekHeight;
+
     // The offset from the top when scrolled to the top of the stack
     @ViewDebug.ExportedProperty(category="recents")
     private int mFocusedTopPeekHeight;
@@ -230,6 +236,10 @@ public class TaskStackLayoutAlgorithm {
     // the end
     @ViewDebug.ExportedProperty(category="recents")
     private int mStackTopOffset;
+
+    // The height of the header bar
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mHeaderBarHeight;
 
     // The offset from the bottom of the stack to the bottom of the bounds when the stack is
     // scrolled to the front
@@ -248,6 +258,9 @@ public class TaskStackLayoutAlgorithm {
     private Path mFocusedDimCurve;
     private FreePathInterpolator mUnfocusedDimCurveInterpolator;
     private FreePathInterpolator mFocusedDimCurveInterpolator;
+
+    // Indexed from the front of the stack, the normalized x in the unfocused range for each task
+    private float[] mInitialNormX;
 
     // The state of the stack focus (0..1), which controls the transition of the stack from the
     // focused to non-focused state
@@ -292,23 +305,32 @@ public class TaskStackLayoutAlgorithm {
     TaskViewTransform mFrontOfStackTransform = new TaskViewTransform();
 
     public TaskStackLayoutAlgorithm(Context context, TaskStackLayoutAlgorithmCallbacks cb) {
-        Resources res = context.getResources();
         mContext = context;
         mCb = cb;
+        mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
+        reloadOnConfigurationChange(context);
+    }
 
+    /**
+     * Reloads the layout for the current configuration.
+     */
+    public void reloadOnConfigurationChange(Context context) {
+        Resources res = context.getResources();
         mFocusedRange = new Range(res.getFloat(R.integer.recents_layout_focused_range_min),
                 res.getFloat(R.integer.recents_layout_focused_range_max));
         mUnfocusedRange = new Range(res.getFloat(R.integer.recents_layout_unfocused_range_min),
                 res.getFloat(R.integer.recents_layout_unfocused_range_max));
-        mFocusState = getDefaultFocusState();
+        mFocusState = getInitialFocusState();
+        mInitialTopPeekHeight = res.getDimensionPixelSize(R.dimen.recents_initial_top_peek_size);
         mFocusedTopPeekHeight =
                 res.getDimensionPixelSize(R.dimen.recents_layout_focused_top_peek_size);
         mFocusedBottomTaskPeekHeight =
                 res.getDimensionPixelSize(R.dimen.recents_layout_focused_bottom_task_peek_size);
+        mHeaderBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
 
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
-        mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
+        mFreeformLayoutAlgorithm.reloadOnConfigurationChange(context);
     }
 
     /**
@@ -316,7 +338,7 @@ public class TaskStackLayoutAlgorithm {
      */
     public void reset() {
         mTaskIndexOverrideMap.clear();
-        setFocusState(getDefaultFocusState());
+        setFocusState(getInitialFocusState());
     }
 
     /**
@@ -439,46 +461,87 @@ public class TaskStackLayoutAlgorithm {
             mTaskIndexMap.put(task.key.id, i);
         }
 
-        // Calculate the min/max scroll
-        if (getDefaultFocusState() > 0f) {
-            mMinScrollP = 0;
-            mMaxScrollP = Math.max(mMinScrollP, mNumStackTasks - 1);
-        } else {
-            if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
-                mMinScrollP = mMaxScrollP = 0;
-            } else {
-                float bottomOffsetPct = (float) (mStackBottomOffset + mTaskRect.height()) /
-                        mStackRect.height();
-                float normX = mUnfocusedCurveInterpolator.getX(bottomOffsetPct);
-                mMinScrollP = 0;
-                mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
-                        Math.max(0, mUnfocusedRange.getAbsoluteX(normX)));
-            }
-        }
-
+        // Update the freeform tasks
         if (!freeformTasks.isEmpty()) {
             mFreeformLayoutAlgorithm.update(freeformTasks, this);
-            mInitialScrollP = mMaxScrollP;
-        } else {
-            Task launchTask = stack.getLaunchTarget();
-            int launchTaskIndex = launchTask != null
-                    ? stack.indexOfStackTask(launchTask)
-                    : mNumStackTasks - 1;
-            if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
-                mInitialScrollP = mMinScrollP;
-            } else if (getDefaultFocusState() > 0f) {
-                if (launchState.launchedFromHome) {
-                    mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
-                } else {
-                    mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP,
-                            mMaxScrollP);
-                }
+        }
+
+        // Calculate the min/max/initial scroll
+        Task launchTask = stack.getLaunchTarget();
+        int launchTaskIndex = launchTask != null
+                ? stack.indexOfStackTask(launchTask)
+                : mNumStackTasks - 1;
+        if (getInitialFocusState() == STATE_FOCUSED) {
+            mMinScrollP = 0;
+            mMaxScrollP = Math.max(mMinScrollP, mNumStackTasks - 1);
+            if (launchState.launchedFromHome) {
+                mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else {
-                float offsetPct = (float) (mTaskRect.height() / 3) / mStackRect.height();
-                float normX = mUnfocusedCurveInterpolator.getX(offsetPct);
-                mInitialScrollP = Utilities.clamp(launchTaskIndex -
-                        mUnfocusedRange.getAbsoluteX(normX), mMinScrollP, mMaxScrollP);
+                mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
             }
+        } else if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
+            // If there is one stack task, ignore the min/max/initial scroll positions
+            mMinScrollP = 0;
+            mMaxScrollP = 0;
+            mInitialScrollP = 0;
+        } else {
+            // Set the max scroll to be the point where the front most task is visible with the
+            // stack bottom offset
+            int maxBottomOffset = mStackBottomOffset + mTaskRect.height();
+            float maxBottomOffsetPct = (float) maxBottomOffset / mStackRect.height();
+            float maxBottomNormX = mUnfocusedCurveInterpolator.getX(maxBottomOffsetPct);
+            mUnfocusedRange.offset(0f);
+            mMinScrollP = 0;
+            mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
+                    Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
+            boolean scrollToFront = launchState.launchedFromHome ||
+                    launchState.launchedFromAppDocked;
+            if (scrollToFront) {
+                mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
+            } else {
+                mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
+            }
+
+            // Set the initial scroll to the predefined state (which differs from the stack)
+            int initialPeekOffset = mStackRect.height() - mInitialTopPeekHeight;
+            float initialPeekOffsetPct = (float) initialPeekOffset / mStackRect.height();
+            float initialPeekOffsetNormX = mUnfocusedCurveInterpolator.getX(initialPeekOffsetPct);
+            float initialFocusedOffset = mStackRect.height() - mInitialTopPeekHeight -
+                    (mHeaderBarHeight * 1f) + 1;
+            float initialFocusedOffsetPct = (float) initialFocusedOffset / mStackRect.height();
+            float initialFocusedNormX = mUnfocusedCurveInterpolator.getX(initialFocusedOffsetPct);
+            int initialBottomOffset = mStackBottomOffset + mHeaderBarHeight;
+            float initialBottomOffsetPct = (float) initialBottomOffset / mStackRect.height();
+            float initialBottomNormX = mUnfocusedCurveInterpolator.getX(initialBottomOffsetPct);
+            /*
+            // If we want to offset the top card slightly
+            mInitialNormX = scrollToFront
+                    ? new float[] { initialFocusedNormX, initialPeekOffsetNormX, 0f }
+                    : new float[] { initialBottomNormX, initialFocusedNormX,
+                            initialPeekOffsetNormX, 0f };
+            */
+            mInitialNormX = scrollToFront
+                    ? new float[] { initialFocusedNormX, initialPeekOffsetNormX, 0f }
+                    : new float[] { initialBottomNormX, 0.5f, 0f };
+        }
+    }
+
+    public void updateToInitialState(List<Task> tasks) {
+        if (mInitialNormX == null) {
+            return;
+        }
+
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        mUnfocusedRange.offset(0f);
+        int taskCount = tasks.size();
+        for (int i = taskCount - 1; i >= 0; i--) {
+            int indexFromFront = taskCount - i - 1;
+            if (indexFromFront >= mInitialNormX.length) {
+                break;
+            }
+            float newTaskProgress = mInitialScrollP +
+                    mUnfocusedRange.getAbsoluteX(mInitialNormX[indexFromFront]);
+            mTaskIndexOverrideMap.put(tasks.get(i).key.id, newTaskProgress);
         }
     }
 
@@ -498,6 +561,10 @@ public class TaskStackLayoutAlgorithm {
                 mTaskIndexOverrideMap.put(task.key.id, unfocusedTaskProgress);
             }
         }
+    }
+
+    public void clearUnfocusedTaskOverrides() {
+        mTaskIndexOverrideMap.clear();
     }
 
     /**
@@ -523,7 +590,7 @@ public class TaskStackLayoutAlgorithm {
             } else {
                 // Scrolling override x away from x, we should still move the scroll towards x
                 float deltaX = overrideX - x;
-                newOverrideX = Math.signum(deltaX) * (Math.abs(deltaX) - deltaScroll);
+                newOverrideX = Math.signum(deltaX) * (Math.abs(deltaX) - Math.abs(deltaScroll));
                 mTaskIndexOverrideMap.put(taskId, x + newOverrideX);
             }
         }
@@ -532,8 +599,13 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Returns the default focus state.
      */
-    public int getDefaultFocusState() {
-        return STATE_FOCUSED;
+    public int getInitialFocusState() {
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        if (debugFlags.isPagingEnabled()) {
+            return STATE_FOCUSED;
+        } else {
+            return STATE_UNFOCUSED;
+        }
     }
 
     /**
@@ -577,7 +649,7 @@ public class TaskStackLayoutAlgorithm {
         // Otherwise, walk backwards in the stack and count the number of tasks and visible
         // thumbnails and add that to the total freeform task count
         TaskViewTransform tmpTransform = new TaskViewTransform();
-        Range currentRange = getDefaultFocusState() > 0f ? mFocusedRange : mUnfocusedRange;
+        Range currentRange = getInitialFocusState() > 0f ? mFocusedRange : mUnfocusedRange;
         currentRange.offset(mInitialScrollP);
         int taskBarHeight = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_task_bar_height);
@@ -635,11 +707,19 @@ public class TaskStackLayoutAlgorithm {
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform) {
         return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
-                false /* forceUpdate */);
+                false /* forceUpdate */, false /* ignoreTaskOverrides */);
+    }
+
+    public TaskViewTransform getStackTransform(Task task, float stackScroll,
+            TaskViewTransform transformOut, TaskViewTransform frontTransform,
+            boolean ignoreTaskOverrides) {
+        return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
+                false /* forceUpdate */, ignoreTaskOverrides);
     }
 
     public TaskViewTransform getStackTransform(Task task, float stackScroll, int focusState,
-        TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate) {
+            TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate,
+            boolean ignoreTaskOverrides) {
         if (mFreeformLayoutAlgorithm.isTransformAvailable(task, this)) {
             mFreeformLayoutAlgorithm.getTransform(task, transformOut, this);
             return transformOut;
@@ -649,7 +729,9 @@ public class TaskStackLayoutAlgorithm {
                 transformOut.reset();
                 return transformOut;
             }
-            float taskProgress = getStackScrollForTask(task);
+            float taskProgress = ignoreTaskOverrides
+                    ? mTaskIndexMap.get(task.key.id, 0)
+                    : getStackScrollForTask(task);
             getStackTransform(taskProgress, stackScroll, focusState, transformOut,
                     frontTransform, false /* ignoreSingleTaskCase */, forceUpdate);
             return transformOut;
@@ -851,8 +933,8 @@ public class TaskStackLayoutAlgorithm {
         // The unfocused dim interpolator starts at max dim, reduces to zero at 0.5 (the focused
         // task), then goes back to max dim towards the front of the stack
         p.moveTo(0f, MAX_DIM);
-        p.cubicTo(0f, 0.1f, 0.4f, 0f, 0.5f, 0f);
-        p.cubicTo(0.6f, 0f, 0.9f, MAX_DIM - 0.1f, 1f, MAX_DIM / 2f);
+        p.cubicTo(0.1f, MAX_DIM, 0.4f, 0.0f, 0.5f, 0f);
+        p.cubicTo(0.6f, 0f, 0.9f, MAX_DIM / 2f, 1f, MAX_DIM / 2f);
         return p;
     }
 

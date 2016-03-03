@@ -446,7 +446,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             }
 
             // Pick up the newly visible views, not including the deleting tasks
-            mSv.bindVisibleTaskViews(newStackScroll);
+            mSv.bindVisibleTaskViews(newStackScroll, true /* ignoreTaskOverrides */);
 
             // Get the final set of task transforms (with task removed)
             mSv.getLayoutTaskTransforms(newStackScroll, TaskStackLayoutAlgorithm.STATE_UNFOCUSED,
@@ -486,6 +486,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mSv.getScroller().setStackScroll(mTargetStackScroll, null);
         // Update the focus state to the final focus state
         mSv.getStackAlgorithm().setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
+        mSv.getStackAlgorithm().clearUnfocusedTaskOverrides();
         // Remove the task view from the stack
         EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv));
         // Stop tracking this deletion animation

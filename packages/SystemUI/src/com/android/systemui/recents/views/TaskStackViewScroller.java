@@ -115,13 +115,8 @@ public class TaskStackViewScroller {
      * @return whether the stack progress changed.
      */
     public boolean setStackScrollToInitialState() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         float prevStackScrollP = mStackScrollP;
-        if (ssp.hasDockedTask()) {
-            setStackScroll(mLayoutAlgorithm.mMaxScrollP);
-        } else {
-            setStackScroll(mLayoutAlgorithm.mInitialScrollP);
-        }
+        setStackScroll(mLayoutAlgorithm.mInitialScrollP);
         return Float.compare(prevStackScrollP, mStackScrollP) != 0;
     }
 
