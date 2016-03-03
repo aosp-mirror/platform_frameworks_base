@@ -1042,6 +1042,11 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        public void setInstallFlagsDontKillApp() {
+            installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
+        }
+
+        /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
             pw.printHexPair("installFlags", installFlags);

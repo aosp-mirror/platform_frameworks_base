@@ -65,6 +65,8 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -184,7 +186,7 @@ final class ActivityStack {
      * The back history of all previous (and possibly still
      * running) activities.  It contains #TaskRecord objects.
      */
-    private ArrayList<TaskRecord> mTaskHistory = new ArrayList<>();
+    private final ArrayList<TaskRecord> mTaskHistory = new ArrayList<>();
 
     /**
      * Used for validating app tokens with window manager.
@@ -836,6 +838,18 @@ final class ActivityStack {
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             activityPausedLocked(mPausingActivity.appToken, true);
+        }
+    }
+
+    void updateActivityApplicationInfoLocked(ApplicationInfo aInfo) {
+        final String packageName = aInfo.packageName;
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final List<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                if (packageName.equals(activities.get(activityNdx).packageName)) {
+                    activities.get(activityNdx).info.applicationInfo = aInfo;
+                }
+            }
         }
     }
 

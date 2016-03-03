@@ -86,6 +86,18 @@ class ApplicationLoaders {
                                                             String libraryPermittedPath,
                                                             boolean isShared);
 
+    /**
+     * Adds a new path the classpath of the given loader.
+     * @throws IllegalStateException if the provided class loader is not a {@link PathClassLoader}.
+     */
+    void addPath(ClassLoader classLoader, String dexPath) {
+        if (!(classLoader instanceof PathClassLoader)) {
+            throw new IllegalStateException("class loader is not a PathClassLoader");
+        }
+        final PathClassLoader baseDexClassLoader = (PathClassLoader) classLoader;
+        baseDexClassLoader.addDexPath(dexPath);
+    }
+
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<String, ClassLoader>();
 
     private static final ApplicationLoaders gApplicationLoaders

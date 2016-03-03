@@ -123,8 +123,13 @@ public interface IApplicationThread extends IInterface {
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
+    // the package has been removed, clean up internal references
     static final int PACKAGE_REMOVED = 0;
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
+    // the package is being modified in-place, don't kill it and retain references to it
+    static final int PACKAGE_REMOVED_DONT_KILL = 2;
+    // a previously removed package was replaced with a new version [eg. upgrade, split added, ...]
+    static final int PACKAGE_REPLACED = 3;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
     void scheduleCrash(String msg) throws RemoteException;
     void dumpActivity(FileDescriptor fd, IBinder servicetoken, String prefix, String[] args)

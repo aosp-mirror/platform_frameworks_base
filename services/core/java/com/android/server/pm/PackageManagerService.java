@@ -360,6 +360,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_MOVE = 1<<13;
     static final int SCAN_INITIAL = 1<<14;
     static final int SCAN_CHECK_ONLY = 1<<15;
+    static final int SCAN_DONT_KILL_APP = 1<<17;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -498,6 +499,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     @GuardedBy("mPackages")
     final ArrayMap<String, PackageParser.Package> mPackages =
             new ArrayMap<String, PackageParser.Package>();
+
+    final ArrayMap<String, Set<String>> mKnownCodebase =
+            new ArrayMap<String, Set<String>>();
 
     // Tracks available target package names -> overlay package paths.
     final ArrayMap<String, ArrayMap<String, PackageParser.Package>> mOverlays =
@@ -1425,19 +1429,21 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                         final boolean grantPermissions = (args.installFlags
                                 & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0;
+                        final boolean killApp = (args.installFlags
+                                & PackageManager.INSTALL_DONT_KILL_APP) == 0;
                         final String[] grantedPermissions = args.installGrantPermissions;
 
                         // Handle the parent package
-                        handlePackagePostInstall(parentRes, grantPermissions, grantedPermissions,
-                                args.observer);
+                        handlePackagePostInstall(parentRes, grantPermissions, killApp,
+                                grantedPermissions, args.observer);
 
                         // Handle the child packages
                         final int childCount = (parentRes.addedChildPackages != null)
                                 ? parentRes.addedChildPackages.size() : 0;
                         for (int i = 0; i < childCount; i++) {
                             PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
-                            handlePackagePostInstall(childRes, grantPermissions, grantedPermissions,
-                                    args.observer);
+                            handlePackagePostInstall(childRes, grantPermissions, killApp,
+                                    grantedPermissions, args.observer);
                         }
 
                         // Log tracing if needed
@@ -1632,11 +1638,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
-            String[] grantedPermissions, IPackageInstallObserver2 installObserver) {
+            boolean killApp, String[] grantedPermissions,
+            IPackageInstallObserver2 installObserver) {
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
             // Send the removed broadcasts
             if (res.removedInfo != null) {
-                res.removedInfo.sendPackageRemovedBroadcasts();
+                res.removedInfo.sendPackageRemovedBroadcasts(killApp);
             }
 
             // Now that we successfully installed the package, grant runtime
@@ -7899,13 +7906,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
-        if ((scanFlags & SCAN_REPLACING) != 0) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "killApplication");
+        final boolean isReplacing = (scanFlags & SCAN_REPLACING) != 0;
+        final boolean killApp = (scanFlags & SCAN_DONT_KILL_APP) == 0;
+        if (killApp) {
+            if (isReplacing) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "killApplication");
 
-            killApplication(pkg.applicationInfo.packageName,
-                        pkg.applicationInfo.uid, "replace pkg");
+                killApplication(pkg.applicationInfo.packageName,
+                            pkg.applicationInfo.uid, "replace pkg");
 
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
         }
 
         // Also need to kill any apps that are dependent on the library.
@@ -10594,7 +10605,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         info.removedPackage = packageName;
         info.removedUsers = new int[] {userId};
         info.uid = UserHandle.getUid(userId, pkgSetting.appId);
-        info.sendPackageRemovedBroadcasts();
+        info.sendPackageRemovedBroadcasts(true /*killApp*/);
     }
 
     private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended) {
@@ -13077,6 +13088,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    public List<String> getPreviousCodePaths(String packageName) {
+        final PackageSetting ps = mSettings.mPackages.get(packageName);
+        final List<String> result = new ArrayList<String>();
+        if (ps != null && ps.oldCodePaths != null) {
+            result.addAll(ps.oldCodePaths);
+        }
+        return result;
+    }
+
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
             int[] allUsers, String installerPackageName, PackageInstalledInfo res) {
@@ -13086,12 +13106,16 @@ public class PackageManagerService extends IPackageManager.Stub {
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
         boolean addedPkg = false;
+        boolean updatedSettings = false;
+        final boolean killApp = (scanFlags & SCAN_DONT_KILL_APP) == 0;
+        final int deleteFlags = PackageManager.DELETE_KEEP_DATA
+                | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
 
         final long origUpdateTime = (pkg.mExtras != null)
                 ? ((PackageSetting)pkg.mExtras).lastUpdateTime : 0;
 
         // First delete the existing package while retaining the data directory
-        if (!deletePackageLI(pkgName, null, true, allUsers, PackageManager.DELETE_KEEP_DATA,
+        if (!deletePackageLI(pkgName, null, true, allUsers, deleteFlags,
                 res.removedInfo, true, pkg)) {
             // If the existing package wasn't successfully deleted
             res.setError(INSTALL_FAILED_REPLACE_COULDNT_DELETE, "replaceNonSystemPackageLI");
@@ -13117,6 +13141,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
                 updateSettingsLI(newPackage, installerPackageName, allUsers, res, user);
+
+                // Update the in-memory copy of the previous code paths.
+                PackageSetting ps = mSettings.mPackages.get(pkgName);
+                if (!killApp) {
+                    if (ps.oldCodePaths == null) {
+                        ps.oldCodePaths = new ArraySet<>();
+                    }
+                    Collections.addAll(ps.oldCodePaths, deletedPackage.baseCodePath);
+                    if (deletedPackage.splitCodePaths != null) {
+                        Collections.addAll(ps.oldCodePaths, deletedPackage.splitCodePaths);
+                    }
+                } else {
+                    ps.oldCodePaths = null;
+                }
+                if (ps.childPackageNames != null) {
+                    for (int i = ps.childPackageNames.size() - 1; i >= 0; --i) {
+                        final String childPkgName = ps.childPackageNames.get(i);
+                        final PackageSetting childPs = mSettings.mPackages.get(childPkgName);
+                        childPs.oldCodePaths = ps.oldCodePaths;
+                    }
+                }
                 prepareAppDataAfterInstall(newPackage);
                 addedPkg = true;
             } catch (PackageManagerException e) {
@@ -13129,7 +13174,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Revert all internal state mutations and added folders for the failed install
             if (addedPkg) {
-                deletePackageLI(pkgName, null, true, allUsers, PackageManager.DELETE_KEEP_DATA,
+                deletePackageLI(pkgName, null, true, allUsers, deleteFlags,
                         res.removedInfo, true, null);
             }
 
@@ -13581,6 +13626,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (args.move != null) {
             // moving a complete application; perform an initial scan on the new install location
             scanFlags |= SCAN_INITIAL;
+        }
+        if ((installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
+            scanFlags |= SCAN_DONT_KILL_APP;
         }
 
         // Result object to be returned
@@ -14302,7 +14350,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (res) {
-            info.sendPackageRemovedBroadcasts();
+            final boolean killApp = (flags & PackageManager.INSTALL_DONT_KILL_APP) == 0;
+            info.sendPackageRemovedBroadcasts(killApp);
             info.sendSystemPackageUpdatedBroadcasts();
             info.sendSystemPackageAppearedBroadcasts();
         }
@@ -14334,12 +14383,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         ArrayMap<String, PackageRemovedInfo> removedChildPackages;
         ArrayMap<String, PackageInstalledInfo> appearedChildPackages;
 
-        void sendPackageRemovedBroadcasts() {
-            sendPackageRemovedBroadcastInternal();
+        void sendPackageRemovedBroadcasts(boolean killApp) {
+            sendPackageRemovedBroadcastInternal(killApp);
             final int childCount = removedChildPackages != null ? removedChildPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
                 PackageRemovedInfo childInfo = removedChildPackages.valueAt(i);
-                childInfo.sendPackageRemovedBroadcastInternal();
+                childInfo.sendPackageRemovedBroadcastInternal(killApp);
             }
         }
 
@@ -14381,10 +14430,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     null, 0, removedPackage, null, null);
         }
 
-        private void sendPackageRemovedBroadcastInternal() {
+        private void sendPackageRemovedBroadcastInternal(boolean killApp) {
             Bundle extras = new Bundle(2);
             extras.putInt(Intent.EXTRA_UID, removedAppId >= 0  ? removedAppId : uid);
             extras.putBoolean(Intent.EXTRA_DATA_REMOVED, dataRemoved);
+            extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
             if (isUpdate || isRemovedPackageSystemUpdate) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
@@ -14875,7 +14925,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
             // Kill application pre-emptively especially for apps on sd.
-            killApplication(packageName, ps.appId, "uninstall pkg");
+            final boolean killApp = (flags & PackageManager.DELETE_DONT_KILL_APP) == 0;
+            if (killApp) {
+                killApplication(packageName, ps.appId, "uninstall pkg");
+            }
             ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings, replacingPackage);
         }
@@ -19123,6 +19176,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 PermissionsState permissionsState = packageSetting.getPermissionsState();
                 return permissionsState.isPermissionReviewRequired(userId);
             }
+        }
+
+        @Override
+        public ApplicationInfo getApplicationInfo(String packageName, int userId) {
+            return PackageManagerService.this.getApplicationInfo(packageName, 0 /*flags*/, userId);
         }
     }
 

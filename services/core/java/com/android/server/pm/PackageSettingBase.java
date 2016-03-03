@@ -30,6 +30,7 @@ import android.util.SparseArray;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Settings base class for pending and resolved classes.
@@ -118,7 +119,14 @@ abstract class PackageSettingBase extends SettingBase {
      * platform will refuse to launch packages in a frozen state.
      */
     boolean frozen = false;
-
+    /**
+     * Non-persisted value. During an "upgrade without restart", we need the set
+     * of all previous code paths so we can surgically add the new APKs to the
+     * active classloader. If at any point an application is upgraded with a
+     * restart, this field will be cleared since the classloader would be created
+     * using the full set of code paths when the package's process is started.
+     */
+    Set<String> oldCodePaths;
     PackageSettingBase origPackage;
 
     /** Package name of the app that installed this package */

@@ -530,4 +530,7 @@ interface IPackageManager {
     String getServicesSystemSharedLibraryPackageName();
 
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
+
+    List<String> getPreviousCodePaths(in String packageName);
+
 }
