@@ -276,7 +276,7 @@ class DocumentLoader implements AutoCloseable {
         static final int STATE_ERROR = 2;
 
         final MtpDatabase mDatabase;
-        int[] mOperationsSupported;
+        final int[] mOperationsSupported;
         final Identifier mIdentifier;
         final int[] mObjectHandles;
         Date mLastNotified;
@@ -285,6 +285,8 @@ class DocumentLoader implements AutoCloseable {
 
         LoaderTask(MtpDatabase database, int[] operationsSupported, Identifier identifier,
                 int[] objectHandles) {
+            Preconditions.checkNotNull(operationsSupported);
+            Preconditions.checkNotNull(objectHandles);
             mDatabase = database;
             mOperationsSupported = operationsSupported;
             mIdentifier = identifier;
