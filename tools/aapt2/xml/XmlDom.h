@@ -68,7 +68,7 @@ struct Namespace : public BaseNode<Namespace> {
 };
 
 struct AaptAttribute {
-    ResourceId id;
+    Maybe<ResourceId> id;
     aapt::Attribute attribute;
 };
 

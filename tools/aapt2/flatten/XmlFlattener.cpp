@@ -144,9 +144,9 @@ struct XmlFlattenerVisitor : public xml::Visitor {
     }
 
     static bool cmpXmlAttributeById(const xml::Attribute* a, const xml::Attribute* b) {
-        if (a->compiledAttribute) {
-            if (b->compiledAttribute) {
-                return a->compiledAttribute.value().id < b->compiledAttribute.value().id;
+        if (a->compiledAttribute && a->compiledAttribute.value().id) {
+            if (b->compiledAttribute && b->compiledAttribute.value().id) {
+                return a->compiledAttribute.value().id.value() < b->compiledAttribute.value().id.value();
             }
             return true;
         } else if (!b->compiledAttribute) {
@@ -167,8 +167,8 @@ struct XmlFlattenerVisitor : public xml::Visitor {
 
         // Filter the attributes.
         for (xml::Attribute& attr : node->attributes) {
-            if (mOptions.maxSdkLevel && attr.compiledAttribute) {
-                size_t sdkLevel = findAttributeSdkLevel(attr.compiledAttribute.value().id);
+            if (mOptions.maxSdkLevel && attr.compiledAttribute && attr.compiledAttribute.value().id) {
+                size_t sdkLevel = findAttributeSdkLevel(attr.compiledAttribute.value().id.value());
                 if (sdkLevel > mOptions.maxSdkLevel.value()) {
                     continue;
                 }
@@ -191,8 +191,8 @@ struct XmlFlattenerVisitor : public xml::Visitor {
         uint16_t attributeIndex = 1;
         for (const xml::Attribute* xmlAttr : mFilteredAttrs) {
             // Assign the indices for specific attributes.
-            if (xmlAttr->compiledAttribute &&
-                    xmlAttr->compiledAttribute.value().id == kIdAttr) {
+            if (xmlAttr->compiledAttribute && xmlAttr->compiledAttribute.value().id &&
+                    xmlAttr->compiledAttribute.value().id.value() == kIdAttr) {
                 flatElem->idIndex = util::hostToDevice16(attributeIndex);
             } else if (xmlAttr->namespaceUri.empty()) {
                 if (xmlAttr->name == u"class") {
@@ -208,7 +208,7 @@ struct XmlFlattenerVisitor : public xml::Visitor {
 
             flatAttr->rawValue.index = util::hostToDevice32(-1);
 
-            if (!xmlAttr->compiledAttribute) {
+            if (!xmlAttr->compiledAttribute || !xmlAttr->compiledAttribute.value().id) {
                 // The attribute has no associated ResourceID, so the string order doesn't matter.
                 addString(xmlAttr->name, kLowPriority, &flatAttr->name);
             } else {
@@ -221,17 +221,17 @@ struct XmlFlattenerVisitor : public xml::Visitor {
                 // Lookup the StringPool for this package and make the reference there.
                 const xml::AaptAttribute& aaptAttr = xmlAttr->compiledAttribute.value();
 
-                StringPool::Ref nameRef = mPackagePools[aaptAttr.id.packageId()].makeRef(
-                        xmlAttr->name, StringPool::Context{ aaptAttr.id.id });
+                StringPool::Ref nameRef = mPackagePools[aaptAttr.id.value().packageId()].makeRef(
+                        xmlAttr->name, StringPool::Context{ aaptAttr.id.value().id });
 
                 // Add it to the list of strings to flatten.
                 addString(nameRef, &flatAttr->name);
+            }
 
-                if (mOptions.keepRawValues) {
-                    // Keep raw values (this is for static libraries).
-                    // TODO(with a smarter inflater for binary XML, we can do without this).
-                    addString(xmlAttr->value, kLowPriority, &flatAttr->rawValue);
-                }
+            if (mOptions.keepRawValues || !xmlAttr->compiledValue) {
+                // Keep raw values if the value is not compiled or
+                // if we're building a static library (need symbols).
+                addString(xmlAttr->value, kLowPriority, &flatAttr->rawValue);
             }
 
             if (xmlAttr->compiledValue) {
@@ -240,7 +240,6 @@ struct XmlFlattenerVisitor : public xml::Visitor {
             } else {
                 // Flatten as a regular string type.
                 flatAttr->typedValue.dataType = android::Res_value::TYPE_STRING;
-                addString(xmlAttr->value, kLowPriority, &flatAttr->rawValue);
                 addString(xmlAttr->value, kLowPriority,
                           (ResStringPool_ref*) &flatAttr->typedValue.data);
             }

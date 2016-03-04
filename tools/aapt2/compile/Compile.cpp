@@ -422,10 +422,6 @@ static bool compileFile(IAaptContext* context, const CompileOptions& options,
 }
 
 class CompileContext : public IAaptContext {
-private:
-    StdErrDiagnostics mDiagnostics;
-    bool mVerbose = false;
-
 public:
     void setVerbose(bool val) {
         mVerbose = val;
@@ -444,18 +440,24 @@ public:
        return nullptr;
     }
 
-    StringPiece16 getCompilationPackage() override {
-       return {};
+    const std::u16string& getCompilationPackage() override {
+        static std::u16string empty;
+        return empty;
     }
 
     uint8_t getPackageId() override {
        return 0x0;
     }
 
-    ISymbolTable* getExternalSymbols() override {
+    SymbolTable* getExternalSymbols() override {
        abort();
        return nullptr;
     }
+
+private:
+    StdErrDiagnostics mDiagnostics;
+    bool mVerbose = false;
+
 };
 
 /**

@@ -483,8 +483,13 @@ const pb::CompiledFile* CompiledFileInputStream::CompiledFile() {
         }
 
         const size_t padding = 4 - (pbSize & 0x03);
-        mData += sizeof(uint64_t) + pbSize + padding;
-        mSize -= sizeof(uint64_t) + pbSize + padding;
+        const size_t offset = sizeof(uint64_t) + pbSize + padding;
+        if (offset > mSize) {
+            return nullptr;
+        }
+
+        mData += offset;
+        mSize -= offset;
         mPbFile = std::move(pbFile);
     }
     return mPbFile.get();

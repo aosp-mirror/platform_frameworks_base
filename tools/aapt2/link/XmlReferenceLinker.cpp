@@ -34,17 +34,10 @@ namespace {
  * as needed.
  */
 class ReferenceVisitor : public ValueVisitor {
-private:
-    IAaptContext* mContext;
-    ISymbolTable* mSymbols;
-    xml::IPackageDeclStack* mDecls;
-    CallSite* mCallSite;
-    bool mError;
-
 public:
     using ValueVisitor::visit;
 
-    ReferenceVisitor(IAaptContext* context, ISymbolTable* symbols, xml::IPackageDeclStack* decls,
+    ReferenceVisitor(IAaptContext* context, SymbolTable* symbols, xml::IPackageDeclStack* decls,
                      CallSite* callSite) :
              mContext(context), mSymbols(symbols), mDecls(decls), mCallSite(callSite),
              mError(false) {
@@ -59,25 +52,23 @@ public:
     bool hasError() const {
         return mError;
     }
+
+private:
+    IAaptContext* mContext;
+    SymbolTable* mSymbols;
+    xml::IPackageDeclStack* mDecls;
+    CallSite* mCallSite;
+    bool mError;
 };
 
 /**
  * Visits each xml Element and compiles the attributes within.
  */
 class XmlVisitor : public xml::PackageAwareVisitor {
-private:
-    IAaptContext* mContext;
-    ISymbolTable* mSymbols;
-    Source mSource;
-    std::set<int>* mSdkLevelsFound;
-    CallSite* mCallSite;
-    ReferenceVisitor mReferenceVisitor;
-    bool mError = false;
-
 public:
     using xml::PackageAwareVisitor::visit;
 
-    XmlVisitor(IAaptContext* context, ISymbolTable* symbols, const Source& source,
+    XmlVisitor(IAaptContext* context, SymbolTable* symbols, const Source& source,
                std::set<int>* sdkLevelsFound, CallSite* callSite) :
             mContext(context), mSymbols(symbols), mSource(source), mSdkLevelsFound(sdkLevelsFound),
             mCallSite(callSite), mReferenceVisitor(context, symbols, this, callSite) {
@@ -105,10 +96,13 @@ public:
 
                 // Convert the string value into a compiled Value if this is a valid attribute.
                 if (attr.compiledAttribute) {
-                    // Record all SDK levels from which the attributes were defined.
-                    const int sdkLevel = findAttributeSdkLevel(attr.compiledAttribute.value().id);
-                    if (sdkLevel > 1) {
-                        mSdkLevelsFound->insert(sdkLevel);
+                    if (attr.compiledAttribute.value().id) {
+                        // Record all SDK levels from which the attributes were defined.
+                        const size_t sdkLevel = findAttributeSdkLevel(
+                                attr.compiledAttribute.value().id.value());
+                        if (sdkLevel > 1) {
+                            mSdkLevelsFound->insert(sdkLevel);
+                        }
                     }
 
                     const Attribute* attribute = &attr.compiledAttribute.value().attribute;
@@ -124,6 +118,7 @@ public:
                                                     << *attribute);
                         mError = true;
                     }
+
                 } else {
                     mContext->getDiagnostics()->error(DiagMessage(source)
                                                       << "attribute '" << package << ":"
@@ -150,6 +145,15 @@ public:
     bool hasError() {
         return mError || mReferenceVisitor.hasError();
     }
+
+private:
+    IAaptContext* mContext;
+    SymbolTable* mSymbols;
+    Source mSource;
+    std::set<int>* mSdkLevelsFound;
+    CallSite* mCallSite;
+    ReferenceVisitor mReferenceVisitor;
+    bool mError = false;
 };
 
 } // namespace

@@ -17,6 +17,7 @@
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "Flags.h"
+#include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
 #include "proto/ProtoSerialize.h"
 #include "util/Files.h"
@@ -56,6 +57,35 @@ void dumpCompiledTable(const pb::ResourceTable& pbTable, const Source& source,
 
 void tryDumpFile(IAaptContext* context, const std::string& filePath) {
     std::string err;
+    std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::create(filePath, &err);
+    if (zip) {
+        io::IFile* file = zip->findFile("resources.arsc.flat");
+        if (file) {
+            std::unique_ptr<io::IData> data = file->openAsData();
+            if (!data) {
+                context->getDiagnostics()->error(DiagMessage(filePath)
+                                                 << "failed to open resources.arsc.flat");
+                return;
+            }
+
+            pb::ResourceTable pbTable;
+            if (!pbTable.ParseFromArray(data->data(), data->size())) {
+                context->getDiagnostics()->error(DiagMessage(filePath)
+                                                 << "invalid resources.arsc.flat");
+                return;
+            }
+
+            std::unique_ptr<ResourceTable> table = deserializeTableFromPb(
+                    pbTable, Source(filePath), context->getDiagnostics());
+            if (table) {
+                DebugPrintTableOptions debugPrintTableOptions;
+                debugPrintTableOptions.showSources = true;
+                Debug::printTable(table.get(), debugPrintTableOptions);
+            }
+        }
+        return;
+    }
+
     Maybe<android::FileMap> file = file::mmapPath(filePath, &err);
     if (!file) {
         context->getDiagnostics()->error(DiagMessage(filePath) << err);
@@ -90,15 +120,16 @@ public:
         return nullptr;
     }
 
-    StringPiece16 getCompilationPackage() override {
-        return {};
+    const std::u16string& getCompilationPackage() override {
+        static std::u16string empty;
+        return empty;
     }
 
     uint8_t getPackageId() override {
         return 0;
     }
 
-    ISymbolTable* getExternalSymbols() override {
+    SymbolTable* getExternalSymbols() override {
         abort();
         return nullptr;
     }
