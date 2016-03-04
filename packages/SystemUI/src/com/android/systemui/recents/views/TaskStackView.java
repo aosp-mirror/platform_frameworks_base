@@ -523,15 +523,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            int taskIndex = mStack.indexOfStackTask(task);
-            TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
 
             // Skip ignored tasks
             if (ignoreTasksSet.contains(task.key)) {
                 continue;
             }
 
-            if (task.isFreeformTask() || transform.visible) {
+            // It is possible for the set of lingering TaskViews to differ from the stack if the
+            // stack was updated before the relayout.  If the task view is no longer in the stack,
+            // then just return it back to the view pool.
+            int taskIndex = mStack.indexOfStackTask(task);
+            TaskViewTransform transform = null;
+            if (taskIndex != -1) {
+                transform = mCurrentTaskTransforms.get(taskIndex);
+            }
+
+            if (task.isFreeformTask() || (transform != null && transform.visible)) {
                 mTmpTaskViewMap.put(task.key, tv);
             } else {
                 if (mTouchExplorationEnabled) {
