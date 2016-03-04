@@ -2543,7 +2543,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final List<UserInfo> users = mUserManager.getUsers();
         for (int i = 0; i < users.size(); i++) {
             final UserInfo user = users.get(i);
-            for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; i--) {
+            for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; j--) {
                 int appId = mPowerSaveTempWhitelistAppIds.keyAt(j);
                 int uid = UserHandle.getUid(user.id, appId);
                 updateRuleForAppIdleLocked(uid);
