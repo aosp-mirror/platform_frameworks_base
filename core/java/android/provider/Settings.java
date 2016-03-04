@@ -5841,15 +5841,6 @@ public final class Settings {
         public static final String ASSIST_SCREENSHOT_ENABLED = "assist_screenshot_enabled";
 
         /**
-         * Names of the service component that the current user has explicitly allowed to
-         * see and change the importance of all of the user's notifications.
-         *
-         * @hide
-         */
-        public static final String ENABLED_NOTIFICATION_ASSISTANT
-                = "enabled_notification_assistant";
-
-        /**
          * Names of the service components that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
          *

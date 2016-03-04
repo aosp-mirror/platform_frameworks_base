@@ -1844,7 +1844,7 @@
   <java-symbol type="string" name="low_internal_storage_view_title" />
   <java-symbol type="string" name="notification_listener_binding_label" />
   <java-symbol type="string" name="condition_provider_service_binding_label" />
-  <java-symbol type="string" name="notification_assistant_binding_label" />
+  <java-symbol type="string" name="notification_ranker_binding_label" />
   <java-symbol type="string" name="report" />
   <java-symbol type="string" name="select_input_method" />
   <java-symbol type="string" name="select_keyboard_layout_notification_title" />

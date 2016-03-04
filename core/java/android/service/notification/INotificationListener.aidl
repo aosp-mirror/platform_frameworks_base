@@ -23,7 +23,7 @@ import android.service.notification.NotificationRankingUpdate;
 /** @hide */
 oneway interface INotificationListener
 {
-    // listeners and assistants
+    // listeners and rankers
     void onListenerConnected(in NotificationRankingUpdate update);
     void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update);
@@ -33,7 +33,7 @@ oneway interface INotificationListener
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
 
-    // assistants only
+    // rankers only
     void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder, int importance, boolean user);
     void onNotificationVisibilityChanged(String key, long time, boolean visible);
     void onNotificationClick(String key, long time);

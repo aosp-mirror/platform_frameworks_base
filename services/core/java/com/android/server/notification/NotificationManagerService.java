@@ -16,21 +16,21 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CLICK;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_ERROR;
-import static android.service.notification.NotificationAssistantService.REASON_GROUP_OPTIMIZATION;
-import static android.service.notification.NotificationAssistantService.REASON_GROUP_SUMMARY_CANCELED;
-import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_SUSPENDED;
-import static android.service.notification.NotificationAssistantService.REASON_PROFILE_TURNED_OFF;
-import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
+import static android.service.notification.NotificationRankerService.REASON_APP_CANCEL;
+import static android.service.notification.NotificationRankerService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationRankerService.REASON_DELEGATE_CANCEL;
+import static android.service.notification.NotificationRankerService.REASON_DELEGATE_CANCEL_ALL;
+import static android.service.notification.NotificationRankerService.REASON_DELEGATE_CLICK;
+import static android.service.notification.NotificationRankerService.REASON_DELEGATE_ERROR;
+import static android.service.notification.NotificationRankerService.REASON_GROUP_OPTIMIZATION;
+import static android.service.notification.NotificationRankerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationRankerService.REASON_LISTENER_CANCEL;
+import static android.service.notification.NotificationRankerService.REASON_LISTENER_CANCEL_ALL;
+import static android.service.notification.NotificationRankerService.REASON_PACKAGE_BANNED;
+import static android.service.notification.NotificationRankerService.REASON_PACKAGE_CHANGED;
+import static android.service.notification.NotificationRankerService.REASON_PACKAGE_SUSPENDED;
+import static android.service.notification.NotificationRankerService.REASON_PROFILE_TURNED_OFF;
+import static android.service.notification.NotificationRankerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
@@ -100,7 +100,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
-import android.service.notification.NotificationAssistantService;
+import android.service.notification.NotificationRankerService;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.StatusBarNotification;
@@ -226,8 +226,6 @@ public class NotificationManagerService extends SystemService {
     private WorkerHandler mHandler;
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
-    private final HandlerThread mAssistantThread = new HandlerThread("assistant",
-            Process.THREAD_PRIORITY_BACKGROUND);
 
     private Light mNotificationLight;
     Light mAttentionLight;
@@ -293,14 +291,13 @@ public class NotificationManagerService extends SystemService {
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
-    private NotificationAssistant mAssistant;
+    private NotificationRanker mRankerServices;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
     private RankingHandler mRankingHandler;
-    private Handler mAssistantHandler;
 
     private static class Archive {
         final int mBufferSize;
@@ -758,7 +755,7 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
                 mListeners.onPackagesChanged(queryReplace, pkgList);
-                mAssistant.onPackagesChanged(queryReplace, pkgList);
+                mRankerServices.onPackagesChanged(queryReplace, pkgList);
                 mConditionProviders.onPackagesChanged(queryReplace, pkgList);
                 mRankingHelper.onPackagesChanged(queryReplace, pkgList);
             }
@@ -807,7 +804,7 @@ public class NotificationManagerService extends SystemService {
                 // Refresh managed services
                 mConditionProviders.onUserSwitched(user);
                 mListeners.onUserSwitched(user);
-                mAssistant.onUserSwitched(user);
+                mRankerServices.onUserSwitched(user);
                 mZenModeHelper.onUserSwitched(user);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 mUserProfiles.updateCache(context);
@@ -818,7 +815,7 @@ public class NotificationManagerService extends SystemService {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mConditionProviders.onUserUnlocked(user);
                 mListeners.onUserUnlocked(user);
-                mAssistant.onUserUnlocked(user);
+                mRankerServices.onUserUnlocked(user);
                 mZenModeHelper.onUserUnlocked(user);
             }
         }
@@ -902,7 +899,6 @@ public class NotificationManagerService extends SystemService {
 
         mHandler = new WorkerHandler();
         mRankingThread.start();
-        mAssistantThread.start();
         String[] extractorNames;
         try {
             extractorNames = resources.getStringArray(R.array.config_notificationSignalExtractors);
@@ -911,7 +907,6 @@ public class NotificationManagerService extends SystemService {
         }
         mUsageStats = new NotificationUsageStats(getContext());
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
-        mAssistantHandler = new Handler(mAssistantThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,
                 mUsageStats,
@@ -947,7 +942,7 @@ public class NotificationManagerService extends SystemService {
         importOldBlockDb();
 
         mListeners = new NotificationListeners();
-        mAssistant = new NotificationAssistant();
+        mRankerServices = new NotificationRanker();
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         mStatusBar.setNotificationDelegate(mNotificationDelegate);
 
@@ -1071,7 +1066,7 @@ public class NotificationManagerService extends SystemService {
             // bind to listener services.
             mSettingsObserver.observe();
             mListeners.onBootPhaseAppsCanStart();
-            mAssistant.onBootPhaseAppsCanStart();
+            mRankerServices.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
         }
     }
@@ -1426,17 +1421,30 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void registerListener(final INotificationListener listener,
-                final ComponentName component, final int userid) {
+                final ComponentName component, final int userid, boolean asRanker) {
             enforceSystemOrSystemUI("INotificationManager.registerListener");
-            mListeners.registerService(listener, component, userid);
+            if (asRanker) {
+                mRankerServices.registerService(listener, component, userid);
+            } else {
+                mListeners.registerService(listener, component, userid);
+            }
         }
 
         /**
          * Remove a listener binder directly
          */
         @Override
-        public void unregisterListener(INotificationListener listener, int userid) {
-            mListeners.unregisterService(listener, userid);
+        public void unregisterListener(INotificationListener token, int userid) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if(mRankerServices.checkServiceTokenLocked(token) != null) {
+                    mRankerServices.unregisterService(token, userid);
+                } else {
+                    mListeners.unregisterService(token, userid);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         /**
@@ -1489,8 +1497,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrSameApp(component.getPackageName());
             long identity = Binder.clearCallingIdentity();
             try {
-                ManagedServices manager = mAssistant.isComponentEnabledForCurrentProfiles(component)
-                        ? mAssistant
+                ManagedServices manager = mRankerServices.isComponentEnabledForCurrentProfiles(component)
+                        ? mRankerServices
                         : mListeners;
                 manager.setComponentState(component, true);
             } finally {
@@ -1983,7 +1991,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setImportanceFromAssistant(INotificationListener token, String key,
+        public void setImportanceFromRankerService(INotificationListener token, String key,
                 int importance, CharSequence explanation) throws RemoteException {
             if (importance == IMPORTANCE_NONE) {
                 throw new IllegalArgumentException("blocking not allowed: key=" + key);
@@ -1991,7 +1999,7 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
-                    mAssistant.checkServiceTokenLocked(token);
+                    mRankerServices.checkServiceTokenLocked(token);
                     NotificationRecord n = mNotificationsByKey.get(key);
                     n.setImportance(importance, explanation);
                     mRankingHandler.requestSort();
@@ -2141,8 +2149,8 @@ public class NotificationManagerService extends SystemService {
                     pw.print(listener.component);
                 }
                 pw.println(')');
-                pw.println("\n  Notification assistant:");
-                mAssistant.dump(pw, filter);
+                pw.println("\n  Notification ranker services:");
+                mRankerServices.dump(pw, filter);
             }
             pw.println("\n  Policy access:");
             pw.print("    mPolicyAccess: "); pw.println(mPolicyAccess);
@@ -2369,9 +2377,9 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
 
-                // tell the assistant about the notification
-                if (mAssistant.isEnabled()) {
-                    mAssistant.onNotificationEnqueued(r);
+                // tell the ranker service about the notification
+                if (mRankerServices.isEnabled()) {
+                    mRankerServices.onNotificationEnqueued(r);
                     // TODO delay the code below here for 100ms or until there is an answer
                 }
 
@@ -3488,21 +3496,21 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    public class NotificationAssistant extends ManagedServices {
+    public class NotificationRanker extends ManagedServices {
 
-        public NotificationAssistant() {
+        public NotificationRanker() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
         }
 
         @Override
         protected Config getConfig() {
             Config c = new Config();
-            c.caption = "notification assistant";
-            c.serviceInterface = NotificationAssistantService.SERVICE_INTERFACE;
-            c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT;
-            c.bindPermission = Manifest.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE;
+            c.caption = "notification ranker service";
+            c.serviceInterface = NotificationRankerService.SERVICE_INTERFACE;
+            c.secureSettingName = null;
+            c.bindPermission = Manifest.permission.BIND_NOTIFICATION_RANKER_SERVICE;
             c.settingsAction = Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS;
-            c.clientLabel = R.string.notification_assistant_binding_label;
+            c.clientLabel = R.string.notification_ranker_binding_label;
             return c;
         }
 
@@ -3530,10 +3538,10 @@ public class NotificationManagerService extends SystemService {
             final StatusBarNotification sbn = r.sbn;
             TrimCache trimCache = new TrimCache(sbn);
 
-            // mServices is the list inside ManagedServices of all the assistants,
+            // mServices is the list inside ManagedServices of all the rankers,
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
-            for (final ManagedServiceInfo info : NotificationAssistant.this.mServices) {
+            for (final ManagedServiceInfo info : NotificationRanker.this.mServices) {
                 boolean sbnVisible = isVisibleToListener(sbn, info);
                 if (!sbnVisible) {
                     continue;
@@ -3542,7 +3550,7 @@ public class NotificationManagerService extends SystemService {
                 final int importance = r.getImportance();
                 final boolean fromUser = r.isImportanceFromUser();
                 final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
-                mAssistantHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         notifyEnqueued(info, sbnToPost, importance, fromUser);
@@ -3553,12 +3561,12 @@ public class NotificationManagerService extends SystemService {
 
         private void notifyEnqueued(final ManagedServiceInfo info,
                 final StatusBarNotification sbn, int importance, boolean fromUser) {
-            final INotificationListener assistant = (INotificationListener) info.service;
+            final INotificationListener ranker = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                assistant.onNotificationEnqueued(sbnHolder, importance, fromUser);
+                ranker.onNotificationEnqueued(sbnHolder, importance, fromUser);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                Log.e(TAG, "unable to notify ranker (enqueued): " + ranker, ex);
             }
         }
 
