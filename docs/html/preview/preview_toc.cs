@@ -72,7 +72,7 @@
         >Data Saver</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/tv-recording-api.html"
-        >TV Recording APIs</a></li>
+        >TV Recording</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
         >ICU4J Support in Framework</a></li>
