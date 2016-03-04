@@ -14,7 +14,7 @@ footer.hide=1
       <div class="col-7of16 col-push-9of16">
         <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
-          Get ready for Android N!
+          Get ready for the next version of Android!
           <strong>Test your apps</strong> on a variety of Nexus devices. Support new system
           behaviors to <strong>save power and memory</strong>.
           Extend your apps with <strong>multiwindow UI</strong>,
@@ -48,7 +48,7 @@ footer.hide=1
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Resources</h1>
   <div class="dac-section-subtitle">
-    Essential information to help you get your apps ready for Android M.
+    Essential information to help get your apps ready for the next version of Android.
   </div>
 
   <div class="resource-widget resource-flow-layout col-16"
