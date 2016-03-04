@@ -24,6 +24,14 @@
 namespace android {
 namespace uirenderer {
 
+
+static Rect sUnreasonablyLargeBounds(-10000, -10000, 10000, 10000);
+
+static const Rect& getConservativeOpBounds(const ClipBase* clip) {
+    // if op is clipped, that rect can be used, but otherwise just use a conservatively large rect
+    return clip ? clip->rect : sUnreasonablyLargeBounds;
+}
+
 RecordingCanvas::RecordingCanvas(size_t width, size_t height)
         : mState(*this)
         , mResourceCache(ResourceCache::getInstance()) {
@@ -242,10 +250,8 @@ void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
 
 void RecordingCanvas::drawPaint(const SkPaint& paint) {
     const ClipBase* clip = getRecordedClip();
-    // if there's no current clip, draw a big rect and hope we cover the eventual clip bounds
-    Rect bounds = clip ? clip->rect : Rect(-10000, -10000, 10000, 10000);
     addOp(alloc().create_trivial<RectOp>(
-            bounds,
+            getConservativeOpBounds(clip),
             Matrix4::identity(),
             clip,
             refPaint(&paint)));
@@ -534,10 +540,11 @@ void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int glyphCount, con
             float hOffset, float vOffset, const SkPaint& paint) {
     if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
     glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
+    auto clip = getRecordedClip();
     addOp(alloc().create_trivial<TextOnPathOp>(
-            mState.getLocalClipBounds(), // TODO: explicitly define bounds
+            getConservativeOpBounds(clip), // TODO: explicitly define bounds
             *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
+            clip,
             refPaint(&paint), glyphs, glyphCount, refPath(&path), hOffset, vOffset));
 }
 
@@ -586,10 +593,11 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor) {
     mDisplayList->functors.push_back(functor);
+    auto clip = getRecordedClip();
     addOp(alloc().create_trivial<FunctorOp>(
-            mState.getLocalClipBounds(), // TODO: explicitly define bounds
+            getConservativeOpBounds(clip), // TODO: explicitly define bounds
             *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
+            clip,
             functor));
 }
 
