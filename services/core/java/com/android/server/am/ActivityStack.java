@@ -1115,7 +1115,7 @@ final class ActivityStack {
             r.stopped = true;
             r.state = ActivityState.STOPPED;
 
-            mWindowManager.notifyAppStopped(r.appToken);
+            mWindowManager.notifyAppStopped(r.appToken, true);
 
             if (getVisibleBehindActivity() == r) {
                 mStackSupervisor.requestVisibleBehindLocked(r, false);
@@ -2246,6 +2246,10 @@ final class ActivityStack {
                 if (next.newIntents != null) {
                     next.app.thread.scheduleNewIntent(next.newIntents, next.appToken);
                 }
+
+                // Well the app will no longer be stopped.
+                // Clear app token stopped state in window manager if needed.
+                mWindowManager.notifyAppStopped(next.appToken, false);
 
                 EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
                         System.identityHashCode(next), next.task.taskId, next.shortComponentName);
