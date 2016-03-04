@@ -535,6 +535,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
     private boolean mForceStatusBarTransparent;
+    boolean mForceNavBarOpaque;
     boolean mHideLockScreen;
     boolean mForcingShowNavBar;
     int mForcingShowNavBarLayer;
@@ -1715,6 +1716,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             mShortPressWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
+
+        mForceNavBarOpaque = res.getBoolean(
+                com.android.internal.R.bool.config_forceNavBarAlwaysOpaque);
     }
 
     @Override
@@ -7078,6 +7082,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 || forceOpaqueSystemBars) {
             vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
                     | View.SYSTEM_UI_TRANSPARENT);
+        }
+
+        if (mForceNavBarOpaque) {
+            vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT);
         }
 
         if (mForceWindowDrawsStatusBarBackground) {
