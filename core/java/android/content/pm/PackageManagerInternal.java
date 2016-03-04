@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.content.pm.PackageManager.NameNotFoundException;
+
 import java.util.List;
 
 /**
@@ -125,4 +127,17 @@ public abstract class PackageManagerInternal {
      * @return True a permissions review is required.
      */
     public abstract boolean isPermissionsReviewRequired(String packageName, int userId);
+
+    /**
+     * Gets all of the information we know about a particular package.
+     *
+     * @param packageName The package name to find.
+     * @param userId The user under which to check.
+     *
+     * @return An {@link ApplicationInfo} containing information about the
+     *         package.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
+     */
+    public abstract ApplicationInfo getApplicationInfo(String packageName, int userId);
 }
