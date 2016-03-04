@@ -18,13 +18,13 @@ package com.android.shell;
 
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
 import static com.android.shell.BugreportProgressService.INTENT_REMOTE_BUGREPORT_FINISHED;
-import static com.android.shell.BugreportProgressService.INTENT_REMOTE_BUGREPORT_DISPATCH;
 import static com.android.shell.BugreportProgressService.getFileExtra;
 import static com.android.shell.BugreportProgressService.getUri;
 import static com.android.shell.BugreportReceiver.cleanupOldFiles;
 
 import java.io.File;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,8 +41,6 @@ import android.text.format.DateUtils;
 public class RemoteBugreportReceiver extends BroadcastReceiver {
 
     private static final String BUGREPORT_MIMETYPE = "application/vnd.android.bugreport";
-    private static final String EXTRA_REMOTE_BUGREPORT_HASH =
-            "android.intent.extra.REMOTE_BUGREPORT_HASH";
 
     /** Always keep just the last remote bugreport's files around. */
     private static final int REMOTE_BUGREPORT_FILES_AMOUNT = 3;
@@ -57,11 +55,12 @@ public class RemoteBugreportReceiver extends BroadcastReceiver {
 
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         final Uri bugreportUri = getUri(context, bugreportFile);
-        final String bugreportHash = intent.getStringExtra(EXTRA_REMOTE_BUGREPORT_HASH);
+        final String bugreportHash = intent.getStringExtra(
+                DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH);
 
-        final Intent newIntent = new Intent(INTENT_REMOTE_BUGREPORT_DISPATCH);
+        final Intent newIntent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
         newIntent.setDataAndType(bugreportUri, BUGREPORT_MIMETYPE);
-        newIntent.putExtra(EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
+        newIntent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
         context.sendBroadcastAsUser(newIntent, UserHandle.SYSTEM,
                 android.Manifest.permission.DUMP);
     }
