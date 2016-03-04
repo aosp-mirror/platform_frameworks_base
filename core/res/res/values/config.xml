@@ -2440,6 +2440,10 @@
          flag). -->
     <bool name="config_forceWindowDrawsStatusBarBackground">true</bool>
 
+    <!-- If set, this will force the navigation bar to always be drawn with an opaque
+         background. -->
+    <bool name="config_forceNavBarAlwaysOpaque">false</bool>
+
     <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
     <string translatable="false" name="config_defaultPictureInPictureBounds">"0 0 100 100"</string>
 
