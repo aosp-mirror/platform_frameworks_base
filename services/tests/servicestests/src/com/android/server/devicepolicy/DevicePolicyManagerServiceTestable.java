@@ -15,14 +15,14 @@
  */
 package com.android.server.devicepolicy;
 
-import com.android.internal.widget.LockPatternUtils;
-
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.database.ContentObserver;
 import android.media.IAudioService;
+import android.net.Uri;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
@@ -30,12 +30,15 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
+import android.util.Log;
+import android.util.Pair;
 import android.view.IWindowManager;
 
-import java.io.File;
+import com.android.internal.widget.LockPatternUtils;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
+import java.io.File;
+import java.util.Map;
 
 /**
  * Overrides {@link #DevicePolicyManagerService} for dependency injection.
@@ -77,6 +80,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     }
 
     public final DpmMockContext context;
+    private final MockInjector mMockInjector;
 
     public DevicePolicyManagerServiceTestable(DpmMockContext context, File dataDir) {
         this(new MockInjector(context, dataDir));
@@ -84,14 +88,35 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
     private DevicePolicyManagerServiceTestable(MockInjector injector) {
         super(injector);
+        mMockInjector = injector;
         this.context = injector.context;
     }
+
+
+    public void notifyChangeToContentObserver(Uri uri, int userHandle) {
+        ContentObserver co = mMockInjector.mContentObservers
+                .get(new Pair<Uri, Integer>(uri, userHandle));
+        if (co != null) {
+            co.onChange(false, uri, userHandle); // notify synchronously
+        }
+
+        // Notify USER_ALL observer too.
+        co = mMockInjector.mContentObservers
+                .get(new Pair<Uri, Integer>(uri, UserHandle.USER_ALL));
+        if (co != null) {
+            co.onChange(false, uri, userHandle); // notify synchronously
+        }
+    }
+
 
     private static class MockInjector extends Injector {
 
         public final DpmMockContext context;
 
         public final File dataDir;
+
+        // Key is a pair of uri and userId
+        private final Map<Pair<Uri, Integer>, ContentObserver> mContentObservers = new ArrayMap<>();
 
         private MockInjector(DpmMockContext context, File dataDir) {
             super(context);
@@ -262,6 +287,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         boolean userManagerIsSplitSystemUser() {
             return context.userManagerForMock.isSplitSystemUser();
+        }
+
+        @Override
+        void registerContentObserver(Uri uri, boolean notifyForDescendents,
+                ContentObserver observer, int userHandle) {
+            mContentObservers.put(new Pair<Uri, Integer>(uri, userHandle), observer);
         }
 
         @Override

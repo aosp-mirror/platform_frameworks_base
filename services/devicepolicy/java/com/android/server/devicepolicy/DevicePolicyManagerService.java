@@ -1480,6 +1480,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return "/data/system/";
         }
 
+        void registerContentObserver(Uri uri, boolean notifyForDescendents,
+                ContentObserver observer, int userHandle) {
+            mContext.getContentResolver().registerContentObserver(uri, notifyForDescendents,
+                    observer, userHandle);
+        }
+
         int settingsSecureGetIntForUser(String name, int def, int userHandle) {
             return Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     name, def, userHandle);
@@ -2536,7 +2542,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         onStartUser(UserHandle.USER_SYSTEM);
 
         // Register an observer for watching for user setup complete.
-        new SetupContentObserver(mHandler).register(mContext.getContentResolver());
+        new SetupContentObserver(mHandler).register();
         // Initialize the user setup state, to handle the upgrade case.
         updateUserSetupComplete();
 
@@ -7833,9 +7839,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             super(handler);
         }
 
-        void register(ContentResolver resolver) {
-            resolver.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(mDeviceProvisioned, false, this, UserHandle.USER_ALL);
+        void register() {
+            mInjector.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
+            mInjector.registerContentObserver(mDeviceProvisioned, false, this, UserHandle.USER_ALL);
         }
 
         @Override
