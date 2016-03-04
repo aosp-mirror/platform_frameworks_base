@@ -9634,6 +9634,20 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void resizePinnedStack(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "resizePinnedStack()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                mStackSupervisor.resizePinnedStackLocked(pinnedBounds, tempPinnedTaskBounds);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void positionTaskInStack(int taskId, int stackId, int position) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "positionTaskInStack()");
         if (stackId == HOME_STACK_ID) {

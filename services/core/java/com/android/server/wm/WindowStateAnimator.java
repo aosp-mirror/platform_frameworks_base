@@ -1115,11 +1115,11 @@ class WindowStateAnimator {
         }
     }
 
-    void updateSurfaceWindowCrop(final boolean recoveringMemory) {
+    Rect calculateSurfaceWindowCrop() {
         final WindowState w = mWin;
         final DisplayContent displayContent = w.getDisplayContent();
         if (displayContent == null) {
-            return;
+            return null;
         }
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Updating crop for window: " + w + ", " + "mLastCrop=" +
@@ -1187,7 +1187,7 @@ class WindowStateAnimator {
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
         adjustCropToStackBounds(w, clipRect, isFreeformResizing);
-        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Clip rect after stack adjustment=" + mClipRect);
+        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Clip rect after stack adjustment=" + clipRect);
 
         w.transformFromScreenToSurfaceSpace(clipRect);
 
@@ -1196,6 +1196,10 @@ class WindowStateAnimator {
             clipRect.setEmpty();
         }
 
+        return clipRect;
+    }
+
+    void updateSurfaceWindowCrop(Rect clipRect, boolean recoveringMemory) {
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
             mSurfaceController.setCropInTransaction(clipRect, recoveringMemory);
@@ -1237,6 +1241,7 @@ class WindowStateAnimator {
                 w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
         final int frameY = isFreeformResizing ? (int) mSurfaceController.getY() :
                 w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
+
         // We need to do some acrobatics with surface position, because their clip region is
         // relative to the inside of the surface, but the stack bounds aren't.
         clipRect.left = Math.max(0,
@@ -1251,14 +1256,44 @@ class WindowStateAnimator {
 
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
+        final Task task = w.getTask();
 
         mTmpSize.set(w.mShownPosition.x, w.mShownPosition.y, 0, 0);
         calculateSurfaceBounds(w, w.getAttrs());
 
-        mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, recoveringMemory);
+        float extraHScale = (float) 1.0;
+        float extraVScale = (float) 1.0;
 
-        mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale, mDtDx * w.mVScale,
-                mDsDy * w.mHScale, mDtDy * w.mVScale, recoveringMemory);
+        final Rect crop = calculateSurfaceWindowCrop();
+        if (task != null && task.mStack.getForceScaleToCrop()) {
+            extraHScale = crop.width() / (float)mTmpSize.width();
+            extraVScale = crop.height() / (float)mTmpSize.height();
+
+            // In the case of ForceScaleToCrop we scale entire tasks together,
+            // and so we need to scale our offsets relative to the task bounds
+            // or parent and child windows would fall out of alignment.
+            int posX = (int) (mTmpSize.left - w.mAttrs.x * (1 - extraHScale));
+            int posY = (int) (mTmpSize.top - w.mAttrs.y * (1 - extraVScale));
+            posX += w.getAttrs().surfaceInsets.left * (1 - extraHScale);
+            posY += w.getAttrs().surfaceInsets.top * (1 - extraVScale);
+            mSurfaceController.setPositionInTransaction(posX, posY, recoveringMemory);
+
+            // Since we are scaled to fit in our previously desired crop, we can now
+            // expose the whole window in buffer space, and not risk extending
+            // past where the system would have cropped us
+            crop.set(0, 0, mTmpSize.width(), mTmpSize.height());
+            updateSurfaceWindowCrop(crop, recoveringMemory);
+        } else {
+            mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
+                    recoveringMemory);
+            updateSurfaceWindowCrop(crop, recoveringMemory);
+        }
+
+
+        mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * extraHScale,
+                mDtDx * w.mVScale * extraVScale,
+                mDsDy * w.mHScale * extraHScale,
+                mDtDy * w.mVScale * extraVScale, recoveringMemory);
         mSurfaceResized = mSurfaceController.setSizeInTransaction(
                 mTmpSize.width(), mTmpSize.height(),
                 recoveringMemory);
@@ -1270,7 +1305,6 @@ class WindowStateAnimator {
             w.applyDimLayerIfNeeded();
         }
 
-        updateSurfaceWindowCrop(recoveringMemory);
     }
 
     void prepareSurfaceLocked(final boolean recoveringMemory) {
@@ -1409,7 +1443,7 @@ class WindowStateAnimator {
             SurfaceControl.openTransaction();
             mSurfaceController.setPositionInTransaction(mWin.mFrame.left + left,
                     mWin.mFrame.top + top, false);
-            updateSurfaceWindowCrop(false);
+            updateSurfaceWindowCrop(calculateSurfaceWindowCrop(), false);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
