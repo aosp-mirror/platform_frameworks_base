@@ -17,28 +17,27 @@ page.tags=androidn
 </div>
 </div>
 
-<p>The system now runs in a secure, Direct Boot mode when the device has been
-powered on but the user has not unlocked the device. To support this, the
-system provides two storage locations for data:</p>
+<p>Android N Developer Preview runs in a secure, <i>Direct Boot</i> mode
+when the device has been powered on but the user has not unlocked the
+device. To support this, the system provides two storage locations for data:</p>
 
 <ul>
 <li><i>Credential encrypted storage</i>, which is the default storage location
-and available only after the user has unlocked the device.</li>
+and only available after the user has unlocked the device.</li>
 <li><i>Device encrypted storage</i>, which is a storage location available both
 during Direct Boot mode and after the user has unlocked the device.</li>
 </ul>
 
-<p>By default apps will not run during Direct Boot mode, because apps won't
-have access to credential encrypted storage.</p>
-
-<p>If your app needs to take action during Direct Boot mode, you can register
+<p>By default, apps do not run during Direct Boot mode.
+If your app needs to take action during Direct Boot mode, you can register
 app components that should be run during this mode. Some common use cases
-for applications needing to run during Direct Boot mode include:</p>
+for apps needing to run during Direct Boot mode include:</p>
+
 <ul>
-<li>Applications that have scheduled notifications, such as alarm clock
+<li>Apps that have scheduled notifications, such as alarm clock
 apps.</li>
-<li>Applications that provide important user notifications, like SMS apps.</li>
-<li>Applications providing accessibility services, like Talkback.</li>
+<li>Apps that provide important user notifications, like SMS apps.</li>
+<li>Apps that provide accessibility services, like Talkback.</li>
 </ul>
 
 <p>If your app needs to access data while running in Direct Boot mode, use
@@ -50,26 +49,26 @@ successful verified boot.</p>
 credentials, such as a PIN or password, use credential encrypted storage.
 Credential encrypted storage is only available after the user has successfully
 unlocked the device, up until when the user restarts the device again. If the
-user enables the lock screen after unlocking the device, this will not lock
+user enables the lock screen after unlocking the device, this doesn't lock
 credential encrypted storage.</p>
 
 <h2 id="run">Requesting Access to Run During Direct Boot</h2>
 
-<p>Applications must register their components with the system before they
-can run during the limited Direct Boot mode, or access device encrypted
-storage. Applications register with the system by marking components as
+<p>Apps must register their components with the system before they
+can run during Direct Boot mode or access device encrypted
+storage. Apps register with the system by marking components as
 <i>encryption aware</i>. To mark your component as encryption aware, set the
 <code>android:encryptionAware</code> attribute to true in your manifest.<p>
 
-<p>When a component is marked as encryption aware, the component receives a
-new <code>LOCKED_BOOT_COMPLETED</code> broadcast message from the
+<p>Encryption aware components can register to receive a
+<code>LOCKED_BOOT_COMPLETED</code> broadcast message from the
 system when the device has been restarted. At this point device encrypted
-storage is available, and your component can run whatever tasks need to be
-done during Direct Boot mode, such as triggering a scheduled alarm.</p>
+storage is available, and your component can execute tasks that need to be
+run during Direct Boot mode, such as triggering a scheduled alarm.</p>
 
 <p>The following code snippet is an example of how to register a
-<code>BroadcastReceiver</code> as encryption aware, and add an intent filter
-for <code>LOCKED_BOOT_COMPLETED</code>, in the application manifest:</p>
+{@link android.content.BroadcastReceiver} as encryption aware, and add an
+intent filter for <code>LOCKED_BOOT_COMPLETED</code>, in the app manifest:</p>
 
 <pre>
 &lt;receiever
@@ -81,16 +80,17 @@ for <code>LOCKED_BOOT_COMPLETED</code>, in the application manifest:</p>
 &lt;/receiver&gt;
 </pre>
 
-<p>Once the user has unlocked the device, components can access both the
+<p>Once the user has unlocked the device, all components can access both the
 device encrypted storage as well as credential encrypted storage.</p>
 
 <h2 id="access">Accessing Device Encrypted Storage</h2>
 
-<p>To access device encrypted storage, create a second <code>Context</code>
-instance by calling <code>Context.createDeviceEncryptedStorageContext()</code>.
-All storage API calls made using this context access the device encrypted
-storage. The following example accesses the device encrypted storage and opens
-an existing app data file:</p>
+<p>To access device encrypted storage, create a second
+{@link android.content.Context} instance by calling
+<code>Context.createDeviceEncryptedStorageContext()</code>. All storage API
+calls made using this context access the device encrypted storage. The
+following example accesses the device encrypted storage and opens an existing
+app data file:</p>
 
 <pre>
 Context directBootContext = Context.createDeviceEncryptedStorageContext();
@@ -99,8 +99,8 @@ FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
 // Use inStream to read content...
 </pre>
 
-<p class="note"><strong>Note:</strong> Use device encrypted storage only for
-information that must be accessible during the Direct Boot mode.
+<p>Use device encrypted storage only for
+information that must be accessible during Direct Boot mode.
 Don't use device encrypted storage as a general-purpose encrypted store.
 For private user information, or encrypted data that isn't needed during
 Direct Boot mode, use credential encrypted storage.</p>
@@ -109,13 +109,14 @@ Direct Boot mode, use credential encrypted storage.</p>
 
 <p>Once the user unlocks the device after restart, your app can switch to
 accessing credential encrypted storage and use regular system services that
-depend on user credentials, like Google Play Services.</p>
+depend on user credentials.</p>
 
 <p>To get notified when the user unlocks the device after a reboot,
-register a <code>BroadcastReceiver</code> from a running component to listen
-for the <code>ACTION_USER_UNLOCKED</code> message. Or, you can receive the
-existing <code>BOOT_COMPLETED</code> message, which now indicates the
-device has booted and the user has unlocked the device.</p>
+register a {@link android.content.BroadcastReceiver} from a running component
+to listen for the <code>ACTION_USER_UNLOCKED</code> message. Or, you can
+receive the existing {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} message, which now indicates the device has booted and
+the user has unlocked the device.</p>
 
 <p>You can directly query if the user has unlocked the device by calling
 <code>UserManager.isUserUnlocked()</code>.</p>
@@ -129,25 +130,29 @@ existing data that needs to get migrated to device encrypted storage. Use
 data between credential encrypted storage and device encrypted storage.</p>
 
 <p>Use your best judgment when deciding what data to migrate from credential
-encrypted storage to device encrypted storage. You should not be migrating
+encrypted storage to device encrypted storage. You should not migrate
 private user information, such as passwords or authorization tokens, to
 device encrypted storage. In some scenarios, you might need to manage
 separate sets of data in the two encrypted stores.</p>
 
 <h2 id="testing">Testing Your Encryption Aware App</h2>
 
-<p>Test your encryption aware application using the new Direct Boot mode.
-On supported devices with Android N Developer Preview installed, enable Direct
-Boot by doing one of the following:</p>
+<p>Test your encryption aware app using the new Direct Boot mode. There are
+two ways to enable Direct Boot.</p>
+
+<p class="caution"><strong>Caution:</strong> Enabling Direct Boot
+wipes all user data on the device.</p>
+
+<p>On supported devices with Android N Developer Preview installed, enable
+Direct Boot by doing one of the following:</p>
 
 <ul>
 <li>On the device, enable <b>Developer options</b> if you haven't already by
-going to <b>Settings &gt; About phone</b>, and tap <b>Build number</b> seven
-times. Once developer options is available, go to <b>Settings &gt;
-Developer options</b> and select <b>Convert to file encryption</b>.
-Note that enabling Direct Boot will wipe user data.</li>
-<li>Use the following adb shell commands to wipe user data and enable Direct
-Boot mode:
+going to <b>Settings &gt; About phone</b>, and tapping <b>Build number</b>
+seven times. Once the developer options screen is available, go to
+<b>Settings &gt; Developer options</b> and select
+<b>Convert to file encryption</b>.</li>
+<li>Use the following adb shell commands to enable Direct Boot mode:
 <pre class="no-pretty-print">
 $ adb reboot-bootloader
 $ fastboot --wipe-and-use-fbe
@@ -172,5 +177,4 @@ $ adb shell sm set-emulate-fbe true
 $ adb shell sm set-emulate-fbe false
 </pre>
 
-<p>Note that using these commands will automatically cause the device to
-reboot.</p>
+<p>Using these commands causes the device to reboot.</p>
