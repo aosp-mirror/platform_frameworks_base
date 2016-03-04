@@ -66,7 +66,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -1368,7 +1367,7 @@ final class ActivityStack {
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 ActivityStack stack = stacks.get(i);
                 if (stack != this && stack.isFocusable()
-                        && stack.getStackVisibilityLocked() != STACK_INVISIBLE) {
+                        && stack.getStackVisibilityLocked(null) != STACK_INVISIBLE) {
                     return stack;
                 }
             }
@@ -1387,21 +1386,26 @@ final class ActivityStack {
         return false;
     }
 
-    private boolean hasTranslucentActivity(ActivityStack stack) {
-        final ArrayList<TaskRecord> tasks = stack.getAllTasks();
-        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
+    /**
+     * Returns true if the stack is translucent and can have other contents visible behind it if
+     * needed. A stack is considered translucent if it don't contain a visible or
+     * starting (about to be visible) activity that is fullscreen (opaque).
+     * @param starting The currently starting activity or null if there is none.
+     */
+    private boolean isStackTranslucent(ActivityRecord starting) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
 
                 // Conditions for an activity to obscure the stack we're
                 // examining:
-                // 1. Not Finishing AND Visible AND:
+                // 1. Not Finishing AND (Visible or the Starting activity) AND:
                 // 2. Either:
                 // - Full Screen Activity OR
                 // - On top of Home and our stack is NOT home
-                if (!r.finishing && r.visible && (r.fullscreen ||
+                if (!r.finishing && (r.visible || r == starting) && (r.fullscreen ||
                         (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()))) {
                     return false;
                 }
@@ -1413,8 +1417,9 @@ final class ActivityStack {
     /**
      * Returns stack's visibility: {@link #STACK_INVISIBLE}, {@link #STACK_VISIBLE} or
      * {@link #STACK_VISIBLE_ACTIVITY_BEHIND}.
+     * @param starting The currently starting activity or null if there is none.
      */
-    int getStackVisibilityLocked() {
+    int getStackVisibilityLocked(ActivityRecord starting) {
         if (!isAttached()) {
             return STACK_INVISIBLE;
         }
@@ -1470,7 +1475,7 @@ final class ActivityStack {
         }
 
         if (focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                && hasTranslucentActivity(focusedStack)) {
+                && focusedStack.isStackTranslucent(starting)) {
             // Stacks behind the fullscreen stack with a translucent activity are always
             // visible so they can act as a backdrop to the translucent activity.
             // For example, dialog activities
@@ -1505,7 +1510,7 @@ final class ActivityStack {
                 return STACK_INVISIBLE;
             }
 
-            if (!hasTranslucentActivity(stack)) {
+            if (!stack.isStackTranslucent(starting)) {
                 return STACK_INVISIBLE;
             }
         }
@@ -1543,7 +1548,7 @@ final class ActivityStack {
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = top != null;
-        final int stackVisibility = getStackVisibilityLocked();
+        final int stackVisibility = getStackVisibilityLocked(starting);
         final boolean stackInvisible = stackVisibility != STACK_VISIBLE;
         final boolean stackVisibleBehind = stackVisibility == STACK_VISIBLE_ACTIVITY_BEHIND;
         boolean behindFullscreenActivity = stackInvisible;
@@ -3806,7 +3811,8 @@ final class ActivityStack {
     void releaseBackgroundResources(ActivityRecord r) {
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
-            if (r == topRunningActivityLocked() && getStackVisibilityLocked() == STACK_VISIBLE) {
+            if (r == topRunningActivityLocked()
+                    && getStackVisibilityLocked(null) == STACK_VISIBLE) {
                 // Don't release the top activity if it has requested to run behind the next
                 // activity and the stack is currently visible.
                 return;
