@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.BidiFormatter;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,9 +85,11 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
             }
         }
 
+        BidiFormatter bidi = BidiFormatter.getInstance();
+
         setTitle(name2 != null
-                ? res.getString(resid, name1.toString(), name2.toString())
-                : res.getString(resid, name1.toString()));
+                ? res.getString(resid, bidi.unicodeWrap(name1.toString()), bidi.unicodeWrap(name2.toString()))
+                : res.getString(resid, bidi.unicodeWrap(name1.toString())));
 
         if (aboveSystem) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
