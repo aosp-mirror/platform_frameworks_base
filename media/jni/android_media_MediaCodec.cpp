@@ -1302,7 +1302,10 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     jobject patternObj = env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoPatternID);
 
     CryptoPlugin::Pattern pattern;
-    if (patternObj != NULL) {
+    if (patternObj == NULL) {
+        pattern.mEncryptBlocks = 0;
+        pattern.mSkipBlocks = 0;
+    } else {
         pattern.mEncryptBlocks = env->GetIntField(patternObj, gFields.patternEncryptBlocksID);
         pattern.mSkipBlocks = env->GetIntField(patternObj, gFields.patternSkipBlocksID);
     }
