@@ -141,9 +141,8 @@ var RESOURCE_COLLECTIONS = {
       "preview/overview.html",
       "preview/api-overview.html",
       "preview/behavior-changes.html",
-      "preview/download.html",
-      "preview/samples.html",
       "preview/setup-sdk.html",
+      "preview/samples.html",
       "preview/support.html"
     ]
   },
@@ -151,8 +150,15 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "preview/features/multi-window.html",
+      "preview/features/notification-updates.html",
       "preview/features/background-optimization.html",
-      "preview/features/notification-updates.html"
+      "preview/features/data-saver.html",
+      "preview/features/direct-boot.html",
+      "preview/features/icu4j-framework.html",
+      "preview/features/multilingual-support.html",
+      "preview/features/scoped-folder-access.html",
+      "preview/features/picture-in-picture.html",
+      "preview/features/tv-recording-api.html"
     ]
   },
   "google/landing/services": {

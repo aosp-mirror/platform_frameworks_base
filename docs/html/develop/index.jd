@@ -63,7 +63,6 @@ excludeFromSuggestions=true
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
     data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
-    data-query="collection:develop/landing/latest"
     data-sortOrder="-timestamp"
     data-cardSizes="6x6"
     data-items-per-page="6"
