@@ -192,6 +192,11 @@ public class WifiScanner {
          * for a given period
          */
         public int stepCount;
+        /**
+         * Flag to indicate if the scan settings are targeted for PNO scan.
+         * {@hide}
+         */
+        public boolean isPnoScan;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -207,6 +212,7 @@ public class WifiScanner {
             dest.writeInt(maxScansToCache);
             dest.writeInt(maxPeriodInMs);
             dest.writeInt(stepCount);
+            dest.writeInt(isPnoScan ? 1 : 0);
 
             if (channels != null) {
                 dest.writeInt(channels.length);
@@ -234,6 +240,7 @@ public class WifiScanner {
                         settings.maxScansToCache = in.readInt();
                         settings.maxPeriodInMs = in.readInt();
                         settings.stepCount = in.readInt();
+                        settings.isPnoScan = in.readInt() == 1;
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
@@ -436,6 +443,158 @@ public class WifiScanner {
                 };
     }
 
+    /** {@hide} */
+    public static final String PNO_PARAMS_PNO_SETTINGS_KEY = "PnoSettings";
+    /** {@hide} */
+    public static final String PNO_PARAMS_SCAN_SETTINGS_KEY = "ScanSettings";
+    /**
+     * PNO scan configuration parameters to be sent to {@link #startPnoScan}.
+     * Note: This structure needs to be in sync with |wifi_epno_params| struct in gscan HAL API.
+     * {@hide}
+     */
+    public static class PnoSettings implements Parcelable {
+        /**
+         * Pno network to be added to the PNO scan filtering.
+         * {@hide}
+         */
+        public static class PnoNetwork {
+            /*
+             * Pno flags bitmask to be set in {@link #PnoNetwork.flags}
+             */
+            /** Whether directed scan needs to be performed (for hidden SSIDs) */
+            public static final byte FLAG_DIRECTED_SCAN = (1 << 0);
+            /** Whether PNO event shall be triggered if the network is found on A band */
+            public static final byte FLAG_A_BAND = (1 << 1);
+            /** Whether PNO event shall be triggered if the network is found on G band */
+            public static final byte FLAG_G_BAND = (1 << 2);
+            /**
+             * Whether strict matching is required
+             * If required then the firmware must store the network's SSID and not just a hash
+             */
+            public static final byte FLAG_STRICT_MATCH = (1 << 3);
+            /**
+             * If this SSID should be considered the same network as the currently connected
+             * one for scoring.
+             */
+            public static final byte FLAG_SAME_NETWORK = (1 << 4);
+
+            /*
+             * Code for matching the beacon AUTH IE - additional codes. Bitmask to be set in
+             * {@link #PnoNetwork.authBitField}
+             */
+            /** Open Network */
+            public static final byte AUTH_CODE_OPEN = (1 << 0);
+            /** WPA_PSK or WPA2PSK */
+            public static final byte AUTH_CODE_PSK = (1 << 1);
+            /** any EAPOL */
+            public static final byte AUTH_CODE_EAPOL = (1 << 2);
+
+            /** SSID of the network */
+            public String ssid;
+            /** Network ID in wpa_supplicant */
+            public int networkId;
+            /** Assigned priority for the network */
+            public int priority;
+            /** Bitmask of the FLAG_XXX */
+            public byte flags;
+            /** Bitmask of the ATUH_XXX */
+            public byte authBitField;
+
+            /**
+             * default constructor for PnoNetwork
+             */
+            public PnoNetwork(String ssid) {
+                this.ssid = ssid;
+                flags = 0;
+                authBitField = 0;
+            }
+        }
+
+        /** Connected vs Disconnected PNO flag {@hide} */
+        public boolean isConnected;
+        /** Minimum 5GHz RSSI for a BSSID to be considered */
+        public int min5GHzRssi;
+        /** Minimum 2.4GHz RSSI for a BSSID to be considered */
+        public int min24GHzRssi;
+        /** Maximum score that a network can have before bonuses */
+        public int initialScoreMax;
+        /**
+         *  Only report when there is a network's score this much higher
+         *  than the current connection.
+         */
+        public int currentConnectionBonus;
+        /** score bonus for all networks with the same network flag */
+        public int sameNetworkBonus;
+        /** score bonus for networks that are not open */
+        public int secureBonus;
+        /** 5GHz RSSI score bonus (applied to all 5GHz networks) */
+        public int band5GHzBonus;
+        /** Pno Network filter list */
+        public PnoNetwork[] networkList;
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(isConnected ? 1 : 0);
+            dest.writeInt(min5GHzRssi);
+            dest.writeInt(min24GHzRssi);
+            dest.writeInt(initialScoreMax);
+            dest.writeInt(currentConnectionBonus);
+            dest.writeInt(sameNetworkBonus);
+            dest.writeInt(secureBonus);
+            dest.writeInt(band5GHzBonus);
+            if (networkList != null) {
+                dest.writeInt(networkList.length);
+                for (int i = 0; i < networkList.length; i++) {
+                    dest.writeString(networkList[i].ssid);
+                    dest.writeInt(networkList[i].networkId);
+                    dest.writeInt(networkList[i].priority);
+                    dest.writeByte(networkList[i].flags);
+                    dest.writeByte(networkList[i].authBitField);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<PnoSettings> CREATOR =
+                new Creator<PnoSettings>() {
+                    public PnoSettings createFromParcel(Parcel in) {
+                        PnoSettings settings = new PnoSettings();
+                        settings.isConnected = in.readInt() == 1;
+                        settings.min5GHzRssi = in.readInt();
+                        settings.min24GHzRssi = in.readInt();
+                        settings.initialScoreMax = in.readInt();
+                        settings.currentConnectionBonus = in.readInt();
+                        settings.sameNetworkBonus = in.readInt();
+                        settings.secureBonus = in.readInt();
+                        settings.band5GHzBonus = in.readInt();
+                        int numNetworks = in.readInt();
+                        settings.networkList = new PnoNetwork[numNetworks];
+                        for (int i = 0; i < numNetworks; i++) {
+                            String ssid = in.readString();
+                            PnoNetwork network = new PnoNetwork(ssid);
+                            network.networkId = in.readInt();
+                            network.priority = in.readInt();
+                            network.flags = in.readByte();
+                            network.authBitField = in.readByte();
+                            settings.networkList[i] = network;
+                        }
+                        return settings;
+                    }
+
+                    public PnoSettings[] newArray(int size) {
+                        return new PnoSettings[size];
+                    }
+                };
+
+    }
+
     /**
      * interface to get scan events on; specify this on {@link #startBackgroundScan} or
      * {@link #startScan}
@@ -454,6 +613,18 @@ public class WifiScanner {
          * reports full scan result for each access point found in scan
          */
         public void onFullResult(ScanResult fullScanResult);
+    }
+
+    /**
+     * interface to get PNO scan events on; specify this on {@link #startDisconnectedPnoScan} and
+     * {@link #startConnectedPnoScan}.
+     * {@hide}
+     */
+    public interface PnoScanListener extends ScanListener {
+        /**
+         * Invoked when one of the PNO networks are found in scan results.
+         */
+        void onPnoNetworkFound(ScanResult[] results);
     }
 
     /** start wifi scan in background
@@ -519,6 +690,75 @@ public class WifiScanner {
         if (key == INVALID_KEY) return;
         validateChannel();
         sAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, key);
+    }
+
+    private void startPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings, int key) {
+        // Bundle up both the settings and send it across.
+        Bundle pnoParams = new Bundle();
+        if (pnoParams == null) return;
+        // Set the PNO scan flag.
+        scanSettings.isPnoScan = true;
+        pnoParams.putParcelable(PNO_PARAMS_SCAN_SETTINGS_KEY, scanSettings);
+        pnoParams.putParcelable(PNO_PARAMS_PNO_SETTINGS_KEY, pnoSettings);
+        sAsyncChannel.sendMessage(CMD_START_PNO_SCAN, 0, key, pnoParams);
+    }
+    /**
+     * Start wifi connected PNO scan
+     * @param scanSettings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param pnoSettings specifies various parameters for PNO; for more information look at
+     * {@link PnoSettings}
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     * {@hide}
+     */
+    public void startConnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
+            PnoScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(pnoSettings, "pnoSettings cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        pnoSettings.isConnected = true;
+        startPnoScan(scanSettings, pnoSettings, key);
+    }
+    /**
+     * Start wifi disconnected PNO scan
+     * @param scanSettings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param pnoSettings specifies various parameters for PNO; for more information look at
+     * {@link PnoSettings}
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     * {@hide}
+     */
+    public void startDisconnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
+            PnoScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(pnoSettings, "pnoSettings cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        pnoSettings.isConnected = false;
+        startPnoScan(scanSettings, pnoSettings, key);
+    }
+    /**
+     * Stop an ongoing wifi PNO scan
+     * @param pnoSettings specifies various parameters for PNO; for more information look at
+     * {@link PnoSettings}
+     * @param listener specifies which scan to cancel; must be same object as passed in {@link
+     *  #startPnoScan}
+     * TODO(rpius): Check if we can remove pnoSettings param in stop.
+     * {@hide}
+     */
+    public void stopPnoScan(PnoSettings pnoSettings, ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        sAsyncChannel.sendMessage(CMD_STOP_PNO_SCAN, 0, key, pnoSettings);
     }
 
     /** specifies information about an access point of interest */
@@ -824,6 +1064,12 @@ public class WifiScanner {
     public static final int CMD_STOP_SINGLE_SCAN            = BASE + 22;
     /** @hide */
     public static final int CMD_SINGLE_SCAN_COMPLETED       = BASE + 23;
+    /** @hide */
+    public static final int CMD_START_PNO_SCAN              = BASE + 24;
+    /** @hide */
+    public static final int CMD_STOP_PNO_SCAN               = BASE + 25;
+    /** @hide */
+    public static final int CMD_PNO_NETWORK_FOUND           = BASE + 26;
 
     private Context mContext;
     private IWifiScanner mService;
@@ -1110,6 +1356,10 @@ public class WifiScanner {
                     if (DBG) Log.d(TAG, "removing listener for single scan");
                     removeListener(msg.arg2);
                     break;
+                case CMD_PNO_NETWORK_FOUND:
+                    ((PnoScanListener) listener).onPnoNetworkFound(
+                            ((ParcelableScanResults) msg.obj).getResults());
+                    return;
                 default:
                     if (DBG) Log.d(TAG, "Ignoring message " + msg.what);
                     return;
