@@ -13504,6 +13504,7 @@ package android.hardware {
     field public static final int TYPE_ACCELEROMETER = 1; // 0x1
     field public static final int TYPE_ALL = -1; // 0xffffffff
     field public static final int TYPE_AMBIENT_TEMPERATURE = 13; // 0xd
+    field public static final int TYPE_DEVICE_PRIVATE_BASE = 65536; // 0x10000
     field public static final int TYPE_GAME_ROTATION_VECTOR = 15; // 0xf
     field public static final int TYPE_GEOMAGNETIC_ROTATION_VECTOR = 20; // 0x14
     field public static final int TYPE_GRAVITY = 9; // 0x9

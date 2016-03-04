@@ -652,6 +652,14 @@ public final class Sensor {
 
     public static final int TYPE_ALL = -1;
 
+    /**
+     * The lowest sensor type vendor defined sensors can use.
+     *
+     * All vendor sensor types are greater than or equal to this constant.
+     *
+     */
+    public static final int TYPE_DEVICE_PRIVATE_BASE = 0x10000;
+
     // If this flag is set, the sensor defined as a wake up sensor. This field and REPORTING_MODE_*
     // constants are defined as flags in sensors.h. Modify at both places if needed.
     private static final int SENSOR_FLAG_WAKE_UP_SENSOR = 1;
