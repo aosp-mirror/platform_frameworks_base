@@ -568,6 +568,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPublicLayout.reInflateViews();
     }
 
+    public void setContentBackground(int customBackgroundColor, boolean animate,
+            NotificationContentView notificationContentView) {
+        if (getShowingLayout() == notificationContentView) {
+            setTintColor(customBackgroundColor, animate);
+        }
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -1107,7 +1114,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         } else {
             animateShowingPublic(delay, duration);
         }
-
+        NotificationContentView showingLayout = getShowingLayout();
+        showingLayout.updateBackgroundColor(animated);
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateClearability();
         mShowingPublicInitialized = true;

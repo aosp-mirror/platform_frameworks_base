@@ -33,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
 import com.android.systemui.statusbar.notification.NotificationCustomViewWrapper;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -48,7 +49,7 @@ public class NotificationContentView extends FrameLayout {
     private static final int VISIBLE_TYPE_EXPANDED = 1;
     private static final int VISIBLE_TYPE_HEADSUP = 2;
     private static final int VISIBLE_TYPE_SINGLELINE = 3;
-    private static final int UNDEFINED = -1;
+    public static final int UNDEFINED = -1;
 
     private final Rect mClipBounds = new Rect();
     private final int mMinContractedHeight;
@@ -367,6 +368,7 @@ public class NotificationContentView extends FrameLayout {
             getViewForVisibleType(visibleType).setVisibility(View.VISIBLE);
             hiddenView.transformTo(shownView, 0.0f);
             mVisibleType = visibleType;
+            updateBackgroundColor(true /* animate */);
         }
         if (mTransformationStartVisibleType != UNDEFINED
                 && mVisibleType != mTransformationStartVisibleType) {
@@ -376,9 +378,27 @@ public class NotificationContentView extends FrameLayout {
             float transformationAmount = calculateTransformationAmount();
             shownView.transformFrom(hiddenView, transformationAmount);
             hiddenView.transformTo(shownView, transformationAmount);
+            updateBackgroundTransformation(transformationAmount);
         } else {
             updateViewVisibilities(visibleType);
+            updateBackgroundColor(false);
         }
+    }
+
+    private void updateBackgroundTransformation(float transformationAmount) {
+        int endColor = getBackgroundColor(mVisibleType);
+        int startColor = getBackgroundColor(mTransformationStartVisibleType);
+        if (endColor != startColor) {
+            if (startColor == 0) {
+                startColor = mContainingNotification.getBackgroundColorWithoutTint();
+            }
+            if (endColor == 0) {
+                endColor = mContainingNotification.getBackgroundColorWithoutTint();
+            }
+            endColor = NotificationUtils.interpolateColors(startColor, endColor,
+                    transformationAmount);
+        }
+        mContainingNotification.setContentBackground(endColor, false, this);
     }
 
     private float calculateTransformationAmount() {
@@ -457,7 +477,22 @@ public class NotificationContentView extends FrameLayout {
                 updateViewVisibilities(visibleType);
             }
             mVisibleType = visibleType;
+            updateBackgroundColor(animate);
         }
+    }
+
+    public void updateBackgroundColor(boolean animate) {
+        int customBackgroundColor = getBackgroundColor(mVisibleType);
+        mContainingNotification.setContentBackground(customBackgroundColor, animate, this);
+    }
+
+    private int getBackgroundColor(int visibleType) {
+        NotificationViewWrapper currentVisibleWrapper = getVisibleWrapper(visibleType);
+        int customBackgroundColor = 0;
+        if (currentVisibleWrapper != null) {
+            customBackgroundColor = currentVisibleWrapper.getCustomBackgroundColor();
+        }
+        return customBackgroundColor;
     }
 
     private void updateViewVisibilities(int visibleType) {
@@ -530,8 +565,8 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    private NotificationViewWrapper getCurrentVisibleWrapper() {
-        switch (mVisibleType) {
+    private NotificationViewWrapper getVisibleWrapper(int visibleType) {
+        switch (visibleType) {
             case VISIBLE_TYPE_EXPANDED:
                 return mExpandedWrapper;
             case VISIBLE_TYPE_HEADSUP:
@@ -606,7 +641,6 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
         mDark = dark;
-        dark = dark && !mShowingLegacyBackground;
         if (mVisibleType == VISIBLE_TYPE_CONTRACTED || !dark) {
             mContractedWrapper.setDark(dark, fade, delay);
         }
@@ -637,6 +671,19 @@ public class NotificationContentView extends FrameLayout {
 
     public void setShowingLegacyBackground(boolean showing) {
         mShowingLegacyBackground = showing;
+        updateShowingLegacyBackground();
+    }
+
+    private void updateShowingLegacyBackground() {
+        if (mContractedChild != null) {
+            mContractedWrapper.setShowingLegacyBackground(mShowingLegacyBackground);
+        }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.setShowingLegacyBackground(mShowingLegacyBackground);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.setShowingLegacyBackground(mShowingLegacyBackground);
+        }
     }
 
     public void setIsChildInGroup(boolean isChildInGroup) {
@@ -658,6 +705,7 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.notifyContentUpdated(entry.notification);
         }
+        updateShowingLegacyBackground();
         selectLayout(false /* animate */, true /* force */);
         setDark(mDark, false /* animate */, 0 /* delay */);
     }
@@ -779,7 +827,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public NotificationHeaderView getVisibleNotificationHeader() {
-        NotificationViewWrapper wrapper = getCurrentVisibleWrapper();
+        NotificationViewWrapper wrapper = getVisibleWrapper(mVisibleType);
         return wrapper == null ? null : wrapper.getNotificationHeader();
     }
 
@@ -807,6 +855,7 @@ public class NotificationContentView extends FrameLayout {
             mTransformationStartVisibleType = UNDEFINED;
             mVisibleType = calculateVisibleType();
             updateViewVisibilities(mVisibleType);
+            updateBackgroundColor(false);
         }
     }
 }

@@ -47,7 +47,6 @@ import java.util.Stack;
  */
 public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
-    private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
     private final PorterDuffColorFilter mIconColorFilter = new PorterDuffColorFilter(
             0, PorterDuff.Mode.SRC_ATOP);
     private final int mIconDarkAlpha;
@@ -178,21 +177,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         }
     }
 
-    protected void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
-            boolean dark, long delay, Animator.AnimatorListener listener) {
-        float startIntensity = dark ? 0f : 1f;
-        float endIntensity = dark ? 1f : 0f;
-        ValueAnimator animator = ValueAnimator.ofFloat(startIntensity, endIntensity);
-        animator.addUpdateListener(updateListener);
-        animator.setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
-        animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        animator.setStartDelay(delay);
-        if (listener != null) {
-            animator.addListener(listener);
-        }
-        animator.start();
-    }
-
     private void fadeIconColorFilter(final ImageView target, boolean dark, long delay) {
         startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -262,10 +246,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
-    }
-
-    private void updateGrayscaleMatrix(float intensity) {
-        mGrayscaleColorMatrix.setSaturation(1 - intensity);
     }
 
     private static int interpolateColor(int source, int target, float t) {
