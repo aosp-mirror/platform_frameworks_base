@@ -349,7 +349,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void notifyAppStopped(IBinder token) throws RemoteException {
+    public void notifyAppStopped(IBinder token, boolean stopped) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
