@@ -5259,7 +5259,7 @@ package android.app {
   }
 
   public static class NotificationManager.Policy implements android.os.Parcelable {
-    ctor public deprecated NotificationManager.Policy(int, int, int);
+    ctor public NotificationManager.Policy(int, int, int);
     ctor public NotificationManager.Policy(int, int, int, int);
     method public int describeContents();
     method public static java.lang.String priorityCategoriesToString(int);

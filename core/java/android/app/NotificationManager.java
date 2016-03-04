@@ -662,7 +662,7 @@ public class NotificationManager
 
     /**
      * Notification policy configuration.  Represents user-preferences for notification
-     * filtering and prioritization.
+     * filtering.
      */
     public static class Policy implements android.os.Parcelable {
         /** Reminder notifications are prioritized. */
@@ -707,13 +707,13 @@ public class NotificationManager
          */
         public static final int SUPPRESSED_EFFECTS_UNSET = -1;
         /**
-         * Whether notification suppressed by DND should not interruption visually when the screen
-         * is off.
+         * Whether notifications suppressed by DND should not interrupt visually (e.g. with
+         * notification lights or by turning the screen on) when the screen is off.
          */
         public static final int SUPPRESSED_EFFECT_SCREEN_OFF = 1 << 0;
         /**
-         * Whether notification suppressed by DND should not interruption visually when the screen
-         * is on.
+         * Whether notifications suppressed by DND should not interrupt visually when the screen
+         * is on (e.g. by peeking onto the screen).
          */
         public static final int SUPPRESSED_EFFECT_SCREEN_ON = 1 << 1;
 
@@ -728,13 +728,27 @@ public class NotificationManager
          */
         public final int suppressedVisualEffects;
 
-
-        @Deprecated
+        /**
+         * Constructs a policy for Do Not Disturb priority mode behavior.
+         *
+         * @param priorityCategories bitmask of categories of notifications that can bypass DND.
+         * @param priorityCallSenders which callers can bypass DND.
+         * @param priorityMessageSenders which message senders can bypass DND.
+         */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders) {
             this(priorityCategories, priorityCallSenders, priorityMessageSenders,
                     SUPPRESSED_EFFECTS_UNSET);
         }
 
+        /**
+         * Constructs a policy for Do Not Disturb priority mode behavior.
+         *
+         * @param priorityCategories bitmask of categories of notifications that can bypass DND.
+         * @param priorityCallSenders which callers can bypass DND.
+         * @param priorityMessageSenders which message senders can bypass DND.
+         * @param suppressedVisualEffects which visual interruptions should be suppressed from
+         *                                notifications that are filtered by DND.
+         */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
                 int suppressedVisualEffects) {
             this.priorityCategories = priorityCategories;
@@ -865,7 +879,6 @@ public class NotificationManager
                 return new Policy[size];
             }
         };
-
     }
 
     /**
