@@ -149,6 +149,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/content/pm/IOnPermissionsChangeListener.aidl \
+	core/java/android/content/pm/IShortcutService.aidl \
 	core/java/android/database/IContentObserver.aidl \
 	../av/camera/aidl/android/hardware/ICameraService.aidl \
 	../av/camera/aidl/android/hardware/ICameraServiceListener.aidl \
@@ -650,6 +651,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/pm/ProviderInfo.aidl \
 	frameworks/base/core/java/android/content/pm/PackageStats.aidl \
 	frameworks/base/core/java/android/content/pm/PermissionGroupInfo.aidl \
+	frameworks/base/core/java/android/content/pm/ShortcutInfo.aidl \
 	frameworks/base/core/java/android/content/pm/LabeledIntent.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \

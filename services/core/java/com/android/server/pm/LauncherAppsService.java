@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,8 +29,12 @@ import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutServiceInternal;
+import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -44,15 +50,16 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.util.List;
 
 /**
  * Service that manages requests and callbacks for launchers that support
- * managed profiles. 
+ * managed profiles.
  */
-
 public class LauncherAppsService extends SystemService {
 
     private final LauncherAppsImpl mLauncherAppsImpl;
@@ -67,21 +74,25 @@ public class LauncherAppsService extends SystemService {
         publishBinderService(Context.LAUNCHER_APPS_SERVICE, mLauncherAppsImpl);
     }
 
-    class LauncherAppsImpl extends ILauncherApps.Stub {
+    static class LauncherAppsImpl extends ILauncherApps.Stub {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
         private final Context mContext;
         private final PackageManager mPm;
         private final UserManager mUm;
+        private final ShortcutServiceInternal mShortcutServiceInternal;
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
 
-        private MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
+        private final MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
             mPm = mContext.getPackageManager();
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            mShortcutServiceInternal = Preconditions.checkNotNull(
+                    LocalServices.getService(ShortcutServiceInternal.class));
+            mShortcutServiceInternal.addListener(mPackageMonitor);
         }
 
         /*
@@ -171,6 +182,20 @@ public class LauncherAppsService extends SystemService {
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        private void verifyCallingPackage(String callingPackage) {
+            int packageUid = -1;
+            try {
+                packageUid = mPm.getPackageUid(callingPackage,
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE
+                                | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Package not found: " + callingPackage);
+            }
+            if (packageUid != Binder.getCallingUid()) {
+                throw new SecurityException("Calling package name mismatch");
             }
         }
 
@@ -264,6 +289,57 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
+        private void enforceShortcutPermission(UserHandle user) {
+            ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
+            // STOPSHIP Implement it
+        }
+
+        @Override
+        public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
+                String packageName, ComponentName componentName, int flags, UserHandle user)
+                throws RemoteException {
+            enforceShortcutPermission(user);
+            verifyCallingPackage(callingPackage);
+
+            return new ParceledListSlice<>(
+                    mShortcutServiceInternal.getShortcuts(callingPackage, changedSince, packageName,
+                    componentName, flags, user.getIdentifier()));
+        }
+
+        @Override
+        public ParceledListSlice getShortcutInfo(String callingPackage, String packageName,
+                List<String> ids, UserHandle user) throws RemoteException {
+            enforceShortcutPermission(user);
+            verifyCallingPackage(callingPackage);
+
+            return new ParceledListSlice<>(
+                    mShortcutServiceInternal.getShortcutInfo(callingPackage, packageName,
+                    ids, user.getIdentifier()));
+        }
+
+        @Override
+        public void pinShortcuts(String callingPackage, String packageName, List<String> ids,
+                UserHandle user) throws RemoteException {
+            enforceShortcutPermission(user);
+            verifyCallingPackage(callingPackage);
+
+            mShortcutServiceInternal.pinShortcuts(callingPackage, packageName,
+                    ids, user.getIdentifier());
+        }
+
+        @Override
+        public void startShortcut(String callingPackage, ShortcutInfo shortcut, Rect sourceBounds,
+                Bundle startActivityOptions, UserHandle user) throws RemoteException {
+            enforceShortcutPermission(user);
+            verifyCallingPackage(callingPackage);
+
+            final Intent intent = mShortcutServiceInternal.createShortcutIntent(callingPackage,
+                    shortcut, user.getIdentifier());
+            // TODO
+            Slog.e(TAG, "startShortcut() not implemented yet, but the intent is " + intent);
+            throw new RuntimeException("not implemented yet");
+        }
+
         @Override
         public boolean isActivityEnabled(ComponentName component, UserHandle user)
                 throws RemoteException {
@@ -355,7 +431,7 @@ public class LauncherAppsService extends SystemService {
         }
 
 
-        private class MyPackageMonitor extends PackageMonitor {
+        private class MyPackageMonitor extends PackageMonitor implements ShortcutChangeListener {
 
             /** Checks if user is a profile of or same as listeningUser.
               * and the user is enabled. */
@@ -389,6 +465,8 @@ public class LauncherAppsService extends SystemService {
                     Binder.restoreCallingIdentity(ident);
                 }
             }
+
+            // TODO Simplify with lambdas.
 
             @Override
             public void onPackageAdded(String packageName, int uid) {
@@ -523,6 +601,25 @@ public class LauncherAppsService extends SystemService {
                 super.onPackagesUnsuspended(packages);
             }
 
+            @Override
+            public void onShortcutChanged(@NonNull String packageName,
+                    @NonNull List<ShortcutInfo> shortcuts, @UserIdInt int userId) {
+                final UserHandle user = UserHandle.of(userId);
+
+                final int n = mListeners.beginBroadcast();
+                for (int i = 0; i < n; i++) {
+                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, listeningUser, "onShortcutChanged")) continue;
+                    try {
+                        listener.onShortcutChanged(user, packageName,
+                                new ParceledListSlice<>(shortcuts));
+                    } catch (RemoteException re) {
+                        Slog.d(TAG, "Callback failed ", re);
+                    }
+                }
+                mListeners.finishBroadcast();
+            }
         }
 
         class PackageCallbackList<T extends IInterface> extends RemoteCallbackList<T> {

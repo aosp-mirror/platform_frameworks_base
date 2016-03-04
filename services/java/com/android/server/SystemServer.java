@@ -83,6 +83,7 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
@@ -726,6 +727,9 @@ public final class SystemServer {
                 // Always start the Device Policy Manager, so that the API is compatible with
                 // API8.
                 mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
+
+// TODO is this a good place?
+                mSystemServiceManager.startService(ShortcutService.Lifecycle.class);
             }
 
             if (!disableSystemUI) {
