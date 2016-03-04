@@ -2391,6 +2391,7 @@
 
   <java-symbol type="string" name="config_packagedKeyboardName" />
   <java-symbol type="bool" name="config_forceWindowDrawsStatusBarBackground" />
+  <java-symbol type="bool" name="config_forceNavBarAlwaysOpaque" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
 
   <!-- EditText suggestion popup. -->
