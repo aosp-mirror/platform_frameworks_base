@@ -672,8 +672,9 @@ public class TaskStackLayoutAlgorithm {
 
             boolean isFrontMostTaskInGroup = task.group == null || task.group.isFrontMostTask(task);
             if (isFrontMostTaskInGroup) {
-                getStackTransform(taskProgress, mInitialScrollP, mFocusState, tmpTransform, null,
-                        false /* ignoreSingleTaskCase */, false /* forceUpdate */);
+                getStackTransform(taskProgress, taskProgress, mInitialScrollP, mFocusState,
+                        tmpTransform, null, false /* ignoreSingleTaskCase */,
+                        false /* forceUpdate */);
                 float screenY = tmpTransform.rect.top;
                 boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
                 if (hasVisibleThumbnail) {
@@ -725,15 +726,16 @@ public class TaskStackLayoutAlgorithm {
             return transformOut;
         } else {
             // Return early if we have an invalid index
-            if (task == null || mTaskIndexMap.get(task.key.id, -1) == -1) {
+            int nonOverrideTaskProgress = mTaskIndexMap.get(task.key.id, -1);
+            if (task == null || nonOverrideTaskProgress == -1) {
                 transformOut.reset();
                 return transformOut;
             }
             float taskProgress = ignoreTaskOverrides
-                    ? mTaskIndexMap.get(task.key.id, 0)
+                    ? nonOverrideTaskProgress
                     : getStackScrollForTask(task);
-            getStackTransform(taskProgress, stackScroll, focusState, transformOut,
-                    frontTransform, false /* ignoreSingleTaskCase */, forceUpdate);
+            getStackTransform(taskProgress, nonOverrideTaskProgress, stackScroll, focusState,
+                    transformOut, frontTransform, false /* ignoreSingleTaskCase */, forceUpdate);
             return transformOut;
         }
     }
@@ -758,9 +760,9 @@ public class TaskStackLayoutAlgorithm {
      *                             internally to ensure that we can calculate the transform for any
      *                             position in the stack.
      */
-    public void getStackTransform(float taskProgress, float stackScroll, int focusState,
-            TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            boolean ignoreSingleTaskCase, boolean forceUpdate) {
+    public void getStackTransform(float taskProgress, float nonOverrideTaskProgress,
+            float stackScroll, int focusState, TaskViewTransform transformOut,
+            TaskViewTransform frontTransform, boolean ignoreSingleTaskCase, boolean forceUpdate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Compute the focused and unfocused offset
@@ -769,6 +771,8 @@ public class TaskStackLayoutAlgorithm {
         mFocusedRange.offset(boundedStackScroll);
         float boundedScrollUnfocusedRangeX = mUnfocusedRange.getNormalizedX(taskProgress);
         float boundedScrollFocusedRangeX = mFocusedRange.getNormalizedX(taskProgress);
+        float boundedScrollUnfocusedNonOverrideRangeX =
+                mUnfocusedRange.getNormalizedX(nonOverrideTaskProgress);
         mUnfocusedRange.offset(stackScroll);
         mFocusedRange.offset(stackScroll);
         boolean unfocusedVisible = mUnfocusedRange.isInRange(taskProgress);
@@ -812,7 +816,7 @@ public class TaskStackLayoutAlgorithm {
 
             y = (mStackRect.top - mTaskRect.top) +
                     (int) Utilities.mapRange(focusState, unfocusedY, focusedY);
-            z = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedRangeX),
+            z = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedNonOverrideRangeX),
                     mMinTranslationZ, mMaxTranslationZ);
             dimAlpha = Utilities.mapRange(focusState, unfocusedDim, focusedDim);
             viewOutlineAlpha = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedRangeX),
@@ -952,9 +956,9 @@ public class TaskStackLayoutAlgorithm {
                 mFocusedRange.relativeMin);
         float max = Utilities.mapRange(mFocusState, mUnfocusedRange.relativeMax,
                 mFocusedRange.relativeMax);
-        getStackTransform(min, 0f, mFocusState, mBackOfStackTransform, null,
+        getStackTransform(min, min, 0f, mFocusState, mBackOfStackTransform, null,
                 true /* ignoreSingleTaskCase */, true /* forceUpdate */);
-        getStackTransform(max, 0f, mFocusState, mFrontOfStackTransform, null,
+        getStackTransform(max, max, 0f, mFocusState, mFrontOfStackTransform, null,
                 true /* ignoreSingleTaskCase */, true /* forceUpdate */);
         mBackOfStackTransform.visible = true;
         mFrontOfStackTransform.visible = true;
