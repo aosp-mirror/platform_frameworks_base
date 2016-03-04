@@ -31,7 +31,7 @@ import android.widget.Toast;
 
 public class TestEnrollmentActivity extends Activity {
     private static final String TAG = "TestEnrollmentActivity";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /** Keyphrase related constants, must match those defined in enrollment_application.xml */
     private static final int KEYPHRASE_ID = 101;

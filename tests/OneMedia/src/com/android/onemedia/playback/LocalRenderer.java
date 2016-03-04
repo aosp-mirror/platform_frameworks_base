@@ -47,7 +47,7 @@ public class LocalRenderer extends Renderer implements OnPreparedListener,
         OnBufferingUpdateListener, OnCompletionListener, OnErrorListener,
         OnAudioFocusChangeListener {
     private static final String TAG = "MediaPlayerManager";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static long sDebugInstanceId = 0;
 
     private static final String[] SUPPORTED_FEATURES = {

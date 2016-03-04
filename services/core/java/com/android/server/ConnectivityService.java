@@ -164,7 +164,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         implements PendingIntent.OnFinished {
     private static final String TAG = "ConnectivityService";
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
     private static final boolean LOGD_RULES = false;
@@ -455,7 +455,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private class LegacyTypeTracker {
 
-        private static final boolean DBG = true;
+        private static final boolean DBG = false;
         private static final boolean VDBG = false;
         private static final String TAG = "CSLegacyTypeTracker";
 

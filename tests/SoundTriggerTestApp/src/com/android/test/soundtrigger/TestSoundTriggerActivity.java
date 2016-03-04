@@ -40,7 +40,7 @@ import android.widget.Toast;
 
 public class TestSoundTriggerActivity extends Activity {
     private static final String TAG = "TestSoundTriggerActivity";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private SoundTriggerUtil mSoundTriggerUtil;
     private Random mRandom;

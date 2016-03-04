@@ -41,7 +41,7 @@ import java.util.Map;
 public class TileUtils {
 
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_TIMING = true;
+    private static final boolean DEBUG_TIMING = false;
 
     private static final String LOG_TAG = "TileUtils";
 
