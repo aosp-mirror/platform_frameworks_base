@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.BidiFormatter;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,18 +69,21 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         mProc = data.proc;
         mResult = data.result;
         mRepeating = data.repeating;
+        BidiFormatter bidi = BidiFormatter.getInstance();
+
         if ((mProc.pkgList.size() == 1) &&
                 (mName = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
             setTitle(res.getString(
                     mRepeating ? com.android.internal.R.string.aerr_application_repeated
                             : com.android.internal.R.string.aerr_application,
-                    mName.toString(), mProc.info.processName));
+                    bidi.unicodeWrap(mName.toString()),
+                    bidi.unicodeWrap(mProc.info.processName)));
         } else {
             mName = mProc.processName;
             setTitle(res.getString(
                     mRepeating ? com.android.internal.R.string.aerr_process_repeated
                             : com.android.internal.R.string.aerr_process,
-                    mName.toString()));
+                    bidi.unicodeWrap(mName.toString())));
         }
 
         setCancelable(false);
