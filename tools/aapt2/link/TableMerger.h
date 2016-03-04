@@ -65,13 +65,17 @@ public:
 
     /**
      * Merges resources from the same or empty package. This is for local sources.
+     * An io::IFileCollection is optional and used to find the referenced Files and process them.
      */
-    bool merge(const Source& src, ResourceTable* table);
+    bool merge(const Source& src, ResourceTable* table,
+               io::IFileCollection* collection = nullptr);
 
     /**
      * Merges resources from an overlay ResourceTable.
+     * An io::IFileCollection is optional and used to find the referenced Files and process them.
      */
-    bool mergeOverlay(const Source& src, ResourceTable* table);
+    bool mergeOverlay(const Source& src, ResourceTable* table,
+                      io::IFileCollection* collection = nullptr);
 
     /**
      * Merges resources from the given package, mangling the name. This is for static libraries.
@@ -104,7 +108,7 @@ private:
 
     bool mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, bool overlay);
 
-    bool mergeImpl(const Source& src, ResourceTable* srcTable,
+    bool mergeImpl(const Source& src, ResourceTable* srcTable, io::IFileCollection* collection,
                    bool overlay, bool allowNew);
 
     bool doMerge(const Source& src, ResourceTable* srcTable, ResourceTablePackage* srcPackage,

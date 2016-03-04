@@ -246,7 +246,7 @@ inline std::unique_ptr<xml::XmlResource> buildXmlDom(const StringPiece& str) {
 inline std::unique_ptr<xml::XmlResource> buildXmlDomForPackageName(IAaptContext* context,
                                                                    const StringPiece& str) {
     std::unique_ptr<xml::XmlResource> doc = buildXmlDom(str);
-    doc->file.name.package = context->getCompilationPackage().toString();
+    doc->file.name.package = context->getCompilationPackage();
     return doc;
 }
 

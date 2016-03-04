@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# This tool is prebuilt if we're doing an app-only build.
-ifeq ($(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)),)
+LOCAL_PATH:= $(call my-dir)
 
 # ==========================================================
 # Setup some common variables for the different build
 # targets here.
 # ==========================================================
-LOCAL_PATH:= $(call my-dir)
 
 main := Main.cpp
 sources := \
@@ -192,4 +189,6 @@ LOCAL_C_INCLUDES += $(protoIncludes)
 
 include $(BUILD_HOST_EXECUTABLE)
 
-endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
+ifeq ($(ONE_SHOT_MAKEFILE),)
+include $(call all-makefiles-under,$(LOCAL_PATH))
+endif

@@ -32,7 +32,7 @@ public:
         mContext = test::ContextBuilder()
                 .setCompilationPackage(u"com.app.test")
                 .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test" })
-                .setSymbolTable(test::StaticSymbolTableBuilder()
+                .addSymbolSource(test::StaticSymbolSourceBuilder()
                         .addSymbol(u"@android:attr/id", ResourceId(0x010100d0),
                                    test::AttributeBuilder().build())
                         .addSymbol(u"@com.app.test:id/id", ResourceId(0x7f020000))
