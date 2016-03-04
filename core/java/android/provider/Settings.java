@@ -1241,6 +1241,19 @@ public final class Settings {
     public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS
             = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
 
+    /**
+     * Activity Action: Show a dialog for remote bugreport flow.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_REMOTE_BUGREPORT_DIALOG
+            = "android.settings.SHOW_REMOTE_BUGREPORT_DIALOG";
+
     // End of Intent actions for Settings
 
     /**
