@@ -52,13 +52,14 @@ final class ListDocumentHolder extends DocumentHolder {
         super(context, parent, R.layout.item_doc_list);
 
         mTitle = (TextView) itemView.findViewById(android.R.id.title);
-        mDetails = (LinearLayout) itemView.findViewById(R.id.line2);
         mDate = (TextView) itemView.findViewById(R.id.date);
         mSize = (TextView) itemView.findViewById(R.id.size);
         mSummary = (TextView) itemView.findViewById(android.R.id.summary);
         mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
         mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
         mIconCheck = (ImageView) itemView.findViewById(R.id.icon_check);
+        // Warning: mDetails view doesn't exists in layout-sw720dp-land layout
+        mDetails = (LinearLayout) itemView.findViewById(R.id.line2);
 
         mIconHelper = iconHelper;
     }
@@ -110,11 +111,11 @@ final class ListDocumentHolder extends DocumentHolder {
         mTitle.setVisibility(View.VISIBLE);
 
 
-        // Note, we don't show any details for any directory...ever.
+        boolean hasDetails = false;
         if (isDirectory) {
-            mDetails.setVisibility(View.GONE);
+            // Note, we don't show any details for any directory...ever.
+            hasDetails = false;
         } else {
-            boolean hasDetails = false;
             if (docSummary != null) {
                 hasDetails = true;
                 mSummary.setText(docSummary);
@@ -136,8 +137,11 @@ final class ListDocumentHolder extends DocumentHolder {
                 mSize.setText(Formatter.formatFileSize(mContext, docSize));
             } else {
                 mSize.setVisibility(View.GONE);
-                mDetails.setVisibility(View.GONE);
             }
+        }
+
+        // mDetails view doesn't exists in layout-sw720dp-land layout
+        if (mDetails != null) {
             mDetails.setVisibility(hasDetails ? View.VISIBLE : View.GONE);
         }
     }
