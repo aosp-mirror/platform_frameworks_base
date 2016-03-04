@@ -370,15 +370,14 @@ public abstract class MediaBrowserService extends Service {
      * called when the loading is complete.
      * </p><p>
      * In case the media item does not have any children, call {@link Result#sendResult}
-     * with an empty list which is not {@code null}. If {@code null} is sent that means
-     * the given {@code parentId} is invalid and {@link MediaBrowser.SubscriptionCallback#onError}
-     * will be called.
+     * with an empty list. When the given {@code parentId} is invalid, implementations must
+     * call {@link Result#sendResult result.sendResult} with {@code null}, which will invoke
+     * {@link MediaBrowser.SubscriptionCallback#onError}.
      * </p>
      *
      * @param parentId The id of the parent media item whose children are to be
      *            queried.
-     * @param result The Result to send the list of children to. Send null if the
-     *            id is invalid.
+     * @param result The Result to send the list of children to.
      */
     public abstract void onLoadChildren(@NonNull String parentId,
             @NonNull Result<List<MediaBrowser.MediaItem>> result);
@@ -394,15 +393,14 @@ public abstract class MediaBrowserService extends Service {
      * called when the loading is complete.
      * </p><p>
      * In case the media item does not have any children, call {@link Result#sendResult}
-     * with an empty list which is not {@code null}. If {@code null} is sent that means
-     * the given {@code parentId} is invalid and {@link MediaBrowser.SubscriptionCallback#onError}
-     * will be called.
+     * with an empty list. When the given {@code parentId} is invalid, implementations must
+     * call {@link Result#sendResult result.sendResult} with {@code null}, which will invoke
+     * {@link MediaBrowser.SubscriptionCallback#onError}.
      * </p>
      *
      * @param parentId The id of the parent media item whose children are to be
      *            queried.
-     * @param result The Result to send the list of children to. Send null if the
-     *            id is invalid.
+     * @param result The Result to send the list of children to.
      * @param options A bundle of service-specific arguments sent from the media
      *            browse. The information returned through the result should be
      *            affected by the contents of this bundle.
@@ -424,13 +422,18 @@ public abstract class MediaBrowserService extends Service {
      * result.detach} may be called before returning from this function, and
      * then {@link Result#sendResult result.sendResult} called when the item has
      * been loaded.
-     * <p>
-     * The default implementation sends a null result.
+     * </p><p>
+     * When the given {@code itemId} is invalid, implementations must call
+     * {@link Result#sendResult result.sendResult} with {@code null}, which will
+     * invoke {@link MediaBrowser.ItemCallback#onError}.
+     * </p><p>
+     * The default implementation calls {@link Result#sendResult result.sendResult}
+     * with {@code null}.
+     * </p>
      *
      * @param itemId The id for the specific
      *            {@link android.media.browse.MediaBrowser.MediaItem}.
-     * @param result The Result to send the item to. Send null if the id is
-     *            invalid.
+     * @param result The Result to send the item to.
      */
     public void onLoadItem(String itemId, Result<MediaBrowser.MediaItem> result) {
         result.sendResult(null);
