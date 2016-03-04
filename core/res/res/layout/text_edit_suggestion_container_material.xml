@@ -33,7 +33,7 @@
             android:id="@+id/suggestionContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
+            android:paddingTop="4dp"
             android:paddingBottom="0dp"
             android:divider="@null" />
         <LinearLayout
