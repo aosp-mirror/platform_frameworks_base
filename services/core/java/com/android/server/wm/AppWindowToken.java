@@ -354,6 +354,11 @@ class AppWindowToken extends WindowToken {
                 continue;
             }
 
+            if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + win
+                    + " destroySurfaces: mAppStopped=" + mAppStopped
+                    + " win.mWindowRemovalAllowed=" + win.mWindowRemovalAllowed
+                    + " win.mRemoveOnExit=" + win.mRemoveOnExit);
+
             win.destroyOrSaveSurface();
             if (win.mRemoveOnExit) {
                 win.mAnimatingExit = false;
@@ -372,15 +377,19 @@ class AppWindowToken extends WindowToken {
         }
     }
 
-    // The application has stopped, so destroy any surfaces which were keeping alive
-    // in case they were still being used.
-    void notifyAppStopped() {
-        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: " + this);
-        mAppStopped = true;
-        destroySurfaces();
+    /**
+     * If the application has stopped it is okay to destroy any surfaces which were keeping alive
+     * in case they were still being used.
+     */
+    void notifyAppStopped(boolean stopped) {
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: stopped=" + stopped + " " + this);
+        mAppStopped = stopped;
 
-        // Remove any starting window that was added for this app if they are still around.
-        mTask.mService.scheduleRemoveStartingWindowLocked(this);
+        if (stopped) {
+            destroySurfaces();
+            // Remove any starting window that was added for this app if they are still around.
+            mTask.mService.scheduleRemoveStartingWindowLocked(this);
+        }
     }
 
     /**

@@ -4197,7 +4197,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void notifyAppStopped(IBinder token) {
+    public void notifyAppStopped(IBinder token, boolean stopped) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "notifyAppStopped()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -4210,7 +4210,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: " + token);
                 return;
             }
-            wtoken.notifyAppStopped();
+            wtoken.notifyAppStopped(stopped);
         }
     }
 
@@ -4247,6 +4247,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.appDied = false;
                 wtoken.removeAllWindows();
             } else if (visible) {
+                if (DEBUG_ADD_REMOVE) Slog.v(
+                        TAG_WM, "No longer Stopped: " + wtoken);
                 wtoken.mAppStopped = false;
                 wtoken.setWindowsExiting(false);
             }
