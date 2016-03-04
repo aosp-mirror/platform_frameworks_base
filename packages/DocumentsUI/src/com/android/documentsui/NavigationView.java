@@ -220,17 +220,14 @@ class NavigationView {
                         .inflate(R.layout.item_subdir, parent, false);
             }
 
-            final ImageView subdir = (ImageView) convertView.findViewById(R.id.subdir);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final DocumentInfo doc = getItem(position);
 
             if (position == 0) {
                 final RootInfo root = mEnv.getCurrentRoot();
                 title.setText(root.title);
-                subdir.setVisibility(View.GONE);
             } else {
                 title.setText(doc.displayName);
-                subdir.setVisibility(View.VISIBLE);
             }
 
             return convertView;
