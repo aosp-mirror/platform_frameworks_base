@@ -80,6 +80,13 @@ using namespace img_utils;
         return nullptr; \
     }
 
+#define BAIL_IF_EXPR_RET_NULL_SP(expr, jnienv, tagId, writer) \
+    if (expr) { \
+        jniThrowExceptionFmt(jnienv, "java/lang/IllegalArgumentException", \
+                "Invalid metadata for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
+        return nullptr; \
+    }
+
 
 #define ANDROID_DNGCREATOR_CTX_JNI_ID     "mNativeContext"
 
@@ -195,8 +202,8 @@ private:
 NativeContext::NativeContext(const CameraMetadata& characteristics, const CameraMetadata& result) :
         mCharacteristics(std::make_shared<CameraMetadata>(characteristics)),
         mResult(std::make_shared<CameraMetadata>(result)), mThumbnailWidth(0),
-        mThumbnailHeight(0), mOrientation(0), mThumbnailSet(false), mGpsSet(false),
-        mDescriptionSet(false), mCaptureTimeSet(false) {}
+        mThumbnailHeight(0), mOrientation(TAG_ORIENTATION_UNKNOWN), mThumbnailSet(false),
+        mGpsSet(false), mDescriptionSet(false), mCaptureTimeSet(false) {}
 
 NativeContext::~NativeContext() {}
 
@@ -1096,7 +1103,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Set orientation
-        uint16_t orientation = 1; // Normal
+        uint16_t orientation = TAG_ORIENTATION_NORMAL;
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_ORIENTATION, 1, &orientation, TIFF_IFD_0),
                 env, TAG_ORIENTATION, writer);
     }
@@ -1138,12 +1145,27 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
     }
 
     {
-        // Set blacklevel tags
+        // Set blacklevel tags, using dynamic black level if available
         camera_metadata_entry entry =
-                characteristics.find(ANDROID_SENSOR_BLACK_LEVEL_PATTERN);
-        BAIL_IF_EMPTY_RET_NULL_SP(entry, env, TAG_BLACKLEVEL, writer);
-        const uint32_t* blackLevel = reinterpret_cast<const uint32_t*>(entry.data.i32);
-        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVEL, entry.count, blackLevel,
+                results.find(ANDROID_SENSOR_DYNAMIC_BLACK_LEVEL);
+        uint32_t blackLevelRational[8] = {0};
+        if (entry.count != 0) {
+            BAIL_IF_EXPR_RET_NULL_SP(entry.count != 4, env, TAG_BLACKLEVEL, writer);
+            for (size_t i = 0; i < entry.count; i++) {
+                blackLevelRational[i * 2] = static_cast<uint32_t>(entry.data.f[i] * 100);
+                blackLevelRational[i * 2 + 1] = 100;
+            }
+        } else {
+            // Fall back to static black level which is guaranteed
+            entry = characteristics.find(ANDROID_SENSOR_BLACK_LEVEL_PATTERN);
+            BAIL_IF_EXPR_RET_NULL_SP(entry.count != 4, env, TAG_BLACKLEVEL, writer);
+            for (size_t i = 0; i < entry.count; i++) {
+                blackLevelRational[i * 2] = static_cast<uint32_t>(entry.data.i32[i]);
+                blackLevelRational[i * 2 + 1] = 1;
+            }
+
+        }
+        BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BLACKLEVEL, 4, blackLevelRational,
                 TIFF_IFD_0), env, TAG_BLACKLEVEL, writer);
 
         uint16_t repeatDim[2] = {2, 2};
@@ -1913,8 +1935,10 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
         {
             // Set bits per sample
-            uint16_t bits = BITS_PER_RGB_SAMPLE;
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_BITSPERSAMPLE, 1, &bits, TIFF_IFD_0),
+            uint16_t bits[SAMPLES_PER_RGB_PIXEL];
+            for (int i = 0; i < SAMPLES_PER_RGB_PIXEL; i++) bits[i] = BITS_PER_RGB_SAMPLE;
+            BAIL_IF_INVALID_RET_NULL_SP(
+                    writer->addEntry(TAG_BITSPERSAMPLE, SAMPLES_PER_RGB_PIXEL, bits, TIFF_IFD_0),
                     env, TAG_BITSPERSAMPLE, writer);
         }
 
