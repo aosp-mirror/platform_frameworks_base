@@ -167,6 +167,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
     };
 
+    public int getColumnCount() {
+        if (mPages.size() == 0) return 0;
+        return mPages.get(0).mColumns;
+    }
+
     public static class TilePage extends TileLayout {
         private int mMaxRows = 3;
 
