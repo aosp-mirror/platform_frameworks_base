@@ -1204,6 +1204,10 @@
         Building a Device Policy Controller
       </a>
       </li>
+      <li><a href="<?cs var:toroot ?>training/enterprise/cosu.html">
+        Configuring Corporate-Owned, Single-Use Devices
+      </a>
+      </li>
     </ul>
   </li>
   <!-- End: Building for Work -->
