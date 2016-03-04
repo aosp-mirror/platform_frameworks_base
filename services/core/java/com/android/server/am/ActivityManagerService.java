@@ -101,6 +101,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.IDevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
@@ -5261,9 +5263,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
-        if (packageName != null && packageName.equals(mDeviceOwnerName)) {
-            throw new SecurityException("Clearing DeviceOwner data is forbidden.");
+
+        final DevicePolicyManagerInternal dpmi = LocalServices
+                .getService(DevicePolicyManagerInternal.class);
+        if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
+            throw new SecurityException("Cannot clear data for a device owner or a profile owner");
         }
+
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         userId = mUserController.handleIncomingUser(pid, uid, userId, false,
