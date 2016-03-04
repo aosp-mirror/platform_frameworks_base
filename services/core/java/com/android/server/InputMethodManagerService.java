@@ -1960,14 +1960,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + id);
         }
 
-        if (mCurClient != null && mCurAttribute != null) {
-            // We have already made sure that the package name belongs to the application's UID.
-            // No further UID check is required.
-            if (SystemConfig.getInstance().getFixedImeApps().contains(mCurAttribute.packageName)) {
-                return;
-            }
-        }
-
         // See if we need to notify a subtype change within the same IME.
         if (id.equals(mCurMethodId)) {
             final int subtypeCount = info.getSubtypeCount();
