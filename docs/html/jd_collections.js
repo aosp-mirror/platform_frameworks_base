@@ -147,6 +147,14 @@ var RESOURCE_COLLECTIONS = {
       "preview/support.html"
     ]
   },
+  "preview/landing/more": {
+    "title": "",
+    "resources": [
+      "preview/features/multi-window.html",
+      "preview/features/background-optimization.html",
+      "preview/features/notification-updates.html"
+    ]
+  },
   "google/landing/services": {
     "title": "",
     "resources": [
