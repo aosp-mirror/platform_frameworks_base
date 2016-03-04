@@ -290,10 +290,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final int CODE_USER_SETUP_COMPLETED = 4;
     private static final int CODE_NONSYSTEM_USER_EXISTS = 5;
     private static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
+    private static final int CODE_NOT_SYSTEM_USER = 7;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
-            CODE_USER_SETUP_COMPLETED })
+            CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER })
     private @interface DeviceOwnerPreConditionCode {}
 
     private static final int DEVICE_ADMIN_DEACTIVATE_TIMEOUT = 10000;
@@ -5971,6 +5972,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         + "already has a profile owner.");
             case CODE_USER_NOT_RUNNING:
                 throw new IllegalStateException("User not running: " + userId);
+            case CODE_NOT_SYSTEM_USER:
+                throw new IllegalStateException("User is not system user");
             case CODE_USER_SETUP_COMPLETED:
                 throw new IllegalStateException(
                         "Cannot set the device owner if the device is already set-up");
@@ -8138,6 +8141,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return CODE_OK;
         } else {
             if (!mInjector.userManagerIsSplitSystemUser()) {
+                // In non-split user mode, DO has to be user 0
+                if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
+                    return CODE_NOT_SYSTEM_USER;
+                }
                 // In non-split user mode, only provision DO before setup wizard completes
                 if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                     return CODE_USER_SETUP_COMPLETED;
