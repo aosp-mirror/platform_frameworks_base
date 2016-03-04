@@ -121,7 +121,7 @@ public class FilesActivityPerfTest extends ActivityTest<FilesActivity> {
                 activity.removeEventListener(listener);
             }
 
-            assertEquals(i, measurements.size());
+            assertEquals(i + 1, measurements.size());
 
             // Go back to the empty root.
             bots.roots.openRoot(STRESS_ROOT_0_ID);
