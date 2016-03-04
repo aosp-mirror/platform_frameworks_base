@@ -4374,7 +4374,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     AppGlobals.getPackageManager().queryIntentActivities(
                             intent, r.resolvedType,
                             PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS,
-                            UserHandle.getCallingUserId());
+                            UserHandle.getCallingUserId()).getList();
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -10857,7 +10857,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             try {
                 final List<ApplicationInfo> apps = AppGlobals.getPackageManager()
-                        .getPersistentApplications(STOCK_PM_FLAGS | matchFlags);
+                        .getPersistentApplications(STOCK_PM_FLAGS | matchFlags).getList();
                 for (ApplicationInfo app : apps) {
                     if (!"android".equals(app.packageName)) {
                         addAppLocked(app, false, null /* ABI override */);
@@ -12608,7 +12608,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         List<ResolveInfo> ris = null;
         try {
             ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                    intent, null, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
+                    intent, null, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM).getList();
         } catch (RemoteException e) {
         }
         if (ris == null) {
@@ -16957,7 +16957,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     continue;
                 }
                 List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
-                        .queryIntentReceivers(intent, resolvedType, pmFlags, user);
+                        .queryIntentReceivers(intent, resolvedType, pmFlags, user).getList();
                 if (user != UserHandle.USER_SYSTEM && newReceivers != null) {
                     // If this is not the system user, we need to check for
                     // any receivers that should be filtered out.
