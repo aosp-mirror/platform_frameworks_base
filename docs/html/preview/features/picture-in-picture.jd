@@ -6,48 +6,61 @@ page.tags=androidn
 
 <div id="tb-wrapper">
 <div id="tb">
-  <h2>In this document</h2>
-  <ol>
-    <li><a href="#declaring">Declaring Your Activity Supports
-    Picture-in-picture</a></li>
-    <li><a href="#pip_button">Switching Your Activity to Picture-in-picture</a>
-    </li>
-    <li><a href="#handling_ui">Handling UI During Picture-in-picture</a>
-    </li>
-    <li><a href="#continuing_playback">Continuing Video Playback While in
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#declaring">Declaring Your Activity Supports
 Picture-in-picture</a></li>
-    <li><a href="#best">Best Practices</a></li>
-  </ol>
+  <li><a href="#pip_button">Switching Your Activity to Picture-in-picture</a>
+</li>
+  <li><a href="#handling_ui">Handling UI During Picture-in-picture</a>
+</li>
+  <li><a href="#continuing_playback">Continuing Video Playback While in
+Picture-in-picture</a></li>
+  <li><a href="#best">Best Practices</a></li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}preview/features/multi-window.html">Multi-Window
+Support</a></li>
+</ol>
+
 </div>
 </div>
 
 <p>In the Android N Developer Preview, Android TV users can now watch a video
 in a pinned window in a corner of the screen when navigating within
-applications. This new Picture-in-picture (PIP) mode lets apps run a video
+apps. Picture-in-picture (PIP) mode lets apps run a video
 activity in the pinned window while another activity continues in the
-background. The PIP window lets users multi-task while using your app, making
-browsing and exploring your app easier and more engaging.</p>
+background. The PIP window lets users multitask while using your app, which
+helps users be more productive.</p>
 
-<p>Your app can decide when to trigger PIP mode. Here are some examples on
+<p>Your app can decide when to trigger PIP mode. Here are some examples of
 when to enter PIP mode:</p>
 
 <ul>
-<li>When the user is navigating back from a video, the video activity can be
-placed in PIP mode instead of being closed.</li>
-<li>When the user is watching the end of an episode of content, the video can
-be placed in PIP mode while the main screen displays promotional or summary
+<li>Your app can move a video into PIP mode when the user navigates
+back from the video to browse other content.</li>
+<li>Your app can switch a video into PIP mode while a user watches the end
+of an episode of content. The main screen displays promotional or summary
 information about the next episode in the series.</li>
-<li>When the user wants to queue up additional content to watch while watching
-the currently playing content, the video can be placed in PIP mode and a
-content selection activity can be shown in the main screen.</li>
+<li>Your app can provide a way for users to queue up additional content while
+they watch a video. The video continues playing in PIP mode while the main
+screen displays a content selection activity.</li>
 </ul>
 
-<p>The PIP window is 240 x 135 dp and is shown at the top-most layer in one of
+<p>The PIP window is 240x135 dp and is shown at the top-most layer in one of
 the four corners of the screen, chosen by the system. The user can bring up a
-PIP menu that lets them toggle the PIP window to full screen, or close the PIP
+PIP menu that lets them toggle the PIP window to full-screen, or close the PIP
 window, by holding down the <b>Home</b> button on the remote. If another
-video starts playing on the main screen, or the user leaves the app, the PIP
-window is automatically closed.</p>
+video starts playing on the main screen, the PIP window is automatically
+closed. Users can also close the PIP window through Recents.</p>
+
+<img src="{@docRoot}preview/images/pip-active.png" />
+<p class="img-caption"><strong>Figure 1.</strong> A Picture-in-picture
+video visible in a corner of the screen while the user browses content
+on the main screen.</p>
 
 <p>PIP leverages the multi-window APIs available in the N Developer Preview to
 provide the pinned video overlay window. To add PIP to your app, you need to
@@ -57,13 +70,13 @@ the activity is in PIP mode.</p>
 
 <h2 id="declaring">Declaring Your Activity Supports Picture-in-picture</h2>
 
-<p>By default, the system will not automatically support PIP for applications.
-If you want support PIP in your application, you need to register your video
+<p>By default, the system does not automatically support PIP for apps.
+If you want support PIP in your app, register your video
 activity in your manifest by setting
 <code>android:supportsPictureInPicture</code> and
 <code>android:resizeableActivity</code> to <code>true</code>. Also, specify
 that your activity handles layout configuration changes so that your activity
-won't relaunch when layout changes occur during PIP mode transitions.</p>
+doesn't relaunch when layout changes occur during PIP mode transitions.</p>
 
 <pre>
 &lt;activity android:name="VideoActivity"
@@ -76,9 +89,10 @@ won't relaunch when layout changes occur during PIP mode transitions.</p>
 
 <p>When registering your activity, keep in mind that in PIP mode, your
 activity is shown in a small overlay window on a TV screen. Video playback
-activities with minimal UI provide the best user experience. Non-video
-activities with detailed UI may not provide a good user experience in PIP
-mode.</p>
+activities with minimal UI provide the best user experience. Activities that
+contain small UI elements might not provide a good user experience
+when switched to PIP mode, because users can't see details of the UI elements
+in the PIP window.</p>
 
 <h2 id="pip_button">Switching Your Activity to Picture-in-picture</h2>
 
@@ -104,13 +118,14 @@ to PIP mode while controlling video playback.</p>
 <p class="img-caption"><strong>Figure 1.</strong> A Picture-in-picture
 button on a media control bar.</p>
 
-<p>A new <code>PlaybackControlsRow.PictureInPictureAction</code> class is
-provided to use the PIP icon and handle control bar PIP actions.</p>
+<p>The N Developer Preview includes a new
+<code>PlaybackControlsRow.PictureInPictureAction</code> class which defines
+control bar PIP actions and uses the PIP icon.</p>
 
 <h2 id="handling_ui">Handling UI During Picture-in-picture</h2>
 
 <p>When your activity enters PIP mode, your activity should only show video
-playback. You should remove UI elements before your activity enters PIP,
+playback. Remove UI elements before your activity enters PIP,
 and restore these elements when your activity becomes full-screen again.
 Override <code>Activity.onPictureInPictureChanged()</code> or
 <code>Fragment.onPictureInPictureChanged()</code> and enable or
@@ -152,7 +167,7 @@ public void onPause() {
 }
 </pre>
 
-<p>When your activity switches out of PIP mode back to full screen mode, the
+<p>When your activity switches out of PIP mode back to full-screen mode, the
 system resumes your activity and calls your <code>onResume()</code> method.</p>
 
 <h2 id="best">Best Practices</h2>
@@ -160,7 +175,7 @@ system resumes your activity and calls your <code>onResume()</code> method.</p>
 <p>PIP is intended for activities that play full-screen video. When switching
 your activity into PIP mode, avoid showing anything except video content.
 Track when your activity enters PIP mode and hide UI elements, as described
-in <a href="#handling_ui">Handling UI During Picture-in-picture Mode</a>.</p>
+in <a href="#handling_ui">Handling UI During Picture-in-picture</a>.</p>
 
 <p>Since the PIP window is shown as a floating window in the corner of the
 screen, you should avoid showing critical information in the main screen
@@ -169,7 +184,3 @@ in any area that can be obscured by the PIP window.</p>
 <p>When an activity is in PIP mode, by default it doesn't get input focus. To
 receive input events while in PIP mode, use
 <code>MediaSession.setMediaButtonReceiver()</code>.</p>
-
-<p>For more information on multi-window APIs, see
-<a href="{@docRoot}preview/features/multi-window.html">Android N 
-Developer Preview Multi-Window Support</a>.</p>
