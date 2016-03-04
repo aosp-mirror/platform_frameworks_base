@@ -2604,7 +2604,6 @@ final class Settings {
         if (pkg.volumeUuid != null) {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
-
         if (pkg.parentPackageName != null) {
             serializer.attribute(null, "parentPackageName", pkg.parentPackageName);
         }
@@ -4316,6 +4315,10 @@ final class Settings {
             }
             pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, ps.pkg); pw.println();
+            final int apkSigningVersion = PackageParser.getApkSigningVersion(ps.pkg);
+            if (apkSigningVersion != PackageParser.APK_SIGNING_UNKNOWN) {
+                pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
+            }
             pw.print(prefix); pw.print("  applicationInfo=");
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,

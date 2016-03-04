@@ -121,6 +121,10 @@ public class PackageParser {
 
     private static final int MAX_PACKAGES_PER_APK = 5;
 
+    public static final int APK_SIGNING_UNKNOWN = 0;
+    public static final int APK_SIGNING_V1 = 1;
+    public static final int APK_SIGNING_V2 = 2;
+
     // TODO: switch outError users to PackageParserException
     // TODO: refactor "codePath" to "apkPath"
 
@@ -1058,12 +1062,24 @@ public class PackageParser {
         return pkg;
     }
 
+    public static int getApkSigningVersion(Package pkg) {
+        try {
+            if (ApkSignatureSchemeV2Verifier.hasSignature(pkg.baseCodePath)) {
+                return APK_SIGNING_V2;
+            }
+            return APK_SIGNING_V1;
+        } catch (IOException e) {
+        }
+        return APK_SIGNING_UNKNOWN;
+    }
+
     /**
      * Collect certificates from all the APKs described in the given package,
      * populating {@link Package#mSignatures}. Also asserts that all APK
      * contents are signed correctly and consistently.
      */
-    public static void collectCertificates(Package pkg, int parseFlags) throws PackageParserException {
+    public static void collectCertificates(Package pkg, int parseFlags)
+            throws PackageParserException {
         collectCertificatesInternal(pkg, parseFlags);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
@@ -1074,7 +1090,8 @@ public class PackageParser {
         }
     }
 
-    private static void collectCertificatesInternal(Package pkg, int parseFlags) throws PackageParserException {
+    private static void collectCertificatesInternal(Package pkg, int parseFlags)
+            throws PackageParserException {
         pkg.mCertificates = null;
         pkg.mSignatures = null;
         pkg.mSigningKeys = null;
