@@ -138,14 +138,16 @@ class ShortcutManager {
                     ComponentName componentName = new ComponentName(packageName, className);
                     try {
                         info = packageManager.getActivityInfo(componentName,
-                                PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+                                PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE
+                                | PackageManager.MATCH_UNINSTALLED_PACKAGES);
                     } catch (PackageManager.NameNotFoundException e) {
                         String[] packages = packageManager.canonicalToCurrentPackageNames(
                                 new String[] { packageName });
                         componentName = new ComponentName(packages[0], className);
                         try {
                             info = packageManager.getActivityInfo(componentName,
-                                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+                                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE
+                                    | PackageManager.MATCH_UNINSTALLED_PACKAGES);
                         } catch (PackageManager.NameNotFoundException e1) {
                             Log.w(TAG, "Unable to add bookmark: " + packageName
                                     + "/" + className, e);
