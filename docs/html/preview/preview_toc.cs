@@ -50,8 +50,6 @@
         >Bundled Notifications</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
         >Language and Locale</a></li>
-        <li><a href="<?cs var:toroot ?>preview/permission-changes.html"
-        >Permissions</a></li>
       </ul>
   </li>
 
