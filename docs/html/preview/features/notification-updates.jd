@@ -20,16 +20,16 @@ trainingnavtop=true
 </div>
 </div>
 
-<p>Android N Developer Preview introduces several new APIs that allow apps to post
+<p>The Android N Developer Preview introduces several new APIs that allow apps to post
 notifications that are highly visible and interactive.</p>
 
-<p>The Android N Developer Preview extends the existing {@link android.support.v4.app.RemoteInput}
+<p>The Preview extends the existing {@link android.support.v4.app.RemoteInput}
 notification API to support inline replies on handsets. This feature allows users
  to quickly respond from the notification shade without visiting your app.</p>
 
 <p>
-  The N Developer Preview also allows you to bundle similar notifications to
-  appear as a single notification. To make this possible, the N Developer
+  The Preview also allows you to bundle similar notifications to
+  appear as a single notification. To make this possible, the
   Preview uses the existing {@link
   android.support.v4.app.NotificationCompat.Builder#setGroup
   NotificationCompat.Builder.setGroup()} method. Users can expand each of the
@@ -37,7 +37,7 @@ notification API to support inline replies on handsets. This feature allows user
   notifications, individually from the notification shade.
 </p>
 
-<p>Last, the N Developer Preview also adds two new custom view style APIs that
+<p>Last, the Preview also adds two new custom view style APIs that
 allow you to leverage system decorations in your app’s customized notification
 views.</p>
 
@@ -46,7 +46,7 @@ views.</p>
 
 <h2 id="direct">Direct Reply</h2>
 
-<p>With the Direct Reply feature in the N Developer Preview, users can quickly
+<p>With the Direct Reply feature in the Preview, users can quickly
 respond to text messages or update task lists directly within the notification
 interface. On a handheld, the inline reply action appears as an additional button
  attached to the notification. When a user replies via keyboard, the system attaches
@@ -57,7 +57,7 @@ interface. On a handheld, the inline reply action appears as an additional butto
 
 <img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png">
 <p class="img-caption">
-  <strong>Figure 1.</strong> N Developer Preview adds <strong>Reply</strong>
+  <strong>Figure 1.</strong> The Preview adds the <strong>Reply</strong>
   action button.
 </p>
 
@@ -182,29 +182,29 @@ When the user responds via {@link android.support.v4.app.RemoteInput},
 
 <h2 id="bundle">Bundled Notifications</h2>
 
-<p>The Android N Developer preview provides developers with a new way to represent
+<p>The Preview provides developers with a new way to represent
  a queue of notifications: <em>bundled notifications</em>. This is similar to the
   <a href="{@docRoot}/training/wearables/notifications/stacks.html">Notification
   Stacks</a> feature in Android Wear. For example, if your app creates notifications
   for received messages, when more than one message is received, bundle the
- notifications together as a single group.You can
- use the existing {@link android.support.v4.app.NotificationCompat.Builder#setGroup}
-Builder.setGroup()}
-   method to bundle similar notifications. </p>
+ notifications together as a single group. You can
+ use the existing {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+Builder.setGroup()} method to bundle similar notifications.</p>
 
-<p>A notification group imposes a hierarchy on the notifications comprising it.
-   At the top of that hierarchy is a parent notification that serves as a summary of
-   the group. The subsequent lines list the contents of the child
-   notifications. The user can expand the bundle to view its notifications. The user
-   can then select a notification within its bundle and perform one of its
-   actions, like "reply" or "dismiss".
-  </p>
+<p>
+  A notification group imposes a hierarchy on the notifications comprising it.
+  At the top of that hierarchy is a parent notification that displays the first
+  line of the first notification in the group. The user can progressively
+  expand the notification group, and the system shows more information as the
+  user drills deeper. When the user expands the bundle, the system reveals the
+  first line of each notification within the bundle; when the user expands one
+  of those notifications, the system reveals its entire content.
+</p>
 
 <img id="fig-bundles" src="{@docRoot}preview/images/bundles.png">
 <p class="img-caption">
-  <strong>Figure 4.</strong> The user can expand a bundle to see its
-  notifications, then expand one of those notifications to use one of its
-  actions.
+  <strong>Figure 4.</strong> The user can progressively expand the notification
+  group.
 </p>
 
 <p>To learn how to add notifications to a group, see
@@ -215,7 +215,7 @@ Each Notification to a Group</a>.</p>
 <h3 id="best-practices">Best practices for bundled notifications</h3>
 <p>This section provides guidelines about when to use notification groups instead
 of the {@link android.app.Notification.InboxStyle} notifications that have been available
- in the earlier versions of the Android platform. </p>
+ in earlier versions of the Android platform.</p>
 <h3>When to use bundled notifications</h3>
 
 <p>You should use notification groups only if all of the following conditions are
@@ -264,8 +264,8 @@ single child left. It should then convert the child into a normal, single
 
 <h3>Backwards compatibility</h3>
 
-<p>On handhelds, notification groups are available beginning from Android N Developer
-preview. However, on tablets, the notification groups API has been available since
+<p>On handhelds, notification groups are available beginning from this
+Preview. However, on tablets, the notification groups API has been available since
 Android Android 5.0 (API level 21). </p>
 
 <p>All Android Wear devices have this feature, regardless of API level.
@@ -281,11 +281,13 @@ For convenience, an app can usually reuse the notification group summary and def
  </p>
 
 <h2 id="custom"> Custom Views</h2>
-<p>Starting from the N Developer Preview, you can customize notification views and
+<p>Starting from this Preview, you can customize notification views and
 still obtain system decorations like notification headers, actions, and expandable
 layouts.</p>
 
-<p>To enable this capability, Android N adds the following custom view style APIs:</p>
+<p>To enable this capability, Android N adds the following APIs to style your
+  custom view:</p>
+
 <dl>
 <dt>
 {@code DecoratedCustomViewStyle()}</dt>
