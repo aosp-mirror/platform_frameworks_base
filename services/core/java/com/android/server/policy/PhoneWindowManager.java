@@ -191,6 +191,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
 
+    static final int LONG_PRESS_BACK_NOTHING = 0;
+    static final int LONG_PRESS_BACK_GO_TO_VOICE_ASSIST = 1;
+
     static final int MULTI_PRESS_POWER_NOTHING = 0;
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
     static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;
@@ -391,6 +394,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // handler thread.  We'll need to resolve this someday by teaching the input dispatcher
     // to hold wakelocks during dispatch and eliminating the critical path.
     volatile boolean mPowerKeyHandled;
+    volatile boolean mBackKeyHandled;
     volatile boolean mBeganFromNonInteractive;
     volatile int mPowerKeyPressCounter;
     volatile boolean mEndCallKeyHandled;
@@ -443,6 +447,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLongPressOnPowerBehavior;
     int mDoublePressOnPowerBehavior;
     int mTriplePressOnPowerBehavior;
+    int mLongPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
     int mShortPressWindowBehavior;
     boolean mAwake;
@@ -699,6 +704,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 16;
     private static final int MSG_REQUEST_TV_PICTURE_IN_PICTURE = 17;
+    private static final int MSG_BACK_LONG_PRESS = 18;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -762,6 +768,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_REQUEST_TV_PICTURE_IN_PICTURE:
                     requestTvPictureInPictureInternal();
+                    break;
+                case MSG_BACK_LONG_PRESS:
+                    backLongPress();
                     break;
             }
         }
@@ -1109,6 +1118,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void cancelPendingBackKeyAction() {
+        if (!mBackKeyHandled) {
+            mBackKeyHandled = true;
+            mHandler.removeMessages(MSG_BACK_LONG_PRESS);
+        }
+    }
+
     private void powerPress(long eventTime, boolean interactive, int count) {
         if (mScreenOnEarly && !mScreenOnFully) {
             Slog.i(TAG, "Suppressed redundant power key press while "
@@ -1216,6 +1232,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void backLongPress() {
+        mBackKeyHandled = true;
+
+        switch (mLongPressOnBackBehavior) {
+            case LONG_PRESS_BACK_NOTHING:
+                break;
+            case LONG_PRESS_BACK_GO_TO_VOICE_ASSIST:
+                Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
+                startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                break;
+        }
+    }
+
     private void sleepPress(long eventTime) {
         if (mShortPressOnSleepBehavior == SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME) {
             launchHomeFromHotKey(false /* awakenDreams */, true /*respectKeyguard*/);
@@ -1242,6 +1271,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean hasLongPressOnPowerBehavior() {
         return getResolvedLongPressOnPowerBehavior() != LONG_PRESS_POWER_NOTHING;
+    }
+
+    private boolean hasLongPressOnBackBehavior() {
+        return mLongPressOnBackBehavior != LONG_PRESS_BACK_NOTHING;
     }
 
     private void interceptScreenshotChord() {
@@ -1572,6 +1605,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mSupportLongPressPowerWhenNonInteractive = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportLongPressPowerWhenNonInteractive);
+
+        mLongPressOnBackBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_longPressOnBackBehavior);
 
         mShortPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnPowerBehavior);
@@ -5341,6 +5377,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Handle special keys.
         switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK: {
+                if (down) {
+                    mBackKeyHandled = false;
+                    if (hasLongPressOnBackBehavior()) {
+                        Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
+                        msg.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(msg,
+                                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+                    }
+                } else {
+                    boolean handled = mBackKeyHandled;
+
+                    // Reset back key state
+                    cancelPendingBackKeyAction();
+
+                    // Don't pass back press to app if we've already handled it
+                    if (handled) {
+                        result &= ~ACTION_PASS_TO_USER;
+                    }
+                }
+                break;
+            }
+
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
@@ -7389,6 +7448,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mLidNavigationAccessibility="); pw.print(mLidNavigationAccessibility);
                 pw.print(" mLidControlsScreenLock="); pw.println(mLidControlsScreenLock);
                 pw.print(" mLidControlsSleep="); pw.println(mLidControlsSleep);
+        pw.print(prefix);
+                pw.print(" mLongPressOnBackBehavior="); pw.println(mLongPressOnBackBehavior);
         pw.print(prefix);
                 pw.print("mShortPressOnPowerBehavior="); pw.print(mShortPressOnPowerBehavior);
                 pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
