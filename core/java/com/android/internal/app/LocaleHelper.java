@@ -180,14 +180,16 @@ public class LocaleHelper {
      */
     public static final class LocaleInfoComparator implements Comparator<LocaleStore.LocaleInfo> {
         private final Collator mCollator;
+        private final boolean mCountryMode;
 
         /**
          * Constructor.
          *
          * @param sortLocale the locale to be used for sorting.
          */
-        public LocaleInfoComparator(Locale sortLocale) {
+        public LocaleInfoComparator(Locale sortLocale, boolean countryMode) {
             mCollator = Collator.getInstance(sortLocale);
+            mCountryMode = countryMode;
         }
 
         /**
@@ -202,9 +204,9 @@ public class LocaleHelper {
         public int compare(LocaleStore.LocaleInfo lhs, LocaleStore.LocaleInfo rhs) {
             // We don't care about the various suggestion types, just "suggested" (!= 0)
             // and "all others" (== 0)
-            if (lhs.isSuggested() == rhs.isSuggested()) {
+            if (mCountryMode || (lhs.isSuggested() == rhs.isSuggested())) {
                 // They are in the same "bucket" (suggested / others), so we compare the text
-                return mCollator.compare(lhs.getLabel(), rhs.getLabel());
+                return mCollator.compare(lhs.getLabel(mCountryMode), rhs.getLabel(mCountryMode));
             } else {
                 // One locale is suggested and one is not, so we put them in different "buckets"
                 return lhs.isSuggested() ? -1 : 1;
