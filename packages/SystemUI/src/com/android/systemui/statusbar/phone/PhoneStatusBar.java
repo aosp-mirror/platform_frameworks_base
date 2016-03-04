@@ -3554,7 +3554,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected boolean isPanelFullyCollapsed() {
+    public boolean isPanelFullyCollapsed() {
         return mNotificationPanel.isFullyCollapsed();
     }
 
