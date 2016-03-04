@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2015 The Android Open Source Project
+ * Copyright (C) 2009-2016 The Android Open Source Project
  * Copyright (C) 2015 Samsung LSI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1837,6 +1837,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.SAP) {
             BluetoothSap sap = new BluetoothSap(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.PBAP_CLIENT) {
+            BluetoothPbapClient pbapClient = new BluetoothPbapClient(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -1904,6 +1907,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.SAP:
                 BluetoothSap sap = (BluetoothSap)proxy;
                 sap.close();
+                break;
+            case BluetoothProfile.PBAP_CLIENT:
+                BluetoothPbapClient pbapClient = (BluetoothPbapClient)proxy;
+                pbapClient.close();
                 break;
         }
     }
