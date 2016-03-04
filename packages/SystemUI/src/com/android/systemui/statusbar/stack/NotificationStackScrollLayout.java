@@ -778,12 +778,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             ExpandableNotificationRow parent = row.getNotificationParent();
-            if (mGearExposedView != null && parent != null
-                    && parent.areChildrenExpanded() && mGearExposedView == parent) {
+            if (parent != null && parent.areChildrenExpanded()
+                    && (mGearExposedView == parent
+                        || (parent.getNotificationChildren().size() == 1
+                                && parent.isClearable()))) {
                 // In this case the group is expanded and showing the gear for the
                 // group, further interaction should apply to the group, not any
-                // child notifications so we use the parent of the child.
-                child = row.getNotificationParent();
+                // child notifications so we use the parent of the child. We also do the same
+                // if we only have a single child.
+                child = parent;
             }
         }
         return child;
