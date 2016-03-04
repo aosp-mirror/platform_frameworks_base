@@ -105,9 +105,6 @@ public class SystemConfig {
     // background while in data-usage save mode, as read from the configuration files.
     final ArraySet<String> mAllowInDataUsageSave = new ArraySet<>();
 
-    // These are the app package names that should not allow IME switching.
-    final ArraySet<String> mFixedImeApps = new ArraySet<>();
-
     // These are the package names of apps which should be in the 'always'
     // URL-handling state upon factory reset.
     final ArraySet<String> mLinkedApps = new ArraySet<>();
@@ -157,10 +154,6 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowInDataUsageSave() {
         return mAllowInDataUsageSave;
-    }
-
-    public ArraySet<String> getFixedImeApps() {
-        return mFixedImeApps;
     }
 
     public ArraySet<String> getLinkedApps() {
@@ -407,17 +400,6 @@ public class SystemConfig {
                                 + " at " + parser.getPositionDescription());
                     } else {
                         mAllowInDataUsageSave.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("fixed-ime-app".equals(name) && allowAll) {
-                    String pkgname = parser.getAttributeValue(null, "package");
-                    if (pkgname == null) {
-                        Slog.w(TAG, "<fixed-ime-app> without package in " + permFile + " at "
-                                + parser.getPositionDescription());
-                    } else {
-                        mFixedImeApps.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
