@@ -31,6 +31,7 @@ import com.google.android.collect.Sets;
 import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -151,6 +152,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -279,6 +282,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /** Keyguard features that are allowed to be set on a managed profile */
     private static final int PROFILE_KEYGUARD_FEATURES =
             PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER | PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY;
+
+    private static final int CODE_OK = 0;
+    private static final int CODE_HAS_DEVICE_OWNER = 1;
+    private static final int CODE_USER_HAS_PROFILE_OWNER = 2;
+    private static final int CODE_USER_NOT_RUNNING = 3;
+    private static final int CODE_USER_SETUP_COMPLETED = 4;
+    private static final int CODE_NONSYSTEM_USER_EXISTS = 5;
+    private static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
+            CODE_USER_SETUP_COMPLETED })
+    private @interface DeviceOwnerPreConditionCode {}
 
     private static final int DEVICE_ADMIN_DEACTIVATE_TIMEOUT = 10000;
 
@@ -5934,52 +5950,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
-     * The device owner can only be set before the setup phase of the primary user has completed,
-     * except for adb if no accounts or additional users are present on the device.
      */
     private void enforceCanSetDeviceOwnerLocked(int userId) {
-        if (mOwners.hasDeviceOwner()) {
-            throw new IllegalStateException("Trying to set the device owner, but device owner "
-                    + "is already set.");
-        }
-        if (mOwners.hasProfileOwner(userId)) {
-            throw new IllegalStateException("Trying to set the device owner, but the user already "
-                    + "has a profile owner.");
-        }
-        if (!mUserManager.isUserRunning(new UserHandle(userId))) {
-            throw new IllegalStateException("User not running: " + userId);
-        }
-
         int callingUid = mInjector.binderGetCallingUid();
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
-            if (!hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                return;
-            }
-            // STOPSHIP Do proper check in split user mode
-            if (!mInjector.userManagerIsSplitSystemUser()) {
-                if (mUserManager.getUserCount() > 1) {
-                    throw new IllegalStateException(
-                            "Not allowed to set the device owner because there "
-                                    + "are already several users on the device");
-                }
-                if (AccountManager.get(mContext).getAccounts().length > 0) {
-                    throw new IllegalStateException(
-                            "Not allowed to set the device owner because there "
-                                    + "are already some accounts on the device");
-                }
-            }
-            return;
+        boolean isAdb = callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
+        if (!isAdb) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
         }
-        // STOPSHIP check the caller UID with userId
 
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
-        // STOPSHIP Do proper check in split user mode
-        if (!mInjector.userManagerIsSplitSystemUser()) {
-            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                throw new IllegalStateException("Cannot set the device owner if the device is "
-                        + "already set-up");
-            }
+        final int code = checkSetDeviceOwnerPreCondition(userId, isAdb);
+        switch (code) {
+            case CODE_OK:
+                return;
+            case CODE_HAS_DEVICE_OWNER:
+                throw new IllegalStateException(
+                        "Trying to set the device owner, but device owner is already set.");
+            case CODE_USER_HAS_PROFILE_OWNER:
+                throw new IllegalStateException("Trying to set the device owner, but the user "
+                        + "already has a profile owner.");
+            case CODE_USER_NOT_RUNNING:
+                throw new IllegalStateException("User not running: " + userId);
+            case CODE_USER_SETUP_COMPLETED:
+                throw new IllegalStateException(
+                        "Cannot set the device owner if the device is already set-up");
+            case CODE_NONSYSTEM_USER_EXISTS:
+                throw new IllegalStateException("Not allowed to set the device owner because there "
+                        + "are already several users on the device");
+            case CODE_ACCOUNTS_NOT_EMPTY:
+                throw new IllegalStateException("Not allowed to set the device owner because there "
+                        + "are already some accounts on the device");
+            default:
+                throw new IllegalStateException("Unknown @DeviceOwnerPreConditionCode " + code);
         }
     }
 
@@ -8036,6 +8038,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isProvisioningAllowed(String action) {
+        if (!mHasFeature) {
+            return false;
+        }
+
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE.equals(action)) {
             if (!hasFeatureManagedUsers()) {
@@ -8100,23 +8106,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         throw new IllegalArgumentException("Unknown provisioning action " + action);
     }
 
-    private boolean isDeviceOwnerProvisioningAllowed(int callingUserId) {
-        synchronized (this) {
-            if (mOwners.hasDeviceOwner()) {
-                return false;
+    /*
+     * The device owner can only be set before the setup phase of the primary user has completed,
+     * except for adb command if no accounts or additional users are present on the device.
+     */
+    private synchronized @DeviceOwnerPreConditionCode int checkSetDeviceOwnerPreCondition(
+            int deviceOwnerUserId, boolean isAdb) {
+        if (mOwners.hasDeviceOwner()) {
+            return CODE_HAS_DEVICE_OWNER;
+        }
+        if (mOwners.hasProfileOwner(deviceOwnerUserId)) {
+            return CODE_USER_HAS_PROFILE_OWNER;
+        }
+        if (!mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
+            return CODE_USER_NOT_RUNNING;
+        }
+        if (isAdb) {
+            // if shell command runs after user setup completed check device status. Otherwise, OK.
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+                if (!mInjector.userManagerIsSplitSystemUser()) {
+                    if (mUserManager.getUserCount() > 1) {
+                        return CODE_NONSYSTEM_USER_EXISTS;
+                    }
+                    if (AccountManager.get(mContext).getAccounts().length > 0) {
+                        return CODE_ACCOUNTS_NOT_EMPTY;
+                    }
+                } else {
+                    // STOPSHIP Do proper check in split user mode
+                }
             }
+            return CODE_OK;
+        } else {
+            if (!mInjector.userManagerIsSplitSystemUser()) {
+                // In non-split user mode, only provision DO before setup wizard completes
+                if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+                    return CODE_USER_SETUP_COMPLETED;
+                }
+            } else {
+                // STOPSHIP Do proper check in split user mode
+            }
+            return CODE_OK;
         }
-        if (getProfileOwner(callingUserId) != null) {
-            return false;
-        }
-        if (mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
-            return false;
-        }
-        if (callingUserId != UserHandle.USER_SYSTEM) {
-            // Device owner provisioning can only be initiated from system user.
-            return false;
-        }
-        return true;
+    }
+
+    private boolean isDeviceOwnerProvisioningAllowed(int deviceOwnerUserId) {
+        return CODE_OK == checkSetDeviceOwnerPreCondition(deviceOwnerUserId, /* isAdb */ false);
     }
 
     private boolean hasFeatureManagedUsers() {
