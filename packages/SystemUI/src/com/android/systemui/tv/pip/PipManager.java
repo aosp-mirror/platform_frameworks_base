@@ -66,6 +66,9 @@ public class PipManager {
 
     public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH = 0x1;
     public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH = 0x2;
+
+    private static final int CLOSE_PIP_WHEN_MEDIA_SESSION_GONE_TIMEOUT_MS = 3000;
+
     private int mSuspendPipResizingReason;
 
     private static final float SCALE_FACTOR = 1.1f;
@@ -168,6 +171,12 @@ public class PipManager {
         @Override
         public void run() {
             resizePinnedStack(mState);
+        }
+    };
+    private final Runnable mClosePipRunnable = new Runnable() {
+        @Override
+        public void run() {
+            closePip();
         }
     };
 
@@ -281,6 +290,7 @@ public class PipManager {
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onPipActivityClosed();
         }
+        mHandler.removeCallbacks(mClosePipRunnable);
     }
 
     /**
@@ -542,6 +552,12 @@ public class PipManager {
             mPipMediaController = mediaController;
             for (int i = mListeners.size() - 1; i >= 0; i--) {
                 mListeners.get(i).onMediaControllerChanged();
+            }
+            if (mPipMediaController == null) {
+                mHandler.postDelayed(mClosePipRunnable,
+                        CLOSE_PIP_WHEN_MEDIA_SESSION_GONE_TIMEOUT_MS);
+            } else {
+                mHandler.removeCallbacks(mClosePipRunnable);
             }
         }
     }
