@@ -71,7 +71,7 @@ import static com.android.ide.common.rendering.api.RenderResources.REFERENCE_UND
  */
 public final class BridgeTypedArray extends TypedArray {
 
-    private final BridgeResources mBridgeResources;
+    private final Resources mBridgeResources;
     private final BridgeContext mContext;
     private final boolean mPlatformFile;
 
@@ -84,7 +84,7 @@ public final class BridgeTypedArray extends TypedArray {
     @Nullable
     private int[] mEmptyIds;
 
-    public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
+    public BridgeTypedArray(Resources resources, BridgeContext context, int len,
             boolean platformFile) {
         super(resources, null, null, 0);
         mBridgeResources = resources;
@@ -756,7 +756,8 @@ public final class BridgeTypedArray extends TypedArray {
         if (resVal instanceof ArrayResourceValue) {
             ArrayResourceValue array = (ArrayResourceValue) resVal;
             int count = array.getElementCount();
-            return count >= 0 ? mBridgeResources.fillValues(array, new CharSequence[count]) : null;
+            return count >= 0 ? Resources_Delegate.fillValues(mBridgeResources, array, new CharSequence[count]) :
+                    null;
         }
         int id = getResourceId(index, 0);
         String resIdMessage = id > 0 ? " (resource id 0x" + Integer.toHexString(id) + ')' : "";
@@ -1004,7 +1005,6 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     static TypedArray obtain(Resources res, int len) {
-        return res instanceof BridgeResources ?
-                new BridgeTypedArray(((BridgeResources) res), null, len, true) : null;
+        return new BridgeTypedArray(res, null, len, true);
     }
 }
