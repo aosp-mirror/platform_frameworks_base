@@ -20,8 +20,13 @@
       ru-lang="Настройка пакета SDK Preview"
       zh-cn-lang="设置预览版 SDK"
       zh-tw-lang="設定預覽版 SDK">
-      Preview SDK</a></div>
+      SDK Setup</a></div>
   </li>
+
+
+
+
+
 
 
 
@@ -39,12 +44,14 @@
       zh-tw-lang="行為變更">Behavior Changes
        </a></div>
       <ul>
-        <li><a href="<?cs var:toroot ?>preview/doze-lite.html"
-        >Doze Lite</a></li>
-        <li><a href="<?cs var:toroot ?>preview/background-check.html"
-        >Background Check</a></li>
-        <li><a href="<?cs var:toroot ?>preview/direct-boot.html"
-        >Direct Boot</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/background-optimization.html"
+        >Background Optimizations</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/notification-updates.html"
+        >Bundled Notifications</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
+        >Language and Locale</a></li>
+        <li><a href="<?cs var:toroot ?>preview/permission-changes.html"
+        >Permissions</a></li>
       </ul>
   </li>
 
@@ -59,28 +66,34 @@
       zh-tw-lang="API 總覽">New APIs and Features
       </a></div>
       <ul>
-        <li><a href="<?cs var:toroot ?>preview/multiwindow.html"
-        >Multiwindow Support</a></li>
-        <li><a href="<?cs var:toroot ?>preview/notifications.html"
-        >Notification Enhancements</a></li>
-        <li><a href="<?cs var:toroot ?>preview/scoped-access.html"
-        >Scoped Access to Files &amp; Folders</a></li>
-        <li><a href="<?cs var:toroot ?>preview/quicksettings.html"
-        >Quick Settings</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/multi-window.html"
+        >Multi-Window Support</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/data-saver.html"
+        >Data Saver</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/tv-recording-api.html"
+        >TV Recording APIs</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
+        >ICU4J Support in Framework</a></li>
+
       </ul>
   </li>
 
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/testing/guide.html"
-      es-lang="Guía de prueba"
-      ja-lang="テストガイド"
-      ko-lang="테스트 가이드"
-      pt-br-lang="Guia de teste"
-      ru-lang="Руководство по тестированию"
-      zh-cn-lang="测试指南"
-      zh-tw-lang="測試指南">
-      Testing Guide</a></div>
-  </li>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   <li class="nav-section">
@@ -95,20 +108,15 @@
       Samples</a></div>
   </li>
 
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/ota.html"
-      >Device Image Downloads</a></div>
-  </li>
-
  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
-      >OTA Device Updates</a></div>
+      >Image Downloads and OTA Updates</a></div>
   </li>
 
 
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
-      Support & Release Notes</a></div>
+      Support and Release Notes</a></div>
   </li>
 
   <li class="nav-section">
