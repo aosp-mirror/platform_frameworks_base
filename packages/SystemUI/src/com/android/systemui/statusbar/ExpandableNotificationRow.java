@@ -1023,7 +1023,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return whether the view state is currently expanded.
      */
     public boolean isExpanded() {
-        return !mOnKeyguard
+        return isExpanded(false /* allowOnKeyguard */);
+    }
+
+    public boolean isExpanded(boolean allowOnKeyguard) {
+        return (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }

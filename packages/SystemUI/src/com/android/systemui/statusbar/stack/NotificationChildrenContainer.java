@@ -511,7 +511,7 @@ public class NotificationChildrenContainer extends ViewGroup {
                 break;
             }
             ExpandableNotificationRow child = mChildren.get(i);
-            float childHeight = child.isExpanded()
+            float childHeight = child.isExpanded(true /* allowOnKeyguard */)
                     ? child.getMaxExpandHeight()
                     : child.getShowingLayout().getMinHeight(true /* likeGroupExpanded */);
             maxContentHeight += childHeight;
@@ -532,7 +532,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         int childCount = mChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
-            float childHeight = child.isExpanded()
+            float childHeight = child.isExpanded(true /* allowOnKeyguard */)
                     ? child.getMaxExpandHeight()
                     : child.getShowingLayout().getMinHeight(true /* likeGroupExpanded */);
             float singleLineHeight = child.getShowingLayout().getMinHeight(

@@ -549,7 +549,7 @@ public class NotificationContentView extends FrameLayout {
     private int calculateVisibleType() {
         if (mUserExpanding) {
             int height = !mIsChildInGroup || isGroupExpanded()
-                    || mContainingNotification.isExpanded()
+                    || mContainingNotification.isExpanded(true /* allowOnKeyguard */)
                     ? mContainingNotification.getMaxContentHeight()
                     : mContainingNotification.getShowingLayout().getMinHeight();
             if (height == 0) {
@@ -588,7 +588,8 @@ public class NotificationContentView extends FrameLayout {
             }
         } else {
             if (noExpandedChild || (viewHeight <= mContractedChild.getHeight()
-                    && (!mIsChildInGroup || !mContainingNotification.isExpanded()))) {
+                    && (!mIsChildInGroup
+                            || !mContainingNotification.isExpanded(true /* allowOnKeyguard */)))) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
