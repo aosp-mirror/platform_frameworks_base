@@ -442,9 +442,7 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
             // since the same clip will be computed at draw time. If such a change is made, this
             // check could be done at record time by querying the clip, or the clip could be altered
             // slightly so that it is serialized.
-            EXPECT_RECT_APPROX_EQ(Rect(58.57864, 58.57864, 341.42136, 341.42136),
-                    (reinterpret_cast<const ClipRect*>(op.localClip))->rect);
-
+            EXPECT_EQ(Rect(59, 59, 341, 341), op.localClip->rect);
             EXPECT_EQ(Rect(400, 400), op.unmappedBounds);
             expectedMatrix.loadIdentity();
             EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
