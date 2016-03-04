@@ -1182,7 +1182,7 @@ public class ApplicationPackageManager extends PackageManager {
                 sameUid ? app.sourceDir : app.publicSourceDir,
                 sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
                 app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
-                null, mContext.mPackageInfo);
+                mContext.mPackageInfo);
         if (r != null) {
             return r;
         }
