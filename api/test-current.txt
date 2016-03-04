@@ -31730,6 +31730,7 @@ package android.provider {
 
   public static final class DocumentsContract.Root {
     field public static final java.lang.String COLUMN_AVAILABLE_BYTES = "available_bytes";
+    field public static final java.lang.String COLUMN_CAPACITY_BYTES = "capacity_bytes";
     field public static final java.lang.String COLUMN_DOCUMENT_ID = "document_id";
     field public static final java.lang.String COLUMN_FLAGS = "flags";
     field public static final java.lang.String COLUMN_ICON = "icon";
