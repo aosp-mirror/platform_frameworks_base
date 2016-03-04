@@ -401,6 +401,13 @@ public class SurfaceTextureRenderer {
 
     private void clearState() {
         mSurfaces.clear();
+        for (EGLSurfaceHolder holder : mConversionSurfaces) {
+            try {
+                LegacyCameraDevice.disconnectSurface(holder.surface);
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
+            }
+        }
         mConversionSurfaces.clear();
         mPBufferPixels = null;
         if (mSurfaceTexture != null) {
@@ -631,6 +638,9 @@ public class SurfaceTextureRenderer {
                 holder.height = surfaceSize.getHeight();
                 if (LegacyCameraDevice.needsConversion(s)) {
                     mConversionSurfaces.add(holder);
+                    // LegacyCameraDevice is the producer of surfaces if it's not handled by EGL,
+                    // so LegacyCameraDevice needs to connect to the surfaces.
+                    LegacyCameraDevice.connectSurface(s);
                 } else {
                     mSurfaces.add(holder);
                 }
