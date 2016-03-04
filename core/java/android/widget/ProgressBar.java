@@ -17,21 +17,15 @@
 package android.widget;
 
 import android.animation.ObjectAnimator;
+import android.annotation.InterpolatorRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.PorterDuff;
-
-import android.util.FloatProperty;
-import android.util.IntProperty;
-import android.view.accessibility.AccessibilityNodeInfo;
-import com.android.internal.R;
-
-import android.annotation.InterpolatorRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Animatable;
@@ -46,6 +40,7 @@ import android.graphics.drawable.shapes.Shape;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.util.MathUtils;
 import android.util.Pools.SynchronizedPool;
 import android.view.Gravity;
@@ -55,6 +50,7 @@ import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -63,6 +59,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
 import android.widget.RemoteViews.RemoteView;
+import com.android.internal.R;
 
 import java.util.ArrayList;
 
@@ -606,11 +603,26 @@ public class ProgressBar extends View {
 
             if (indeterminate) {
                 // swap between indeterminate and regular backgrounds
-                mCurrentDrawable = mIndeterminateDrawable;
+                swapCurrentDrawable(mIndeterminateDrawable);
                 startAnimation();
             } else {
-                mCurrentDrawable = mProgressDrawable;
+                swapCurrentDrawable(mProgressDrawable);
                 stopAnimation();
+            }
+        }
+    }
+
+    private void swapCurrentDrawable(Drawable newDrawable) {
+        final Drawable oldDrawable = mCurrentDrawable;
+        mCurrentDrawable = newDrawable;
+        if (oldDrawable != mCurrentDrawable) {
+            if (oldDrawable != null) {
+                oldDrawable.setVisible(false, false);
+            }
+            if (mCurrentDrawable != null) {
+                mCurrentDrawable.setVisible(
+                        getVisibility() == VISIBLE && getWindowVisibility() == VISIBLE,
+                        false);
             }
         }
     }
@@ -654,7 +666,7 @@ public class ProgressBar extends View {
             }
 
             if (mIndeterminate) {
-                mCurrentDrawable = d;
+                swapCurrentDrawable(d);
                 postInvalidate();
             }
         }
@@ -820,7 +832,7 @@ public class ProgressBar extends View {
             }
 
             if (!mIndeterminate) {
-                mCurrentDrawable = d;
+                swapCurrentDrawable(d);
                 postInvalidate();
             }
 
@@ -1555,7 +1567,7 @@ public class ProgressBar extends View {
      * <p>Start the indeterminate progress animation.</p>
      */
     void startAnimation() {
-        if (getVisibility() != VISIBLE) {
+        if (getVisibility() != VISIBLE || getWindowVisibility() != VISIBLE) {
             return;
         }
 
@@ -1653,13 +1665,29 @@ public class ProgressBar extends View {
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
 
+        updateVisibility();
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(@Visibility int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+
+        updateVisibility();
+    }
+
+    private void updateVisibility() {
+        final boolean isVisible = getVisibility() == VISIBLE && getWindowVisibility() == VISIBLE;
         if (mIndeterminate) {
             // let's be nice with the UI thread
-            if (visibility == GONE || visibility == INVISIBLE) {
-                stopAnimation();
-            } else {
+            if (isVisible) {
                 startAnimation();
+            } else {
+                stopAnimation();
             }
+        }
+
+        if (mCurrentDrawable != null) {
+            mCurrentDrawable.setVisible(isVisible, false);
         }
     }
 
