@@ -58067,6 +58067,31 @@ package java.util {
     method public long orElseThrow(java.util.function.Supplier<X>) throws java.lang.Throwable;
   }
 
+  public abstract interface PrimitiveIterator implements java.util.Iterator {
+    method public abstract void forEachRemaining(T_CONS);
+  }
+
+  public static abstract interface PrimitiveIterator.OfDouble implements java.util.PrimitiveIterator {
+    method public default void forEachRemaining(java.util.function.DoubleConsumer);
+    method public default void forEachRemaining(java.util.function.Consumer<? super java.lang.Double>);
+    method public default java.lang.Double next();
+    method public abstract double nextDouble();
+  }
+
+  public static abstract interface PrimitiveIterator.OfInt implements java.util.PrimitiveIterator {
+    method public default void forEachRemaining(java.util.function.IntConsumer);
+    method public default void forEachRemaining(java.util.function.Consumer<? super java.lang.Integer>);
+    method public default java.lang.Integer next();
+    method public abstract int nextInt();
+  }
+
+  public static abstract interface PrimitiveIterator.OfLong implements java.util.PrimitiveIterator {
+    method public default void forEachRemaining(java.util.function.LongConsumer);
+    method public default void forEachRemaining(java.util.function.Consumer<? super java.lang.Long>);
+    method public default java.lang.Long next();
+    method public abstract long nextLong();
+  }
+
   public class PriorityQueue extends java.util.AbstractQueue implements java.io.Serializable {
     ctor public PriorityQueue();
     ctor public PriorityQueue(int);
