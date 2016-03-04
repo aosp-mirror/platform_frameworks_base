@@ -323,6 +323,10 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <style name="TextAppearance.NotificationGuts.Radio">
+        <item name="android:alpha">.87</item>
+    </style>
+
     <style name="TextAppearance.NotificationGuts.Button">
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
