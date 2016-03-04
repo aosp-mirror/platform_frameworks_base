@@ -478,8 +478,6 @@ public final class LocaleList implements Parcelable {
     /**
      * Returns the default locale list, adjusted by moving the default locale to its first
      * position.
-     *
-     * {@hide}
      */
     @NonNull @Size(min=1)
     public static LocaleList getAdjustedDefault() {
