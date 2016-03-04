@@ -27,7 +27,7 @@
 namespace android {
 namespace uirenderer {
 
-static Rect kViewportBounds(0, 0, 2048, 2048);
+static Rect kViewportBounds(2048, 2048);
 
 static ClipArea createClipArea() {
     ClipArea area;
@@ -140,17 +140,15 @@ TEST(ClipArea, serializeClip) {
 
     // rect list
     Matrix4 rotate;
-    rotate.loadRotate(2.0f);
-    area.clipRectWithTransform(Rect(200, 200), &rotate, SkRegion::kIntersect_Op);
+    rotate.loadRotate(5.0f);
+    area.clipRectWithTransform(Rect(50, 50, 150, 150), &rotate, SkRegion::kIntersect_Op);
     {
         auto serializedClip = area.serializeClip(allocator);
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::RectangleList, serializedClip->mode);
         auto clipRectList = reinterpret_cast<const ClipRectList*>(serializedClip);
         EXPECT_EQ(2, clipRectList->rectList.getTransformedRectanglesCount());
-        EXPECT_FALSE(clipRectList->rect.isEmpty());
-        EXPECT_FLOAT_EQ(199.87817f, clipRectList->rect.right)
-            << "Right side should be clipped by rotated rect";
+        EXPECT_EQ(Rect(37, 54, 145, 163), clipRectList->rect);
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
     }
@@ -238,6 +236,29 @@ TEST(ClipArea, serializeIntersectedClip) {
         ASSERT_EQ(ClipMode::Region, resolvedClip->mode);
         auto clipRegion = reinterpret_cast<const ClipRegion*>(resolvedClip);
         EXPECT_EQ(SkIRect::MakeLTRB(60, 20, 160, 200), clipRegion->region.getBounds());
+    }
+}
+
+TEST(ClipArea, serializeIntersectedClip_snap) {
+    ClipArea area(createClipArea());
+    area.setClip(100.2, 100.4, 500.6, 500.8);
+    LinearAllocator allocator;
+
+    {
+        // no recorded clip case
+        auto resolvedClip = area.serializeIntersectedClip(allocator, nullptr, Matrix4::identity());
+        EXPECT_EQ(Rect(100, 100, 501, 501), resolvedClip->rect);
+    }
+    {
+        // recorded clip case
+        ClipRect recordedClip(Rect(100.12, 100.74));
+        Matrix4 translateScale;
+        translateScale.loadTranslate(100, 100, 0);
+        translateScale.scale(2, 3, 1); // recorded clip will have non-int coords, even after transform
+        auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, translateScale);
+        ASSERT_NE(nullptr, resolvedClip);
+        EXPECT_EQ(ClipMode::Rectangle, resolvedClip->mode);
+        EXPECT_EQ(Rect(100, 100, 300, 402), resolvedClip->rect);
     }
 }
 
