@@ -54,7 +54,7 @@ import java.util.Set;
  */
 public class PermissionMonitor {
     private static final String TAG = "PermissionMonitor";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean SYSTEM = true;
     private static final boolean NETWORK = false;
 

@@ -76,7 +76,7 @@ import java.util.Random;
  * {@hide}
  */
 public class NetworkMonitor extends StateMachine {
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "NetworkMonitor";
     private static final String DEFAULT_SERVER = "connectivitycheck.gstatic.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;

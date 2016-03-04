@@ -84,10 +84,10 @@ import static android.net.dhcp.DhcpPacket.*;
 public class DhcpClient extends StateMachine {
 
     private static final String TAG = "DhcpClient";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean STATE_DBG = false;
     private static final boolean MSG_DBG = false;
-    private static final boolean PACKET_DBG = true;
+    private static final boolean PACKET_DBG = false;
 
     // Timers and timeouts.
     private static final int SECONDS = 1000;
@@ -342,14 +342,14 @@ public class DhcpClient extends StateMachine {
 
         @Override
         public void run() {
-            maybeLog("Receive thread started");
+            if (DBG) Log.d(TAG, "Receive thread started");
             while (!stopped) {
                 int length = 0;  // Or compiler can't tell it's initialized if a parse error occurs.
                 try {
                     length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
                     DhcpPacket packet = null;
                     packet = DhcpPacket.decodeFullPacket(mPacket, length, DhcpPacket.ENCAP_L2);
-                    maybeLog("Received packet: " + packet);
+                    if (DBG) Log.d(TAG, "Received packet: " + packet);
                     sendMessage(CMD_RECEIVED_PACKET, packet);
                 } catch (IOException|ErrnoException e) {
                     if (!stopped) {
@@ -362,7 +362,7 @@ public class DhcpClient extends StateMachine {
                     }
                 }
             }
-            maybeLog("Receive thread stopped");
+            if (DBG) Log.d(TAG, "Receive thread stopped");
         }
     }
 
@@ -373,12 +373,12 @@ public class DhcpClient extends StateMachine {
     private boolean transmitPacket(ByteBuffer buf, String description, Inet4Address to) {
         try {
             if (to.equals(INADDR_BROADCAST)) {
-                maybeLog("Broadcasting " + description);
+                if (DBG) Log.d(TAG, "Broadcasting " + description);
                 Os.sendto(mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
             } else {
                 // It's safe to call getpeername here, because we only send unicast packets if we
                 // have an IP address, and we connect the UDP socket in DhcpHaveAddressState#enter.
-                maybeLog("Unicasting " + description + " to " + Os.getpeername(mUdpSock));
+                if (DBG) Log.d(TAG, "Unicasting " + description + " to " + Os.getpeername(mUdpSock));
                 Os.write(mUdpSock, buf);
             }
         } catch(ErrnoException|IOException e) {
@@ -452,10 +452,6 @@ public class DhcpClient extends StateMachine {
     protected void onQuitting() {
         Log.d(TAG, "onQuitting");
         mController.sendMessage(CMD_ON_QUIT);
-    }
-
-    private void maybeLog(String msg) {
-        if (DBG) Log.d(TAG, msg);
     }
 
     abstract class LoggingState extends State {
@@ -592,7 +588,7 @@ public class DhcpClient extends StateMachine {
                     transitionTo(mStoppedState);
                     return HANDLED;
                 case CMD_ONESHOT_TIMEOUT:
-                    maybeLog("Timed out");
+                    if (DBG) Log.d(TAG, "Timed out");
                     notifyFailure();
                     return HANDLED;
                 default:
@@ -790,7 +786,7 @@ public class DhcpClient extends StateMachine {
 
         @Override
         public void exit() {
-            maybeLog("Clearing IP address");
+            if (DBG) Log.d(TAG, "Clearing IP address");
             setIpAddress(new LinkAddress("0.0.0.0/0"));
         }
     }

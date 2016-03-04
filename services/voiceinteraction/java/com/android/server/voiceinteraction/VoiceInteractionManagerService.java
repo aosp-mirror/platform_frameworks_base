@@ -75,7 +75,7 @@ import java.util.List;
  */
 public class VoiceInteractionManagerService extends SystemService {
     static final String TAG = "VoiceInteractionManagerService";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     final Context mContext;
     final ContentResolver mResolver;
