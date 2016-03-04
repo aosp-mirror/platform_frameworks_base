@@ -30,7 +30,7 @@
     <!-- Button to close PIP overlay menu on PIP UI -->
     <string name="pip_cancel" translatable="false">Cancel</string>
     <!-- Overlay text on PIP -->
-    <string name="pip_hold_home" translatable="false">Hold HOME to control PIP</string>
+    <string name="pip_hold_home" translatable="false">Hold <b>HOME</b> to control PIP</string>
     <!-- Picture-in-Picture onboarding screen -->
     <eat-comment />
     <!-- Description for onboarding screen. -->
