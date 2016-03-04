@@ -1511,6 +1511,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (result != null) {
                     if (isTextEditable()) {
                         replaceSelectionWithText(result);
+                        if (mEditor != null) {
+                            mEditor.refreshTextActionMode();
+                        }
                     } else {
                         if (result.length() > 0) {
                             Toast.makeText(getContext(), String.valueOf(result), Toast.LENGTH_LONG)
@@ -1520,12 +1523,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             } else if (mText instanceof Spannable) {
                 // Reset the selection.
-                stopTextActionMode();
-                Selection.setSelection((Spannable) mText, getSelectionStart(), getSelectionEnd());
-            }
-
-            if (mEditor.hasSelectionController()) {
-                mEditor.startSelectionActionMode();
+                Selection.setSelection((Spannable) mText, getSelectionEnd());
             }
         }
     }
@@ -5393,11 +5391,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // - onFocusChanged cannot start it when focus is given to a view with selected text (after
         //   a screen rotation) since layout is not yet initialized at that point.
         if (mEditor != null && mEditor.mCreatedWithASelection) {
-            if (mEditor.extractedTextModeWillBeStarted()) {
-                mEditor.checkFieldAndSelectCurrentWord();
-            } else {
-                mEditor.startSelectionActionMode();
-            }
+            mEditor.refreshTextActionMode();
             mEditor.mCreatedWithASelection = false;
         }
 
@@ -6594,6 +6588,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // in the extracted view.
         mEditor.hideCursorAndSpanControllers();
         stopTextActionMode();
+        if (mEditor.mSelectionModifierCursorController != null) {
+            mEditor.mSelectionModifierCursorController.resetTouchOffsets();
+        }
     }
 
     /**
@@ -8289,6 +8286,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (newSelEnd < 0) {
                     newSelEnd = Selection.getSelectionEnd(buf);
                 }
+                if (mEditor != null) {
+                    mEditor.refreshTextActionMode();
+                }
                 onSelectionChanged(newSelStart, newSelEnd);
             }
         }
@@ -9199,10 +9199,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     if (start >= 0 && start <= end && end <= text.length()) {
                         Selection.setSelection((Spannable) text, start, end);
-                        // Make sure selection mode is engaged.
-                        if (mEditor != null) {
-                            mEditor.startSelectionActionMode();
-                        }
                         return true;
                     }
                 }
@@ -9393,16 +9389,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (id) {
             case ID_SELECT_ALL:
-                // This starts an action mode if triggered from another action mode. Text is
-                // highlighted, so that it can be bulk edited, like selectAllOnFocus does. Returns
-                // true even if text is empty.
-                boolean shouldRestartActionMode =
-                        mEditor != null && mEditor.mTextActionMode != null;
-                stopTextActionMode();
                 selectAllText();
-                if (shouldRestartActionMode) {
-                    mEditor.startSelectionActionMode();
-                }
                 return true;
 
             case ID_UNDO:
@@ -9428,7 +9415,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case ID_CUT:
                 setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
                 deleteText_internal(min, max);
-                stopTextActionMode();
                 return true;
 
             case ID_COPY:
@@ -9684,12 +9670,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean selectAllText() {
-        // Need to hide insert point cursor controller before settings selection, otherwise insert
-        // point cursor controller obtains cursor update event and update cursor with cancelling
-        // selection.
-        if (mEditor != null) {
-            mEditor.hideInsertionPointCursorController();
-        }
         final int length = mText.length();
         Selection.setSelection((Spannable) mText, 0, length);
         return length > 0;
@@ -9728,7 +9708,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             }
-            stopTextActionMode();
             sLastCutCopyOrTextChangedTime = 0;
         }
     }
@@ -9741,7 +9720,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             sharingIntent.removeExtra(android.content.Intent.EXTRA_TEXT);
             sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, selectedText);
             getContext().startActivity(Intent.createChooser(sharingIntent, null));
-            stopTextActionMode();
+            Selection.setSelection((Spannable) mText, getSelectionEnd());
         }
     }
 
@@ -10059,18 +10038,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && getAccessibilitySelectionEnd() == end) {
             return;
         }
+        CharSequence text = getIterableTextForAccessibility();
+        if (Math.min(start, end) >= 0 && Math.max(start, end) <= text.length()) {
+            Selection.setSelection((Spannable) text, start, end);
+        } else {
+            Selection.removeSelection((Spannable) text);
+        }
         // Hide all selection controllers used for adjusting selection
         // since we are doing so explicitlty by other means and these
         // controllers interact with how selection behaves.
         if (mEditor != null) {
             mEditor.hideCursorAndSpanControllers();
             mEditor.stopTextActionMode();
-        }
-        CharSequence text = getIterableTextForAccessibility();
-        if (Math.min(start, end) >= 0 && Math.max(start, end) <= text.length()) {
-            Selection.setSelection((Spannable) text, start, end);
-        } else {
-            Selection.removeSelection((Spannable) text);
         }
     }
 
