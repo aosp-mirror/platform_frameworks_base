@@ -44,7 +44,4 @@ LOCAL_MODULE := libandroid
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
-# Required because of b/25642296
-LOCAL_CLANG_arm64 := false
-
 include $(BUILD_SHARED_LIBRARY)
