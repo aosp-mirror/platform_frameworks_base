@@ -365,6 +365,14 @@ public class RequestThreadManager {
             mGLThreadManager.waitUntilIdle();
         }
         resetJpegSurfaceFormats(mCallbackOutputs);
+
+        for (Surface s : mCallbackOutputs) {
+            try {
+                LegacyCameraDevice.disconnectSurface(s);
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.w(TAG, "Surface abandoned, skipping...", e);
+            }
+        }
         mPreviewOutputs.clear();
         mCallbackOutputs.clear();
         mJpegSurfaceIds.clear();
@@ -392,6 +400,10 @@ public class RequestThreadManager {
                             mJpegSurfaceIds.add(LegacyCameraDevice.getSurfaceId(s));
                             mCallbackOutputs.add(s);
                             callbackOutputSizes.add(outSize);
+
+                            // LegacyCameraDevice is the producer of JPEG output surfaces
+                            // so LegacyCameraDevice needs to connect to the surfaces.
+                            LegacyCameraDevice.connectSurface(s);
                             break;
                         default:
                             LegacyCameraDevice.setScalingMode(s, LegacyCameraDevice.

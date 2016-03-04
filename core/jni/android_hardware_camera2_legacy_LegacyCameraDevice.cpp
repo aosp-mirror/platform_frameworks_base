@@ -29,6 +29,7 @@
 
 #include <gui/Surface.h>
 #include <gui/IGraphicBufferProducer.h>
+#include <gui/IProducerListener.h>
 #include <ui/GraphicBuffer.h>
 #include <system/window.h>
 #include <hardware/camera3.h>
@@ -93,27 +94,17 @@ static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, android_yc
             cStep, yStride, cStride);
 }
 
-static status_t configureSurface(const sp<ANativeWindow>& anw,
-                                 int32_t width,
-                                 int32_t height,
-                                 int32_t pixelFmt,
-                                 int32_t maxBufferSlack) {
+static status_t connectSurface(const sp<Surface>& surface, int32_t maxBufferSlack) {
     status_t err = NO_ERROR;
-    err = native_window_set_buffers_dimensions(anw.get(), width, height);
-    if (err != NO_ERROR) {
-        ALOGE("%s: Failed to set native window buffer dimensions, error %s (%d).", __FUNCTION__,
+
+    err = surface->connect(NATIVE_WINDOW_API_CAMERA, /*listener*/NULL);
+    if (err != OK) {
+        ALOGE("%s: Unable to connect to surface, error %s (%d).", __FUNCTION__,
                 strerror(-err), err);
         return err;
     }
 
-    err = native_window_set_buffers_format(anw.get(), pixelFmt);
-    if (err != NO_ERROR) {
-        ALOGE("%s: Failed to set native window buffer format, error %s (%d).", __FUNCTION__,
-                strerror(-err), err);
-        return err;
-    }
-
-    err = native_window_set_usage(anw.get(), GRALLOC_USAGE_SW_WRITE_OFTEN);
+    err = native_window_set_usage(surface.get(), GRALLOC_USAGE_SW_WRITE_OFTEN);
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to set native window usage flag, error %s (%d).", __FUNCTION__,
                 strerror(-err), err);
@@ -121,19 +112,17 @@ static status_t configureSurface(const sp<ANativeWindow>& anw,
     }
 
     int minUndequeuedBuffers;
-    err = anw.get()->query(anw.get(),
-            NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
-            &minUndequeuedBuffers);
+    err = static_cast<ANativeWindow*>(surface.get())->query(surface.get(),
+            NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &minUndequeuedBuffers);
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to get native window min undequeued buffers, error %s (%d).",
                 __FUNCTION__, strerror(-err), err);
         return err;
     }
 
-    ALOGV("%s: Setting buffer count to %d, size to (%dx%d), fmt (0x%x)", __FUNCTION__,
-          maxBufferSlack + 1 + minUndequeuedBuffers,
-          width, height, pixelFmt);
-    err = native_window_set_buffer_count(anw.get(), maxBufferSlack + 1 + minUndequeuedBuffers);
+    ALOGV("%s: Setting buffer count to %d", __FUNCTION__,
+            maxBufferSlack + 1 + minUndequeuedBuffers);
+    err = native_window_set_buffer_count(surface.get(), maxBufferSlack + 1 + minUndequeuedBuffers);
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to set native window buffer count, error %s (%d).", __FUNCTION__,
                 strerror(-err), err);
@@ -509,6 +498,26 @@ static jint LegacyCameraDevice_nativeDetectSurfaceUsageFlags(JNIEnv* env, jobjec
     return usage;
 }
 
+static jint LegacyCameraDevice_nativeDisconnectSurface(JNIEnv* env, jobject thiz,
+          jobject surface) {
+    ALOGV("nativeDisconnectSurface");
+    if (surface == nullptr) return NO_ERROR;
+
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGV("Buffer queue has already been abandoned.");
+        return NO_ERROR;
+    }
+
+    status_t err = native_window_api_disconnect(anw.get(), NATIVE_WINDOW_API_CAMERA);
+    if(err != NO_ERROR) {
+        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+            "Error while disconnecting surface");
+        return err;
+    }
+    return NO_ERROR;
+}
+
 static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject thiz,
         jobject surfaceTexture, jintArray dimens) {
     ALOGV("nativeDetectTextureDimens");
@@ -540,15 +549,14 @@ static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject th
     return NO_ERROR;
 }
 
-static jint LegacyCameraDevice_nativeConfigureSurface(JNIEnv* env, jobject thiz, jobject surface,
-        jint width, jint height, jint pixelFormat) {
-    ALOGV("nativeConfigureSurface");
-    sp<ANativeWindow> anw;
-    if ((anw = getNativeWindow(env, surface)) == NULL) {
-        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+static jint LegacyCameraDevice_nativeConnectSurface(JNIEnv* env, jobject thiz, jobject surface) {
+    ALOGV("nativeConnectSurface");
+    sp<Surface> s;
+    if ((s = getSurface(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve surface.", __FUNCTION__);
         return BAD_VALUE;
     }
-    status_t err = configureSurface(anw, width, height, pixelFormat, CAMERA_DEVICE_BUFFER_SLACK);
+    status_t err = connectSurface(s, CAMERA_DEVICE_BUFFER_SLACK);
     if (err != NO_ERROR) {
         ALOGE("%s: Error while configuring surface %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
@@ -740,9 +748,9 @@ static const JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeDetectSurfaceDimens",
     "(Landroid/view/Surface;[I)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceDimens },
-    { "nativeConfigureSurface",
-    "(Landroid/view/Surface;III)I",
-    (void *)LegacyCameraDevice_nativeConfigureSurface },
+    { "nativeConnectSurface",
+    "(Landroid/view/Surface;)I",
+    (void *)LegacyCameraDevice_nativeConnectSurface },
     { "nativeProduceFrame",
     "(Landroid/view/Surface;[BIII)I",
     (void *)LegacyCameraDevice_nativeProduceFrame },
@@ -773,6 +781,9 @@ static const JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeSetScalingMode",
     "(Landroid/view/Surface;I)I",
     (void *)LegacyCameraDevice_nativeSetScalingMode },
+    { "nativeDisconnectSurface",
+    "(Landroid/view/Surface;)I",
+    (void *)LegacyCameraDevice_nativeDisconnectSurface },
 };
 
 // Get all the required offsets in java class and register native functions
