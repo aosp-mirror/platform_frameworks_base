@@ -1895,7 +1895,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected abstract boolean isPanelFullyCollapsed();
+    public abstract boolean isPanelFullyCollapsed();
 
     /**
      * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
