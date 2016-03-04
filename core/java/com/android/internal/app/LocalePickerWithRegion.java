@@ -21,6 +21,7 @@ import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.LocaleList;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,6 +51,11 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private Set<LocaleStore.LocaleInfo> mLocaleList;
     private LocaleStore.LocaleInfo mParentLocale;
     private boolean mTranslatedOnly = false;
+    private SearchView mSearchView = null;
+    private CharSequence mPreviousSearch = null;
+    private boolean mPreviousSearchHadFocus = false;
+    private int mFirstVisiblePosition = 0;
+    private int mTopDistance = 0;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -154,12 +160,32 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         super.onResume();
 
         if (mParentLocale != null) {
-            this.getActivity().setTitle(mParentLocale.getFullNameNative());
+            getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
-            this.getActivity().setTitle(R.string.language_selection_title);
+            getActivity().setTitle(R.string.language_selection_title);
         }
 
         getListView().requestFocus();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Save search status
+        if (mSearchView != null) {
+            mPreviousSearchHadFocus = mSearchView.hasFocus();
+            mPreviousSearch = mSearchView.getQuery();
+        } else {
+            mPreviousSearchHadFocus = false;
+            mPreviousSearch = null;
+        }
+
+        // Save scroll position
+        final ListView list = getListView();
+        final View firstChild = list.getChildAt(0);
+        mFirstVisiblePosition = list.getFirstVisiblePosition();
+        mTopDistance = (firstChild == null) ? 0 : (firstChild.getTop() - list.getPaddingTop());
     }
 
     @Override
@@ -193,12 +219,27 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         if (mParentLocale == null) {
             inflater.inflate(R.menu.language_selection_list, menu);
 
-            MenuItem mSearchMenuItem = menu.findItem(R.id.locale_search_menu);
-            SearchView mSearchView = (SearchView) mSearchMenuItem.getActionView();
+            final MenuItem searchMenuItem = menu.findItem(R.id.locale_search_menu);
+            mSearchView = (SearchView) searchMenuItem.getActionView();
 
             mSearchView.setQueryHint(getText(R.string.search_language_hint));
             mSearchView.setOnQueryTextListener(this);
-            mSearchView.setQuery("", false /* submit */);
+
+            // Restore previous search status
+            if (!TextUtils.isEmpty(mPreviousSearch)) {
+                searchMenuItem.expandActionView();
+                mSearchView.setIconified(false);
+                mSearchView.setActivated(true);
+                if (mPreviousSearchHadFocus) {
+                    mSearchView.requestFocus();
+                }
+                mSearchView.setQuery(mPreviousSearch, true /* submit */);
+            } else {
+                mSearchView.setQuery(null, false /* submit */);
+            }
+
+            // Restore previous scroll position
+            getListView().setSelectionFromTop(mFirstVisiblePosition, mTopDistance);
         }
     }
 
