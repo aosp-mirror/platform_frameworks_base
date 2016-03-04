@@ -10466,7 +10466,6 @@ package android.database {
     method public boolean hasNext();
     method public java.util.Iterator<android.database.CursorJoiner.Result> iterator();
     method public android.database.CursorJoiner.Result next();
-    method public void remove();
   }
 
   public static final class CursorJoiner.Result extends java.lang.Enum {
@@ -38479,7 +38478,6 @@ package android.text {
     method public boolean hasNext();
     method public java.util.Iterator<java.lang.String> iterator();
     method public java.lang.String next();
-    method public void remove();
     method public void setString(java.lang.String);
   }
 
@@ -57715,9 +57713,10 @@ package java.util {
   }
 
   public abstract interface Iterator {
+    method public default void forEachRemaining(java.util.function.Consumer<? super E>);
     method public abstract boolean hasNext();
     method public abstract E next();
-    method public abstract void remove();
+    method public default void remove();
   }
 
   public class LinkedHashMap extends java.util.HashMap implements java.util.Map {
@@ -58239,7 +58238,6 @@ package java.util {
     method public short nextShort();
     method public short nextShort(int);
     method public int radix();
-    method public void remove();
     method public java.util.Scanner reset();
     method public java.util.Scanner skip(java.util.regex.Pattern);
     method public java.util.Scanner skip(java.lang.String);
