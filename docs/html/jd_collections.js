@@ -1661,10 +1661,11 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/enterprise/app-compatibility.html",
       "training/enterprise/app-restrictions.html",
+      "training/enterprise/cosu.html",
       "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
       "samples/AppRestrictionSchema/index.html",
-      "samples/AppRestrictionEnforcer/index.html",
-      "https://www.youtube.com/watch?v=dH41OutAMNM"
+      "https://www.youtube.com/watch?v=dH41OutAMNM",
+      "samples/AppRestrictionEnforcer/index.html"
     ]
   },
   "training/work/admin": {
