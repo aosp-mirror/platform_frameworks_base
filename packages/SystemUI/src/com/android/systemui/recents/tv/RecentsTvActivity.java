@@ -40,7 +40,6 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
-import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
@@ -288,7 +287,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
-                !launchState.launchedFromAppWithThumbnail;
+                !launchState.launchedFromApp;
         if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
             EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
         }

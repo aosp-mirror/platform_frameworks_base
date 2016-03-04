@@ -42,6 +42,7 @@ import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
@@ -68,6 +69,7 @@ import static android.net.wifi.WifiManager.EXTRA_NETWORK_INFO;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_CONFIGURATION;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_INFO;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -294,6 +296,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     final SparseIntArray mUidFirewallStandbyRules = new SparseIntArray();
     final SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
+    final SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
 
     /** Set of states for the child firewall chains. True if the chain is active. */
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
@@ -522,9 +525,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     new PowerManagerInternal.LowPowerModeListener() {
                 @Override
                 public void onLowPowerModeChanged(boolean enabled) {
+                    if (LOGD) Slog.d(TAG, "onLowPowerModeChanged(" + enabled + ")");
                     synchronized (mRulesLock) {
                         if (mRestrictPower != enabled) {
                             mRestrictPower = enabled;
+                            updateRulesForRestrictPowerLocked();
                             updateRulesForGlobalChangeLocked(true);
                         }
                     }
@@ -1175,13 +1180,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
-        // If we are in restrict power mode, we want to treat all interfaces
-        // as metered, to restrict access to the network by uid.  However, we
-        // will not have a bandwidth limit.  Also only do this if restrict
-        // background data use is *not* enabled, since that takes precedence
-        // use over those networks can have a cost associated with it).
-        final boolean powerSave = mRestrictPower && !mRestrictBackground;
-
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
         final ArrayList<Pair<String, NetworkIdentity>> connIdents = new ArrayList<>(states.length);
@@ -1193,9 +1191,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final String baseIface = state.linkProperties.getInterfaceName();
                 if (baseIface != null) {
                     connIdents.add(Pair.create(baseIface, ident));
-                    if (powerSave) {
-                        connIfaces.add(baseIface);
-                    }
                 }
 
                 // Stacked interfaces are considered to have same identity as
@@ -1205,9 +1200,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final String stackedIface = stackedLink.getInterfaceName();
                     if (stackedIface != null) {
                         connIdents.add(Pair.create(stackedIface, ident));
-                        if (powerSave) {
-                            connIfaces.add(stackedIface);
-                        }
                     }
                 }
             }
@@ -1254,8 +1246,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             if (LOGD) {
-                Slog.d(TAG, "applying policy " + policy.toString() + " to ifaces "
-                        + Arrays.toString(ifaces));
+                Slog.d(TAG, "applying policy " + policy + " to ifaces " + Arrays.toString(ifaces));
             }
 
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
@@ -1286,9 +1277,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     removeInterfaceQuota(iface);
                     setInterfaceQuota(iface, quotaBytes);
                     newMeteredIfaces.add(iface);
-                    if (powerSave) {
-                        connIfaces.remove(iface);
-                    }
                 }
             }
 
@@ -2299,9 +2287,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // state changed, push updated rules
             mUidState.put(uid, uidState);
             updateRulesForUidStateChangeLocked(uid, oldUidState, uidState);
-            if (mDeviceIdleMode && isProcStateAllowedWhileIdle(oldUidState)
-                    != isProcStateAllowedWhileIdle(uidState)) {
-                updateRuleForDeviceIdleLocked(uid);
+            if (isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
+                    != isProcStateAllowedWhileIdleOrPowerSaveMode(uidState) ) {
+                if (mDeviceIdleMode) {
+                    updateRuleForDeviceIdleLocked(uid);
+                }
+                if (mRestrictPower) {
+                    updateRulesForRestrictPowerLocked(uid);
+                }
             }
         }
     }
@@ -2316,6 +2309,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         ActivityManager.PROCESS_STATE_CACHED_EMPTY);
                 if (mDeviceIdleMode) {
                     updateRuleForDeviceIdleLocked(uid);
+                }
+                if (mRestrictPower) {
+                    updateRulesForRestrictPowerLocked(uid);
                 }
             }
         }
@@ -2354,15 +2350,36 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    static boolean isProcStateAllowedWhileIdle(int procState) {
+    static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
         return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
+    void updateRulesForRestrictPowerLocked() {
+        updateRulesForWhitelistedPowerSaveLocked(mRestrictPower, FIREWALL_CHAIN_POWERSAVE,
+                mUidFirewallPowerSaveRules);
+    }
+
+    void updateRulesForRestrictPowerLocked(int uid) {
+        updateRulesForWhitelistedPowerSaveLocked(uid, mRestrictPower, FIREWALL_CHAIN_POWERSAVE);
+    }
+
     void updateRulesForDeviceIdleLocked() {
-        if (mDeviceIdleMode) {
-            // sync the whitelists before enable dozable chain.  We don't care about the rules if
+        updateRulesForWhitelistedPowerSaveLocked(mDeviceIdleMode, FIREWALL_CHAIN_DOZABLE,
+                mUidFirewallDozableRules);
+    }
+
+    void updateRuleForDeviceIdleLocked(int uid) {
+        updateRulesForWhitelistedPowerSaveLocked(uid, mDeviceIdleMode, FIREWALL_CHAIN_DOZABLE);
+    }
+
+    // NOTE: since both fw_dozable and fw_powersave uses the same map (mPowerSaveTempWhitelistAppIds)
+    // for whitelisting, we can reuse their logic in this method.
+    private void updateRulesForWhitelistedPowerSaveLocked(boolean enabled, int chain,
+            SparseIntArray rules) {
+        if (enabled) {
+            // Sync the whitelists before enabling the chain.  We don't care about the rules if
             // we are disabling the chain.
-            final SparseIntArray uidRules = mUidFirewallDozableRules;
+            final SparseIntArray uidRules = rules;
             uidRules.clear();
             final List<UserInfo> users = mUserManager.getUsers();
             for (int ui = users.size() - 1; ui >= 0; ui--) {
@@ -2381,24 +2398,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
             for (int i = mUidState.size() - 1; i >= 0; i--) {
-                if (isProcStateAllowedWhileIdle(mUidState.valueAt(i))) {
+                if (isProcStateAllowedWhileIdleOrPowerSaveMode(mUidState.valueAt(i))) {
                     uidRules.put(mUidState.keyAt(i), FIREWALL_RULE_ALLOW);
                 }
             }
-            setUidFirewallRules(FIREWALL_CHAIN_DOZABLE, uidRules);
+            setUidFirewallRules(chain, uidRules);
         }
 
-        enableFirewallChainLocked(FIREWALL_CHAIN_DOZABLE, mDeviceIdleMode);
+        enableFirewallChainLocked(chain, enabled);
     }
 
-    void updateRuleForDeviceIdleLocked(int uid) {
-        if (mDeviceIdleMode) {
+    // NOTE: since both fw_dozable and fw_powersave uses the same map (mPowerSaveTempWhitelistAppIds)
+    // for whitelisting, we can reuse their logic in this method.
+    private void updateRulesForWhitelistedPowerSaveLocked(int uid, boolean enabled, int chain) {
+        if (enabled) {
             int appId = UserHandle.getAppId(uid);
             if (mPowerSaveTempWhitelistAppIds.get(appId) || mPowerSaveWhitelistAppIds.get(appId)
-                    || isProcStateAllowedWhileIdle(mUidState.get(uid))) {
-                setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, FIREWALL_RULE_ALLOW);
+                    || isProcStateAllowedWhileIdleOrPowerSaveMode(mUidState.get(uid))) {
+                setUidFirewallRule(chain, uid, FIREWALL_RULE_ALLOW);
             } else {
-                setUidFirewallRule(FIREWALL_CHAIN_DOZABLE, uid, FIREWALL_RULE_DEFAULT);
+                setUidFirewallRule(chain, uid, FIREWALL_RULE_DEFAULT);
             }
         }
 
@@ -2454,10 +2473,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link #mRestrictPower}, or {@link #mDeviceIdleMode} value.
      */
     void updateRulesForGlobalChangeLocked(boolean restrictedNetworksChanged) {
+        long start;
+        if (LOGD) start = System.currentTimeMillis();
+
         final PackageManager pm = mContext.getPackageManager();
 
         updateRulesForDeviceIdleLocked();
         updateRulesForAppIdleLocked();
+        updateRulesForRestrictPowerLocked();
 
         // update rules for all installed applications
         final List<UserInfo> users = mUserManager.getUsers();
@@ -2465,8 +2488,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS
                         | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
 
-        for (UserInfo user : users) {
-            for (ApplicationInfo app : apps) {
+        final int usersSize = users.size();
+        final int appsSize = apps.size();
+        for (int i = 0; i < usersSize; i++) {
+            final UserInfo user = users.get(i);
+            for (int j = 0; j < appsSize; j++) {
+                final ApplicationInfo app = apps.get(j);
                 final int uid = UserHandle.getUid(user.id, app.uid);
                 updateRulesForUidLocked(uid);
             }
@@ -2481,16 +2508,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             normalizePoliciesLocked();
             updateNetworkRulesLocked();
         }
+        if (LOGD) {
+          final long delta = System.currentTimeMillis() - start;
+          Slog.d(TAG, "updateRulesForGlobalChangeLocked(" + restrictedNetworksChanged + ") took "
+                  + delta + "ms");
+        }
     }
 
     void updateRulesForTempWhitelistChangeLocked() {
         final List<UserInfo> users = mUserManager.getUsers();
-        for (UserInfo user : users) {
-            for (int i = mPowerSaveTempWhitelistAppIds.size() - 1; i >= 0; i--) {
-                int appId = mPowerSaveTempWhitelistAppIds.keyAt(i);
+        for (int i = 0; i < users.size(); i++) {
+            final UserInfo user = users.get(i);
+            for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; i--) {
+                int appId = mPowerSaveTempWhitelistAppIds.keyAt(j);
                 int uid = UserHandle.getUid(user.id, appId);
                 updateRuleForAppIdleLocked(uid);
                 updateRuleForDeviceIdleLocked(uid);
+                updateRulesForRestrictPowerLocked(uid);
             }
         }
     }
@@ -2580,6 +2614,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Check dozable state, which is whitelist
         if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE)
                 && mUidFirewallDozableRules.get(uid, FIREWALL_RULE_DEFAULT) != FIREWALL_RULE_ALLOW) {
+            uidRules = RULE_REJECT_ALL;
+        }
+
+        // Check powersave state, which is whitelist
+        if (mFirewallChainStates.get(FIREWALL_CHAIN_POWERSAVE)
+                && mUidFirewallPowerSaveRules.get(uid, FIREWALL_RULE_DEFAULT) != FIREWALL_RULE_ALLOW) {
             uidRules = RULE_REJECT_ALL;
         }
 
@@ -2810,6 +2850,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mUidFirewallDozableRules.put(uid, rule);
         } else if (chain == FIREWALL_CHAIN_STANDBY) {
             mUidFirewallStandbyRules.put(uid, rule);
+        } else if (chain == FIREWALL_CHAIN_POWERSAVE) {
+            mUidFirewallPowerSaveRules.put(uid, rule);
         }
 
         try {

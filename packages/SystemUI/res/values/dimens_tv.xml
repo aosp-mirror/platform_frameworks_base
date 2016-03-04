@@ -43,4 +43,7 @@
 
     <!-- Extra space around the PIP and its outline in PIP onboarding activity  -->
     <dimen name="tv_pip_bounds_space">3dp</dimen>
+
+    <!-- Values for text on recents cards on tv -->
+    <dimen name="recents_tv_title_text_size">12sp</dimen>
 </resources>

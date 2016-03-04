@@ -606,7 +606,7 @@ public class Am extends BaseCommand {
                             new File(mProfileFile),
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE |
-                            ParcelFileDescriptor.MODE_READ_WRITE);
+                            ParcelFileDescriptor.MODE_WRITE_ONLY);
                 } catch (FileNotFoundException e) {
                     System.err.println("Error: Unable to open file: " + mProfileFile);
                     System.err.println("Consider using a file under /data/local/tmp/");
@@ -903,7 +903,7 @@ public class Am extends BaseCommand {
             fd = openForSystemServer(file,
                     ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE |
-                            ParcelFileDescriptor.MODE_READ_WRITE);
+                            ParcelFileDescriptor.MODE_WRITE_ONLY);
         } catch (FileNotFoundException e) {
             System.err.println("Error: Unable to open file: " + filename);
             System.err.println("Consider using a file under /data/local/tmp/");
@@ -992,7 +992,7 @@ public class Am extends BaseCommand {
                         new File(profileFile),
                         ParcelFileDescriptor.MODE_CREATE |
                         ParcelFileDescriptor.MODE_TRUNCATE |
-                        ParcelFileDescriptor.MODE_READ_WRITE);
+                        ParcelFileDescriptor.MODE_WRITE_ONLY);
             } catch (FileNotFoundException e) {
                 System.err.println("Error: Unable to open file: " + profileFile);
                 System.err.println("Consider using a file under /data/local/tmp/");
@@ -1052,7 +1052,7 @@ public class Am extends BaseCommand {
             fd = openForSystemServer(file,
                     ParcelFileDescriptor.MODE_CREATE |
                     ParcelFileDescriptor.MODE_TRUNCATE |
-                    ParcelFileDescriptor.MODE_READ_WRITE);
+                    ParcelFileDescriptor.MODE_WRITE_ONLY);
         } catch (FileNotFoundException e) {
             System.err.println("Error: Unable to open file: " + heapFile);
             System.err.println("Consider using a file under /data/local/tmp/");

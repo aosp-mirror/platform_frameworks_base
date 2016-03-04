@@ -37,6 +37,13 @@ public class FreeformWorkspaceLayoutAlgorithm {
     private int mTaskPadding;
 
     public FreeformWorkspaceLayoutAlgorithm(Context context) {
+        reloadOnConfigurationChange(context);
+    }
+
+    /**
+     * Reloads the layout for the current configuration.
+     */
+    public void reloadOnConfigurationChange(Context context) {
         // This is applied to the edges of each task
         mTaskPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.recents_freeform_workspace_task_padding) / 2;
@@ -72,8 +79,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
                 }
                 // Bound the task width to the workspace width so that at the worst case, it will
                 // fit its own row
-                normalizedTaskWidths[i] = Math.min(rowTaskWidth,
-                        normalizedWorkspaceWidth);
+                normalizedTaskWidths[i] = Math.min(rowTaskWidth, normalizedWorkspaceWidth);
             }
 
             // Determine the scale to best fit each of the tasks in the workspace

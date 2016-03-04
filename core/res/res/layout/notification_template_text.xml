@@ -14,12 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.ImageFloatingTextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/text"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="top"
-    android:layout_marginTop="1.5dp"
+    android:layout_marginTop="1dp"
     android:ellipsize="marquee"
     android:fadingEdge="horizontal"
     android:gravity="top"

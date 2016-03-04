@@ -1870,8 +1870,8 @@ void ResTable_config::swapHtoD() {
 
     // The language & region are equal, so compare the scripts and variants.
     const char emptyScript[sizeof(l.localeScript)] = {'\0', '\0', '\0', '\0'};
-    const char *lScript = l.localeScriptWasProvided ? l.localeScript : emptyScript;
-    const char *rScript = r.localeScriptWasProvided ? r.localeScript : emptyScript;
+    const char *lScript = l.localeScriptWasComputed ? emptyScript : l.localeScript;
+    const char *rScript = r.localeScriptWasComputed ? emptyScript : r.localeScript;
     int script = memcmp(lScript, rScript, sizeof(l.localeScript));
     if (script) {
         return script;
@@ -2016,11 +2016,11 @@ int ResTable_config::isLocaleMoreSpecificThan(const ResTable_config& o) const {
     // scripts since it seems more useful to do so. We will consider
     // "en-US-POSIX" to be more specific than "en-Latn-US".
 
-    const int score = (localeScriptWasProvided ? 1 : 0) +
-        ((localeVariant[0] != 0) ? 2 : 0);
+    const int score = ((localeScript[0] != '\0' && !localeScriptWasComputed) ? 1 : 0) +
+        ((localeVariant[0] != '\0') ? 2 : 0);
 
-    const int oScore = (o.localeScriptWasProvided ? 1 : 0) +
-        ((o.localeVariant[0] != 0) ? 2 : 0);
+    const int oScore = (o.localeScript[0] != '\0' && !o.localeScriptWasComputed ? 1 : 0) +
+        ((o.localeVariant[0] != '\0') ? 2 : 0);
 
     return score - oScore;
 
@@ -2535,7 +2535,8 @@ bool ResTable_config::match(const ResTable_config& settings) const {
         if (settings.localeScript[0] == '\0') { // could not determine the request's script
             countriesMustMatch = true;
         } else {
-            if (localeScript[0] == '\0') { // script was not provided, so we try to compute it
+            if (localeScript[0] == '\0' && !localeScriptWasComputed) {
+                // script was not provided or computed, so we try to compute it
                 localeDataComputeScript(computed_script, language, country);
                 if (computed_script[0] == '\0') { // we could not compute the script
                     countriesMustMatch = true;
@@ -2684,8 +2685,8 @@ void ResTable_config::appendDirLocale(String8& out) const {
     if (!language[0]) {
         return;
     }
-
-    if (!localeScriptWasProvided && !localeVariant[0]) {
+    const bool scriptWasProvided = localeScript[0] != '\0' && !localeScriptWasComputed;
+    if (!scriptWasProvided && !localeVariant[0]) {
         // Legacy format.
         if (out.size() > 0) {
             out.append("-");
@@ -2715,7 +2716,7 @@ void ResTable_config::appendDirLocale(String8& out) const {
     size_t len = unpackLanguage(buf);
     out.append(buf, len);
 
-    if (localeScriptWasProvided) {
+    if (scriptWasProvided) {
         out.append("+");
         out.append(localeScript, sizeof(localeScript));
     }
@@ -2746,7 +2747,7 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
         charsWritten += unpackLanguage(str);
     }
 
-    if (localeScriptWasProvided) {
+    if (localeScript[0] && !localeScriptWasComputed) {
         if (charsWritten) {
             str[charsWritten++] = '-';
         }
@@ -2787,7 +2788,6 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
                for (size_t i = 1; i < 4; ++i) {
                    config->localeScript[i] = tolower(start[i]);
                }
-               config->localeScriptWasProvided = true;
                break;
            }
        case 5:
@@ -2807,7 +2807,6 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
 
 void ResTable_config::setBcp47Locale(const char* in) {
     locale = 0;
-    localeScriptWasProvided = false;
     memset(localeScript, 0, sizeof(localeScript));
     memset(localeVariant, 0, sizeof(localeVariant));
 
@@ -2824,9 +2823,10 @@ void ResTable_config::setBcp47Locale(const char* in) {
 
     const size_t size = in + strlen(in) - start;
     assignLocaleComponent(this, start, size);
-    if (localeScript[0] == '\0') {
+    localeScriptWasComputed = (localeScript[0] == '\0');
+    if (localeScriptWasComputed) {
         computeScript();
-    };
+    }
 }
 
 String8 ResTable_config::toString() const {
