@@ -328,7 +328,12 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
         // Only a1's pause listener should be called.
         assertTrue(l1.pauseCalled);
         assertFalse(l1.resumeCalled);
-        a1.resume();
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                a1.resume();
+            }
+        });
 
         Thread.sleep(a1.getTotalDuration());
 
