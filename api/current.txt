@@ -19870,7 +19870,7 @@ package android.media {
 
   public static abstract class AudioManager.AudioRecordingCallback {
     ctor public AudioManager.AudioRecordingCallback();
-    method public void onRecordConfigChanged();
+    method public void onRecordConfigChanged(android.media.AudioRecordConfiguration[]);
   }
 
   public static abstract interface AudioManager.OnAudioFocusChangeListener {
