@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.stack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
@@ -862,7 +861,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public boolean canChildBeExpanded(View v) {
         return v instanceof ExpandableNotificationRow
                 && ((ExpandableNotificationRow) v).isExpandable()
-                && !((ExpandableNotificationRow) v).isHeadsUp();
+                && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
     }
 
     public void setUserExpandedChild(View v, boolean userExpanded) {
