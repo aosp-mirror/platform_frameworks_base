@@ -115,7 +115,7 @@ public class Allocation extends BaseObj {
 
         if (cmp == Short.TYPE) {
             if (checkType) {
-                validateIsInt16();
+                validateIsInt16OrFloat16();
                 return mType.mElement.mType;
             }
             return Element.DataType.SIGNED_16;
@@ -402,9 +402,10 @@ public class Allocation extends BaseObj {
             "32 bit integer source does not match allocation type " + mType.mElement.mType);
     }
 
-    private void validateIsInt16() {
+    private void validateIsInt16OrFloat16() {
         if ((mType.mElement.mType == Element.DataType.SIGNED_16) ||
-            (mType.mElement.mType == Element.DataType.UNSIGNED_16)) {
+            (mType.mElement.mType == Element.DataType.UNSIGNED_16) ||
+            (mType.mElement.mType == Element.DataType.FLOAT_16)) {
             return;
         }
         throw new RSIllegalArgumentException(
@@ -751,7 +752,7 @@ public class Allocation extends BaseObj {
      * @param d the source data array
      */
     public void copyFrom(short[] d) {
-        validateIsInt16();
+        validateIsInt16OrFloat16();
         copyFromUnchecked(d, Element.DataType.SIGNED_16, d.length);
     }
 
@@ -1060,7 +1061,7 @@ public class Allocation extends BaseObj {
      * @param d the source data array
      */
     public void copy1DRangeFrom(int off, int count, short[] d) {
-        validateIsInt16();
+        validateIsInt16OrFloat16();
         copy1DRangeFromUnchecked(off, count, d, Element.DataType.SIGNED_16, d.length);
     }
 
@@ -1204,7 +1205,7 @@ public class Allocation extends BaseObj {
      * @param data to be placed into the Allocation
      */
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] data) {
-        validateIsInt16();
+        validateIsInt16OrFloat16();
         copy2DRangeFromUnchecked(xoff, yoff, w, h, data,
                                  Element.DataType.SIGNED_16, data.length);
     }
@@ -1473,7 +1474,7 @@ public class Allocation extends BaseObj {
      * @param d The array to be set from the Allocation.
      */
     public void copyTo(short[] d) {
-        validateIsInt16();
+        validateIsInt16OrFloat16();
         copyTo(d, Element.DataType.SIGNED_16, d.length);
     }
 
@@ -1693,7 +1694,7 @@ public class Allocation extends BaseObj {
      * @param d the source data array
      */
     public void copy1DRangeTo(int off, int count, short[] d) {
-        validateIsInt16();
+        validateIsInt16OrFloat16();
         copy1DRangeToUnchecked(off, count, d, Element.DataType.SIGNED_16, d.length);
     }
 
@@ -1794,7 +1795,7 @@ public class Allocation extends BaseObj {
      * @param data Dest Array to be copied into
      */
     public void copy2DRangeTo(int xoff, int yoff, int w, int h, short[] data) {
-        validateIsInt16();
+        validateIsInt16OrFloat16();
         copy2DRangeToUnchecked(xoff, yoff, w, h, data,
                                Element.DataType.SIGNED_16, data.length);
     }
