@@ -25,37 +25,20 @@
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
 
+#include <android-base/macros.h>
 #include <androidfw/AssetManager.h>
 #include <algorithm>
-#include <map>
 #include <memory>
 #include <vector>
 
 namespace aapt {
 
-struct ISymbolTable {
-    virtual ~ISymbolTable() = default;
-
-    struct Symbol {
-        ResourceId id;
-        std::unique_ptr<Attribute> attribute;
-        bool isPublic;
-    };
-
-    /**
-     * Never hold on to the result between calls to findByName or findById. The results
-     * are typically stored in a cache which may evict entries.
-     */
-    virtual const Symbol* findByName(const ResourceName& name) = 0;
-    virtual const Symbol* findById(ResourceId id) = 0;
-};
-
 inline android::hash_t hash_type(const ResourceName& name) {
     std::hash<std::u16string> strHash;
     android::hash_t hash = 0;
-    hash = android::JenkinsHashMix(hash, strHash(name.package));
+    hash = android::JenkinsHashMix(hash, (uint32_t) strHash(name.package));
     hash = android::JenkinsHashMix(hash, (uint32_t) name.type);
-    hash = android::JenkinsHashMix(hash, strHash(name.entry));
+    hash = android::JenkinsHashMix(hash, (uint32_t) strHash(name.entry));
     return hash;
 }
 
@@ -63,88 +46,87 @@ inline android::hash_t hash_type(const ResourceId& id) {
     return android::hash_type(id.id);
 }
 
-/**
- * Presents a ResourceTable as an ISymbolTable, caching results.
- * Instances of this class must outlive the encompassed ResourceTable.
- * Since symbols are cached, the ResourceTable should not change during the
- * lifetime of this SymbolTableWrapper.
- *
- * If a resource in the ResourceTable does not have a ResourceID assigned to it,
- * it is ignored.
- *
- * Lookups by ID are ignored.
- */
-class SymbolTableWrapper : public ISymbolTable {
+class ISymbolSource;
+
+class SymbolTable {
+public:
+    struct Symbol {
+        Maybe<ResourceId> id;
+        std::unique_ptr<Attribute> attribute;
+        bool isPublic;
+    };
+
+    SymbolTable() : mCache(200), mIdCache(200) {
+    }
+
+    void appendSource(std::unique_ptr<ISymbolSource> source);
+    void prependSource(std::unique_ptr<ISymbolSource> source);
+
+    /**
+     * Never hold on to the result between calls to findByName or findById. The results
+     * are typically stored in a cache which may evict entries.
+     */
+    const Symbol* findByName(const ResourceName& name);
+    const Symbol* findById(ResourceId id);
+
 private:
-    ResourceTable* mTable;
+    std::vector<std::unique_ptr<ISymbolSource>> mSources;
 
     // We use shared_ptr because unique_ptr is not supported and
     // we need automatic deletion.
     android::LruCache<ResourceName, std::shared_ptr<Symbol>> mCache;
+    android::LruCache<ResourceId, std::shared_ptr<Symbol>> mIdCache;
 
+    DISALLOW_COPY_AND_ASSIGN(SymbolTable);
+};
+
+/**
+ * An interface that a symbol source implements in order to surface symbol information
+ * to the symbol table.
+ */
+class ISymbolSource {
 public:
-    SymbolTableWrapper(ResourceTable* table) : mTable(table), mCache(200) {
+    virtual ~ISymbolSource() = default;
+
+    virtual std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) = 0;
+    virtual std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) = 0;
+};
+
+/**
+ * Exposes the resources in a ResourceTable as symbols for SymbolTable.
+ * Instances of this class must outlive the encompassed ResourceTable.
+ * Lookups by ID are ignored.
+ */
+class ResourceTableSymbolSource : public ISymbolSource {
+public:
+    explicit ResourceTableSymbolSource(ResourceTable* table) : mTable(table) {
     }
 
-    const Symbol* findByName(const ResourceName& name) override;
+    std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) override;
 
-    // Unsupported, all queries to ResourceTable should be done by name.
-    const Symbol* findById(ResourceId id) override {
+    std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override {
         return {};
     }
+
+private:
+    ResourceTable* mTable;
+
+    DISALLOW_COPY_AND_ASSIGN(ResourceTableSymbolSource);
 };
 
-class AssetManagerSymbolTableBuilder {
-private:
-    struct AssetManagerSymbolTable : public ISymbolTable {
-        std::vector<std::unique_ptr<android::AssetManager>> mAssets;
-
-        // We use shared_ptr because unique_ptr is not supported and
-        // we need automatic deletion.
-        android::LruCache<ResourceName, std::shared_ptr<Symbol>> mCache;
-        android::LruCache<ResourceId, std::shared_ptr<Symbol>> mIdCache;
-
-        AssetManagerSymbolTable() : mCache(200), mIdCache(200) {
-        }
-
-        const Symbol* findByName(const ResourceName& name) override;
-        const Symbol* findById(ResourceId id) override;
-    };
-
-    std::unique_ptr<AssetManagerSymbolTable> mSymbolTable =
-            util::make_unique<AssetManagerSymbolTable>();
-
+class AssetManagerSymbolSource : public ISymbolSource {
 public:
-    AssetManagerSymbolTableBuilder& add(std::unique_ptr<android::AssetManager> assetManager) {
-        mSymbolTable->mAssets.push_back(std::move(assetManager));
-        return *this;
-    }
+    AssetManagerSymbolSource() = default;
 
-    std::unique_ptr<ISymbolTable> build() {
-        return std::move(mSymbolTable);
-    }
-};
+    bool addAssetPath(const StringPiece& path);
 
-class JoinedSymbolTableBuilder {
+    std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) override;
+    std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override;
+
 private:
-    struct JoinedSymbolTable : public ISymbolTable {
-        std::vector<std::unique_ptr<ISymbolTable>> mSymbolTables;
+    android::AssetManager mAssets;
 
-        const Symbol* findByName(const ResourceName& name) override;
-        const Symbol* findById(ResourceId id) override;
-    };
-
-    std::unique_ptr<JoinedSymbolTable> mSymbolTable = util::make_unique<JoinedSymbolTable>();
-
-public:
-    JoinedSymbolTableBuilder& addSymbolTable(std::unique_ptr<ISymbolTable> table) {
-        mSymbolTable->mSymbolTables.push_back(std::move(table));
-        return *this;
-    }
-
-    std::unique_ptr<ISymbolTable> build() {
-        return std::move(mSymbolTable);
-    }
+    DISALLOW_COPY_AND_ASSIGN(AssetManagerSymbolSource);
 };
 
 } // namespace aapt

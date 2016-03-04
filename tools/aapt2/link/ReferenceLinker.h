@@ -38,36 +38,36 @@ struct ReferenceLinker : public IResourceTableConsumer {
     /**
      * Returns true if the symbol is visible by the reference and from the callsite.
      */
-    static bool isSymbolVisible(const ISymbolTable::Symbol& symbol, const Reference& ref,
+    static bool isSymbolVisible(const SymbolTable::Symbol& symbol, const Reference& ref,
                                 const CallSite& callSite);
 
     /**
      * Performs name mangling and looks up the resource in the symbol table. Returns nullptr
      * if the symbol was not found.
      */
-    static const ISymbolTable::Symbol* resolveSymbol(const Reference& reference,
-                                                     NameMangler* mangler, ISymbolTable* symbols);
+    static const SymbolTable::Symbol* resolveSymbol(const Reference& reference,
+                                                    NameMangler* mangler, SymbolTable* symbols);
 
     /**
      * Performs name mangling and looks up the resource in the symbol table. If the symbol is
      * not visible by the reference at the callsite, nullptr is returned. outError holds
      * the error message.
      */
-    static const ISymbolTable::Symbol* resolveSymbolCheckVisibility(const Reference& reference,
-                                                                    NameMangler* nameMangler,
-                                                                    ISymbolTable* symbols,
-                                                                    CallSite* callSite,
-                                                                    std::string* outError);
+    static const SymbolTable::Symbol* resolveSymbolCheckVisibility(const Reference& reference,
+                                                                   NameMangler* nameMangler,
+                                                                   SymbolTable* symbols,
+                                                                   CallSite* callSite,
+                                                                   std::string* outError);
 
     /**
      * Same as resolveSymbolCheckVisibility(), but also makes sure the symbol is an attribute.
      * That is, the return value will have a non-null value for ISymbolTable::Symbol::attribute.
      */
-    static const ISymbolTable::Symbol* resolveAttributeCheckVisibility(const Reference& reference,
-                                                                       NameMangler* nameMangler,
-                                                                       ISymbolTable* symbols,
-                                                                       CallSite* callSite,
-                                                                       std::string* outError);
+    static const SymbolTable::Symbol* resolveAttributeCheckVisibility(const Reference& reference,
+                                                                      NameMangler* nameMangler,
+                                                                      SymbolTable* symbols,
+                                                                      CallSite* callSite,
+                                                                      std::string* outError);
 
     /**
      * Resolves the attribute reference and returns an xml::AaptAttribute if successful.
@@ -75,7 +75,7 @@ struct ReferenceLinker : public IResourceTableConsumer {
      */
     static Maybe<xml::AaptAttribute> compileXmlAttribute(const Reference& reference,
                                                          NameMangler* nameMangler,
-                                                         ISymbolTable* symbols,
+                                                         SymbolTable* symbols,
                                                          CallSite* callSite,
                                                          std::string* outError);
 
@@ -92,7 +92,7 @@ struct ReferenceLinker : public IResourceTableConsumer {
      * to the reference at the callsite, the reference is updated with an ID.
      * Returns false on failure, and an error message is logged to the IDiagnostics in the context.
      */
-    static bool linkReference(Reference* reference, IAaptContext* context, ISymbolTable* symbols,
+    static bool linkReference(Reference* reference, IAaptContext* context, SymbolTable* symbols,
                               xml::IPackageDeclStack* decls, CallSite* callSite);
 
     /**
