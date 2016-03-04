@@ -75,6 +75,36 @@ public class ApkSignatureSchemeV2Verifier {
     public static final int SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID = 2;
 
     /**
+     * Returns {@code true} if the provided APK contains an APK Signature Scheme V2
+     * signature. The signature will not be verified.
+     */
+    public static boolean hasSignature(String apkFile) throws IOException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
+            long fileSize = apk.length();
+            if (fileSize > Integer.MAX_VALUE) {
+                return false;
+            }
+            MappedByteBuffer apkContents =
+                    apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
+            // ZipUtils and APK Signature Scheme v2 verifier expect little-endian byte order.
+            apkContents.order(ByteOrder.LITTLE_ENDIAN);
+
+            final int centralDirOffset =
+                    (int) getCentralDirOffset(apkContents, getEocdOffset(apkContents));
+            // Find the APK Signing Block.
+            int apkSigningBlockOffset = findApkSigningBlock(apkContents, centralDirOffset);
+            ByteBuffer apkSigningBlock =
+                    sliceFromTo(apkContents, apkSigningBlockOffset, centralDirOffset);
+
+            // Find the APK Signature Scheme v2 Block inside the APK Signing Block.
+            findApkSignatureSchemeV2Block(apkSigningBlock);
+            return true;
+        } catch (SignatureNotFoundException e) {
+        }
+        return false;
+    }
+
+    /**
      * Verifies APK Signature Scheme v2 signatures of the provided APK and returns the certificates
      * associated with each signer.
      *
@@ -130,31 +160,8 @@ public class ApkSignatureSchemeV2Verifier {
         // ZipUtils and APK Signature Scheme v2 verifier expect little-endian byte order.
         apkContents.order(ByteOrder.LITTLE_ENDIAN);
 
-        // Find the offset of ZIP End of Central Directory (EoCD)
-        int eocdOffset = ZipUtils.findZipEndOfCentralDirectoryRecord(apkContents);
-        if (eocdOffset == -1) {
-            throw new SignatureNotFoundException(
-                    "Not an APK file: ZIP End of Central Directory record not found");
-        }
-        if (ZipUtils.isZip64EndOfCentralDirectoryLocatorPresent(apkContents, eocdOffset)) {
-            throw new SignatureNotFoundException("ZIP64 APK not supported");
-        }
-        ByteBuffer eocd = sliceFromTo(apkContents, eocdOffset, apkContents.capacity());
-
-        // Look up the offset of ZIP Central Directory.
-        long centralDirOffsetLong = ZipUtils.getZipEocdCentralDirectoryOffset(eocd);
-        if (centralDirOffsetLong >= eocdOffset) {
-            throw new SignatureNotFoundException(
-                    "ZIP Central Directory offset out of range: " + centralDirOffsetLong
-                    + ". ZIP End of Central Directory offset: " + eocdOffset);
-        }
-        long centralDirSizeLong = ZipUtils.getZipEocdCentralDirectorySizeBytes(eocd);
-        if (centralDirOffsetLong + centralDirSizeLong != eocdOffset) {
-            throw new SignatureNotFoundException(
-                    "ZIP Central Directory is not immediately followed by End of Central"
-                    + " Directory");
-        }
-        int centralDirOffset = (int) centralDirOffsetLong;
+        final int eocdOffset = getEocdOffset(apkContents);
+        final int centralDirOffset = (int) getCentralDirOffset(apkContents, eocdOffset);
 
         // Find the APK Signing Block.
         int apkSigningBlockOffset = findApkSigningBlock(apkContents, centralDirOffset);
@@ -497,6 +504,43 @@ public class ApkSignatureSchemeV2Verifier {
             result.put(digestAlgorithm, output);
         }
         return result;
+    }
+
+    /**
+     * Finds the offset of ZIP End of Central Directory (EoCD).
+     *
+     * @throws SignatureNotFoundException If the EoCD could not be found
+     */
+    private static int getEocdOffset(ByteBuffer apkContents) throws SignatureNotFoundException {
+        int eocdOffset = ZipUtils.findZipEndOfCentralDirectoryRecord(apkContents);
+        if (eocdOffset == -1) {
+            throw new SignatureNotFoundException(
+                    "Not an APK file: ZIP End of Central Directory record not found");
+        }
+        return eocdOffset;
+    }
+
+    private static long getCentralDirOffset(ByteBuffer apkContents, int eocdOffset)
+            throws SignatureNotFoundException {
+        if (ZipUtils.isZip64EndOfCentralDirectoryLocatorPresent(apkContents, eocdOffset)) {
+            throw new SignatureNotFoundException("ZIP64 APK not supported");
+        }
+        ByteBuffer eocd = sliceFromTo(apkContents, eocdOffset, apkContents.capacity());
+
+        // Look up the offset of ZIP Central Directory.
+        long centralDirOffsetLong = ZipUtils.getZipEocdCentralDirectoryOffset(eocd);
+        if (centralDirOffsetLong >= eocdOffset) {
+            throw new SignatureNotFoundException(
+                    "ZIP Central Directory offset out of range: " + centralDirOffsetLong
+                    + ". ZIP End of Central Directory offset: " + eocdOffset);
+        }
+        long centralDirSizeLong = ZipUtils.getZipEocdCentralDirectorySizeBytes(eocd);
+        if (centralDirOffsetLong + centralDirSizeLong != eocdOffset) {
+            throw new SignatureNotFoundException(
+                    "ZIP Central Directory is not immediately followed by End of Central"
+                    + " Directory");
+        }
+        return centralDirOffsetLong;
     }
 
     private static final int getChunkCount(int inputSizeBytes) {
