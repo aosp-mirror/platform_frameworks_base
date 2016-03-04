@@ -478,7 +478,6 @@ public final class DocumentsContract {
         /**
          * Capacity of a root in bytes. This column is optional, and may be
          * {@code null} if unknown or unbounded.
-         * {@hide}
          * <p>
          * Type: INTEGER (long)
          */
