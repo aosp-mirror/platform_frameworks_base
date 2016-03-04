@@ -108,7 +108,7 @@ public class AnimatorInflater {
             float pathErrorScale) throws NotFoundException {
         final ConfigurationBoundResourceCache<Animator> animatorCache = resources
                 .getAnimatorCache();
-        Animator animator = animatorCache.getInstance(id, theme);
+        Animator animator = animatorCache.getInstance(id, resources, theme);
         if (animator != null) {
             if (DBG_ANIMATOR_INFLATER) {
                 Log.d(TAG, "loaded animator from cache, " + resources.getResourceName(id));
@@ -157,7 +157,7 @@ public class AnimatorInflater {
         final ConfigurationBoundResourceCache<StateListAnimator> cache = resources
                 .getStateListAnimatorCache();
         final Theme theme = context.getTheme();
-        StateListAnimator animator = cache.getInstance(id, theme);
+        StateListAnimator animator = cache.getInstance(id, resources, theme);
         if (animator != null) {
             return animator;
         }
