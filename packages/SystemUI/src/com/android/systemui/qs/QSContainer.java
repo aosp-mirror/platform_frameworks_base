@@ -156,6 +156,7 @@ public class QSContainer extends FrameLayout {
     public void setKeyguardShowing(boolean keyguardShowing) {
         if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
         mKeyguardShowing = keyguardShowing;
+        mQSAnimator.setOnKeyguard(keyguardShowing);
         updateQsState();
     }
 
