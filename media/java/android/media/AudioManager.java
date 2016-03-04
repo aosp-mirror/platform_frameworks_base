@@ -2147,9 +2147,10 @@ public class AudioManager {
                                 }
                                 break;
                             case MSSG_RECORDING_CONFIG_CHANGE:
-                                final AudioRecordingCallback cb = (AudioRecordingCallback) msg.obj;
-                                if (cb != null) {
-                                    cb.onRecordConfigChanged();
+                                final RecordConfigChangeCallbackData cbData =
+                                        (RecordConfigChangeCallbackData) msg.obj;
+                                if (cbData.mCb != null) {
+                                    cbData.mCb.onRecordConfigChanged(cbData.mConfigs);
                                 }
                                 break;
                             default:
@@ -2734,8 +2735,10 @@ public class AudioManager {
     public static abstract class AudioRecordingCallback {
         /**
          * Called whenever the device recording configuration has changed.
+         * @param configs array containing the results of
+         *      {@link AudioManager#getActiveRecordConfigurations()}.
          */
-        public void onRecordConfigChanged() {}
+        public void onRecordConfigChanged(AudioRecordConfiguration[] configs) {}
     }
 
     private static class AudioRecordingCallbackInfo {
@@ -2744,6 +2747,17 @@ public class AudioManager {
         AudioRecordingCallbackInfo(AudioRecordingCallback cb, Handler handler) {
             mCb = cb;
             mHandler = handler;
+        }
+    }
+
+    private final static class RecordConfigChangeCallbackData {
+        final AudioRecordingCallback mCb;
+        final AudioRecordConfiguration[] mConfigs;
+
+        RecordConfigChangeCallbackData(AudioRecordingCallback cb,
+                AudioRecordConfiguration[] configs) {
+            mCb = cb;
+            mConfigs = configs;
         }
     }
 
@@ -2882,14 +2896,15 @@ public class AudioManager {
 
     private final IRecordingConfigDispatcher mRecCb = new IRecordingConfigDispatcher.Stub() {
 
-        public void dispatchRecordingConfigChange() {
+        public void dispatchRecordingConfigChange(AudioRecordConfiguration[] configs) {
             synchronized(mRecordCallbackLock) {
                 if (mRecordCallbackList != null) {
                     for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
                         final AudioRecordingCallbackInfo arci = mRecordCallbackList.get(i);
                         if (arci.mHandler != null) {
                             final Message m = arci.mHandler.obtainMessage(
-                                    MSSG_RECORDING_CONFIG_CHANGE/*what*/, arci.mCb/*obj*/);
+                                    MSSG_RECORDING_CONFIG_CHANGE/*what*/,
+                                    new RecordConfigChangeCallbackData(arci.mCb, configs)/*obj*/);
                             arci.mHandler.sendMessage(m);
                         }
                     }

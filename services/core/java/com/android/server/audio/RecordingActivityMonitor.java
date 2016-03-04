@@ -54,12 +54,15 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             return;
         }
-        if (updateSnapshot(event, session, source, recordingInfo)) {
-            final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
+        final AudioRecordConfiguration[] configs =
+                updateSnapshot(event, session, source, recordingInfo);
+        if (configs != null){
             synchronized(mClients) {
+                final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
                 while (clientIterator.hasNext()) {
                     try {
-                        clientIterator.next().mDispatcherCb.dispatchRecordingConfigChange();
+                        clientIterator.next().mDispatcherCb.dispatchRecordingConfigChange(
+                                configs);
                     } catch (RemoteException e) {
                         Log.w(TAG, "Could not call dispatchRecordingConfigChange() on client", e);
                     }
@@ -115,14 +118,19 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * @param recordingFormat see
      *     {@link AudioSystem.AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])}
      *     for the definition of the contents of the array
-     * @return true if the list of active recording sessions has been modified, false otherwise.
+     * @return null if the list of active recording sessions has not been modified, an array
+     *     with the current active configurations otherwise.
      */
-    private boolean updateSnapshot(int event, int session, int source, int[] recordingInfo) {
+    private AudioRecordConfiguration[] updateSnapshot(int event, int session, int source,
+            int[] recordingInfo) {
+        final boolean configChanged;
+        final AudioRecordConfiguration[] configs;
         synchronized(mRecordConfigs) {
             switch (event) {
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
                 // return failure if an unknown recording session stopped
-                return (mRecordConfigs.remove(new Integer(session)) != null);
+                configChanged = (mRecordConfigs.remove(new Integer(session)) != null);
+                break;
             case AudioManager.RECORD_CONFIG_EVENT_START:
                 final AudioFormat clientFormat = new AudioFormat.Builder()
                         .setEncoding(recordingInfo[0])
@@ -143,25 +151,32 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                             new AudioRecordConfiguration(session, source,
                                     clientFormat, deviceFormat, patchHandle);
                     if (updatedConfig.equals(mRecordConfigs.get(sessionKey))) {
-                        return false;
+                        configChanged = false;
                     } else {
                         // config exists but has been modified
                         mRecordConfigs.remove(sessionKey);
                         mRecordConfigs.put(sessionKey, updatedConfig);
-                        return true;
+                        configChanged = true;
                     }
                 } else {
                     mRecordConfigs.put(sessionKey,
                             new AudioRecordConfiguration(session, source,
                                     clientFormat, deviceFormat, patchHandle));
-                    return true;
+                    configChanged = true;
                 }
+                break;
             default:
                 Log.e(TAG, String.format("Unknown event %d for session %d, source %d",
                         event, session, source));
-                return false;
+                configChanged = false;
+            }
+            if (configChanged) {
+                configs = mRecordConfigs.values().toArray(new AudioRecordConfiguration[0]);
+            } else {
+                configs = null;
             }
         }
+        return configs;
     }
 
     /**
