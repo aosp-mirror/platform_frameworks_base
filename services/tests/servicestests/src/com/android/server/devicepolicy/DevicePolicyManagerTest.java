@@ -969,6 +969,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
 
+        when(mContext.userManagerForMock.isSplitSystemUser()).thenReturn(true);
+
         // Make sure the admin packge is installed to each user.
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         setUpPackageManagerForAdmin(admin3, DpmMockContext.CALLER_SYSTEM_USER_UID);
@@ -1008,6 +1010,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      * finds the right component from a package name upon migration.
      */
     public void testDeviceOwnerMigration() throws Exception {
+        when(mContext.userManagerForMock.isSplitSystemUser()).thenReturn(true);
         checkDeviceOwnerWithMultipleDeviceAdmins();
 
         // Overwrite the device owner setting and clears the clas name.
