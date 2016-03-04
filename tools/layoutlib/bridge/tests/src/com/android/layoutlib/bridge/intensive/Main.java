@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
+import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.ide.common.resources.FrameworkResources;
 import com.android.ide.common.resources.ResourceItem;
 import com.android.ide.common.resources.ResourceRepository;
@@ -48,9 +49,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -398,6 +401,40 @@ public class Main {
         renderAndVerify(params, "vector_drawable.png", TimeUnit.SECONDS.toNanos(2));
     }
 
+    /** Test activity.xml */
+    @Test
+    public void testScrolling() throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "scrolled.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+        params.setForceNoDecor();
+        params.setExtendedViewInfoMode(true);
+
+        RenderResult result = renderAndVerify(params, "scrolled.png");
+        assertNotNull(result);
+        assertTrue(result.getResult().isSuccess());
+
+        ViewInfo rootLayout = result.getRootViews().get(0);
+        // Check the first box in the main LinearLayout
+        assertEquals(-90, rootLayout.getChildren().get(0).getTop());
+        assertEquals(-30, rootLayout.getChildren().get(0).getLeft());
+        assertEquals(90, rootLayout.getChildren().get(0).getBottom());
+        assertEquals(150, rootLayout.getChildren().get(0).getRight());
+
+        // Check the first box within the nested LinearLayout
+        assertEquals(-450, rootLayout.getChildren().get(5).getChildren().get(0).getTop());
+        assertEquals(90, rootLayout.getChildren().get(5).getChildren().get(0).getLeft());
+        assertEquals(-270, rootLayout.getChildren().get(5).getChildren().get(0).getBottom());
+        assertEquals(690, rootLayout.getChildren().get(5).getChildren().get(0).getRight());
+    }
+
     /**
      * Create a new rendering session and test that rendering the given layout doesn't throw any
      * exceptions and matches the provided image.
@@ -405,7 +442,8 @@ public class Main {
      * If frameTimeNanos is >= 0 a frame will be executed during the rendering. The time indicates
      * how far in the future is.
      */
-    private void renderAndVerify(SessionParams params, String goldenFileName, long frameTimeNanos)
+    @Nullable
+    private RenderResult renderAndVerify(SessionParams params, String goldenFileName, long frameTimeNanos)
             throws ClassNotFoundException {
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
@@ -428,36 +466,43 @@ public class Main {
         try {
             String goldenImagePath = APP_TEST_DIR + "/golden/" + goldenFileName;
             ImageUtils.requireSimilar(goldenImagePath, session.getImage());
+
+            return RenderResult.getFromSession(session);
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
         } finally {
             session.dispose();
         }
+
+        return null;
     }
 
     /**
      * Create a new rendering session and test that rendering the given layout doesn't throw any
      * exceptions and matches the provided image.
      */
-    private void renderAndVerify(SessionParams params, String goldenFileName)
+    @Nullable
+    private RenderResult renderAndVerify(SessionParams params, String goldenFileName)
             throws ClassNotFoundException {
-        renderAndVerify(params, goldenFileName, -1);
+        return renderAndVerify(params, goldenFileName, -1);
     }
 
     /**
      * Create a new rendering session and test that rendering the given layout on nexus 5
      * doesn't throw any exceptions and matches the provided image.
      */
-    private void renderAndVerify(String layoutFileName, String goldenFileName)
+    @Nullable
+    private RenderResult renderAndVerify(String layoutFileName, String goldenFileName)
             throws ClassNotFoundException {
-        renderAndVerify(layoutFileName, goldenFileName, ConfigGenerator.NEXUS_5);
+        return renderAndVerify(layoutFileName, goldenFileName, ConfigGenerator.NEXUS_5);
     }
 
     /**
      * Create a new rendering session and test that rendering the given layout on given device
      * doesn't throw any exceptions and matches the provided image.
      */
-    private void renderAndVerify(String layoutFileName, String goldenFileName,
+    @Nullable
+    private RenderResult renderAndVerify(String layoutFileName, String goldenFileName,
             ConfigGenerator deviceConfig)
             throws ClassNotFoundException {
         // Create the layout pull parser.
@@ -469,7 +514,7 @@ public class Main {
         // Create session params.
         SessionParams params = getSessionParams(parser, deviceConfig,
                 layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
-        renderAndVerify(params, goldenFileName);
+        return renderAndVerify(params, goldenFileName);
     }
 
     /**

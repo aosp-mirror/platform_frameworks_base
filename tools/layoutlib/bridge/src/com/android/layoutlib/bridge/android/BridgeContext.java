@@ -127,7 +127,8 @@ public final class BridgeContext extends Context {
     private final LayoutlibCallback mLayoutlibCallback;
     private final WindowManager mWindowManager;
     private final DisplayManager mDisplayManager;
-    private final HashMap<View, Integer> mScrollYPos = new HashMap<View, Integer>();
+    private final HashMap<View, Integer> mScrollYPos = new HashMap<>();
+    private final HashMap<View, Integer> mScrollXPos = new HashMap<>();
 
     private Resources.Theme mTheme;
 
@@ -1834,6 +1835,15 @@ public final class BridgeContext extends Context {
 
     public int getScrollYPos(@NonNull View view) {
         Integer pos = mScrollYPos.get(view);
+        return pos != null ? pos : 0;
+    }
+
+    public void setScrollXPos(@NonNull View view, int scrollPos) {
+        mScrollXPos.put(view, scrollPos);
+    }
+
+    public int getScrollXPos(@NonNull View view) {
+        Integer pos = mScrollXPos.get(view);
         return pos != null ? pos : 0;
     }
 
