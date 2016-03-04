@@ -212,6 +212,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void onScreenTurnedOff() {
         mScreenTurnedOn = false;
+        mPhoneStatusBar.onScreenTurnedOff();
     }
 
     public void notifyDeviceWakeUpRequested() {

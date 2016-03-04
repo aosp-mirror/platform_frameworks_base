@@ -25,6 +25,11 @@ public class DurationCountClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "DUR";
+    }
+
+    @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         return DurationCountEvaluator.evaluate(stroke.getDurationSeconds() / stroke.getCount());
     }
