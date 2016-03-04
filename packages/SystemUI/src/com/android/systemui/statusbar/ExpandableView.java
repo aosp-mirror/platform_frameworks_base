@@ -36,7 +36,6 @@ public abstract class ExpandableView extends FrameLayout {
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
-    private boolean mActualHeightInitialized;
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private int mClipTopOptimization;
@@ -99,26 +98,7 @@ public abstract class ExpandableView extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (!mActualHeightInitialized && mActualHeight == 0) {
-            int initialHeight = getInitialHeight();
-            if (initialHeight != 0) {
-                setActualHeight(initialHeight);
-            }
-        }
         updateClipping();
-    }
-
-    /**
-     * Resets the height of the view on the next layout pass
-     */
-    protected void resetActualHeight() {
-        mActualHeight = 0;
-        mActualHeightInitialized = false;
-        requestLayout();
-    }
-
-    protected int getInitialHeight() {
-        return getHeight();
     }
 
     @Override
@@ -137,7 +117,6 @@ public abstract class ExpandableView extends FrameLayout {
      * @param notifyListeners Whether the listener should be informed about the change.
      */
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
-        mActualHeightInitialized = true;
         mActualHeight = actualHeight;
         updateClipping();
         if (notifyListeners) {
