@@ -24,16 +24,6 @@
     android:orientation="horizontal"
     android:baselineAligned="false">
 
-    <ImageView
-        android:id="@+id/subdir"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:paddingEnd="8dp"
-        android:scaleType="centerInside"
-        android:visibility="gone"
-        android:src="@drawable/ic_subdirectory_arrow"
-        android:contentDescription="@null" />
-
     <TextView
         android:id="@android:id/title"
         android:layout_width="0dp"
