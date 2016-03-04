@@ -2917,20 +2917,18 @@
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">Touch to disable USB debugging.</string>
 
+    <!-- Title of notification shown to indicate that bug report is being collected. -->
+    <string name="taking_remote_bugreport_notification_title">Taking bug report\u2026</string>
     <!-- Title of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
     <string name="share_remote_bugreport_notification_title">Share bug report?</string>
     <!-- Title of notification shown to indicate that bug report is still being collected after sharing was accepted. -->
     <string name="sharing_remote_bugreport_notification_title">Sharing bug report\u2026</string>
-    <!-- Message of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
-    <string name="share_remote_bugreport_notification_message">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared and your device may temporarily slow down.</string>
-    <!-- Message of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
-    <string name="share_finished_remote_bugreport_notification_message">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared.</string>
-    <!-- Message of notification shown to shown to indicate that bug report is still being collected after sharing was accepted. -->
-    <string name="sharing_remote_bugreport_notification_message">This may temporarily slow down your device</string>
+    <!-- Message of a notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
+    <string name="share_remote_bugreport_notification_message_finished">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared.</string>
     <!-- Acceptance label of notification shown to ask for user consent for sharing the remote bugreport. -->
-    <string name="share_remote_bugreport_notification_accept">ACCEPT</string>
+    <string name="share_remote_bugreport_action">SHARE</string>
     <!-- Decline label of notification shown to ask for user consent for sharing the remote bugreport. -->
-    <string name="share_remote_bugreport_notification_decline">DECLINE</string>
+    <string name="decline_remote_bugreport_action">DECLINE</string>
 
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
