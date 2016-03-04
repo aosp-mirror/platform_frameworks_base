@@ -8170,6 +8170,8 @@ i
              Defined in same coordinates as the path itself -->
         <attr name="endY" format="float" />
 
+        <!-- Defines the tile mode of the gradient. SweepGradient don't support tiling. -->
+        <attr name="tileMode"/>
     </declare-styleable>
 
     <!-- Describes an item of a GradientColor. Minimally need 2 items to define the gradient
