@@ -1206,8 +1206,8 @@ public class TypedArray {
 
     /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {
         mResources = resources;
-        mMetrics = mResources.mMetrics;
-        mAssets = mResources.mAssets;
+        mMetrics = mResources.getDisplayMetrics();
+        mAssets = mResources.getAssets();
         mData = data;
         mIndices = indices;
         mLength = len;

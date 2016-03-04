@@ -38,7 +38,7 @@ public class ConfigurationBoundResourceCacheTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mCache = new ConfigurationBoundResourceCache<Float>(getActivity().getResources());
+        mCache = new ConfigurationBoundResourceCache<>();
     }
 
     public void testGetEmpty() {
