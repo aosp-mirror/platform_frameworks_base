@@ -69,7 +69,6 @@ public class RecentsConfiguration {
     public final int smallestWidth;
 
     /** Misc **/
-    public boolean useHardwareLayers;
     public boolean fakeShadows;
     public int svelteLevel;
     public int searchBarSpaceHeightPx;
@@ -80,7 +79,6 @@ public class RecentsConfiguration {
         SystemServicesProxy ssp = Recents.getSystemServices();
         Context appContext = context.getApplicationContext();
         Resources res = appContext.getResources();
-        useHardwareLayers = res.getBoolean(R.bool.config_recents_use_hardware_layers);
         fakeShadows = res.getBoolean(R.bool.config_recents_fake_shadows);
         svelteLevel = res.getInteger(R.integer.recents_svelte_level);
 

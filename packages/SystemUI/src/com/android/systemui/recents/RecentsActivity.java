@@ -43,6 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
+import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
@@ -107,7 +108,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private RecentsAppWidgetHostView mSearchWidgetHostView;
 
     // Runnables to finish the Recents activity
-    private FinishRecentsRunnable mFinishLaunchHomeRunnable;
+    private Intent mHomeIntent;
 
     // The trigger to automatically launch the current task
     private int mFocusTimerDuration;
@@ -119,7 +120,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * last activity launch state. Generally we always launch home when we exit Recents rather than
      * just finishing the activity since we don't know what is behind Recents in the task stack.
      */
-    class FinishRecentsRunnable implements Runnable {
+    class LaunchHomeRunnable implements Runnable {
 
         Intent mLaunchIntent;
         ActivityOptions mOpts;
@@ -127,7 +128,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         /**
          * Creates a finish runnable that starts the specified intent.
          */
-        public FinishRecentsRunnable(Intent launchIntent, ActivityOptions opts) {
+        public LaunchHomeRunnable(Intent launchIntent, ActivityOptions opts) {
             mLaunchIntent = launchIntent;
             mOpts = opts;
         }
@@ -215,7 +216,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             MetricsLogger.count(this, "overview_trigger_nav_btn", 1);
         }
         // Keep track of whether we launched from an app or from home
-        if (launchState.launchedFromAppWithThumbnail) {
+        if (launchState.launchedFromApp) {
             MetricsLogger.count(this, "overview_source_app", 1);
             // If from an app, track the stack index of the app in the stack (for affiliated tasks)
             MetricsLogger.histogram(this, "overview_source_app_index", launchTaskIndexInStack);
@@ -294,12 +295,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     void dismissRecentsToHome(boolean animateTaskViews, ActivityOptions overrideAnimation) {
         DismissRecentsToHomeAnimationStarted dismissEvent =
                 new DismissRecentsToHomeAnimationStarted(animateTaskViews);
-        if (overrideAnimation != null) {
-            dismissEvent.addPostAnimationCallback(new FinishRecentsRunnable(
-                    mFinishLaunchHomeRunnable.mLaunchIntent, overrideAnimation));
-        } else {
-            dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
-        }
+        dismissEvent.addPostAnimationCallback(new LaunchHomeRunnable(mHomeIntent,
+                overrideAnimation));
         dismissEvent.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
@@ -365,11 +362,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         });
 
         // Create the home intent runnable
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+        mHomeIntent = new Intent(Intent.ACTION_MAIN, null);
+        mHomeIntent.addCategory(Intent.CATEGORY_HOME);
+        mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent, null);
 
         // Bind the search app widget when we first start up
         if (RecentsDebugFlags.Static.EnableSearchBar) {
@@ -404,7 +400,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
-                !launchState.launchedFromAppWithThumbnail;
+                !launchState.launchedFromApp;
         if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
             EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
         }
@@ -528,6 +524,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public void onMultiWindowChanged(boolean inMultiWindow) {
         super.onMultiWindowChanged(inMultiWindow);
+        EventBus.getDefault().send(new ConfigurationChangedEvent());
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.loadIcons = false;

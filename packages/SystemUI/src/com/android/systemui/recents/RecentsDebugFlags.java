@@ -39,8 +39,8 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean EnableAffiliatedTaskGroups = true;
         // Enables the history
         public static final boolean EnableHistory = false;
-        // Overrides the Tuner flags and enables the fast toggle and timeout
-        public static final boolean EnableFastToggleTimeoutOverride = true;
+        // Overrides the Tuner flags and enables the timeout
+        private static final boolean EnableFastToggleTimeout = false;
 
         // Enables us to create mock recents tasks
         public static final boolean EnableMockTasks = false;
@@ -54,9 +54,9 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final int MockTaskGroupsTaskCount = 12;
     }
 
-    private static final String KEY_DISABLE_FAST_TOGGLE = "overview_disable_fast_toggle_via_button";
+    private static final String KEY_ENABLE_PAGING = "overview_enable_paging";
 
-    private boolean mDisableFastToggleRecents;
+    private boolean mEnablePaging;
 
     /**
      * We read the prefs once when we start the activity, then update them as the tuner changes
@@ -65,31 +65,32 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public RecentsDebugFlags(Context context) {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
-        TunerService.get(context).addTunable(this, KEY_DISABLE_FAST_TOGGLE);
+        TunerService.get(context).addTunable(this, KEY_ENABLE_PAGING);
     }
 
     /**
      * @return whether we are enabling fast toggling.
      */
     public boolean isFastToggleRecentsEnabled() {
-        // These checks EnableFastToggleTimeoutOverride
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (mDisableFastToggleRecents || ssp.hasFreeformWorkspaceSupport() || ssp.hasDockedTask()
-                || ssp.isTouchExplorationEnabled()) {
+        if (ssp.hasFreeformWorkspaceSupport() || ssp.isTouchExplorationEnabled()) {
             return false;
         }
-        if (Static.EnableFastToggleTimeoutOverride) {
-            return true;
-        }
-        return true;
+        return Static.EnableFastToggleTimeout;
+    }
+
+    /**
+     * @return whether we are enabling paging.
+     */
+    public boolean isPagingEnabled() {
+        return mEnablePaging;
     }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
         switch (key) {
-            case KEY_DISABLE_FAST_TOGGLE:
-                mDisableFastToggleRecents = (newValue != null) &&
-                        (Integer.parseInt(newValue) != 0);
+            case KEY_ENABLE_PAGING:
+                mEnablePaging = (newValue != null) && (Integer.parseInt(newValue) != 0);
                 break;
         }
         EventBus.getDefault().send(new DebugFlagsChangedEvent());
