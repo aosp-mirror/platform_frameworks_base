@@ -227,7 +227,32 @@ TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {
 }
 
 TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
+    Attribute attr(false);
+    attr.setComment(StringPiece16(u"This is an attribute"));
 
+    Styleable styleable;
+    styleable.entries.push_back(Reference(test::parseNameOrDie(u"@android:attr/one")));
+    styleable.setComment(StringPiece16(u"This is a styleable"));
+
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addValue(u"@android:attr/one", util::make_unique<Attribute>(attr))
+            .addValue(u"@android:styleable/Container",
+                      std::unique_ptr<Styleable>(styleable.clone(nullptr)))
+            .build();
+
+    JavaClassGeneratorOptions options;
+    options.useFinal = false;
+    JavaClassGenerator generator(table.get(), options);
+
+    std::stringstream out;
+    ASSERT_TRUE(generator.generate(u"android", &out));
+    std::string actual = out.str();
+
+    EXPECT_NE(std::string::npos, actual.find("@attr name android:one"));
+    EXPECT_NE(std::string::npos, actual.find("@attr description"));
+    EXPECT_NE(std::string::npos, actual.find(util::utf16ToUtf8(attr.getComment())));
+    EXPECT_NE(std::string::npos, actual.find(util::utf16ToUtf8(styleable.getComment())));
 }
 
 } // namespace aapt
