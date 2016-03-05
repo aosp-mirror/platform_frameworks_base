@@ -1017,7 +1017,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateChildrenHeaderAppearance();
-        updateHeaderChildCount();
         updateChildrenVisibility();
     }
 
@@ -1173,13 +1172,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    public void updateHeaderChildCount() {
-        if (mIsSummaryWithChildren) {
-            mNotificationHeader.setChildCount(
-                    mChildrenContainer.getNotificationChildren().size());
-        }
-    }
-
     public static void applyTint(View v, int color) {
         int alpha;
         if (color != 0) {
@@ -1293,7 +1285,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         updateHeaderExpandButton();
         updateChildrenHeaderAppearance();
-        updateHeaderChildCount();
     }
 
     private void updateHeaderExpandButton() {

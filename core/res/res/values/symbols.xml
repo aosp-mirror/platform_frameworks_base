@@ -2405,11 +2405,9 @@
   <java-symbol type="id" name="notification_material_reply_text_2" />
   <java-symbol type="id" name="notification_material_reply_text_3" />
 
-  <java-symbol type="string" name="notification_children_count_bracketed" />
   <java-symbol type="string" name="notification_hidden_text" />
   <java-symbol type="string" name="notification_hidden_by_policy_text" />
   <java-symbol type="id" name="app_name_text" />
-  <java-symbol type="id" name="number_of_children" />
   <java-symbol type="id" name="header_sub_text" />
   <java-symbol type="id" name="expand_button" />
   <java-symbol type="id" name="notification_header" />
