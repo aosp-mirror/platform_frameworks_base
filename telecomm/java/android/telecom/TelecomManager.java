@@ -1442,7 +1442,7 @@ public class TelecomManager {
     /**
      * Creates the {@link Intent} which can be used with {@link Context#startActivity(Intent)} to
      * launch the activity to manage blocked numbers.
-     * <p> This method displays the UI to manage blocked numbers only if
+     * <p> The activity will display the UI to manage blocked numbers only if
      * {@link android.provider.BlockedNumberContract#canCurrentUserBlockNumbers(Context)} returns
      * {@code true} for the current user.
      */
