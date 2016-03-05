@@ -2496,7 +2496,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
             return mPackageManager.queryIntentReceivers(intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    flags, userId);
+                    flags, userId).getList();
         } catch (RemoteException re) {
             return Collections.emptyList();
         } finally {

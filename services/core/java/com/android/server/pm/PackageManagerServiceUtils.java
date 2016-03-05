@@ -16,13 +16,15 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
+import static com.android.server.pm.PackageManagerService.TAG;
+
 import android.app.AppGlobals;
 import android.content.Intent;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.Package;
 import android.content.pm.ResolveInfo;
-import android.os.UserHandle;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -35,9 +37,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
-import static com.android.server.pm.PackageManagerService.TAG;
-
 /**
  * Class containing helper methods for the PackageManagerService.
  *
@@ -49,7 +48,8 @@ public class PackageManagerServiceUtils {
     private static ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
         List<ResolveInfo> ris = null;
         try {
-            ris = AppGlobals.getPackageManager().queryIntentReceivers(intent, null, 0, userId);
+            ris = AppGlobals.getPackageManager().queryIntentReceivers(intent, null, 0, userId)
+                    .getList();
         } catch (RemoteException e) {
         }
         ArraySet<String> pkgNames = new ArraySet<String>();

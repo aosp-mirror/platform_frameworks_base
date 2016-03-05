@@ -714,7 +714,8 @@ final class DefaultPermissionGrantPolicy {
     private PackageParser.Package getDefaultSystemHandlerServicePackageLPr(
             Intent intent, int userId) {
         List<ResolveInfo> handlers = mService.queryIntentServices(intent,
-                intent.resolveType(mService.mContext.getContentResolver()), DEFAULT_FLAGS, userId);
+                intent.resolveType(mService.mContext.getContentResolver()), DEFAULT_FLAGS, userId)
+                .getList();
         if (handlers == null) {
             return null;
         }

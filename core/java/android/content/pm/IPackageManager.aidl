@@ -71,11 +71,11 @@ interface IPackageManager {
 
     PermissionInfo getPermissionInfo(String name, int flags);
 
-    List<PermissionInfo> queryPermissionsByGroup(String group, int flags);
+    ParceledListSlice queryPermissionsByGroup(String group, int flags);
 
     PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
 
-    List<PermissionGroupInfo> getAllPermissionGroups(int flags);
+    ParceledListSlice getAllPermissionGroups(int flags);
 
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
@@ -138,24 +138,24 @@ interface IPackageManager {
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
-    List<ResolveInfo> queryIntentActivities(in Intent intent,
+    ParceledListSlice queryIntentActivities(in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentActivityOptions(
+    ParceledListSlice queryIntentActivityOptions(
             in ComponentName caller, in Intent[] specifics,
             in String[] specificTypes, in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentReceivers(in Intent intent,
+    ParceledListSlice queryIntentReceivers(in Intent intent,
             String resolvedType, int flags, int userId);
 
     ResolveInfo resolveService(in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentServices(in Intent intent,
+    ParceledListSlice queryIntentServices(in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentContentProviders(in Intent intent,
+    ParceledListSlice queryIntentContentProviders(in Intent intent,
             String resolvedType, int flags, int userId);
 
     /**
@@ -189,7 +189,7 @@ interface IPackageManager {
      * @return A List&lt;applicationInfo> containing one entry for each persistent
      *         application.
      */
-    List<ApplicationInfo> getPersistentApplications(int flags);
+    ParceledListSlice getPersistentApplications(int flags);
 
     ProviderInfo resolveContentProvider(String name, int flags, int userId);
 
@@ -210,7 +210,7 @@ interface IPackageManager {
     InstrumentationInfo getInstrumentationInfo(
             in ComponentName className, int flags);
 
-    List<InstrumentationInfo> queryInstrumentation(
+    ParceledListSlice queryInstrumentation(
             String targetPackage, int flags);
 
     /** @deprecated Use PackageInstaller instead */
@@ -239,12 +239,6 @@ interface IPackageManager {
     void deletePackage(in String packageName, IPackageDeleteObserver2 observer, int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
-
-    void addPackageToPreferred(String packageName);
-
-    void removePackageFromPreferred(String packageName);
-
-    List<PackageInfo> getPreferredPackages(int flags);
 
     void resetApplicationPreferences(int userId);
 
@@ -406,7 +400,7 @@ interface IPackageManager {
      * Get a list of features that are available on the
      * system.
      */
-    FeatureInfo[] getSystemAvailableFeatures();
+    ParceledListSlice getSystemAvailableFeatures();
 
     boolean hasSystemFeature(String name, int version);
 
@@ -480,8 +474,8 @@ interface IPackageManager {
     void verifyIntentFilter(int id, int verificationCode, in List<String> failedDomains);
     int getIntentVerificationStatus(String packageName, int userId);
     boolean updateIntentVerificationStatus(String packageName, int status, int userId);
-    List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName);
-    List<IntentFilter> getAllIntentFilters(String packageName);
+    ParceledListSlice getIntentFilterVerifications(String packageName);
+    ParceledListSlice getAllIntentFilters(String packageName);
 
     boolean setDefaultBrowserPackageName(String packageName, int userId);
     String getDefaultBrowserPackageName(int userId);
