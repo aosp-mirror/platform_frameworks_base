@@ -916,11 +916,11 @@ public class TaskStackLayoutAlgorithm {
         float peekHeightPct = (float) mFocusedTopPeekHeight / mStackRect.height();
         float slope = ((1f - peekHeightPct) - cpoint1Y) / (0.5f - cpoint1X);
         float b = 1f - slope * cpoint1X;
-        float cpoint2X = 0.75f;
+        float cpoint2X = 0.65f;
         float cpoint2Y = slope * cpoint2X + b;
         Path p = new Path();
         p.moveTo(0f, 1f);
-        p.cubicTo(0f, 1f, cpoint1X, 1f, 0.5f, 1f - peekHeightPct);
+        p.cubicTo(0f, 1f, cpoint1X, cpoint1Y, 0.5f, 1f - peekHeightPct);
         p.cubicTo(0.5f, 1f - peekHeightPct, cpoint2X, cpoint2Y, 1f, 0f);
         return p;
     }
