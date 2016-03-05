@@ -68,13 +68,38 @@ static bool isValidSymbol(const StringPiece16& symbol) {
  * Java symbols can not contain . or -, but those are valid in a resource name.
  * Replace those with '_'.
  */
-static std::u16string transform(const StringPiece16& symbol) {
-    std::u16string output = symbol.toString();
-    for (char16_t& c : output) {
-        if (c == u'.' || c == u'-') {
-            c = u'_';
+static std::string transform(const StringPiece16& symbol) {
+    std::string output = util::utf16ToUtf8(symbol);
+    for (char& c : output) {
+        if (c == '.' || c == '-') {
+            c = '_';
         }
     }
+    return output;
+}
+
+/**
+ * Transforms an attribute in a styleable to the Java field name:
+ *
+ * <declare-styleable name="Foo">
+ *   <attr name="android:bar" />
+ *   <attr name="bar" />
+ * </declare-styleable>
+ *
+ * Foo_android_bar
+ * Foo_bar
+ */
+static std::string transformNestedAttr(const ResourceNameRef& attrName,
+                                       const std::string& styleableClassName,
+                                       const StringPiece16& packageNameToGenerate) {
+    std::string output = styleableClassName;
+
+    // We may reference IDs from other packages, so prefix the entry name with
+    // the package.
+    if (!attrName.package.empty() && packageNameToGenerate != attrName.package) {
+        output += "_" + transform(attrName.package);
+    }
+    output += "_" + transform(attrName.entry);
     return output;
 }
 
@@ -90,48 +115,91 @@ bool JavaClassGenerator::skipSymbol(SymbolState state) {
     return true;
 }
 
+struct StyleableAttr {
+    const Reference* attrRef;
+    std::string fieldName;
+};
+
+static bool lessStyleableAttr(const StyleableAttr& lhs, const StyleableAttr& rhs) {
+    const ResourceId lhsId = lhs.attrRef->id ? lhs.attrRef->id.value() : ResourceId(0);
+    const ResourceId rhsId = rhs.attrRef->id ? rhs.attrRef->id.value() : ResourceId(0);
+    if (lhsId < rhsId) {
+        return true;
+    } else if (lhsId > rhsId) {
+        return false;
+    } else {
+        return lhs.attrRef->name.value() < rhs.attrRef->name.value();
+    }
+}
+
 void JavaClassGenerator::writeStyleableEntryForClass(ClassDefinitionWriter* outClassDef,
                                                      AnnotationProcessor* processor,
                                                      const StringPiece16& packageNameToGenerate,
                                                      const std::u16string& entryName,
                                                      const Styleable* styleable) {
+    const std::string className = transform(entryName);
+
     // This must be sorted by resource ID.
-    std::vector<std::pair<ResourceId, ResourceNameRef>> sortedAttributes;
+    std::vector<StyleableAttr> sortedAttributes;
     sortedAttributes.reserve(styleable->entries.size());
     for (const auto& attr : styleable->entries) {
         // If we are not encoding final attributes, the styleable entry may have no ID
         // if we are building a static library.
         assert((!mOptions.useFinal || attr.id) && "no ID set for Styleable entry");
         assert(attr.name && "no name set for Styleable entry");
-        sortedAttributes.emplace_back(attr.id ? attr.id.value() : ResourceId(0), attr.name.value());
-    }
-    std::sort(sortedAttributes.begin(), sortedAttributes.end());
 
-    auto accessorFunc = [](const std::pair<ResourceId, ResourceNameRef>& a) -> ResourceId {
-        return a.first;
+        sortedAttributes.emplace_back(StyleableAttr{
+                &attr, transformNestedAttr(attr.name.value(), className, packageNameToGenerate) });
+    }
+    std::sort(sortedAttributes.begin(), sortedAttributes.end(), lessStyleableAttr);
+
+    const size_t attrCount = sortedAttributes.size();
+
+    if (attrCount > 0) {
+        // Build the comment string for the Styleable. It includes details about the
+        // child attributes.
+        std::stringstream styleableComment;
+        styleableComment << "Attributes that can be used with a " << className << ".\n";
+        styleableComment << "<table>\n"
+                "<colgroup align=\"left\" />\n"
+                "<colgroup align=\"left\">\n"
+                "<tr><th>Attribute</th><th>Description</th></tr>\n";
+        for (const auto& entry : sortedAttributes) {
+            const ResourceName& attrName = entry.attrRef->name.value();
+            styleableComment << "<tr><td><code>{@link #" << entry.fieldName << " "
+                    << attrName.package << ":" << attrName.entry
+                    << "}</code></td><td></td></tr>\n";
+        }
+        styleableComment << "</table>\n";
+        for (const auto& entry : sortedAttributes) {
+            styleableComment << "@see #" << entry.fieldName << "\n";
+        }
+        processor->appendComment(styleableComment.str());
+    }
+
+    auto accessorFunc = [](const StyleableAttr& a) -> ResourceId {
+        return a.attrRef->id ? a.attrRef->id.value() : ResourceId(0);
     };
 
     // First we emit the array containing the IDs of each attribute.
-    outClassDef->addArrayMember(transform(entryName), processor,
+    outClassDef->addArrayMember(className, processor,
                                 sortedAttributes.begin(),
                                 sortedAttributes.end(),
                                 accessorFunc);
 
     // Now we emit the indices into the array.
-    size_t attrCount = sortedAttributes.size();
     for (size_t i = 0; i < attrCount; i++) {
-        std::stringstream name;
-        name << transform(entryName);
+        const ResourceName& attrName = sortedAttributes[i].attrRef->name.value();
 
-        // We may reference IDs from other packages, so prefix the entry name with
-        // the package.
-        const ResourceNameRef& itemName = sortedAttributes[i].second;
-        if (!itemName.package.empty() && packageNameToGenerate != itemName.package) {
-            name << "_" << transform(itemName.package);
+        AnnotationProcessor attrProcessor;
+        std::stringstream doclavaComments;
+        doclavaComments << "@attr name ";
+        if (!attrName.package.empty()) {
+            doclavaComments << attrName.package << ":";
         }
-        name << "_" << transform(itemName.entry);
-
-        outClassDef->addIntMember(name.str(), nullptr, i);
+        doclavaComments << attrName.entry;
+        attrProcessor.appendComment(doclavaComments.str());
+        outClassDef->addIntMember(sortedAttributes[i].fieldName, &attrProcessor, i);
     }
 }
 
