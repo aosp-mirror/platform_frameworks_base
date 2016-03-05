@@ -7130,7 +7130,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                         PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
-                        parentUserId);
+                        parentUserId).getList();
 
                 if (VERBOSE_LOG) {
                     Slog.d(LOG_TAG, "Enabling system activities: " + activitiesToEnable);

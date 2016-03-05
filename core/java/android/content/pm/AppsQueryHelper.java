@@ -171,7 +171,7 @@ public class AppsQueryHelper {
             return mPackageManager.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES
                     | PackageManager.GET_DISABLED_COMPONENTS, userId).getList();
         } catch (RemoteException e) {
-            throw new IllegalStateException("Package manager has died", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -181,9 +181,9 @@ public class AppsQueryHelper {
             return mPackageManager.queryIntentActivities(intent, null,
                     PackageManager.GET_DISABLED_COMPONENTS
                             | PackageManager.GET_UNINSTALLED_PACKAGES,
-                    userId);
+                    userId).getList();
         } catch (RemoteException e) {
-            throw new IllegalStateException("Package manager has died", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -192,9 +192,9 @@ public class AppsQueryHelper {
         try {
             return mPackageManager.queryIntentServices(intent, null,
                     PackageManager.GET_META_DATA
-                            | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId);
+                            | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId).getList();
         } catch (RemoteException e) {
-            throw new IllegalStateException("Package manager has died", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -205,8 +205,7 @@ public class AppsQueryHelper {
             return mPackageManager.getPackagesHoldingPermissions(new String[]{perm}, 0,
                     userId).getList();
         } catch (RemoteException e) {
-            throw new IllegalStateException("Package manager has died", e);
+            throw e.rethrowFromSystemServer();
         }
     }
-
 }

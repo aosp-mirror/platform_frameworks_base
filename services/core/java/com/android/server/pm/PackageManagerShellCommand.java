@@ -317,11 +317,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runListFeatures() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final List<FeatureInfo> list = new ArrayList<FeatureInfo>();
-        final FeatureInfo[] rawList = mInterface.getSystemAvailableFeatures();
-        for (int i=0; i<rawList.length; i++) {
-            list.add(rawList[i]);
-        }
+        final List<FeatureInfo> list = mInterface.getSystemAvailableFeatures().getList();
 
         // sort by name
         Collections.sort(list, new Comparator<FeatureInfo>() {
@@ -380,7 +376,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         final List<InstrumentationInfo> list =
-                mInterface.queryInstrumentation(targetPackage, 0 /*flags*/);
+                mInterface.queryInstrumentation(targetPackage, 0 /*flags*/).getList();
 
         // sort by target package
         Collections.sort(list, new Comparator<InstrumentationInfo>() {
@@ -521,7 +517,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runListPermissionGroups() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final List<PermissionGroupInfo> pgs = mInterface.getAllPermissionGroups(0);
+        final List<PermissionGroupInfo> pgs = mInterface.getAllPermissionGroups(0).getList();
 
         final int count = pgs.size();
         for (int p = 0; p < count ; p++) {
@@ -568,7 +564,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final ArrayList<String> groupList = new ArrayList<String>();
         if (groups) {
             final List<PermissionGroupInfo> infos =
-                    mInterface.getAllPermissionGroups(0 /*flags*/);
+                    mInterface.getAllPermissionGroups(0 /*flags*/).getList();
             final int count = infos.size();
             for (int i = 0; i < count; i++) {
                 groupList.add(infos.get(i).name);
@@ -718,7 +714,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         try {
             List<ResolveInfo> result = mInterface.queryIntentActivities(intent, null, 0,
-                    mTargetUser);
+                    mTargetUser).getList();
             PrintWriter pw = getOutPrintWriter();
             if (result == null || result.size() <= 0) {
                 pw.println("No activities found");
@@ -745,7 +741,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         try {
             List<ResolveInfo> result = mInterface.queryIntentServices(intent, null, 0,
-                    mTargetUser);
+                    mTargetUser).getList();
             PrintWriter pw = getOutPrintWriter();
             if (result == null || result.size() <= 0) {
                 pw.println("No services found");
@@ -772,7 +768,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         try {
             List<ResolveInfo> result = mInterface.queryIntentReceivers(intent, null, 0,
-                    mTargetUser);
+                    mTargetUser).getList();
             PrintWriter pw = getOutPrintWriter();
             if (result == null || result.size() <= 0) {
                 pw.println("No receivers found");
@@ -1051,7 +1047,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 prefix = "  ";
             }
             List<PermissionInfo> ps =
-                    mInterface.queryPermissionsByGroup(groupList.get(i), 0 /*flags*/);
+                    mInterface.queryPermissionsByGroup(groupList.get(i), 0 /*flags*/).getList();
             final int count = ps.size();
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {

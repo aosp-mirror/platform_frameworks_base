@@ -577,7 +577,7 @@ public class Am extends BaseCommand {
                         return;
                     }
                     List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0,
-                            mUserId);
+                            mUserId).getList();
                     if (activities == null || activities.size() <= 0) {
                         System.err.println("Error: Intent does not match any activities: "
                                 + intent);

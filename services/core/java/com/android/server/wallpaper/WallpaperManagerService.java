@@ -1317,7 +1317,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 List<ResolveInfo> ris =
                         mIPackageManager.queryIntentServices(intent,
                                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                PackageManager.GET_META_DATA, serviceUserId);
+                                PackageManager.GET_META_DATA, serviceUserId).getList();
                 for (int i=0; i<ris.size(); i++) {
                     ServiceInfo rsi = ris.get(i).serviceInfo;
                     if (rsi.name.equals(si.name) &&

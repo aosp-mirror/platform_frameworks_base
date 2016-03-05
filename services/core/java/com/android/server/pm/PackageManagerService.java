@@ -175,7 +175,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -2565,7 +2564,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @Nullable String getRequiredButNotReallyRequiredVerifierLPr() {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
-        final List<ResolveInfo> matches = queryIntentReceivers(intent, PACKAGE_MIME_TYPE,
+        final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
@@ -2580,7 +2579,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
-        final List<ResolveInfo> matches = queryIntentActivities(intent, PACKAGE_MIME_TYPE,
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
@@ -2592,7 +2591,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
         final Intent intent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
 
-        final List<ResolveInfo> matches = queryIntentReceivers(intent, PACKAGE_MIME_TYPE,
+        final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
         ResolveInfo best = null;
         final int N = matches.size();
@@ -2627,7 +2626,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
-        final List<ResolveInfo> resolvers = queryIntentServices(resolverIntent, null,
+        final List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
                 MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
 
         final int N = resolvers.size();
@@ -2672,7 +2671,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
-        final List<ResolveInfo> matches = queryIntentActivities(intent, PACKAGE_MIME_TYPE,
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
         if (matches.size() == 0) {
             return null;
@@ -2767,7 +2766,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private List<String> resolveAllBrowserApps(int userId) {
         // Resolve the canonical browser intent and check that the handleAllWebDataURI boolean is set
-        List<ResolveInfo> list = queryIntentActivities(sBrowserIntent, null,
+        List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
                 PackageManager.MATCH_ALL, userId);
 
         final int count = list.size();
@@ -2787,7 +2786,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private boolean packageIsBrowser(String packageName, int userId) {
-        List<ResolveInfo> list = queryIntentActivities(sBrowserIntent, null,
+        List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
                 PackageManager.MATCH_ALL, userId);
         final int N = list.size();
         for (int i = 0; i < N; i++) {
@@ -3036,9 +3035,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<PermissionInfo> queryPermissionsByGroup(String group, int flags) {
+    public @Nullable ParceledListSlice<PermissionInfo> queryPermissionsByGroup(String group,
+            int flags) {
         // reader
         synchronized (mPackages) {
+            if (group != null && !mPermissionGroups.containsKey(group)) {
+                // This is thrown as NameNotFoundException
+                return null;
+            }
+
             ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
             for (BasePermission p : mSettings.mPermissions.values()) {
                 if (group == null) {
@@ -3051,11 +3056,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-
-            if (out.size() > 0) {
-                return out;
-            }
-            return mPermissionGroups.containsKey(group) ? out : null;
+            return new ParceledListSlice<>(out);
         }
     }
 
@@ -3069,7 +3070,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
+    public @NonNull ParceledListSlice<PermissionGroupInfo> getAllPermissionGroups(int flags) {
         // reader
         synchronized (mPackages) {
             final int N = mPermissionGroups.size();
@@ -3078,7 +3079,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (PackageParser.PermissionGroup pg : mPermissionGroups.values()) {
                 out.add(PackageParser.generatePermissionGroupInfo(pg, flags));
             }
-            return out;
+            return new ParceledListSlice<>(out);
         }
     }
 
@@ -3476,22 +3477,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public FeatureInfo[] getSystemAvailableFeatures() {
-        Collection<FeatureInfo> featSet;
+    public @NonNull ParceledListSlice<FeatureInfo> getSystemAvailableFeatures() {
         synchronized (mPackages) {
-            featSet = mAvailableFeatures.values();
-            int size = featSet.size();
-            if (size > 0) {
-                FeatureInfo[] features = new FeatureInfo[size+1];
-                featSet.toArray(features);
-                FeatureInfo fi = new FeatureInfo();
-                fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
-                        FeatureInfo.GL_ES_VERSION_UNDEFINED);
-                features[size] = fi;
-                return features;
-            }
+            final ArrayList<FeatureInfo> res = new ArrayList<>(mAvailableFeatures.values());
+
+            final FeatureInfo fi = new FeatureInfo();
+            fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
+                    FeatureInfo.GL_ES_VERSION_UNDEFINED);
+            res.add(fi);
+
+            return new ParceledListSlice<>(res);
         }
-        return null;
     }
 
     @Override
@@ -4571,7 +4567,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         flags = updateFlagsForResolve(flags, userId, intent);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "resolve intent");
-        List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
+        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
+                userId);
         final ResolveInfo bestChoice =
                 chooseBestActivity(intent, resolvedType, flags, query, userId);
 
@@ -4603,7 +4600,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             filter.dump(new PrintStreamPrinter(System.out), "    ");
         }
         intent.setComponent(null);
-        List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
+        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
+                userId);
         // Find any earlier preferred or last chosen entries and nuke them
         findPreferredActivity(intent, resolvedType,
                 flags, query, 0, false, true, false, userId);
@@ -4616,7 +4614,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo getLastChosenActivity(Intent intent, String resolvedType, int flags) {
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
-        List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
+        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
+                userId);
         return findPreferredActivity(intent, resolvedType, flags, query, 0,
                 false, false, false, userId);
     }
@@ -5027,7 +5026,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<ResolveInfo> queryIntentActivities(Intent intent,
+    public @NonNull ParceledListSlice<ResolveInfo> queryIntentActivities(Intent intent,
+            String resolvedType, int flags, int userId) {
+        return new ParceledListSlice<>(
+                queryIntentActivitiesInternal(intent, resolvedType, flags, userId));
+    }
+
+    private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         flags = updateFlagsForResolve(flags, userId, intent);
@@ -5518,7 +5523,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<ResolveInfo> queryIntentActivityOptions(ComponentName caller,
+    public @NonNull ParceledListSlice<ResolveInfo> queryIntentActivityOptions(ComponentName caller,
+            Intent[] specifics, String[] specificTypes, Intent intent,
+            String resolvedType, int flags, int userId) {
+        return new ParceledListSlice<>(queryIntentActivityOptionsInternal(caller, specifics,
+                specificTypes, intent, resolvedType, flags, userId));
+    }
+
+    private @NonNull List<ResolveInfo> queryIntentActivityOptionsInternal(ComponentName caller,
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
@@ -5528,7 +5540,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 "query intent activity options");
         final String resultsAction = intent.getAction();
 
-        List<ResolveInfo> results = queryIntentActivities(intent, resolvedType, flags
+        final List<ResolveInfo> results = queryIntentActivitiesInternal(intent, resolvedType, flags
                 | PackageManager.GET_RESOLVED_FILTER, userId);
 
         if (DEBUG_INTENT_MATCHING) {
@@ -5693,8 +5705,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<ResolveInfo> queryIntentReceivers(Intent intent, String resolvedType, int flags,
-            int userId) {
+    public @NonNull ParceledListSlice<ResolveInfo> queryIntentReceivers(Intent intent,
+            String resolvedType, int flags, int userId) {
+        return new ParceledListSlice<>(
+                queryIntentReceiversInternal(intent, resolvedType, flags, userId));
+    }
+
+    private @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
+            String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         flags = updateFlagsForResolve(flags, userId, intent);
         ComponentName comp = intent.getComponent();
@@ -5726,7 +5744,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mReceivers.queryIntentForPackage(intent, resolvedType, flags, pkg.receivers,
                         userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -5734,7 +5752,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForResolve(flags, userId, intent);
-        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
+        List<ResolveInfo> query = queryIntentServicesInternal(intent, resolvedType, flags, userId);
         if (query != null) {
             if (query.size() >= 1) {
                 // If there is more than one service with the same priority,
@@ -5746,8 +5764,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<ResolveInfo> queryIntentServices(Intent intent, String resolvedType, int flags,
-            int userId) {
+    public @NonNull ParceledListSlice<ResolveInfo> queryIntentServices(Intent intent,
+            String resolvedType, int flags, int userId) {
+        return new ParceledListSlice<>(
+                queryIntentServicesInternal(intent, resolvedType, flags, userId));
+    }
+
+    private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
+            String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         flags = updateFlagsForResolve(flags, userId, intent);
         ComponentName comp = intent.getComponent();
@@ -5779,12 +5803,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mServices.queryIntentForPackage(intent, resolvedType, flags, pkg.services,
                         userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
     @Override
-    public List<ResolveInfo> queryIntentContentProviders(
+    public @NonNull ParceledListSlice<ResolveInfo> queryIntentContentProviders(Intent intent,
+            String resolvedType, int flags, int userId) {
+        return new ParceledListSlice<>(
+                queryIntentContentProvidersInternal(intent, resolvedType, flags, userId));
+    }
+
+    private @NonNull List<ResolveInfo> queryIntentContentProvidersInternal(
             Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         flags = updateFlagsForResolve(flags, userId, intent);
@@ -5817,7 +5847,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mProviders.queryIntentForPackage(
                         intent, resolvedType, flags, pkg.providers, userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -6073,7 +6103,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 && UserHandle.getAppId(Binder.getCallingUid()) == pkg.applicationInfo.uid;
     }
 
-    public List<ApplicationInfo> getPersistentApplications(int flags) {
+    @Override
+    public @NonNull ParceledListSlice<ApplicationInfo> getPersistentApplications(int flags) {
+        return new ParceledListSlice<>(getPersistentApplicationsInternal(flags));
+    }
+
+    private @NonNull List<ApplicationInfo> getPersistentApplicationsInternal(int flags) {
         final ArrayList<ApplicationInfo> finalList = new ArrayList<ApplicationInfo>();
 
         // reader
@@ -6155,11 +6190,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<ProviderInfo> queryContentProviders(String processName,
+    public @NonNull ParceledListSlice<ProviderInfo> queryContentProviders(String processName,
             int uid, int flags) {
         final int userId = processName != null ? UserHandle.getUserId(uid)
                 : UserHandle.getCallingUserId();
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForComponent(flags, userId, processName);
 
         ArrayList<ProviderInfo> finalList = null;
@@ -6191,7 +6226,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return new ParceledListSlice<ProviderInfo>(finalList);
         }
 
-        return null;
+        return ParceledListSlice.emptyList();
     }
 
     @Override
@@ -6204,10 +6239,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<InstrumentationInfo> queryInstrumentation(String targetPackage,
+    public @NonNull ParceledListSlice<InstrumentationInfo> queryInstrumentation(
+            String targetPackage, int flags) {
+        return new ParceledListSlice<>(queryInstrumentationInternal(targetPackage, flags));
+    }
+
+    private @NonNull List<InstrumentationInfo> queryInstrumentationInternal(String targetPackage,
             int flags) {
-        ArrayList<InstrumentationInfo> finalList =
-            new ArrayList<InstrumentationInfo>();
+        ArrayList<InstrumentationInfo> finalList = new ArrayList<InstrumentationInfo>();
 
         // reader
         synchronized (mPackages) {
@@ -11082,21 +11121,22 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
+    public @NonNull ParceledListSlice<IntentFilterVerificationInfo> getIntentFilterVerifications(
+            String packageName) {
         synchronized (mPackages) {
-            return mSettings.getIntentFilterVerificationsLPr(packageName);
+            return new ParceledListSlice<>(mSettings.getIntentFilterVerificationsLPr(packageName));
         }
     }
 
     @Override
-    public List<IntentFilter> getAllIntentFilters(String packageName) {
+    public @NonNull ParceledListSlice<IntentFilter> getAllIntentFilters(String packageName) {
         if (TextUtils.isEmpty(packageName)) {
-            return Collections.<IntentFilter>emptyList();
+            return ParceledListSlice.emptyList();
         }
         synchronized (mPackages) {
             PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null || pkg.activities == null) {
-                return Collections.<IntentFilter>emptyList();
+                return ParceledListSlice.emptyList();
             }
             final int count = pkg.activities.size();
             ArrayList<IntentFilter> result = new ArrayList<>();
@@ -11106,7 +11146,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     result.addAll(activity.intents);
                 }
             }
-            return result;
+            return new ParceledListSlice<>(result);
         }
     }
 
@@ -11832,7 +11872,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     // Query all live verifiers based on current user state
-                    final List<ResolveInfo> receivers = queryIntentReceivers(verification,
+                    final List<ResolveInfo> receivers = queryIntentReceiversInternal(verification,
                             PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
 
                     if (DEBUG_VERIFY) {
@@ -15531,22 +15571,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-
-    @Override
-    public void addPackageToPreferred(String packageName) {
-        Slog.w(TAG, "addPackageToPreferred: this is now a no-op");
-    }
-
-    @Override
-    public void removePackageFromPreferred(String packageName) {
-        Slog.w(TAG, "removePackageFromPreferred: this is now a no-op");
-    }
-
-    @Override
-    public List<PackageInfo> getPreferredPackages(int flags) {
-        return new ArrayList<PackageInfo>();
-    }
-
     private int getUidTargetSdkVersionLockedLPr(int uid) {
         Object obj = mSettings.getUserIdLPr(uid);
         if (obj instanceof SharedUserSetting) {
@@ -16399,7 +16423,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         intent.addCategory(Intent.CATEGORY_HOME);
 
         final int callingUserId = UserHandle.getCallingUserId();
-        List<ResolveInfo> list = queryIntentActivities(intent, null,
+        List<ResolveInfo> list = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, callingUserId);
         ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
                 true, false, false, callingUserId);
@@ -17395,8 +17419,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     private String dumpDomainString(String packageName) {
-        List<IntentFilterVerificationInfo> iviList = getIntentFilterVerifications(packageName);
-        List<IntentFilter> filters = getAllIntentFilters(packageName);
+        List<IntentFilterVerificationInfo> iviList = getIntentFilterVerifications(packageName)
+                .getList();
+        List<IntentFilter> filters = getAllIntentFilters(packageName).getList();
 
         ArraySet<String> result = new ArraySet<>();
         if (iviList.size() > 0) {
