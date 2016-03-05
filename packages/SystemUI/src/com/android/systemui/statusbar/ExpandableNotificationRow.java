@@ -1283,14 +1283,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             header.reapply(getContext(), mNotificationHeader);
             mNotificationHeaderWrapper.notifyContentUpdated(mEntry.notification);
         }
-        updateHeaderExpandButton();
         updateChildrenHeaderAppearance();
-    }
-
-    private void updateHeaderExpandButton() {
-        if (mIsSummaryWithChildren) {
-            mNotificationHeader.setIsGroupHeader(true /* isGroupHeader*/);
-        }
     }
 
     public void updateChildrenHeaderAppearance() {
