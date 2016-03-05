@@ -20854,6 +20854,7 @@ package android.media {
     method public final void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String) throws java.io.IOException;
+    method public final void setDataSource(android.content.res.AssetFileDescriptor) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public final void setDataSource(java.io.FileDescriptor) throws java.io.IOException;
     method public final void setDataSource(java.io.FileDescriptor, long, long) throws java.io.IOException;
     method public void unselectTrack(int);
