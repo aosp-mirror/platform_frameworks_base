@@ -135,17 +135,7 @@ void BakedOpRenderer::endFrame(const Rect& repaintRect) {
         mRenderState.stencil().disable();
     }
 
-    mCaches.clearGarbage();
-    mCaches.pathCache.trim();
-    mCaches.tessellationCache.trim();
-
-#if DEBUG_MEMORY_USAGE
-    mCaches.dumpMemoryUsage();
-#else
-    if (Properties::debugLevel & kDebugMemory) {
-        mCaches.dumpMemoryUsage();
-    }
-#endif
+    // Note: we leave FBO 0 renderable here, for post-frame-content decoration
 }
 
 void BakedOpRenderer::setViewport(uint32_t width, uint32_t height) {
@@ -177,6 +167,38 @@ Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
         return mCaches.textureCache.get(bitmap);
     }
     return texture;
+}
+
+void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
+    std::vector<Vertex> vertices;
+    vertices.reserve(count);
+    Vertex* vertex = vertices.data();
+
+    for (int index = 0; index < count; index += 4) {
+        float l = rects[index + 0];
+        float t = rects[index + 1];
+        float r = rects[index + 2];
+        float b = rects[index + 3];
+
+        Vertex::set(vertex++, l, t);
+        Vertex::set(vertex++, r, t);
+        Vertex::set(vertex++, l, b);
+        Vertex::set(vertex++, r, b);
+    }
+
+    LOG_ALWAYS_FATAL_IF(mRenderTarget.frameBufferId != 0, "decoration only supported for FBO 0");
+    // TODO: Currently assume full FBO damage, due to FrameInfoVisualizer::unionDirty.
+    // Should should scissor safely.
+    mRenderState.scissor().setEnabled(false);
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setRoundRectClipState(nullptr)
+            .setMeshIndexedQuads(vertices.data(), count / 4)
+            .setFillPaint(*paint, 1.0f)
+            .setTransform(Matrix4::identity(), TransformFlags::None)
+            .setModelViewIdentityEmptyBounds()
+            .build();
+    mRenderState.render(glop, mRenderTarget.orthoMatrix);
 }
 
 // clears and re-fills stencil with provided rendertarget space quads,
