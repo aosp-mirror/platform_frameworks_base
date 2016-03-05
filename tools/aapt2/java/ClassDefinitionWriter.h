@@ -65,7 +65,7 @@ public:
              << "String " << name << "=\"" << val << "\";\n";
     }
 
-    void addResourceMember(const StringPiece16& name, AnnotationProcessor* processor,
+    void addResourceMember(const StringPiece& name, AnnotationProcessor* processor,
                            const ResourceId id) {
         ensureClassDeclaration();
         if (processor) {
@@ -76,7 +76,7 @@ public:
     }
 
     template <typename Iterator, typename FieldAccessorFunc>
-    void addArrayMember(const StringPiece16& name, AnnotationProcessor* processor,
+    void addArrayMember(const StringPiece& name, AnnotationProcessor* processor,
                         const Iterator begin, const Iterator end, FieldAccessorFunc f) {
         ensureClassDeclaration();
         if (processor) {
