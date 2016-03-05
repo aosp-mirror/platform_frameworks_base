@@ -43,6 +43,14 @@ package android.media {
 
 }
 
+package android.media.tv {
+
+  public class TvView extends android.view.ViewGroup {
+    method public void requestUnblockContent(android.media.tv.TvContentRating);
+  }
+
+}
+
 package android.net {
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {

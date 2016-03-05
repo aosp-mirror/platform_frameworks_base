@@ -491,7 +491,7 @@ public abstract class TvInputService extends Service {
          * until this method is called.
          *
          * <p>The TV input service must call this method as soon as the content rendered onto its
-         * surface is ready for viewing. This method must be called each time {@link #onTune(Uri)}
+         * surface is ready for viewing. This method must be called each time {@link #onTune}
          * is called.
          *
          * @see #notifyVideoUnavailable
@@ -837,14 +837,15 @@ public abstract class TvInputService extends Service {
         public abstract boolean onTune(Uri channelUri);
 
         /**
-         * Calls {@link #onTune(Uri)}. Override this method in order to handle {@code params}.
+         * Calls {@link #onTune(Uri)}. Override this method in order to handle domain-specific
+         * features that are only known between certain TV inputs and their clients.
          *
          * @param channelUri The URI of the channel.
-         * @param params The extra parameters from other applications.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
          * @return {@code true} if the tuning was successful, {@code false} otherwise.
-         * @hide
          */
-        @SystemApi
         public boolean onTune(Uri channelUri, Bundle params) {
             return onTune(channelUri);
         }
@@ -1209,7 +1210,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onTune}.
+         * Calls {@link #onTune(Uri, Bundle)}.
          */
         void tune(Uri channelUri, Bundle params) {
             mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
@@ -1836,7 +1837,7 @@ public abstract class TvInputService extends Service {
      * a hardware TV Input (e.g. HDMI 1) and forward the application's surface to the session so
      * that the user can see the screen of the hardware TV Input when she tunes to a channel from
      * this TV input. The implementation of this class is expected to change the channel of the
-     * external set-top box via a proprietary protocol when {@link HardwareSession#onTune(Uri)} is
+     * external set-top box via a proprietary protocol when {@link HardwareSession#onTune} is
      * requested by the application.
      *
      * <p>Note that this class is not for inputs for internal hardware like built-in tuner and HDMI

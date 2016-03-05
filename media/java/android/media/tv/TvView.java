@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -56,7 +57,7 @@ import java.util.Queue;
  * TV inputs available on the system can be obtained by calling
  * {@link TvInputManager#getTvInputList() TvInputManager.getTvInputList()}.)
  *
- * <p>Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
+ * <p>Once the application supplies the URI for a specific TV channel to {@link #tune}
  * method, it takes care of underlying service binding (and unbinding if the current TvView is
  * already bound to a service) and automatically allocates/deallocates resources needed. In addition
  * to a few essential methods to control how the contents are presented, it also provides a way to
@@ -206,13 +207,18 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets the Z order of a window owning the surface of this TvView above the normal TvView
-     * but below an application.
+     * Controls whether the TvView's surface is placed on top of another regular surface view in the
+     * window (but still behind the window itself).
+     * This is typically used to place overlays on top of an underlying TvView.
      *
-     * @see SurfaceView#setZOrderMediaOverlay
-     * @hide
+     * <p>Note that this must be set before the TvView's containing window is attached to the
+     * window manager.
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderOnTop}.
+     *
+     * @param isMediaOverlay {@code true} to be on top of another regular surface, {@code false}
+     *            otherwise.
      */
-    @SystemApi
     public void setZOrderMediaOverlay(boolean isMediaOverlay) {
         if (isMediaOverlay) {
             mWindowZOrder = ZORDER_MEDIA_OVERLAY;
@@ -230,12 +236,18 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets the Z order of a window owning the surface of this TvView on top of an application.
+     * Controls whether the TvView's surface is placed on top of its window. Normally it is placed
+     * behind the window, to allow it to (for the most part) appear to composite with the views in
+     * the hierarchy.  By setting this, you cause it to be placed above the window. This means that
+     * none of the contents of the window this TvView is in will be visible on top of its surface.
      *
-     * @see SurfaceView#setZOrderOnTop
-     * @hide
+     * <p>Note that this must be set before the TvView's containing window is attached to the window
+     * manager.
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
+     *
+     * @param onTop {@code true} to be on top of its window, {@code false} otherwise.
      */
-    @SystemApi
     public void setZOrderOnTop(boolean onTop) {
         if (onTop) {
             mWindowZOrder = ZORDER_ON_TOP;
@@ -280,14 +292,15 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Tunes to a given channel.
+     * Tunes to a given channel. This can be used to provide domain-specific features that are only
+     * known between certain TvView applications and their TV inputs.
      *
      * @param inputId The ID of TV input for the given channel.
      * @param channelUri The URI of a channel.
-     * @param params Extra parameters.
-     * @hide
+     * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+     *            name, i.e. prefixed with a package name you own, so that different developers will
+     *            not create conflicting keys.
      */
-    @SystemApi
     public void tune(String inputId, Uri channelUri, Bundle params) {
         if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
         if (TextUtils.isEmpty(inputId)) {
@@ -360,11 +373,8 @@ public class TvView extends ViewGroup {
      *
      * @param unblockedRating A TvContentRating to unblock.
      * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
-     * @hide
-     * @deprecated Use {@link #unblockContent} instead.
+     * @removed
      */
-    @Deprecated
-    @SystemApi
     public void requestUnblockContent(TvContentRating unblockedRating) {
         unblockContent(unblockedRating);
     }
@@ -379,6 +389,7 @@ public class TvView extends ViewGroup {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
     public void unblockContent(TvContentRating unblockedRating) {
         if (mSession != null) {
             mSession.unblockContent(unblockedRating);
@@ -539,7 +550,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)} for the current
+     * Calls {@link TvInputService.Session#onAppPrivateCommand(String, Bundle)} for the current
      * session.
      *
      * @param action The name of the private command to send. This <em>must</em> be a scoped name,
@@ -893,7 +904,7 @@ public class TvView extends ViewGroup {
 
         /**
          * This is invoked when the channel of this TvView is changed by the underlying TV input
-         * without any {@link TvView#tune(String, Uri)} request.
+         * without any {@link TvView#tune} request.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param channelUri The URI of a channel.
