@@ -55,7 +55,7 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
-import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
+import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -97,6 +97,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private long mLastTabKeyEventTime;
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
+    private boolean mIsVisible;
 
     // Top level views
     private RecentsView mRecentsView;
@@ -173,59 +174,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         }
     };
-
-    /** Updates the set of recent tasks */
-    void updateRecentsTasks() {
-        // If AlternateRecentsComponent has preloaded a load plan, then use that to prevent
-        // reconstructing the task stack
-        RecentsTaskLoader loader = Recents.getTaskLoader();
-        RecentsTaskLoadPlan plan = RecentsImpl.consumeInstanceLoadPlan();
-        if (plan == null) {
-            plan = loader.createLoadPlan(this);
-        }
-
-        // Start loading tasks according to the load plan
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        if (!plan.hasTasks()) {
-            loader.preloadTasks(plan, -1, launchState.launchedFromHome);
-        }
-        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
-        loadOpts.runningTaskId = launchState.launchedToTaskId;
-        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
-        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
-        loader.loadTasks(this, plan, loadOpts);
-
-        TaskStack stack = plan.getTaskStack();
-        mRecentsView.setTaskStack(stack);
-
-        // Animate the SystemUI scrims into view
-        Task launchTarget = stack.getLaunchTarget();
-        int taskCount = stack.getTaskCount();
-        int launchTaskIndexInStack = launchTarget != null
-                ? stack.indexOfStackTask(launchTarget)
-                : 0;
-        boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
-        boolean animateNavBarScrim = !launchState.launchedWhileDocking;
-        mScrimViews.prepareEnterRecentsAnimation(hasNavBarScrim, animateNavBarScrim);
-
-        // Keep track of whether we launched from the nav bar button or via alt-tab
-        if (launchState.launchedWithAltTab) {
-            MetricsLogger.count(this, "overview_trigger_alttab", 1);
-        } else {
-            MetricsLogger.count(this, "overview_trigger_nav_btn", 1);
-        }
-        // Keep track of whether we launched from an app or from home
-        if (launchState.launchedFromApp) {
-            MetricsLogger.count(this, "overview_source_app", 1);
-            // If from an app, track the stack index of the app in the stack (for affiliated tasks)
-            MetricsLogger.histogram(this, "overview_source_app_index", launchTaskIndexInStack);
-        } else {
-            MetricsLogger.count(this, "overview_source_home", 1);
-        }
-        // Keep track of the total stack task count
-        MetricsLogger.histogram(this, "overview_task_count", taskCount);
-    }
 
     /**
      * Dismisses the history view back into the stack view.
@@ -345,6 +293,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Set the Recents layout
         setContentView(R.layout.recents);
+        takeKeyEvents(true);
         mRecentsView = (RecentsView) findViewById(R.id.recents_view);
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
@@ -382,45 +331,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
 
-        // Update the recent tasks
-        updateRecentsTasks();
-
-        // If this is a new instance from a configuration change, then we have to manually trigger
-        // the enter animation state, or if recents was relaunched by AM, without going through
-        // the normal mechanisms
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        boolean wasLaunchedByAm = !launchState.launchedFromHome &&
-                !launchState.launchedFromApp;
-        if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
-            EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
-        }
-
         // Notify that recents is now visible
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
-
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
         MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
-
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-
-            @Override
-            public boolean onPreDraw() {
-                mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-                EventBus.getDefault().post(new RecentsDrawnEvent());
-                return true;
-            }
-        });
     }
 
     @Override
@@ -430,26 +346,91 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+        super.onResume();
 
-        // Stop the fast-toggle dozer
-        mIterateTrigger.stopDozing();
+        // If the Recents component has preloaded a load plan, then use that to prevent
+        // reconstructing the task stack
+        RecentsTaskLoader loader = Recents.getTaskLoader();
+        RecentsTaskLoadPlan loadPlan = RecentsImpl.consumeInstanceLoadPlan();
+        if (loadPlan == null) {
+            loadPlan = loader.createLoadPlan(this);
+        }
+
+        // Start loading tasks according to the load plan
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
+        if (!loadPlan.hasTasks()) {
+            loader.preloadTasks(loadPlan, -1, launchState.launchedFromHome);
+        }
+
+        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
+        loadOpts.runningTaskId = launchState.launchedToTaskId;
+        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
+        loader.loadTasks(this, loadPlan, loadOpts);
+        TaskStack stack = loadPlan.getTaskStack();
+        mRecentsView.onResume(mIsVisible, stack);
+
+        // Animate the SystemUI scrims into view
+        Task launchTarget = stack.getLaunchTarget();
+        int taskCount = stack.getTaskCount();
+        int launchTaskIndexInStack = launchTarget != null
+                ? stack.indexOfStackTask(launchTarget)
+                : 0;
+        boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
+        boolean animateNavBarScrim = !launchState.launchedWhileDocking;
+        mScrimViews.prepareEnterRecentsAnimation(hasNavBarScrim, animateNavBarScrim);
+
+        // If this is a new instance from a configuration change, then we have to manually trigger
+        // the enter animation state, or if recents was relaunched by AM, without going through
+        // the normal mechanisms
+        boolean wasLaunchedByAm = !launchState.launchedFromHome &&
+                !launchState.launchedFromApp;
+        if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
+            EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+        }
+
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+
+                    @Override
+                    public boolean onPreDraw() {
+                        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        EventBus.getDefault().post(new RecentsDrawnEvent());
+                        return true;
+                    }
+                });
+
+        // Keep track of whether we launched from the nav bar button or via alt-tab
+        if (launchState.launchedWithAltTab) {
+            MetricsLogger.count(this, "overview_trigger_alttab", 1);
+        } else {
+            MetricsLogger.count(this, "overview_trigger_nav_btn", 1);
+        }
+
+        // Keep track of whether we launched from an app or from home
+        if (launchState.launchedFromApp) {
+            MetricsLogger.count(this, "overview_source_app", 1);
+            // If from an app, track the stack index of the app in the stack (for affiliated tasks)
+            MetricsLogger.histogram(this, "overview_source_app_index", launchTaskIndexInStack);
+        } else {
+            MetricsLogger.count(this, "overview_source_home", 1);
+        }
+
+        // Keep track of the total stack task count
+        MetricsLogger.histogram(this, "overview_task_count", taskCount);
+
+        // After we have resumed, set the visible state until the next onStop() call
+        mIsVisible = true;
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
 
-        // Reset some states
         mIgnoreAltTabRelease = false;
-        if (RecentsDebugFlags.Static.EnableHistory && mRecentsView.isHistoryVisible()) {
-            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
-        }
-
-        // Notify that recents is now hidden
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, false));
+        mIterateTrigger.stopDozing();
 
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not
@@ -457,7 +438,20 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.reset();
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Only hide the history if Recents is completely hidden
+        if (RecentsDebugFlags.Static.EnableHistory && mRecentsView.isHistoryVisible()) {
+            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
+        }
+
+        // Notify that recents is now hidden
+        mIsVisible = false;
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
     }
 
@@ -525,16 +519,22 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onMultiWindowChanged(boolean inMultiWindow) {
         super.onMultiWindowChanged(inMultiWindow);
         EventBus.getDefault().send(new ConfigurationChangedEvent());
+
+        // Reload the task stack completely
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         RecentsTaskLoader loader = Recents.getTaskLoader();
-        RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-        launchOpts.loadIcons = false;
-        launchOpts.loadThumbnails = false;
-        launchOpts.onlyLoadForCache = true;
         RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-        loader.preloadTasks(loadPlan, -1, false);
-        loader.loadTasks(this, loadPlan, launchOpts);
-        EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack(),
-                inMultiWindow));
+        loader.preloadTasks(loadPlan, -1 /* topTaskId */, false /* isTopTaskHome */);
+
+        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
+        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
+        loader.loadTasks(this, loadPlan, loadOpts);
+
+        mRecentsView.onResume(mIsVisible, loadPlan.getTaskStack());
+
+        EventBus.getDefault().send(new MultiWindowStateChangedEvent(inMultiWindow));
     }
 
     @Override

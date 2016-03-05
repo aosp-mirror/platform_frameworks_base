@@ -100,11 +100,7 @@ public class Task {
 
         @Override
         public String toString() {
-            return "Task.Key: " + id + ", "
-                    + "s: " + stackId + ", "
-                    + "u: " + userId + ", "
-                    + "lat: " + lastActiveTime + ", "
-                    + getComponent().getPackageName();
+            return "t" + id + ", s" + stackId + ", u" + userId;
         }
 
         private void updateHashCode() {
@@ -204,7 +200,9 @@ public class Task {
         this.isDockable = isDockable;
     }
 
-    /** Copies the other task. */
+    /**
+     * Copies the metadata from another task, but retains the current callbacks.
+     */
     public void copyFrom(Task o) {
         this.key = o.key;
         this.group = o.group;
@@ -300,11 +298,6 @@ public class Task {
 
     @Override
     public String toString() {
-        String groupAffiliation = "no group";
-        if (group != null) {
-            groupAffiliation = Integer.toString(group.affiliation);
-        }
-        return "Task (" + groupAffiliation + "): " + key +
-                " [" + super.toString() + "]";
+        return "[" + key.toString() + "] " + title;
     }
 }

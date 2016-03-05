@@ -602,7 +602,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 com.android.internal.R.dimen.navigation_bar_width);
         mTaskBarHeight = res.getDimensionPixelSize(
                 R.dimen.recents_task_bar_height);
-        mDummyStackView = new TaskStackView(mContext, new TaskStack());
+        mDummyStackView = new TaskStackView(mContext);
         mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
                 null, false);
     }
@@ -615,8 +615,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      *                               is not already bound (can be expensive)
      * @param stack the stack to initialize the stack layout with
      */
-    private void updateHeaderBarLayout(boolean tryAndBindSearchWidget,
-            TaskStack stack) {
+    private void updateHeaderBarLayout(boolean tryAndBindSearchWidget, TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect systemInsets = new Rect();
@@ -640,14 +639,15 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 mSearchBarBounds, mTaskStackBounds);
 
         // Rebind the header bar and draw it for the transition
-        TaskStackLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
+        TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
-        algo.setSystemInsets(systemInsets);
+        stackLayout.setSystemInsets(systemInsets);
         if (stack != null) {
-            algo.initialize(taskStackBounds,
+            stackLayout.initialize(taskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
+            mDummyStackView.setTasks(stack, false /* notifyStackChanges */);
         }
-        Rect taskViewBounds = algo.getUntransformedTaskViewBounds();
+        Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
             mLastTaskViewBounds.set(taskViewBounds);
 
@@ -705,7 +705,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
 
         // Update the destination rect
-        mDummyStackView.updateLayoutForStack(stack);
         final Task toTask = new Task();
         final TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask);
         ForegroundThread.getHandler().postAtFrontOfQueue(new Runnable() {
@@ -887,7 +886,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
 
         // Prepare the dummy stack for the transition
-        mDummyStackView.updateLayoutForStack(stack);
         TaskStackLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
 

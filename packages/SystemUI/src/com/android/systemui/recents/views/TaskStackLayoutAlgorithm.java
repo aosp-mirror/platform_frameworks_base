@@ -531,7 +531,6 @@ public class TaskStackLayoutAlgorithm {
             return;
         }
 
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         mUnfocusedRange.offset(0f);
         int taskCount = tasks.size();
         for (int i = taskCount - 1; i >= 0; i--) {
@@ -571,6 +570,10 @@ public class TaskStackLayoutAlgorithm {
      * Updates this stack when a scroll happens.
      */
     public void updateFocusStateOnScroll(float stackScroll, float deltaScroll) {
+        if (deltaScroll == 0f) {
+            return;
+        }
+
         for (int i = mTaskIndexOverrideMap.size() - 1; i >= 0; i--) {
             int taskId = mTaskIndexOverrideMap.keyAt(i);
             float x = mTaskIndexMap.get(taskId);
@@ -628,6 +631,13 @@ public class TaskStackLayoutAlgorithm {
      */
     public StackState getStackState() {
         return mState;
+    }
+
+    /**
+     * Returns whether this stack layout has been initialized.
+     */
+    public boolean isInitialized() {
+        return !mStackRect.isEmpty();
     }
 
     /**
