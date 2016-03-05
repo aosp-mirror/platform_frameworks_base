@@ -48565,6 +48565,7 @@ package java.lang {
   public abstract interface Iterable {
     method public default void forEach(java.util.function.Consumer<? super T>);
     method public abstract java.util.Iterator<T> iterator();
+    method public default java.util.Spliterator<T> spliterator();
   }
 
   public class LinkageError extends java.lang.Error {
@@ -49406,6 +49407,25 @@ package java.lang.annotation {
   }
 
   public abstract class Target implements java.lang.annotation.Annotation {
+  }
+
+}
+
+package java.lang.invoke {
+
+  public final class SerializedLambda implements java.io.Serializable {
+    ctor public SerializedLambda(java.lang.Class<?>, java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object[]);
+    method public java.lang.Object getCapturedArg(int);
+    method public int getCapturedArgCount();
+    method public java.lang.String getCapturingClass();
+    method public java.lang.String getFunctionalInterfaceClass();
+    method public java.lang.String getFunctionalInterfaceMethodName();
+    method public java.lang.String getFunctionalInterfaceMethodSignature();
+    method public java.lang.String getImplClass();
+    method public int getImplMethodKind();
+    method public java.lang.String getImplMethodName();
+    method public java.lang.String getImplMethodSignature();
+    method public final java.lang.String getInstantiatedMethodType();
   }
 
 }
@@ -54988,6 +55008,7 @@ package java.util {
     method public E removeLast();
     method public boolean removeLastOccurrence(java.lang.Object);
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
   }
 
   public class ArrayList extends java.util.AbstractList implements java.lang.Cloneable java.util.List java.util.RandomAccess java.io.Serializable {
@@ -54999,6 +55020,7 @@ package java.util {
     method public void forEach(java.util.function.Consumer<? super E>);
     method public E get(int);
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public void trimToSize();
   }
 
@@ -55099,6 +55121,14 @@ package java.util {
     method public static void sort(java.lang.Object[], int, int);
     method public static void sort(T[], java.util.Comparator<? super T>);
     method public static void sort(T[], int, int, java.util.Comparator<? super T>);
+    method public static java.util.Spliterator<T> spliterator(T[]);
+    method public static java.util.Spliterator<T> spliterator(T[], int, int);
+    method public static java.util.Spliterator.OfInt spliterator(int[]);
+    method public static java.util.Spliterator.OfInt spliterator(int[], int, int);
+    method public static java.util.Spliterator.OfLong spliterator(long[]);
+    method public static java.util.Spliterator.OfLong spliterator(long[], int, int);
+    method public static java.util.Spliterator.OfDouble spliterator(double[]);
+    method public static java.util.Spliterator.OfDouble spliterator(double[], int, int);
     method public static java.lang.String toString(long[]);
     method public static java.lang.String toString(int[]);
     method public static java.lang.String toString(short[]);
@@ -55598,6 +55628,7 @@ package java.util {
     method public java.lang.Object clone();
     method public java.util.Iterator<E> iterator();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
   }
 
   public class Hashtable extends java.util.Dictionary implements java.lang.Cloneable java.util.Map java.io.Serializable {
@@ -55742,6 +55773,7 @@ package java.util {
     method public E removeLast();
     method public boolean removeLastOccurrence(java.lang.Object);
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
   }
 
   public abstract interface List implements java.util.Collection {
@@ -55908,6 +55940,8 @@ package java.util {
   }
 
   public static abstract interface Map.Entry {
+    method public static java.util.Comparator<java.util.Map.Entry<K, V>> comparingByKey();
+    method public static java.util.Comparator<java.util.Map.Entry<K, V>> comparingByKey(java.util.Comparator<? super K>);
     method public abstract boolean equals(java.lang.Object);
     method public abstract K getKey();
     method public abstract V getValue();
@@ -56086,6 +56120,7 @@ package java.util {
   public class PriorityQueue extends java.util.AbstractQueue implements java.io.Serializable {
     ctor public PriorityQueue();
     ctor public PriorityQueue(int);
+    ctor public PriorityQueue(java.util.Comparator<? super E>);
     ctor public PriorityQueue(int, java.util.Comparator<? super E>);
     ctor public PriorityQueue(java.util.Collection<? extends E>);
     ctor public PriorityQueue(java.util.PriorityQueue<? extends E>);
@@ -56096,6 +56131,7 @@ package java.util {
     method public E peek();
     method public E poll();
     method public int size();
+    method public final java.util.Spliterator<E> spliterator();
   }
 
   public class Properties extends java.util.Hashtable {
@@ -56338,6 +56374,111 @@ package java.util {
     method public abstract java.util.SortedSet<E> tailSet(E);
   }
 
+  public abstract interface Spliterator {
+    method public abstract int characteristics();
+    method public abstract long estimateSize();
+    method public default void forEachRemaining(java.util.function.Consumer<? super T>);
+    method public default java.util.Comparator<? super T> getComparator();
+    method public default long getExactSizeIfKnown();
+    method public default boolean hasCharacteristics(int);
+    method public abstract boolean tryAdvance(java.util.function.Consumer<? super T>);
+    method public abstract java.util.Spliterator<T> trySplit();
+    field public static final int CONCURRENT = 4096; // 0x1000
+    field public static final int DISTINCT = 1; // 0x1
+    field public static final int IMMUTABLE = 1024; // 0x400
+    field public static final int NONNULL = 256; // 0x100
+    field public static final int ORDERED = 16; // 0x10
+    field public static final int SIZED = 64; // 0x40
+    field public static final int SORTED = 4; // 0x4
+    field public static final int SUBSIZED = 16384; // 0x4000
+  }
+
+  public static abstract interface Spliterator.OfDouble implements java.util.Spliterator.OfPrimitive {
+    method public default void forEachRemaining(java.util.function.DoubleConsumer);
+    method public default void forEachRemaining(java.util.function.Consumer<? super java.lang.Double>);
+    method public abstract boolean tryAdvance(java.util.function.DoubleConsumer);
+    method public default boolean tryAdvance(java.util.function.Consumer<? super java.lang.Double>);
+    method public abstract java.util.Spliterator.OfDouble trySplit();
+  }
+
+  public static abstract interface Spliterator.OfInt implements java.util.Spliterator.OfPrimitive {
+    method public default void forEachRemaining(java.util.function.IntConsumer);
+    method public default void forEachRemaining(java.util.function.Consumer<? super java.lang.Integer>);
+    method public abstract boolean tryAdvance(java.util.function.IntConsumer);
+    method public default boolean tryAdvance(java.util.function.Consumer<? super java.lang.Integer>);
+    method public abstract java.util.Spliterator.OfInt trySplit();
+  }
+
+  public static abstract interface Spliterator.OfLong implements java.util.Spliterator.OfPrimitive {
+    method public default void forEachRemaining(java.util.function.LongConsumer);
+    method public default void forEachRemaining(java.util.function.Consumer<? super java.lang.Long>);
+    method public abstract boolean tryAdvance(java.util.function.LongConsumer);
+    method public default boolean tryAdvance(java.util.function.Consumer<? super java.lang.Long>);
+    method public abstract java.util.Spliterator.OfLong trySplit();
+  }
+
+  public static abstract interface Spliterator.OfPrimitive implements java.util.Spliterator {
+    method public default void forEachRemaining(T_CONS);
+    method public abstract boolean tryAdvance(T_CONS);
+    method public abstract T_SPLITR trySplit();
+  }
+
+  public final class Spliterators {
+    method public static java.util.Spliterator.OfDouble emptyDoubleSpliterator();
+    method public static java.util.Spliterator.OfInt emptyIntSpliterator();
+    method public static java.util.Spliterator.OfLong emptyLongSpliterator();
+    method public static java.util.Spliterator<T> emptySpliterator();
+    method public static java.util.Iterator<T> iterator(java.util.Spliterator<? extends T>);
+    method public static java.util.PrimitiveIterator.OfInt iterator(java.util.Spliterator.OfInt);
+    method public static java.util.PrimitiveIterator.OfLong iterator(java.util.Spliterator.OfLong);
+    method public static java.util.PrimitiveIterator.OfDouble iterator(java.util.Spliterator.OfDouble);
+    method public static java.util.Spliterator<T> spliterator(java.lang.Object[], int);
+    method public static java.util.Spliterator<T> spliterator(java.lang.Object[], int, int, int);
+    method public static java.util.Spliterator.OfInt spliterator(int[], int);
+    method public static java.util.Spliterator.OfInt spliterator(int[], int, int, int);
+    method public static java.util.Spliterator.OfLong spliterator(long[], int);
+    method public static java.util.Spliterator.OfLong spliterator(long[], int, int, int);
+    method public static java.util.Spliterator.OfDouble spliterator(double[], int);
+    method public static java.util.Spliterator.OfDouble spliterator(double[], int, int, int);
+    method public static java.util.Spliterator<T> spliterator(java.util.Collection<? extends T>, int);
+    method public static java.util.Spliterator<T> spliterator(java.util.Iterator<? extends T>, long, int);
+    method public static java.util.Spliterator.OfInt spliterator(java.util.PrimitiveIterator.OfInt, long, int);
+    method public static java.util.Spliterator.OfLong spliterator(java.util.PrimitiveIterator.OfLong, long, int);
+    method public static java.util.Spliterator.OfDouble spliterator(java.util.PrimitiveIterator.OfDouble, long, int);
+    method public static java.util.Spliterator<T> spliteratorUnknownSize(java.util.Iterator<? extends T>, int);
+    method public static java.util.Spliterator.OfInt spliteratorUnknownSize(java.util.PrimitiveIterator.OfInt, int);
+    method public static java.util.Spliterator.OfLong spliteratorUnknownSize(java.util.PrimitiveIterator.OfLong, int);
+    method public static java.util.Spliterator.OfDouble spliteratorUnknownSize(java.util.PrimitiveIterator.OfDouble, int);
+  }
+
+  public static abstract class Spliterators.AbstractDoubleSpliterator implements java.util.Spliterator.OfDouble {
+    ctor protected Spliterators.AbstractDoubleSpliterator(long, int);
+    method public int characteristics();
+    method public long estimateSize();
+    method public java.util.Spliterator.OfDouble trySplit();
+  }
+
+  public static abstract class Spliterators.AbstractIntSpliterator implements java.util.Spliterator.OfInt {
+    ctor protected Spliterators.AbstractIntSpliterator(long, int);
+    method public int characteristics();
+    method public long estimateSize();
+    method public java.util.Spliterator.OfInt trySplit();
+  }
+
+  public static abstract class Spliterators.AbstractLongSpliterator implements java.util.Spliterator.OfLong {
+    ctor protected Spliterators.AbstractLongSpliterator(long, int);
+    method public int characteristics();
+    method public long estimateSize();
+    method public java.util.Spliterator.OfLong trySplit();
+  }
+
+  public static abstract class Spliterators.AbstractSpliterator implements java.util.Spliterator {
+    ctor protected Spliterators.AbstractSpliterator(long, int);
+    method public int characteristics();
+    method public long estimateSize();
+    method public java.util.Spliterator<T> trySplit();
+  }
+
   public class Stack extends java.util.Vector {
     ctor public Stack();
     method public boolean empty();
@@ -56468,6 +56609,7 @@ package java.util {
     method public E pollFirst();
     method public E pollLast();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public java.util.NavigableSet<E> subSet(E, boolean, E, boolean);
     method public java.util.SortedSet<E> subSet(E, E);
     method public java.util.NavigableSet<E> tailSet(E, boolean);
@@ -56524,6 +56666,7 @@ package java.util {
     method public synchronized void setElementAt(E, int);
     method public synchronized void setSize(int);
     method public synchronized int size();
+    method public java.util.Spliterator<E> spliterator();
     method public synchronized void trimToSize();
     field protected int capacityIncrement;
     field protected int elementCount;
