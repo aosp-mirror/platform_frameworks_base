@@ -1205,7 +1205,8 @@ static jobject translate_gps_measurement(JNIEnv* env,
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY,
            CarrierPhaseUncertainty,
            measurement->carrier_phase_uncertainty);
-    SET(MultipathIndicator, measurement->multipath_indicator);
+    SET(MultipathIndicator,
+        static_cast<int32_t>(measurement->multipath_indicator));
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
 
     return object.get();
@@ -1244,7 +1245,8 @@ static jobject translate_gnss_measurement(JNIEnv* env,
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY,
            CarrierPhaseUncertainty,
            measurement->carrier_phase_uncertainty);
-    SET(MultipathIndicator, measurement->multipath_indicator);
+    SET(MultipathIndicator,
+        static_cast<int32_t>(measurement->multipath_indicator));
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
 
     return object.get();
