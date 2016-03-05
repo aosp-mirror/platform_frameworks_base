@@ -348,11 +348,25 @@ void CanvasContext::draw() {
     FrameBuilder frameBuilder(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
             mRenderNodes, mLightGeometry, mContentDrawBounds, &Caches::getInstance());
     mLayerUpdateQueue.clear();
-    BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(),
+    auto&& caches = Caches::getInstance();
+    BakedOpRenderer renderer(caches, mRenderThread.renderState(),
             mOpaque, mLightInfo);
-    // TODO: profiler().draw(mCanvas);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
+    profiler().draw(&renderer);
     bool drew = renderer.didDraw();
+
+    // post frame cleanup
+    caches.clearGarbage();
+    caches.pathCache.trim();
+    caches.tessellationCache.trim();
+
+#if DEBUG_MEMORY_USAGE
+    mCaches.dumpMemoryUsage();
+#else
+    if (CC_UNLIKELY(Properties::debugLevel & kDebugMemory)) {
+        caches.dumpMemoryUsage();
+    }
+#endif
 
 #else
     mCanvas->prepareDirty(frame.width(), frame.height(),

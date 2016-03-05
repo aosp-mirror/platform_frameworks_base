@@ -85,6 +85,16 @@ public:
     bool offscreenRenderTarget() { return mRenderTarget.offscreenBuffer != nullptr; }
     void dirtyRenderTarget(const Rect& dirtyRect);
     bool didDraw() const { return mHasDrawn; }
+
+    uint32_t getViewportWidth() const { return mRenderTarget.viewportWidth; }
+    uint32_t getViewportHeight() const { return mRenderTarget.viewportHeight; }
+
+    // simple draw methods, to be used for end frame decoration
+    void drawRect(float left, float top, float right, float bottom, const SkPaint* paint) {
+        float ltrb[4] = { left, top, right, bottom };
+        drawRects(ltrb, 4, paint);
+    }
+    void drawRects(const float* rects, int count, const SkPaint* paint);
 private:
     void setViewport(uint32_t width, uint32_t height);
     void clearColorBuffer(const Rect& clearRect);
