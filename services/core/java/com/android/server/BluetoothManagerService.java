@@ -89,14 +89,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_BLUETOOTH_SERVICE_CONNECTED = 40;
     private static final int MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED = 41;
     private static final int MESSAGE_RESTART_BLUETOOTH_SERVICE = 42;
-    private static final int MESSAGE_BLUETOOTH_STATE_CHANGE=60;
-    private static final int MESSAGE_TIMEOUT_BIND =100;
-    private static final int MESSAGE_TIMEOUT_UNBIND =101;
+    private static final int MESSAGE_BLUETOOTH_STATE_CHANGE = 60;
+    private static final int MESSAGE_TIMEOUT_BIND = 100;
+    private static final int MESSAGE_TIMEOUT_UNBIND = 101;
     private static final int MESSAGE_USER_SWITCHED = 300;
+    private static final int MESSAGE_USER_UNLOCKED = 301;
     private static final int MESSAGE_ADD_PROXY_DELAYED = 400;
     private static final int MESSAGE_BIND_PROFILE_SERVICE = 401;
-    private static final int MAX_SAVE_RETRIES=3;
-    private static final int MAX_ERROR_RESTART_RETRIES=6;
+    private static final int MAX_SAVE_RETRIES = 3;
+    private static final int MAX_ERROR_RESTART_RETRIES = 6;
 
     // Bluetooth persisted setting is off
     private static final int BLUETOOTH_OFF=0;
@@ -767,8 +768,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      * Called when switching to a different foreground user.
      */
     public void handleOnSwitchUser(int userHandle) {
-        if (DBG) Slog.d(TAG, "Bluetooth user switched");
-        mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_USER_SWITCHED, userHandle, 0));
+        if (DBG) Slog.d(TAG, "User " + userHandle + " switched");
+        mHandler.obtainMessage(MESSAGE_USER_SWITCHED, userHandle, 0).sendToTarget();
+    }
+
+    /**
+     * Called when user is unlocked.
+     */
+    public void handleOnUnlockUser(int userHandle) {
+        if (DBG) Slog.d(TAG, "User " + userHandle + " unlocked");
+        mHandler.obtainMessage(MESSAGE_USER_UNLOCKED, userHandle, 0).sendToTarget();
     }
 
     /**
@@ -1308,12 +1317,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     break;
                 }
 
-                case MESSAGE_USER_SWITCHED:
-                {
-                    if (DBG) {
-                        Slog.d(TAG, "MESSAGE_USER_SWITCHED");
-                    }
+                case MESSAGE_USER_SWITCHED: {
+                    if (DBG) Slog.d(TAG, "MESSAGE_USER_SWITCHED");
                     mHandler.removeMessages(MESSAGE_USER_SWITCHED);
+
                     /* disable and enable BT when detect a user switch */
                     if (mEnable && mBluetooth != null) {
                         synchronized (mConnection) {
@@ -1380,6 +1387,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         }
                     }
                     break;
+                }
+                case MESSAGE_USER_UNLOCKED: {
+                    if (DBG) Slog.d(TAG, "MESSAGE_USER_UNLOCKED");
+                    mHandler.removeMessages(MESSAGE_USER_SWITCHED);
+
+                    synchronized (mConnection) {
+                        if (mEnable && !mBinding && (mBluetooth == null)) {
+                            // We should be connected, but we gave up for some
+                            // reason; maybe the Bluetooth service wasn't encryption
+                            // aware, so try binding again.
+                            if (DBG) Slog.d(TAG, "Enabled but not bound; retrying after unlock");
+                            handleEnable(mQuietEnable);
+                        }
+                    }
                 }
             }
         }
