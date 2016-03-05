@@ -1,4 +1,4 @@
-page.title=ICU4J Support in Framework
+page.title=ICU4J in the Android Framework
 
 @jd:body
 
@@ -31,40 +31,36 @@ page.title=ICU4J Support in Framework
 <p>
   ICU4J is an open-source, widely used set of Java libraries providing Unicode
   and globalization support for software applications. The N Developer Preview
-  exposes a subset of ICU4J APIs in the Android Framework for app developers to
-  use under the {@code android.icu} package. The ICU4J Android Framework uses
-  localization data present on the device and can result in a substantial APK
-  size reduction over apps that include their own copy of ICU4J.
+  exposes a subset of the ICU4J APIs in the Android framework for app developers
+  to use under the {@code android.icu} package. These APIs use
+  localization data present on the device. As a result, you can reduce your APK
+  footprint by not compiling the ICU4J libraries into your APK; instead, you can
+  simply call out to them in the framework. (In this case, you may want to provide
+  <a href="{@docRoot}google/play/publishing/multiple-apks.html">multiple versions
+  of your APK</a>, so users running versions of Android lower than the N Developer
+  Preview can download a version of the app that contains the ICU4J libraries.)
 </p>
 
 <p>
   This document begins by providing some basic information on the minimum
   Android API levels required to support these libraries. It then explains what
   you need to know about the Android-specific implementation of ICU4J. Finally,
-  it tells you how to incorporate android.icu APIs into your app.
-</p>
-
-<h2 id="compatibility">Compatibility Across Android Releases</h2>
-
-<p>
-  The ICU4J Android Framework APIs are provided with the N Developer Preview.
-  If you need to support Android versions prior to the N Developer Preview you
-  should use the techniques described in <a href=
-  "{@docRoot}guide/practices/compatibility.html#Versions">Device
-  Compatibility</a>.
+  it tells you how to use the ICU4J APIs in the Android framework.
 </p>
 
 <h2 id="relation">Relationship to ICU4J</h2>
 
 <p>
-  The N Developer Preview provides a subset of the full ICU4J APIs under the
-  <code>android.icu</code> package. For example, the N Preview does not expose
+  The N Developer Preview exposes a subset of the ICU4J APIs via the
+  <code>android.icu</code> package. The Android framework may choose not to
+  expose ICU4J APIs for various reasons; for example, the N Preview does not expose
   some deprecated APIs or those that the ICU team have not yet declared as
-  stable. As the ICU team deprecates APIs in future, Android will also mark
+  stable. As the ICU team deprecates APIs in the future, Android will also mark
   them as deprecated but will continue to include them.
 </p>
 
-<p class="table-caption"><strong>Table 1.</strong> ICU and CLDR versions used in the N Developer Preview.
+<p class="table-caption"><strong>Table 1.</strong> ICU and CLDR versions used
+  in the N Preview.</p>
 <table>
 <tr>
 <th>Android API level</th>
@@ -79,7 +75,7 @@ page.title=ICU4J Support in Framework
 </table>
 
 <p class="note">
-  <b>Note</b>: When using the ICU4J Android Framework APIs you may notice
+  <b>Note</b>: When using the the the ICU4J APIs in the Android framework, you may notice
   differences between Android releases. For example, the exact text returned
   from formatters may vary between API levels as they do for existing
   <code>java.util</code> and <code>java.text</code> classes on Android. These
@@ -91,27 +87,26 @@ page.title=ICU4J Support in Framework
 
 <ul>
 <li>The ICU4J Android Framework APIs do not include all the ICU4J APIs.</li>
-<li>Android does not expose the ICU4C APIs for developers using the NDK.</li>
-<li>The ICU4J Android Framework APIs do not replace Android’s support for
-<a href="{@docRoot}guide/topics/resources/localization.html">Localizing with
-Resources</a>.</li>
+<li>NDK developers should know that Android ICU4C is not supported.</li>
+<li>The APIs in the Android framework do not replace Android’s support for
+<a href="{@docRoot}guide/topics/resources/localization.html">localizing with
+resources</a>.</li>
 </ul>
 
-<h2 id="migration">Migrating to android.icu APIs from ICU4J</h2>
+<h2 id="migration">Migrating to the android.icu package from com.ibm.icu</h2>
 
 <p>
-  If you are already using ICU4J APIs in your app, and the
+  If you are already using the ICU4J APIs in your app, and the
   <code>android.icu</code> APIs meet your requirements, then migrating to
-  <code>android.icu</code> framework requires you to change your Java imports
-  from <code>com.ibm.icu</code> to <code>android.icu.</code> You may then
+  the framework APIs requires you to change your Java imports
+  from <code>com.ibm.icu</code> to <code>android.icu</code>. You may then
   remove your own copy of ICU4J files from the APK.
 </p>
 
 <p class="note">
-  <b>Note</b>: The ICU4J Android Framework exposes the classes in the
-  <code>android.icu</code>
-  package instead of <code>com.ibm.icu</code>. This is to avoid conflicts with
-  a copy of ICU4J that may be included in your app’s .apk file.
+  <b>Note</b>: ICU4J in the Android framework uses the {@code android.icu}
+  namespace instead of {@code com.ibm.icu}. This is to avoid namespace
+  conflicts in APKs that contain their own {@code com.ibm.icu} libraries.
 </p>
 
 <h3 id="migrate-from-android">
@@ -120,8 +115,8 @@ Resources</a>.</li>
 
 <p>
   Some classes in the <code>java</code> and<code>android</code> packages have
-  equivalents to those found in ICU4J. The ICU4J version often provides more
-  complete support for standards or a wider range of languages.
+  equivalents to those found in ICU4J. However, ICU4J often provides broader
+  support for standards and languages.
 </p>
 <p>Here are some examples to get you started:</p>
 <table>
@@ -169,7 +164,8 @@ Resources</a>.</li>
 <h2 id="licence">Licensing</h2>
 
 <p>
-  ICU4J is released under a nonrestrictive <a class="external-link" href=
-  "http://source.icu-project.org/repos/icu/icu/trunk/license.html">open source
-  license</a>.
+  ICU4J is released under the ICU license. For details, see the <a class=
+  "external-link" href=
+  "http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU
+  User Guide.</a>
 </p>
