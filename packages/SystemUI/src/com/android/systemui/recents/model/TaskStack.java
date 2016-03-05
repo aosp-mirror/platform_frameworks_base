@@ -92,15 +92,6 @@ class FilteredTaskList {
         }
     }
 
-    /**
-     * Resets the task list, but does not remove the filter.
-     */
-    void reset() {
-        mTasks.clear();
-        mFilteredTasks.clear();
-        mTaskIndices.clear();
-    }
-
     /** Removes the task filter and returns the previous touch state */
     void removeFilter() {
         mFilter = null;
@@ -481,15 +472,6 @@ public class TaskStack {
         mCb = cb;
     }
 
-    /** Resets this TaskStack. */
-    public void reset() {
-        mCb = null;
-        mStackTaskList.reset();
-        mHistoryTaskList.reset();
-        mGroups.clear();
-        mAffinitiesGroups.clear();
-    }
-
     /**
      * Moves the given task to either the front of the freeform workspace or the stack.
      */
@@ -556,12 +538,12 @@ public class TaskStack {
      * @param tasks the new set of tasks to replace the current set.
      * @param notifyStackChanges whether or not to callback on specific changes to the list of tasks.
      */
-    public void setTasks(List<Task> tasks, boolean notifyStackChanges) {
+    public void setTasks(Context context, List<Task> tasks, boolean notifyStackChanges) {
         // Compute a has set for each of the tasks
         ArrayMap<Task.TaskKey, Task> currentTasksMap = createTaskKeyMapFromList(mRawTaskList);
         ArrayMap<Task.TaskKey, Task> newTasksMap = createTaskKeyMapFromList(tasks);
-
-        ArrayList<Task> newTasks = new ArrayList<>();
+        ArrayList<Task> addedTasks = new ArrayList<>();
+        ArrayList<Task> allTasks = new ArrayList<>();
 
         // Disable notifications if there are no callbacks
         if (mCb == null) {
@@ -570,10 +552,13 @@ public class TaskStack {
 
         // Remove any tasks that no longer exist
         int taskCount = mRawTaskList.size();
-        for (int i = 0; i < taskCount; i++) {
+        for (int i = taskCount - 1; i >= 0; i--) {
             Task task = mRawTaskList.get(i);
             if (!newTasksMap.containsKey(task.key)) {
                 if (notifyStackChanges) {
+                    // If we are notifying, then remove the task now, otherwise the raw task list
+                    // will be reset at the end of this method
+                    removeTask(task, AnimationProps.IMMEDIATE);
                     mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null,
                             AnimationProps.IMMEDIATE);
                 }
@@ -584,26 +569,28 @@ public class TaskStack {
         // Add any new tasks
         taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
-            Task task = tasks.get(i);
-            if (!currentTasksMap.containsKey(task.key)) {
-                if (notifyStackChanges) {
-                    mCb.onStackTaskAdded(this, task);
-                }
-                newTasks.add(task);
-            } else {
-                newTasks.add(currentTasksMap.get(task.key));
+            Task newTask = tasks.get(i);
+            Task currentTask = currentTasksMap.get(newTask.key);
+            if (currentTask == null && notifyStackChanges) {
+                addedTasks.add(newTask);
+            } else if (currentTask != null) {
+                // The current task has bound callbacks, so just copy the data from the new task
+                // state and add it back into the list
+                currentTask.copyFrom(newTask);
+                newTask = currentTask;
             }
+            allTasks.add(newTask);
         }
 
         // Sort all the tasks to ensure they are ordered correctly
-        Collections.sort(newTasks, FREEFORM_LAST_ACTIVE_TIME_COMPARATOR);
+        Collections.sort(allTasks, FREEFORM_LAST_ACTIVE_TIME_COMPARATOR);
 
         // Filter out the historical tasks from this new list
         ArrayList<Task> stackTasks = new ArrayList<>();
         ArrayList<Task> historyTasks = new ArrayList<>();
-        int newTaskCount = newTasks.size();
+        int newTaskCount = allTasks.size();
         for (int i = 0; i < newTaskCount; i++) {
-            Task task = newTasks.get(i);
+            Task task = allTasks.get(i);
             if (task.isHistorical) {
                 historyTasks.add(task);
             } else {
@@ -613,10 +600,16 @@ public class TaskStack {
 
         mStackTaskList.set(stackTasks);
         mHistoryTaskList.set(historyTasks);
-        mRawTaskList.clear();
-        mRawTaskList.addAll(newTasks);
-        mGroups.clear();
-        mAffinitiesGroups.clear();
+        mRawTaskList = allTasks;
+
+        // Only callback for the newly added tasks after this stack has been updated
+        int addedTaskCount = addedTasks.size();
+        for (int i = 0; i < addedTaskCount; i++) {
+            mCb.onStackTaskAdded(this, addedTasks.get(i));
+        }
+
+        // Update the affiliated groupings
+        createAffiliatedGroupings(context);
     }
 
     /**
@@ -779,9 +772,12 @@ public class TaskStack {
     }
 
     /**
-     * Temporary: This method will simulate affiliation groups by
+     * Temporary: This method will simulate affiliation groups
      */
-    public void createAffiliatedGroupings(Context context) {
+    void createAffiliatedGroupings(Context context) {
+        mGroups.clear();
+        mAffinitiesGroups.clear();
+
         if (RecentsDebugFlags.Static.EnableMockTaskGroups) {
             ArrayMap<Task.TaskKey, Task> taskMap = new ArrayMap<>();
             // Sort all tasks by increasing firstActiveTime of the task
@@ -926,13 +922,13 @@ public class TaskStack {
 
     @Override
     public String toString() {
-        String str = "Stack Tasks:\n";
+        String str = "Stack Tasks (" + mStackTaskList.size() + "):\n";
         for (Task t : mStackTaskList.getTasks()) {
-            str += "  " + t.toString() + "\n";
+            str += "    " + t.toString() + "\n";
         }
-        str += "Historical Tasks:\n";
+        str += "Historical Tasks(" + mHistoryTaskList.size() + "):\n";
         for (Task t : mHistoryTaskList.getTasks()) {
-            str += "  " + t.toString() + "\n";
+            str += "    " + t.toString() + "\n";
         }
         return str;
     }
