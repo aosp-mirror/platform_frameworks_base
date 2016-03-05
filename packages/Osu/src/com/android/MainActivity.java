@@ -239,6 +239,10 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onHandleIntent(Intent intent) {
+            if (intent == null) {
+                Log.d(OSUManager.TAG, "Null intent!");
+                return;
+            }
             Bundle bundle = intent.getExtras();
             WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
             Log.d(OSUManager.TAG, "OSU Service got intent: " + intent.getStringExtra(ACTION_KEY));
@@ -283,7 +287,26 @@ public class MainActivity extends Activity {
                             bundle.getByteArray(WifiManager.EXTRA_PASSPOINT_ICON_DATA));
                     break;
                 case WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION:
-                    mOsuManager.networkConfigChange((WifiConfiguration)
+                    boolean multiNetwork =
+                            bundle.getBoolean(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, false);
+                    if (multiNetwork) {
+                        mOsuManager.networkChanged(null);
+                    } else {
+                        WifiConfiguration configuration =
+                                intent.getParcelableExtra(WifiManager.EXTRA_WIFI_CONFIGURATION);
+                        switch (bundle.getInt(WifiManager.EXTRA_CHANGE_REASON,
+                                WifiManager.CHANGE_REASON_CONFIG_CHANGE)) {
+                            case WifiManager.CHANGE_REASON_ADDED:
+                                break;
+                            case WifiManager.CHANGE_REASON_REMOVED:
+                                mOsuManager.networkDeleted(configuration);
+                                break;
+                            case WifiManager.CHANGE_REASON_CONFIG_CHANGE:
+                                mOsuManager.networkChanged(configuration);
+                                break;
+                        }
+                    }
+                    mOsuManager.networkChanged((WifiConfiguration)
                             intent.getParcelableExtra(WifiManager.EXTRA_WIFI_CONFIGURATION));
                     break;
                 case WifiManager.WIFI_STATE_CHANGED_ACTION:
