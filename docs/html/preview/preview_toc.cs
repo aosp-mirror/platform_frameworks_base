@@ -47,7 +47,7 @@
         <li><a href="<?cs var:toroot ?>preview/features/background-optimization.html"
         >Background Optimizations</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/notification-updates.html"
-        >Bundled Notifications</a></li>
+        Notifications</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
         >Language and Locale</a></li>
       </ul>
