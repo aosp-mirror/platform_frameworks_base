@@ -45,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:popupTheme="?actionBarPopupTheme"
+                android:background="@android:color/transparent"
                 android:overlapAnchor="true" />
 
         </com.android.documentsui.DocumentsToolbar>

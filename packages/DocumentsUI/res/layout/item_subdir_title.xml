@@ -28,6 +28,7 @@
         android:singleLine="true"
         android:ellipsize="end"
         android:textAlignment="viewStart"
+        android:drawablePadding="12dp"
+        android:drawableRight="@drawable/ic_breadcrumb_arrow_down"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title" />
-
 </LinearLayout>
