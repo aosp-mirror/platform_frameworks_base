@@ -28,6 +28,8 @@ import android.media.MediaHTTPService;
 import android.net.Uri;
 import android.os.IBinder;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -186,6 +188,26 @@ final public class MediaExtractor {
                 path,
                 null,
                 null);
+    }
+
+    /**
+     * Sets the data source (AssetFileDescriptor) to use. It is the caller's
+     * responsibility to close the file descriptor. It is safe to do so as soon
+     * as this call returns.
+     *
+     * @param afd the AssetFileDescriptor for the file you want to extract from.
+     */
+    public final void setDataSource(@NonNull AssetFileDescriptor afd)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        Preconditions.checkNotNull(afd);
+        // Note: using getDeclaredLength so that our behavior is the same
+        // as previous versions when the content provider is returning
+        // a full file.
+        if (afd.getDeclaredLength() < 0) {
+            setDataSource(afd.getFileDescriptor());
+        } else {
+            setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getDeclaredLength());
+        }
     }
 
     /**
