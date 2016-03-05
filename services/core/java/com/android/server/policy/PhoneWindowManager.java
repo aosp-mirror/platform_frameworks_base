@@ -57,6 +57,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.CompatibilityInfo;
@@ -76,6 +77,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.FactoryTest;
@@ -2057,7 +2059,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 // check if user has enabled this operation. SecurityException will be thrown if
                 // this app has not been allowed by the user
-                final int mode = mAppOpsManager.checkOp(outAppOp[0], callingUid,
+                final int mode = mAppOpsManager.checkOpNoThrow(outAppOp[0], callingUid,
                         attrs.packageName);
                 switch (mode) {
                     case AppOpsManager.MODE_ALLOWED:
@@ -2066,6 +2068,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // actually be hidden in WindowManagerService
                         return WindowManagerGlobal.ADD_OKAY;
                     case AppOpsManager.MODE_ERRORED:
+                        try {
+                            ApplicationInfo appInfo = mContext.getPackageManager()
+                                    .getApplicationInfo(attrs.packageName,
+                                            UserHandle.getUserId(callingUid));
+                            // Don't crash legacy apps
+                            if (appInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                                return WindowManagerGlobal.ADD_OKAY;
+                            }
+                        } catch (PackageManager.NameNotFoundException e) {
+                            /* ignore */
+                        }
                         return WindowManagerGlobal.ADD_PERMISSION_DENIED;
                     default:
                         // in the default mode, we will make a decision here based on
