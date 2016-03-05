@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.component;
-
-import android.content.Context;
+package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent when the visibility of the RecentsActivity for the current user changes.  Handlers
- * of this event should not alter the UI, as the activity may still be visible.
+ * This is sent by the activity whenever the multi-window state has changed.
  */
-public class RecentsVisibilityChangedEvent extends EventBus.Event {
+public class MultiWindowStateChangedEvent extends EventBus.Event {
 
-    public final Context applicationContext;
-    public final boolean visible;
+    public final boolean inMultiWindow;
 
-    public RecentsVisibilityChangedEvent(Context context, boolean visible) {
-        this.applicationContext = context.getApplicationContext();
-        this.visible = visible;
+    public MultiWindowStateChangedEvent(boolean inMultiWindow) {
+        this.inMultiWindow = inMultiWindow;
     }
 }

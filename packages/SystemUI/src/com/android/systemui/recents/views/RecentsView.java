@@ -60,9 +60,7 @@ import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
-import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
 import com.android.systemui.recents.events.activity.ToggleHistoryEvent;
-import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
@@ -168,35 +166,39 @@ public class RecentsView extends FrameLayout {
     }
 
     /** Set/get the bsp root node */
-    public void setTaskStack(TaskStack stack) {
+    public void onResume(boolean isResumingFromVisible, TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        mStack = stack;
-        if (launchState.launchedReuseTaskStackViews) {
-            if (mTaskStackView != null) {
-                // If onRecentsHidden is not triggered, we need to the stack view again here
-                mTaskStackView.reset();
-                mTaskStackView.setStack(stack);
-            } else {
-                mTaskStackView = new TaskStackView(getContext(), stack);
-                addView(mTaskStackView);
-            }
-        } else {
-            if (mTaskStackView != null) {
-                removeView(mTaskStackView);
-            }
-            mTaskStackView = new TaskStackView(getContext(), stack);
+
+        if (mTaskStackView == null || !launchState.launchedReuseTaskStackViews) {
+            isResumingFromVisible = false;
+            removeView(mTaskStackView);
+            mTaskStackView = new TaskStackView(getContext());
+            mStack = mTaskStackView.getStack();
             addView(mTaskStackView);
         }
 
-        // If we are already occluded by the app, then just set the default background scrim now.
-        // Otherwise, defer until the enter animation completes to animate the scrim with the
-        // tasks for the home animation.
-        if (launchState.launchedWhileDocking || launchState.launchedFromApp
-                || mStack.getTaskCount() == 0) {
-            mBackgroundScrim.setAlpha((int) (DEFAULT_SCRIM_ALPHA * 255));
+        // Reset the state
+        mAwaitingFirstLayout = !isResumingFromVisible;
+        mLastTaskLaunchedWasFreeform = false;
+
+        // Update the stack
+        mTaskStackView.onResume(isResumingFromVisible);
+        mTaskStackView.setTasks(stack, isResumingFromVisible /* notifyStackChanges */);
+
+        if (isResumingFromVisible) {
+            // If we are already visible, then restore the background scrim
+            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, DEFAULT_UPDATE_SCRIM_DURATION);
         } else {
-            mBackgroundScrim.setAlpha(0);
+            // If we are already occluded by the app, then set the final background scrim alpha now.
+            // Otherwise, defer until the enter animation completes to animate the scrim alpha with
+            // the tasks for the home animation.
+            if (launchState.launchedWhileDocking || launchState.launchedFromApp
+                    || mStack.getTaskCount() == 0) {
+                mBackgroundScrim.setAlpha((int) (DEFAULT_SCRIM_ALPHA * 255));
+            } else {
+                mBackgroundScrim.setAlpha(0);
+            }
         }
 
         // Update the top level view's visibilities
@@ -205,9 +207,6 @@ public class RecentsView extends FrameLayout {
         } else {
             showEmptyView();
         }
-
-        // Trigger a new layout
-        requestLayout();
     }
 
     /**
@@ -662,13 +661,6 @@ public class RecentsView extends FrameLayout {
         animator.start();
     }
 
-    public final void onBusEvent(TaskStackUpdatedEvent event) {
-        if (!event.inMultiWindow) {
-            mStack.setTasks(event.stack.computeAllTasksList(), true /* notifyStackChanges */);
-            mStack.createAffiliatedGroupings(getContext());
-        }
-    }
-
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (!launchState.launchedWhileDocking && !launchState.launchedFromApp
@@ -684,17 +676,6 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(ResetBackgroundScrimEvent event) {
         animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, DEFAULT_UPDATE_SCRIM_DURATION);
-    }
-
-    public final void onBusEvent(RecentsVisibilityChangedEvent event) {
-        if (!event.visible) {
-            // Reset the view state
-            mAwaitingFirstLayout = true;
-            mLastTaskLaunchedWasFreeform = false;
-            if (RecentsDebugFlags.Static.EnableHistory) {
-                hideHistoryButton(0, false /* translate */);
-            }
-        }
     }
 
     public final void onBusEvent(ToggleHistoryEvent event) {
