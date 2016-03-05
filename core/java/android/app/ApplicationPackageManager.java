@@ -275,7 +275,7 @@ public class ApplicationPackageManager extends PackageManager {
     public List<PermissionInfo> queryPermissionsByGroup(String group, int flags)
             throws NameNotFoundException {
         try {
-            List<PermissionInfo> pi = mPM.queryPermissionsByGroup(group, flags);
+            List<PermissionInfo> pi = mPM.queryPermissionsByGroup(group, flags).getList();
             if (pi != null) {
                 return pi;
             }
@@ -304,7 +304,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
         try {
-            return mPM.getAllPermissionGroups(flags);
+            return mPM.getAllPermissionGroups(flags).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -441,7 +441,12 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public FeatureInfo[] getSystemAvailableFeatures() {
         try {
-            return mPM.getSystemAvailableFeatures();
+            final List<FeatureInfo> list = mPM.getSystemAvailableFeatures().getList();
+            final FeatureInfo[] res = new FeatureInfo[list.size()];
+            for (int i = 0; i < res.length; i++) {
+                res[i] = list.get(i);
+            }
+            return res;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -772,7 +777,7 @@ public class ApplicationPackageManager extends PackageManager {
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                userId);
+                userId).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -802,9 +807,10 @@ public class ApplicationPackageManager extends PackageManager {
         }
 
         try {
-            return mPM.queryIntentActivityOptions(caller, specifics,
-                                                  specificTypes, intent, intent.resolveTypeIfNeeded(resolver),
-                                                  flags, mContext.getUserId());
+            return mPM
+                    .queryIntentActivityOptions(caller, specifics, specificTypes, intent,
+                            intent.resolveTypeIfNeeded(resolver), flags, mContext.getUserId())
+                    .getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -820,7 +826,7 @@ public class ApplicationPackageManager extends PackageManager {
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                userId);
+                userId).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -851,7 +857,7 @@ public class ApplicationPackageManager extends PackageManager {
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                userId);
+                userId).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -867,7 +873,8 @@ public class ApplicationPackageManager extends PackageManager {
             Intent intent, int flags, int userId) {
         try {
             return mPM.queryIntentContentProviders(intent,
-                    intent.resolveTypeIfNeeded(mContext.getContentResolver()), flags, userId);
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()), flags, userId)
+                    .getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -926,7 +933,7 @@ public class ApplicationPackageManager extends PackageManager {
     public List<InstrumentationInfo> queryInstrumentation(
         String targetPackage, int flags) {
         try {
-            return mPM.queryInstrumentation(targetPackage, flags);
+            return mPM.queryInstrumentation(targetPackage, flags).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1572,7 +1579,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
         try {
-            return mPM.getIntentFilterVerifications(packageName);
+            return mPM.getIntentFilterVerifications(packageName).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1581,7 +1588,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public List<IntentFilter> getAllIntentFilters(String packageName) {
         try {
-            return mPM.getAllIntentFilters(packageName);
+            return mPM.getAllIntentFilters(packageName).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1892,31 +1899,21 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
     @Override
     public void addPackageToPreferred(String packageName) {
-        try {
-            mPM.addPackageToPreferred(packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Log.w(TAG, "addPackageToPreferred() is a no-op");
     }
 
     @Override
     public void removePackageFromPreferred(String packageName) {
-        try {
-            mPM.removePackageFromPreferred(packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Log.w(TAG, "removePackageFromPreferred() is a no-op");
     }
 
     @Override
     public List<PackageInfo> getPreferredPackages(int flags) {
-        try {
-            return mPM.getPreferredPackages(flags);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        Log.w(TAG, "getPreferredPackages() is a no-op");
+        return Collections.emptyList();
     }
 
     @Override

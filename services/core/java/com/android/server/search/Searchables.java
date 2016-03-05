@@ -410,7 +410,7 @@ public class Searchables {
             activities =
                     mPm.queryIntentActivities(intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    flags, mUserId);
+                    flags, mUserId).getList();
         } catch (RemoteException re) {
             // Local call
         }

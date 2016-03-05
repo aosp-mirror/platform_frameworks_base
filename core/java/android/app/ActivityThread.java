@@ -193,7 +193,7 @@ public final class ActivityThread {
 
     private ContextImpl mSystemContext;
 
-    static IPackageManager sPackageManager;
+    static volatile IPackageManager sPackageManager;
 
     final ApplicationThread mAppThread = new ApplicationThread();
     final Looper mLooper = Looper.myLooper();
@@ -218,7 +218,7 @@ public final class ActivityThread {
     // set of instantiated backup agents, keyed by package name
     final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
     /** Reference to singleton {@link ActivityThread} */
-    private static ActivityThread sCurrentActivityThread;
+    private static volatile ActivityThread sCurrentActivityThread;
     Instrumentation mInstrumentation;
     String mInstrumentationPackageName = null;
     String mInstrumentationAppDir = null;
@@ -296,7 +296,7 @@ public final class ActivityThread {
     final GcIdler mGcIdler = new GcIdler();
     boolean mGcIdlerScheduled = false;
 
-    static Handler sMainThreadHandler;  // set once in main()
+    static volatile Handler sMainThreadHandler;  // set once in main()
 
     Bundle mCoreSettings = null;
 
