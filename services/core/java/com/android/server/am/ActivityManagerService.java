@@ -9908,11 +9908,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final List<ProviderInfo> generateApplicationProvidersLocked(ProcessRecord app) {
         List<ProviderInfo> providers = null;
         try {
-            ParceledListSlice<ProviderInfo> slice = AppGlobals.getPackageManager()
+            providers = AppGlobals.getPackageManager()
                     .queryContentProviders(app.processName, app.uid,
                             STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS
-                                    | MATCH_DEBUG_TRIAGED_MISSING);
-            providers = slice != null ? slice.getList() : null;
+                                    | MATCH_DEBUG_TRIAGED_MISSING)
+                    .getList();
         } catch (RemoteException ex) {
         }
         if (DEBUG_MU) Slog.v(TAG_MU,

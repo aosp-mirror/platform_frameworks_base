@@ -113,6 +113,7 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -5264,9 +5265,8 @@ public final class ActivityThread {
             // don't bring up providers in restricted mode; they may depend on the
             // app's custom Application class
             if (!data.restrictedBackupMode) {
-                List<ProviderInfo> providers = data.providers;
-                if (providers != null) {
-                    installContentProviders(app, providers);
+                if (!ArrayUtils.isEmpty(data.providers)) {
+                    installContentProviders(app, data.providers);
                     // For process that contains content providers, we want to
                     // ensure that the JIT is enabled "at some point".
                     mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
