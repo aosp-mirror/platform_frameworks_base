@@ -27,6 +27,7 @@ import libcore.util.EmptyArray;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -121,6 +122,13 @@ public class ArrayUtils {
         }
 
         return (T[]) cache;
+    }
+
+    /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static boolean isEmpty(@Nullable List<?> array) {
+        return array == null || array.isEmpty();
     }
 
     /**
