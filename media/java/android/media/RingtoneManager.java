@@ -30,7 +30,9 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -223,9 +225,9 @@ public class RingtoneManager {
      */
     public static final int URI_COLUMN_INDEX = 2;
 
-    private Activity mActivity;
-    private Context mContext;
-    
+    private final Activity mActivity;
+    private final Context mContext;
+
     private Cursor mCursor;
 
     private int mType = TYPE_RINGTONE;
@@ -246,7 +248,8 @@ public class RingtoneManager {
      * @param activity The activity used to get a managed cursor.
      */
     public RingtoneManager(Activity activity) {
-        mContext = mActivity = activity;
+        mActivity = activity;
+        mContext = activity;
         setType(mType);
     }
 
@@ -258,6 +261,7 @@ public class RingtoneManager {
      * @param context The context to used to get a cursor.
      */
     public RingtoneManager(Context context) {
+        mActivity = null;
         mContext = context;
         setType(mType);
     }
@@ -271,7 +275,6 @@ public class RingtoneManager {
      * @see #EXTRA_RINGTONE_TYPE           
      */
     public void setType(int type) {
-
         if (mCursor != null) {
             throw new IllegalStateException(
                     "Setting filter columns should be done before querying for ringtones.");
@@ -656,21 +659,44 @@ public class RingtoneManager {
      * @see #getActualDefaultRingtoneUri(Context, int)
      */
     public static void setActualDefaultRingtoneUri(Context context, int type, Uri ringtoneUri) {
+        final ContentResolver resolver = context.getContentResolver();
+
         String setting = getSettingForType(type);
         if (setting == null) return;
-        Settings.System.putString(context.getContentResolver(), setting,
+        Settings.System.putString(resolver, setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null);
 
         // Stream selected ringtone into cache so it's available for playback
         // when CE storage is still locked
         if (ringtoneUri != null) {
-            final ContentResolver cr = context.getContentResolver();
             final Uri cacheUri = getCacheForType(type);
-            try (InputStream in = cr.openInputStream(ringtoneUri);
-                    OutputStream out = cr.openOutputStream(cacheUri)) {
+            try (InputStream in = openRingtone(context, ringtoneUri);
+                    OutputStream out = resolver.openOutputStream(cacheUri)) {
                 Streams.copy(in, out);
             } catch (IOException e) {
                 Log.w(TAG, "Failed to cache ringtone: " + e);
+            }
+        }
+    }
+
+    /**
+     * Try opening the given ringtone locally first, but failover to
+     * {@link IRingtonePlayer} if we can't access it directly. Typically happens
+     * when process doesn't hold
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
+     */
+    private static InputStream openRingtone(Context context, Uri uri) throws IOException {
+        final ContentResolver resolver = context.getContentResolver();
+        try {
+            return resolver.openInputStream(uri);
+        } catch (SecurityException | IOException e) {
+            Log.w(TAG, "Failed to open directly; attempting failover: " + e);
+            final IRingtonePlayer player = context.getSystemService(AudioManager.class)
+                    .getRingtonePlayer();
+            try {
+                return new ParcelFileDescriptor.AutoCloseInputStream(player.openRingtone(uri));
+            } catch (Exception e2) {
+                throw new IOException(e2);
             }
         }
     }

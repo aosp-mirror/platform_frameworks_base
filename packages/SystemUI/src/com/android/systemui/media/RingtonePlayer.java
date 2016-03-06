@@ -16,8 +16,10 @@
 
 package com.android.systemui.media;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
 import android.media.AudioAttributes;
 import android.media.IAudioService;
 import android.media.IRingtonePlayer;
@@ -25,15 +27,20 @@ import android.media.Ringtone;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.MediaStore;
+import android.provider.MediaStore.Audio.AudioColumns;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
 import com.android.systemui.SystemUI;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
@@ -179,6 +186,34 @@ public class RingtonePlayer extends SystemUI {
             final UserHandle user = Binder.getCallingUserHandle();
             return Ringtone.getTitle(getContextForUser(user), uri,
                     false /*followSettingsUri*/, false /*allowRemote*/);
+        }
+
+        @Override
+        public ParcelFileDescriptor openRingtone(Uri uri) {
+            final UserHandle user = Binder.getCallingUserHandle();
+            final ContentResolver resolver = getContextForUser(user).getContentResolver();
+
+            // Only open the requested Uri if it's a well-known ringtone or
+            // other sound from the platform media store, otherwise this opens
+            // up arbitrary access to any file on external storage.
+            if (uri.toString().startsWith(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString())) {
+                try (Cursor c = resolver.query(uri, new String[] {
+                        MediaStore.Audio.AudioColumns.IS_RINGTONE,
+                        MediaStore.Audio.AudioColumns.IS_ALARM,
+                        MediaStore.Audio.AudioColumns.IS_NOTIFICATION
+                }, null, null, null)) {
+                    if (c.moveToFirst()) {
+                        if (c.getInt(0) != 0 || c.getInt(1) != 0 || c.getInt(2) != 0) {
+                            try {
+                                return resolver.openFileDescriptor(uri, "r");
+                            } catch (IOException e) {
+                                throw new SecurityException(e);
+                            }
+                        }
+                    }
+                }
+            }
+            throw new SecurityException("Uri is not ringtone, alarm, or notification: " + uri);
         }
     };
 
