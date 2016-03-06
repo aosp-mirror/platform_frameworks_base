@@ -74,9 +74,11 @@
         <li><a href="<?cs var:toroot ?>preview/features/tv-recording-api.html"
         >TV Recording</a></li>
 
+        <li><a href="<?cs var:toroot ?>preview/features/security-config.html"
+        >Network Security Configuration</a></li>
+
         <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
         >ICU4J Support in Framework</a></li>
-
       </ul>
   </li>
 
