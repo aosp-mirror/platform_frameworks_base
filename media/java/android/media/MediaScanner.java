@@ -1042,13 +1042,13 @@ public class MediaScanner implements AutoCloseable {
 
             if(needToSetSettings) {
                 if (notifications) {
-                    setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
+                    setRingtoneIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
                     mDefaultNotificationSet = true;
                 } else if (ringtones) {
-                    setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
+                    setRingtoneIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
                 } else if (alarms) {
-                    setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
+                    setRingtoneIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
                     mDefaultAlarmSet = true;
                 }
             }
@@ -1063,18 +1063,18 @@ public class MediaScanner implements AutoCloseable {
                     pathFilenameStart + filenameLength == path.length();
         }
 
-        private void setSettingIfNotSet(String settingName, Uri uri, long rowId) {
-
-            if(wasSettingAlreadySet(settingName)) {
+        private void setRingtoneIfNotSet(String settingName, Uri uri, long rowId) {
+            if (wasRingtoneAlreadySet(settingName)) {
                 return;
             }
 
             ContentResolver cr = mContext.getContentResolver();
             String existingSettingValue = Settings.System.getString(cr, settingName);
             if (TextUtils.isEmpty(existingSettingValue)) {
-                // Set the setting to the given URI
-                Settings.System.putString(cr, settingName,
-                        ContentUris.withAppendedId(uri, rowId).toString());
+                final Uri settingUri = Settings.System.getUriFor(settingName);
+                final Uri ringtoneUri = ContentUris.withAppendedId(uri, rowId);
+                RingtoneManager.setActualDefaultRingtoneUri(mContext,
+                        RingtoneManager.getDefaultType(settingUri), ringtoneUri);
             }
             Settings.System.putInt(cr, settingSetIndicatorName(settingName), 1);
         }
@@ -1107,7 +1107,7 @@ public class MediaScanner implements AutoCloseable {
         return base + "_set";
     }
 
-    private boolean wasSettingAlreadySet(String name) {
+    private boolean wasRingtoneAlreadySet(String name) {
         ContentResolver cr = mContext.getContentResolver();
         String indicatorName = settingSetIndicatorName(name);
         try {
@@ -1134,9 +1134,9 @@ public class MediaScanner implements AutoCloseable {
             selectionArgs = new String[] { "" };
         }
 
-        mDefaultRingtoneSet = wasSettingAlreadySet(Settings.System.RINGTONE);
-        mDefaultNotificationSet = wasSettingAlreadySet(Settings.System.NOTIFICATION_SOUND);
-        mDefaultAlarmSet = wasSettingAlreadySet(Settings.System.ALARM_ALERT);
+        mDefaultRingtoneSet = wasRingtoneAlreadySet(Settings.System.RINGTONE);
+        mDefaultNotificationSet = wasRingtoneAlreadySet(Settings.System.NOTIFICATION_SOUND);
+        mDefaultAlarmSet = wasRingtoneAlreadySet(Settings.System.ALARM_ALERT);
 
         // Tell the provider to not delete the file.
         // If the file is truly gone the delete is unnecessary, and we want to avoid
