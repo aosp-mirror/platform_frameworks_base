@@ -18,6 +18,7 @@ package android.media;
 
 import android.media.AudioAttributes;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 
 /**
@@ -36,4 +37,6 @@ interface IRingtonePlayer {
 
     /** Return the title of the media. */
     String getTitle(in Uri uri);
+
+    ParcelFileDescriptor openRingtone(in Uri uri);
 }
