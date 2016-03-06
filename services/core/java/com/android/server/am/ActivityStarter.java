@@ -1757,7 +1757,7 @@ class ActivityStarter {
             // and if yes, we will launch into that stack. If not, we just put the new
             // activity into parent's stack, because we can't find a better place.
             final ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
-            if (stack != null && stack.getStackVisibilityLocked() == STACK_INVISIBLE) {
+            if (stack != null && stack.getStackVisibilityLocked(r) == STACK_INVISIBLE) {
                 // There is a docked stack, but it isn't visible, so we can't launch into that.
                 return null;
             } else {
