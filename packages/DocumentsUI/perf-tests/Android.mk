@@ -10,8 +10,8 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     ../tests/src/com/android/documentsui/DocumentsProviderHelper.java \
     ../tests/src/com/android/documentsui/StubProvider.java
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 mockito-target ub-uiautomator
+LOCAL_JAVA_LIBRARIES := android-support-v4 android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := mockito-target ub-uiautomator
 
 LOCAL_PACKAGE_NAME := DocumentsUIPerfTests
 LOCAL_INSTRUMENTATION_FOR := DocumentsUI
