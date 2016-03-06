@@ -101,6 +101,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 class WindowList extends ArrayList<WindowState> {
+    WindowList() {}
+    WindowList(WindowList windowList) {
+        super(windowList);
+    }
 }
 
 /**
