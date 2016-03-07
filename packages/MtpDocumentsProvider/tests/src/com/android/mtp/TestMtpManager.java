@@ -106,7 +106,7 @@ public class TestMtpManager extends MtpManager {
         mDevices.put(
                 deviceId,
                 new MtpDeviceRecord(device.deviceId, device.name, device.deviceKey, false,
-                        device.roots, null, null));
+                        device.roots, device.operationsSupported, device.eventsSupported));
     }
 
     @Override

@@ -596,7 +596,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 0,
                 "Device A",
                 "device key",
-                true /* unopened */,
+                true /* opened */,
                 new MtpRoot[] {
                     new MtpRoot(
                             0 /* deviceId */,
@@ -606,7 +606,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                             2048 /* total space */,
                             "" /* no volume identifier */)
                 },
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
 
         final String[] names = strings("Directory A", "Directory B", "Directory C");
