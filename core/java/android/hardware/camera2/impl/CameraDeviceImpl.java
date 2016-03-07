@@ -1116,6 +1116,11 @@ public class CameraDeviceImpl extends CameraDevice
                 int sequenceId) {
             // default empty implementation
         }
+
+        public void onCaptureBufferLost(CameraDevice camera,
+                CaptureRequest request, Surface target, long frameNumber) {
+            // default empty implementation
+        }
     }
 
     /**
@@ -1887,48 +1892,66 @@ public class CameraDeviceImpl extends CameraDevice
 
             final CaptureRequest request = holder.getRequest(subsequenceId);
 
-            // No way to report buffer errors right now
+            Runnable failureDispatch = null;
             if (errorCode == ERROR_CAMERA_BUFFER) {
-                Log.e(TAG, String.format("Lost output buffer reported for frame %d", frameNumber));
-                return;
-            }
-
-            boolean mayHaveBuffers = (errorCode == ERROR_CAMERA_RESULT);
-
-            // This is only approximate - exact handling needs the camera service and HAL to
-            // disambiguate between request failures to due abort and due to real errors.
-            // For now, assume that if the session believes we're mid-abort, then the error
-            // is due to abort.
-            int reason = (mCurrentSession != null && mCurrentSession.isAborting()) ?
-                    CaptureFailure.REASON_FLUSHED :
-                    CaptureFailure.REASON_ERROR;
-
-            final CaptureFailure failure = new CaptureFailure(
-                request,
-                reason,
-                /*dropped*/ mayHaveBuffers,
-                requestId,
-                frameNumber);
-
-            Runnable failureDispatch = new Runnable() {
-                @Override
-                public void run() {
-                    if (!CameraDeviceImpl.this.isClosed()){
-                        holder.getCallback().onCaptureFailed(
-                            CameraDeviceImpl.this,
-                            request,
-                            failure);
-                    }
+                final Surface outputSurface =
+                        mConfiguredOutputs.get(resultExtras.getErrorStreamId()).getSurface();
+                if (DEBUG) {
+                    Log.v(TAG, String.format("Lost output buffer reported for frame %d, target %s",
+                            frameNumber, outputSurface));
                 }
-            };
-            holder.getHandler().post(failureDispatch);
+                failureDispatch = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!CameraDeviceImpl.this.isClosed()){
+                            holder.getCallback().onCaptureBufferLost(
+                                CameraDeviceImpl.this,
+                                request,
+                                outputSurface,
+                                frameNumber);
+                        }
+                    }
+                };
+            } else {
+                boolean mayHaveBuffers = (errorCode == ERROR_CAMERA_RESULT);
 
-            // Fire onCaptureSequenceCompleted if appropriate
-            if (DEBUG) {
-                Log.v(TAG, String.format("got error frame %d", frameNumber));
+                // This is only approximate - exact handling needs the camera service and HAL to
+                // disambiguate between request failures to due abort and due to real errors.  For
+                // now, assume that if the session believes we're mid-abort, then the error is due
+                // to abort.
+                int reason = (mCurrentSession != null && mCurrentSession.isAborting()) ?
+                        CaptureFailure.REASON_FLUSHED :
+                        CaptureFailure.REASON_ERROR;
+
+                final CaptureFailure failure = new CaptureFailure(
+                    request,
+                    reason,
+                    /*dropped*/ mayHaveBuffers,
+                    requestId,
+                    frameNumber);
+
+                failureDispatch = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!CameraDeviceImpl.this.isClosed()){
+                            holder.getCallback().onCaptureFailed(
+                                CameraDeviceImpl.this,
+                                request,
+                                failure);
+                        }
+                    }
+                };
+
+                // Fire onCaptureSequenceCompleted if appropriate
+                if (DEBUG) {
+                    Log.v(TAG, String.format("got error frame %d", frameNumber));
+                }
+                mFrameNumberTracker.updateTracker(frameNumber, /*error*/true, request.isReprocess());
+                checkAndFireSequenceComplete();
             }
-            mFrameNumberTracker.updateTracker(frameNumber, /*error*/true, request.isReprocess());
-            checkAndFireSequenceComplete();
+
+            // Dispatch the failure callback
+            holder.getHandler().post(failureDispatch);
         }
 
     } // public class CameraDeviceCallbacks

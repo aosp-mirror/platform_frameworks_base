@@ -13785,6 +13785,7 @@ package android.hardware.camera2 {
 
   public static abstract class CameraCaptureSession.CaptureCallback {
     ctor public CameraCaptureSession.CaptureCallback();
+    method public void onCaptureBufferLost(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.view.Surface, long);
     method public void onCaptureCompleted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult);
     method public void onCaptureFailed(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureFailure);
     method public void onCaptureProgressed(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
