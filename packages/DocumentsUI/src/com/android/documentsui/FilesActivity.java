@@ -282,6 +282,24 @@ public class FilesActivity extends BaseActivity {
      * Launches an intent to view the specified document.
      */
     private void openDocument(DocumentInfo doc, Model model) {
+
+        // Provide specialized handling of downloaded APKs This sends the APK
+        // details off to get extra security information added, and finally
+        // to be handled by the package manager.
+        if (MimePredicate.isApkType(doc.mimeType)) {
+            // First try managing the document; we expect manager to filter
+            // based on authority, so we don't grant.
+            final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
+            manage.setData(doc.derivedUri);
+
+            try {
+                startActivity(manage);
+                return;
+            } catch (ActivityNotFoundException ex) {
+                // fall back to regular handling below.
+            }
+        }
+
         Intent intent = new QuickViewIntentBuilder(
                 getPackageManager(), getResources(), doc, model).build();
 
@@ -296,7 +314,7 @@ public class FilesActivity extends BaseActivity {
             }
         }
 
-        // Fallback to traditional VIEW action...
+        // Fall back to traditional VIEW action...
         intent = new Intent(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setData(doc.derivedUri);
