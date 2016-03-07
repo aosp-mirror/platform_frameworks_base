@@ -635,7 +635,6 @@ public final class SystemServer {
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
-        TextServicesManagerService tsms = null;
         ILockSettings lockSettings = null;
         AssetAtlasService atlas = null;
         MediaRouterService mediaRouter = null;
@@ -762,14 +761,7 @@ public final class SystemServer {
             }
 
             if (!disableNonCoreServices) {
-                traceBeginAndSlog("StartTextServicesManagerService");
-                try {
-                    tsms = new TextServicesManagerService(context);
-                    ServiceManager.addService(Context.TEXT_SERVICES_MANAGER_SERVICE, tsms);
-                } catch (Throwable e) {
-                    reportWtf("starting Text Service Manager Service", e);
-                }
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
             }
 
             if (!disableNetwork) {
@@ -1256,7 +1248,6 @@ public final class SystemServer {
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
         final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
-        final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
@@ -1370,12 +1361,6 @@ public final class SystemServer {
                     }
                 } catch (Throwable e) {
                     reportWtf("Notifying CommonTimeManagementService running", e);
-                }
-                try {
-                    if (textServiceManagerServiceF != null)
-                        textServiceManagerServiceF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying TextServicesManagerService running", e);
                 }
                 try {
                     if (atlasF != null) atlasF.systemRunning();

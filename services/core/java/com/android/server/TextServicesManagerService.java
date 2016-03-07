@@ -83,9 +83,34 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             new HashMap<String, SpellCheckerBindGroup>();
     private final TextServicesSettings mSettings;
 
-    public void systemRunning() {
-        if (!mSystemReady) {
-            mSystemReady = true;
+    public static final class Lifecycle extends SystemService {
+        private TextServicesManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new TextServicesManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.TEXT_SERVICES_MANAGER_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mService.systemRunning();
+            }
+        }
+    }
+
+    void systemRunning() {
+        synchronized (mSpellCheckerMap) {
+            if (!mSystemReady) {
+                mSystemReady = true;
+            }
         }
     }
 
