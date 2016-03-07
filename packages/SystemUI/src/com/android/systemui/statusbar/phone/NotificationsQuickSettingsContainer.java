@@ -24,21 +24,24 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
-
+import com.android.systemui.DensityContainer;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSContainer;
+import com.android.systemui.qs.customize.QSCustomizer;
 
 /**
  * The container with notification stack scroller and quick settings inside.
  */
 public class NotificationsQuickSettingsContainer extends FrameLayout
-        implements ViewStub.OnInflateListener {
+        implements ViewStub.OnInflateListener, DensityContainer.InflateListener {
 
-    private View mQsContainer;
+    private DensityContainer mQsContainer;
     private View mUserSwitcher;
     private View mStackScroller;
     private View mKeyguardStatusBar;
     private boolean mInflated;
     private boolean mQsExpanded;
+    private boolean mCustomizerAnimating;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,7 +50,8 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mQsContainer = findViewById(R.id.qs_density_container);
+        mQsContainer = (DensityContainer) findViewById(R.id.qs_density_container);
+        mQsContainer.addInflateListener(this);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
@@ -80,8 +84,9 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         boolean userSwitcherVisible = mInflated && mUserSwitcher.getVisibility() == View.VISIBLE;
         boolean statusBarVisible = mKeyguardStatusBar.getVisibility() == View.VISIBLE;
 
-        View stackQsTop = mQsExpanded ? mStackScroller : mQsContainer;
-        View stackQsBottom = !mQsExpanded ? mStackScroller : mQsContainer;
+        final boolean qsBottom = mQsExpanded && !mCustomizerAnimating;
+        View stackQsTop = qsBottom ? mStackScroller : mQsContainer;
+        View stackQsBottom = !qsBottom ? mStackScroller : mQsContainer;
         // Invert the order of the scroll view and user switcher such that the notifications receive
         // touches first but the panel gets drawn above.
         if (child == mQsContainer) {
@@ -117,9 +122,22 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         }
     }
 
+    @Override
+    public void onInflated(View v) {
+        QSCustomizer customizer = ((QSContainer) v).getCustomizer();
+        customizer.setContainer(this);
+    }
+
     public void setQsExpanded(boolean expanded) {
         if (mQsExpanded != expanded) {
             mQsExpanded = expanded;
+            invalidate();
+        }
+    }
+
+    public void setCustomizerAnimating(boolean isAnimating) {
+        if (mCustomizerAnimating != isAnimating) {
+            mCustomizerAnimating = isAnimating;
             invalidate();
         }
     }

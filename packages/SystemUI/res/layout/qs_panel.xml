@@ -34,4 +34,7 @@
 
     <include android:id="@+id/qs_detail" layout="@layout/qs_detail" />
 
+    <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
+        android:visibility="gone" />
+
 </com.android.systemui.qs.QSContainer>

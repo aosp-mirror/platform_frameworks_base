@@ -65,7 +65,7 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 import java.util.List;
 
 public class NotificationPanelView extends PanelView implements
-        ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
+        ExpandableView.OnHeightChangedListener,
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
         HeadsUpManager.OnHeadsUpChangedListener {
@@ -222,6 +222,7 @@ public class NotificationPanelView extends PanelView implements
             @Override
             public void onInflated(View v) {
                 mQsContainer = (QSContainer) v.findViewById(R.id.quick_settings_container);
+                mQsContainer.setPanelView(NotificationPanelView.this);
                 mQsContainer.getHeader().setOnClickListener(NotificationPanelView.this);
             }
         });
@@ -247,7 +248,7 @@ public class NotificationPanelView extends PanelView implements
                 final int height = bottom - top;
                 final int oldHeight = oldBottom - oldTop;
                 if (height != oldHeight) {
-                    onScrollChanged();
+                    onQsHeightChanged();
                 }
             }
         });
@@ -547,7 +548,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mBlockTouches) {
+        if (mBlockTouches || mQsContainer.isCustomizing()) {
             return false;
         }
         initDownStates(event);
@@ -707,7 +708,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mBlockTouches) {
+        if (mBlockTouches || mQsContainer.isCustomizing()) {
             return false;
         }
         initDownStates(event);
@@ -903,18 +904,6 @@ public class NotificationPanelView extends PanelView implements
     private int getFalsingThreshold() {
         float factor = mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
         return (int) (mQsFalsingThreshold * factor);
-    }
-
-    @Override
-    public void onOverscrolled(float lastTouchX, float lastTouchY, int amount) {
-        if (mIntercepting && shouldQuickSettingsIntercept(lastTouchX, lastTouchY,
-                -1 /* yDiff: Not relevant here */)) {
-            mQsTracking = true;
-            onQsExpansionStarted(amount);
-            mInitialHeightOnTouch = mQsExpansionHeight;
-            mInitialTouchY = mLastTouchY;
-            mInitialTouchX = mLastTouchX;
-        }
     }
 
     @Override
@@ -1719,9 +1708,10 @@ public class NotificationPanelView extends PanelView implements
     public void onReset(ExpandableView view) {
     }
 
-    @Override
-    public void onScrollChanged() {
+    public void onQsHeightChanged() {
+        mQsMaxExpansionHeight = mQsContainer.getDesiredHeight();
         if (mQsExpanded) {
+            mQsExpansionHeight = mQsMaxExpansionHeight;
             requestScrollerTopPaddingUpdate(false /* animate */);
             requestPanelHeightUpdate();
         }
