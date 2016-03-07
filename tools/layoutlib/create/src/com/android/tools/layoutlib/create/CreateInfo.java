@@ -164,6 +164,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.TypedArray#obtain",
         "android.graphics.BitmapFactory#finishDecode",
         "android.graphics.BitmapFactory#setDensityFromOptions",
+        "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#useLastSeenTarget",
         "android.graphics.drawable.GradientDrawable#buildRing",
         "android.graphics.Typeface#getSystemFontConfigLocation",
         "android.graphics.Typeface#makeFamilyFromParsed",
@@ -269,6 +270,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
+        "android.graphics.drawable.AnimatedVectorDrawable",
         "android.graphics.drawable.VectorDrawable",
         "android.os.SystemClock",
         "android.os.SystemProperties",
@@ -276,6 +278,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.text.StaticLayout",
         "android.util.PathParser",
         "android.view.Display",
+        "com.android.internal.view.animation.NativeInterpolatorFactoryHelper",
         "libcore.icu.ICU",
     };
 
