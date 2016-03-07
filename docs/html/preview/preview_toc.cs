@@ -50,7 +50,8 @@
         >Notifications</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
         >Language and Locale</a></li>
-      </ul>
+        <li><a href="<?cs var:toroot ?>preview/features/afw.html"
+        >Android for Work</a></li>      </ul>
   </li>
 
   <li class="nav-section">
