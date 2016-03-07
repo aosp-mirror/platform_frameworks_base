@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ਡੀਬਗਿੰਗ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਣ ਲਈ ਛੋਹਵੋ।"</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ਤੁਹਾਡੇ IT ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇਸ ਡੀਵਾਈਸ ਦੀ ਸਮੱਸਿਆ ਨੂੰ ਠੀਕ ਕਰਨ ਵਿੱਚ ਮਦਦ ਲਈ ਬੱਗ ਰਿਪੋਰਟ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਹੈ। ਐਪਾਂ ਅਤੇ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ ਅਤੇ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਆਰਜ਼ੀ ਤੌਰ \'ਤੇ ਹੌਲੀ ਹੋ ਸਕਦੀ ਹੈ।"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ਤੁਹਾਡੇ IT ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇਸ ਡੀਵਾਈਸ ਦੀ ਸਮੱਸਿਆ ਨੂੰ ਠੀਕ ਕਰਨ ਵਿੱੱਚ ਮਦਦ ਲਈ ਬੱਗ ਰਿਪੋਰਟ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਹੈ। ਐਪਾਂ ਅਤੇ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"ਇਹ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਨੂੰ ਆਰਜ਼ੀ ਤੌਰ \'ਤੇ ਹੌਲੀ ਕਰ ਸਕਦਾ ਹੈ"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ਸਵੀਕਾਰ ਕਰੋ"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀਬੋਰਡ ਬਦਲੋ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ਕੀਬੋਰਡਸ ਚੁਣੋ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>

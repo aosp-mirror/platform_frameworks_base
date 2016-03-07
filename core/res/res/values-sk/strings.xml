@@ -1068,13 +1068,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Ďalšie možnosti zobrazíte klepnutím."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladenie cez USB pripojené"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Klepnutím zakážete ladenie cez USB"</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Chcete zdieľať hlásenie chyby?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Zdieľa sa hlásenie chyby…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Správca IT si vyžiadal hlásenie chyby, aby mohol vyriešiť problém na tomto zariadení. Aplikácie a dáta môžu byť zdieľané. Môže to dočasne spomaliť vaše zariadenie."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Správca IT si vyžiadal hlásenie chyby, aby mohol vyriešiť problém na tomto zariadení. Aplikácie a dáta môžu byť zdieľané."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Môže to dočasne spomaliť vaše zariadenie."</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"PRIJAŤ"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ODMIETNUŤ"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Zmeniť klávesnicu"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Vybrať klávesnicu"</string>
     <string name="show_ime" msgid="2506087537466597099">"Ponechať na obrazovke, keď je aktívna fyzická klávesnica"</string>

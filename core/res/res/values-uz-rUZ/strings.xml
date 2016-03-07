@@ -895,7 +895,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Ilovani tanlang"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"“%1$s” bilan ochish"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Ochish…"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"“%1$s” yordamida ochish"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s bilan ochish"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"“%1$s” yordamida tahrirlash"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Ulashish…"</string>
@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Sozlash uchun bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"O‘chirib qo‘yish uchun bosing."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Xatoliklar hisoboti yuborilmoqda…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi va bu vaqtincha qurilmangizni sekinlashtirishi ham mumkin."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi mumkin."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Qurilmaning ishlash tezligi vaqtincha pasayishi mumkin."</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"QABUL QILISH"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RAD ETISH"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Klaviaturani tanlash"</string>
     <string name="show_ime" msgid="2506087537466597099">"Tashqi klaviaturadan foydalanilayotganda buni ekranda saqlab turish"</string>
@@ -1505,7 +1508,7 @@
       <item quantity="other">%d soat</item>
       <item quantity="one">1 soat</item>
     </plurals>
-    <string name="zen_mode_until" msgid="7336308492289875088">"Ushbu vaqtgacha: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha (keyingi signal)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Men o‘chirmaguncha"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"“Bezovta qilinmasin” rejimi o‘chirilmaguncha"</string>

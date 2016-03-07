@@ -1060,13 +1060,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Dodirnite za više opcija."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Uređaj za USB otklanjanje grešaka povezan"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dodirnite da biste onemogućili USB otklanjanje grešaka."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Podijeliti izvještaj o grešci?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Dijeljenje izvještaja o grešci..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Vaš IT administrator je zatražio izvještaj o grešci kako bi pomogao riješiti problem na ovom uređaju. To može uzrokovati dijeljenje aplikacija i podataka te privremeno usporiti vaš uređaj."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Vaš IT administrator je zatražio izvještaj o grešci kako bi pomogao u rješavanju problema ovog uređaja. Aplikacije i podaci se mogu dijeliti."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"To može privremeno usporiti vaš uređaj"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"PRIHVATI"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ODBACI"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Promijeni tastaturu"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Odaberite tastature"</string>
     <string name="show_ime" msgid="2506087537466597099">"Prikaži na ekranu dok je fizička tastatura aktivna"</string>
@@ -1558,7 +1561,7 @@
     </plurals>
     <string name="importance_from_user" msgid="7318955817386549931">"Vi određujete značaj ovih obavještenja."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ovo je značajno zbog osoba koje su uključene."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Da li dozvoljate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za nalog <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Da li dozvoljavate aplikaciji <xliff:g id="APP">%1$s</xliff:g> da kreira novog korisnika s računom <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Da li dozvoljavate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (Korisnik sa ovim nalogom već postoji)?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodaj jezik"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Izbor regije"</string>

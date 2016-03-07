@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"और विकल्पों के लिए स्पर्श करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करना अक्षम करने के लिए स्‍पर्श करें."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्ट साझा करें?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्ट साझा की जा रही है…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"इस डिवाइस के समस्या निवारण में सहायता हेतु आपके आईटी व्यवस्थापक ने बग रिपोर्ट के लिए अनुरोध किया है. ऐप्स और डेटा को साझा किया जा सकता है और आपके डिवाइस की गति अस्थायी रूप से धीमी हो सकती है."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"आपके आईटी व्यवस्थापक ने इस डिवाइस के समस्या निवारण में सहायता के लिए एक बग रिपोर्ट का अनुरोध किया है. ऐप्स और डेटा साझा किए जा सकते हैं."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"इससे आपका डिवाइस अस्थायी रूप से धीमा हो सकता है"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार करें"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार करें"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदलें"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड चुनें"</string>
     <string name="show_ime" msgid="2506087537466597099">"भौतिक कीबोर्ड के सक्रिय होने के दौरान इसे स्‍क्रीन पर बनाए रखें"</string>

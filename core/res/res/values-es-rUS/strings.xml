@@ -239,7 +239,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"acceder a los contactos"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ubicación"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"acceso a la ubicación de este dispositivo"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"acceder a la ubicación de este dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acceder al calendario"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver más opciones."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración por USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración por USB."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"El administrador de TI solicitó un informe de errores para ayudar a solucionar los problemas de este dispositivo. Es posible que se compartan apps y datos, y que el dispositivo se ralentice temporalmente."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"El administrador de TI solicitó un informe de errores para ayudar a solucionar los problemas de este dispositivo. Es posible que se compartan apps y datos."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Es posible que tu dispositivo se ralentice temporalmente"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEPTAR"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECHAZAR"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar el teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Seleccionar teclados"</string>
     <string name="show_ime" msgid="2506087537466597099">"Mantener en la pantalla cuando el teclado físico está activo"</string>

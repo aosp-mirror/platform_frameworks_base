@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Sentuh untuk mendapatkan lagi pilihan."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Penyahpepijatan USB disambungkan"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Sentuh untuk melumpuhkan penyahpepijatan USB."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Kongsi laporan pepijat?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Berkongsi laporan pepijat…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Pentadbir IT anda meminta laporan pepijat untuk membantu menyelesaikan masalah peranti ini. Apl dan data mungkin dikongsi dan peranti anda mungkin menjadi perlahan untuk sementara waktu."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Pentadbir IT anda meminta laporan pepijat untuk membantu menyelesaikan masalah peranti ini. Apl dan data mungkin dikongsi."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Proses ini mungkin memperlahankan peranti anda untuk sementara waktu"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"TERIMA"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"TOLAK"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Tukar papan kekunci"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Pilih papan kekunci"</string>
     <string name="show_ime" msgid="2506087537466597099">"Pastikannya pada skrin, semasa papan kekunci fizikal aktif"</string>

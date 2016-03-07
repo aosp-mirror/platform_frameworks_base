@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"輕觸即可顯示更多選項。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享錯誤報告嗎？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享錯誤報告…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"您的 IT 管理員要求您提供錯誤報告，以便排解這個裝置發生的問題。報告可能會揭露裝置中的應用程式和相關資料，裝置運行速度也可能會因此暫時減慢。"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"您的 IT 管理員要求您提供錯誤報告，以便排解這個裝置發生的問題。報告可能會揭露裝置中的應用程式和相關資料。"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"這可能會暫時減慢裝置運行速度"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"接受"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"拒絕"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"選擇鍵盤"</string>
     <string name="show_ime" msgid="2506087537466597099">"有連接的實體鍵盤時保持顯示"</string>

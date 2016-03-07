@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"버그 보고서를 공유하시겠습니까?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"버그 신고서 공유 중..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IT 관리자가 이 기기의 문제해결을 위해 버그 신고서를 요청했습니다. 앱과 데이터가 공유될 수 있으며 기기 속도가 일시적으로 느려질 수 있습니다."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IT 관리자가 이 기기의 문제해결을 위해 버그 보고서를 요청했습니다. 앱과 데이터가 공유될 수 있습니다."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"이로 인해 일시적으로 기기 속도가 느려질 수 있습니다."</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"수락"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"거절"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"키보드 선택"</string>
     <string name="show_ime" msgid="2506087537466597099">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
