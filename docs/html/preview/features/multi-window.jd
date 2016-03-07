@@ -15,6 +15,12 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
         <li><a href="#running">Running Your App in Multi-Window Mode</a></li>
         <li><a href="#testing">Testing Your App's Multi-Window Support</a></li>
       </ol>
+    <h2>See Also</h2>
+      <ol>
+        <li><a class="external-link"
+          href="https://github.com/googlesamples/android-MultiWindowPlayground">Multi-Window
+          Playground sample app</a></li>
+      </ol>
   </div>
 </div>
 
@@ -29,8 +35,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <p>
   If you build your app with the N Preview SDK, you can configure how your app
   handles multi-window display. For example, you can specify your activity's
-  minimum allowable dimensions, preventing users from making the activity
-  window smaller than that size. You can also disable multi-window display for
+  minimum allowable dimensions. You can also disable multi-window display for
   your app, ensuring that the system only shows your app in full-screen
   mode.
 </p>
@@ -64,7 +69,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   </li>
 </ul>
 
-<img src="{@docRoot}preview/images/mw-splitscreen.png" alt="" width="641"
+<img src="{@docRoot}preview/images/mw-splitscreen.png" alt="" width="650"
+    srcset="{@docRoot}preview/images/mw-splitscreen.png 1x,
+    {@docRoot}preview/images/mw-splitscreen_2x.png 2x,"
     id="img-split-screen" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Two apps running side-by-side in split-screen mode.
@@ -116,7 +123,12 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   <strong>Note:</strong> In multi-window mode, an app can be in the paused
   state and still be visible to the user. An app might need to continue its
   activities even while paused. For example, a video-playing app that is in
-  paused mode but is visible should continue showing its video.
+  paused mode but is visible should continue showing its video. For this
+  reason, we recommend that activities that play video <em>not</em> pause the
+  video in their {@link android.app.Activity#onPause onPause()} handlers.
+  Instead, they should pause video in {@link android.app.Activity#onStop
+  onStop()}, and resume playback in {@link android.app.Activity#onStart
+  onStart()}.
 </p>
 
 <p>
@@ -173,7 +185,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <pre>
-android:resizableActivity=["true" | "false"]
+android:resizeableActivity=["true" | "false"]
 </pre>
 
 <p>
@@ -193,7 +205,8 @@ android:resizableActivity=["true" | "false"]
 
 <p>
   Set this attribute in your manifest's <code>&lt;activity&gt;</code> node to
-  indicate whether the activity supports picture-in-picture display.
+  indicate whether the activity supports picture-in-picture display. This
+  attribute is ignored if <code>android:resizeableActivity</code> is false.
 </p>
 
 <pre>
@@ -240,8 +253,9 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <dd>
     Minimum height and minimum width for the activity in both split-screen
-    and freeform modes. The system does not permit the user to resize the
-    activity below the specified size in either dimension.
+    and freeform modes. If the user moves the divider in split-screen mode
+    to make an activity smaller than the specified minimum, the system crops
+    the activity to the size the user requests.
   </dd>
 </dl>
 
@@ -423,7 +437,12 @@ android:supportsPictureInPicture=["true" | "false"]
   </dt>
 
   <dd>
-    New alias for {@link android.view.View#startDrag View.startDrag()}.
+    New alias for {@link android.view.View#startDrag View.startDrag()}. To
+    enable cross-activity drag and drop, pass the new flag
+    <code>View.DRAG_FLAG_GLOBAL</code>. If you need to give URI permissions to
+    the recipient activity, pass the new flags
+    <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> or
+    <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code>, as appropriate.
   </dd>
 
   <dt>
