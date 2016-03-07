@@ -458,10 +458,10 @@
     <string name="show_silently" msgid="6841966539811264192">"显示通知，但不发出提示音"</string>
     <string name="block" msgid="2734508760962682611">"屏蔽所有通知"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"不静音"</string>
-    <string name="do_not_silence_block" msgid="4070647971382232311">"不静音或不屏蔽"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"不静音也不屏蔽"</string>
     <string name="tuner_full_importance_settings" msgid="8103289238676424226">"显示完整的重要性设置"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"屏蔽"</string>
-    <string name="min_importance" msgid="1901894910809414782">"最低重要性"</string>
+    <string name="min_importance" msgid="1901894910809414782">"重要性最低"</string>
     <string name="low_importance" msgid="4109929986107147930">"重要性：低"</string>
     <string name="default_importance" msgid="8192107689995742653">"重要性：一般"</string>
     <string name="high_importance" msgid="1527066195614050263">"重要性：高"</string>
@@ -470,8 +470,8 @@
     <string name="notification_importance_min" msgid="1938190340516905748">"在通知列表底部显示，但不发出提示音"</string>
     <string name="notification_importance_low" msgid="3657252049508213048">"显示这些通知，但不发出提示音"</string>
     <string name="notification_importance_default" msgid="4466466472622442175">"允许这些通知发出提示音"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"在屏幕上短暂显示，并发出提示音"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"在通知列表顶部显示，同时在屏幕上短暂显示，并发出提示音"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"在屏幕上短暂显示，并允许发出提示音"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"在通知列表顶部显示，同时在屏幕上短暂显示，并允许发出提示音"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"颜色和外观"</string>
