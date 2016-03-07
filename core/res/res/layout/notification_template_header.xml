@@ -33,16 +33,6 @@
         android:layout_marginEnd="3dp"
         />
     <TextView
-        android:id="@+id/number_of_children"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material.Notification"
-        android:layout_marginEnd="3dp"
-        android:layout_marginStart="2dp"
-        android:visibility="gone"
-        android:singleLine="true"
-        />
-    <TextView
         android:id="@+id/app_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

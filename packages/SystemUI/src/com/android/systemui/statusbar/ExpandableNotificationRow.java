@@ -411,8 +411,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public ExpandableNotificationRow getViewAtPosition(float y) {
-        if (!mIsSummaryWithChildren || !mChildrenExpanded
-                || (getNotificationChildren().size() == 1 && isClearable())) {
+        if (!mIsSummaryWithChildren || !mChildrenExpanded) {
             return this;
         } else {
             ExpandableNotificationRow view = mChildrenContainer.getViewAtPosition(y);
@@ -567,6 +566,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         mPrivateLayout.reInflateViews();
         mPublicLayout.reInflateViews();
+    }
+
+    public void setContentBackground(int customBackgroundColor, boolean animate,
+            NotificationContentView notificationContentView) {
+        if (getShowingLayout() == notificationContentView) {
+            setTintColor(customBackgroundColor, animate);
+        }
     }
 
     public interface ExpansionLogger {
@@ -1011,7 +1017,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateChildrenHeaderAppearance();
-        updateHeaderChildCount();
         updateChildrenVisibility();
     }
 
@@ -1024,7 +1029,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return whether the view state is currently expanded.
      */
     public boolean isExpanded() {
-        return !mOnKeyguard
+        return isExpanded(false /* allowOnKeyguard */);
+    }
+
+    public boolean isExpanded(boolean allowOnKeyguard) {
+        return (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }
@@ -1104,7 +1113,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         } else {
             animateShowingPublic(delay, duration);
         }
-
+        NotificationContentView showingLayout = getShowingLayout();
+        showingLayout.updateBackgroundColor(animated);
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateClearability();
         mShowingPublicInitialized = true;
@@ -1159,13 +1169,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         if (mChildrenContainer != null) {
             mChildrenContainer.setChildrenExpanded(expanded);
-        }
-    }
-
-    public void updateHeaderChildCount() {
-        if (mIsSummaryWithChildren) {
-            mNotificationHeader.setChildCount(
-                    mChildrenContainer.getNotificationChildren().size());
         }
     }
 
@@ -1280,15 +1283,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             header.reapply(getContext(), mNotificationHeader);
             mNotificationHeaderWrapper.notifyContentUpdated(mEntry.notification);
         }
-        updateHeaderExpandButton();
         updateChildrenHeaderAppearance();
-        updateHeaderChildCount();
-    }
-
-    private void updateHeaderExpandButton() {
-        if (mIsSummaryWithChildren) {
-            mNotificationHeader.setIsGroupHeader(true /* isGroupHeader*/);
-        }
     }
 
     public void updateChildrenHeaderAppearance() {

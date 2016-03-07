@@ -772,10 +772,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
         View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
         mScrimController = SystemUIFactory.getInstance().createScrimController(
-                scrimBehind, scrimInFront, headsUpScrim, mScrimSrcModeEnabled);
+                scrimBehind, scrimInFront, headsUpScrim);
+        if (mScrimSrcModeEnabled) {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    boolean asSrc = mBackdrop.getVisibility() != View.VISIBLE;
+                    mScrimController.setDrawBehindAsSrc(asSrc);
+                    mStackScroller.setDrawBackgroundAsSrc(asSrc);
+                }
+            };
+            mBackdrop.setOnVisibilityChangedRunnable(runnable);
+            runnable.run();
+        }
         mHeadsUpManager.addListener(mScrimController);
         mStackScroller.setScrimController(mScrimController);
-        mScrimController.setBackDropView(mBackdrop);
         mStatusBarView.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context);
 
@@ -1466,12 +1477,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStackScroller.removeView(remove);
             mStackScroller.setChildTransferInProgress(false);
         }
+
+        removeNotificationChildren();
+
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
                 mStackScroller.addView(v);
             }
         }
+
+        addNotificationChildrenAndSort();
 
         // So after all this work notifications still aren't sorted correctly.
         // Let's do that now by advancing through toShow and mStackScroller in
@@ -1493,9 +1509,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             j++;
 
         }
-
-        // lets handle the child notifications now
-        updateNotificationShadeForChildren();
 
         // clear the map again for the next usage
         mTmpChildOrderMap.clear();
@@ -1522,34 +1535,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && !ONLY_CORE_APPS);
     }
 
-    private void updateNotificationShadeForChildren() {
-        // First let's remove all children which don't belong in the parents
-        ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
-        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
-            View view = mStackScroller.getChildAt(i);
-            if (!(view instanceof ExpandableNotificationRow)) {
-                // We don't care about non-notification views.
-                continue;
-            }
-
-            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
-            List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
-
-            if (children != null) {
-                toRemove.clear();
-                for (ExpandableNotificationRow childRow : children) {
-                    if (orderedChildren == null || !orderedChildren.contains(childRow)) {
-                        toRemove.add(childRow);
-                    }
-                }
-                for (ExpandableNotificationRow remove : toRemove) {
-                    parent.removeChildNotification(remove);
-                    mStackScroller.notifyGroupChildRemoved(remove);
-                }
-            }
-        }
-
+    private void addNotificationChildrenAndSort() {
         // Let's now add all notification children which are missing
         boolean orderChanged = false;
         for (int i = 0; i < mStackScroller.getChildCount(); i++) {
@@ -1577,6 +1563,39 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (orderChanged) {
             mStackScroller.generateChildOrderChangedEvent();
+        }
+    }
+
+    private void removeNotificationChildren() {
+        // First let's remove all children which don't belong in the parents
+        ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
+        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
+            View view = mStackScroller.getChildAt(i);
+            if (!(view instanceof ExpandableNotificationRow)) {
+                // We don't care about non-notification views.
+                continue;
+            }
+
+            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
+            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
+            List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
+
+            if (children != null) {
+                toRemove.clear();
+                for (ExpandableNotificationRow childRow : children) {
+                    if (orderedChildren == null || !orderedChildren.contains(childRow)) {
+                        toRemove.add(childRow);
+                    }
+                }
+                for (ExpandableNotificationRow remove : toRemove) {
+                    parent.removeChildNotification(remove);
+                    if (mNotificationData.get(remove.getStatusBarNotification().getKey()) == null) {
+                        // We only want to add an animation if the view is completely removed
+                        // otherwise it's just a transfer
+                        mStackScroller.notifyGroupChildRemoved(remove);
+                    }
+                }
+            }
         }
     }
 
