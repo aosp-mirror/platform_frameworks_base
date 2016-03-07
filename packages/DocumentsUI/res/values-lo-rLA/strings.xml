@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ປ່ຽນແປງບາງໄຟລ໌ແລ້ວ"</string>
     <string name="allow" msgid="7225948811296386551">"ອະນຸຍາດ"</string>
     <string name="deny" msgid="2081879885755434506">"ປະ​ຕິ​ເສດ"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"ລຶບໄຟລ໌ອອກບໍ?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="other">ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟລ໌?</item>
-      <item quantity="one">ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟລ໌?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="other">ລຶບ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟລ໌ອອກບໍ?</item>
+      <item quantity="one">ລຶບ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟລ໌ອອກບໍ?</item>
     </plurals>
 </resources>

@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"केही फाइलहरू परिवर्तन गरिएका थिए"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दिनुहोस्"</string>
     <string name="deny" msgid="2081879885755434506">"अस्वीकार गर्नुहोस्"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"फाइलहरूलाई मेट्ने हो?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="other">तपाईँ निश्चित रूपमा <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरूलाई मेट्न चाहनुहुन्छ?</item>
-      <item quantity="one">तपाईँ निश्चित रूपमा <xliff:g id="COUNT_0">%1$d</xliff:g> फाइललाई मेट्न चाहनुहुन्छ?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरूलाई मेट्ने हो?</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> फाइललाई मेट्ने हो?</item>
     </plurals>
 </resources>

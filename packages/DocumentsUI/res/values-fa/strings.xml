@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"بعضی از فایل‌ها تبدیل شدند"</string>
     <string name="allow" msgid="7225948811296386551">"ارزیابی‌شده"</string>
     <string name="deny" msgid="2081879885755434506">"اجازه ندارد"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"فایل‌ها حذف شوند؟"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="one">مطمئنید می‌خواهید <xliff:g id="COUNT_1">%1$d</xliff:g> فایل را حذف کنید؟</item>
-      <item quantity="other">مطمئنید می‌خواهید <xliff:g id="COUNT_1">%1$d</xliff:g> فایل را حذف کنید؟</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل حذف شود؟</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل حذف شود؟</item>
     </plurals>
 </resources>

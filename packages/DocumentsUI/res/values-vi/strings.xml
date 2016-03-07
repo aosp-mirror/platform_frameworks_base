@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Đã chuyển đổi một số tệp"</string>
     <string name="allow" msgid="7225948811296386551">"Cho phép"</string>
     <string name="deny" msgid="2081879885755434506">"Từ chối"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Xóa tệp?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="other">Bạn có chắc chắn muốn xóa <xliff:g id="COUNT_1">%1$d</xliff:g> tệp không?</item>
-      <item quantity="one">Bạn có chắc chắn muốn xóa <xliff:g id="COUNT_0">%1$d</xliff:g> tệp không?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="other">Xóa <xliff:g id="COUNT_1">%1$d</xliff:g> tệp?</item>
+      <item quantity="one">Xóa <xliff:g id="COUNT_0">%1$d</xliff:g> tệp?</item>
     </plurals>
 </resources>
