@@ -121,8 +121,6 @@ public class BugreportProgressService extends Service {
     static final String INTENT_BUGREPORT_FINISHED = "android.intent.action.BUGREPORT_FINISHED";
     static final String INTENT_REMOTE_BUGREPORT_FINISHED =
             "android.intent.action.REMOTE_BUGREPORT_FINISHED";
-    static final String INTENT_REMOTE_BUGREPORT_DISPATCH =
-            "android.intent.action.REMOTE_BUGREPORT_DISPATCH";
 
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
