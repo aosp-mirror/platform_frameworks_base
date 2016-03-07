@@ -23,7 +23,7 @@ import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.Nullable;
-import android.content.res.BridgeResources.NinePatchInputStream;
+import com.android.layoutlib.bridge.util.NinePatchInputStream;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Bitmap_Delegate.BitmapCreateFlags;
 
