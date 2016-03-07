@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"შეეხეთ დამატებითი პარამეტრებისთვის."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB გამართვა შეერთებულია"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"შეეხეთ, რათა შეწყვიტოთ USB-ის გამართვა."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"გსურთ ხარვეზის შესახებ ანგარიშის გაზიარება?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"მიმდინარეობს ხარვეზის შესახებ ანგარიშის გაზიარება…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ამ მოწყობილობის პრობლემების აღმოფხვრაში დასახმარებლად, თქვენი IT ადმინისტრატორი ხარვეზის შესახებ ანგარიშს ითხოვს, რა დროსაც შეიძლება გაზიარდეს აპები და მონაცემები, ხოლო თქვენი მოწყობილობა დროებით შენელდეს."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ამ მოწყობილობის პრობლემების აღმოფხვრაში დასახმარებლად, თქვენი IT ადმინისტრატორი ხარვეზის შესახებ ანგარიშს ითხოვს, რა დროსაც შეიძლება გაზიარდეს აპები და მონაცემები."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"ამან შეიძლება დროებით შეანელოს თქვენი მოწყობილობა"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"მიღება"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"უარყოფა"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"კლავიატურის შეცვლა"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"კლავიატურების არჩევა"</string>
     <string name="show_ime" msgid="2506087537466597099">"აქტიური ფიზიკური კლავიატურისას ეკრანზე შენარჩუნება"</string>

@@ -1060,13 +1060,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Citas opcijas"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB atkļūdošana ir pievienota."</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Iespējot USB atkļūdošanu."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Notiek kļūdas pārskata izveide…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vai kopīgot kļūdas pārskatu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Notiek kļūdas pārskata kopīgošana…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Jūsu IT administrators pieprasīja kļūdas pārskatu, lai palīdzētu novērst problēmu šajā ierīcē. Var tikt kopīgotas lietotnes un dati, un jūsu ierīces darbība var īslaicīgi palēnināties."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Jūsu IT administrators pieprasīja kļūdas pārskatu, lai palīdzētu novērst problēmu šajā ierīcē. Var tikt kopīgotas lietotnes un dati."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Jūsu ierīces darbība var īslaicīgi palēnināties."</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"APSTIPRINĀT"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"NORAIDĪT"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Jūsu IT administrators pieprasīja kļūdas pārskatu, lai palīdzētu novērst problēmu šajā ierīcē. Var tikt kopīgotas lietotnes un dati."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"KOPĪGOT"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"NORAIDĪT"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatūras maiņa"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izvēlēties tastatūru"</string>
     <string name="show_ime" msgid="2506087537466597099">"Paturēt ekrānā, kamēr ir aktīva fiziskā tastatūra"</string>

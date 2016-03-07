@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ထပ်မံရွေးချယ်စရာများအတွက် ထိပါ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ဒီဘာဂင် ပိတ်ရန် ထိပါ။"</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ချွတ်ယွင်းမှုအစီရင်ခံစာ မျှဝေနေသည်…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ဤစက်ပစ္စည်းကို ပြဿနာအဖြေရှာရာတွင် ကူညီရန် သင့်အိုင်တီစီမံခန့်ခွဲသူသည် ချွတ်ယွင်းချက်အစီရင်ခံစာကို တောင်းဆိုထားသည်။ အက်ပ်များနှင့် ဒေတာကိုမျှဝေထားနိုင်ပြီး သင့်စက်ပစ္စည်းကို ခေတ္တနှေးကွေးသွားစေနိုင်သည်။"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ဤစက်ပစ္စည်းကို ပြဿနာအဖြေရှာရာတွင် ကူညီရန် သင့်အိုင်တီစီမံခန့်ခွဲသူသည် ချွတ်ယွင်းချက်အစီရင်ခံစာကို တောင်းဆိုထားသည်။ အက်ပ်များနှင့် ဒေတာကိုမျှဝေထားနိုင်ပါသည်။"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"၎င်းသည်သင့်စက်ပစ္စည်းကို ခေတ္တနှေးကွေးသွားစေနိုင်သည်"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"လက်ခံပါ"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ငြင်းပယ်ပါ"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ဤစက်ပစ္စည်းကို ပြဿနာအဖြေရှာရာတွင် ကူညီရန် သင့်အိုင်တီစီမံခန့်ခွဲသူသည် ချွတ်ယွင်းချက်အစီရင်ခံစာကို တောင်းဆိုထားသည်။ အက်ပ်များနှင့် ဒေတာကိုမျှဝေထားနိုင်ပါသည်။"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"မျှဝေပါ"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ငြင်းပယ်ပါ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ကီးဘုတ်များကို ရွေးရန်"</string>
     <string name="show_ime" msgid="2506087537466597099">"စက်၏ကီးဘုတ်ကိုအသုံးပြုနေစဉ် ၎င်းကိုမျက်နှာပြင်ပေါ်တွင် ထားပါ"</string>

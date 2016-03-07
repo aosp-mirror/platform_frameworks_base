@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Prek për më shumë opsione."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Prek për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Po ndan raportin e defekteve në kod..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Administratori i teknologjisë së informacionit kërkoi një raport të defekteve në kod për të ndihmuar me zgjidhjen e problemeve. Aplikacioni dhe të dhënat mund të ndahen dhe kjo mund të ngadalësojë përkohësisht pajisjen tënde."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administratori i teknologjisë së informacionit kërkoi një raport të defekteve në kod për të ndihmuar me zgjidhjen e problemeve. Aplikacioni dhe të dhënat mund të ndahen."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Kjo mund të ngadalësojë përkohësisht pajisjen tënde"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"PRANO"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REFUZO"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Administratori i teknologjisë së informacionit kërkoi një raport të defekteve në kod për të ndihmuar me zgjidhjen e problemeve. Aplikacioni dhe të dhënat mund të ndahen."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SHPËRNDA"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUZO"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Zgjidh tastierat"</string>
     <string name="show_ime" msgid="2506087537466597099">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>

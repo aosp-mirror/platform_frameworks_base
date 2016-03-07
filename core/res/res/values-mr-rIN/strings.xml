@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"अधिक पर्यायांसाठी स्पर्श करा."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करणे अक्षम करण्यासाठी स्पर्श करा."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"दोष अहवाल घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल सामायिक करायचा?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"दोष अहवाल सामायिक करीत आहे..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"आपल्या IT प्रशासकाने या डिव्हाइसची समस्या निवारण करण्यात मदत करण्यासाठी एका दोष अहवालाची विनंती केली. अॅप्स आणि डेटा सामायिक केले जाऊ शकतात आणि आपले डिव्हाइस तात्पुरते धीमे होऊ शकते."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"आपल्या IT प्रशासकाने या डिव्हाइसच्या समस्येचे निवारण करण्यात मदत करण्यासाठी दोष अहवालाची विनंती केली. अॅप्स आणि डेटा सामायिक केला जाऊ शकतो."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"हे तात्पुरता आपले डिव्हाइस धिमे करू शकते."</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार करा"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"नकार द्या"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"आपल्या IT प्रशासकाने या डिव्हाइसच्या समस्येचे निवारण करण्यात मदत करण्यासाठी दोष अहवालाची विनंती केली. अॅप्स आणि डेटा सामायिक केले जाऊ शकतात."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"सामायिक करा"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"नकार द्या"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदला"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड निवडा"</string>
     <string name="show_ime" msgid="2506087537466597099">"भौतिक कीबोर्ड सक्रिय असताना त्यास स्क्रीनवर ठेवा"</string>

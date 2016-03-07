@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toque para ver mais opções."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desat. a depuração USB."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Pretende partilhar o relatório de erro?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"A partilhar relatório de erro…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"O seu administrador de TI solicitou um relatório de erro para ajudar na resolução de problemas deste dispositivo. As aplicações e os dados podem ser partilhados e o dispositivo pode tornar-se temporariamente mais lento."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"O seu administrador de TI solicitou um relatório de erro para ajudar na resolução de problemas deste dispositivo. As aplicações e os dados podem ser partilhados."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Esta ação pode tornar o dispositivo mais lento temporariamente"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEITAR"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECUSAR"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Escolher teclados"</string>
     <string name="show_ime" msgid="2506087537466597099">"Manter no ecrã enquanto o teclado físico estiver ativo"</string>

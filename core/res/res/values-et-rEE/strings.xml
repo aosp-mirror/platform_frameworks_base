@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Puudutage rohkemate valikute kuvamiseks."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-silumine ühendatud"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Puudutage USB-silumise keelamiseks."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Veaaruande võtmine …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Kas jagada veaaruannet?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Veaaruande jagamine …"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IT-administraator taotles veaaruannet, mis aitaks seadmes vigu otsida. Rakendusi ja andmeid võidakse jagada ja see võib ajutiselt teie seadet aeglustada."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IT-administraator taotles veaaruannet, mis aitaks seadmes vigu otsida. Rakendusi ja andmeid võidakse jagada."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"See võib ajutiselt teie seadet aeglustada"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"NÕUSTU"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"KEELDU"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"IT-administraator taotles veaaruannet, mis aitaks seadmes vigu otsida. Rakendusi ja andmeid võidakse jagada."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"JAGA"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"KEELDU"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatuuri muutmine"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Vali klaviatuurid"</string>
     <string name="show_ime" msgid="2506087537466597099">"Hoia seda ekraanil, kui füüsiline klaviatuur on aktiivne"</string>
