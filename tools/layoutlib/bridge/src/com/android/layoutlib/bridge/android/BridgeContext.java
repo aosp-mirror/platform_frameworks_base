@@ -52,11 +52,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.BridgeAssetManager;
-import android.content.res.BridgeResources;
 import android.content.res.BridgeTypedArray;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.content.res.Resources_Delegate;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -224,7 +224,7 @@ public final class BridgeContext extends Context {
     public void initResources() {
         AssetManager assetManager = AssetManager.getSystem();
 
-        mSystemResources = BridgeResources.initSystem(
+        mSystemResources = Resources_Delegate.initSystem(
                 this,
                 assetManager,
                 mMetrics,
@@ -237,7 +237,7 @@ public final class BridgeContext extends Context {
      * Disposes the {@link Resources} singleton.
      */
     public void disposeResources() {
-        BridgeResources.disposeSystem();
+        Resources_Delegate.disposeSystem();
     }
 
     public void setBridgeInflater(BridgeInflater inflater) {
@@ -706,8 +706,8 @@ public final class BridgeContext extends Context {
 
         List<Pair<String, Boolean>> attributeList = searchAttrs(attrs);
 
-        BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
-                isPlatformFile);
+        BridgeTypedArray ta =
+                Resources_Delegate.newTypeArray(mSystemResources, attrs.length, isPlatformFile);
 
         // look for a custom style.
         String customStyle = null;
@@ -941,7 +941,7 @@ public final class BridgeContext extends Context {
 
         List<Pair<String, Boolean>> attributes = searchAttrs(attrs);
 
-        BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
+        BridgeTypedArray ta = Resources_Delegate.newTypeArray(mSystemResources, attrs.length,
                 false);
 
         // for each attribute, get its name so that we can search it in the style
