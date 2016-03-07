@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.graphics.Color;
 import android.widget.ImageView;
 
 import com.android.internal.util.NotificationColorUtil;
@@ -37,5 +38,13 @@ public class NotificationUtils {
 
     public static float interpolate(float start, float end, float amount) {
         return start * (1.0f - amount) + end * amount;
+    }
+
+    public static int interpolateColors(int startColor, int endColor, float amount) {
+        return Color.argb(
+                (int) interpolate(Color.alpha(startColor), Color.alpha(endColor), amount),
+                (int) interpolate(Color.red(startColor), Color.red(endColor), amount),
+                (int) interpolate(Color.green(startColor), Color.green(endColor), amount),
+                (int) interpolate(Color.blue(startColor), Color.blue(endColor), amount));
     }
 }

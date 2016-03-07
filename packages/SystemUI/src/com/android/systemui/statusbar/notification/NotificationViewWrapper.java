@@ -16,13 +16,19 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.ColorMatrix;
 import android.service.notification.StatusBarNotification;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.NotificationContentView;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
  * Wraps the actual notification content view; used to implement behaviors which are different for
@@ -30,6 +36,7 @@ import com.android.systemui.statusbar.TransformableView;
  */
 public abstract class NotificationViewWrapper implements TransformableView {
 
+    protected final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
     protected final View mView;
     protected boolean mDark;
     protected boolean mDarkInitialized = false;
@@ -74,6 +81,26 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void notifyContentUpdated(StatusBarNotification notification) {
         mDarkInitialized = false;
     };
+
+
+    protected void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
+            boolean dark, long delay, Animator.AnimatorListener listener) {
+        float startIntensity = dark ? 0f : 1f;
+        float endIntensity = dark ? 1f : 0f;
+        ValueAnimator animator = ValueAnimator.ofFloat(startIntensity, endIntensity);
+        animator.addUpdateListener(updateListener);
+        animator.setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
+        animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        animator.setStartDelay(delay);
+        if (listener != null) {
+            animator.addListener(listener);
+        }
+        animator.start();
+    }
+
+    protected void updateGrayscaleMatrix(float intensity) {
+        mGrayscaleColorMatrix.setSaturation(1 - intensity);
+    }
 
     /**
      * Update the appearance of the expand button.
@@ -121,5 +148,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void setVisible(boolean visible) {
         mView.animate().cancel();
         mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    public int getCustomBackgroundColor() {
+        return 0;
+    }
+
+    public void setShowingLegacyBackground(boolean showing) {
     }
 }

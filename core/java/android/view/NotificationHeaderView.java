@@ -35,7 +35,6 @@ import java.util.ArrayList;
 public class NotificationHeaderView extends ViewGroup {
     public static final int NO_COLOR = -1;
     private final int mChildMinWidth;
-    private final int mExpandTopPadding;
     private final int mContentEndMargin;
     private View mAppName;
     private View mSubTextView;
@@ -43,12 +42,10 @@ public class NotificationHeaderView extends ViewGroup {
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private ImageView mExpandButton;
     private View mIcon;
-    private TextView mChildCount;
     private View mProfileBadge;
     private View mInfo;
     private int mIconColor;
     private int mOriginalNotificationColor;
-    private boolean mGroupHeader;
     private boolean mExpanded;
     private boolean mShowWorkBadgeAtEnd;
 
@@ -70,7 +67,6 @@ public class NotificationHeaderView extends ViewGroup {
                 com.android.internal.R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
-        mExpandTopPadding = (int) (1 * getResources().getDisplayMetrics().density);
     }
 
     @Override
@@ -80,7 +76,6 @@ public class NotificationHeaderView extends ViewGroup {
         mSubTextView = findViewById(com.android.internal.R.id.header_sub_text);
         mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
-        mChildCount = (TextView) findViewById(com.android.internal.R.id.number_of_children);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
         mInfo = findViewById(com.android.internal.R.id.header_content_info);
     }
@@ -193,17 +188,6 @@ public class NotificationHeaderView extends ViewGroup {
         updateTouchListener();
     }
 
-    public void setChildCount(int childCount) {
-        if (childCount > 0) {
-            mChildCount.setText(getContext().getString(
-                    com.android.internal.R.string.notification_children_count_bracketed,
-                    childCount));
-            mChildCount.setVisibility(VISIBLE);
-        } else {
-            mChildCount.setVisibility(GONE);
-        }
-    }
-
     @RemotableViewMethod
     public void setOriginalIconColor(int color) {
         mIconColor = color;
@@ -222,11 +206,6 @@ public class NotificationHeaderView extends ViewGroup {
         return mOriginalNotificationColor;
     }
 
-    public void setIsGroupHeader(boolean isGroupHeader) {
-        mGroupHeader = isGroupHeader;
-        updateExpandButton();
-    }
-
     @RemotableViewMethod
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
@@ -235,24 +214,13 @@ public class NotificationHeaderView extends ViewGroup {
 
     private void updateExpandButton() {
         int drawableId;
-        int paddingTop = 0;
-        if (mGroupHeader) {
-            if (mExpanded) {
-                drawableId = com.android.internal.R.drawable.ic_collapse_bundle;
-            } else {
-                drawableId =com.android.internal.R.drawable.ic_expand_bundle;
-            }
+        if (mExpanded) {
+            drawableId = com.android.internal.R.drawable.ic_collapse_notification;
         } else {
-            if (mExpanded) {
-                drawableId = com.android.internal.R.drawable.ic_collapse_notification;
-            } else {
-                drawableId = com.android.internal.R.drawable.ic_expand_notification;
-            }
-            paddingTop = mExpandTopPadding;
+            drawableId = com.android.internal.R.drawable.ic_expand_notification;
         }
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
         mExpandButton.setColorFilter(mOriginalNotificationColor);
-        mExpandButton.setPadding(0, paddingTop, 0, 0);
     }
 
     public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {

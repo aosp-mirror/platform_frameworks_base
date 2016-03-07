@@ -548,9 +548,6 @@
          [CHAR LIMIT=4] -->
     <string name="status_bar_notification_info_overflow">999+</string>
 
-    <!-- The number of notifications in the notification header. An example would be (2) or (12) -->
-    <string name="notification_children_count_bracketed">(<xliff:g id="notificationCount" example="1">%d</xliff:g>)</string>
-
     <!-- The divider symbol between different parts of the notification header. not translatable [CHAR LIMIT=1] -->
     <string name="notification_header_divider_symbol" translatable="false">•</string>
 

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.stack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
@@ -324,6 +323,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
     };
+    private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -359,7 +359,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
         mFalsingManager = FalsingManager.getInstance(context);
-        mBackgroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
 
     @Override
@@ -425,6 +424,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
+    }
+
+    public void setDrawBackgroundAsSrc(boolean asSrc) {
+        mBackgroundPaint.setXfermode(asSrc ? mSrcMode : null);
+        invalidate();
     }
 
     private void notifyHeightChangeListener(ExpandableView view) {
@@ -774,12 +778,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             ExpandableNotificationRow parent = row.getNotificationParent();
-            if (mGearExposedView != null && parent != null
-                    && parent.areChildrenExpanded() && mGearExposedView == parent) {
+            if (parent != null && parent.areChildrenExpanded()
+                    && (mGearExposedView == parent
+                        || (parent.getNotificationChildren().size() == 1
+                                && parent.isClearable()))) {
                 // In this case the group is expanded and showing the gear for the
                 // group, further interaction should apply to the group, not any
-                // child notifications so we use the parent of the child.
-                child = row.getNotificationParent();
+                // child notifications so we use the parent of the child. We also do the same
+                // if we only have a single child.
+                child = parent;
             }
         }
         return child;
@@ -857,7 +864,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public boolean canChildBeExpanded(View v) {
         return v instanceof ExpandableNotificationRow
                 && ((ExpandableNotificationRow) v).isExpandable()
-                && !((ExpandableNotificationRow) v).isHeadsUp();
+                && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
     }
 
     public void setUserExpandedChild(View v, boolean userExpanded) {
