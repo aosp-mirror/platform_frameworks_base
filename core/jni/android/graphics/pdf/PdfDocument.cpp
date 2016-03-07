@@ -94,8 +94,6 @@ public:
             SkCanvas* canvas = document->beginPage(page->mWidth, page->mHeight,
                     &(page->mContentRect));
 
-            canvas->clipRect(page->mContentRect);
-            canvas->translate(page->mContentRect.left(), page->mContentRect.top());
             canvas->drawPicture(page->mPicture);
 
             document->endPage();
