@@ -203,8 +203,9 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
         mCanvasState.setClippingOutline(mAllocator, &(properties.getOutline()));
     }
 
-    bool quickRejected = properties.getClipToBounds()
-            && mCanvasState.quickRejectConservative(0, 0, width, height);
+    bool quickRejected = mCanvasState.currentSnapshot()->getRenderTargetClip().isEmpty()
+            || (properties.getClipToBounds()
+                    && mCanvasState.quickRejectConservative(0, 0, width, height));
     if (!quickRejected) {
         // not rejected, so defer render as either Layer, or direct (possibly wrapped in saveLayer)
         if (node.getLayer()) {
