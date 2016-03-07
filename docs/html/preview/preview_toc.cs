@@ -61,7 +61,7 @@
       pt-br-lang="Visão geral da API"
       ru-lang="Обзор API-интерфейсов"
       zh-cn-lang="API 概览"
-      zh-tw-lang="API 總覽">New APIs and Features
+      zh-tw-lang="API 總覽">API Overview
       </a></div>
       <ul>
 
@@ -78,7 +78,7 @@
         >Network Security Configuration</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
-        >ICU4J Support in Framework</a></li>
+        >ICU4J Support</a></li>
       </ul>
   </li>
 
@@ -110,7 +110,7 @@
 
  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
-      >Image Downloads and OTA Updates</a></div>
+      >Getting System Updates</a></div>
   </li>
 
 
