@@ -11,28 +11,29 @@ page.image=images/cards/card-n-changes_2x.png
 
 <h2>In this document</h2>
 
-<ol id="toc44" class="hide-nested">
-  <li><a href="#behavior-power">Battery Performance</a>
+<ol>
+  <li><a href="#perf">Performance Improvements</a>
     <ol>
       <li><a href="#doze">Doze</a></li>
       <li><a href="#bg-opt">Background Optimizations</a></li>
     </ol>
   </li>
-  <li><a href="#">Permissions Changes</a></li>
-  <li><a href="#behavior-power">Accessibility Improvements</a>
+  <li><a href="#perm">Permissions Changes</a></li>
+  <li><a href="#accessibility">Accessibility Improvements</a>
     <ol>
-      <li><a href="#doze">Screen Zoom</a></li>
-      <li><a href="#bg-opt">Vision Settings in Setup Wizard</a></li>
+      <li><a href="#screen-zoom">Screen Zoom</a></li>
+      <li><a href="#vision-settings">Vision Settings in Setup Wizard</a></li>
     </ol>
   </li>
-  <li><a href="#">Platform Migration toward OpenJDK 8</a></li>
-  <li><a href="#">NDK Apps Linking to Platform Libraries</a></li>
+  <li><a href="#open-jdk">Platform Migration toward OpenJDK 8</a></li>
+  <li><a href="#ndk">NDK Apps Linking to Platform Libraries</a></li>
+  <li><a href="#afw">Android for Work</a></li>
 </ol>
 
 <h2>See Also</h2>
 <ol>
   <li><a href="{@docRoot}preview/api-overview.html">
-    M Developer Preview API Overview</a></li>
+    N Developer Preview API Overview</a></li>
 </ol>
 
 </div>
@@ -52,13 +53,14 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 
-<h2 id="batt-perf">Battery Performance</h2>
+<h2 id="perf">Performance Improvements</h2>
 
 <p>
   The Preview contains system behavior changes aimed at improving the battery
-  life of devices. These changes can impact the availability of system
-  resources and system notifications to your app. You should review these
-  changes and evaluate how your app may need to adjust to them.
+  life of devices, RAM usage, and app performance. These changes can impact the
+  availability of system resources and system notifications to your app. You
+  should review these changes and evaluate how your app may need to adjust to
+  them.
 </p>
 
 <h3 id="doze">Doze</h3>
@@ -72,7 +74,9 @@ page.image=images/cards/card-n-changes_2x.png
   stationary, for example, when a handset is traveling in a user’s pocket.
 </p>
 
-<img src="" alt="" height="XXX" id="figure1" />
+
+<img src="{@docRoot}preview/images/doze-diagram-1.png"
+  alt="" height="251px" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Illustration of how Doze applies a first level of
   system activity restrictions to improve battery life.
@@ -81,34 +85,37 @@ page.image=images/cards/card-n-changes_2x.png
 <p>
   When a device is on battery power, and the screen has been off for a certain
   time, the device enters Doze and applies the first subset of restrictions: It
-  shuts off app network access, and defers jobs and syncs. After some more time
-  elapses, the system applies the rest of the Doze restrictions to {@link
-  android.os.PowerManager.WakeLock}, {@link android.app.AlarmManager} alarms,
-  GPS, and Wi-Fi scans.. Regardless of whether some or all Doze restrictions
-  are being applied, the system wakes the device for brief maintenance windows,
-  during which applications are allowed network access and can execute any
-  deferred jobs/syncs.
+  shuts off app network access, and defers jobs and syncs. If the device is
+  stationary for a certain time after entering Doze, the system applies the
+  rest of the Doze restrictions to {@link android.os.PowerManager.WakeLock},
+  {@link android.app.AlarmManager} alarms, GPS, and Wi-Fi scans.. Regardless of
+  whether some or all Doze restrictions are being applied, the system wakes the
+  device for brief maintenance windows, during which applications are allowed
+  network access and can execute any deferred jobs/syncs.
 </p>
 
 
-<img src="" alt="" height="XXX" id="figure1" />
+<img src="{@docRoot}preview/images/doze-diagram-2.png"
+  alt="" id="figure2" />
 <p class="img-caption">
-  <strong>Figure 1.</strong> Illustration of how Doze applies a second level of
-  system activity restrictions to further improve battery life.
+  <strong>Figure 2.</strong> Illustration of how Doze applies a second level of
+  system activity restrictions after the device is stationary for a certain time.
 </p>
 
 <p>
   Note that activating the screen on or plugging in the device exits Doze and
   removes these processing restrictions. The additional behavior does not
   affect recommendations and best practices in adapting your app to the prior
-  version of Doze introduced in Android 6.0 (API level 23). You should still
+  version of Doze introduced in Android 6.0 (API level 23), as discussed in
+  <a href=”{@docRoot}/training/monitoring-device-state/doze-standby.html”>
+  Optimizing for Doze and App Standby</a>. You should still
   follow those recommendations, such as using Google Cloud Messaging (GCM) to
-  send and receive messages, and start planning updates for the additional Doze
-  behavior.
+  send and receive messages, and start planning updates to accomodate the
+  additional Doze behavior.
 </p>
 
 
-<h3 id="bg-opt">Background Optimizations</h3>
+<h3 id="bg-opt">Project Svelte: Background Optimizations</h3>
 
 <p>
   The Preview removes three implicit broadcasts in order to help optimize both
@@ -150,7 +157,8 @@ page.image=images/cards/card-n-changes_2x.png
   </li>
 
   <li>Apps cannot send or receive {@code NEW_PICTURE} or {@code NEW_VIDEO}
-  broadcasts.
+  broadcasts. This optimization affects all apps, not only those
+  targeting the Preview.
   </li>
 </ul>
 
@@ -178,7 +186,7 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 
-<h2 id="">Permissions Changes</h2>
+<h2 id="perm">Permissions Changes</h2>
 
 <p>
   The Preview includes changes to permissions that may affect your app,
@@ -216,7 +224,7 @@ page.image=images/cards/card-n-changes_2x.png
 
 
 
-<h2 id="">Accessibility Improvements</h2>
+<h2 id="accessibility">Accessibility Improvements</h2>
 
 <p>
   This Preview includes changes intended to improve the usability of the
@@ -227,7 +235,7 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 
-<h3 id="">Screen Zoom</h3>
+<h3 id="screen-zoom">Screen Zoom</h3>
 
 <p>
   The Preview enables users to set <strong>Display size</strong>which magnifies
@@ -238,12 +246,21 @@ page.image=images/cards/card-n-changes_2x.png
   sw320dp</a>, which is the width of a Nexus 4, a common medium-sized phone.
 </p>
 
+<div class="cols">
 
-<img src="{@docRoot}images/image-0.png" alt="" height="XXX" id="figure1" />
+<div class="col-6">
+  <img src="{@docRoot}preview/images/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}preview/images/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
 <p class="img-caption">
-  <strong>Figure 1.</strong> The screen on the right shows the effect of
+  <strong>Figure 3.</strong> The screen on the right shows the effect of
   increasing the Display size of a device running an N Preview system image.
 </p>
+
 
 <p>
   When the device density changes, the system notifies running apps in the
@@ -276,7 +293,7 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 
-<h3 id="">Vision Settings in Setup Wizard</h3>
+<h3 id="vision-settings">Vision Settings in Setup Wizard</h3>
 
 <p>
   The Preview includes Vision Settings on the Welcome screen, where users can
@@ -337,60 +354,22 @@ java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
 </ul>
 
 
-<h2 id="">Android for Work</h2>
+<h2 id="ndk">NDK Apps Linking to Platform Libraries</h2>
+
 <p>
-  The Preview contains changes for apps that target Android for Work, including
-  changes to certificate installation, password resetting, secondary user
-  management, and access to device identifiers. If you are building apps for
-  Android for Work environments, you should review these changes and modify
-  your app accordingly.
+  The Preview includes namespace changes to prevent loading of non-public APIs.
+  If you use the NDK, you should only be using public APIs from the Android
+  platform. Using non-public APIs in the next official release of Android
+  can cause your app to crash.
 </p>
 
-<ul>
-  <li>You must install a delegated certificate installer before the DPC can set
-  it. For both profile and device-owner apps targeting the N SDK, you should
-  install the delegated certificate installer before the device policy
-  controller (DPC) calls
-  <code>DevicePolicyManager.setCertInstallerPackage()</code>. If the installer
-  is not already installed, the system throws an
-  <code>IllegalArgumentException</code>.
-  </li>
-
-  <li>Reset password restrictions for device admins now apply to profile
-  owners.Device admins can no longer use
-  <code>DevicePolicyManager.resetPassword()</code>to clear passwords or change
-  ones that are already set. Device admins can still set a password, but only
-  when the device has no password, PIN, or pattern.
-  </li>
-
-  <li>Device and profile owners can manage accounts even if restrictions are
-  set.Device owners and profile owners can call the Account Management APIs
-  even if <code>DISALLOW_MODIFY_ACCOUNTS</code> user restrictions are in place.
-  </li>
-
-  <li>Device owners can manage secondary users more easily.When a device is
-  running in device owner mode, the <code>DISALLOW_ADD_USER</code> restriction
-  is automatically set. This prevents users from creating unmanaged secondary
-  users. In addition, the <code>CreateUser()</code> and
-  <code>createAndInitial()</code> methods are deprecated; the new
-  <code>DevicePolicyManager.createAndManageUser()</code> method replaces them.
-  </li>
-
-  <li>Device owners can access device identifiers.A Device owner can access the
-  Wi-Fi MAC address of a device, using
-  <code>DevicePolicyManagewr.getWifiMacAddress()</code> . If Wi-Fi has never
-  been enabled on the device, this method returns a value of {@code null}.
-  </li>
-</ul>
-
-
-<h2 id="">NDK Apps Linking to Platform Libraries</h2>
-
 <p>
-  In the Preview, an application built with the NDK and targeting the N Preview
-  API cannot link against the platform libraries shipped with the NDK. This
-  change affects both the dlopen(3) and DT_NEEDED entries in your {@code .so}
-  files.
+  In order to alert you to use of non-public APIs, apps running on a Preview
+  device generate an error in logcat output when an app calls a non-public API.
+  This error is also displayed on the device screen as a message to help
+  raise awareness of this situation. You should review your app code to
+  remove use of non-public platform APIs and thoroughly test your apps using
+  a preview device or emulator.
 </p>
 
 <p>
@@ -400,6 +379,12 @@ java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
   especially if your app uses a library that is part of the platform (such as
   <code>libpng</code>), but is not part of the NDK. In that case, ensure that
   your APK contains all the .so files you intended to link against.
+</p>
+
+<p class="caution">
+  <strong>Caution:</strong> Some third-party libraries may link to non-public
+  APIs. If your app uses these libraries, your app may crash when running
+  on the next official release of Android.
 </p>
 
 <p>
@@ -455,5 +440,51 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   replaced with an app local version. For example, you should statically link
   {@code libcyrpto.a} in your {@code .so} file or include your own dynamically
   {@code libcrypto.so} from BoringSSL or OpenSSL in your app.
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  The Preview contains changes for apps that target Android for Work, including
+  changes to certificate installation, password resetting, secondary user
+  management, and access to device identifiers. If you are building apps for
+  Android for Work environments, you should review these changes and modify
+  your app accordingly.
+</p>
+
+<ul>
+  <li>You must install a delegated certificate installer before the DPC can set
+  it. For both profile and device-owner apps targeting the N SDK, you should
+  install the delegated certificate installer before the device policy
+  controller (DPC) calls
+  <code>DevicePolicyManager.setCertInstallerPackage()</code>. If the installer
+  is not already installed, the system throws an
+  <code>IllegalArgumentException</code>.
+  </li>
+
+  <li>Reset password restrictions for device admins now apply to profile
+  owners.Device admins can no longer use
+  <code>DevicePolicyManager.resetPassword()</code>to clear passwords or change
+  ones that are already set. Device admins can still set a password, but only
+  when the device has no password, PIN, or pattern.
+  </li>
+
+  <li>Device and profile owners can manage accounts even if restrictions are
+  set.Device owners and profile owners can call the Account Management APIs
+  even if <code>DISALLOW_MODIFY_ACCOUNTS</code> user restrictions are in place.
+  </li>
+
+  <li>Device owners can manage secondary users more easily.When a device is
+  running in device owner mode, the <code>DISALLOW_ADD_USER</code> restriction
+  is automatically set. This prevents users from creating unmanaged secondary
+  users. In addition, the <code>CreateUser()</code> and
+  <code>createAndInitial()</code> methods are deprecated; the new
+  <code>DevicePolicyManager.createAndManageUser()</code> method replaces them.
+  </li>
+
+  <li>Device owners can access device identifiers.A Device owner can access the
+  Wi-Fi MAC address of a device, using
+  <code>DevicePolicyManagewr.getWifiMacAddress()</code> . If Wi-Fi has never
+  been enabled on the device, this method returns a value of {@code null}.
   </li>
 </ul>
