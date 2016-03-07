@@ -25,4 +25,6 @@
     <string name="mediasize_default">ISO_A4</string>
     <string name="mediasize_standard">@string/mediasize_standard_iso</string>
 
+    <string name="uri_package_details">market://details?id=%1$s</string>
+
 </resources>

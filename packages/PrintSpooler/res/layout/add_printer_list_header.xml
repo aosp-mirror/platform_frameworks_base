@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
      limitations under the License.
 -->
 
-<resources>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="?android:attr/listPreferredItemHeightSmall"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:orientation="horizontal"
+        android:gravity="start|center_vertical">
 
-    <color name="print_button_tint_color">#EEFF41</color>
+    <TextView android:id="@+id/text"
+            style="?android:attr/listSeparatorTextViewStyle" />
 
-    <color name="print_preview_scrim_color">#99000000</color>
-
-    <color name="print_preview_background_color">#F2F1F2</color>
-
-    <color name="material_grey_500">#ffa3a3a3</color>
-
-</resources>
+</LinearLayout>

@@ -22,11 +22,13 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -51,10 +53,12 @@ import android.print.PrintAttributes.Resolution;
 import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.print.PrintServicesLoader;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintService;
+import android.printservice.PrintServiceInfo;
 import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -94,7 +98,6 @@ import com.android.printspooler.util.ApprovedPrintServices;
 import com.android.printspooler.util.MediaSizeUtils;
 import com.android.printspooler.util.MediaSizeUtils.MediaSizeComparator;
 import com.android.printspooler.util.PageRangeUtils;
-import com.android.printspooler.util.PrintOptionUtils;
 import com.android.printspooler.widget.PrintContentView;
 import com.android.printspooler.widget.PrintContentView.OptionsStateChangeListener;
 import com.android.printspooler.widget.PrintContentView.OptionsStateController;
@@ -113,12 +116,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PrintActivity extends Activity implements RemotePrintDocument.UpdateResultCallbacks,
         PrintErrorFragment.OnActionListener, PageAdapter.ContentCallbacks,
-        OptionsStateChangeListener, OptionsStateController {
+        OptionsStateChangeListener, OptionsStateController,
+        LoaderManager.LoaderCallbacks<List<PrintServiceInfo>> {
     private static final String LOG_TAG = "PrintActivity";
 
     private static final boolean DEBUG = false;
@@ -128,6 +133,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final String FRAGMENT_TAG = "FRAGMENT_TAG";
 
     private static final String HAS_PRINTED_PREF = "has_printed";
+
+    private static final int LOADER_ID_ENABLED_PRINT_SERVICES = 1;
+    private static final int LOADER_ID_PRINT_REGISTRY = 2;
+    private static final int LOADER_ID_PRINT_REGISTRY_INT = 3;
 
     private static final int ORIENTATION_PORTRAIT = 0;
     private static final int ORIENTATION_LANDSCAPE = 1;
@@ -139,7 +148,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int DEST_ADAPTER_MAX_ITEM_COUNT = 9;
 
     private static final int DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF = Integer.MAX_VALUE;
-    private static final int DEST_ADAPTER_ITEM_ID_ALL_PRINTERS = Integer.MAX_VALUE - 1;
+    private static final int DEST_ADAPTER_ITEM_ID_MORE = Integer.MAX_VALUE - 1;
 
     private static final int STATE_INITIALIZING = 0;
     private static final int STATE_CONFIGURING = 1;
@@ -239,6 +248,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     /** Observer for changes to the printers */
     private PrintersObserver mPrintersObserver;
 
+    /** Advances options activity name for current printer */
+    private ComponentName mAdvancedPrintOptionsActivity;
+
+    /** Whether at least one print services is enabled or not */
+    private boolean mArePrintServicesEnabled;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -278,6 +293,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
             }
         });
+
+        getLoaderManager().initLoader(LOADER_ID_ENABLED_PRINT_SERVICES, null, this);
     }
 
     private void onConnectedToPrintSpooler(final IBinder documentAdapter) {
@@ -292,7 +309,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             public void run() {
                 onPrinterRegistryReady(documentAdapter);
             }
-        });
+        }, LOADER_ID_PRINT_REGISTRY, LOADER_ID_PRINT_REGISTRY_INT);
     }
 
     private void onPrinterRegistryReady(IBinder documentAdapter) {
@@ -716,15 +733,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void startAdvancedPrintOptionsActivity(PrinterInfo printer) {
-        ComponentName serviceName = printer.getId().getServiceName();
-
-        String activityName = PrintOptionUtils.getAdvancedOptionsActivityName(this, serviceName);
-        if (TextUtils.isEmpty(activityName)) {
+        if (mAdvancedPrintOptionsActivity == null) {
             return;
         }
 
         Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setComponent(new ComponentName(serviceName.getPackageName(), activityName));
+        intent.setComponent(mAdvancedPrintOptionsActivity);
 
         List<ResolveInfo> resolvedActivities = getPackageManager()
                 .queryIntentActivities(intent, 0);
@@ -1283,6 +1297,59 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
     }
 
+    @Override
+    public Loader<List<PrintServiceInfo>> onCreateLoader(int id, Bundle args) {
+        return new PrintServicesLoader((PrintManager) getSystemService(Context.PRINT_SERVICE), this,
+                PrintManager.ENABLED_SERVICES);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<PrintServiceInfo>> loader,
+            List<PrintServiceInfo> services) {
+        ComponentName newAdvancedPrintOptionsActivity = null;
+        if (mCurrentPrinter != null && services != null) {
+            final int numServices = services.size();
+            for (int i = 0; i < numServices; i++) {
+                PrintServiceInfo service = services.get(i);
+
+                if (service.getComponentName().equals(mCurrentPrinter.getId().getServiceName())) {
+                    String advancedOptionsActivityName = service.getAdvancedOptionsActivityName();
+
+                    if (!TextUtils.isEmpty(advancedOptionsActivityName)) {
+                        newAdvancedPrintOptionsActivity = new ComponentName(
+                                service.getComponentName().getPackageName(),
+                                advancedOptionsActivityName);
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!Objects.equals(newAdvancedPrintOptionsActivity, mAdvancedPrintOptionsActivity)) {
+            mAdvancedPrintOptionsActivity = newAdvancedPrintOptionsActivity;
+            updateOptionsUi();
+        }
+
+        boolean newArePrintServicesEnabled = services != null && !services.isEmpty();
+        if (mArePrintServicesEnabled != newArePrintServicesEnabled) {
+            mArePrintServicesEnabled = newArePrintServicesEnabled;
+
+            // Reload mDestinationSpinnerAdapter as mArePrintServicesEnabled changed and the adapter
+            // reads that in DestinationAdapter#getMoreItemTitle
+            if (mDestinationSpinnerAdapter != null) {
+                mDestinationSpinnerAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<PrintServiceInfo>> loader) {
+        if (!isFinishing()) {
+            onLoadFinished(loader, null);
+        }
+    }
+
     /**
      * A dialog that asks the user to approve a {@link PrintService}. This dialog is automatically
      * dismissed if the same {@link PrintService} gets approved by another
@@ -1722,9 +1789,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         // Advanced print options
-        ComponentName serviceName = mCurrentPrinter.getId().getServiceName();
-        if (!TextUtils.isEmpty(PrintOptionUtils.getAdvancedOptionsActivityName(
-                this, serviceName))) {
+        if (mAdvancedPrintOptionsActivity != null) {
             mMoreOptionsButton.setVisibility(View.VISIBLE);
             mMoreOptionsButton.setEnabled(true);
         } else {
@@ -2216,14 +2281,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 0) {
                     return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
                 } else if (position == 1) {
-                    return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
+                    return DEST_ADAPTER_ITEM_ID_MORE;
                 }
             } else {
                 if (position == 1) {
                     return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
                 }
                 if (position == getCount() - 1) {
-                    return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
+                    return DEST_ADAPTER_ITEM_ID_MORE;
                 }
             }
             return position;
@@ -2234,6 +2299,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             View view = getView(position, convertView, parent);
             view.setEnabled(isEnabled(position));
             return view;
+        }
+
+        private String getMoreItemTitle() {
+            if (mArePrintServicesEnabled) {
+                return getString(R.string.all_printers);
+            } else {
+                return getString(R.string.print_add_printer);
+            }
         }
 
         @Override
@@ -2264,7 +2337,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     title = printerHolder.printer.getName();
                     icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf, null);
                 } else if (position == 1) {
-                    title = getString(R.string.all_printers);
+                    title = getMoreItemTitle();
                 }
             } else {
                 if (position == 1 && getPdfPrinter() != null) {
@@ -2272,7 +2345,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     title = printerHolder.printer.getName();
                     icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf, null);
                 } else if (position == getCount() - 1) {
-                    title = getString(R.string.all_printers);
+                    title = getMoreItemTitle();
                 } else {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     PrinterInfo printInfo = printerHolder.printer;
@@ -2307,7 +2380,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
                 iconView.setImageDrawable(icon);
             } else {
-                iconView.setVisibility(View.GONE);
+                iconView.setVisibility(View.INVISIBLE);
             }
 
             return convertView;
@@ -2352,6 +2425,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 PrinterInfo updatedPrinter = newPrintersMap.remove(oldPrinterId);
                 if (updatedPrinter != null) {
                     printerHolder.printer = updatedPrinter;
+                    printerHolder.removed = false;
                 } else {
                     printerHolder.removed = true;
                 }
@@ -2497,6 +2571,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 updateDocument(false);
             }
 
+            // Force a reload of the enabled print services to update mAdvancedPrintOptionsActivity
+            // in onLoadFinished();
+            getLoaderManager().getLoader(LOADER_ID_ENABLED_PRINT_SERVICES).forceLoad();
+
             updateOptionsUi();
             updateSummary();
         }
@@ -2522,7 +2600,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     return;
                 }
 
-                if (id == DEST_ADAPTER_ITEM_ID_ALL_PRINTERS) {
+                if (id == DEST_ADAPTER_ITEM_ID_MORE) {
                     startSelectPrinterActivity();
                     return;
                 }

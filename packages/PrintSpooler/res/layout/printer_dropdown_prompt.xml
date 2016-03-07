@@ -16,13 +16,10 @@
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="?android:attr/listPreferredItemHeightSmall"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:textIsSelectable="false"
       android:textColor="?android:attr/textColorPrimary"
       android:paddingStart="20dip"
-      android:paddingEnd="8dip"
-      android:minHeight="56dip"
-      android:orientation="horizontal"
+      style="?android:attr/spinnerItemStyle"
       android:text="@string/destination_default_text"
       android:gravity="start|center_vertical" />
