@@ -2638,7 +2638,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | AssertionError e) {
                 Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
             }
             if (!hasCert) {
