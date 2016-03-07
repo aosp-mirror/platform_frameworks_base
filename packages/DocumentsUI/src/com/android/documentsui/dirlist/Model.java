@@ -59,7 +59,7 @@ public class Model {
      * A sorted array of model IDs for the files currently in the Model.  Sort order is determined
      * by {@link #mSortOrder}
      */
-    private List<String> mIds = new ArrayList<>();
+    private String mIds[] = new String[0];
     private int mSortOrder = SORT_ORDER_DISPLAY_NAME;
 
     @Nullable String info;
@@ -108,7 +108,7 @@ public class Model {
         if (result == null) {
             mCursor = null;
             mCursorCount = 0;
-            mIds.clear();
+            mIds = new String[0];
             mPositions.clear();
             info = null;
             error = null;
@@ -152,7 +152,7 @@ public class Model {
      */
     private void updateModelData() {
         int[] positions = new int[mCursorCount];
-        mIds.clear();
+        mIds = new String[mCursorCount];
         String[] stringValues = new String[mCursorCount];
         long[] longValues = null;
 
@@ -164,7 +164,7 @@ public class Model {
         for (int pos = 0; pos < mCursorCount; ++pos) {
             mCursor.moveToNext();
             positions[pos] = pos;
-            mIds.add(createModelId(mCursor));
+            mIds[pos] = createModelId(mCursor);
 
             switch(mSortOrder) {
                 case SORT_ORDER_DISPLAY_NAME:
@@ -201,7 +201,7 @@ public class Model {
         // Populate the positions.
         mPositions.clear();
         for (int i = 0; i < mCursorCount; ++i) {
-            mPositions.put(mIds.get(i), positions[i]);
+            mPositions.put(mIds[i], positions[i]);
         }
     }
 
@@ -214,12 +214,12 @@ public class Model {
      * @param positions Cursor positions to be sorted.
      * @param ids Model IDs to be sorted.
      */
-    private static void binarySort(String[] sortKey, int[] positions, List<String> ids) {
+    private static void binarySort(String[] sortKey, int[] positions, String[] ids) {
         final int count = positions.length;
         for (int start = 1; start < count; start++) {
             final int pivotPosition = positions[start];
             final String pivotValue = sortKey[start];
-            final String pivotId = ids.get(start);
+            final String pivotId = ids[start];
 
             int left = 0;
             int right = start;
@@ -243,23 +243,21 @@ public class Model {
                 case 2:
                     positions[left + 2] = positions[left + 1];
                     sortKey[left + 2] = sortKey[left + 1];
-                    ids.set(left + 2, ids.get(left + 1));
+                    ids[left + 2] = ids[left + 1];
                 case 1:
                     positions[left + 1] = positions[left];
                     sortKey[left + 1] = sortKey[left];
-                    ids.set(left + 1, ids.get(left));
+                    ids[left + 1] = ids[left];
                     break;
                 default:
                     System.arraycopy(positions, left, positions, left + 1, n);
                     System.arraycopy(sortKey, left, sortKey, left + 1, n);
-                    for (int i = n; i >= 1; --i) {
-                        ids.set(left + i, ids.get(left + i - 1));
-                    }
+                    System.arraycopy(ids, left, ids, left + 1, n);
             }
 
             positions[left] = pivotPosition;
             sortKey[left] = pivotValue;
-            ids.set(left, pivotId);
+            ids[left] = pivotId;
         }
     }
 
@@ -275,13 +273,13 @@ public class Model {
      * @param ids Model IDs to be sorted.
      */
     private static void binarySort(
-            long[] sortKey, String[] mimeTypes, int[] positions, List<String> ids) {
+            long[] sortKey, String[] mimeTypes, int[] positions, String[] ids) {
         final int count = positions.length;
         for (int start = 1; start < count; start++) {
             final int pivotPosition = positions[start];
             final long pivotValue = sortKey[start];
             final String pivotMime = mimeTypes[start];
-            final String pivotId = ids.get(start);
+            final String pivotId = ids[start];
 
             int left = 0;
             int right = start;
@@ -310,7 +308,7 @@ public class Model {
                 // have identical numerical sort keys.  One common example of this scenario is seen
                 // when sorting a set of active downloads by mod time.
                 if (compare == 0) {
-                    compare = pivotId.compareTo(ids.get(mid));
+                    compare = pivotId.compareTo(ids[mid]);
                 }
 
                 if (compare < 0) {
@@ -326,26 +324,24 @@ public class Model {
                     positions[left + 2] = positions[left + 1];
                     sortKey[left + 2] = sortKey[left + 1];
                     mimeTypes[left + 2] = mimeTypes[left + 1];
-                    ids.set(left + 2, ids.get(left + 1));
+                    ids[left + 2] = ids[left + 1];
                 case 1:
                     positions[left + 1] = positions[left];
                     sortKey[left + 1] = sortKey[left];
                     mimeTypes[left + 1] = mimeTypes[left];
-                    ids.set(left + 1, ids.get(left));
+                    ids[left + 1] = ids[left];
                     break;
                 default:
                     System.arraycopy(positions, left, positions, left + 1, n);
                     System.arraycopy(sortKey, left, sortKey, left + 1, n);
                     System.arraycopy(mimeTypes, left, mimeTypes, left + 1, n);
-                    for (int i = n; i >= 1; --i) {
-                        ids.set(left + i, ids.get(left + i - 1));
-                    }
+                    System.arraycopy(ids, left, ids, left + 1, n);
             }
 
             positions[left] = pivotPosition;
             sortKey[left] = pivotValue;
             mimeTypes[left] = pivotMime;
-            ids.set(left, pivotId);
+            ids[left] = pivotId;
         }
     }
 
@@ -413,7 +409,7 @@ public class Model {
      * @return An ordered array of model IDs representing the documents in the model. It is sorted
      *         according to the current sort order, which was set by the last model update.
      */
-    public List<String> getModelIds() {
+    public String[] getModelIds() {
         return mIds;
     }
 }
