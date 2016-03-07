@@ -76,11 +76,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private final Context mContext;
     private boolean mSystemReady;
     private final TextServicesMonitor mMonitor;
-    private final HashMap<String, SpellCheckerInfo> mSpellCheckerMap =
-            new HashMap<String, SpellCheckerInfo>();
-    private final ArrayList<SpellCheckerInfo> mSpellCheckerList = new ArrayList<SpellCheckerInfo>();
-    private final HashMap<String, SpellCheckerBindGroup> mSpellCheckerBindGroups =
-            new HashMap<String, SpellCheckerBindGroup>();
+    private final HashMap<String, SpellCheckerInfo> mSpellCheckerMap = new HashMap<>();
+    private final ArrayList<SpellCheckerInfo> mSpellCheckerList = new ArrayList<>();
+    private final HashMap<String, SpellCheckerBindGroup> mSpellCheckerBindGroups = new HashMap<>();
     private final TextServicesSettings mSettings;
 
     public void systemRunning() {
@@ -615,8 +613,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.d(TAG, "FinishSpellCheckerService");
         }
         synchronized(mSpellCheckerMap) {
-            final ArrayList<SpellCheckerBindGroup> removeList =
-                    new ArrayList<SpellCheckerBindGroup>();
+            final ArrayList<SpellCheckerBindGroup> removeList = new ArrayList<>();
             for (SpellCheckerBindGroup group : mSpellCheckerBindGroups.values()) {
                 if (group == null) continue;
                 // Use removeList to avoid modifying mSpellCheckerBindGroups in this loop.
@@ -811,7 +808,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         private final String TAG = SpellCheckerBindGroup.class.getSimpleName();
         private final InternalServiceConnection mInternalConnection;
         private final CopyOnWriteArrayList<InternalDeathRecipient> mListeners =
-                new CopyOnWriteArrayList<InternalDeathRecipient>();
+                new CopyOnWriteArrayList<>();
         public boolean mBound;
         public ISpellCheckerService mSpellChecker;
         public boolean mConnected;
@@ -885,8 +882,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
             synchronized(mSpellCheckerMap) {
                 final int size = mListeners.size();
-                final ArrayList<InternalDeathRecipient> removeList =
-                        new ArrayList<InternalDeathRecipient>();
+                final ArrayList<InternalDeathRecipient> removeList = new ArrayList<>();
                 for (int i = 0; i < size; ++i) {
                     final InternalDeathRecipient tempRecipient = mListeners.get(i);
                     if(tempRecipient.hasSpellCheckerListener(listener)) {
