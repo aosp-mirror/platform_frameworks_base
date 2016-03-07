@@ -612,45 +612,79 @@ public final class PrintManagerService extends SystemService {
 
         private void registerBroadcastReceivers() {
             PackageMonitor monitor = new PackageMonitor() {
-                private void updateServices(String packageName) {
-                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-                    synchronized (mLock) {
-                        // A background user/profile's print jobs are running but there is
-                        // no UI shown. Hence, if the packages of such a user change we need
-                        // to handle it as the change may affect ongoing print jobs.
-                        boolean servicesChanged = false;
-                        UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+                /**
+                 * Checks if the package contains a print service.
+                 *
+                 * @param packageName The name of the package
+                 *
+                 * @return true iff the package contains a print service
+                 */
+                private boolean hasPrintService(String packageName) {
+                    Intent intent = new Intent(android.printservice.PrintService.SERVICE_INTERFACE);
+                    intent.setPackage(packageName);
 
-                        List<PrintServiceInfo> installedServices = userState
-                                .getPrintServices(PrintManager.ALL_SERVICES);
-                        if (installedServices != null) {
-                            final int numInstalledServices = installedServices.size();
-                            for (int i = 0; i < numInstalledServices; i++) {
-                                if (installedServices.get(i).getResolveInfo()
-                                        .serviceInfo.packageName.equals(packageName)) {
-                                    servicesChanged = true;
-                                    break;
-                                }
-                            }
-                            if (servicesChanged) {
-                                userState.updateIfNeededLocked();
-                            }
+                    List<ResolveInfo> installedServices = mContext.getPackageManager()
+                            .queryIntentServicesAsUser(intent,
+                                    GET_SERVICES | MATCH_DEBUG_TRIAGED_MISSING,
+                                    getChangingUserId());
+
+                    return installedServices != null && !installedServices.isEmpty();
+                }
+
+                /**
+                 * Checks if there is a print service currently registered for this package.
+                 *
+                 * @param userState The userstate for the current user
+                 * @param packageName The name of the package
+                 *
+                 * @return true iff the package contained (and might still contain) a print service
+                 */
+                private boolean hadPrintService(@NonNull UserState userState, String packageName) {
+                    List<PrintServiceInfo> installedServices = userState
+                            .getPrintServices(PrintManager.ALL_SERVICES);
+
+                    if (installedServices == null) {
+                        return false;
+                    }
+
+                    final int numInstalledServices = installedServices.size();
+                    for (int i = 0; i < numInstalledServices; i++) {
+                        if (installedServices.get(i).getResolveInfo().serviceInfo.packageName
+                                .equals(packageName)) {
+                            return true;
                         }
                     }
+
+                    return false;
                 }
 
                 @Override
                 public void onPackageModified(String packageName) {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-                    updateServices(packageName);
-                    getOrCreateUserStateLocked(getChangingUserId()).prunePrintServices();
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+
+                    synchronized (mLock) {
+                        if (hadPrintService(userState, packageName)
+                                || hasPrintService(packageName)) {
+                            userState.updateIfNeededLocked();
+                        }
+                    }
+
+                    userState.prunePrintServices();
                 }
 
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-                    updateServices(packageName);
-                    getOrCreateUserStateLocked(getChangingUserId()).prunePrintServices();
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+
+                    synchronized (mLock) {
+                        if (hadPrintService(userState, packageName)) {
+                            userState.updateIfNeededLocked();
+                        }
+                    }
+
+                    userState.prunePrintServices();
                 }
 
                 @Override
@@ -694,21 +728,11 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageAdded(String packageName, int uid) {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-
-                    // A background user/profile's print jobs are running but there is
-                    // no UI shown. Hence, if the packages of such a user change we need
-                    // to handle it as the change may affect ongoing print jobs.
-                    Intent intent = new Intent(android.printservice.PrintService.SERVICE_INTERFACE);
-                    intent.setPackage(packageName);
-
-                    List<ResolveInfo> installedServices = mContext.getPackageManager()
-                            .queryIntentServicesAsUser(intent,
-                                    GET_SERVICES | MATCH_DEBUG_TRIAGED_MISSING,
-                                    getChangingUserId());
-
-                    if (installedServices != null) {
-                        UserState userState = getOrCreateUserStateLocked(getChangingUserId());
-                        userState.updateIfNeededLocked();
+                    synchronized (mLock) {
+                        if (hasPrintService(packageName)) {
+                            UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+                            userState.updateIfNeededLocked();
+                        }
                     }
                 }
             };
