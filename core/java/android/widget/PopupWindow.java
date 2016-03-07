@@ -1651,10 +1651,11 @@ public class PopupWindow {
         // to executing this method, so we can rely on that instead.
         final Transition exitTransition = mExitTransition;
         if (mIsAnchorRootAttached && exitTransition != null && decorView.isLaidOut()) {
-            // The decor view is non-interactive during exit transitions.
+            // The decor view is non-interactive and non-IME-focusable during exit transitions.
             final LayoutParams p = (LayoutParams) decorView.getLayoutParams();
             p.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
             p.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
+            p.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             mWindowManager.updateViewLayout(decorView, p);
 
             // Once we start dismissing the decor view, all state (including
