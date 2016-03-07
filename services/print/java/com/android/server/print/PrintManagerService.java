@@ -623,16 +623,18 @@ public final class PrintManagerService extends SystemService {
 
                         List<PrintServiceInfo> installedServices = userState
                                 .getPrintServices(PrintManager.ALL_SERVICES);
-                        final int numInstalledServices = installedServices.size();
-                        for (int i = 0; i < numInstalledServices; i++) {
-                            if (installedServices.get(i).getResolveInfo().serviceInfo.packageName
-                                    .equals(packageName)) {
-                                servicesChanged = true;
-                                break;
+                        if (installedServices != null) {
+                            final int numInstalledServices = installedServices.size();
+                            for (int i = 0; i < numInstalledServices; i++) {
+                                if (installedServices.get(i).getResolveInfo()
+                                        .serviceInfo.packageName.equals(packageName)) {
+                                    servicesChanged = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (servicesChanged) {
-                            userState.updateIfNeededLocked();
+                            if (servicesChanged) {
+                                userState.updateIfNeededLocked();
+                            }
                         }
                     }
                 }
