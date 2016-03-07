@@ -455,23 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Attivare il Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connettere la tastiera al tablet, devi prima attivare il Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Attiva"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Mostra silenziosamente le notifiche"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Mostra le notifiche silenziosamente"</string>
     <string name="block" msgid="2734508760962682611">"Blocca tutte le notifiche"</string>
-    <string name="do_not_silence" msgid="6878060322594892441">"Non disattivare i suoni"</string>
-    <string name="do_not_silence_block" msgid="4070647971382232311">"Non disattivare i suoni e non bloccare"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Mostra impostazioni importanza complete"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Non silenziare"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Non silenziare e non bloccare"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Mostra impostazioni di importanza complete"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Bloccata"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Importanza min"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Importanza minima"</string>
     <string name="low_importance" msgid="4109929986107147930">"Importanza scarsa"</string>
     <string name="default_importance" msgid="8192107689995742653">"Importanza normale"</string>
     <string name="high_importance" msgid="1527066195614050263">"Importanza elevata"</string>
     <string name="max_importance" msgid="5089005872719563894">"Importanza urgente"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Non mostrare mai queste notifiche"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Mostra silenziosamente nella parte inferiore dell\'elenco delle notifiche"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Mostra silenziosamente queste notifiche"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Attiva i suoni per queste notifiche"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Apri sullo schermo e attiva l\'audio"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Mostra in cima all\'elenco delle notifiche, apri sullo schermo e attiva l\'audio"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Mostra silenziosamente in fondo all\'elenco delle notifiche"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Mostra queste notifiche silenziosamente"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Attiva l\'audio per queste notifiche"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Visualizza sullo schermo e attiva l\'audio"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Mostra in cima all\'elenco delle notifiche, visualizza sullo schermo e attiva l\'audio"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Altre impostazioni"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fine"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Colore e aspetto"</string>
