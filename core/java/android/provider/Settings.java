@@ -217,21 +217,6 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_SETTINGS";
 
     /**
-     * Activity Action: Launch the screen reader tutorial.
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: Nothing.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SCREEN_READER_TUTORIAL =
-            "android.settings.SCREEN_READER_TUTORIAL";
-
-
-    /**
      * Activity Action: Show settings to control access to usage information.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
