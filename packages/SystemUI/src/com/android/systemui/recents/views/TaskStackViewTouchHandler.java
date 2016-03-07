@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.MutableBoolean;
@@ -44,6 +45,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
+import com.android.systemui.recents.misc.FreePathInterpolator;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -60,6 +62,16 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     private static final int INACTIVE_POINTER_ID = -1;
     private static final Interpolator STACK_TRANSFORM_INTERPOLATOR =
             new PathInterpolator(0.73f, 0.33f, 0.42f, 0.85f);
+    // The min overscroll is the amount of task progress overscroll we want / the max overscroll
+    // curve value below
+    private static final float MAX_OVERSCROLL = 0.7f / 0.3f;
+    private static final Interpolator OVERSCROLL_INTERP;
+    static {
+        Path OVERSCROLL_PATH = new Path();
+        OVERSCROLL_PATH.moveTo(0, 0);
+        OVERSCROLL_PATH.cubicTo(0.2f, 0.175f, 0.25f, 0.3f, 1f, 0.3f);
+        OVERSCROLL_INTERP = new FreePathInterpolator(OVERSCROLL_PATH);
+    }
 
     Context mContext;
     TaskStackView mSv;
@@ -245,6 +257,18 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // of the curve, so just move the scroll proportional to that
                     float deltaP = layoutAlgorithm.getDeltaPForY(mDownY, y);
                     float curScrollP = mDownScrollP + deltaP;
+
+                    // Modulate the overscroll to prevent users from pulling the stack too far
+                    float minScrollP = layoutAlgorithm.mMinScrollP;
+                    float maxScrollP = layoutAlgorithm.mMaxScrollP;
+                    if (curScrollP < minScrollP || curScrollP > maxScrollP) {
+                        float clampedScrollP = Utilities.clamp(curScrollP, minScrollP, maxScrollP);
+                        float overscrollP = (curScrollP - clampedScrollP);
+                        float overscrollX = Math.abs(overscrollP) / MAX_OVERSCROLL;
+                        curScrollP = clampedScrollP + (Math.signum(overscrollP) *
+                                (OVERSCROLL_INTERP.getInterpolation(overscrollX) * MAX_OVERSCROLL));
+                    }
+
                     mScroller.setStackScroll(curScrollP);
                     mStackViewScrolledEvent.updateY(y - mLastY);
                     EventBus.getDefault().send(mStackViewScrolledEvent);
