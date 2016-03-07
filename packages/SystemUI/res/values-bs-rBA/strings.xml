@@ -456,11 +456,11 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želiti li uključiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Da povežete tastaturu sa tabletom, prvo morate uključiti Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Uključi"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Nečujno pokaži obavijesti"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Nečujno prikaži obavijesti"</string>
     <string name="block" msgid="2734508760962682611">"Blokiraj sva obavještenja"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Nemoj utišati"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Nemoj utišati ili blokirati"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Pokaži kompletne postavke za određivanje značaja"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Prikaži kompletne postavke za određivanje značaja"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Blokirano"</string>
     <string name="min_importance" msgid="1901894910809414782">"Minimalni značaj"</string>
     <string name="low_importance" msgid="4109929986107147930">"Mali značaj"</string>
@@ -468,11 +468,11 @@
     <string name="high_importance" msgid="1527066195614050263">"Visok značaj"</string>
     <string name="max_importance" msgid="5089005872719563894">"Hitan značaj"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Nikada ne prikazuj ova obavještenja"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Nečujno pokaži na dnu spiska obavještenja"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Nečujno prikaži na dnu spiska obavještenja"</string>
     <string name="notification_importance_low" msgid="3657252049508213048">"Nečujno prikaži ova obavještenja"</string>
     <string name="notification_importance_default" msgid="4466466472622442175">"Dozvolite zvuk na ovim obavještenjima"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Kratko prikaži na ekranu i dozvoli zvuk i dozvoli zvuk"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Pokaži na vrhu liste obaveštenja, kratko prikaži na ekranu i dozvoli zvuk"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Kratko prikaži na ekranu i dozvoli zvuk"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Prikaži na vrhu liste obavještenja, kratko prikaži na ekranu i dozvoli zvuk"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Boja i izgled"</string>

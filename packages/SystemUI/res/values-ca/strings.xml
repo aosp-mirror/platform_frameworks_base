@@ -459,7 +459,7 @@
     <string name="block" msgid="2734508760962682611">"Bloqueja totes les notificacions"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"No silenciïs"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"No silenciïs ni bloquegis"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Mostra la configuració de la importància completa"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Mostra la configuració completa per a la importància"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Bloquejades"</string>
     <string name="min_importance" msgid="1901894910809414782">"Importància mínima"</string>
     <string name="low_importance" msgid="4109929986107147930">"Importància baixa"</string>
