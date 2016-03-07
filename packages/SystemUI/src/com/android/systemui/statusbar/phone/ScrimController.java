@@ -45,7 +45,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public static final long ANIMATION_DURATION = 220;
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR
             = new PathInterpolator(0f, 0, 0.7f, 1f);
-
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
     private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
     private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
@@ -59,6 +58,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private final ScrimView mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
     private final View mHeadsUpScrim;
+
+    private float mScrimBehindAlpha = SCRIM_BEHIND_ALPHA;
+    private float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
+    private float mScrimBehindAlphaUnlocking = SCRIM_BEHIND_ALPHA_UNLOCKING;
 
     protected boolean mKeyguardShowing;
     private float mFraction;
@@ -98,6 +101,19 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setKeyguardShowing(boolean showing) {
         mKeyguardShowing = showing;
+        scheduleUpdate();
+    }
+
+    public void setShowScrimBehind(boolean show) {
+        if (show) {
+            mScrimBehindAlpha = SCRIM_BEHIND_ALPHA;
+            mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
+            mScrimBehindAlphaUnlocking = SCRIM_BEHIND_ALPHA_UNLOCKING;
+        } else {
+            mScrimBehindAlpha = 0;
+            mScrimBehindAlphaKeyguard = 0;
+            mScrimBehindAlphaUnlocking = 0;
+        }
         scheduleUpdate();
     }
 
@@ -229,7 +245,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             fraction = (float) Math.pow(fraction, 0.8f);
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
             setScrimInFrontColor(fraction * SCRIM_IN_FRONT_ALPHA);
-            setScrimBehindColor(behindFraction * SCRIM_BEHIND_ALPHA_KEYGUARD);
+            setScrimBehindColor(behindFraction * mScrimBehindAlphaKeyguard);
         } else if (mBouncerShowing) {
             setScrimInFrontColor(SCRIM_IN_FRONT_ALPHA);
             setScrimBehindColor(0f);
@@ -237,8 +253,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             float fraction = Math.max(0, Math.min(mFraction, 1));
             setScrimInFrontColor(0f);
             setScrimBehindColor(fraction
-                    * (SCRIM_BEHIND_ALPHA_KEYGUARD - SCRIM_BEHIND_ALPHA_UNLOCKING)
-                    + SCRIM_BEHIND_ALPHA_UNLOCKING);
+                    * (mScrimBehindAlphaKeyguard - mScrimBehindAlphaUnlocking)
+                    + mScrimBehindAlphaUnlocking);
         }
     }
 
@@ -251,7 +267,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         } else {
             // woo, special effects
             final float k = (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2f))));
-            setScrimBehindColor(k * SCRIM_BEHIND_ALPHA);
+            setScrimBehindColor(k * mScrimBehindAlpha);
         }
     }
 
