@@ -311,6 +311,8 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nenotiek uzlāde"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Pilns"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolē administrators"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Iespējojis administrators"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Atspējojis administrators"</string>
     <string name="home" msgid="8263346537524314127">"Sākums"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"Pirms šāda laika: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Atlikušais laiks: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
