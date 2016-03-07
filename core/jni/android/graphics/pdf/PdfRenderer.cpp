@@ -205,11 +205,10 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     clip.bottom = destBottom;
     fxgeDevice->SetClip_Rect(&clip);
 
-    CPDF_RenderContext* pageContext = new CPDF_RenderContext;
+    CPDF_RenderContext* pageContext = new CPDF_RenderContext(pPage);
     pContext->m_pContext = pageContext;
-    pageContext->Create(pPage);
 
-    CFX_AffineMatrix matrix;
+    CFX_Matrix matrix;
     if (!transform) {
         pPage->GetDisplayMatrix(matrix, destLeft, destTop, destRight - destLeft,
                 destBottom - destTop, 0);
@@ -232,8 +231,8 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     }
     pageContext->AppendObjectList(pPage, &matrix);
 
-    pContext->m_pRenderer = new CPDF_ProgressiveRenderer;
-    pContext->m_pRenderer->Start(pageContext, fxgeDevice, renderOptions, NULL);
+    pContext->m_pRenderer = new CPDF_ProgressiveRenderer(pageContext, fxgeDevice, renderOptions);
+    pContext->m_pRenderer->Start(NULL);
 
     fxgeDevice->RestoreState();
 

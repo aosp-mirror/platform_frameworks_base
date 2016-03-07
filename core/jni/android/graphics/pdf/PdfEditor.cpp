@@ -196,7 +196,7 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
         return;
     }
 
-    CFX_AffineMatrix matrix;
+    CFX_Matrix matrix;
 
     SkMatrix* skTransform = reinterpret_cast<SkMatrix*>(transformPtr);
 
