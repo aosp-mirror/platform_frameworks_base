@@ -169,6 +169,13 @@ public class WifiScanner {
         public int band;
         /** list of channels; used when band is set to WIFI_BAND_UNSPECIFIED */
         public ChannelSpec[] channels;
+        /**
+         * list of networkId's of hidden networks to scan for.
+         * These Id's should correspond to the wpa_supplicant's networkId's and will be used
+         * in connectivity scans using wpa_supplicant.
+         * {@hide}
+         * */
+        public int[] hiddenNetworkIds;
         /** period of background scan; in millisecond, 0 => single shot scan */
         public int periodInMs;
         /** must have a valid REPORT_EVENT value */
@@ -213,10 +220,8 @@ public class WifiScanner {
             dest.writeInt(maxPeriodInMs);
             dest.writeInt(stepCount);
             dest.writeInt(isPnoScan ? 1 : 0);
-
             if (channels != null) {
                 dest.writeInt(channels.length);
-
                 for (int i = 0; i < channels.length; i++) {
                     dest.writeInt(channels[i].frequency);
                     dest.writeInt(channels[i].dwellTimeMS);
@@ -225,13 +230,13 @@ public class WifiScanner {
             } else {
                 dest.writeInt(0);
             }
+            dest.writeIntArray(hiddenNetworkIds);
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<ScanSettings> CREATOR =
                 new Creator<ScanSettings>() {
                     public ScanSettings createFromParcel(Parcel in) {
-
                         ScanSettings settings = new ScanSettings();
                         settings.band = in.readInt();
                         settings.periodInMs = in.readInt();
@@ -245,13 +250,12 @@ public class WifiScanner {
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
                             int frequency = in.readInt();
-
                             ChannelSpec spec = new ChannelSpec(frequency);
                             spec.dwellTimeMS = in.readInt();
                             spec.passive = in.readInt() == 1;
                             settings.channels[i] = spec;
                         }
-
+                        settings.hiddenNetworkIds = in.createIntArray();
                         return settings;
                     }
 
