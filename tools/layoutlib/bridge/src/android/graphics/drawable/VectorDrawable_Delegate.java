@@ -211,12 +211,16 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static void nUpdateFullPathFillGradient(long pathPtr, long fillGradientPtr) {
+        VFullPath_Delegate path = getDelegate(pathPtr);
 
+        path.setFillGradient(fillGradientPtr);
     }
 
     @LayoutlibDelegate
     static void nUpdateFullPathStrokeGradient(long pathPtr, long strokeGradientPtr) {
+        VFullPath_Delegate path = getDelegate(pathPtr);
 
+        path.setStrokeGradient(strokeGradientPtr);
     }
 
     @LayoutlibDelegate
@@ -540,6 +544,8 @@ public class VectorDrawable_Delegate {
         float mStrokeWidth = 0;
 
         int mFillColor = Color.TRANSPARENT;
+        long mStrokeGradient = 0;
+        long mFillGradient = 0;
         float mStrokeAlpha = 1.0f;
         float mFillAlpha = 1.0f;
         float mTrimPathStart = 0;
@@ -569,6 +575,9 @@ public class VectorDrawable_Delegate {
             mStrokeLineCap = copy.mStrokeLineCap;
             mStrokeLineJoin = copy.mStrokeLineJoin;
             mStrokeMiterlimit = copy.mStrokeMiterlimit;
+
+            mStrokeGradient = copy.mStrokeGradient;
+            mFillGradient = copy.mFillGradient;
         }
 
         private int getStrokeLineCap() {
@@ -637,7 +646,7 @@ public class VectorDrawable_Delegate {
             return mStrokeColor;
         }
 
-                private void setStrokeColor(int strokeColor) {
+        private void setStrokeColor(int strokeColor) {
             mStrokeColor = strokeColor;
         }
 
@@ -703,6 +712,14 @@ public class VectorDrawable_Delegate {
 
         private float getStrokeMiterlimit() {
             return mStrokeMiterlimit;
+        }
+
+        private void setStrokeGradient(long gradientPtr) {
+            mStrokeGradient = gradientPtr;
+        }
+
+        private void setFillGradient(long gradientPtr) {
+            mFillGradient = gradientPtr;
         }
     }
 
@@ -1046,11 +1063,11 @@ public class VectorDrawable_Delegate {
                     final Paint fillPaint = mFillPaint;
                     fillPaint.setColor(applyAlpha(fullPath.mFillColor, fullPath.mFillAlpha));
                     Paint_Delegate fillPaintDelegate = Paint_Delegate.getDelegate(fillPaint
-                            .getNativeInstance
-                            ());
+                            .getNativeInstance());
                     // mFillPaint can not be null at this point so we will have a delegate
                     assert fillPaintDelegate != null;
                     fillPaintDelegate.setColorFilter(filterPtr);
+                    fillPaintDelegate.setShader(fullPath.mFillGradient);
                     Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
                             .getNativeInstance());
                 }
@@ -1080,6 +1097,7 @@ public class VectorDrawable_Delegate {
                     strokePaintDelegate.setColorFilter(filterPtr);
                     final float finalStrokeScale = minScale * matrixScale;
                     strokePaint.setStrokeWidth(fullPath.mStrokeWidth * finalStrokeScale);
+                    strokePaintDelegate.setShader(fullPath.mStrokeGradient);
                     Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, strokePaint
                             .getNativeInstance());
                 }

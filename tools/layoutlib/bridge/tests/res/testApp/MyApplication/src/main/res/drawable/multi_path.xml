@@ -53,6 +53,16 @@
             android:trimPathStart="0.2"
             android:trimPathEnd="0.8"
         />
+
+        <!--
+            Draw a line with gradient stroke color
+        -->
+        <path
+            android:strokeWidth="1"
+            android:strokeColor="#FF00FF"
+            android:fillColor="@color/gradient"
+            android:pathData="M-20,-20 l0, 10 l10, 0 l0, -10 l-10,0 "
+        />
     </group>
 
 </vector>
