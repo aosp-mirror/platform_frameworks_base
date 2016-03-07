@@ -307,7 +307,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // measure/layout pass
             updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
             updateToInitialState();
-            relayoutTaskViewsOnNextFrame(AnimationProps.IMMEDIATE);
+            relayoutTaskViews(AnimationProps.IMMEDIATE);
+
+            // Rebind all the task views.  This will not trigger new resources to be loaded unless
+            // they have actually changed
+            List<TaskView> taskViews = getTaskViews();
+            int taskViewCount = taskViews.size();
+            for (int i = 0; i < taskViewCount; i++) {
+                TaskView tv = taskViews.get(i);
+                bindTaskView(tv, tv.getTask());
+            }
         }
     }
 
@@ -640,9 +649,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
-            final TaskView tv = taskViews.get(i);
-            final int taskIndex = mStack.indexOfStackTask(tv.getTask());
-            final TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
+            TaskView tv = taskViews.get(i);
+            int taskIndex = mStack.indexOfStackTask(tv.getTask());
+            TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
 
             if (ignoreTasksSet.contains(tv.getTask().key)) {
                 continue;
@@ -1430,8 +1439,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onReturnViewToPool(TaskView tv) {
         final Task task = tv.getTask();
 
-        // Report that this task's data is no longer being used
-        Recents.getTaskLoader().unloadTaskData(task);
+        // Unbind the task from the task view
+        unbindTaskView(tv, task);
 
         // Reset the view properties and view state
         tv.resetViewProperties();
@@ -1476,11 +1485,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the task views list after adding the new task view
         updateTaskViewsList();
 
-        // Rebind the task and request that this task's data be filled into the TaskView
-        tv.onTaskBound(task);
-
-        // Load the task data
-        Recents.getTaskLoader().loadTaskData(task, true /* fetchAndInvalidateThumbnails */);
+        // Bind the task view to the new task
+        bindTaskView(tv, task);
 
         // If the doze trigger has already fired, then update the state for this task view
         if (mUIDozeTrigger.isAsleep()) {
@@ -1510,6 +1516,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public boolean hasPreferredData(TaskView tv, Task preferredData) {
         return (tv.getTask() == preferredData);
+    }
+
+    private void bindTaskView(TaskView tv, Task task) {
+        // Rebind the task and request that this task's data be filled into the TaskView
+        tv.onTaskBound(task);
+
+        // Load the task data
+        Recents.getTaskLoader().loadTaskData(task, true /* fetchAndInvalidateThumbnails */);
+    }
+
+    private void unbindTaskView(TaskView tv, Task task) {
+        // Report that this task's data is no longer being used
+        Recents.getTaskLoader().unloadTaskData(task);
     }
 
     /**** TaskViewCallbacks Implementation ****/
