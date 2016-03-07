@@ -236,6 +236,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private int mUiState = UI_STATE_PREVIEW;
 
+    /** Observer for changes to the printers */
+    private PrintersObserver mPrintersObserver;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1191,7 +1194,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mCopiesEditText.addTextChangedListener(new EditTextWatcher());
 
         // Destination.
-        mDestinationSpinnerAdapter.registerDataSetObserver(new PrintersObserver());
+        mPrintersObserver = new PrintersObserver();
+        mDestinationSpinnerAdapter.registerDataSetObserver(mPrintersObserver);
         mDestinationSpinner = (Spinner) findViewById(R.id.destination_spinner);
         mDestinationSpinner.setAdapter(mDestinationSpinnerAdapter);
         mDestinationSpinner.setOnItemSelectedListener(itemSelectedListener);
@@ -1969,6 +1973,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPrinterRegistry.setTrackedPrinter(null);
         }
 
+        if (mPrintersObserver != null) {
+            mDestinationSpinnerAdapter.unregisterDataSetObserver(mPrintersObserver);
+        }
+
         if (mState != STATE_INITIALIZING) {
             mProgressMessageController.cancel();
             mSpoolerProvider.destroy();
@@ -2449,6 +2457,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             PrinterCapabilitiesInfo oldCapab = oldPrinterState.getCapabilities();
             PrinterCapabilitiesInfo newCapab = newPrinterState.getCapabilities();
 
+            final boolean hadCabab = oldCapab != null;
             final boolean hasCapab = newCapab != null;
             final boolean gotCapab = oldCapab == null && newCapab != null;
             final boolean lostCapab = oldCapab != null && newCapab == null;
@@ -2467,18 +2476,22 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
             mCurrentPrinter = newPrinterState;
 
-            if ((isActive && gotCapab) || (becameActive && hasCapab)) {
-                if (hasCapab && capabChanged) {
-                    updatePrintAttributesFromCapabilities(newCapab);
-                    updatePrintPreviewController(false);
-                }
-                onPrinterAvailable(newPrinterState);
-            } else if ((becameInactive && hasCapab) || (isActive && lostCapab)) {
-                onPrinterUnavailable(newPrinterState);
-            }
-
             final boolean updateNeeded = ((capabChanged && hasCapab && isActive)
                     || (becameActive && hasCapab) || (isActive && gotCapab));
+
+            if (capabChanged && hasCapab) {
+                updatePrintAttributesFromCapabilities(newCapab);
+            }
+
+            if (updateNeeded) {
+                updatePrintPreviewController(false);
+            }
+
+            if ((isActive && gotCapab) || (becameActive && hasCapab)) {
+                onPrinterAvailable(newPrinterState);
+            } else if ((becameInactive && hadCabab) || (isActive && lostCapab)) {
+                onPrinterUnavailable(newPrinterState);
+            }
 
             if (updateNeeded && canUpdateDocument()) {
                 updateDocument(false);
