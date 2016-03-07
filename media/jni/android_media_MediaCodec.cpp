@@ -65,6 +65,7 @@ static struct CryptoErrorCodes {
     jint cryptoErrorResourceBusy;
     jint cryptoErrorInsufficientOutputProtection;
     jint cryptoErrorSessionNotOpened;
+    jint cryptoErrorUnsupportedOperation;
 } gCryptoErrorCodes;
 
 static struct CodecActionCodes {
@@ -868,6 +869,10 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
         case ERROR_DRM_SESSION_NOT_OPENED:
             err = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
             defaultMsg = "Attempted to use a closed session";
+            break;
+        case ERROR_DRM_CANNOT_HANDLE:
+            err = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
+            defaultMsg = "Operation not supported in this configuration";
             break;
         default:  /* Other negative DRM error codes go out as is. */
             break;
@@ -1771,6 +1776,11 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     field = env->GetStaticFieldID(clazz.get(), "ERROR_SESSION_NOT_OPENED", "I");
     CHECK(field != NULL);
     gCryptoErrorCodes.cryptoErrorSessionNotOpened =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_UNSUPPORTED_OPERATION", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorUnsupportedOperation =
         env->GetStaticIntField(clazz.get(), field);
 
     clazz.reset(env->FindClass("android/media/MediaCodec$CodecException"));
