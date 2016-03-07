@@ -201,6 +201,26 @@ private:
     const unsigned int mSize;
 };
 
+// Necessary for decodes when the native decoder cannot scale to appropriately match the sampleSize
+// (for example, RAW). If the sampleSize divides evenly into the dimension, we require that the
+// scale matches exactly. If sampleSize does not divide evenly, we allow the decoder to choose how
+// best to round.
+static bool needsFineScale(const int fullSize, const int decodedSize, const int sampleSize) {
+    if (fullSize % sampleSize == 0 && fullSize / sampleSize != decodedSize) {
+        return true;
+    } else if ((fullSize / sampleSize + 1) != decodedSize &&
+               (fullSize / sampleSize) != decodedSize) {
+        return true;
+    }
+    return false;
+}
+
+static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
+                           const int sampleSize) {
+    return needsFineScale(fullSize.width(), decodedSize.width(), sampleSize) ||
+           needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
+}
+
 static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding, jobject options) {
     // This function takes ownership of the input stream.  Since the SkAndroidCodec
     // will take ownership of the stream, we don't necessarily need to take ownership
@@ -250,7 +270,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             }
         }
     }
-    const bool willScale = scale != 1.0f;
 
     // Create the codec.
     NinePatchPeeker peeker;
@@ -269,20 +288,40 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         prefColorType = kN32_SkColorType;
     }
 
-    // Determine the output size and return if the client only wants the size.
+    // Determine the output size.
     SkISize size = codec->getSampledDimensions(sampleSize);
+
+    int scaledWidth = size.width();
+    int scaledHeight = size.height();
+    bool willScale = false;
+
+    // Apply a fine scaling step if necessary.
+    if (needsFineScale(codec->getInfo().dimensions(), size, sampleSize)) {
+        willScale = true;
+        scaledWidth = codec->getInfo().width() / sampleSize;
+        scaledHeight = codec->getInfo().height() / sampleSize;
+    }
+
+    // Set the options and return if the client only wants the size.
     if (options != NULL) {
         jstring mimeType = encodedFormatToString(env, codec->getEncodedFormat());
         if (env->ExceptionCheck()) {
             return nullObjectReturn("OOM in encodedFormatToString()");
         }
-        env->SetIntField(options, gOptions_widthFieldID, size.width());
-        env->SetIntField(options, gOptions_heightFieldID, size.height());
+        env->SetIntField(options, gOptions_widthFieldID, scaledWidth);
+        env->SetIntField(options, gOptions_heightFieldID, scaledHeight);
         env->SetObjectField(options, gOptions_mimeFieldID, mimeType);
 
         if (onlyDecodeSize) {
             return nullptr;
         }
+    }
+
+    // Scale is necessary due to density differences.
+    if (scale != 1.0f) {
+        willScale = true;
+        scaledWidth = static_cast<int>(scaledWidth * scale + 0.5f);
+        scaledHeight = static_cast<int>(scaledHeight * scale + 0.5f);
     }
 
     android::Bitmap* reuseBitmap = nullptr;
@@ -379,13 +418,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             break;
         default:
             return nullObjectReturn("codec->getAndroidPixels() failed.");
-    }
-
-    int scaledWidth = size.width();
-    int scaledHeight = size.height();
-    if (willScale) {
-        scaledWidth = int(scaledWidth * scale + 0.5f);
-        scaledHeight = int(scaledHeight * scale + 0.5f);
     }
 
     jbyteArray ninePatchChunk = NULL;
