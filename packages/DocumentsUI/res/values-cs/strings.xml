@@ -126,11 +126,10 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Některé soubory byly převedeny"</string>
     <string name="allow" msgid="7225948811296386551">"Povolit"</string>
     <string name="deny" msgid="2081879885755434506">"Odepřít"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Smazat soubory?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="few">Opravdu chcete smazat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory?</item>
-      <item quantity="many">Opravdu chcete smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru?</item>
-      <item quantity="other">Opravdu chcete smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů?</item>
-      <item quantity="one">Opravdu chcete smazat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="few">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory?</item>
+      <item quantity="many">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru?</item>
+      <item quantity="other">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů?</item>
+      <item quantity="one">Smazat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor?</item>
     </plurals>
 </resources>

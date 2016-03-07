@@ -119,10 +119,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Unele fișiere au fost convertite"</string>
     <string name="allow" msgid="7225948811296386551">"Permiteți"</string>
     <string name="deny" msgid="2081879885755434506">"Refuzați"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Ștergeți fișierele?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="few">Sigur doriți să ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere?</item>
-      <item quantity="other">Sigur doriți să ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere?</item>
-      <item quantity="one">Sigur doriți să ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> fișier?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="few">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere?</item>
+      <item quantity="other">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere?</item>
+      <item quantity="one">Ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> fișier?</item>
     </plurals>
 </resources>

@@ -112,8 +112,7 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"일부 파일이 변환되었습니다."</string>
     <string name="allow" msgid="7225948811296386551">"허용"</string>
     <string name="deny" msgid="2081879885755434506">"거부"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"파일을 삭제하시겠습니까?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
       <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
       <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
     </plurals>
