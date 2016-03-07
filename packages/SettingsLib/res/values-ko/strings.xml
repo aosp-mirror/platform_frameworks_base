@@ -311,6 +311,8 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"충전 안함"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"충전 완료"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"관리자가 제어"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"관리자가 사용 설정함"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"관리자가 사용 중지함"</string>
     <string name="home" msgid="8263346537524314127">"홈"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> 전"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> 남음"</string>

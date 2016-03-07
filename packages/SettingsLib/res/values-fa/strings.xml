@@ -274,11 +274,11 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"فعال کردن وب‌نما چند پردازشی"</string>
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"فعال کردن وب‌نمای چندپردازشی"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"اجرای تولیدکننده تصویر وب‌نما در یک پردازش مجزا."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"اجرای وب‌نما"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"تنظیم اجرای وب‌نما"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"اجرای وب‌نما انتخابی نامعتبر است چون فهرست گزینه‌های اجرای انتخابی قدیمی شده است. این فهرست اکنون باید به‌روزرسانی شود."</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"اجرای وب‌نمای انتخابی نامعتبر است چون فهرست گزینه‌های اجرای انتخابی قدیمی شده است. این فهرست اکنون باید به‌روزرسانی شود."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"تبدیل به رمزگذاری برحسب فایل"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"تبدیل…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"از قبل به رمزگذاری بر حسب فایل تبدیل شده است"</string>
@@ -311,6 +311,8 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"پر"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"توسط سرپرست سیستم کنترل می‌شود"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"سرپرست آن را فعال کرده است"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"سرپرست آن را غیرفعال کرده است"</string>
     <string name="home" msgid="8263346537524314127">"صفحه اصلی"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> قبل"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> باقی مانده است"</string>

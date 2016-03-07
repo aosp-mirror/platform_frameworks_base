@@ -311,6 +311,8 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ආරෝපණය නොවෙමින්"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"පූර්ණ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"පරිපාලක විසින් සබල කරන ලදී"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"පරිපාලක විසින් අබල කරන ලදී"</string>
     <string name="home" msgid="8263346537524314127">"මුල් පිටුව"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>කට පෙර"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g>ක් ඉතිරිය"</string>

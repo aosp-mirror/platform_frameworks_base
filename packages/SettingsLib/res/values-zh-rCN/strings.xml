@@ -311,6 +311,8 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"未在充电"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"电量充足"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"由管理员控制"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"已被管理员启用"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"已被管理员禁用"</string>
     <string name="home" msgid="8263346537524314127">"主屏幕"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"还剩 <xliff:g id="ID_1">%1$s</xliff:g>"</string>
