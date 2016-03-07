@@ -16,12 +16,15 @@
 
 package com.android.documentsui;
 
+import android.annotation.Nullable;
+
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
 
 public class MimePredicate implements Predicate<DocumentInfo> {
     private final String[] mFilters;
 
+    private static final String APK_TYPE = "application/vnd.android.package-archive";
     /**
      * MIME types that are visual in nature. For example, they should always be
      * shown as thumbnails in list mode.
@@ -91,5 +94,9 @@ public class MimePredicate implements Predicate<DocumentInfo> {
         } else {
             return false;
         }
+    }
+
+    public static boolean isApkType(@Nullable String mimeType) {
+        return APK_TYPE.equals(mimeType);
     }
 }
