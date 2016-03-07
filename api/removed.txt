@@ -201,14 +201,6 @@ package android.provider {
 
 }
 
-package android.service.notification {
-
-  public abstract class ConditionProviderService extends android.app.Service {
-    method public void onRequestConditions(int);
-  }
-
-}
-
 package android.test.mock {
 
   public deprecated class MockPackageManager extends android.content.pm.PackageManager {
