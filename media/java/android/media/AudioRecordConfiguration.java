@@ -27,13 +27,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * The AudioRecordingConfiguration class collects the information describing an audio recording
+ * The AudioRecordConfiguration class collects the information describing an audio recording
  * session. This information is returned through the
  * {@link AudioManager#getActiveRecordConfigurations()} method.
  *
  */
-public final class AudioRecordingConfiguration implements Parcelable {
-    private final static String TAG = new String("AudioRecordingConfiguration");
+public final class AudioRecordConfiguration implements Parcelable {
+    private final static String TAG = new String("AudioRecordConfiguration");
 
     private final int mSessionId;
 
@@ -47,7 +47,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public AudioRecordingConfiguration(int session, int source, AudioFormat devFormat,
+    public AudioRecordConfiguration(int session, int source, AudioFormat devFormat,
             AudioFormat clientFormat, int patchHandle) {
         mSessionId = session;
         mClientSource = source;
@@ -136,18 +136,18 @@ public final class AudioRecordingConfiguration implements Parcelable {
         return null;
     }
 
-    public static final Parcelable.Creator<AudioRecordingConfiguration> CREATOR
-            = new Parcelable.Creator<AudioRecordingConfiguration>() {
+    public static final Parcelable.Creator<AudioRecordConfiguration> CREATOR
+            = new Parcelable.Creator<AudioRecordConfiguration>() {
         /**
-         * Rebuilds an AudioRecordingConfiguration previously stored with writeToParcel().
-         * @param p Parcel object to read the AudioRecordingConfiguration from
-         * @return a new AudioRecordingConfiguration created from the data in the parcel
+         * Rebuilds an AudioRecordConfiguration previously stored with writeToParcel().
+         * @param p Parcel object to read the AudioRecordConfiguration from
+         * @return a new AudioRecordConfiguration created from the data in the parcel
          */
-        public AudioRecordingConfiguration createFromParcel(Parcel p) {
-            return new AudioRecordingConfiguration(p);
+        public AudioRecordConfiguration createFromParcel(Parcel p) {
+            return new AudioRecordConfiguration(p);
         }
-        public AudioRecordingConfiguration[] newArray(int size) {
-            return new AudioRecordingConfiguration[size];
+        public AudioRecordConfiguration[] newArray(int size) {
+            return new AudioRecordConfiguration[size];
         }
     };
 
@@ -170,7 +170,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
         dest.writeInt(mPatchHandle);
     }
 
-    private AudioRecordingConfiguration(Parcel in) {
+    private AudioRecordConfiguration(Parcel in) {
         mSessionId = in.readInt();
         mClientSource = in.readInt();
         mClientFormat = AudioFormat.CREATOR.createFromParcel(in);
@@ -181,9 +181,9 @@ public final class AudioRecordingConfiguration implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof AudioRecordingConfiguration)) return false;
+        if (o == null || !(o instanceof AudioRecordConfiguration)) return false;
 
-        AudioRecordingConfiguration that = (AudioRecordingConfiguration) o;
+        AudioRecordConfiguration that = (AudioRecordConfiguration) o;
 
         return ((mSessionId == that.mSessionId)
                 && (mClientSource == that.mClientSource)
