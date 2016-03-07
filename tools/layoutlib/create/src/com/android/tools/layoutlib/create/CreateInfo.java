@@ -155,6 +155,31 @@ public final class CreateInfo implements ICreateInfo {
      */
     public final static String[] DELEGATE_METHODS = new String[] {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
+        "android.content.res.Resources#getAnimation",
+        "android.content.res.Resources#getBoolean",
+        "android.content.res.Resources#getColor",
+        "android.content.res.Resources#getColorStateList",
+        "android.content.res.Resources#getDimension",
+        "android.content.res.Resources#getDimensionPixelOffset",
+        "android.content.res.Resources#getDimensionPixelSize",
+        "android.content.res.Resources#getDrawable",
+        "android.content.res.Resources#getIntArray",
+        "android.content.res.Resources#getInteger",
+        "android.content.res.Resources#getLayout",
+        "android.content.res.Resources#getResourceEntryName",
+        "android.content.res.Resources#getResourceName",
+        "android.content.res.Resources#getResourceTypeName",
+        "android.content.res.Resources#getString",
+        "android.content.res.Resources#getStringArray",
+        "android.content.res.Resources#getText",
+        "android.content.res.Resources#getTextArray",
+        "android.content.res.Resources#getValue",
+        "android.content.res.Resources#getXml",
+        "android.content.res.Resources#loadXmlResourceParser",
+        "android.content.res.Resources#obtainAttributes",
+        "android.content.res.Resources#obtainTypedArray",
+        "android.content.res.Resources#openRawResource",
+        "android.content.res.Resources#openRawResourceFd",
         "android.content.res.Resources$Theme#obtainStyledAttributes",
         "android.content.res.Resources$Theme#resolveAttribute",
         "android.content.res.Resources$Theme#resolveAttributes",
@@ -316,7 +341,7 @@ public final class CreateInfo implements ICreateInfo {
             // Use android.icu.text versions of DateFormat and SimpleDateFormat since the
             // original ones do not match the Android implementation
             "java.text.DateFormat",                            "android.icu.text.DateFormat",
-            "java.text.SimpleDateFormat",                      "android.icu.text.SimpleDateFormat"
+            "java.text.SimpleDateFormat",                      "android.icu.text.SimpleDateFormat",
         };
 
     private final static String[] EXCLUDED_CLASSES =

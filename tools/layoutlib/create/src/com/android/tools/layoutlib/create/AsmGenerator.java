@@ -367,6 +367,10 @@ public class AsmGenerator {
 
         ClassVisitor cv = cw;
 
+        // FIXME Generify
+        if ("android/content/res/Resources".equals(className)) {
+            cv = new FieldInjectorAdapter(cv);
+        }
         if (mReplaceMethodCallsClasses.contains(className)) {
             cv = new ReplaceMethodCallsAdapter(cv, className);
         }
@@ -445,4 +449,5 @@ public class AsmGenerator {
         }
         return buffer.toByteArray();
     }
+
 }
