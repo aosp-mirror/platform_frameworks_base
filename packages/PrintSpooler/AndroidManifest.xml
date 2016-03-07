@@ -63,7 +63,7 @@
             android:name=".ui.PrintActivity"
             android:configChanges="screenSize|smallestScreenSize|orientation"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
-            android:theme="@style/PrintActivity">
+            android:theme="@style/Theme.PrintActivity">
             <intent-filter>
                 <action android:name="android.print.PRINT_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -74,7 +74,14 @@
         <activity
             android:name=".ui.SelectPrinterActivity"
             android:label="@string/all_printers_label"
-            android:theme="@android:style/Theme.Material.Settings"
+            android:theme="@style/Theme.SelectPrinterActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".ui.AddPrinterActivity"
+            android:label="@string/print_add_printer"
+            android:theme="@style/Theme.AddPrinterActivity"
             android:exported="false">
         </activity>
 

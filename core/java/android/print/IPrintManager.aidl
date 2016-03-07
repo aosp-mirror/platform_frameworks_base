@@ -16,12 +16,14 @@
 
 package android.print;
 
+import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
 import android.print.PrintJobId;
 import android.print.IPrintJobStateChangeListener;
+import android.print.IPrintServicesChangeListener;
 import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
@@ -45,8 +47,47 @@ interface IPrintManager {
     void removePrintJobStateChangeListener(in IPrintJobStateChangeListener listener,
             int userId);
 
-    List<PrintServiceInfo> getInstalledPrintServices(int userId);
-    List<PrintServiceInfo> getEnabledPrintServices(int userId);
+    /**
+     * Listen for changes to the installed and enabled print services.
+     *
+     * @param listener the listener to add
+     * @param userId the id of the user listening
+     *
+     * @see android.print.PrintManager#getPrintServices(int, String)
+     */
+    void addPrintServicesChangeListener(in IPrintServicesChangeListener listener,
+            int userId);
+
+    /**
+     * Stop listening for changes to the installed and enabled print services.
+     *
+     * @param listener the listener to remove
+     * @param userId the id of the user requesting the removal
+     *
+     * @see android.print.PrintManager#getPrintServices(int, String)
+     */
+    void removePrintServicesChangeListener(in IPrintServicesChangeListener listener,
+            int userId);
+
+    /**
+     * Get the print services.
+     *
+     * @param selectionFlags flags selecting which services to get
+     * @param selectedService if not null, the id of the print service to get
+     * @param userId the id of the user requesting the services
+     *
+     * @return the list of selected print services.
+     */
+    List<PrintServiceInfo> getPrintServices(int selectionFlags, int userId);
+
+    /**
+     * Enable or disable a print service.
+     *
+     * @param service The service to enabled or disable
+     * @param isEnabled whether the service should be enabled or disabled
+     * @param userId the id of the user requesting the services
+     */
+    void setPrintServiceEnabled(in ComponentName service, boolean isEnabled, int userId);
 
     void createPrinterDiscoverySession(in IPrinterDiscoveryObserver observer, int userId);
     void startPrinterDiscovery(in IPrinterDiscoveryObserver observer,

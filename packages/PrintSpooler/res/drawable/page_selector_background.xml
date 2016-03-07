@@ -22,14 +22,14 @@
         android:state_selected="true">
         <bitmap
             android:src="@drawable/ic_check_circle"
-            android:tint="@color/promoted_action_background_color">
+            android:tint="?android:attr/colorAccent">
         </bitmap>
     </item>
 
     <item>
         <bitmap
             android:src="@drawable/ic_remove_circle"
-            android:tint="@color/promoted_action_background_color">
+            android:tint="?android:attr/colorAccent">
         </bitmap>
     </item>
 

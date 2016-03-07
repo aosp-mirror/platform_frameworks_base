@@ -31,6 +31,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.print.PrintManager;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -579,7 +580,7 @@ final class DefaultPermissionGrantPolicy {
 
             // Print Spooler
             PackageParser.Package printSpoolerPackage = getSystemPackageLPr(
-                    "com.android.printspooler");
+                    PrintManager.PRINT_SPOOLER_PACKAGE_NAME);
             if (printSpoolerPackage != null
                     && doesPackageSupportRuntimePermissions(printSpoolerPackage)) {
                 grantRuntimePermissionsLPw(printSpoolerPackage, LOCATION_PERMISSIONS, true, userId);
