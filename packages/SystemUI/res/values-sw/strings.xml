@@ -461,7 +461,7 @@
     <string name="do_not_silence_block" msgid="4070647971382232311">"Usinyamazishe wala kuzuia"</string>
     <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Onyesha mipangilio kamili ya umuhimu"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Amezuiwa"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Umuhimu wa kiwango cha chini zaidi"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Umuhimu wa kiwango cha chini"</string>
     <string name="low_importance" msgid="4109929986107147930">"Umuhimu kiwango cha chini"</string>
     <string name="default_importance" msgid="8192107689995742653">"Umuhimu wa kiwango cha kawaida"</string>
     <string name="high_importance" msgid="1527066195614050263">"Umuhimu wa kiwango cha juu"</string>

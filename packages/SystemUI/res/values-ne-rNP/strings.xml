@@ -303,8 +303,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"स्क्रिन पिन गर्दै"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"खोजी गर्नुहोस्"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"सुरु गर्न सकिएन <xliff:g id="APP">%s</xliff:g>।"</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> लाई सुरक्षित-मोडमा असक्षम गरिएको छ।"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"इतिहास"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"मेटाउनुहोस्"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"यस अनुप्रयोगले बहु-विन्डोलाई समर्थन गर्दैन"</string>
@@ -456,11 +455,11 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्ने हो?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"सक्रिय पार्नुहोस्"</string>
-    <string name="show_silently" msgid="6841966539811264192">"सूचनाहरूलाई बिना आवाज देखाउनुहोस्"</string>
+    <string name="show_silently" msgid="6841966539811264192">"सूचनाहरूलाई बिना आवाज देखाउने"</string>
     <string name="block" msgid="2734508760962682611">"सबै सूचनाहरूलाई रोक्नुहोस्"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"मौन नगर्नुहोस्"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"मौन नगर्नुहोस् वा नरोक्नुहोस्"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"पूर्ण महत्त्व सेटिङहरू देखाउनुहोस्"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"पूर्ण महत्त्व सेटिङहरू देखाउने"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"रोकियो"</string>
     <string name="min_importance" msgid="1901894910809414782">"न्यूनतम महत्त्व"</string>
     <string name="low_importance" msgid="4109929986107147930">"न्यून महत्त्व"</string>

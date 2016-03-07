@@ -457,8 +457,8 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Күйгүзүү"</string>
     <string name="show_silently" msgid="6841966539811264192">"Эскертмелер үнсүз көрсөтүлсүн"</string>
     <string name="block" msgid="2734508760962682611">"Бардык эскертмелерди бөгөттөө"</string>
-    <string name="do_not_silence" msgid="6878060322594892441">"Үнсүз кылынбасын"</string>
-    <string name="do_not_silence_block" msgid="4070647971382232311">"Үнсүз кылынып же бөгөттөлбөсүн"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Үнү менен көрсөтүлсүн"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Үнү менен көрсөтүлүп бөгөттөлбөсүн"</string>
     <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Маанилүүлүк жөндөөлөрү толук көрсөтүлсүн"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Бөгөттөлгөн"</string>
     <string name="min_importance" msgid="1901894910809414782">"Маанилүүлүгү эң төмөн"</string>
@@ -469,7 +469,7 @@
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Бул эскертмелер эч качан көрсөтүлбөсүн"</string>
     <string name="notification_importance_min" msgid="1938190340516905748">"Эскертмелер тизмесинин соңунда үнсүз көрсөтүлсүн"</string>
     <string name="notification_importance_low" msgid="3657252049508213048">"Бул эскертмелер үнсүз көрсөтүлсүн"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Бул эскертмелер добуш чыгарышына уруксат берилсин"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Бул эскертмелер үнү менен көрсөтүлсүн"</string>
     <string name="notification_importance_high" msgid="2135428926525093825">"Үн менен коштолуп, экранга чыгарылсын"</string>
     <string name="notification_importance_max" msgid="5806278962376556491">"Эскертмелер тизмесинин эң башында көрсөтүлүп, үн менен коштолуп, экранга чыгарылсын"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>

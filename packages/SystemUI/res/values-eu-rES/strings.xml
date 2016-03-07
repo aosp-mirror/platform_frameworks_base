@@ -459,7 +459,7 @@
     <string name="block" msgid="2734508760962682611">"Blokeatu jakinarazpen guztiak"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Ez isilarazi"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Ez isilarazi edo blokeatu"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Erakutsi garrantzia handiko jakinarazpenen ezarpenak"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Erakutsi garrantzi handiko jakinarazpenen ezarpenak"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Blokeatuta"</string>
     <string name="min_importance" msgid="1901894910809414782">"Gutxieneko garrantzia"</string>
     <string name="low_importance" msgid="4109929986107147930">"Garrantzi txikia"</string>
