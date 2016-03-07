@@ -25,13 +25,8 @@ import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
-import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
@@ -42,7 +37,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater_Delegate;
 import android.view.ViewGroup.LayoutParams;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -306,76 +300,21 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     @Override
-    public ComplexColor getComplexColor(int index) {
-        // TODO: Support GradientColor
-        return getColorStateList(index);
-    }
-
-    /**
-     * Retrieve the ColorStateList for the attribute at <var>index</var>.
-     * The value may be either a single solid color or a reference to
-     * a color or complex {@link android.content.res.ColorStateList} description.
-     *
-     * @param index Index of attribute to retrieve.
-     *
-     * @return ColorStateList for the attribute, or null if not defined.
-     */
-    @Override
     public ColorStateList getColorStateList(int index) {
         if (!hasValue(index)) {
             return null;
         }
 
-        ResourceValue resValue = mResourceData[index];
-        String value = resValue.getValue();
+        return ResourceHelper.getColorStateList(mResourceData[index], mContext);
+    }
 
-        if (value == null) {
+    @Override
+    public ComplexColor getComplexColor(int index) {
+        if (!hasValue(index)) {
             return null;
         }
 
-
-        try {
-            // Get the state list file content from callback to parse PSI file
-            XmlPullParser parser = mContext.getLayoutlibCallback().getXmlFileParser(value);
-            if (parser == null) {
-                // If used with a version of Android Studio that does not implement getXmlFileParser
-                // fall back to reading the file from disk
-                File f = new File(value);
-                if (f.isFile()) {
-                    parser = ParserFactory.create(f);
-                }
-            }
-            if (parser != null) {
-                BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
-                        parser, mContext, resValue.isFramework());
-                try {
-                    return ColorStateList.createFromXml(mContext.getResources(), blockParser,
-                            mContext.getTheme());
-                } finally {
-                    blockParser.ensurePopped();
-                }
-            }
-        } catch (XmlPullParserException e) {
-            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                    "Failed to configure parser for " + value, e, null);
-            return null;
-        } catch (Exception e) {
-            // this is an error and not warning since the file existence is checked before
-            // attempting to parse it.
-            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                    "Failed to parse file " + value, e, null);
-
-            return null;
-        }
-
-        try {
-            int color = ResourceHelper.getColor(value);
-            return ColorStateList.valueOf(color);
-        } catch (NumberFormatException e) {
-            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null);
-        }
-
-        return null;
+        return ResourceHelper.getComplexColor(mResourceData[index], mContext);
     }
 
     /**
