@@ -20,6 +20,7 @@ import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 @LargeTest
 public class RootsUiTest extends ActivityTest<FilesActivity> {
@@ -44,6 +45,7 @@ public class RootsUiTest extends ActivityTest<FilesActivity> {
         assertDefaultContentOfTestDir0();
     }
 
+    @Suppress
     public void testRootChanged_ClearSelection() throws Exception {
         bots.directory.selectDocument(fileName1);
         bots.main.assertInActionMode(true);
