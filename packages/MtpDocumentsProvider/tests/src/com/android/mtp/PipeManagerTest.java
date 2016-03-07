@@ -45,6 +45,11 @@ public class PipeManagerTest extends AndroidTestCase {
         mPipeManager = new PipeManager(mDatabase, mExecutor);
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        assertTrue(mPipeManager.close());
+    }
+
     public void testReadDocument_basic() throws Exception {
         mtpManager.setImportFileBytes(0, 1, HELLO_BYTES);
         final ParcelFileDescriptor descriptor = mPipeManager.readDocument(
