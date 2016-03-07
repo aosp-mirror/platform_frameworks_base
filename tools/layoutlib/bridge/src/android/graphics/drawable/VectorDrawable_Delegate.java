@@ -204,14 +204,14 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static void nUpdateFullPathFillGradient(long pathPtr, long fillGradientPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
 
         path.setFillGradient(fillGradientPtr);
     }
 
     @LayoutlibDelegate
     static void nUpdateFullPathStrokeGradient(long pathPtr, long strokeGradientPtr) {
-        VFullPath_Delegate path = getDelegate(pathPtr);
+        VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
 
         path.setStrokeGradient(strokeGradientPtr);
     }
