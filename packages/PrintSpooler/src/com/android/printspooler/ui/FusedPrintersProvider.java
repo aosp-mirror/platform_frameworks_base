@@ -16,7 +16,10 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
@@ -28,9 +31,11 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.print.PrintManager;
+import android.print.PrintServicesLoader;
 import android.print.PrinterDiscoverySession;
 import android.print.PrinterDiscoverySession.OnPrintersChangeListener;
 import android.print.PrinterId;
@@ -127,11 +132,11 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         }
     }
 
-    public FusedPrintersProvider(Context context) {
-        super(context);
+    public FusedPrintersProvider(Activity activity, int internalLoaderId) {
+        super(activity);
         mLocationLock = new Object();
-        mPersistenceManager = new PersistenceManager(context);
-        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        mPersistenceManager = new PersistenceManager(activity, internalLoaderId);
+        mLocationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
     }
 
     public void addHistoricalPrinter(PrinterInfo printer) {
@@ -383,7 +388,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         mPrinters.clear();
         if (mDiscoverySession != null) {
             mDiscoverySession.destroy();
-            mDiscoverySession = null;
         }
     }
 
@@ -499,7 +503,8 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         updatePrinters(mDiscoverySession.getPrinters(), newFavoritePrinters, getCurrentLocation());
     }
 
-    private final class PersistenceManager {
+    private final class PersistenceManager implements
+            LoaderManager.LoaderCallbacks<List<PrintServiceInfo>> {
         private static final String PERSIST_FILE_NAME = "printer_history.xml";
 
         private static final String TAG_PRINTERS = "printers";
@@ -520,6 +525,15 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
 
         private final AtomicFile mStatePersistFile;
 
+        /**
+         * Whether the enabled print services have been updated since last time the history was
+         * read.
+         */
+        private boolean mAreEnabledServicesUpdated;
+
+        /** The enabled services read when they were last updated */
+        private @NonNull List<PrintServiceInfo> mEnabledServices;
+
         private List<Pair<PrinterInfo, Location>> mHistoricalPrinters = new ArrayList<>();
 
         private boolean mReadHistoryCompleted;
@@ -528,9 +542,52 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
 
         private volatile long mLastReadHistoryTimestamp;
 
-        private PersistenceManager(Context context) {
-            mStatePersistFile = new AtomicFile(new File(context.getFilesDir(),
+        private PersistenceManager(final Activity activity, final int internalLoaderId) {
+            mStatePersistFile = new AtomicFile(new File(activity.getFilesDir(),
                     PERSIST_FILE_NAME));
+
+            // Initialize enabled services to make sure they are set are the read task might be done
+            // before the loader updated the services the first time.
+            mEnabledServices = ((PrintManager) activity
+                    .getSystemService(Context.PRINT_SERVICE))
+                    .getPrintServices(PrintManager.ENABLED_SERVICES);
+
+            mAreEnabledServicesUpdated = true;
+
+            // Cannot start a loader while starting another, hence delay this loader
+            (new Handler(activity.getMainLooper())).post(new Runnable() {
+                @Override
+                public void run() {
+                    activity.getLoaderManager().initLoader(internalLoaderId, null,
+                            PersistenceManager.this);
+                }
+            });
+        }
+
+
+        @Override
+        public Loader<List<PrintServiceInfo>> onCreateLoader(int id, Bundle args) {
+            return new PrintServicesLoader(
+                    (PrintManager) getContext().getSystemService(Context.PRINT_SERVICE),
+                    getContext(), PrintManager.ENABLED_SERVICES);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<PrintServiceInfo>> loader,
+                List<PrintServiceInfo> services) {
+            mAreEnabledServicesUpdated = true;
+            mEnabledServices = services;
+
+            // Ask the fused printer provider to reload which will cause the persistence manager to
+            // reload the history and reconsider the enabled services.
+            if (isStarted()) {
+                forceLoad();
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<PrintServiceInfo>> loader) {
+            // no data is cached
         }
 
         public boolean isReadHistoryInProgress() {
@@ -644,7 +701,8 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         }
 
         public boolean isHistoryChanged() {
-            return mLastReadHistoryTimestamp != mStatePersistFile.getBaseFile().lastModified();
+            return mAreEnabledServicesUpdated ||
+                    mLastReadHistoryTimestamp != mStatePersistFile.getBaseFile().lastModified();
         }
 
         /**
@@ -738,19 +796,15 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
                 }
 
                 // Ignore printer records whose target services are not enabled.
-                PrintManager printManager = (PrintManager) getContext()
-                        .getSystemService(Context.PRINT_SERVICE);
-                List<PrintServiceInfo> services = printManager
-                        .getEnabledPrintServices();
-
                 Set<ComponentName> enabledComponents = new ArraySet<>();
-                final int installedServiceCount = services.size();
+                final int installedServiceCount = mEnabledServices.size();
                 for (int i = 0; i < installedServiceCount; i++) {
-                    ServiceInfo serviceInfo = services.get(i).getResolveInfo().serviceInfo;
+                    ServiceInfo serviceInfo = mEnabledServices.get(i).getResolveInfo().serviceInfo;
                     ComponentName componentName = new ComponentName(
                             serviceInfo.packageName, serviceInfo.name);
                     enabledComponents.add(componentName);
                 }
+                mAreEnabledServicesUpdated = false;
 
                 final int printerCount = printers.size();
                 for (int i = printerCount - 1; i >= 0; i--) {

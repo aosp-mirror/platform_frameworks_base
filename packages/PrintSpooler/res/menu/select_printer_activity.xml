@@ -26,12 +26,4 @@
         android:imeOptions="actionSearch">
     </item>
 
-    <item
-        android:id="@+id/action_add_printer"
-        android:title="@string/print_add_printer"
-        android:icon="@drawable/ic_add"
-        android:showAsAction="ifRoom"
-        android:alphabeticShortcut="a">
-    </item>
-
 </menu>

@@ -36,6 +36,7 @@ import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
+import android.print.PrintManager;
 import android.print.PrinterId;
 import android.printservice.PrintService;
 import android.util.Slog;
@@ -115,8 +116,8 @@ final class RemotePrintSpooler {
         mCallbacks = callbacks;
         mClient = new PrintSpoolerClient(this);
         mIntent = new Intent();
-        mIntent.setComponent(new ComponentName("com.android.printspooler",
-                "com.android.printspooler.model.PrintSpoolerService"));
+        mIntent.setComponent(new ComponentName(PrintManager.PRINT_SPOOLER_PACKAGE_NAME,
+                PrintManager.PRINT_SPOOLER_PACKAGE_NAME + ".model.PrintSpoolerService"));
     }
 
     public final List<PrintJobInfo> getPrintJobInfos(ComponentName componentName, int state,

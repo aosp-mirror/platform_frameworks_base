@@ -22,11 +22,7 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:scrollbarStyle="outsideOverlay"
-        android:cacheColorHint="@android:color/transparent"
-        android:scrollbarAlwaysDrawVerticalTrack="true" >
-    </ListView>
+        android:layout_height="fill_parent" />
 
     <FrameLayout
         android:id="@+id/empty_print_state"
@@ -63,8 +59,17 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal">
+                style="?android:attr/progressBarStyleHorizontal">
             </ProgressBar>
+
+            <Button
+                    android:id="@+id/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/print_add_printer"
+                    android:textAllCaps="true" />
 
         </LinearLayout>
 
