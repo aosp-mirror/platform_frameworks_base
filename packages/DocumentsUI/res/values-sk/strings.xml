@@ -126,11 +126,10 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Niektoré súbory boli konvertované"</string>
     <string name="allow" msgid="7225948811296386551">"Povoliť"</string>
     <string name="deny" msgid="2081879885755434506">"Zamietnuť"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Odstrániť súbory?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="few">Naozaj chcete odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súbory?</item>
-      <item quantity="many">Naozaj chcete odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súboru?</item>
-      <item quantity="other">Naozaj chcete odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súborov?</item>
-      <item quantity="one">Naozaj chcete odstrániť <xliff:g id="COUNT_0">%1$d</xliff:g> súbor?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="few">Odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súbory?</item>
+      <item quantity="many">Odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súboru?</item>
+      <item quantity="other">Odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súborov?</item>
+      <item quantity="one">Odstrániť <xliff:g id="COUNT_0">%1$d</xliff:g> súbor?</item>
     </plurals>
 </resources>

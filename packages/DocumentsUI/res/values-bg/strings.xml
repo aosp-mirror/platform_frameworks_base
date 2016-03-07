@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Някои файлове бяха преобразувани"</string>
     <string name="allow" msgid="7225948811296386551">"Разрешаване"</string>
     <string name="deny" msgid="2081879885755434506">"Отказване"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Да се изтрият ли файловете?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="other">Наистина ли искате да изтриете <xliff:g id="COUNT_1">%1$d</xliff:g> файла?</item>
-      <item quantity="one">Наистина ли искате да изтриете <xliff:g id="COUNT_0">%1$d</xliff:g> файл?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="other">Искате ли да изтриете <xliff:g id="COUNT_1">%1$d</xliff:g> файла?</item>
+      <item quantity="one">Искате ли да изтриете <xliff:g id="COUNT_0">%1$d</xliff:g> файл?</item>
     </plurals>
 </resources>

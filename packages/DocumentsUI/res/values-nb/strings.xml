@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Noen filer er konvertert"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
     <string name="deny" msgid="2081879885755434506">"Avslå"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Vil du slette filene?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="other">Er du sikker på at du vil slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
-      <item quantity="one">Er du sikker på at du vil slette <xliff:g id="COUNT_0">%1$d</xliff:g> fil?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="other">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
+      <item quantity="one">Vil du slette <xliff:g id="COUNT_0">%1$d</xliff:g> fil?</item>
     </plurals>
 </resources>

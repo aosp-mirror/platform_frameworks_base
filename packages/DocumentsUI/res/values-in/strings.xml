@@ -112,9 +112,8 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Beberapa file dikonversi"</string>
     <string name="allow" msgid="7225948811296386551">"Izinkan"</string>
     <string name="deny" msgid="2081879885755434506">"Tolak"</string>
-    <string name="delete_confirmation_title" msgid="1958369150786342998">"Hapus file?"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
-      <item quantity="other">Yakin ingin menghapus <xliff:g id="COUNT_1">%1$d</xliff:g> file?</item>
-      <item quantity="one">Yakin ingin menghapus <xliff:g id="COUNT_0">%1$d</xliff:g> file?</item>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
+      <item quantity="other">Hapus <xliff:g id="COUNT_1">%1$d</xliff:g> file?</item>
+      <item quantity="one">Hapus <xliff:g id="COUNT_0">%1$d</xliff:g> file?</item>
     </plurals>
 </resources>
