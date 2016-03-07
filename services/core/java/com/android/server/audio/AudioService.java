@@ -58,7 +58,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioPort;
-import android.media.AudioRecordConfiguration;
+import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -6287,8 +6287,8 @@ public class AudioService extends IAudioService.Stub {
         mRecordMonitor.unregisterRecordingCallback(rcdb);
     }
 
-    public AudioRecordConfiguration[] getActiveRecordConfigurations() {
-        return mRecordMonitor.getActiveRecordConfigurations();
+    public AudioRecordingConfiguration[] getActiveRecordingConfigurations() {
+        return mRecordMonitor.getActiveRecordingConfigurations();
     }
 
     //======================
