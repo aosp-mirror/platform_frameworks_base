@@ -26,8 +26,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 class PipeManager {
+    /**
+     * Milliseconds we wait for background thread when pausing.
+     */
+    private final static long AWAIT_TERMINATION_TIMEOUT = 2000;
+
     final ExecutorService mExecutor;
     final MtpDatabase mDatabase;
 
@@ -203,7 +209,8 @@ class PipeManager {
         }
     }
 
-    void close() {
-        mExecutor.shutdown();
+    boolean close() throws InterruptedException {
+        mExecutor.shutdownNow();
+        return mExecutor.awaitTermination(AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS);
     }
 }
