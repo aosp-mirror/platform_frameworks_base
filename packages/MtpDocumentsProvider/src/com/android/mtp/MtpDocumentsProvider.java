@@ -440,7 +440,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (DEBUG) {
             Log.d(TAG, "Close device " + deviceId);
         }
-        getDeviceToolkit(deviceId).mDocumentLoader.close();
+        getDeviceToolkit(deviceId).close();
         mDeviceToolkits.remove(deviceId);
         mMtpManager.closeDevice(deviceId);
         if (mDeviceToolkits.size() == 0) {
@@ -496,7 +496,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         return cursor;
     }
 
-    private static class DeviceToolkit {
+    private static class DeviceToolkit implements AutoCloseable {
         public final PipeManager mPipeManager;
         public final DocumentLoader mDocumentLoader;
         public final MtpDeviceRecord mDeviceRecord;
@@ -508,6 +508,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             mPipeManager = new PipeManager(database);
             mDocumentLoader = new DocumentLoader(record, manager, resolver, database);
             mDeviceRecord = record;
+        }
+
+        @Override
+        public void close() throws InterruptedException {
+            mPipeManager.close();
+            mDocumentLoader.close();
         }
     }
 
