@@ -1054,13 +1054,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ប៉ះដើម្បីបានជម្រើសថែមទៀត។"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ប៉ះ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"កំពុងទទួលយករបាយការណ៍កំហុស…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"កំពុងចែករំលែករបាយកំហុស…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នកបានស្នើរបាយការណ៍កំហុសដើម្បីដោះស្រាយកំហុសឧបករណ៍នេះ។ កម្មវិធី និងទិន្នន័យអាចនឹងត្រូវបានចែករំលែក ហើយឧបករណ៍របស់អ្នកអាចនឹងយឺតជាបណ្តោះអាសន្ន។"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នកបានស្នើរបាយការណ៍កំហុសដើម្បីដោះស្រាយកំហុសឧបករណ៍នេះ។ កម្មវិធី និងទិន្នន័យអាចនឹងត្រូវបានចែករំលែក។"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"វាអាចនឹងធ្វើឲ្យឧបករណ៍របស់អ្នកយឺតជាបណ្តោះអាសន្ន។"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ព្រមទទួល"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"បដិសេធ"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នកបានស្នើរបាយការណ៍កំហុសដើម្បីដោះស្រាយកំហុសឧបករណ៍នេះ។ កម្មវិធី និងទិន្នន័យអាចនឹងត្រូវបានចែករំលែក។"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ចែករំលែក"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"បដិសេធ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ជ្រើស​ក្ដារចុច"</string>
     <string name="show_ime" msgid="2506087537466597099">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>

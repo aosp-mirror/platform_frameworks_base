@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Tocca per visualizzare più opzioni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Condividere la segnalazione di bug?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Condivisione della segnalazione di bug…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"L\'amministratore IT ha richiesto una segnalazione di bug per poter risolvere più facilmente i problemi di questo dispositivo. Potrebbero essere condivisi dati e app e il dispositivo potrebbe rallentare temporaneamente."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"L\'amministratore IT ha richiesto una segnalazione di bug per poter risolvere più facilmente i problemi di questo dispositivo. Potrebbero essere condivisi dati e app."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Il dispositivo potrebbe rallentare temporaneamente"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCETTO"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RIFIUTO"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiera"</string>
     <string name="show_ime" msgid="2506087537466597099">"Tieni sullo schermo quando è attiva la tastiera fisica"</string>

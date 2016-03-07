@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Daha fazla seçenek için dokunun."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB hata ayıklama özelliğini devre dışı bırakmak için dokunun."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Hata raporu paylaşılsın mı?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Hata raporu paylaşılıyor..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"BT yöneticiniz, bu cihazda sorun gidermeye yardımcı olması için bir hata raporu istedi. Uygulamalar ve veriler paylaşılabilir. Bu durum, cihazınızı geçici olarak yavaşlatabilir."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"BT yöneticiniz, bu cihazda sorun gidermeye yardımcı olması için bir hata raporu istedi. Uygulamalar ve veriler paylaşılabilir."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Bu durum, cihazınızı geçici olarak yavaşlatabilir"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"KABUL ET"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REDDET"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Klavyeyi değiştir"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Klavyeyi seç"</string>
     <string name="show_ime" msgid="2506087537466597099">"Fiziksel klavye etkin durumdayken ekranda tut"</string>

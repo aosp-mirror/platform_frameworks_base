@@ -1060,13 +1060,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Додирните за још опција."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је успостављено"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Додирните да бисте онемогућили отклањање грешака са USB-а."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Желите ли да поделите извештај о грешци?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Дели се извештај о грешци…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ИТ администратор је затражио извештај о грешци ради лакшег решавања проблема у вези са овим уређајем. Апликације и подаци могу да се деле, а уређај ће се привремено успорити."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ИТ администратор је затражио извештај о грешци ради лакшег решавања проблема у вези са овим уређајем. Апликације и подаци могу да се деле."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Ово ће привремено успорити уређај"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ПРИХВАТИ"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ОДБИЈ"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Изаберите тастатуре"</string>
     <string name="show_ime" msgid="2506087537466597099">"Задржи га на екрану док је физичка тастатура активна"</string>

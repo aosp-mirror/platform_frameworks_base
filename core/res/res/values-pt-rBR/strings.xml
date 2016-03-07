@@ -243,7 +243,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acesse sua agenda"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"enviar e ver mensagens SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"envie e veja mensagens SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acesse fotos, mídia e arquivos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfone"</string>
@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toque para ver mais opções."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desativar a depuração do USB."</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartilhando relatório do bug…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Seu administrador de TI solicitou um relatório de bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados, o que pode deixar seu dispositivo temporariamente mais lento."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Seu administrador de TI solicitou um relatório de bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Isso pode deixar seu dispositivo temporariamente mais lento"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEITAR"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECUSAR"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Escolher teclados"</string>
     <string name="show_ime" msgid="2506087537466597099">"Manter na tela enquanto o teclado físico estiver ativo"</string>

@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"আরো বিকল্পের জন্য স্পর্শ করুন৷"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ডিবাগিং সংযুক্ত হয়েছে"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ডিবাগিং অক্ষম করতে স্পর্শ করুন৷"</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ত্রুটির প্রতিবেদন নেওয়া হচ্ছে..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ত্রুটির প্রতিবেদন শেয়ার করবেন?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ত্রুটির প্রতিবেদন শেয়ার করা হচ্ছে..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"আপনার আইটি প্রশাসক এই ডিভাইসটির সমস্যা নিবারণে সহায়তা করতে একটি ত্রুটির প্রতিবেদন চেয়েছেন৷ অ্যাপ্লিকেশানগুলি এবং ডেটা শেয়ার করা হতে পারে এবং আপনার ডিভাইসটিকে অস্থায়ীভাবে ধীর করে দিতে পারে৷"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"আপনার আইটি প্রশাসক এই ডিভাইসটির সমস্যা নিবারণে সহায়তা করতে একটি ত্রুটির প্রতিবেদন চেয়েছেন৷ অ্যাপ্লিকেশান এবং ডেটা শেয়ার করা হতে পারে৷"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"এটি অস্থায়ীভাবে আপনার ডিভাইসটিকে ধীর করে দিতে পারে"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"স্বীকার করুন"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"অস্বীকার করুন"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"আপনার আইটি প্রশাসক এই ডিভাইসটির সমস্যা নিবারণে সহায়তা করতে একটি ত্রুটির প্রতিবেদন চেয়েছেন৷ অ্যাপ্লিকেশান এবং ডেটা শেয়ার করা হতে পারে৷"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"শেয়ার করুন"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"অস্বীকার করুন"</string>
     <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"কীবোর্ড চয়ন করুন"</string>
     <string name="show_ime" msgid="2506087537466597099">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>

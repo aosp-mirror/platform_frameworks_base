@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Допри за повеќе опции."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку УСБ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Се зема извештајот за грешки…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели извештајот за грешки?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Се споделува извештај за грешки…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Администраторот за информатичка технологија побара извештај за грешки за да ви помогне во отстранувањето на грешките од уредот. Апликациите и податоците можеби ќе се споделат, а уредот можеби ќе биде привремено побавен при работата."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Вашиот администратор за информатичка технологија побара извештај за грешки за да помогне со отстранување на грешките на овој уред. Апликациите и податоците може да бидат споделени."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Ова може привремено да го забави уредот"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ПРИФАТИ"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ОДБИЈ"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Вашиот администратор за информатичка технологија побара извештај за грешки за да ви помогне во отстранувањето на грешките на овој уред. Апликациите и податоците може да бидат споделени."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"СПОДЕЛИ"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Избери тастатури"</string>
     <string name="show_ime" msgid="2506087537466597099">"Прикажувај го на екранот додека е активна физичката тастатура"</string>

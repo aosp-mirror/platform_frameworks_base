@@ -1052,13 +1052,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ສຳ​ພັດ​ສຳ​ລັບ​ທາງ​ເລືອກ​ເພີ່ມ​ເຕີມ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັ໊ກຜ່ານ USB ແລ້ວ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ແຕະເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ກຳລັງຂໍລາຍງານຂໍ້ຜິດພາດ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ແບ່ງປັນລາຍງານບັນຫາບໍ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ກຳລັງແບ່ງປັນລາຍງານບັນຫາ…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານໄດ້ຮ້ອງຂໍລາຍງານຂໍ້ຜິດພາດເພື່ອຊ່ວຍແກ້ໄຂບັນຫາອຸປະກອນນີ້. ແອັບ ແລະ ຂໍ້ມູນອາດຖືກແບ່ງປັນ ແລະ ອຸປະກອນຂອງທ່ານອາດເຮັດວຽກຊ້າລົງຊົ່ວຄາວ."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານໄດ້ຮ້ອງຂໍເອົາລາຍງານບັນຫາ ເພື່ອຊ່ວຍແກ້ໄຂບັນຫາໃຫ້ອຸປະກອນນີ້. ອາດຈະມີການແບ່ງປັນແອັບ ແລະ ຂໍ້ມູນນຳ."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"ນີ້ອາດຈະເຮັດໃຫ້ອຸປະກອນຂອງທ່ານຊ້າລົງຊົ່ວຄາວ"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ຍອມຮັບ"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ປະຕິເສດ"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານໄດ້ຮ້ອງຂໍເອົາລາຍງານບັນຫາ ເພື່ອຊ່ວຍແກ້ໄຂບັນຫາໃຫ້ອຸປະກອນນີ້. ອາດຈະມີການແບ່ງປັນແອັບ ແລະ ຂໍ້ມູນນຳ."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ແບ່ງປັນ"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ປະຕິເສດ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"​ປ່ຽນ​ແປ້ນ​ພິມ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"​ເລືອກ​ແປ້ນ​ພິມ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ເປີດໃຊ້ໃຫ້ມັນຢູ່ໃນໜ້າຈໍໃນຂະນະທີ່ໃຊ້ແປ້ນພິມພາຍນອກຢູ່"</string>

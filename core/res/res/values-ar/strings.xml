@@ -1084,13 +1084,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏المس لتعطيل تصحيح أخطاء USB."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"جارٍ الحصول على تقرير الخطأ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"هل تريد مشاركة تقرير الخطأ؟"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"جارٍ مشاركة تقرير الخطأ…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"طلب مشرف تكنولوجيا المعلومات الحصول على تقرير خطأ للمساعدة في تحرِّي مشكلة هذا الجهاز وإصلاحها. قد تتم مشاركة التطبيقات والبيانات. وقد يؤدي هذا إلى حدوث بطء مؤقت في جهازك."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"طلب مشرف تكنولوجيا المعلومات الحصول على تقرير خطأ للمساعدة في تحرِّي مشكلة هذا الجهاز وإصلاحها. قد تتم مشاركة التطبيقات والبيانات."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"قد يؤدي هذا إلى حدوث بطء مؤقت في جهازك"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"قبول"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"رفض"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"طلب مشرف تكنولوجيا المعلومات الحصول على تقرير خطأ للمساعدة في تحرِّي مشكلة هذا الجهاز وإصلاحها؛ ويمكن أن تتم مشاركة التطبيقات والبيانات."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"مشاركة"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"رفض"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"اختيار لوحات المفاتيح"</string>
     <string name="show_ime" msgid="2506087537466597099">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>

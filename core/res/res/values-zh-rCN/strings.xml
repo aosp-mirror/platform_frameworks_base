@@ -1052,13 +1052,16 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"触摸以查看更多选项。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
+    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
+    <skip />
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享错误报告吗？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享错误报告…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"您的 IT 管理员希望获取错误报告，以便排查此设备的问题。报告可能会透露您设备上的应用和数据，设备运行速度也可能会因此而暂时减慢。"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"您的 IT 管理员希望获取错误报告，以便排查此设备的问题。报告可能会透露您设备上的应用和数据。"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"这可能会暂时减慢您设备的运行速度"</string>
-    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"接受"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"拒绝"</string>
+    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
+    <skip />
+    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"选择键盘"</string>
     <string name="show_ime" msgid="2506087537466597099">"连接到实体键盘时使其在屏幕上保持显示状态"</string>
