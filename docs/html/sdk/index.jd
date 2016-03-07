@@ -410,8 +410,6 @@ Studio</a>.</p>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Java Runtime Environment (JRE) 6</li>
 <li>Java Development Kit (JDK) 7</li>
-<li>Optional for accelerated emulator: Intel® processor with support for Intel® VT-x, Intel® EM64T
-(Intel® 64), and Execute Disable (XD) Bit functionality</li>
 </ul>
 
 <p>On Mac OS, run Android Studio with Java Runtime Environment (JRE) 6 for optimized font
