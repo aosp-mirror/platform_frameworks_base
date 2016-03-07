@@ -2074,6 +2074,16 @@ final public class MediaCodec {
          */
         public static final int ERROR_SESSION_NOT_OPENED = 5;
 
+        /**
+         * This indicates that an operation was attempted that could not be
+         * supported by the crypto system of the device in its current
+         * configuration.  It may occur when the license policy requires
+         * device security features that aren't supported by the device,
+         * or due to an internal error in the crypto system that prevents
+         * the specified security policy from being met.
+         */
+        public static final int ERROR_UNSUPPORTED_OPERATION = 6;
+
         /** @hide */
         @IntDef({
             ERROR_NO_KEY,
@@ -2081,6 +2091,7 @@ final public class MediaCodec {
             ERROR_RESOURCE_BUSY,
             ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
             ERROR_SESSION_NOT_OPENED,
+            ERROR_UNSUPPORTED_OPERATION
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface CryptoErrorCode {}
