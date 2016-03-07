@@ -27,9 +27,9 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
-import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -97,6 +97,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         @Override
+        public void onSwitchUser(@UserIdInt int userHandle) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
+            mService.onSwitchUser(userHandle);
+        }
+
+        @Override
         public void onBootPhase(int phase) {
             // Called on the system server's main looper thread.
             // TODO: Dispatch this to a worker thread as needed.
@@ -114,6 +121,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
+    void onSwitchUser(@UserIdInt int userId) {
+        synchronized (mSpellCheckerMap) {
+            switchUserLocked(userId);
+        }
+    }
+
     public TextServicesManagerService(Context context) {
         mSystemReady = false;
         mContext = context;
@@ -125,24 +138,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         int userId = UserHandle.USER_SYSTEM;
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                    new SynchronousUserSwitchObserver() {
-                        @Override
-                        public void onUserSwitching(int newUserId) throws RemoteException {
-                            synchronized(mSpellCheckerMap) {
-                                switchUserLocked(newUserId);
-                            }
-                        }
-
-                        @Override
-                        public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        }
-
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
-                        }
-                    });
             userId = ActivityManagerNative.getDefault().getCurrentUser().id;
         } catch (RemoteException e) {
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
@@ -155,7 +150,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         switchUserLocked(userId);
     }
 
-    private void switchUserLocked(int userId) {
+    private void switchUserLocked(@UserIdInt int userId) {
         mSettings.setCurrentUserId(userId);
         updateCurrentProfileIds();
         unbindServiceLocked();
@@ -1040,17 +1035,18 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     private static class TextServicesSettings {
         private final ContentResolver mResolver;
+        @UserIdInt
         private int mCurrentUserId;
         @GuardedBy("mLock")
         private int[] mCurrentProfileIds = new int[0];
         private Object mLock = new Object();
 
-        public TextServicesSettings(ContentResolver resolver, int userId) {
+        public TextServicesSettings(ContentResolver resolver, @UserIdInt int userId) {
             mResolver = resolver;
             mCurrentUserId = userId;
         }
 
-        public void setCurrentUserId(int userId) {
+        public void setCurrentUserId(@UserIdInt int userId) {
             if (DBG) {
                 Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to "
                         + userId + ", new ime = " + getSelectedSpellChecker());
@@ -1065,7 +1061,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
         }
 
-        public boolean isCurrentProfile(int userId) {
+        public boolean isCurrentProfile(@UserIdInt int userId) {
             synchronized (mLock) {
                 if (userId == mCurrentUserId) return true;
                 for (int i = 0; i < mCurrentProfileIds.length; i++) {
@@ -1075,6 +1071,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
         }
 
+        @UserIdInt
         public int getCurrentUserId() {
             return mCurrentUserId;
         }
