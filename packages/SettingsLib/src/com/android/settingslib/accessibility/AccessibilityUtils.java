@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -40,12 +41,21 @@ public class AccessibilityUtils {
             new TextUtils.SimpleStringSplitter(ENABLED_ACCESSIBILITY_SERVICES_SEPARATOR);
 
     /**
-     * @return the set of enabled accessibility services. If there are not services
-     * it returned the unmodifiable {@link Collections#emptySet()}.
+     * @return the set of enabled accessibility services. If there are no services,
+     * it returns the unmodifiable {@link Collections#emptySet()}.
      */
     public static Set<ComponentName> getEnabledServicesFromSettings(Context context) {
-        final String enabledServicesSetting = Settings.Secure.getString(
-                context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        return getEnabledServicesFromSettings(context, UserHandle.myUserId());
+    }
+
+    /**
+     * @return the set of enabled accessibility services for {@param userId}. If there are no
+     * services, it returns the unmodifiable {@link Collections#emptySet()}.
+     */
+    public static Set<ComponentName> getEnabledServicesFromSettings(Context context, int userId) {
+        final String enabledServicesSetting = Settings.Secure.getStringForUser(
+                context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userId);
         if (enabledServicesSetting == null) {
             return Collections.emptySet();
         }
@@ -77,11 +87,22 @@ public class AccessibilityUtils {
         return langContext.getText(resId);
     }
 
+    /**
+     * Changes an accessibility component's state.
+     */
     public static void setAccessibilityServiceState(Context context, ComponentName toggledService,
             boolean enabled) {
+        setAccessibilityServiceState(context, toggledService, enabled, UserHandle.myUserId());
+    }
+
+    /**
+     * Changes an accessibility component's state for {@param userId}.
+     */
+    public static void setAccessibilityServiceState(Context context, ComponentName toggledService,
+            boolean enabled, int userId) {
         // Parse the enabled services.
         Set<ComponentName> enabledServices = AccessibilityUtils.getEnabledServicesFromSettings(
-                context);
+                context, userId);
 
         if (enabledServices.isEmpty()) {
             enabledServices = new ArraySet<>(1);
@@ -121,13 +142,14 @@ public class AccessibilityUtils {
         if (enabledServicesBuilderLength > 0) {
             enabledServicesBuilder.deleteCharAt(enabledServicesBuilderLength - 1);
         }
-        Settings.Secure.putString(context.getContentResolver(),
+        Settings.Secure.putStringForUser(context.getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                enabledServicesBuilder.toString());
+                enabledServicesBuilder.toString(), userId);
 
         // Update accessibility enabled.
-        Settings.Secure.putInt(context.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_ENABLED, accessibilityEnabled ? 1 : 0);
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ENABLED, accessibilityEnabled ? 1 : 0,
+                userId);
     }
 
     private static Set<ComponentName> getInstalledServices(Context context) {
