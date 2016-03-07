@@ -862,6 +862,9 @@ public final class PageContentRepository {
                 // Take a note that the content is rendered.
                 renderedPage.state = RenderedPage.STATE_RENDERED;
 
+                // Invalidate all caches of the old state of the bitmap
+                mRenderedPage.content.invalidateSelf();
+
                 // Announce success if needed.
                 if (mCallback != null) {
                     mCallback.onPageContentAvailable(renderedPage.content);
