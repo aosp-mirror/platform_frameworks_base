@@ -36,7 +36,9 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.FakeShadowView;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -121,6 +123,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private float mAnimationTranslationY;
     private boolean mDrawingAppearAnimation;
     private ValueAnimator mAppearAnimator;
+    private ValueAnimator mBackgroundColorAnimator;
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
     private boolean mShowingLegacyBackground;
@@ -157,6 +160,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     };
     private float mShadowAlpha = 1.0f;
     private FakeShadowView mFakeShadow;
+    private int mCurrentBackgroundTint;
+    private int mTargetTint;
+    private int mStartTint;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -457,21 +463,63 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * Sets the tint color of the background
      */
     public void setTintColor(int color) {
+        setTintColor(color, false);
+    }
+
+    /**
+     * Sets the tint color of the background
+     */
+    public void setTintColor(int color, boolean animated) {
         mBgTint = color;
-        updateBackgroundTint();
+        updateBackgroundTint(animated);
     }
 
     protected void updateBackgroundTint() {
-        int color = getBgColor();
+        updateBackgroundTint(false /* animated */);
+    }
+
+    private void updateBackgroundTint(boolean animated) {
+        if (mBackgroundColorAnimator != null) {
+            mBackgroundColorAnimator.cancel();
+        }
         int rippleColor = getRippleColor();
+        mBackgroundDimmed.setRippleColor(rippleColor);
+        mBackgroundNormal.setRippleColor(rippleColor);
+        int color = calculateBgColor();
+        if (!animated) {
+            setBackgroundTintColor(color);
+        } else if (color != mCurrentBackgroundTint) {
+            mStartTint = mCurrentBackgroundTint;
+            mTargetTint = color;
+            mBackgroundColorAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
+            mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int newColor = NotificationUtils.interpolateColors(mStartTint, mTargetTint,
+                            animation.getAnimatedFraction());
+                    setBackgroundTintColor(newColor);
+                }
+            });
+            mBackgroundColorAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            mBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
+            mBackgroundColorAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mBackgroundColorAnimator = null;
+                }
+            });
+            mBackgroundColorAnimator.start();
+        }
+    }
+
+    private void setBackgroundTintColor(int color) {
+        mCurrentBackgroundTint = color;
         if (color == mNormalColor) {
             // We don't need to tint a normal notification
             color = 0;
         }
         mBackgroundDimmed.setTint(color);
         mBackgroundNormal.setTint(color);
-        mBackgroundDimmed.setRippleColor(rippleColor);
-        mBackgroundNormal.setRippleColor(rippleColor);
     }
 
     /**
@@ -773,8 +821,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     protected abstract View getContentView();
 
-    public int getBgColor() {
-        if (mBgTint != 0) {
+    public int calculateBgColor() {
+        return calculateBgColor(true /* withTint */);
+    }
+
+    private int calculateBgColor(boolean withTint) {
+        if (withTint && mBgTint != 0) {
             return mBgTint;
         } else if (mShowingLegacyBackground) {
             return mLegacyColor;
@@ -839,7 +891,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     public boolean hasSameBgColor(ActivatableNotificationView otherView) {
-        return getBgColor() == otherView.getBgColor();
+        return calculateBgColor() == otherView.calculateBgColor();
     }
 
     @Override
@@ -861,6 +913,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mFakeShadow.setFakeShadowTranslationZ(shadowIntensity * (getTranslationZ()
                 + FakeShadowView.SHADOW_SIBLING_TRESHOLD), outlineAlpha, shadowYEnd,
                 outlineTranslation);
+    }
+
+    public int getBackgroundColorWithoutTint() {
+        return calculateBgColor(false /* withTint */);
     }
 
     public interface OnActivatedListener {

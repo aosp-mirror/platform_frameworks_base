@@ -2994,7 +2994,6 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
             contentView.setViewVisibility(R.id.header_content_info, View.GONE);
-            contentView.setViewVisibility(R.id.number_of_children, View.GONE);
             contentView.setViewVisibility(R.id.sub_text_divider, View.GONE);
             contentView.setViewVisibility(R.id.content_info_divider, View.GONE);
             contentView.setViewVisibility(R.id.time_divider, View.GONE);
@@ -3095,17 +3094,12 @@ public class Notification implements Parcelable
 
         private void bindNotificationHeader(RemoteViews contentView) {
             bindSmallIcon(contentView);
-            bindChildCountColor(contentView);
             bindHeaderAppName(contentView);
             bindHeaderSubText(contentView);
             bindContentInfo(contentView);
             bindHeaderChronometerAndTime(contentView);
             bindExpandButton(contentView);
             bindProfileBadge(contentView);
-        }
-
-        private void bindChildCountColor(RemoteViews contentView) {
-            contentView.setTextColor(R.id.number_of_children, resolveColor());
         }
 
         private void bindContentInfo(RemoteViews contentView) {

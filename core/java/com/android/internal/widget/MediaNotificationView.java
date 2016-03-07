@@ -89,36 +89,50 @@ public class MediaNotificationView extends FrameLayout {
         int topMargin = getMeasuredHeight() - mRightIcon.getMeasuredHeight()
                 - iconParams.bottomMargin;
         // If the topMargin is high enough we can also remove the header constraint!
+        boolean reMeasure = false;
         if (!hasIcon || topMargin >= mImageMinTopMargin) {
-            resetHeaderIndention();
+            reMeasure = resetHeaderIndention();
         } else {
             int paddingEnd = mNotificationContentImageMarginEnd;
             ViewGroup.MarginLayoutParams headerParams =
                     (MarginLayoutParams) mHeader.getLayoutParams();
-            headerParams.setMarginEnd(mRightIcon.getMeasuredWidth() + iconParams.getMarginEnd());
-            if (mHeader.getPaddingEnd() != paddingEnd) {
-                mHeader.setPadding(
-                        isLayoutRtl() ? paddingEnd : mHeader.getPaddingLeft(),
-                        mHeader.getPaddingTop(),
-                        isLayoutRtl() ? mHeader.getPaddingLeft() : paddingEnd,
-                        mHeader.getPaddingBottom());
+            int newMarginEnd = mRightIcon.getMeasuredWidth() + iconParams.getMarginEnd();
+            if (headerParams.getMarginEnd() != newMarginEnd) {
+                headerParams.setMarginEnd(newMarginEnd);
                 mHeader.setLayoutParams(headerParams);
+                reMeasure = true;
             }
+            if (mHeader.getPaddingEnd() != paddingEnd) {
+                mHeader.setPaddingRelative(mHeader.getPaddingStart(),
+                        mHeader.getPaddingTop(),
+                        paddingEnd,
+                        mHeader.getPaddingBottom());
+                reMeasure = true;
+            }
+        }
+        if (reMeasure) {
+            measureChildWithMargins(mHeader, widthMeasureSpec, 0, heightMeasureSpec, 0);
         }
     }
 
-    private void resetHeaderIndention() {
+    private boolean resetHeaderIndention() {
+        boolean remeasure = false;
         if (mHeader.getPaddingEnd() != mNotificationContentMarginEnd) {
-            ViewGroup.MarginLayoutParams headerParams =
-                    (MarginLayoutParams) mHeader.getLayoutParams();
-            headerParams.setMarginEnd(0);
-            mHeader.setPadding(
-                    isLayoutRtl() ? mNotificationContentMarginEnd : mHeader.getPaddingLeft(),
+            mHeader.setPaddingRelative(mHeader.getPaddingStart(),
                     mHeader.getPaddingTop(),
-                    isLayoutRtl() ? mHeader.getPaddingLeft() : mNotificationContentMarginEnd,
+                    mNotificationContentMarginEnd,
                     mHeader.getPaddingBottom());
-            mHeader.setLayoutParams(headerParams);
+            remeasure = true;
         }
+        ViewGroup.MarginLayoutParams headerParams =
+                (MarginLayoutParams) mHeader.getLayoutParams();
+        headerParams.setMarginEnd(0);
+        if (headerParams.getMarginEnd() != 0) {
+            headerParams.setMarginEnd(0);
+            mHeader.setLayoutParams(headerParams);
+            remeasure = true;
+        }
+        return remeasure;
     }
 
     public MediaNotificationView(Context context, AttributeSet attrs, int defStyleAttr,
