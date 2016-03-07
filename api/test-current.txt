@@ -19735,7 +19735,7 @@ package android.media {
     method public void adjustVolume(int, int);
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int generateAudioSessionId();
-    method public android.media.AudioRecordingConfiguration[] getActiveRecordConfigurations();
+    method public android.media.AudioRecordConfiguration[] getActiveRecordConfigurations();
     method public android.media.AudioDeviceInfo[] getDevices(int);
     method public int getMode();
     method public java.lang.String getParameters(java.lang.String);
@@ -19881,7 +19881,7 @@ package android.media {
 
   public static abstract class AudioManager.AudioRecordingCallback {
     ctor public AudioManager.AudioRecordingCallback();
-    method public void onRecordConfigChanged(android.media.AudioRecordingConfiguration[]);
+    method public void onRecordConfigChanged(android.media.AudioRecordConfiguration[]);
   }
 
   public static abstract interface AudioManager.OnAudioFocusChangeListener {
@@ -19955,7 +19955,7 @@ package android.media {
     method public abstract void onRoutingChanged(android.media.AudioRecord);
   }
 
-  public final class AudioRecordingConfiguration implements android.os.Parcelable {
+  public final class AudioRecordConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method public android.media.AudioDeviceInfo getAudioDevice();
     method public int getClientAudioSessionId();
@@ -19963,7 +19963,7 @@ package android.media {
     method public android.media.AudioFormat getClientFormat();
     method public android.media.AudioFormat getFormat();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.AudioRecordingConfiguration> CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.AudioRecordConfiguration> CREATOR;
   }
 
   public abstract interface AudioRouting {

@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.media.AudioAttributes;
-import android.media.AudioRecordingConfiguration;
+import android.media.AudioRecordConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -164,5 +164,5 @@ interface IAudioService {
 
     oneway void unregisterRecordingCallback(in IRecordingConfigDispatcher rcdb);
 
-    AudioRecordingConfiguration[] getActiveRecordConfigurations();
+    AudioRecordConfiguration[] getActiveRecordConfigurations();
 }
