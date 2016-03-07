@@ -159,6 +159,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int STATE_PRINTER_UNAVAILABLE = 6;
     private static final int STATE_UPDATE_SLOW = 7;
     private static final int STATE_PRINT_COMPLETED = 8;
+    private static final int STATE_FINISHING = 9;
 
     private static final int UI_STATE_PREVIEW = 0;
     private static final int UI_STATE_ERROR = 1;
@@ -2033,6 +2034,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             // The printedDocument will call doFinish() when the current command finishes
             return;
         }
+
+        if (mState == STATE_FINISHING) {
+            return;
+        }
+
+        mState = STATE_FINISHING;
 
         if (mPrinterRegistry != null) {
             mPrinterRegistry.setTrackedPrinter(null);
