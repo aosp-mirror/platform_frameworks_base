@@ -541,7 +541,6 @@ static void android_media_AudioTrack_release(JNIEnv *env,  jobject thiz) {
         return;
     }
     //ALOGV("deleting lpTrack: %x\n", (int)lpTrack);
-    lpTrack->stop();
 
     // delete the JNI data
     AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)env->GetLongField(
