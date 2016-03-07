@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MICROBENCH_MICROBENCH_H
-#define MICROBENCH_MICROBENCH_H
 
-namespace android {
-namespace uirenderer {
+#include <benchmark/benchmark.h>
 
-#define NO_INLINE __attribute__ ((noinline))
-
-class MicroBench {
-public:
-    template <class Tp>
-    static inline void DoNotOptimize(Tp const& value) {
-        asm volatile("" : "+rm" (const_cast<Tp&>(value)));
-    }
-};
-
-} /* namespace uirenderer */
-} /* namespace android */
-
-#endif /* MICROBENCH_MICROBENCH_H */
+BENCHMARK_MAIN();

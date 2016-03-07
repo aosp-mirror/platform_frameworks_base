@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#include <benchmark/Benchmark.h>
+#include <benchmark/benchmark.h>
 
 #include "Matrix.h"
 #include "Rect.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
 #include "TessellationCache.h"
-#include "tests/microbench/MicroBench.h"
 
 #include <SkPath.h>
 
@@ -78,39 +77,35 @@ static inline void tessellateShadows(ShadowTestData& testData, bool opaque,
             testData.lightRadius, *ambient, *spot);
 }
 
-BENCHMARK_NO_ARG(BM_TessellateShadows_roundrect_opaque);
-void BM_TessellateShadows_roundrect_opaque::Run(int iters) {
+void BM_TessellateShadows_roundrect_opaque(benchmark::State& state) {
     ShadowTestData shadowData;
     createShadowTestData(&shadowData);
     SkPath path;
     path.addRoundRect(SkRect::MakeWH(100, 100), 5, 5);
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         VertexBuffer ambient;
         VertexBuffer spot;
         tessellateShadows(shadowData, true, path, &ambient, &spot);
-        MicroBench::DoNotOptimize(&ambient);
-        MicroBench::DoNotOptimize(&spot);
+        benchmark::DoNotOptimize(&ambient);
+        benchmark::DoNotOptimize(&spot);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_TessellateShadows_roundrect_opaque);
 
-BENCHMARK_NO_ARG(BM_TessellateShadows_roundrect_translucent);
-void BM_TessellateShadows_roundrect_translucent::Run(int iters) {
+void BM_TessellateShadows_roundrect_translucent(benchmark::State& state) {
     ShadowTestData shadowData;
     createShadowTestData(&shadowData);
     SkPath path;
     path.reset();
     path.addRoundRect(SkRect::MakeLTRB(0, 0, 100, 100), 5, 5);
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         std::unique_ptr<VertexBuffer> ambient(new VertexBuffer);
         std::unique_ptr<VertexBuffer> spot(new VertexBuffer);
         tessellateShadows(shadowData, false, path, ambient.get(), spot.get());
-        MicroBench::DoNotOptimize(ambient.get());
-        MicroBench::DoNotOptimize(spot.get());
+        benchmark::DoNotOptimize(ambient.get());
+        benchmark::DoNotOptimize(spot.get());
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_TessellateShadows_roundrect_translucent);
