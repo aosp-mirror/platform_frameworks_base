@@ -434,9 +434,12 @@ class WindowStateAnimator {
                 + " remove=" + mWin.mRemoveOnExit
                 + " windowAnimating=" + isWindowAnimating());
 
-        final int N = mWin.mChildWindows.size();
-        for (int i=0; i<N; i++) {
-            mWin.mChildWindows.get(i).mWinAnimator.finishExit();
+        if (!mWin.mChildWindows.isEmpty()) {
+            // Copying to a different list as multiple children can be removed.
+            final WindowList childWindows = new WindowList(mWin.mChildWindows);
+            for (int i = childWindows.size() - 1; i >= 0; i--) {
+                childWindows.get(i).mWinAnimator.finishExit();
+            }
         }
 
         if (mEnteringAnimation) {
