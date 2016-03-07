@@ -35,6 +35,6 @@
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Мүчүлүштүк тууралуу билдирүүнүн <xliff:g id="ID">#%d</xliff:g> чоо-жайы"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Файлдын аталышы"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"Мүчүлүштүктүн аталышы"</string>
-    <string name="bugreport_info_description" msgid="5072835127481627722">"Мүчүлүштүктүн корутундусу"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Мүчүлүштүк корутундусу"</string>
     <string name="save" msgid="4781509040564835759">"Сактоо"</string>
 </resources>
