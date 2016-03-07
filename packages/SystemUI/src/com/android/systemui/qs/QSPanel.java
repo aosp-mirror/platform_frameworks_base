@@ -155,12 +155,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return mHost.createTile(subPanel);
     }
 
-    protected void createCustomizePanel() {
-        mCustomizePanel = (QSCustomizer) LayoutInflater.from(mContext)
-                .inflate(R.layout.qs_customize_panel, null);
-        mCustomizePanel.setHost(mHost);
-    }
-
     public void setBrightnessMirror(BrightnessMirrorController c) {
         super.onFinishInflate();
         ToggleSlider brightnessSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
@@ -173,12 +167,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         mCallback = callback;
     }
 
-    public void setHost(QSTileHost host) {
+    public void setHost(QSTileHost host, QSCustomizer customizer) {
         mHost = host;
         mHost.addCallback(this);
         setTiles(mHost.getTiles());
         mFooter.setHost(host);
-        createCustomizePanel();
+        mCustomizePanel = customizer;
+        if (mCustomizePanel != null) {
+            mCustomizePanel.setHost(mHost);
+        }
     }
 
     public QSTileHost getHost() {

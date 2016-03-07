@@ -14,10 +14,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
+<!-- Height is 0 because it will be managed by the QSContainer manually -->
 <com.android.systemui.qs.customize.QSCustomizer
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="0dp"
     android:orientation="vertical"
     android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">

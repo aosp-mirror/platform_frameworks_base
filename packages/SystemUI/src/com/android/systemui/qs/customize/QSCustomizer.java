@@ -32,8 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
@@ -59,6 +61,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private RecyclerView mRecyclerView;
     private TileAdapter mTileAdapter;
     private Toolbar mToolbar;
+    private boolean mCustomizing;
+    private NotificationsQuickSettingsContainer mNotifQsContainer;
+    private QSContainer mQsContainer;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
@@ -68,6 +73,14 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void setHost(QSTileHost host) {
         mHost = host;
         mPhoneStatusBar = host.getPhoneStatusBar();
+    }
+
+    public void setContainer(NotificationsQuickSettingsContainer notificationsQsContainer) {
+        mNotifQsContainer = notificationsQsContainer;
+    }
+
+    public void setQsContainer(QSContainer qsContainer) {
+        mQsContainer = qsContainer;
     }
 
     @Override
@@ -105,23 +118,31 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void show(int x, int y) {
         if (!isShown) {
             isShown = true;
-            mPhoneStatusBar.getStatusBarWindow().addView(this);
             setTileSpecs();
-            mClipper.animateCircularClip(x, y, true, null);
+            setVisibility(View.VISIBLE);
+            mClipper.animateCircularClip(x, y, true, mExpandAnimationListener);
             new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
+            mNotifQsContainer.setCustomizerAnimating(true);
         }
     }
 
     public void hide(int x, int y) {
         if (isShown) {
             isShown = false;
+            setCustomizing(false);
             save();
             mClipper.animateCircularClip(x, y, false, mCollapseAnimationListener);
+            mNotifQsContainer.setCustomizerAnimating(true);
         }
     }
 
+    private void setCustomizing(boolean customizing) {
+        mCustomizing = customizing;
+        mQsContainer.notifyCustomizeChanged();
+    }
+
     public boolean isCustomizing() {
-        return isShown;
+        return mCustomizing;
     }
 
     @Override
@@ -155,19 +176,34 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mTileAdapter.saveSpecs(mHost);
     }
 
+    private final AnimatorListener mExpandAnimationListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            setCustomizing(true);
+            mNotifQsContainer.setCustomizerAnimating(false);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mNotifQsContainer.setCustomizerAnimating(false);
+        }
+    };
+
     private final AnimatorListener mCollapseAnimationListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
             if (!isShown) {
-                mPhoneStatusBar.getStatusBarWindow().removeView(QSCustomizer.this);
+                setVisibility(View.GONE);
             }
+            mNotifQsContainer.setCustomizerAnimating(false);
         }
 
         @Override
         public void onAnimationCancel(Animator animation) {
             if (!isShown) {
-                mPhoneStatusBar.getStatusBarWindow().removeView(QSCustomizer.this);
+                setVisibility(View.GONE);
             }
+            mNotifQsContainer.setCustomizerAnimating(false);
         }
     };
 }
