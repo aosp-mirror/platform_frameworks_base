@@ -2518,8 +2518,37 @@ public class Editor {
         mPreserveDetachedSelection = true;
     }
 
-    private void replaceWithSuggestion(SuggestionInfo suggestionInfo, int spanStart, int spanEnd) {
+    private void replaceWithSuggestion(final SuggestionInfo suggestionInfo) {
         final Editable editable = (Editable) mTextView.getText();
+        if (editable.getSpanStart(suggestionInfo.mSuggestionSpan) < 0) {
+            // Suggestion span coundn't be found. Try to find a suggestion span that has the same
+            // contents.
+            final SuggestionSpan[] suggestionSpans = editable.getSpans(
+                    suggestionInfo.mSuggestionSpanStart, suggestionInfo.mSuggestionSpanEnd,
+                    SuggestionSpan.class);
+            for (final SuggestionSpan suggestionSpan : suggestionSpans) {
+                final int spanStart = editable.getSpanStart(suggestionSpan);
+                if (spanStart != suggestionInfo.mSuggestionSpanStart) {
+                    continue;
+                }
+                int spanEnd = editable.getSpanEnd(suggestionSpan);
+                if (spanEnd != suggestionInfo.mSuggestionSpanEnd) {
+                    continue;
+                }
+                if (suggestionSpan.equals(suggestionInfo.mSuggestionSpan)) {
+                    // Found.
+                    suggestionInfo.mSuggestionSpan = suggestionSpan;
+                    break;
+                }
+            }
+        }
+        final int spanStart = editable.getSpanStart(suggestionInfo.mSuggestionSpan);
+        final int spanEnd = editable.getSpanEnd(suggestionInfo.mSuggestionSpan);
+        if (spanStart < 0 || spanEnd <= spanStart) {
+            // Span has been removed
+            return;
+        }
+
         final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
         // SuggestionSpans are removed by replace: save them before
         SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
@@ -2593,11 +2622,7 @@ public class Editor {
                 clear();
                 return false;
             }
-            final Spannable spannable = (Spannable) mTextView.getText();
-            final SuggestionSpan suggestionSpan =
-                    mSuggestionInfosInContextMenu[index].mSuggestionSpan;
-            replaceWithSuggestion(mSuggestionInfosInContextMenu[index],
-                    spannable.getSpanStart(suggestionSpan), spannable.getSpanEnd(suggestionSpan));
+            replaceWithSuggestion(mSuggestionInfosInContextMenu[index]);
             clear();
             return true;
         }
@@ -3028,12 +3053,18 @@ public class Editor {
     }
 
     private static class SuggestionInfo {
-        // Range of actual suggestion within text
+        // Range of actual suggestion within mText
         int mSuggestionStart, mSuggestionEnd;
 
         // The SuggestionSpan that this TextView represents
         @Nullable
         SuggestionSpan mSuggestionSpan;
+
+        // The SuggestionSpan start position
+        int mSuggestionSpanStart;
+
+        // The SuggestionSpan end position
+        int mSuggestionSpanEnd;
 
         // The index of this suggestion inside suggestionSpan
         int mSuggestionIndex;
@@ -3141,6 +3172,8 @@ public class Editor {
                     suggestionInfo.mSuggestionIndex = suggestionIndex;
                     suggestionInfo.mSuggestionStart = 0;
                     suggestionInfo.mSuggestionEnd = suggestion.length();
+                    suggestionInfo.mSuggestionSpanStart = spanStart;
+                    suggestionInfo.mSuggestionSpanEnd = spanEnd;
                     suggestionInfo.mText.replace(0, suggestionInfo.mText.length(), suggestion);
                     numberOfSuggestions++;
                     if (numberOfSuggestions >= suggestionInfos.length) {
@@ -3434,10 +3467,8 @@ public class Editor {
                 if ((suggestionSpan.getFlags() & SuggestionSpan.FLAG_MISSPELLED) != 0) {
                     mMisspelledSpan = suggestionSpan;
                 }
-                final int spanStart = spannable.getSpanStart(suggestionSpan);
-                final int spanEnd = spannable.getSpanEnd(suggestionSpan);
-                spanUnionStart = Math.min(spanUnionStart, spanStart);
-                spanUnionEnd = Math.max(spanUnionEnd, spanEnd);
+                spanUnionStart = Math.min(spanUnionStart, suggestionInfo.mSuggestionSpanStart);
+                spanUnionEnd = Math.max(spanUnionEnd, suggestionInfo.mSuggestionSpanEnd);
             }
 
             for (int i = 0; i < mNumberOfSuggestions; i++) {
@@ -3476,8 +3507,8 @@ public class Editor {
         private void highlightTextDifferences(SuggestionInfo suggestionInfo, int unionStart,
                 int unionEnd) {
             final Spannable text = (Spannable) mTextView.getText();
-            final int spanStart = text.getSpanStart(suggestionInfo.mSuggestionSpan);
-            final int spanEnd = text.getSpanEnd(suggestionInfo.mSuggestionSpan);
+            final int spanStart = suggestionInfo.mSuggestionSpanStart;
+            final int spanEnd = suggestionInfo.mSuggestionSpanEnd;
 
             // Adjust the start/end of the suggestion span
             suggestionInfo.mSuggestionStart = spanStart - unionStart;
@@ -3495,16 +3526,8 @@ public class Editor {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Editable editable = (Editable) mTextView.getText();
             SuggestionInfo suggestionInfo = mSuggestionInfos[position];
-            final int spanStart = editable.getSpanStart(suggestionInfo.mSuggestionSpan);
-            final int spanEnd = editable.getSpanEnd(suggestionInfo.mSuggestionSpan);
-            if (spanStart < 0 || spanEnd <= spanStart) {
-                // Span has been removed
-                hideWithCleanUp();
-                return;
-            }
-            replaceWithSuggestion(suggestionInfo, spanStart, spanEnd);
+            replaceWithSuggestion(suggestionInfo);
             hideWithCleanUp();
         }
     }
@@ -3637,8 +3660,7 @@ public class Editor {
         }
 
         private void updateReplaceItem(Menu menu) {
-            boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions()
-                    && !(mTextView.isInExtractedMode() && mTextView.hasSelection());
+            boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions();
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
                 menu.add(Menu.NONE, TextView.ID_REPLACE, MENU_ITEM_ORDER_REPLACE,
