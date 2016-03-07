@@ -54,17 +54,12 @@ line tools.</p>
     If you're developing on Windows, you might need to install the appropriate USB driver for your
     device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM
     USB Drivers</a> document.</li>
-  <li>Enable <strong>USB debugging</strong> on your device.
-    <ul>
-      <li>On most devices running Android 3.2 or older, you can find the option under
-        <strong>Settings > Applications > Development</strong>.</li>
-      <li>On Android 4.0 and newer, it's in <strong>Settings > Developer options</strong>.
+  <li>Enable <strong>USB debugging</strong> on your device. On Android 4.0 and newer, go to
+    <strong>Settings > Developer options</strong>.
         <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
         options</strong> is hidden by default. To make it available, go
         to <strong>Settings > About phone</strong> and tap <strong>Build number</strong>
         seven times. Return to the previous screen to find <strong>Developer options</strong>.</p>
-      </li>
-    </ul>
   </li>
 </ol>
 

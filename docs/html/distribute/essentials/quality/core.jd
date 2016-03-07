@@ -988,8 +988,7 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
     Switch to another app to send the test app into the background. Go to
     Settings and check whether the test app has any services running while in
     the background. In Android 4.0 and higher, go to the Apps screen and find
-    the app in the "Running" tab. In earlier versions, use "Manage
-    Applications" to check for running services.
+    the app in the "Running" tab.
   </td>
   </tr>
 
