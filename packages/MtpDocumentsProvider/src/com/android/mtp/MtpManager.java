@@ -143,7 +143,12 @@ class MtpManager {
             throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            return device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle);
+            final int[] handles =
+                    device.getObjectHandles(storageId, 0 /* all format */, parentObjectHandle);
+            if (handles == null) {
+                throw new IOException("Failed to fetch object handles.");
+            }
+            return handles;
         }
     }
 
