@@ -174,7 +174,6 @@ LOCAL_SRC_FILES := $(hwui_src_files)
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
         $(LOCAL_PATH) \
-        $(hwui_c_includes) \
         $(call hwui_proto_include)
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
@@ -198,7 +197,6 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
         $(LOCAL_PATH) \
-        $(hwui_c_includes) \
         $(call hwui_proto_include)
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
@@ -230,6 +228,7 @@ LOCAL_STATIC_LIBRARIES := libhwui_static_null_gpu
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -DHWUI_NULL_GPU
+LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
@@ -276,6 +275,7 @@ LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuitest
 LOCAL_MODULE_STEM_64 := hwuitest64
 LOCAL_CFLAGS := $(hwui_cflags)
+LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 # set to libhwui_static_null_gpu to skip actual GL commands
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
@@ -303,7 +303,9 @@ LOCAL_MODULE_STEM_64 := hwuimicro64
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -DHWUI_NULL_GPU
-LOCAL_C_INCLUDES += bionic/benchmarks/
+LOCAL_C_INCLUDES += \
+        bionic/benchmarks/ \
+        $(hwui_c_includes)
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_null_gpu
 LOCAL_STATIC_LIBRARIES := libbenchmark libbase
