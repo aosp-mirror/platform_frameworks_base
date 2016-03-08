@@ -2774,12 +2774,11 @@
         android:protectionLevel="signature" />
 
     <!-- Must be required by an {@link
-         android.service.notification.NotificationAssistantService},
-         to ensure that only the system can bind to it.
+         android.service.notification.NotificationRankerService         to ensure that only the system can bind to it.
          <p>Protection level: signature
          @hide This is not a third-party API (intended for system apps). -->
     -->
-    <permission android:name="android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE"
+    <permission android:name="android.permission.BIND_NOTIFICATION_RANKER_SERVICE"
         android:protectionLevel="signature" />
 
     <!-- Must be required by a {@link

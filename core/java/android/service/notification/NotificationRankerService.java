@@ -31,31 +31,20 @@ import android.util.Log;
 import com.android.internal.os.SomeArgs;
 
 /**
- * A service that helps the user manage notifications by modifying the
- * relative importance of notifications.
- * <p>To extend this class, you must declare the service in your manifest file with
- * the {@link android.Manifest.permission#BIND_NOTIFICATION_ASSISTANT_SERVICE} permission
- * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
- * <pre>
- * &lt;service android:name=".NotificationAssistant"
- *          android:label="&#64;string/service_name"
- *          android:permission="android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE">
- *     &lt;intent-filter>
- *         &lt;action android:name="android.service.notification.NotificationAssistantService" />
- *     &lt;/intent-filter>
- * &lt;/service></pre>
+ * A service that helps the user manage notifications. This class is only used to
+ * extend the framework service and may not be implemented by non-framework components.
  * @hide
  */
 @SystemApi
-public abstract class NotificationAssistantService extends NotificationListenerService {
-    private static final String TAG = "NotificationAssistant";
+public abstract class NotificationRankerService extends NotificationListenerService {
+    private static final String TAG = "NotificationRanker";
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE
-            = "android.service.notification.NotificationAssistantService";
+            = "android.service.notification.NotificationRankerService";
 
     /** Notification was canceled by the status bar reporting a click. */
     public static final int REASON_DELEGATE_CLICK = 1;
@@ -130,7 +119,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     @Override
     public void registerAsSystemService(Context context, ComponentName componentName,
             int currentUser) throws RemoteException {
-        super.registerAsSystemService(context, componentName, currentUser);
+        registerAsSystemServiceImpl(context, componentName, currentUser, true /* as Ranker */);
         mHandler = new MyHandler(getContext().getMainLooper());
     }
 
@@ -143,7 +132,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     @Override
     public final IBinder onBind(Intent intent) {
         if (mWrapper == null) {
-            mWrapper = new NotificationAssistantWrapper();
+            mWrapper = new NotificationRankingServiceWrapper();
         }
         return mWrapper;
     }
@@ -216,14 +205,14 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public final void adjustImportance(String key, Adjustment adjustment) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().setImportanceFromAssistant(mWrapper, key,
+            getNotificationInterface().setImportanceFromRankerService(mWrapper, key,
                     adjustment.mImportance, adjustment.mExplanation);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
     }
 
-    private class NotificationAssistantWrapper extends NotificationListenerWrapper {
+    private class NotificationRankingServiceWrapper extends NotificationListenerWrapper {
         @Override
         public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder,
                 int importance, boolean user) {

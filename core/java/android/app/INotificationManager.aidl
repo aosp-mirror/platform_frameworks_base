@@ -61,7 +61,7 @@ interface INotificationManager
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 
-    void registerListener(in INotificationListener listener, in ComponentName component, int userid);
+    void registerListener(in INotificationListener listener, in ComponentName component, int userid, boolean asRanker);
     void unregisterListener(in INotificationListener listener, int userid);
 
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
@@ -80,7 +80,7 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
-    void setImportanceFromAssistant(in INotificationListener token, String key, int importance, CharSequence explanation);
+    void setImportanceFromRankerService(in INotificationListener token, String key, int importance, CharSequence explanation);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
