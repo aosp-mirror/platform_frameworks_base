@@ -107,7 +107,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 clearAnimationState();
             }
         } else if (MOVE_FULL_ROWS.equals(key)) {
-            mFullRows = newValue != null && Integer.parseInt(newValue) != 0;
+            mFullRows = newValue == null || Integer.parseInt(newValue) != 0;
         } else if (QuickQSPanel.NUM_QUICK_TILES.equals(key)) {
             mNumQuickTiles = QuickQSPanel.getNumQuickTiles(mQsContainer.getContext());
             clearAnimationState();
