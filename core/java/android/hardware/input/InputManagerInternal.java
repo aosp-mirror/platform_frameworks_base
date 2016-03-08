@@ -52,4 +52,11 @@ public abstract class InputManagerInternal {
      */
     public abstract void onInputMethodSubtypeChanged(int userId,
             @Nullable InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype subtype);
+
+    /**
+     * Toggles Caps Lock state for input device with specific id.
+     *
+     * @param deviceId The id of input device.
+     */
+    public abstract void toggleCapsLock(int deviceId);
 }

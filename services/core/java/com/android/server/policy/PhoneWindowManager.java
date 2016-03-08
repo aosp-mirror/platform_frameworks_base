@@ -69,6 +69,7 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
+import android.hardware.input.InputManagerInternal;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -304,6 +305,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
     ActivityManagerInternal mActivityManagerInternal;
+    InputManagerInternal mInputManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
@@ -601,6 +603,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
     boolean mPendingMetaAction;
+    boolean mPendingCapsLockToggle;
+    int mMetaState;
+    int mInitialMetaState;
     boolean mForceShowSystemBars;
 
     // support for activating the lock screen while the screen is on
@@ -1486,6 +1491,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
@@ -2954,6 +2960,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mPendingMetaAction && !KeyEvent.isMetaKey(keyCode)) {
             mPendingMetaAction = false;
         }
+        // Any key that is not Alt or Meta cancels Caps Lock combo tracking.
+        if (mPendingCapsLockToggle && !KeyEvent.isMetaKey(keyCode) && !KeyEvent.isAltKey(keyCode)) {
+            mPendingCapsLockToggle = false;
+        }
 
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
@@ -3200,6 +3210,38 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 dispatchDirectAudioEvent(event);
                 return -1;
             }
+        }
+
+        // Toggle Caps Lock on META-ALT.
+        boolean actionTriggered = false;
+        if (KeyEvent.isModifierKey(keyCode)) {
+            if (!mPendingCapsLockToggle) {
+                // Start tracking meta state for combo.
+                mInitialMetaState = mMetaState;
+                mPendingCapsLockToggle = true;
+            } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                int altOnMask = mMetaState & KeyEvent.META_ALT_MASK;
+                int metaOnMask = mMetaState & KeyEvent.META_META_MASK;
+
+                // Check for Caps Lock toggle
+                if ((metaOnMask != 0) && (altOnMask != 0)) {
+                    // Check if nothing else is pressed
+                    if (mInitialMetaState == (mMetaState ^ (altOnMask | metaOnMask))) {
+                        // Handle Caps Lock Toggle
+                        mInputManagerInternal.toggleCapsLock(event.getDeviceId());
+                        actionTriggered = true;
+                    }
+                }
+
+                // Always stop tracking when key goes up.
+                mPendingCapsLockToggle = false;
+            }
+        }
+        // Store current meta state to be able to evaluate it later.
+        mMetaState = metaState;
+
+        if (actionTriggered) {
+            return -1;
         }
 
         if (KeyEvent.isMetaKey(keyCode)) {
