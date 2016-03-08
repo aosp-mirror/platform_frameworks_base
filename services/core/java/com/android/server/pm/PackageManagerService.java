@@ -4443,6 +4443,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public List<String> getAllPackages() {
+        synchronized (mPackages) {
+            return new ArrayList<String>(mPackages.keySet());
+        }
+    }
+
+    @Override
     public String[] getPackagesForUid(int uid) {
         uid = UserHandle.getAppId(uid);
         // reader

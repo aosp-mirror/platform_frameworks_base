@@ -191,7 +191,6 @@ class PackageDexOptimizer {
                         throw new IllegalStateException("Invalid dexopt:" + dexoptNeeded);
                 }
 
-
                 Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
