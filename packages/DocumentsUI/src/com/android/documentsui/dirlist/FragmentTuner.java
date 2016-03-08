@@ -82,6 +82,12 @@ public abstract class FragmentTuner {
     abstract void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch);
 
     /**
+     * When managed mode is enabled, active downloads will be visible in the UI.
+     * Presumably this should only be true when in the downloads directory.
+     */
+    abstract boolean enableManagedMode();
+
+    /**
      * Provides support for Platform specific specializations of DirectoryFragment.
      */
     private static final class DocumentsTuner extends FragmentTuner {
@@ -157,6 +163,11 @@ public abstract class FragmentTuner {
                 ((BaseActivity) mContext).setRootsDrawerOpen(true);
             }
         }
+
+        @Override
+        public boolean enableManagedMode() {
+            return false;
+        }
     }
 
     /**
@@ -166,6 +177,7 @@ public abstract class FragmentTuner {
 
         public DownloadsTuner(Context context, State state) {
             super(context, state);
+            assert(state.action == ACTION_MANAGE);
         }
 
         @Override
@@ -192,6 +204,11 @@ public abstract class FragmentTuner {
 
         @Override
         void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {}
+
+        @Override
+        public boolean enableManagedMode() {
+            return mState.stack.root != null && mState.stack.root.isDownloads();
+        }
     }
 
     /**
@@ -232,6 +249,17 @@ public abstract class FragmentTuner {
                 // This noops on layouts without drawer, so no need to guard.
                 ((BaseActivity) mContext).setRootsDrawerOpen(true);
             }
+        }
+
+        @Override
+        public boolean enableManagedMode() {
+            // When in downloads top level directory, we also show active downloads.
+            // And while we don't allow folders in Downloads, we do allow Zip files in
+            // downloads that themselves can be opened and viewed like directories.
+            // This method helps us understand when to kick in on those special behaviors.
+            return mState.stack.root != null
+                    && mState.stack.root.isDownloads()
+                    && mState.stack.size() == 1;
         }
     }
 
