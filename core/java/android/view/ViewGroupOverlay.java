@@ -15,6 +15,7 @@
  */
 package android.view;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
@@ -37,7 +38,7 @@ public class ViewGroupOverlay extends ViewOverlay {
     }
 
     /**
-     * Adds a View to the overlay. The bounds of the added view should be
+     * Adds a {@code View} to the overlay. The bounds of the added view should be
      * relative to the host view. Any view added to the overlay should be
      * removed when it is no longer needed or no longer visible.
      *
@@ -54,23 +55,32 @@ public class ViewGroupOverlay extends ViewOverlay {
      * and 200 pixels down from the origin of the overlay's
      * host view, then the view will be offset by (100, 200).</p>
      *
-     * @param view The View to be added to the overlay. The added view will be
+     * <p>{@code View}s added with this API will be drawn in the order they were
+     * added. Drawing of the overlay views will happen before drawing of any of the
+     * {@code Drawable}s added with {@link #add(Drawable)} API even if a call to
+     * this API happened after the call to {@link #add(Drawable)}.</p>
+     *
+     * <p>Passing <code>null</code> parameter will result in an
+     * {@link IllegalArgumentException} being thrown.</p>
+     *
+     * @param view The {@code View} to be added to the overlay. The added view will be
      * drawn when the overlay is drawn.
      * @see #remove(View)
      * @see ViewOverlay#add(Drawable)
      */
-    public void add(View view) {
+    public void add(@NonNull View view) {
         mOverlayViewGroup.add(view);
     }
 
     /**
-     * Removes the specified View from the overlay.
+     * Removes the specified {@code View} from the overlay. Passing <code>null</code> parameter
+     * will result in an {@link IllegalArgumentException} being thrown.
      *
-     * @param view The View to be removed from the overlay.
+     * @param view The {@code View} to be removed from the overlay.
      * @see #add(View)
      * @see ViewOverlay#remove(Drawable)
      */
-    public void remove(View view) {
+    public void remove(@NonNull View view) {
         mOverlayViewGroup.remove(view);
     }
 }
