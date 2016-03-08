@@ -10,6 +10,8 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TypedValue;
 
+import com.android.server.wm.DimLayer.DimLayerUser;
+
 import java.io.PrintWriter;
 
 /**
@@ -18,7 +20,8 @@ import java.io.PrintWriter;
  * as well as other use cases (such as dimming above a dead window).
  */
 class DimLayerController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "DimLayerController" : TAG_WM;
+    private static final String TAG_LOCAL = "DimLayerController";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? TAG_LOCAL : TAG_WM;
 
     /** Amount of time in milliseconds to animate the dim surface from one value to another,
      * when no window animation is driving it. */
@@ -63,7 +66,8 @@ class DimLayerController {
                     newDimLayer = state.dimLayer;
                 } else {
                     // Create new full screen dim layer.
-                    newDimLayer = new DimLayer(mDisplayContent.mService, dimLayerUser, displayId);
+                    newDimLayer = new DimLayer(mDisplayContent.mService, dimLayerUser, displayId,
+                            getDimLayerTag(dimLayerUser));
                 }
                 dimLayerUser.getDimBounds(mTmpBounds);
                 newDimLayer.setBounds(mTmpBounds);
@@ -73,12 +77,17 @@ class DimLayerController {
             }
         } else {
             newDimLayer = (state.dimLayer == null || previousFullscreen)
-                    ? new DimLayer(mDisplayContent.mService, dimLayerUser, displayId)
+                    ? new DimLayer(mDisplayContent.mService, dimLayerUser, displayId,
+                            getDimLayerTag(dimLayerUser))
                     : state.dimLayer;
             dimLayerUser.getDimBounds(mTmpBounds);
             newDimLayer.setBounds(mTmpBounds);
         }
         state.dimLayer = newDimLayer;
+    }
+
+    private static String getDimLayerTag(DimLayerUser dimLayerUser) {
+        return TAG_LOCAL + "/" + dimLayerUser.toShortString();
     }
 
     private DimLayerState getOrCreateDimLayerState(DimLayer.DimLayerUser dimLayerUser) {
