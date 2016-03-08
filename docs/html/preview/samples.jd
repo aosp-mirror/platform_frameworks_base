@@ -49,13 +49,13 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 
-<h3 id="fbe">File Based Encryption</h3>
+<h3 id="fbe">Direct Boot</h3>
 <p>
   This sample demonstrates how to store and access data in a device encrypted
   storage which is always available while the device is booted.
 </p>
 <p>
-  <a href="https://github.com/googlesamples/android-FileBasedEncryption">
+  <a href="https://github.com/googlesamples/android-DirectBoot">
   Get it on GitHub</a>
 </p>
 
