@@ -14,11 +14,11 @@
 
 package com.android.systemui.qs;
 
+import android.graphics.Path;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
-import android.view.animation.PathInterpolator;
 import android.widget.TextView;
 import com.android.systemui.qs.PagedTileLayout.PageListener;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
@@ -40,9 +40,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private static final String ALLOW_FANCY_ANIMATION = "sysui_qs_fancy_anim";
     private static final String MOVE_FULL_ROWS = "sysui_qs_move_whole_rows";
 
-    public static final PathInterpolator TRANSLATION_Y_INTERPOLATOR =
-            new PathInterpolator(.1f, .3f, 1, 1);
-
     public static final float EXPANDED_TILE_DELAY = .7f;
 
     private final ArrayList<View> mAllViews = new ArrayList<>();
@@ -56,7 +53,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private boolean mOnFirstPage = true;
     private TouchAnimator mFirstPageAnimator;
     private TouchAnimator mFirstPageDelayedAnimator;
-    private TouchAnimator mTranslationYAnimator;
+    private TouchAnimator mTranslationAnimator;
     private TouchAnimator mNonfirstPageAnimator;
 
     private boolean mOnKeyguard;
@@ -129,6 +126,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     private void updateAnimators() {
         TouchAnimator.Builder firstPageBuilder = new Builder();
+        TouchAnimator.Builder translationXBuilder = new Builder();
         TouchAnimator.Builder translationYBuilder = new Builder();
         TouchAnimator.Builder firstPageDelayedBuilder = new Builder();
         Collection<QSTile<?>> tiles = mQsPanel.getHost().getTiles();
@@ -138,7 +136,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         int lastYDiff = 0;
         firstPageDelayedBuilder.setStartDelay(EXPANDED_TILE_DELAY);
         firstPageBuilder.setListener(this);
-        translationYBuilder.setInterpolator(TRANSLATION_Y_INTERPOLATOR);
         // Fade in the tiles/labels as we reach the final position.
         firstPageDelayedBuilder.addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1);
         mAllViews.clear();
@@ -158,7 +155,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 final int yDiff = loc2[1] - loc1[1];
                 lastYDiff = yDiff;
                 // Move the quick tile right from its location to the new one.
-                firstPageBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
+                translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
                 translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
 
                 // Counteract the parent translation on the tile. So we have a static base to
@@ -167,7 +164,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                 // Move the real tile's label from the quick tile position to its final
                 // location.
-                firstPageBuilder.addFloat(label, "translationX", -xDiff, 0);
+                translationXBuilder.addFloat(label, "translationX", -xDiff, 0);
                 translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
 
                 mTopFiveQs.add(tileIcon);
@@ -188,7 +185,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mAllowFancy) {
             mFirstPageAnimator = firstPageBuilder.build();
             mFirstPageDelayedAnimator = firstPageDelayedBuilder.build();
-            mTranslationYAnimator = translationYBuilder.build();
+            Path path = new Path();
+            path.moveTo(0, 0);
+            path.cubicTo(0, 0, 0, 1, 1, 1);
+            mTranslationAnimator = new TouchAnimator.Builder()
+                    .addPath(translationXBuilder.build(), translationYBuilder.build(),
+                            "position", "position", path)
+                    .build();
         }
         mNonfirstPageAnimator = new TouchAnimator.Builder()
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
@@ -226,7 +229,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mQuickQsPanel.setAlpha(1);
             mFirstPageAnimator.setPosition(position);
             mFirstPageDelayedAnimator.setPosition(position);
-            mTranslationYAnimator.setPosition(position);
+            mTranslationAnimator.setPosition(position);
         } else {
             mNonfirstPageAnimator.setPosition(position);
         }
