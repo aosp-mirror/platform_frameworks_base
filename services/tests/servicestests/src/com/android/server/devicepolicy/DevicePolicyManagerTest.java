@@ -1441,10 +1441,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Test 1. Caller doesn't have DO or DA.
         try {
-            dpm.getWifiMacAddress();
+            dpm.getWifiMacAddress(admin1);
             fail();
         } catch (SecurityException e) {
-            MoreAsserts.assertContainsRegex("No active admin owned", e.getMessage());
+            MoreAsserts.assertContainsRegex("No active admin", e.getMessage());
         }
 
         // DO needs to be an DA.
@@ -1453,19 +1453,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Test 2. Caller has DA, but not DO.
         try {
-            dpm.getWifiMacAddress();
+            dpm.getWifiMacAddress(admin1);
             fail();
         } catch (SecurityException e) {
-            MoreAsserts.assertContainsRegex("No active admin owned", e.getMessage());
+            MoreAsserts.assertContainsRegex("does not own the device", e.getMessage());
         }
 
         // Test 3. Caller has PO, but not DO.
         assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
         try {
-            dpm.getWifiMacAddress();
+            dpm.getWifiMacAddress(admin1);
             fail();
         } catch (SecurityException e) {
-            MoreAsserts.assertContainsRegex("No active admin owned", e.getMessage());
+            MoreAsserts.assertContainsRegex("does not own the device", e.getMessage());
         }
 
         // Remove PO.
@@ -1475,17 +1475,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
 
         // 4-1.  But no WifiInfo.
-        assertNull(dpm.getWifiMacAddress());
+        assertNull(dpm.getWifiMacAddress(admin1));
 
         // 4-2.  Returns WifiInfo, but with the default MAC.
         when(mContext.wifiManager.getConnectionInfo()).thenReturn(new WifiInfo());
-        assertNull(dpm.getWifiMacAddress());
+        assertNull(dpm.getWifiMacAddress(admin1));
 
         // 4-3. With a real MAC address.
         final WifiInfo wi = new WifiInfo();
         wi.setMacAddress("11:22:33:44:55:66");
         when(mContext.wifiManager.getConnectionInfo()).thenReturn(wi);
-        assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress());
+        assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress(admin1));
     }
 
     public void testRebootCanOnlyBeCalledByDeviceOwner() throws Exception {
