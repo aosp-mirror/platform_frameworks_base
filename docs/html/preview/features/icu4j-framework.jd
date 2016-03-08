@@ -1,4 +1,4 @@
-page.title=ICU4J Support in the Android Framework
+page.title=ICU4J Android Framework APIs
 
 @jd:body
 
@@ -6,7 +6,6 @@ page.title=ICU4J Support in the Android Framework
 <div id="tb">
 <h2>In this document:</h2>
 <ol>
-<li><a href="#compatibility">Compatibility Across Android Releases</a></li>
     <li><a href="#relation">Relationship to ICU4J</a></li>
     <li><a href="#migration">Migrating to android.icu APIs from ICU4J </a></li>
     <li><a href="#licence">Licensing</a></li>
@@ -51,8 +50,9 @@ page.title=ICU4J Support in the Android Framework
 <h2 id="relation">Relationship to ICU4J</h2>
 
 <p>
-  The N Developer Preview exposes a subset of the ICU4J APIs via the
-  <code>android.icu</code> package. The Android framework may choose not to
+  The Preview exposes a subset of the ICU4J APIs via the
+  <code>android.icu</code> package, rather than <code>com.ibm.icu</code>. The
+  Android framework may choose not to
   expose ICU4J APIs for various reasons; for example, the N Preview does not expose
   some deprecated APIs or those that the ICU team have not yet declared as
   stable. As the ICU team deprecates APIs in the future, Android will also mark
@@ -60,7 +60,7 @@ page.title=ICU4J Support in the Android Framework
 </p>
 
 <p class="table-caption"><strong>Table 1.</strong> ICU and CLDR versions used
-  in the N Preview.</p>
+  in the Preview.</p>
 <table>
 <tr>
 <th>Android API level</th>
@@ -74,19 +74,10 @@ page.title=ICU4J Support in the Android Framework
 </tr>
 </table>
 
-<p class="note">
-  <b>Note</b>: When using the the the ICU4J APIs in the Android framework, you may notice
-  differences between Android releases. For example, the exact text returned
-  from formatters may vary between API levels as they do for existing
-  <code>java.util</code> and <code>java.text</code> classes on Android. These
-  differences are the result of improvements to translations between Android
-  versions.
-</p>
-
 <p>Here are a few important things to note:</p>
 
 <ul>
-<li>The ICU4J Android Framework APIs do not include all the ICU4J APIs.</li>
+<li>The ICU4J Android framework APIs do not include all the ICU4J APIs.</li>
 <li>NDK developers should know that Android ICU4C is not supported.</li>
 <li>The APIs in the Android framework do not replace Android’s support for
 <a href="{@docRoot}guide/topics/resources/localization.html">localizing with
@@ -104,7 +95,7 @@ resources</a>.</li>
 </p>
 
 <p class="note">
-  <b>Note</b>: ICU4J in the Android framework uses the {@code android.icu}
+  <b>Note</b>: The ICU4J framework APIs use the {@code android.icu}
   namespace instead of {@code com.ibm.icu}. This is to avoid namespace
   conflicts in APKs that contain their own {@code com.ibm.icu} libraries.
 </p>
