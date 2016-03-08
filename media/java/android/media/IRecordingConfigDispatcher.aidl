@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.media.AudioRecordConfiguration;
+import android.media.AudioRecordingConfiguration;
 
 /**
  * AIDL for the RecordingActivity monitor in AudioService to signal audio recording updates.
@@ -25,6 +25,6 @@ import android.media.AudioRecordConfiguration;
  */
 oneway interface IRecordingConfigDispatcher {
 
-    void dispatchRecordingConfigChange(in AudioRecordConfiguration[] configs);
+    void dispatchRecordingConfigChange(in AudioRecordingConfiguration[] configs);
 
 }

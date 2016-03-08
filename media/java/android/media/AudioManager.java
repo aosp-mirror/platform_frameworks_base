@@ -2730,15 +2730,16 @@ public class AudioManager {
      * this abstract class and register it with
      * {@link AudioManager#registerAudioRecordingCallback(AudioRecordingCallback, Handler)}
      * to be notified.
-     * Use {@link AudioManager#getActiveRecordConfigurations()} to query the current configuration.
+     * Use {@link AudioManager#getActiveRecordingConfigurations()} to query the current
+     * configuration.
      */
     public static abstract class AudioRecordingCallback {
         /**
          * Called whenever the device recording configuration has changed.
          * @param configs array containing the results of
-         *      {@link AudioManager#getActiveRecordConfigurations()}.
+         *      {@link AudioManager#getActiveRecordingConfigurations()}.
          */
-        public void onRecordConfigChanged(AudioRecordConfiguration[] configs) {}
+        public void onRecordConfigChanged(AudioRecordingConfiguration[] configs) {}
     }
 
     private static class AudioRecordingCallbackInfo {
@@ -2752,10 +2753,10 @@ public class AudioManager {
 
     private final static class RecordConfigChangeCallbackData {
         final AudioRecordingCallback mCb;
-        final AudioRecordConfiguration[] mConfigs;
+        final AudioRecordingConfiguration[] mConfigs;
 
         RecordConfigChangeCallbackData(AudioRecordingCallback cb,
-                AudioRecordConfiguration[] configs) {
+                AudioRecordingConfiguration[] configs) {
             mCb = cb;
             mConfigs = configs;
         }
@@ -2838,10 +2839,10 @@ public class AudioManager {
      * @return a non-null array of recording configurations. An array of length 0 indicates there is
      *     no recording active when queried.
      */
-    public @NonNull AudioRecordConfiguration[] getActiveRecordConfigurations() {
+    public @NonNull AudioRecordingConfiguration[] getActiveRecordingConfigurations() {
         final IAudioService service = getService();
         try {
-            return service.getActiveRecordConfigurations();
+            return service.getActiveRecordingConfigurations();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2896,7 +2897,7 @@ public class AudioManager {
 
     private final IRecordingConfigDispatcher mRecCb = new IRecordingConfigDispatcher.Stub() {
 
-        public void dispatchRecordingConfigChange(AudioRecordConfiguration[] configs) {
+        public void dispatchRecordingConfigChange(AudioRecordingConfiguration[] configs) {
             synchronized(mRecordCallbackLock) {
                 if (mRecordCallbackList != null) {
                     for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
