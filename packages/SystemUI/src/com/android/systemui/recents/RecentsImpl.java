@@ -645,7 +645,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         if (stack != null) {
             stackLayout.initialize(taskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
-            mDummyStackView.setTasks(stack, false /* notifyStackChanges */);
+            mDummyStackView.setTasks(stack, false /* notifyStackChanges */,
+                    false /* relayoutTaskStack */);
         }
         Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
