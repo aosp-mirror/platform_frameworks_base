@@ -234,6 +234,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean extractOnly = false;
         boolean forceCompilation = false;
         boolean allPackages = false;
+        boolean clearProfileData = false;
         String compilationMode = "default";
 
         String opt;
@@ -242,11 +243,19 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "-a":
                     allPackages = true;
                     break;
-                case "-m":
-                    compilationMode = getNextArgRequired();
+                case "-c":
+                    clearProfileData = true;
                     break;
                 case "-f":
                     forceCompilation = true;
+                    break;
+                case "-m":
+                    compilationMode = getNextArgRequired();
+                    break;
+                case "--reset":
+                    forceCompilation = true;
+                    clearProfileData = true;
+                    compilationMode = "extract";
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -290,7 +299,10 @@ class PackageManagerShellCommand extends ShellCommand {
 
         List<String> failedPackages = new ArrayList<>();
         for (String packageName : packageNames) {
-            pw.println(packageName);
+            if (clearProfileData) {
+                mInterface.clearApplicationProfileData(packageName);
+            }
+
             boolean result = mInterface.performDexOpt(packageName, null /* instructionSet */,
                         useJitProfiles, extractOnly, forceCompilation);
             if (!result) {
@@ -1170,9 +1182,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Trigger compilation of TARGET-PACKAGE or all packages if \"-a\".");
         pw.println("    Options:");
         pw.println("      -a: compile all packages");
+        pw.println("      -c: clear profile data before compiling");
+        pw.println("      -f: force compilation even if not needed");
         pw.println("      -m: select compilation mode");
         pw.println("          MODE can be one of \"default\", \"all\", \"profile\", and \"extract\"");
-        pw.println("      -f: force compilation even if not needed");
+        pw.println("      --reset: restore the package to post-install state");
+        pw.println("          shorthand for \"-c -f -m extract\"");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");
