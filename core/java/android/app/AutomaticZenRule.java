@@ -42,7 +42,7 @@ public final class AutomaticZenRule implements Parcelable {
      * @param name The name of the rule.
      * @param owner The Condition Provider service that owns this rule.
      * @param conditionId A representation of the state that should cause the Condition Provider
-     *                    service to apply the interruption filter.
+     *                    service to apply the given interruption filter.
      * @param interruptionFilter The interruption filter defines which notifications are allowed to
      *                           interrupt the user (e.g. via sound &amp; vibration) while this rule
      *                           is active.
