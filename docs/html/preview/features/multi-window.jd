@@ -305,7 +305,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   The following new methods have been added to the {@link android.app.Activity}
   class to support multi-window display. For details on each method, see the
-  <a href="{@docRoot}preview/download.html#docs">N Preview SDK Reference</a>
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK Reference</a>.
 </p>
 
 <dl>
@@ -418,7 +418,7 @@ android:supportsPictureInPicture=["true" | "false"]
   The N Preview SDK extends the <a href=
   "{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
   package to support cross-app drag and drop. For details on the following
-  classes and methods, see the <a href="{@docRoot}preview/download.html#docs">N
+  classes and methods, see the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N
   Preview SDK Reference</a>.
 </p>
 
