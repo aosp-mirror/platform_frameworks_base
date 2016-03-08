@@ -1051,6 +1051,30 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             mCurrentUserId = userId;
         }
 
+        private void putString(final String key, final String str) {
+            Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+        }
+
+        private String getString(final String key) {
+            return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
+        }
+
+        private void putInt(final String key, final int value) {
+            Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+        }
+
+        private int getInt(final String key, final int defaultValue) {
+            return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
+        }
+
+        private void putBoolean(final String key, final boolean value) {
+            putInt(key, value ? 1 : 0);
+        }
+
+        private boolean getBoolean(final String key, final boolean defaultValue) {
+            return getInt(key, defaultValue ? 1 : 0) == 1;
+        }
+
         public void setCurrentProfileIds(int[] currentProfileIds) {
             synchronized (mLock) {
                 mCurrentProfileIds = currentProfileIds;
@@ -1073,34 +1097,27 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         public void putSelectedSpellChecker(String sciId) {
-            Settings.Secure.putStringForUser(mResolver,
-                    Settings.Secure.SELECTED_SPELL_CHECKER, sciId, mCurrentUserId);
+            putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
         }
 
         public void putSelectedSpellCheckerSubtype(int hashCode) {
-            Settings.Secure.putStringForUser(mResolver,
-                    Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, String.valueOf(hashCode),
-                    mCurrentUserId);
+            putString(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, String.valueOf(hashCode));
         }
 
         public void setSpellCheckerEnabled(boolean enabled) {
-            Settings.Secure.putIntForUser(mResolver,
-                    Settings.Secure.SPELL_CHECKER_ENABLED, enabled ? 1 : 0, mCurrentUserId);
+            putBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, enabled);
         }
 
         public String getSelectedSpellChecker() {
-            return Settings.Secure.getStringForUser(mResolver,
-                    Settings.Secure.SELECTED_SPELL_CHECKER, mCurrentUserId);
+            return getString(Settings.Secure.SELECTED_SPELL_CHECKER);
         }
 
         public String getSelectedSpellCheckerSubtype() {
-            return Settings.Secure.getStringForUser(mResolver,
-                    Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, mCurrentUserId);
+            return getString(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE);
         }
 
         public boolean isSpellCheckerEnabled() {
-            return Settings.Secure.getIntForUser(mResolver,
-                    Settings.Secure.SPELL_CHECKER_ENABLED, 1, mCurrentUserId) == 1;
+            return getBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, true);
         }
     }
 
