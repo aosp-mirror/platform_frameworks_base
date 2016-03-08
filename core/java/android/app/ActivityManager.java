@@ -3371,6 +3371,15 @@ public class ActivityManager {
         }
     }
 
+    /** {@hide} */
+    public boolean isVrModePackageEnabled(ComponentName component) {
+        try {
+            return ActivityManagerNative.getDefault().isVrModePackageEnabled(component);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Perform a system dump of various state associated with the given application
      * package name.  This call blocks while the dump is being performed, so should

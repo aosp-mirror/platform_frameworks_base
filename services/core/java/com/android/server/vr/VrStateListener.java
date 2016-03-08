@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,9 @@
 package com.android.server.vr;
 
 /**
- * Listener for state changes in VrManagerService,
+ * Listener for state changes in VrManagerService.
+ *
+ * @hide Only for use within system server.
  */
 public abstract class VrStateListener {
 

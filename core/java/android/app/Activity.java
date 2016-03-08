@@ -6177,14 +6177,24 @@ public class Activity extends ContextThemeWrapper
     /**
      * Enable or disable virtual reality (VR) mode.
      *
-     * <p>VR mode is a hint to Android system services to switch to modes optimized for
-     * high-performance stereoscopic rendering.</p>
+     * <p>VR mode is a hint to Android system services to switch to a mode optimized for
+     * high-performance stereoscopic rendering.  This mode will be enabled while this Activity has
+     * focus.</p>
      *
      * @param enabled {@code true} to enable this mode.
+     * @param requestedComponent the name of the component to use as a
+     *        {@link android.service.vr.VrListenerService} while VR mode is enabled.
+     *
+     * @throws android.content.pm.PackageManager.NameNotFoundException;
      */
-    public void setVrMode(boolean enabled) {
+    public void setVrModeEnabled(boolean enabled, @NonNull ComponentName requestedComponent)
+          throws PackageManager.NameNotFoundException {
         try {
-            ActivityManagerNative.getDefault().setVrMode(mToken, enabled);
+            if (ActivityManagerNative.getDefault().setVrMode(mToken, enabled, requestedComponent)
+                    != 0) {
+                throw new PackageManager.NameNotFoundException(
+                        requestedComponent.flattenToString());
+            }
         } catch (RemoteException e) {
             // pass
         }

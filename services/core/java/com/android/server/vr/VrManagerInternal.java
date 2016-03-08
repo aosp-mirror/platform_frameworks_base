@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,20 @@
  */
 package com.android.server.vr;
 
+import android.annotation.NonNull;
+import android.content.ComponentName;
+
 /**
- * VR mode local system service interface.
+ * Service for accessing the VR mode manager.
  *
  * @hide Only for use within system server.
  */
 public abstract class VrManagerInternal {
+
+    /**
+     * The error code returned on success.
+     */
+    public static final int NO_ERROR = 0;
 
     /**
      * Return current VR mode state.
@@ -33,8 +41,11 @@ public abstract class VrManagerInternal {
      * Set the current VR mode state.
      *
      * @param enabled {@code true} to enable VR mode.
+     * @param packageName The package name of the requested VrListenerService to bind.
+     * @param userId the user requesting the VrListenerService component.
      */
-    public abstract void setVrMode(boolean enabled);
+    public abstract void setVrMode(boolean enabled, @NonNull ComponentName packageName,
+            int userId);
 
     /**
      * Add a listener for VR mode state changes.
@@ -43,13 +54,23 @@ public abstract class VrManagerInternal {
      * </p>
      * @param listener the listener instance to add.
      */
-    public abstract void registerListener(VrStateListener listener);
+    public abstract void registerListener(@NonNull VrStateListener listener);
 
     /**
      * Remove the listener from the current set of listeners.
      *
      * @param listener the listener to remove.
      */
-    public abstract void unregisterListener(VrStateListener listener);
+    public abstract void unregisterListener(@NonNull VrStateListener listener);
+
+   /**
+    * Return NO_ERROR if the given package is installed on the device and enabled as a
+    * VrListenerService for the given current user, or a negative error code indicating a failure.
+    *
+    * @param packageName the name of the package to check, or null to select the default package.
+    * @return NO_ERROR if the given package is installed and is enabled, or a negative error code
+    *       given in {@link android.service.vr.VrModeException} on failure.
+    */
+    public abstract int hasVrPackage(@NonNull ComponentName packageName, int userId);
 
 }

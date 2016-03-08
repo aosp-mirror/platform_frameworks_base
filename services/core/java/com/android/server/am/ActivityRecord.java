@@ -123,7 +123,7 @@ final class ActivityRecord {
     final boolean stateNotNeeded; // As per ActivityInfo.flags
     boolean fullscreen; // covers the full screen?
     final boolean noDisplay;  // activity is not displayed?
-    final boolean componentSpecified;  // did caller specifiy an explicit component?
+    final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
     static final int APPLICATION_ACTIVITY_TYPE = 0;
@@ -190,7 +190,7 @@ final class ActivityRecord {
     boolean forceNewConfig; // force re-create with new config next time
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
-    boolean isVrActivity;   // is the activity running in VR mode?
+    ComponentName requestedVrComponent; // the requested component for handling VR mode.
     ArrayList<ActivityContainer> mChildContainers = new ArrayList<>();
 
     String stringName;      // for caching of toString().
@@ -354,7 +354,11 @@ final class ActivityRecord {
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
                 pw.println(activityTypeToString(mActivityType));
-        pw.print(prefix); pw.print("vrMode="); pw.println(isVrActivity);
+        if (requestedVrComponent != null) {
+            pw.print(prefix);
+            pw.print("requestedVrComponent=");
+            pw.println(requestedVrComponent);
+        }
         if (displayStartTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("displayStartTime=");
                     if (displayStartTime == 0) pw.print("0");
@@ -718,7 +722,6 @@ final class ActivityRecord {
             }
 
             immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
-            isVrActivity = (aInfo.flags & ActivityInfo.FLAG_ENABLE_VR_MODE) != 0;
         } else {
             realActivity = null;
             taskAffinity = null;
@@ -730,7 +733,6 @@ final class ActivityRecord {
             noDisplay = false;
             mActivityType = APPLICATION_ACTIVITY_TYPE;
             immersive = false;
-            isVrActivity = false;
         }
     }
 

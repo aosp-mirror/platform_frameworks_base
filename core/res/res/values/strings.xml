@@ -3132,6 +3132,8 @@
     <!-- Label to show for a service that is running because it is observing
          the user's notifications. -->
     <string name="notification_listener_binding_label">Notification listener</string>
+    <!-- Label to show for a service that is running because the system is in VR mode. -->
+    <string name="vr_listener_binding_label">VR listener</string>
     <!-- Label to show for a service that is running because it is providing conditions. -->
     <string name="condition_provider_service_binding_label">Condition provider</string>
     <!-- Label to show for a service that is running because it is observing and modifying the
