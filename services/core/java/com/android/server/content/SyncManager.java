@@ -78,8 +78,9 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 
+import com.android.server.LocalServices;
+import com.android.server.job.JobSchedulerInternal;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -113,9 +114,7 @@ import java.util.Set;
  * All scheduled syncs will be passed on to JobScheduler as jobs
  * (See {@link #scheduleSyncOperationH(SyncOperation, long)}. This function schedules a job
  * with JobScheduler with appropriate delay and constraints (according to backoffs and extras).
- * A local copy of each scheduled SyncOperation object is stored in {@link mScheduledSyncs}.This
- * acts as a cache, so that we don't have to query JobScheduler every time we want to get a list of
- * all scheduled operations. The scheduleSyncOperationH function also assigns a unique jobId to each
+ * The scheduleSyncOperationH function also assigns a unique jobId to each
  * SyncOperation.
  *
  * Periodic Syncs:
@@ -128,14 +127,6 @@ import java.util.Set;
  * the backoff on the authority. Then we reschedule all syncs associated with that authority to
  * run at a later time. Similarly, when a sync succeeds, backoff is cleared and all associated syncs
  * are rescheduled. A rescheduled sync will get a new jobId.
- *
- * State of {@link mScheduledSyncs}:
- * Every one-off SyncOperation will be put into this SparseArray when it is scheduled with
- * JobScheduler. And it will be removed once JobScheduler has started the job. Periodic syncs work
- * differently. They will always be present in mScheduledSyncs until the periodic sync is removed.
- * This is to ensure that if a request to add a periodic sync comes in, we add a new one only if a
- * duplicate doesn't exist. At every point of time, mScheduledSyncs and JobScheduler will show the
- * same pending syncs.
  *
  * @hide
  */
@@ -220,6 +211,7 @@ public class SyncManager {
     private final NotificationManager mNotificationMgr;
     private final IBatteryStats mBatteryStats;
     private JobScheduler mJobScheduler;
+    private JobSchedulerInternal mJobSchedulerInternal;
     private SyncJobService mSyncJobService;
 
     private SyncStorageEngine mSyncStorageEngine;
@@ -235,14 +227,13 @@ public class SyncManager {
 
     protected SyncAdaptersCache mSyncAdapters;
 
-    // Cache of all operations scheduled on the JobScheduler so that JobScheduler doesn't have
-    // to be queried often.
-    private SparseArray<SyncOperation> mScheduledSyncs = new SparseArray<SyncOperation>(32);
     private final Random mRand;
 
-    private boolean isJobIdInUseLockedH(int jobId) {
-        if (mScheduledSyncs.indexOfKey(jobId) >= 0) {
-            return true;
+    private boolean isJobIdInUseLockedH(int jobId, List<JobInfo> pendingJobs) {
+        for (JobInfo job: pendingJobs) {
+            if (job.getId() == jobId) {
+                return true;
+            }
         }
         for (ActiveSyncContext asc: mActiveSyncContexts) {
             if (asc.mSyncOperation.jobId == jobId) {
@@ -253,35 +244,25 @@ public class SyncManager {
     }
 
     private int getUnusedJobIdH() {
-        synchronized (mScheduledSyncs) {
-            int newJobId;
-            do {
-                newJobId = MIN_SYNC_JOB_ID + mRand.nextInt(MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID);
-            } while (isJobIdInUseLockedH(newJobId));
-            return newJobId;
-        }
+        int newJobId;
+        do {
+            newJobId = MIN_SYNC_JOB_ID + mRand.nextInt(MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID);
+        } while (isJobIdInUseLockedH(newJobId,
+                mJobSchedulerInternal.getSystemScheduledPendingJobs()));
+        return newJobId;
     }
 
-    private void addSyncOperationToCache(SyncOperation op) {
-        synchronized (mScheduledSyncs) {
-            mScheduledSyncs.put(op.jobId, op);
-        }
-    }
-
-    private void removeSyncOperationFromCache(int jobId) {
-        synchronized (mScheduledSyncs) {
-            mScheduledSyncs.remove(jobId);
-        }
-    }
-
-    private List<SyncOperation> getAllPendingSyncsFromCache() {
-        synchronized (mScheduledSyncs) {
-            List<SyncOperation> pending = new ArrayList<SyncOperation>(mScheduledSyncs.size());
-            for (int i=0; i<mScheduledSyncs.size(); i++) {
-                pending.add(mScheduledSyncs.valueAt(i));
+    private List<SyncOperation> getAllPendingSyncs() {
+        verifyJobScheduler();
+        List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
+        List<SyncOperation> pendingSyncs = new ArrayList<SyncOperation>(pendingJobs.size());
+        for (JobInfo job: pendingJobs) {
+            SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
+            if (op != null) {
+                pendingSyncs.add(op);
             }
-            return pending;
         }
+        return pendingSyncs;
     }
 
     private final BroadcastReceiver mStorageIntentReceiver =
@@ -443,7 +424,7 @@ public class SyncManager {
         mSyncHandler.postAtFrontOfQueue(new Runnable() {
             @Override
             public void run() {
-                List<SyncOperation> ops = getAllPendingSyncsFromCache();
+                List<SyncOperation> ops = getAllPendingSyncs();
                 Set<String> cleanedKeys = new HashSet<String>();
                 for (SyncOperation opx: ops) {
                     if (cleanedKeys.contains(opx.key)) {
@@ -455,7 +436,6 @@ public class SyncManager {
                             continue;
                         }
                         if (opx.key.equals(opy.key)) {
-                            removeSyncOperationFromCache(opy.jobId);
                             mJobScheduler.cancel(opy.jobId);
                         }
                     }
@@ -473,18 +453,16 @@ public class SyncManager {
         }
         mJobScheduler = (JobScheduler) mContext.getSystemService(
                 Context.JOB_SCHEDULER_SERVICE);
+        mJobSchedulerInternal = LocalServices.getService(JobSchedulerInternal.class);
         // Get all persisted syncs from JobScheduler
         List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
-        synchronized (mScheduledSyncs) {
-            for (JobInfo job : pendingJobs) {
-                SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
-                if (op != null) {
-                    mScheduledSyncs.put(op.jobId, op);
-                    if (!op.isPeriodic) {
-                        // Set the pending status of this EndPoint to true. Pending icon is
-                        // shown on the settings activity.
-                        mSyncStorageEngine.markPending(op.target, true);
-                    }
+        for (JobInfo job : pendingJobs) {
+            SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
+            if (op != null) {
+                if (!op.isPeriodic) {
+                    // Set the pending status of this EndPoint to true. Pending icon is
+                    // shown on the settings activity.
+                    mSyncStorageEngine.markPending(op.target, true);
                 }
             }
         }
@@ -707,7 +685,7 @@ public class SyncManager {
     }
 
     private void setAuthorityPendingState(EndPoint info) {
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(info)) {
                 getSyncStorageEngine().markPending(info, true);
@@ -927,11 +905,10 @@ public class SyncManager {
 
     private void removeSyncsForAuthority(EndPoint info) {
         verifyJobScheduler();
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (op.target.matchesSpec(info)) {
-                removeSyncOperationFromCache(op.jobId);
-                getJobScheduler().cancel(op.jobId);
+                 getJobScheduler().cancel(op.jobId);
             }
         }
     }
@@ -961,7 +938,7 @@ public class SyncManager {
      * Get a list of periodic syncs corresponding to the given target.
      */
     public List<PeriodicSync> getPeriodicSyncs(EndPoint target) {
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         List<PeriodicSync> periodicSyncs = new ArrayList<PeriodicSync>();
 
         for (SyncOperation op: ops) {
@@ -1145,12 +1122,11 @@ public class SyncManager {
      * to current backoff and delayUntil values of this EndPoint.
      */
     private void rescheduleSyncs(EndPoint target) {
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         int count = 0;
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(target)) {
                 count++;
-                removeSyncOperationFromCache(op.jobId);
                 getJobScheduler().cancel(op.jobId);
                 postScheduleSyncMessage(op);
             }
@@ -1251,7 +1227,7 @@ public class SyncManager {
             int duplicatesCount = 0;
             long now = SystemClock.elapsedRealtime();
             syncOperation.expectedRuntime = now + minDelay;
-            List<SyncOperation> pending = getAllPendingSyncsFromCache();
+            List<SyncOperation> pending = getAllPendingSyncs();
             SyncOperation opWithLeastExpectedRuntime = syncOperation;
             for (SyncOperation op : pending) {
                 if (op.isPeriodic) {
@@ -1276,7 +1252,6 @@ public class SyncManager {
                         if (isLoggable) {
                             Slog.v(TAG, "Cancelling duplicate sync " + op);
                         }
-                        removeSyncOperationFromCache(op.jobId);
                         getJobScheduler().cancel(op.jobId);
                     }
                 }
@@ -1294,7 +1269,6 @@ public class SyncManager {
         if (syncOperation.jobId == SyncOperation.NO_JOB_ID) {
             syncOperation.jobId = getUnusedJobIdH();
         }
-        addSyncOperationToCache(syncOperation);
 
         if (isLoggable) {
             Slog.v(TAG, "scheduling sync operation " + syncOperation.toString());
@@ -1335,10 +1309,9 @@ public class SyncManager {
      * have null account/provider info to specify all accounts/providers.
      */
     public void clearScheduledSyncOperations(SyncStorageEngine.EndPoint info) {
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(info)) {
-                removeSyncOperationFromCache(op.jobId);
                 getJobScheduler().cancel(op.jobId);
                 getSyncStorageEngine().markPending(op.target, false);
             }
@@ -1353,11 +1326,10 @@ public class SyncManager {
      * @param extras extras bundle to uniquely identify sync.
      */
     public void cancelScheduledSyncOperation(SyncStorageEngine.EndPoint info, Bundle extras) {
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(info)
                     && syncExtrasEquals(extras, op.extras, false)) {
-                removeSyncOperationFromCache(op.jobId);
                 getJobScheduler().cancel(op.jobId);
             }
         }
@@ -1466,10 +1438,9 @@ public class SyncManager {
 
         // Clean up the storage engine database
         mSyncStorageEngine.doDatabaseCleanup(new Account[0], userId);
-        List<SyncOperation> ops = getAllPendingSyncsFromCache();
+        List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (op.target.userId == userId) {
-                removeSyncOperationFromCache(op.jobId);
                 getJobScheduler().cancel(op.jobId);
             }
         }
@@ -1635,7 +1606,7 @@ public class SyncManager {
 
     protected void dumpPendingSyncs(PrintWriter pw) {
         pw.println("Pending Syncs:");
-        List<SyncOperation> pendingSyncs = getAllPendingSyncsFromCache();
+        List<SyncOperation> pendingSyncs = getAllPendingSyncs();
         int count = 0;
         for (SyncOperation op: pendingSyncs) {
             if (!op.isPeriodic) {
@@ -1649,7 +1620,7 @@ public class SyncManager {
 
     protected void dumpPeriodicSyncs(PrintWriter pw) {
         pw.println("Periodic Syncs:");
-        List<SyncOperation> pendingSyncs = getAllPendingSyncsFromCache();
+        List<SyncOperation> pendingSyncs = getAllPendingSyncs();
         int count = 0;
         for (SyncOperation op: pendingSyncs) {
             if (op.isPeriodic) {
@@ -2259,10 +2230,6 @@ public class SyncManager {
         private boolean tryEnqueueMessageUntilReadyToRun(Message msg) {
             synchronized (this) {
                 if (!mBootCompleted || !mProvisioned) {
-                    if (msg.what == MESSAGE_START_SYNC) {
-                        SyncOperation op = (SyncOperation) msg.obj;
-                        addSyncOperationToCache(op);
-                    }
                     // Need to copy the message bc looper will recycle it.
                     Message m = Message.obtain(msg);
                     mUnreadyQueue.add(m);
@@ -2479,7 +2446,6 @@ public class SyncManager {
             if (op.isPeriodic) {
                 scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
             } else {
-                removeSyncOperationFromCache(op.jobId);
                 scheduleSyncOperationH(op, delay);
             }
         }
@@ -2489,7 +2455,6 @@ public class SyncManager {
             if (op.isPeriodic) {
                 scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
             } else {
-                removeSyncOperationFromCache(op.jobId);
                 scheduleSyncOperationH(op, delay);
             }
         }
@@ -2515,7 +2480,7 @@ public class SyncManager {
             if (op.isPeriodic) {
                 // Don't allow this periodic to run if a previous instance failed and is currently
                 // scheduled according to some backoff criteria.
-                List<SyncOperation> ops = getAllPendingSyncsFromCache();
+                List<SyncOperation> ops = getAllPendingSyncs();
                 for (SyncOperation syncOperation: ops) {
                     if (syncOperation.sourcePeriodicId == op.jobId) {
                         mSyncJobService.callJobFinished(op.jobId, false);
@@ -2535,9 +2500,6 @@ public class SyncManager {
                     deferSyncH(op, 0 /* No minimum delay */);
                     return;
                 }
-            } else {
-                // Remove SyncOperation entry from mScheduledSyncs cache for non periodic jobs.
-                removeSyncOperationFromCache(op.jobId);
             }
 
             // Check for conflicting syncs.
@@ -2616,10 +2578,9 @@ public class SyncManager {
                 }
             }
 
-            List<SyncOperation> ops = getAllPendingSyncsFromCache();
+            List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (!containsAccountAndUser(accounts, op.target.account, op.target.userId)) {
-                    removeSyncOperationFromCache(op.jobId);
                     getJobScheduler().cancel(op.jobId);
                 }
             }
@@ -2665,7 +2626,7 @@ public class SyncManager {
                         + " flexMillis: " + flex
                         + " extras: " + extras.toString());
             }
-            List<SyncOperation> ops = getAllPendingSyncsFromCache();
+            List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
                         && syncExtrasEquals(op.extras, extras, true /* includeSyncSettings */)) {
@@ -2704,7 +2665,7 @@ public class SyncManager {
          */
         private void removePeriodicSyncInternalH(SyncOperation syncOperation) {
             // Remove this periodic sync and all one-off syncs initiated by it.
-            List<SyncOperation> ops = getAllPendingSyncsFromCache();
+            List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.sourcePeriodicId == syncOperation.jobId || op.jobId == syncOperation.jobId) {
                     ActiveSyncContext asc = findActiveSyncContextH(syncOperation.jobId);
@@ -2712,7 +2673,6 @@ public class SyncManager {
                         mSyncJobService.callJobFinished(syncOperation.jobId, false);
                         runSyncFinishedOrCanceledH(null, asc);
                     }
-                    removeSyncOperationFromCache(op.jobId);
                     getJobScheduler().cancel(op.jobId);
                 }
             }
@@ -2720,7 +2680,7 @@ public class SyncManager {
 
         private void removePeriodicSyncH(EndPoint target, Bundle extras) {
             verifyJobScheduler();
-            List<SyncOperation> ops = getAllPendingSyncsFromCache();
+            List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
                         && syncExtrasEquals(op.extras, extras, true /* includeSyncSettings */)) {
@@ -2896,7 +2856,7 @@ public class SyncManager {
         private void reschedulePeriodicSyncH(SyncOperation syncOperation) {
             // Ensure that the periodic sync wasn't removed.
             SyncOperation periodicSync = null;
-            List<SyncOperation> ops = getAllPendingSyncsFromCache();
+            List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && syncOperation.matchesPeriodicOperation(op)) {
                     periodicSync = op;
