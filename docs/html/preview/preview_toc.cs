@@ -20,17 +20,12 @@
       ru-lang="Настройка пакета SDK Preview"
       zh-cn-lang="设置预览版 SDK"
       zh-tw-lang="設定預覽版 SDK">
-      SDK Setup</a></div>
+      Set Up to Develop</a></div>
   </li>
-
-
-
-
-
-
-
-
-
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/run-app.html">
+      Run Your App</a></div>
+  </li>
 
 
   <li class="nav-section">
