@@ -505,9 +505,9 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "Removing ID " + id);
             mProcesses.remove(id);
         }
-        stopSelfWhenDone();
         Log.v(TAG, "stopProgress(" + id + "): cancel notification");
         NotificationManager.from(mContext).cancel(TAG, id);
+        stopSelfWhenDone();
     }
 
     /**
