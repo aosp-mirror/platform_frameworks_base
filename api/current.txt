@@ -23092,6 +23092,7 @@ package android.media.tv {
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
+    method public boolean onTune(android.net.Uri, android.os.Bundle);
     method public void onUnblockContent(android.media.tv.TvContentRating);
     method public void setOverlayViewEnabled(boolean);
   }
@@ -23165,12 +23166,15 @@ package android.media.tv {
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
     method public void setTimeShiftPositionCallback(android.media.tv.TvView.TimeShiftPositionCallback);
+    method public void setZOrderMediaOverlay(boolean);
+    method public void setZOrderOnTop(boolean);
     method public void timeShiftPause();
     method public void timeShiftPlay(java.lang.String, android.net.Uri);
     method public void timeShiftResume();
     method public void timeShiftSeekTo(long);
     method public void timeShiftSetPlaybackParams(android.media.PlaybackParams);
     method public void tune(java.lang.String, android.net.Uri);
+    method public void tune(java.lang.String, android.net.Uri, android.os.Bundle);
   }
 
   public static abstract interface TvView.OnUnhandledInputEventListener {
