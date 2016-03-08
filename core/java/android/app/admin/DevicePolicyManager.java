@@ -5542,14 +5542,15 @@ public class DevicePolicyManager {
     /**
      * Called by device owner to get the MAC address of the Wi-Fi device.
      *
+     * @param admin Which device owner this request is associated with.
      * @return the MAC address of the Wi-Fi device, or null when the information is not
      * available. (For example, Wi-Fi hasn't been enabled, or the device doesn't support Wi-Fi.)
      *
      * <p>The address will be in the {@code XX:XX:XX:XX:XX:XX} format.
      */
-    public String getWifiMacAddress() {
+    public String getWifiMacAddress(@NonNull ComponentName admin) {
         try {
-            return mService.getWifiMacAddress();
+            return mService.getWifiMacAddress(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
