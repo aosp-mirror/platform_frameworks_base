@@ -20,6 +20,7 @@ import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 @LargeTest
 public class SearchViewUiTest extends ActivityTest<FilesActivity> {
@@ -28,6 +29,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         super(FilesActivity.class);
     }
 
+    @Suppress
     public void testSearchView_ExpandsOnClick() throws Exception {
         bots.main.openSearchView();
         bots.main.assertSearchTextFiledAndIcon(true, false);
@@ -41,6 +43,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
+    @Suppress
     public void testSearchView_ClearsTextOnBack() throws Exception {
         String query = "file2";
         bots.main.openSearchView();
@@ -51,6 +54,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
+    @Suppress
     public void testSearch_ResultsFound() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -68,6 +72,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextField(false, query);
     }
 
+    @Suppress
     public void testSearchResultsFound_ClearsOnBack() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -82,6 +87,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         assertDefaultContentOfTestDir0();
     }
 
+    @Suppress
     public void testSearch_NoResults() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -101,6 +107,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextField(false, query);
     }
 
+    @Suppress
     public void testSearchNoResults_ClearsOnBack() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -116,6 +123,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         assertDefaultContentOfTestDir0();
     }
 
+    @Suppress
     public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
