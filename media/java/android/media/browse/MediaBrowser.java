@@ -1116,7 +1116,7 @@ public final class MediaBrowser {
                 }
             }
             mCallbacks.add(callback);
-            mOptionsList.add(options);
+            mOptionsList.add(options == null ? null : new Bundle(options));
         }
 
         public boolean removeCallback(Bundle options) {
