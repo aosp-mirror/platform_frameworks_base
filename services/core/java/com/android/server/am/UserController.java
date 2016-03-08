@@ -24,7 +24,6 @@ import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.os.Process.SYSTEM_UID;
-import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -46,14 +45,11 @@ import android.app.Dialog;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -71,12 +67,10 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.R;
@@ -153,34 +147,6 @@ final class UserController {
 
     private final LockPatternUtils mLockPatternUtils;
 
-    // Set of users who have completed the set-up process.
-    private final SparseBooleanArray mSetupCompletedUsers = new SparseBooleanArray();
-    private final UserSetupCompleteContentObserver mUserSetupCompleteContentObserver;
-
-    private class UserSetupCompleteContentObserver extends ContentObserver {
-        private final Uri mUserSetupComplete = Settings.Secure.getUriFor(USER_SETUP_COMPLETE);
-
-        public UserSetupCompleteContentObserver(Handler handler) {
-            super(handler);
-        }
-
-        void register(ContentResolver resolver) {
-            resolver.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
-            synchronized (mService) {
-                updateUserSetupCompleteLocked(UserHandle.USER_ALL);
-            }
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            if (mUserSetupComplete.equals(uri)) {
-                synchronized (mService) {
-                    updateUserSetupCompleteLocked(userId);
-                }
-            }
-        }
-    }
-
     UserController(ActivityManagerService service) {
         mService = service;
         mHandler = mService.mHandler;
@@ -190,7 +156,6 @@ final class UserController {
         mUserLru.add(UserHandle.USER_SYSTEM);
         mLockPatternUtils = new LockPatternUtils(mService.mContext);
         updateStartedUserArrayLocked();
-        mUserSetupCompleteContentObserver = new UserSetupCompleteContentObserver(mHandler);
     }
 
     void finishUserSwitch(UserState uss) {
@@ -477,7 +442,6 @@ final class UserController {
                 mStartedUsers.remove(userId);
                 mUserLru.remove(Integer.valueOf(userId));
                 updateStartedUserArrayLocked();
-                mSetupCompletedUsers.delete(userId);
 
                 mService.onUserStoppedLocked(userId);
                 // Clean up all state and processes associated with the user.
@@ -677,7 +641,6 @@ final class UserController {
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
-                updateUserSetupCompleteLocked(userId);
 
                 if (foreground) {
                     mCurrentUserId = userId;
@@ -890,22 +853,6 @@ final class UserController {
             }
         }
         mUserSwitchObservers.finishBroadcast();
-    }
-
-    void updateUserSetupCompleteLocked(int userId) {
-        final ContentResolver cr = mService.mContext.getContentResolver();
-        for (int i = mStartedUsers.size() - 1; i >= 0; i--) {
-            int startedUser = mStartedUsers.keyAt(i);
-            if (startedUser == userId || userId == UserHandle.USER_ALL) {
-                final boolean setupComplete =
-                        Settings.Secure.getIntForUser(cr, USER_SETUP_COMPLETE, 0, startedUser) != 0;
-                mSetupCompletedUsers.put(startedUser, setupComplete);
-            }
-        }
-    }
-
-    boolean isUserSetupCompleteLocked(int userId) {
-        return mSetupCompletedUsers.get(userId);
     }
 
     private void stopBackgroundUsersIfEnforced(int oldUserId) {
@@ -1218,7 +1165,6 @@ final class UserController {
 
     void onSystemReady() {
         updateCurrentProfileIdsLocked();
-        mUserSetupCompleteContentObserver.register(mService.mContext.getContentResolver());
     }
 
     /**
