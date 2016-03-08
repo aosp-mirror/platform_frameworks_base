@@ -2680,6 +2680,7 @@ public abstract class Context {
             RADIO_SERVICE,
             HARDWARE_PROPERTIES_SERVICE,
             //@hide: SOUND_TRIGGER_SERVICE,
+            SHORTCUT_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3574,6 +3575,14 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String HARDWARE_PROPERTIES_SERVICE = "hardwareproperties";
+
+    /**
+     * TODO Javadoc
+     *
+     * @see #getSystemService
+     * @see android.content.pm.ShortcutManager
+     */
+    public static final String SHORTCUT_SERVICE = "shortcut";
 
     /**
      * Determine whether the given permission is allowed for a particular

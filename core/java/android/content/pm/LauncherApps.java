@@ -16,23 +16,29 @@
 
 package android.content.pm;
 
+import android.Manifest.permission;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ILauncherApps;
-import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -147,6 +153,91 @@ public class LauncherApps {
          * @param user The UserHandle of the profile that generated the change.
          */
         public void onPackagesUnsuspended(String[] packageNames, UserHandle user) {
+        }
+
+        /**
+         * Indicates that one or more shortcuts (which may be dynamic and/or pinned)
+         * have been added, updated or removed.
+         *
+         * @param packageName The name of the package that has the shortcuts.
+         * @param shortcuts all shortcuts from the package (dynamic and/or pinned).
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        public void onShortcutsChanged(@NonNull String packageName,
+                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
+        }
+    }
+
+    /**
+     * Represents a query passed to {@link #getShortcuts(ShortcutQuery, UserHandle)}.
+     */
+    public static class ShortcutQuery {
+        /**
+         * Include dynamic shortcuts in the result.
+         */
+        public static final int FLAG_GET_DYNAMIC = 1 << 0;
+
+        /**
+         * Include pinned shortcuts in the result.
+         */
+        public static final int FLAG_GET_PINNED = 1 << 1;
+
+        /**
+         * Requests "key" fields only.
+         */
+        public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
+
+        /** @hide */
+        @IntDef(flag = true,
+                value = {
+                        FLAG_GET_DYNAMIC,
+                        FLAG_GET_PINNED,
+                        FLAG_GET_KEY_FIELDS_ONLY,
+                })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface QueryFlags {}
+
+        long mChangedSince;
+
+        @Nullable
+        String mPackage;
+
+        @Nullable
+        ComponentName mActivity;
+
+        @QueryFlags
+        int mQueryFlags;
+
+        public ShortcutQuery() {
+        }
+
+        /**
+         * If non-zero, returns only shortcuts that have been added or updated since the timestamp,
+         * which is a milliseconds since the Epoch.
+         */
+        public void setChangedSince(long changedSince) {
+            mChangedSince = changedSince;
+        }
+
+        /**
+         * If non-null, returns only shortcuts from the package.
+         */
+        public void setPackage(@Nullable String packageName) {
+            mPackage = packageName;
+        }
+
+        /**
+         * If non-null, returns only shortcuts associated with the activity.
+         */
+        public void setActivity(@Nullable ComponentName activity) {
+            mActivity = activity;
+        }
+
+        /**
+         * Set query options.
+         */
+        public void setQueryFlags(@QueryFlags int queryFlags) {
+            mQueryFlags = queryFlags;
         }
     }
 
@@ -302,6 +393,125 @@ public class LauncherApps {
         }
     }
 
+    /**
+     * Returns the IDs of {@link ShortcutInfo}s that match {@code query}.
+     *
+     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     *
+     * @param query result includes shortcuts matching this query.
+     * @param user The UserHandle of the profile.
+     *
+     * @return the IDs of {@link ShortcutInfo}s that match the query.
+     */
+    @RequiresPermission(permission.BIND_APPWIDGET)
+    @Nullable
+    public List<ShortcutInfo> getShortcuts(@NonNull ShortcutQuery query,
+            @NonNull UserHandle user) {
+        try {
+            return mService.getShortcuts(mContext.getPackageName(),
+                    query.mChangedSince, query.mPackage, query.mActivity, query.mQueryFlags, user)
+                    .getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@link ShortcutInfo}s with the given IDs from a package.
+     *
+     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     *
+     * @param packageName The target package.
+     * @param ids IDs of the shortcuts to retrieve.
+     * @param user The UserHandle of the profile.
+     *
+     * @return list of {@link ShortcutInfo} associated with the package.
+     */
+    @RequiresPermission(permission.BIND_APPWIDGET)
+    @Nullable
+    public List<ShortcutInfo> getShortcutInfo(@NonNull String packageName,
+            @NonNull List<String> ids, @NonNull UserHandle user) {
+        try {
+            return mService.getShortcutInfo(mContext.getPackageName(), packageName, ids, user)
+                    .getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Pin shortcuts on a package.
+     *
+     * <p>This API is <b>NOT</b> cumulative; this will replace all pinned shortcuts for the package.
+     * However, different launchers may have different set of pinned shortcuts.
+     *
+     * <p>Callers must have the {@link permission#BIND_APPWIDGET} permission.
+     *
+     * @param packageName The target package name.
+     * @param shortcutIds The IDs of the shortcut to be pinned.
+     * @param user The UserHandle of the profile.
+     */
+    @RequiresPermission(permission.BIND_APPWIDGET)
+    public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
+            @NonNull UserHandle user) {
+        try {
+            mService.pinShortcuts(mContext.getPackageName(), packageName, shortcutIds, user);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the icon resource ID, if {@code shortcut} has one
+     * (i.e. when {@link ShortcutInfo#hasIconResource()} returns {@code true}).
+     *
+     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     *
+     * @param shortcut The target shortcut.
+     * @param user The UserHandle of the profile.
+     */
+    @RequiresPermission(permission.BIND_APPWIDGET)
+    public int getShortcutIconResId(@NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    /**
+     * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
+     * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
+     *
+     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     *
+     * @param shortcut The target shortcut.
+     * @param user The UserHandle of the profile.
+     */
+    @RequiresPermission(permission.BIND_APPWIDGET)
+    public ParcelFileDescriptor getShortcutIconFd(
+            @NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    /**
+     * Launches a shortcut.
+     *
+     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     *
+     * @param shortcut The target shortcut.
+     * @param sourceBounds The Rect containing the source bounds of the clicked icon.
+     * @param startActivityOptions Options to pass to startActivity.
+     * @param user The UserHandle of the profile.
+     */
+    @RequiresPermission(permission.BIND_APPWIDGET)
+    public void startShortcut(@NonNull ShortcutInfo shortcut,
+            @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
+            @NonNull UserHandle user) {
+        try {
+            mService.startShortcut(mContext.getPackageName(), shortcut, sourceBounds,
+                    startActivityOptions, user);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Registers a callback for changes to packages in current and managed profiles.
@@ -474,6 +684,20 @@ public class LauncherApps {
                 }
             }
         }
+
+        @Override
+        public void onShortcutChanged(UserHandle user, String packageName,
+                ParceledListSlice shortcuts) {
+            if (DEBUG) {
+                Log.d(TAG, "onShortcutChanged " + user.getIdentifier() + "," + packageName);
+            }
+            final List<ShortcutInfo> list = shortcuts.getList();
+            synchronized (LauncherApps.this) {
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnShortcutChanged(packageName, user, list);
+                }
+            }
+        }
     };
 
     private static class CallbackMessageHandler extends Handler {
@@ -484,6 +708,7 @@ public class LauncherApps {
         private static final int MSG_UNAVAILABLE = 5;
         private static final int MSG_SUSPENDED = 6;
         private static final int MSG_UNSUSPENDED = 7;
+        private static final int MSG_SHORTCUT_CHANGED = 8;
 
         private LauncherApps.Callback mCallback;
 
@@ -492,6 +717,7 @@ public class LauncherApps {
             String packageName;
             boolean replacing;
             UserHandle user;
+            List<ShortcutInfo> shortcuts;
         }
 
         public CallbackMessageHandler(Looper looper, LauncherApps.Callback callback) {
@@ -526,6 +752,9 @@ public class LauncherApps {
                     break;
                 case MSG_UNSUSPENDED:
                     mCallback.onPackagesUnsuspended(info.packageNames, info.user);
+                    break;
+                case MSG_SHORTCUT_CHANGED:
+                    mCallback.onShortcutsChanged(info.packageName, info.shortcuts, info.user);
                     break;
             }
         }
@@ -581,6 +810,15 @@ public class LauncherApps {
             info.packageNames = packageNames;
             info.user = user;
             obtainMessage(MSG_UNSUSPENDED, info).sendToTarget();
+        }
+
+        public void postOnShortcutChanged(String packageName, UserHandle user,
+                List<ShortcutInfo> shortcuts) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageName = packageName;
+            info.user = user;
+            info.shortcuts = shortcuts;
+            obtainMessage(MSG_SHORTCUT_CHANGED, info).sendToTarget();
         }
     }
 }
