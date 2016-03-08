@@ -161,7 +161,7 @@ the add-on, you need to create an AVD configuration that uses that system image.
 However, it does provide: </p>
 
 <ul>
-<li>An Google Play background service that implements the
+<li>A Google Play background service that implements the
 <code>ILicensingService</code> remote interface, so that your application can
 send license checks over the network to the licensing server. </li>
 <li>A set of underlying account services that let you add an a Google account on
@@ -213,24 +213,8 @@ Run/Debug Configuration that targets the appropriate device or AVD. </p>
 
 <p>You do not need to make any changes to your application's
 build configuration, provided that the project is already configured to compile
-against a standard Android 1.5 (API level 3) or higher library. For example:
-
-<ul>
-<li>If you have an existing application that is compiled against
-the Android 1.5 library, you do not need to make any changes to your
-build configuration to support licensing. The build target meets the minimum
-requirements for licensing, so you would continue building
-against the same version of the Android platform.</li>
-
-<li>Similarly, if you are building against Android 1.5 (API level 3) but
-are using an emulator running the Google APIs Add-On API 8 as the application's
-runtime environment, there is no need to change your application's build
-configuration. </li>
-</ul>
-
-<p>In general, adding licensing to an application should have no impact
-whatsoever on the application's build configuration.</p>
-
+against a standard Android 1.5 (API level 3) or higher library. Adding licensing to an application
+should have no impact whatsoever on the application's build configuration.</p>
 
 <h3 id="download-lvl">Downloading the LVL</h3>
 
