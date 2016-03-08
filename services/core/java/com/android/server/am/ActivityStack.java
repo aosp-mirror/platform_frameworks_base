@@ -1088,6 +1088,13 @@ final class ActivityStack {
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
     }
 
+    final void activityResumedLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        if (DEBUG_SAVED_STATE) Slog.i(TAG_STATES, "Resumed activity; dropping state of: " + r);
+        r.icicle = null;
+        r.haveState = false;
+    }
+
     final void activityStoppedLocked(ActivityRecord r, Bundle icicle,
             PersistableBundle persistentState, CharSequence description) {
         if (r.state != ActivityState.STOPPING) {
@@ -4436,10 +4443,10 @@ final class ActivityStack {
                     "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + r
                     + " callers=" + Debug.getCallers(6));
             r.forceNewConfig = false;
+            mStackSupervisor.activityRelaunchingLocked(r);
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
                     !andResume, new Configuration(mService.mConfiguration),
                     new Configuration(r.task.mOverrideConfig), preserveWindow);
-            mStackSupervisor.activityRelaunchingLocked(r);
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
