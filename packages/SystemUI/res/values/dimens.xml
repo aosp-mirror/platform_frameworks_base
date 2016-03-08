@@ -58,19 +58,19 @@
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">86dp</dimen>
+    <dimen name="notification_min_height">92dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">276dp</dimen>
+    <dimen name="notification_max_height">284dp</dimen>
 
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">141dp</dimen>
+    <dimen name="notification_max_heads_up_height">148dp</dimen>
 
     <!-- Height of a the summary ("more card") notification on keyguard. -->
     <dimen name="notification_summary_height">44dp</dimen>

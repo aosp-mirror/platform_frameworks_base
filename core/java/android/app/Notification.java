@@ -4206,7 +4206,8 @@ public class Notification implements Parcelable
             int i=0;
             final float density = mBuilder.mContext.getResources().getDisplayMetrics().density;
             int topPadding = (int) (5 * density);
-            int bottomPadding = (int) (13 * density);
+            int bottomPadding = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_content_margin_bottom);
             boolean first = true;
             while (i < mTexts.size() && i < rowIds.length) {
                 CharSequence str = mTexts.get(i);

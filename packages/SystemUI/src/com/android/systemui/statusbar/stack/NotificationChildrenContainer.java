@@ -96,7 +96,8 @@ public class NotificationChildrenContainer extends ViewGroup {
                 com.android.internal.R.dimen.notification_content_margin_top);
         mNotificatonTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_children_container_top_padding);
-        mCollapsedBottompadding = 11.5f * getResources().getDisplayMetrics().density;
+        mCollapsedBottompadding = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_bottom);
     }
 
     @Override
