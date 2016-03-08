@@ -1,6 +1,7 @@
 page.title=Notifications
 page.tags=notifications
 helpoutsWidget=true
+page.image=/preview/images/notifications-card.png
 
 trainingnavtop=true
 
@@ -124,7 +125,7 @@ notification action. </p>
 <img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png"
     srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
     {@docRoot}preview/images/inline-type-reply_2x.png 2x"
-    itemprop="image" width="300">
+    width="300">
 <p class="img-caption">
   <strong>Figure 2.</strong> The user inputs text from the notification shade.
 </p>
@@ -298,7 +299,7 @@ information content of the group. This applies to child notifications in
 Android 5.0 (API level 21) and above.
 </p>
 
-<p> 
+<p>
 For convenience, apps can usually reuse the notification group summary
 and define it as an
 {@link android.app.Notification.InboxStyle InboxStyle} notification,
