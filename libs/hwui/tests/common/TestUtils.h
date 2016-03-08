@@ -180,8 +180,6 @@ public:
 
     typedef std::function<void(renderthread::RenderThread& thread)> RtCallback;
 
-    static void setRenderThreadCrashHandler(std::function<void()> crashHandler);
-
     class TestTask : public renderthread::RenderTask {
     public:
         TestTask(RtCallback rtCallback)
