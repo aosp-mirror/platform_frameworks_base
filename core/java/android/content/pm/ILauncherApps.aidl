@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -42,4 +43,13 @@ interface ILauncherApps {
     boolean isPackageEnabled(String packageName, in UserHandle user);
     boolean isActivityEnabled(in ComponentName component, in UserHandle user);
     ApplicationInfo getApplicationInfo(String packageName, int flags, in UserHandle user);
+
+    ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
+            in ComponentName componentName, int flags, in UserHandle user);
+    ParceledListSlice getShortcutInfo(String callingPackage, String packageName, in List<String> ids,
+            in UserHandle user);
+    void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
+            in UserHandle user);
+    void startShortcut(String callingPackage, in ShortcutInfo shortcut, in Rect sourceBounds,
+            in Bundle startActivityOptions, in UserHandle user);
 }

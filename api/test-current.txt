@@ -8150,6 +8150,7 @@ package android.content {
     field public static final java.lang.String RESTRICTIONS_SERVICE = "restrictions";
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
+    field public static final java.lang.String SHORTCUT_SERVICE = "shortcut";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
     field public static final java.lang.String TELECOM_SERVICE = "telecom";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
@@ -9458,13 +9459,19 @@ package android.content.pm {
   public class LauncherApps {
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
     method public android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String, int, android.os.UserHandle);
+    method public android.os.ParcelFileDescriptor getShortcutIconFd(android.content.pm.ShortcutInfo, android.os.UserHandle);
+    method public int getShortcutIconResId(android.content.pm.ShortcutInfo, android.os.UserHandle);
+    method public java.util.List<android.content.pm.ShortcutInfo> getShortcutInfo(java.lang.String, java.util.List<java.lang.String>, android.os.UserHandle);
+    method public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(android.content.pm.LauncherApps.ShortcutQuery, android.os.UserHandle);
     method public boolean isActivityEnabled(android.content.ComponentName, android.os.UserHandle);
     method public boolean isPackageEnabled(java.lang.String, android.os.UserHandle);
+    method public void pinShortcuts(java.lang.String, java.util.List<java.lang.String>, android.os.UserHandle);
     method public void registerCallback(android.content.pm.LauncherApps.Callback);
     method public void registerCallback(android.content.pm.LauncherApps.Callback, android.os.Handler);
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
     method public void startAppDetailsActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
     method public void startMainActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
+    method public void startShortcut(android.content.pm.ShortcutInfo, android.graphics.Rect, android.os.Bundle, android.os.UserHandle);
     method public void unregisterCallback(android.content.pm.LauncherApps.Callback);
   }
 
@@ -9477,6 +9484,18 @@ package android.content.pm {
     method public void onPackagesSuspended(java.lang.String[], android.os.UserHandle);
     method public abstract void onPackagesUnavailable(java.lang.String[], android.os.UserHandle, boolean);
     method public void onPackagesUnsuspended(java.lang.String[], android.os.UserHandle);
+    method public void onShortcutsChanged(java.lang.String, java.util.List<android.content.pm.ShortcutInfo>, android.os.UserHandle);
+  }
+
+  public static class LauncherApps.ShortcutQuery {
+    ctor public LauncherApps.ShortcutQuery();
+    method public void setActivity(android.content.ComponentName);
+    method public void setChangedSince(long);
+    method public void setPackage(java.lang.String);
+    method public void setQueryFlags(int);
+    field public static final int FLAG_GET_DYNAMIC = 1; // 0x1
+    field public static final int FLAG_GET_KEY_FIELDS_ONLY = 4; // 0x4
+    field public static final int FLAG_GET_PINNED = 2; // 0x2
   }
 
   public class PackageInfo implements android.os.Parcelable {
@@ -9975,6 +9994,56 @@ package android.content.pm {
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
     field public int flags;
     field public java.lang.String permission;
+  }
+
+  public class ShortcutInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getActivityComponent();
+    method public android.os.PersistableBundle getExtras();
+    method public java.lang.String getId();
+    method public android.content.Intent getIntent();
+    method public long getLastChangedTimestamp();
+    method public java.lang.String getPackageName();
+    method public java.lang.String getTitle();
+    method public int getWeight();
+    method public boolean hasIconFile();
+    method public boolean hasIconResource();
+    method public boolean isDynamic();
+    method public boolean isPinned();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CLONE_REMOVE_FOR_CREATOR = 1; // 0x1
+    field public static final int CLONE_REMOVE_FOR_LAUNCHER = 3; // 0x3
+    field public static final int CLONE_REMOVE_NON_KEY_INFO = 4; // 0x4
+    field public static final android.os.Parcelable.Creator<android.content.pm.ShortcutInfo> CREATOR;
+    field public static final int FLAG_DYNAMIC = 1; // 0x1
+    field public static final int FLAG_HAS_ICON_FILE = 8; // 0x8
+    field public static final int FLAG_HAS_ICON_RES = 4; // 0x4
+    field public static final int FLAG_PINNED = 2; // 0x2
+  }
+
+  public static class ShortcutInfo.Builder {
+    ctor public ShortcutInfo.Builder(android.content.Context);
+    method public android.content.pm.ShortcutInfo build();
+    method public android.content.pm.ShortcutInfo.Builder setActivityComponent(android.content.ComponentName);
+    method public android.content.pm.ShortcutInfo.Builder setExtras(android.os.PersistableBundle);
+    method public android.content.pm.ShortcutInfo.Builder setIcon(android.graphics.drawable.Icon);
+    method public android.content.pm.ShortcutInfo.Builder setId(java.lang.String);
+    method public android.content.pm.ShortcutInfo.Builder setIntent(android.content.Intent);
+    method public android.content.pm.ShortcutInfo.Builder setTitle(java.lang.String);
+    method public android.content.pm.ShortcutInfo.Builder setWeight(int);
+  }
+
+  public class ShortcutManager {
+    method public boolean addDynamicShortcut(android.content.pm.ShortcutInfo);
+    method public void deleteAllDynamicShortcuts();
+    method public void deleteDynamicShortcut(java.lang.String);
+    method public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
+    method public int getMaxDynamicShortcutCount();
+    method public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
+    method public long getRateLimitResetTime();
+    method public int getRemainingCallCount();
+    method public boolean setDynamicShortcuts(java.util.List<android.content.pm.ShortcutInfo>);
+    method public boolean updateShortcuts(java.util.List<android.content.pm.ShortcutInfo>);
   }
 
   public class Signature implements android.os.Parcelable {
@@ -29023,6 +29092,7 @@ package android.os {
     ctor public PersistableBundle();
     ctor public PersistableBundle(int);
     ctor public PersistableBundle(android.os.PersistableBundle);
+    ctor public PersistableBundle(android.os.Bundle);
     method public java.lang.Object clone();
     method public android.os.PersistableBundle deepcopy();
     method public int describeContents();

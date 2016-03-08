@@ -106,6 +106,10 @@
 
         <service android:name="com.android.server.job.MockPriorityJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <activity android:name="com.android.server.pm.ShortcutManagerTest$ShortcutActivity" />
+        <activity android:name="com.android.server.pm.ShortcutManagerTest$ShortcutActivity2" />
+        <activity android:name="com.android.server.pm.ShortcutManagerTest$ShortcutActivity3" />
     </application>
 
     <instrumentation

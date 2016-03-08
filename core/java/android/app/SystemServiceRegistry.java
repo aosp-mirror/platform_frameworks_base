@@ -37,7 +37,9 @@ import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
 import android.content.pm.ILauncherApps;
+import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
@@ -748,6 +750,15 @@ final class SystemServiceRegistry {
                 Log.i(TAG, "Creating new instance of SoundTriggerManager object.");
                 return new SoundTriggerManager(ctx, ISoundTriggerService.Stub.asInterface(b));
             }});
+
+        registerService(Context.SHORTCUT_SERVICE, ShortcutManager.class,
+                new CachedServiceFetcher<ShortcutManager>() {
+                    @Override
+                    public ShortcutManager createService(ContextImpl ctx) {
+                        IBinder b = ServiceManager.getService(Context.SHORTCUT_SERVICE);
+                        return new ShortcutManager(ctx,
+                                IShortcutService.Stub.asInterface(b));
+                    }});
     }
 
     /**
