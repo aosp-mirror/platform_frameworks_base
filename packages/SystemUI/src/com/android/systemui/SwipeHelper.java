@@ -32,6 +32,7 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
@@ -58,6 +59,7 @@ public class SwipeHelper implements Gefingerpoken {
     private float mMinSwipeProgress = 0f;
     private float mMaxSwipeProgress = 1f;
 
+    private FlingAnimationUtils mFlingAnimationUtils;
     private float mPagingTouchSlop;
     private Callback mCallback;
     private Handler mHandler;
@@ -95,6 +97,8 @@ public class SwipeHelper implements Gefingerpoken {
         mFalsingThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.swipe_helper_falsing_threshold);
         mFalsingManager = FalsingManager.getInstance(context);
+        mFlingAnimationUtils = new FlingAnimationUtils(context,
+                MAX_ESCAPE_ANIMATION_DURATION / 1000f /* maxLengthSeconds */);
     }
 
     public void setLongPressListener(LongPressListener listener) {
@@ -320,7 +324,8 @@ public class SwipeHelper implements Gefingerpoken {
      * @param velocity The desired pixels/second speed at which the view should move
      */
     public void dismissChild(final View view, float velocity) {
-        dismissChild(view, velocity, null, 0, false, 0);
+        dismissChild(view, velocity, null /* endAction */, 0 /* delay */,
+                velocity == 0 /* useAccelerateInterpolator */, 0 /* fixedDuration */);
     }
 
     /**
@@ -377,10 +382,11 @@ public class SwipeHelper implements Gefingerpoken {
         }
         if (useAccelerateInterpolator) {
             anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+            anim.setDuration(duration);
         } else {
-            anim.setInterpolator(Interpolators.LINEAR);
+            mFlingAnimationUtils.applyDismissing(anim, getTranslation(animView),
+                    newPos, velocity, getSize(animView));
         }
-        anim.setDuration(duration);
         if (delay > 0) {
             anim.setStartDelay(delay);
         }
