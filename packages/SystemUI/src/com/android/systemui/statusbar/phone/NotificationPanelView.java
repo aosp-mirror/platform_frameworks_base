@@ -92,6 +92,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
     protected QSContainer mQsContainer;
+    private DensityContainer mQsDensityContainer;
     private KeyguardStatusView mKeyguardStatusView;
     private TextView mClockView;
     private View mReserveNotificationSpace;
@@ -217,8 +218,8 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
-        DensityContainer container = (DensityContainer) findViewById(R.id.qs_density_container);
-        container.addInflateListener(new InflateListener() {
+        mQsDensityContainer = (DensityContainer) findViewById(R.id.qs_density_container);
+        mQsDensityContainer.addInflateListener(new InflateListener() {
             @Override
             public void onInflated(View v) {
                 mQsContainer = (QSContainer) v.findViewById(R.id.quick_settings_container);
@@ -2209,7 +2210,7 @@ public class NotificationPanelView extends PanelView implements
 
     protected void setVerticalPanelTranslation(float translation) {
         mNotificationStackScroller.setTranslationX(translation);
-        mQsContainer.setTranslationX(translation);
+        mQsDensityContainer.setTranslationX(translation);
     }
 
     protected void updateStackHeight(float stackHeight) {
