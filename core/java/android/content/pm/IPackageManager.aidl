@@ -120,6 +120,8 @@ interface IPackageManager {
 
     int checkUidSignatures(int uid1, int uid2);
 
+    List<String> getAllPackages();
+
     String[] getPackagesForUid(int uid);
 
     String getNameForUid(int uid);
