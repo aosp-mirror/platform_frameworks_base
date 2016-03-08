@@ -19,11 +19,12 @@
 <gradient xmlns:android="http://schemas.android.com/apk/res/android"
           android:centerColor="#ff0000"
           android:endColor="#ff0000ff"
-          android:centerX="300"
-          android:centerY="300"
-          android:gradientRadius="100"
+          android:centerX="500"
+          android:centerY="500"
+          android:gradientRadius="10"
           android:startColor="#ffffffff"
-          android:type="radial">
+          android:type="sweep"
+          android:tileMode="repeat">
     <item android:offset="0.1" android:color="?android:attr/colorPrimary"/>
     <item android:offset="0.4" android:color="#fff"/>
     <item android:offset="0.9" android:color="?android:attr/colorControlActivated"/>
