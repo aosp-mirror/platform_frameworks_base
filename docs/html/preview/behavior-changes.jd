@@ -33,7 +33,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2>See Also</h2>
 <ol>
   <li><a href="{@docRoot}preview/api-overview.html">
-    N Developer Preview API Overview</a></li>
+    Android N API Overview</a></li>
 </ol>
 
 </div>
@@ -41,7 +41,7 @@ page.image=images/cards/card-n-changes_2x.png
 
 
 <p>
-  Along with new features and capabilities, the Android N Developer Preview
+  Along with new features and capabilities, Android N
   includes a variety of system and API behavior changes. This document
   highlights some of the key changes that you should understand and account for
   in your apps.
@@ -56,7 +56,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2 id="perf">Performance Improvements</h2>
 
 <p>
-  The Preview contains system behavior changes aimed at improving the battery
+  Android N contains system behavior changes aimed at improving the battery
   life of devices, RAM usage, and app performance. These changes can impact the
   availability of system resources and system notifications to your app. You
   should review these changes and evaluate how your app may need to adjust to
@@ -68,7 +68,7 @@ page.image=images/cards/card-n-changes_2x.png
 <p>
   Introduced in Android 6.0 (API level 23), Doze improves battery life by
   deferring CPU and network activities when a user leaves a device unplugged,
-  stationary, and with the screen turned off. This Preview brings further
+  stationary, and with the screen turned off. Android N brings further
   enhancements to Doze by applying a subset of CPU and network restrictions
   while the device is unplugged with the screen turned off, but not necessarily
   stationary, for example, when a handset is traveling in a user’s pocket.
@@ -118,7 +118,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h3 id="bg-opt">Project Svelte: Background Optimizations</h3>
 
 <p>
-  The Preview removes three implicit broadcasts in order to help optimize both
+  Android N removes three implicit broadcasts in order to help optimize both
   memory use and power consumption. This change is necessary because implicit
   broadcasts frequently start apps that have registered to listen for them in
   the background. Removing these broadcasts can substantially benefit device
@@ -143,12 +143,12 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 <p>
-  To alleviate these issues, the Preview applies the following
+  To alleviate these issues, Android N applies the following
   optimizations:
 </p>
 
 <ul>
-  <li>Apps targeting the Preview do not receive {@link
+  <li>Apps targeting Android N do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
   have manifest entries to request notification of these events. Apps running
   in the foreground can still listen for {@code CONNECTIVITY_CHANGE} on their
@@ -158,7 +158,7 @@ page.image=images/cards/card-n-changes_2x.png
 
   <li>Apps cannot send or receive {@code NEW_PICTURE} or {@code NEW_VIDEO}
   broadcasts. This optimization affects all apps, not only those
-  targeting the Preview.
+  targeting Android N.
   </li>
 </ul>
 
@@ -189,7 +189,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2 id="perm">Permissions Changes</h2>
 
 <p>
-  The Preview includes changes to permissions that may affect your app,
+  Android N includes changes to permissions that may affect your app,
   including user accounts permissions and a new permission for writing to
   external storage. Here is a summary of the permissions that have changed in
   the preview:
@@ -199,7 +199,7 @@ page.image=images/cards/card-n-changes_2x.png
   <li>{@code GET_ACCOUNTS} (Deprecated)
     <p>
       The GET_ACCOUNTS permission is now deprecated. The system ignores this
-      permission for apps that target the N Developer Preview.
+      permission for apps that target Android N.
     </p>
   </li>
 
@@ -227,7 +227,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2 id="accessibility">Accessibility Improvements</h2>
 
 <p>
-  This Preview includes changes intended to improve the usability of the
+  Android N includes changes intended to improve the usability of the
   platform for users with low or impaired vision. These changes should
   generally not require code changes in your app, however you should review
   these feature and test them with your app to assess potential impacts to user
@@ -238,7 +238,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h3 id="screen-zoom">Screen Zoom</h3>
 
 <p>
-  The Preview enables users to set <strong>Display size</strong>which magnifies
+  Android N enables users to set <strong>Display size</strong>which magnifies
   or shrinks all elements on the screen, thereby improving device accessibility
   for users with low vision. Users cannot zoom the screen past a minimum screen
   width of <a href=
@@ -258,7 +258,7 @@ page.image=images/cards/card-n-changes_2x.png
 </div> <!-- end cols -->
 <p class="img-caption">
   <strong>Figure 3.</strong> The screen on the right shows the effect of
-  increasing the Display size of a device running an N Preview system image.
+  increasing the Display size of a device running an Android N system image.
 </p>
 
 
@@ -278,7 +278,7 @@ page.image=images/cards/card-n-changes_2x.png
   Runtime Changes</a>, just as if the device's orientation had changed.
   </li>
 
-  <li>If an app targets the N Developer Preview, all of its processes
+  <li>If an app targets Android N, all of its processes
   (foreground and background) are notified of the configuration change as
   described in <a href=
   "{@docRoot}guide/topics/resources/runtime-changes.html">Handling
@@ -296,7 +296,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h3 id="vision-settings">Vision Settings in Setup Wizard</h3>
 
 <p>
-  The Preview includes Vision Settings on the Welcome screen, where users can
+  Android N includes Vision Settings on the Welcome screen, where users can
   set up the following accessibility settings on a new device:
   <strong>Magnification gesture</strong>, <strong>Font size</strong>,
   <strong>Display size</strong> and <strong>TalkBack</strong>. This change
@@ -310,7 +310,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2 id="open-jdk">Platform Migration toward OpenJDK 8</h2>
 
 <p>
-  The Preview moves Android’s Java language libraries to an OpenJDK-based
+  Android N moves Android’s Java language libraries to an OpenJDK-based
   approach, creating a common code base for developers to build apps and
   services. If your app depends on a private implementation of Java or
   unspecified behavior, you should be aware of these known issues:
@@ -357,14 +357,14 @@ java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
 <h2 id="ndk">NDK Apps Linking to Platform Libraries</h2>
 
 <p>
-  The Preview includes namespace changes to prevent loading of non-public APIs.
+  Android N includes namespace changes to prevent loading of non-public APIs.
   If you use the NDK, you should only be using public APIs from the Android
   platform. Using non-public APIs in the next official release of Android
   can cause your app to crash.
 </p>
 
 <p>
-  In order to alert you to use of non-public APIs, apps running on a Preview
+  In order to alert you to use of non-public APIs, apps running on an Android N
   device generate an error in logcat output when an app calls a non-public API.
   This error is also displayed on the device screen as a message to help
   raise awareness of this situation. You should review your app code to
@@ -399,8 +399,7 @@ java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
 
 <p>
   To help you diagnose these types problems here are some example Java and NDK
-  errors you might encounter when attempting to build your app with the N
-  Developer Preview:
+  errors you might encounter when attempting to build your app with Android N:
 </p>
 
 <p>Example Java error:</p>
@@ -445,7 +444,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 
 <h2 id="afw">Android for Work</h2>
 <p>
-  The Preview contains changes for apps that target Android for Work, including
+  Android N contains changes for apps that target Android for Work, including
   changes to certificate installation, password resetting, secondary user
   management, and access to device identifiers. If you are building apps for
   Android for Work environments, you should review these changes and modify

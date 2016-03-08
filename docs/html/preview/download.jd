@@ -170,7 +170,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#device-preview">Getting Preview on Devices</a>
+        <li><a href="#device-preview">Getting Android N on Devices</a>
           <ol>
             <li><a href="#ota">Over the air updates</a></li>
             <li><a href="#flash">Installing system images</a></li>
@@ -185,19 +185,19 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <p>
   The Android N Developer Preview includes device system images to help you
   test your app and the new APIs coming in the next release of the platform.
-  This document describes how to get Preview system images on a device for
+  This document describes how to get Android N system images on a device for
   testing.
 </p>
 
-<h2 id="device-preview">Getting Preview on Devices</h2>
+<h2 id="device-preview">Getting Android N on Devices</h2>
 
 <p>
-  In order to effectively test your apps with the Preview, use
-  a Preview emulator provided with the Preview SDK or configure a device
-  with a Preview system image. The N Developer Preview allows you to update
-  devices for use in testing the functionality of the Preview APIs and system
-  behaviors with your apps. You can get the Preview on a device by opting a
-  device into the Android Beta Program or by downloading a preview system
+  In order to effectively test your apps with Android N, use
+  an Android N emulator provided with the N Preview SDK or configure a device
+  with an Android N system image. Android N allows you to update
+  devices for use in testing the functionality of the Android N APIs and system
+  behaviors with your apps. You can get Android N on a device by opting a
+  device into the Android Beta Program or by downloading an Android N system
   image and installing it on a device.
 </p>
 
@@ -212,7 +212,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 <p>
-  You can create emulators containing the Preview within the Preview SDK.
+  You can create emulators containing Android N within the Preview SDK.
   For more information about getting the Preview SDK, see
   <a href="{@docRoot}preview/setup-sdk.html">Set Up the SDK</a>.
 </p>
@@ -221,9 +221,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <h3 id="ota">Over the air updates</h3>
 
 <p>
-  You can receive Preview versions of Android on compatible devices by
+  You can receive preview versions of Android on compatible devices by
   enrolling them in the Android Beta Program. Once you enroll a device in
-  this program, it receives Preview versions of Android over-the-air (OTA).
+  this program, it receives preview versions of Android over-the-air (OTA).
   These updates are automatically downloaded and can installed just like
   official updates.
 </p>

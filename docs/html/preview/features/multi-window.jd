@@ -1,5 +1,5 @@
 page.title=Multi-Window Support
-page.metaDescription=New support in the N Developer Preview for showing more than one app at a time.
+page.metaDescription=New support in Android N for showing more than one app at a time.
 page.keywords="multi-window", "android N", "split screen", "free-form"
 
 @jd:body
@@ -25,7 +25,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </div>
 
 <p>
-  The N Developer Preview adds support for displaying more than one app at the
+  Android N adds support for displaying more than one app at the
   same time. On handheld devices, two apps can run side-by-side or
   one-above-the-other in <em>split-screen</em> mode. On TV devices, apps can
   use <em>picture-in-picture</em> mode to continue video playback while users
@@ -43,20 +43,20 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <h2 id="overview">Overview</h2>
 
 <p>
-  The N Developer Preview allows several apps to share the screen at once. For
+  Android N allows several apps to share the screen at once. For
   example, a user could split the screen, viewing a web page on the left side
   while composing an email on the right side. The user experience depends on
   the device:
 </p>
 
 <ul>
-  <li>Handheld devices running the N Developer Preview offer split-screen
+  <li>Handheld devices running Android N offer split-screen
   mode. In this mode, the system fills the screen with two apps, showing them
   either side-by-side or one-above-the-other. The user can drag the dividing
   line separating the two to make one app larger and the other smaller.
   </li>
 
-  <li>On Nexus Player running the N Developer Preview, apps can put themselves
+  <li>On Nexus Player running Android N, apps can put themselves
   in <a href="picture-in-picture.html">picture-in-picture mode</a>, allowing
   them to continue showing content while the user browses or interacts with
   other apps.
@@ -160,7 +160,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <h2 id="configuring">Configuring Your App for Multi-Window Mode</h2>
 
 <p>
-  If your app targets the N Developer Preview, you can configure how and
+  If your app targets Android N, you can configure how and
   whether your app's activities support multi-window display. You can set
   attributes in your manifest to control both size and layout.
   A root activity's attribute settings apply to all activities
@@ -169,7 +169,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p class="note">
   <strong>Note:</strong> If you build a multi-orientation app with a version of the
-  SDK earlier than the N Developer Preview, and the user uses the app in
+  SDK lower than Android N, and the user uses the app in
   multi-window mode, the system forcibly resizes the app. The system presents a
   dialog box warning the user that the app may behave unexpectedly. The system
   does <em>not</em> resize fixed-orientation apps; if
@@ -197,7 +197,7 @@ android:resizeableActivity=["true" | "false"]
 </p>
 
 <p>
-  If your app targets the N Developer Preview, but you do not specify a value
+  If your app targets Android N, but you do not specify a value
   for this attribute, the attribute's value defaults to true.
 </p>
 
@@ -216,7 +216,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="layout">Layout attributes</h3>
 
 <p>
-  With the N Developer Preview, the <code>&lt;layout&gt;</code> manifest element
+  With Android N, the <code>&lt;layout&gt;</code> manifest element
   supports several attributes that affect how an activity behaves in
   multi-window mode:
 </p>
@@ -277,7 +277,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h2 id="running">Running Your App in Multi-Window Mode</h2>
 
 <p>
-  The N Developer Preview offers new functionality to support apps that can run
+  Android N offers new functionality to support apps that can run
   in multi-window mode.
 </p>
 
@@ -476,15 +476,15 @@ android:supportsPictureInPicture=["true" | "false"]
 <h2 id="testing">Testing Your App's Multi-Window Support</h2>
 
 <p>
-  Whether or not you update your app for the N Developer Preview, you should
+  Whether or not you update your app for Android N, you should
   verify how it behaves in multi-window mode in case a user tries to launch it
-  in multiwindow mode on a device running the N Developer Preview.
+  in multiwindow mode on a device running Android N.
 </p>
 
 <h3 id="configuring">Configuring a Test Device</h3>
 
 <p>
-  If you install the N Developer Preview on a device, split-screen mode is
+  If you install Android N on a device, split-screen mode is
   automatically supported.
 </p>
 
@@ -498,7 +498,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   If your app does not declare a fixed orientation, you should launch your app
-  on a device running the N Developer Preview and attempt to put the app in
+  on a device running Android N and attempt to put the app in
   split-screen mode. Verify that the user experience is
   acceptable when the app is forcibly resized.
 </p>
@@ -586,7 +586,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   If you disabled multi-window support by setting
   <code>android:resizableActivity="false"</code>, you should launch your app on
-  a device running the N Developer Preview and attempt to put the app in
+  a device running Android N and attempt to put the app in
   freeform and split-screen modes. Verify that when you do so, the app remains
   in full-screen mode.
 </p>

@@ -29,15 +29,15 @@ page.title=ICU4J Android Framework APIs
 
 <p>
   ICU4J is an open-source, widely used set of Java libraries providing Unicode
-  and globalization support for software applications. The N Developer Preview
+  and globalization support for software applications. Android N
   exposes a subset of the ICU4J APIs in the Android framework for app developers
   to use under the {@code android.icu} package. These APIs use
   localization data present on the device. As a result, you can reduce your APK
   footprint by not compiling the ICU4J libraries into your APK; instead, you can
   simply call out to them in the framework. (In this case, you may want to provide
   <a href="{@docRoot}google/play/publishing/multiple-apks.html">multiple versions
-  of your APK</a>, so users running versions of Android lower than the N Developer
-  Preview can download a version of the app that contains the ICU4J libraries.)
+  of your APK</a>, so users running versions of Android lower than Android N
+  can download a version of the app that contains the ICU4J libraries.)
 </p>
 
 <p>
@@ -50,17 +50,17 @@ page.title=ICU4J Android Framework APIs
 <h2 id="relation">Relationship to ICU4J</h2>
 
 <p>
-  The Preview exposes a subset of the ICU4J APIs via the
+  Android N exposes a subset of the ICU4J APIs via the
   <code>android.icu</code> package, rather than <code>com.ibm.icu</code>. The
   Android framework may choose not to
-  expose ICU4J APIs for various reasons; for example, the N Preview does not expose
+  expose ICU4J APIs for various reasons; for example, Android N does not expose
   some deprecated APIs or those that the ICU team have not yet declared as
   stable. As the ICU team deprecates APIs in the future, Android will also mark
   them as deprecated but will continue to include them.
 </p>
 
 <p class="table-caption"><strong>Table 1.</strong> ICU and CLDR versions used
-  in the Preview.</p>
+  in Android N.</p>
 <table>
 <tr>
 <th>Android API level</th>
@@ -68,7 +68,7 @@ page.title=ICU4J Android Framework APIs
 <th>CLDR version</th>
 </tr>
 <tr>
-<td>N Developer Preview</td>
+<td>Android N</td>
 <td>56</td>
 <td>28</td>
 </tr>

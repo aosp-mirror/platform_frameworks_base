@@ -8,8 +8,8 @@ page.image=images/cards/card-n-support_2x.png
 
 <p>
   Two primary support channels are available to you when developing and testing
-  with the Android N Developer Preview. If you've encountered bugs or have
-  feedback about the N Developer Preview, you can <a href=
+  with Android N. If you've encountered bugs or have
+  feedback about Android N, you can <a href=
   "https://code.google.com/p/android-developer-preview/">create an issue</a>
   <strong>***NEED LINK***</strong> on
   our issue tracker. We'll triage the issue for further review and provide
@@ -69,7 +69,7 @@ page.image=images/cards/card-n-support_2x.png
 
   <li>Android for Work:
     <ul>
-      <li>After migrating to (or creation on) N Developer Preview, work
+      <li>After migrating to (or creation on) Android N, work
       profiles can't create keys in keystore until the pattern/PIN/password is
       changed or a Work Challenge is set up.
       </li>
@@ -116,11 +116,11 @@ page.image=images/cards/card-n-support_2x.png
 </p>
 
 <h3 id="preview1-get">
-  Get the N Developer Preview
+  Get Android N
 </h3>
 
 <p>
-  You can download the N Developer Preview platform and emulator images from
+  You can download Android N platform and emulator images from
   the SDK Manager. <strong>***Is this true?***</strong>
 </p>
 

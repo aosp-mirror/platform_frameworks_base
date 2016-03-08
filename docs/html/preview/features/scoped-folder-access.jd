@@ -32,7 +32,7 @@ via a system UI, which is unnecessary if your app always accesses the same
 external directory.</li>
 </ul>
 
-<p>The Android N Developer Preview provides a new simplified API to access
+<p>Android N provides a new simplified API to access
 common external storage directories. </p>
 
 <h2 id="accessing">Accessing an External Storage Directory</h2>

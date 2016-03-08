@@ -17,7 +17,7 @@ page.tags=androidn
 </div>
 </div>
 
-<p>Android N Developer Preview runs in a secure, <i>Direct Boot</i> mode
+<p>Android N runs in a secure, <i>Direct Boot</i> mode
 when the device has been powered on but the user has not unlocked the
 device. To support this, the system provides two storage locations for data:</p>
 
@@ -143,7 +143,7 @@ two ways to enable Direct Boot.</p>
 <p class="caution"><strong>Caution:</strong> Enabling Direct Boot
 wipes all user data on the device.</p>
 
-<p>On supported devices with Android N Developer Preview installed, enable
+<p>On supported devices with Android N installed, enable
 Direct Boot by doing one of the following:</p>
 
 <ul>

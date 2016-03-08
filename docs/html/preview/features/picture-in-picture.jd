@@ -29,7 +29,7 @@ Support</a></li>
 </div>
 </div>
 
-<p>In the Android N Developer Preview, Android TV users can now watch a video
+<p>In Android N, Android TV users can now watch a video
 in a pinned window in a corner of the screen when navigating within
 apps. Picture-in-picture (PIP) mode lets apps run a video
 activity in the pinned window while another activity continues in the
@@ -62,7 +62,7 @@ closed. Users can also close the PIP window through Recents.</p>
 video visible in a corner of the screen while the user browses content
 on the main screen.</p>
 
-<p>PIP leverages the multi-window APIs available in the N Developer Preview to
+<p>PIP leverages the multi-window APIs available in Android N to
 provide the pinned video overlay window. To add PIP to your app, you need to
 register your activities that support PIP, switch your activity to PIP mode as
 needed, and make sure UI elements are hidden and video playback continues when
@@ -118,7 +118,7 @@ to PIP mode while controlling video playback.</p>
 <p class="img-caption"><strong>Figure 1.</strong> A Picture-in-picture
 button on a media control bar.</p>
 
-<p>The N Developer Preview includes a new
+<p>Android N includes a new
 <code>PlaybackControlsRow.PictureInPictureAction</code> class which defines
 control bar PIP actions and uses the PIP icon.</p>
 

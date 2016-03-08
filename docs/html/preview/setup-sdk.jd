@@ -1,4 +1,4 @@
-page.title=Set Up to Develop for the N Preview
+page.title=Set Up to Develop for Android N
 meta.keywords="preview", "android"
 page.tags="preview", "developer preview"
 page.image=images/cards/card-n-sdk_2x.png
@@ -10,7 +10,7 @@ page.image=images/cards/card-n-sdk_2x.png
   <div id="qv">
 <ol>
   <li><a href="#get-as13">Get Android Studio 2.1</a></li>
-  <li><a href="#get-sdk">Get the N Preview SDK</a></li>
+  <li><a href="#get-sdk">Get the Android N SDK</a></li>
   <li><a href="#java8">Get the Java 8 JDK and JRE</a></li>
   <li><a href="#create-update">Update or Create a Project</a></li>
   <li><a href="#next">Next Steps</a></li>
@@ -19,18 +19,18 @@ page.image=images/cards/card-n-sdk_2x.png
 </div>
 
 <p>
-To develop apps for Android using new APIs in the N Preview and new language
+To develop apps for Android using new APIs in Android N and new language
 features of Java 8, you need to set up Android Studio 2.1 (preview) as described
 on this page.</p>
 
 <p>If you instead want to simply test your app's forward-compatibility on the
-Android N Preview system image, you can instead follow the guide to <a
-href="{@docRoot}preview/run-app.html">Run Your App on the N Preview</a>.</p>
+Android N system image, you can instead follow the guide to <a
+href="{@docRoot}preview/run-app.html">Run Your App on Android N</a>.</p>
 
 
 <h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
 
-<p>Developing for the Android N Preview platform requires Java 8 and a new
+<p>Developing for the Android N platform requires Java 8 and a new
 compiler toolchain called JACK, which is currently supported only in
 Android Studio 2.1.
 </p>
@@ -39,7 +39,7 @@ Android Studio 2.1.
 release channel&mdash;it is still in development. If you already
 have Android Studio and don't want to update to the canary channel, you can
 download Android Studio 2.1 as a separate installation and use it
-for use with the N Preview, leaving your primary Android Studio environment
+with Android N, leaving your primary Android Studio environment
 unaffected.</p>
 
 <p>To download Android Studio 2.1 as a separate installation, follow these
@@ -104,7 +104,7 @@ existing installation, skip to step 4):</p>
 <p>In addition to these preview components, you should download the
 N Preview developer docs from the following table. This is an offline version
 of the developer.android.com web site, except it includes the updated
-API reference for the N Preview APIs and an API difference report.</p>
+API reference for the Android N APIs and an API difference report.</p>
 
 <table id="docs-dl">
   <tr>
@@ -127,8 +127,8 @@ API reference for the N Preview APIs and an API difference report.</p>
 <h2 id="java8">Get the Java 8 JDK and JRE</h2>
 
 <p>
-  The Java 8 Development Kit (JDK) is required to develop apps with the Android
-  N Preview, and the Java 8 Runtime Environment (JRE) is required to run some
+  The Java 8 Development Kit (JDK) is required to develop apps with Android
+  N, and the Java 8 Runtime Environment (JRE) is required to run some
   tools included in Android Studio 2.1.
 </p>
 <p>So, if you don't have the latest version of each already,
@@ -153,7 +153,7 @@ API reference for the N Preview APIs and an API difference report.</p>
 <h2 id="create-update">Update or Create a Project</h2>
 
 <p>
-  To use the N Preview APIs, your project must be configured appropriately.
+  To use the Android N APIs, your project must be configured appropriately.
 </p>
 
 
@@ -200,8 +200,8 @@ android {
 
 <p>Now that you've set up Android Studio 2.1 (preview), follow the guide
 to <a
-href="{@docRoot}preview/run-app.html">Run Your App on the N Preview</a>.
-And learn more about the Android N Preview platform with 
+href="{@docRoot}preview/run-app.html">Run Your App on Android N</a>.
+And learn more about the Android N platform with 
 <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>
 and <a href="{@docRoot}preview/api-overview.html">Android N APIs
 and Features</a>.</p>
