@@ -41,11 +41,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import com.android.internal.R;
 
 /**
  * A Transition holds information about animations that will be run on its
@@ -192,7 +192,7 @@ public abstract class Transition implements Cloneable {
     private TransitionValuesMaps mStartValues = new TransitionValuesMaps();
     private TransitionValuesMaps mEndValues = new TransitionValuesMaps();
     TransitionSet mParent = null;
-    private int[] mMatchOrder = DEFAULT_MATCH_ORDER;
+    int[] mMatchOrder = DEFAULT_MATCH_ORDER;
     ArrayList<TransitionValues> mStartValuesList; // only valid after playTransition starts
     ArrayList<TransitionValues> mEndValuesList; // only valid after playTransitions starts
 
@@ -246,7 +246,7 @@ public abstract class Transition implements Cloneable {
 
     // The function used to interpolate along two-dimensional points. Typically used
     // for adding curves to x/y View motion.
-    private PathMotion mPathMotion = STRAIGHT_PATH_MOTION;
+    PathMotion mPathMotion = STRAIGHT_PATH_MOTION;
 
     /**
      * Constructs a Transition object with no target objects. A transition with
@@ -780,7 +780,7 @@ public abstract class Transition implements Cloneable {
                 }
             }
         }
-        if (minStartDelay != 0) {
+        if (startDelays.size() != 0) {
             for (int i = 0; i < startDelays.size(); i++) {
                 int index = startDelays.keyAt(i);
                 Animator animator = mAnimators.get(index);
