@@ -305,9 +305,12 @@ public class ScanResult implements Parcelable {
      */
     public static class InformationElement {
         public static final int EID_SSID = 0;
+        public static final int EID_SUPPORTED_RATES = 1;
         public static final int EID_TIM = 5;
         public static final int EID_BSS_LOAD = 11;
+        public static final int EID_ERP = 42;
         public static final int EID_RSN = 48;
+        public static final int EID_EXTENDED_SUPPORTED_RATES = 50;
         public static final int EID_HT_OPERATION = 61;
         public static final int EID_INTERWORKING = 107;
         public static final int EID_ROAMING_CONSORTIUM = 111;
