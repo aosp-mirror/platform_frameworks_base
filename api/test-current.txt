@@ -5889,7 +5889,7 @@ package android.app.admin {
     method public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(android.content.ComponentName, android.content.ComponentName);
     method public android.os.Bundle getUserRestrictions(android.content.ComponentName);
-    method public java.lang.String getWifiMacAddress();
+    method public java.lang.String getWifiMacAddress(android.content.ComponentName);
     method public boolean hasCaCertInstalled(android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean installCaCert(android.content.ComponentName, byte[]);

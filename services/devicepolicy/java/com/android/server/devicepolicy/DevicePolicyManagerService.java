@@ -8193,10 +8193,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public String getWifiMacAddress() {
+    public String getWifiMacAddress(ComponentName admin) {
         // Make sure caller has DO.
         synchronized (this) {
-            getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
         }
 
         final long ident = mInjector.binderClearCallingIdentity();
