@@ -67,8 +67,10 @@ private:
             }
         };
         struct Part {
-            int count;
-            int pause;
+            int count;  // The number of times this part should repeat, 0 for infinite
+            int pause;  // The number of frames to pause for at the end of this part
+            int clockPosY;  // The y position of the clock, in pixels, from the bottom of the
+                            // display (the clock is centred horizontally). -1 to disable the clock
             String8 path;
             SortedVector<Frame> frames;
             bool playUntilComplete;
@@ -86,6 +88,7 @@ private:
     bool android();
     bool readFile(const char* name, String8& outString);
     bool movie();
+    void drawTime(const Texture& clockTex, const int yPos);
 
     void checkExit();
 
@@ -93,6 +96,7 @@ private:
     sp<AudioPlayer>                 mAudioPlayer;
     AssetManager mAssets;
     Texture     mAndroid[2];
+    Texture     mClock;
     int         mWidth;
     int         mHeight;
     EGLDisplay  mDisplay;
@@ -101,6 +105,7 @@ private:
     sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
     ZipFileRO   *mZip;
+    bool        mClockEnabled;
 };
 
 // ---------------------------------------------------------------------------
