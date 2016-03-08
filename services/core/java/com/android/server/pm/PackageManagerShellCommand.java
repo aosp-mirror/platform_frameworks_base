@@ -268,7 +268,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 useJitProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
                 extractOnly = false;
                 break;
-            case "all":
+            case "full":
                 useJitProfiles = false;
                 extractOnly = false;
                 break;
@@ -1185,7 +1185,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -c: clear profile data before compiling");
         pw.println("      -f: force compilation even if not needed");
         pw.println("      -m: select compilation mode");
-        pw.println("          MODE can be one of \"default\", \"all\", \"profile\", and \"extract\"");
+        pw.println("          MODE can be one of \"default\", \"full\", \"profile\","
+                   " and \"extract\"");
         pw.println("      --reset: restore the package to post-install state");
         pw.println("          shorthand for \"-c -f -m extract\"");
         pw.println("  list features");
