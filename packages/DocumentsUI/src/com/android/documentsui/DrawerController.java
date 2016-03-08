@@ -16,10 +16,14 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
 import android.app.Activity;
+import android.content.Context;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toolbar;
 
@@ -29,6 +33,8 @@ import android.widget.Toolbar;
  * @see DrawerController#create(DrawerLayout)
  */
 abstract class DrawerController implements DrawerListener {
+
+    public static final String TAG = "DrawerController";
 
     abstract void setOpen(boolean open);
     abstract boolean isPresent();
@@ -50,6 +56,8 @@ abstract class DrawerController implements DrawerListener {
         View drawer = activity.findViewById(R.id.drawer_roots);
         Toolbar toolbar = (Toolbar) activity.findViewById(R.id.roots_toolbar);
 
+        drawer.getLayoutParams().width = calculateDrawerWidth(activity);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 activity,
                 layout,
@@ -65,6 +73,19 @@ abstract class DrawerController implements DrawerListener {
      */
     static DrawerController createDummy() {
         return new DummyDrawerController();
+    }
+
+    private static int calculateDrawerWidth(Activity activity) {
+        // Material design specification for navigation drawer:
+        // https://www.google.com/design/spec/patterns/navigation-drawer.html
+        float width = Display.screenWidth(activity) - Display.actionBarHeight(activity);
+        float maxWidth = activity.getResources().getDimension(R.dimen.max_drawer_width);
+        int finalWidth = (int) ((width > maxWidth ? maxWidth : width));
+
+        if (DEBUG)
+            Log.d(TAG, "Calculated drawer width:" + (finalWidth / Display.density(activity)));
+
+        return finalWidth;
     }
 
     /**
