@@ -121,7 +121,10 @@ notificationManager.notify(notificationId, notification);
 <p> The system prompts the user to input a response when they trigger the
 notification action. </p>
 
-<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png">
+<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png"
+    srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
+    {@docRoot}preview/images/inline-type-reply_2x.png 2x"
+    width="300">
 <p class="img-caption">
   <strong>Figure 2.</strong> The user inputs text from the notification shade.
 </p>
@@ -200,7 +203,10 @@ Builder.setGroup()} method to bundle similar notifications.</p>
   expands one of those notifications, the system reveals its entire content.
 </p>
 
-<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png">
+<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png"
+  srcset="{@docRoot}preview/images/bundles.png 1x,
+          {@docRoot}preview/images/bundles_2x.png 2x"
+  width="300">
 <p class="img-caption">
   <strong>Figure 4.</strong> The user can progressively expand the notification
   group.
