@@ -388,7 +388,7 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
 }
 
 static void
-android_media_AudioSystem_recording_callback(int event, int session, int source,
+android_media_AudioSystem_recording_callback(int event, audio_session_t session, int source,
         const audio_config_base_t *clientConfig, const audio_config_base_t *deviceConfig,
         audio_patch_handle_t patchHandle)
 {
@@ -1539,7 +1539,7 @@ android_media_AudioSystem_eventHandlerFinalize(JNIEnv *env, jobject thiz)
 static jint
 android_media_AudioSystem_getAudioHwSyncForSession(JNIEnv *env, jobject thiz, jint sessionId)
 {
-    return (jint)AudioSystem::getAudioHwSyncForSession((audio_session_t)sessionId);
+    return (jint) AudioSystem::getAudioHwSyncForSession((audio_session_t) sessionId);
 }
 
 static void

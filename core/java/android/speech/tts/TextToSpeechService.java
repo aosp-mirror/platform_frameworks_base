@@ -19,7 +19,7 @@ import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
-import android.media.AudioSystem;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -659,7 +659,7 @@ public abstract class TextToSpeechService extends Service {
         /**
          * Audio session identifier. May be used to associate audio playback with one of the
          * {@link android.media.audiofx.AudioEffect} objects. If not specified by client,
-         * it should be equal to {@link AudioSystem#AUDIO_SESSION_ALLOCATE}.
+         * it should be equal to {@link AudioManager#AUDIO_SESSION_ID_GENERATE}.
          */
         public final int mSessionId;
 
@@ -684,7 +684,7 @@ public abstract class TextToSpeechService extends Service {
 
         /** Create AudioOutputParams with default values */
         AudioOutputParams() {
-            mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
+            mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
             mVolume = Engine.DEFAULT_VOLUME;
             mPan = Engine.DEFAULT_PAN;
             mAudioAttributes = null;
@@ -722,7 +722,7 @@ public abstract class TextToSpeechService extends Service {
             return new AudioOutputParams(
                     paramsBundle.getInt(
                             Engine.KEY_PARAM_SESSION_ID,
-                            AudioSystem.AUDIO_SESSION_ALLOCATE),
+                            AudioManager.AUDIO_SESSION_ID_GENERATE),
                     paramsBundle.getFloat(
                             Engine.KEY_PARAM_VOLUME,
                             Engine.DEFAULT_VOLUME),

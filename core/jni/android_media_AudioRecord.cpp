@@ -200,7 +200,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         return (jint) AUDIO_JAVA_ERROR;
     }
-    int sessionId = nSession[0];
+    audio_session_t sessionId = (audio_session_t) nSession[0];
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     nSession = NULL;
 
@@ -385,7 +385,7 @@ android_media_AudioRecord_start(JNIEnv *env, jobject thiz, jint event, jint trig
     }
 
     return nativeToJavaStatus(
-            lpRecorder->start((AudioSystem::sync_event_t)event, triggerSession));
+            lpRecorder->start((AudioSystem::sync_event_t)event, (audio_session_t) triggerSession));
 }
 
 

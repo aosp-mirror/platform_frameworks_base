@@ -906,14 +906,16 @@ android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaPlayer_release(env, thiz);
 }
 
-static void android_media_MediaPlayer_set_audio_session_id(JNIEnv *env,  jobject thiz, jint sessionId) {
+static void android_media_MediaPlayer_set_audio_session_id(JNIEnv *env,  jobject thiz,
+        jint sessionId) {
     ALOGV("set_session_id(): %d", sessionId);
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    process_media_player_call( env, thiz, mp->setAudioSessionId(sessionId), NULL, NULL );
+    process_media_player_call( env, thiz, mp->setAudioSessionId((audio_session_t) sessionId), NULL,
+            NULL);
 }
 
 static jint android_media_MediaPlayer_get_audio_session_id(JNIEnv *env,  jobject thiz) {

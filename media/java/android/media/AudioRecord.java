@@ -228,7 +228,7 @@ public class AudioRecord implements AudioRouting
     /**
      * Audio session ID
      */
-    private int mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
+    private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
     /**
      * AudioAttributes
      */
