@@ -29,6 +29,11 @@ public class PointerCountClassifier extends GestureClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "PTR_CNT";
+    }
+
+    @Override
     public void onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
 

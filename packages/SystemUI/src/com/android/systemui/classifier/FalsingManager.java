@@ -31,6 +31,8 @@ import android.view.MotionEvent;
 import com.android.systemui.analytics.DataCollector;
 import com.android.systemui.statusbar.StatusBarState;
 
+import java.io.PrintWriter;
+
 /**
  * When the phone is locked, listens to touch, sensor and phone events and sends them to
  * DataCollector and HumanInteractionClassifier.
@@ -102,8 +104,14 @@ public class FalsingManager implements SensorEventListener {
     }
 
     private boolean shouldSessionBeActive() {
-        return isEnabled() && mScreenOn &&
-                (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED);
+        if (FalsingLog.ENABLED && FalsingLog.VERBOSE)
+            FalsingLog.v("shouldBeActive", new StringBuilder()
+                    .append("enabled=").append(isEnabled() ? 1 : 0)
+                    .append(" mScreenOn=").append(mScreenOn ? 1 : 0)
+                    .append(" mState=").append(StatusBarState.toShortString(mState))
+                    .toString()
+            );
+        return isEnabled() && mScreenOn && (mState == StatusBarState.KEYGUARD);
     }
 
     private boolean sessionEntrypoint() {
@@ -122,6 +130,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     private void onSessionStart() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onSessionStart", "classifierEnabled=" + isClassiferEnabled());
+        }
         mBouncerOn = false;
         mSessionActive = true;
 
@@ -154,6 +165,16 @@ public class FalsingManager implements SensorEventListener {
      * @return true if the classifier determined that this is not a human interacting with the phone
      */
     public boolean isFalseTouch() {
+        if (FalsingLog.ENABLED) {
+            if (!mSessionActive) {
+                FalsingLog.wtf("isFalseTouch", new StringBuilder()
+                        .append("Session is not active, yet there's a query for a false touch.")
+                        .append(" enabled=").append(isEnabled() ? 1 : 0)
+                        .append(" mScreenOn=").append(mScreenOn ? 1 : 0)
+                        .append(" mState=").append(StatusBarState.toShortString(mState))
+                        .toString());
+            }
+        }
         return mHumanInteractionClassifier.isFalseTouch();
     }
 
@@ -173,6 +194,12 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void setStatusBarState(int state) {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("setStatusBarState", new StringBuilder()
+                    .append("from=").append(StatusBarState.toShortString(mState))
+                    .append(" to=").append(StatusBarState.toShortString(state))
+                    .toString());
+        }
         mState = state;
         if (shouldSessionBeActive()) {
             sessionEntrypoint();
@@ -182,6 +209,11 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onScreenTurningOn() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onScreenTurningOn", new StringBuilder()
+                    .append("from=").append(mScreenOn ? 1 : 0)
+                    .toString());
+        }
         mScreenOn = true;
         if (sessionEntrypoint()) {
             mDataCollector.onScreenTurningOn();
@@ -189,6 +221,11 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onScreenOnFromTouch() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onScreenOnFromTouch", new StringBuilder()
+                    .append("from=").append(mScreenOn ? 1 : 0)
+                    .toString());
+        }
         mScreenOn = true;
         if (sessionEntrypoint()) {
             mDataCollector.onScreenOnFromTouch();
@@ -196,17 +233,30 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onScreenOff() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onScreenOff", new StringBuilder()
+                    .append("from=").append(mScreenOn ? 1 : 0)
+                    .toString());
+        }
         mDataCollector.onScreenOff();
         mScreenOn = false;
         sessionExitpoint(false /* force */);
     }
 
     public void onSucccessfulUnlock() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onSucccessfulUnlock", "");
+        }
         mDataCollector.onSucccessfulUnlock();
         sessionExitpoint(true /* force */);
     }
 
     public void onBouncerShown() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onBouncerShown", new StringBuilder()
+                    .append("from=").append(mBouncerOn ? 1 : 0)
+                    .toString());
+        }
         if (!mBouncerOn) {
             mBouncerOn = true;
             mDataCollector.onBouncerShown();
@@ -214,6 +264,11 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onBouncerHidden() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onBouncerHidden", new StringBuilder()
+                    .append("from=").append(mBouncerOn ? 1 : 0)
+                    .toString());
+        }
         if (mBouncerOn) {
             mBouncerOn = false;
             mDataCollector.onBouncerHidden();
@@ -221,6 +276,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onQsDown() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onQsDown", "");
+        }
         mHumanInteractionClassifier.setType(Classifier.QUICK_SETTINGS);
         mDataCollector.onQsDown();
     }
@@ -230,6 +288,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onTrackingStarted() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onTrackingStarted", "");
+        }
         mHumanInteractionClassifier.setType(Classifier.UNLOCK);
         mDataCollector.onTrackingStarted();
     }
@@ -251,6 +312,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onNotificatonStartDraggingDown() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onNotificatonStartDraggingDown", "");
+        }
         mHumanInteractionClassifier.setType(Classifier.NOTIFICATION_DRAG_DOWN);
         mDataCollector.onNotificatonStartDraggingDown();
     }
@@ -264,6 +328,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onNotificatonStartDismissing() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onNotificatonStartDismissing", "");
+        }
         mHumanInteractionClassifier.setType(Classifier.NOTIFICATION_DISMISS);
         mDataCollector.onNotificatonStartDismissing();
     }
@@ -281,6 +348,9 @@ public class FalsingManager implements SensorEventListener {
     }
 
     public void onAffordanceSwipingStarted(boolean rightCorner) {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onAffordanceSwipingStarted", "");
+        }
         if (rightCorner) {
             mHumanInteractionClassifier.setType(Classifier.RIGHT_AFFORDANCE);
         } else {
@@ -310,5 +380,15 @@ public class FalsingManager implements SensorEventListener {
             mDataCollector.onTouchEvent(event, width, height);
             mHumanInteractionClassifier.onTouchEvent(event);
         }
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("FALSING MANAGER");
+        pw.print("classifierEnabled="); pw.println(isClassiferEnabled() ? 1 : 0);
+        pw.print("mSessionActive="); pw.println(mSessionActive ? 1 : 0);
+        pw.print("mBouncerOn="); pw.println(mSessionActive ? 1 : 0);
+        pw.print("mState="); pw.println(StatusBarState.toShortString(mState));
+        pw.print("mScreenOn="); pw.println(mScreenOn ? 1 : 0);
+        pw.println();
     }
 }

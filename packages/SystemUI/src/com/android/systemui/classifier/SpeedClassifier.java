@@ -27,6 +27,11 @@ public class SpeedClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "SPD";
+    }
+
+    @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         float duration = (float) stroke.getDurationNanos() / NANOS_TO_SECONDS;
         if (duration == 0.0f) {

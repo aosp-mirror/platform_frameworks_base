@@ -112,6 +112,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -2263,6 +2264,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarWindowManager.setPanelExpanded(isExpanded);
     }
 
+    public void onScreenTurnedOff() {
+        mFalsingManager.onScreenOff();
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
@@ -2966,16 +2971,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
         }
 
+        FalsingManager.getInstance(mContext).dump(pw);
+        FalsingLog.dump(pw);
+
         pw.println("SharedPreferences:");
         for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
             pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
         }
-    }
-
-    private String hunStateToString(Entry entry) {
-        if (entry == null) return "null";
-        if (entry.notification == null) return "corrupt";
-        return entry.notification.getPackageName();
     }
 
     private static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
@@ -4186,7 +4188,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDeviceInteractive = false;
         mWakeUpComingFromTouch = false;
         mWakeUpTouchLocation = null;
-        mFalsingManager.onScreenOff();
         mStackScroller.setAnimationsEnabled(false);
         updateVisibleToUser();
         if (mLaunchCameraOnFinishedGoingToSleep) {

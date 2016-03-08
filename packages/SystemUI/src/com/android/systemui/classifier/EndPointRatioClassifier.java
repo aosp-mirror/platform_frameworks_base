@@ -26,6 +26,11 @@ public class EndPointRatioClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "END_RTIO";
+    }
+
+    @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         float ratio;
         if (stroke.getTotalLength() == 0.0f) {

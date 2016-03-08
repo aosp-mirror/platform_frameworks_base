@@ -25,6 +25,11 @@ public class DirectionClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "DIR";
+    }
+
+    @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         Point firstPoint = stroke.getPoints().get(0);
         Point lastPoint = stroke.getPoints().get(stroke.getPoints().size() - 1);
