@@ -1044,6 +1044,42 @@ $(static_doc_index_redirect): \
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
 
+# ====  static html in the sdk, reference only ===============================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := offline-refonly
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-offlinemode \
+		-title "Android SDK" \
+		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
+		-sdkvalues $(OUT_DOCS) \
+		-hdf android.whichdoc offline \
+		-referenceonly
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-refonly
+
+include $(BUILD_DROIDDOC)
+
+static_doc_index_redirect := $(out_dir)/index.html
+$(static_doc_index_redirect): \
+	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
+	$(hide) mkdir -p $(dir $@)
+	$(hide) $(ACP) $< $@
+
+$(full_target): $(static_doc_index_redirect)
+$(full_target): $(framework_built)
+
 # ==== docs for the web (on the androiddevdocs app engine server) =======================
 include $(CLEAR_VARS)
 
