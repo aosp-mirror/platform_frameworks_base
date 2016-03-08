@@ -19171,24 +19171,6 @@ package android.location {
     method public boolean hasFullBiasNanos();
     method public boolean hasLeapSecond();
     method public boolean hasTimeUncertaintyNanos();
-    method public void reset();
-    method public void resetBiasNanos();
-    method public void resetBiasUncertaintyNanos();
-    method public void resetDriftNanosPerSecond();
-    method public void resetDriftUncertaintyNanosPerSecond();
-    method public void resetFullBiasNanos();
-    method public void resetLeapSecond();
-    method public void resetTimeUncertaintyNanos();
-    method public void set(android.location.GnssClock);
-    method public void setBiasNanos(double);
-    method public void setBiasUncertaintyNanos(double);
-    method public void setDriftNanosPerSecond(double);
-    method public void setDriftUncertaintyNanosPerSecond(double);
-    method public void setFullBiasNanos(long);
-    method public void setHardwareClockDiscontinuityCount(int);
-    method public void setLeapSecond(int);
-    method public void setTimeNanos(long);
-    method public void setTimeUncertaintyNanos(double);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssClock> CREATOR;
   }
@@ -19219,31 +19201,6 @@ package android.location {
     method public boolean hasCarrierPhaseUncertainty();
     method public boolean hasSnrInDb();
     method public boolean isPseudorangeRateCorrected();
-    method public void reset();
-    method public void resetCarrierCycles();
-    method public void resetCarrierFrequencyHz();
-    method public void resetCarrierPhase();
-    method public void resetCarrierPhaseUncertainty();
-    method public void resetSnrInDb();
-    method public void set(android.location.GnssMeasurement);
-    method public void setAccumulatedDeltaRangeMeters(double);
-    method public void setAccumulatedDeltaRangeState(int);
-    method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
-    method public void setCarrierCycles(long);
-    method public void setCarrierFrequencyHz(float);
-    method public void setCarrierPhase(double);
-    method public void setCarrierPhaseUncertainty(double);
-    method public void setCn0DbHz(double);
-    method public void setConstellationType(int);
-    method public void setMultipathIndicator(int);
-    method public void setPseudorangeRateMetersPerSecond(double);
-    method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
-    method public void setReceivedSvTimeNanos(long);
-    method public void setReceivedSvTimeUncertaintyNanos(long);
-    method public void setSnrInDb(double);
-    method public void setState(int);
-    method public void setSvid(int);
-    method public void setTimeOffsetNanos(double);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ADR_STATE_CYCLE_SLIP = 4; // 0x4
     field public static final int ADR_STATE_RESET = 2; // 0x2
@@ -19293,14 +19250,6 @@ package android.location {
     method public int getSubmessageId();
     method public int getSvid();
     method public int getType();
-    method public void reset();
-    method public void set(android.location.GnssNavigationMessage);
-    method public void setData(byte[]);
-    method public void setMessageId(int);
-    method public void setStatus(int);
-    method public void setSubmessageId(int);
-    method public void setSvid(int);
-    method public void setType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessage> CREATOR;
     field public static final int STATUS_PARITY_PASSED = 1; // 0x1

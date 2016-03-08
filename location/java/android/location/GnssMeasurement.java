@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.TestApi;
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -46,6 +47,7 @@ public final class GnssMeasurement implements Parcelable {
     private double mCarrierPhaseUncertainty;
     private int mMultipathIndicator;
     private double mSnrInDb;
+    private boolean mPseudorangeRateCorrected;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -55,7 +57,6 @@ public final class GnssMeasurement implements Parcelable {
     private static final int HAS_CARRIER_CYCLES = (1<<10);
     private static final int HAS_CARRIER_PHASE = (1<<11);
     private static final int HAS_CARRIER_PHASE_UNCERTAINTY = (1<<12);
-    private static final int HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
 
     /** The status of multipath. */
     @Retention(RetentionPolicy.SOURCE)
@@ -141,13 +142,19 @@ public final class GnssMeasurement implements Parcelable {
 
     // End enumerations in sync with gps.h
 
-    GnssMeasurement() {
+    /**
+     * @hide
+     */
+    @TestApi
+    public GnssMeasurement() {
         initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
+     * @hide
      */
+    @TestApi
     public void set(GnssMeasurement measurement) {
         mFlags = measurement.mFlags;
         mSvid = measurement.mSvid;
@@ -174,7 +181,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets all the contents to its original state.
+     * @hide
      */
+    @TestApi
     public void reset() {
         initialize();
     }
@@ -189,7 +198,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the Pseud-random number (PRN).
+     * @hide
      */
+    @TestApi
     public void setSvid(int value) {
         mSvid = value;
     }
@@ -204,7 +215,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the constellation type.
+     * @hide
      */
+    @TestApi
     public void setConstellationType(@GnssStatus.ConstellationType int value) {
         mConstellationType = value;
     }
@@ -227,7 +240,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the time offset at which the measurement was taken in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setTimeOffsetNanos(double value) {
         mTimeOffsetNanos = value;
     }
@@ -244,7 +259,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the sync state.
+     * @hide
      */
+    @TestApi
     public void setState(int value) {
         mState = value;
     }
@@ -353,7 +370,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the received GNSS time in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setReceivedSvTimeNanos(long value) {
         mReceivedSvTimeNanos = value;
     }
@@ -367,7 +386,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the received GNSS time uncertainty (1-Sigma) in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setReceivedSvTimeUncertaintyNanos(long value) {
         mReceivedSvTimeUncertaintyNanos = value;
     }
@@ -384,7 +405,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the carrier-to-noise density in dB-Hz.
+     * @hide
      */
+    @TestApi
     public void setCn0DbHz(double value) {
         mCn0DbHz = value;
     }
@@ -409,7 +432,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the pseudorange rate at the timestamp in m/s.
+     * @hide
      */
+    @TestApi
     public void setPseudorangeRateMetersPerSecond(double value) {
         mPseudorangeRateMetersPerSecond = value;
     }
@@ -421,7 +446,16 @@ public final class GnssMeasurement implements Parcelable {
      *         value, {@code false} if it contains an uncorrected value.
      */
     public boolean isPseudorangeRateCorrected() {
-        return !isFlagSet(HAS_UNCORRECTED_PSEUDORANGE_RATE);
+        return mPseudorangeRateCorrected;
+    }
+
+    /**
+     * Sets whether the pseudorange corrected.
+     * @hide
+     */
+    @TestApi
+    public void setPseudorangeRateCorrected(boolean value) {
+        mPseudorangeRateCorrected = value;
     }
 
     /**
@@ -434,7 +468,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the pseudorange's rate uncertainty (1-Sigma) in m/s.
+     * @hide
      */
+    @TestApi
     public void setPseudorangeRateUncertaintyMetersPerSecond(double value) {
         mPseudorangeRateUncertaintyMetersPerSecond = value;
     }
@@ -450,7 +486,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the 'Accumulated Delta Range' state.
+     * @hide
      */
+    @TestApi
     public void setAccumulatedDeltaRangeState(int value) {
         mAccumulatedDeltaRangeState = value;
     }
@@ -500,7 +538,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the accumulated delta range in meters.
+     * @hide
      */
+    @TestApi
     public void setAccumulatedDeltaRangeMeters(double value) {
         mAccumulatedDeltaRangeMeters = value;
     }
@@ -519,7 +559,10 @@ public final class GnssMeasurement implements Parcelable {
      * Sets the accumulated delta range's uncertainty (1-sigma) in meters.
      *
      * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     *
+     * @hide
      */
+    @TestApi
     public void setAccumulatedDeltaRangeUncertaintyMeters(double value) {
         mAccumulatedDeltaRangeUncertaintyMeters = value;
     }
@@ -543,7 +586,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the Carrier frequency (L1 or L2) in Hz.
+     * @hide
      */
+    @TestApi
     public void setCarrierFrequencyHz(float carrierFrequencyHz) {
         setFlag(HAS_CARRIER_FREQUENCY);
         mCarrierFrequencyHz = carrierFrequencyHz;
@@ -551,7 +596,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the Carrier frequency (L1 or L2) in Hz.
+     * @hide
      */
+    @TestApi
     public void resetCarrierFrequencyHz() {
         resetFlag(HAS_CARRIER_FREQUENCY);
         mCarrierFrequencyHz = Float.NaN;
@@ -576,7 +623,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the number of full carrier cycles between the satellite and the receiver.
+     * @hide
      */
+    @TestApi
     public void setCarrierCycles(long value) {
         setFlag(HAS_CARRIER_CYCLES);
         mCarrierCycles = value;
@@ -584,7 +633,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the number of full carrier cycles between the satellite and the receiver.
+     * @hide
      */
+    @TestApi
     public void resetCarrierCycles() {
         resetFlag(HAS_CARRIER_CYCLES);
         mCarrierCycles = Long.MIN_VALUE;
@@ -613,7 +664,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the RF phase detected by the receiver.
+     * @hide
      */
+    @TestApi
     public void setCarrierPhase(double value) {
         setFlag(HAS_CARRIER_PHASE);
         mCarrierPhase = value;
@@ -621,7 +674,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the RF phase detected by the receiver.
+     * @hide
      */
+    @TestApi
     public void resetCarrierPhase() {
         resetFlag(HAS_CARRIER_PHASE);
         mCarrierPhase = Double.NaN;
@@ -646,7 +701,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the Carrier-phase's uncertainty (1-Sigma) in cycles.
+     * @hide
      */
+    @TestApi
     public void setCarrierPhaseUncertainty(double value) {
         setFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
         mCarrierPhaseUncertainty = value;
@@ -654,7 +711,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the Carrier-phase's uncertainty (1-Sigma) in cycles.
+     * @hide
      */
+    @TestApi
     public void resetCarrierPhaseUncertainty() {
         resetFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
         mCarrierPhaseUncertainty = Double.NaN;
@@ -670,7 +729,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the 'multi-path' indicator.
+     * @hide
      */
+    @TestApi
     public void setMultipathIndicator(@MultipathIndicator int value) {
         mMultipathIndicator = value;
     }
@@ -710,7 +771,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Sets the Signal-to-noise ratio (SNR) in dB.
+     * @hide
      */
+    @TestApi
     public void setSnrInDb(double snrInDb) {
         setFlag(HAS_SNR);
         mSnrInDb = snrInDb;
@@ -718,7 +781,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the Signal-to-noise ratio (SNR) in dB.
+     * @hide
      */
+    @TestApi
     public void resetSnrInDb() {
         resetFlag(HAS_SNR);
         mSnrInDb = Double.NaN;
@@ -748,6 +813,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mCarrierPhaseUncertainty = parcel.readDouble();
             gnssMeasurement.mMultipathIndicator = parcel.readInt();
             gnssMeasurement.mSnrInDb = parcel.readDouble();
+            gnssMeasurement.mPseudorangeRateCorrected = (parcel.readByte() != 0);
 
             return gnssMeasurement;
         }
@@ -779,6 +845,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mCarrierPhaseUncertainty);
         parcel.writeInt(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
+        parcel.writeByte((byte) (mPseudorangeRateCorrected ? 1 : 0));
     }
 
     @Override
@@ -876,6 +943,7 @@ public final class GnssMeasurement implements Parcelable {
         resetCarrierPhaseUncertainty();
         setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
         resetSnrInDb();
+        setPseudorangeRateCorrected(false);
     }
 
     private void setFlag(int flag) {

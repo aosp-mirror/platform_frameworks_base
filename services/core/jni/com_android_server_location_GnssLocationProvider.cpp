@@ -1209,6 +1209,10 @@ static jobject translate_gps_measurement(JNIEnv* env,
         static_cast<int32_t>(measurement->multipath_indicator));
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
 
+    SET_IF(!GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE,
+           PseudorangeRateCorrected,
+           true);
+
     return object.get();
 }
 
