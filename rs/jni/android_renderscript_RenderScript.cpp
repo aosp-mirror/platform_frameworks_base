@@ -1062,7 +1062,7 @@ nElementCreate(JNIEnv *_env, jobject _this, jlong con, jlong type, jint kind, jb
               type, kind, norm, size);
     }
     return (jlong)(uintptr_t)rsElementCreate((RsContext)con, (RsDataType)type, (RsDataKind)kind,
-                                             norm, size, true);
+                                             norm, size);
 }
 
 static jlong
@@ -1101,7 +1101,7 @@ nElementCreate2(JNIEnv *_env, jobject _this, jlong con,
     jlong id = (jlong)(uintptr_t)rsElementCreate2((RsContext)con,
                                      (const RsElement *)ids, fieldCount,
                                      nameArray, fieldCount * sizeof(size_t),  sizeArray,
-                                     (const uint32_t *)arraySizes, fieldCount, true);
+                                     (const uint32_t *)arraySizes, fieldCount);
 
     free(ids);
     free(arraySizes);
@@ -1175,7 +1175,7 @@ nTypeCreate(JNIEnv *_env, jobject _this, jlong con, jlong eid,
     }
 
     return (jlong)(uintptr_t)rsTypeCreate((RsContext)con, (RsElement)eid, dimx, dimy, dimz, mips,
-                                          faces, yuv, true);
+                                          faces, yuv);
 }
 
 static void
@@ -1211,7 +1211,7 @@ nAllocationCreateTyped(JNIEnv *_env, jobject _this, jlong con, jlong type, jint 
     }
     return (jlong)(uintptr_t) rsAllocationCreateTyped((RsContext)con, (RsType)type,
                                                       (RsAllocationMipmapControl)mips,
-                                                      (uint32_t)usage, (uintptr_t)pointer, true);
+                                                      (uint32_t)usage, (uintptr_t)pointer);
 }
 
 static void
@@ -1316,7 +1316,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
-                                                  ptr, bitmap.getSize(), usage, true);
+                                                  ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
     return id;
 }
@@ -1332,7 +1332,7 @@ nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateTyped((RsContext)con,
                                             (RsType)type, (RsAllocationMipmapControl)mip,
-                                            (uint32_t)usage, (uintptr_t)ptr, true);
+                                            (uint32_t)usage, (uintptr_t)ptr);
     bitmap.unlockPixels();
     return id;
 }
@@ -1348,7 +1348,7 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
-                                                      ptr, bitmap.getSize(), usage, true);
+                                                      ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
     return id;
 }
