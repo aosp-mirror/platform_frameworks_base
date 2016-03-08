@@ -128,8 +128,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private static final boolean DEBUG = false;
 
-    public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
-
     private static final String FRAGMENT_TAG = "FRAGMENT_TAG";
 
     private static final String HAS_PRINTED_PREF = "has_printed";
@@ -714,21 +712,17 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private void onSelectPrinterActivityResult(int resultCode, Intent data) {
         if (resultCode == RESULT_OK && data != null) {
-            PrinterId printerId = data.getParcelableExtra(INTENT_EXTRA_PRINTER_ID);
-            if (printerId != null) {
-                mDestinationSpinnerAdapter.ensurePrinterInVisibleAdapterPosition(printerId);
-                final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
-                if (index != AdapterView.INVALID_POSITION) {
-                    mDestinationSpinner.setSelection(index);
-                    return;
-                }
+            PrinterInfo printerInfo = data.getParcelableExtra(
+                    SelectPrinterActivity.INTENT_EXTRA_PRINTER);
+            if (printerInfo != null) {
+                mCurrentPrinter = printerInfo;
+                mDestinationSpinnerAdapter.ensurePrinterInVisibleAdapterPosition(printerInfo);
             }
         }
 
         if (mCurrentPrinter != null) {
-            PrinterId printerId = mCurrentPrinter.getId();
-            final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
-            mDestinationSpinner.setSelection(index);
+            // Trigger PrintersObserver.onChanged() to adjust selection back to current printer
+            mDestinationSpinnerAdapter.notifyDataSetChanged();
         }
     }
 
@@ -2217,23 +2211,36 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return AdapterView.INVALID_POSITION;
         }
 
-        public void ensurePrinterInVisibleAdapterPosition(PrinterId printerId) {
+        public void ensurePrinterInVisibleAdapterPosition(PrinterInfo printer) {
             final int printerCount = mPrinterHolders.size();
+            boolean isKnownPrinter = false;
             for (int i = 0; i < printerCount; i++) {
                 PrinterHolder printerHolder = mPrinterHolders.get(i);
-                if (printerHolder.printer.getId().equals(printerId)) {
+
+                if (printerHolder.printer.getId().equals(printer.getId())) {
+                    isKnownPrinter = true;
+
                     // If already in the list - do nothing.
                     if (i < getCount() - 2) {
-                        return;
+                        break;
                     }
                     // Else replace the last one (two items are not printers).
                     final int lastPrinterIndex = getCount() - 3;
                     mPrinterHolders.set(i, mPrinterHolders.get(lastPrinterIndex));
                     mPrinterHolders.set(lastPrinterIndex, printerHolder);
-                    notifyDataSetChanged();
-                    return;
+                    break;
                 }
             }
+
+            if (!isKnownPrinter) {
+                PrinterHolder printerHolder = new PrinterHolder(printer);
+                printerHolder.removed = true;
+
+                mPrinterHolders.add(Math.max(0, getCount() - 3), printerHolder);
+            }
+
+            // Force reload to adjust selection in PrintersObserver.onChanged()
+            notifyDataSetChanged();
         }
 
         @Override
@@ -2416,8 +2423,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             List<PrinterHolder> newPrinterHolders = new ArrayList<>();
 
             // Update printers we already have which are either updated or removed.
-            // We do not remove printers if the currently selected printer is removed
-            // to prevent the user printing to a wrong printer.
+            // We do not remove the currently selected printer.
             final int oldPrinterCount = mPrinterHolders.size();
             for (int i = 0; i < oldPrinterCount; i++) {
                 PrinterHolder printerHolder = mPrinterHolders.get(i);
@@ -2426,10 +2432,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (updatedPrinter != null) {
                     printerHolder.printer = updatedPrinter;
                     printerHolder.removed = false;
-                } else {
+                    newPrinterHolders.add(printerHolder);
+                } else if (mCurrentPrinter != null && mCurrentPrinter.getId().equals(oldPrinterId)){
                     printerHolder.removed = true;
+                    newPrinterHolders.add(printerHolder);
                 }
-                newPrinterHolders.add(printerHolder);
             }
 
             // Add the rest of the new printers, i.e. what is left.
@@ -2461,14 +2468,25 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return null;
         }
 
-        public void pruneRemovedPrinters() {
+        /**
+         * Remove a printer from the holders if it is marked as removed.
+         *
+         * @param printerId the id of the printer to remove.
+         *
+         * @return true iff the printer was removed.
+         */
+        public boolean pruneRemovedPrinter(PrinterId printerId) {
             final int holderCounts = mPrinterHolders.size();
             for (int i = holderCounts - 1; i >= 0; i--) {
                 PrinterHolder printerHolder = mPrinterHolders.get(i);
-                if (printerHolder.removed) {
+
+                if (printerHolder.printer.getId().equals(printerId) && printerHolder.removed) {
                     mPrinterHolders.remove(i);
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private void addPrinters(List<PrinterHolder> list, Collection<PrinterInfo> printers) {
@@ -2513,15 +2531,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
             PrinterHolder printerHolder = mDestinationSpinnerAdapter.getPrinterHolder(
                     oldPrinterState.getId());
-            if (printerHolder == null) {
-                return;
-            }
             PrinterInfo newPrinterState = printerHolder.printer;
 
-            if (!printerHolder.removed) {
-                mDestinationSpinnerAdapter.pruneRemovedPrinters();
-            } else {
+            if (printerHolder.removed) {
                 onPrinterUnavailable(newPrinterState);
+            }
+
+            if (mDestinationSpinner.getSelectedItem() != printerHolder) {
+                mDestinationSpinner.setSelection(
+                        mDestinationSpinnerAdapter.getPrinterIndex(newPrinterState.getId()));
             }
 
             if (oldPrinterState.equals(newPrinterState)) {
@@ -2613,13 +2631,28 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     return;
                 }
 
+                PrinterId oldId = null;
+                if (mCurrentPrinter != null) {
+                    oldId = mCurrentPrinter.getId();
+                }
+
                 mCurrentPrinter = currentPrinter;
+
+                if (oldId != null) {
+                    boolean printerRemoved = mDestinationSpinnerAdapter.pruneRemovedPrinter(oldId);
+
+                    if (printerRemoved) {
+                        // Trigger PrinterObserver.onChanged to adjust selection. This will call
+                        // this function again.
+                        mDestinationSpinnerAdapter.notifyDataSetChanged();
+                        return;
+                    }
+                }
 
                 PrinterHolder printerHolder = mDestinationSpinnerAdapter.getPrinterHolder(
                         currentPrinter.getId());
                 if (!printerHolder.removed) {
                     setState(STATE_CONFIGURING);
-                    mDestinationSpinnerAdapter.pruneRemovedPrinters();
                     ensurePreviewUiShown();
                 }
 
