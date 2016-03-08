@@ -167,8 +167,8 @@ public final class BridgeContext extends Context {
         RTL_ATTRS.put("?android:attr/paddingRight", "paddingEnd");
         RTL_ATTRS.put("?android:attr/layout_marginLeft", "layout_marginStart");
         RTL_ATTRS.put("?android:attr/layout_marginRight", "layout_marginEnd");
-        RTL_ATTRS.put("?android:attr/layout_toLeft", "layout_toStartOf");
-        RTL_ATTRS.put("?android:attr/layout_toRight", "layout_toEndOf");
+        RTL_ATTRS.put("?android:attr/layout_toLeftOf", "layout_toStartOf");
+        RTL_ATTRS.put("?android:attr/layout_toRightOf", "layout_toEndOf");
         RTL_ATTRS.put("?android:attr/layout_alignParentLeft", "layout_alignParentStart");
         RTL_ATTRS.put("?android:attr/layout_alignParentRight", "layout_alignParentEnd");
         RTL_ATTRS.put("?android:attr/drawableLeft", "drawableStart");
