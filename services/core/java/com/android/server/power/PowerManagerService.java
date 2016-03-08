@@ -50,6 +50,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
 import android.util.Slog;
@@ -57,6 +58,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
+
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
@@ -537,6 +539,8 @@ public final class PowerManagerService extends SystemService
                     }
                 }
                 mBootCompletedRunnables = null;
+
+                incrementBootCount();
             }
         }
     }
@@ -772,7 +776,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    void updateLowPowerModeLocked() {
+    private void updateLowPowerModeLocked() {
         if (mIsPowered && mLowPowerModeSetting) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateLowPowerModeLocked: powered, turning setting off");
@@ -2911,6 +2915,20 @@ public final class PowerManagerService extends SystemService
         SuspendBlocker suspendBlocker = new SuspendBlockerImpl(name);
         mSuspendBlockers.add(suspendBlocker);
         return suspendBlocker;
+    }
+
+    private void incrementBootCount() {
+        synchronized (mLock) {
+            int count;
+            try {
+                count = Settings.Global.getInt(
+                        getContext().getContentResolver(), Settings.Global.BOOT_COUNT);
+            } catch (SettingNotFoundException e) {
+                count = 0;
+            }
+            Settings.Global.putInt(
+                    getContext().getContentResolver(), Settings.Global.BOOT_COUNT, count + 1);
+        }
     }
 
     private static WorkSource copyWorkSource(WorkSource workSource) {
