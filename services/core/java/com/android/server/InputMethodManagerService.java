@@ -39,6 +39,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
@@ -47,7 +48,6 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -465,7 +465,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             super(handler);
         }
 
-        public void registerContentObserverLocked(int userId) {
+        public void registerContentObserverLocked(@UserIdInt int userId) {
             if (mRegistered && mUserId == userId) {
                 return;
             }
@@ -774,7 +774,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
+        public void onSwitchUser(@UserIdInt int userHandle) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
+            mService.onSwitchUser(userHandle);
+        }
+
+        @Override
         public void onBootPhase(int phase) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 StatusBarManagerService statusBarService = (StatusBarManagerService) ServiceManager
                         .getService(Context.STATUS_BAR_SERVICE);
@@ -783,12 +792,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onUnlockUser(int userHandle) {
+        public void onUnlockUser(@UserIdInt int userHandle) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
             mService.onUnlockUser(userHandle);
         }
     }
 
-    public void onUnlockUser(int userId) {
+    void onUnlockUser(@UserIdInt int userId) {
         synchronized(mMethodMap) {
             final int currentUserId = mSettings.getCurrentUserId();
             if (DEBUG) {
@@ -801,6 +812,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // We need to rebuild IMEs.
             buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
             updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
+        }
+    }
+
+    void onSwitchUser(@UserIdInt int userId) {
+        synchronized (mMethodMap) {
+            switchUserLocked(userId);
         }
     }
 
@@ -852,25 +869,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mNotificationShown = false;
         int userId = 0;
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                    new SynchronousUserSwitchObserver() {
-                        @Override
-                        public void onUserSwitching(int newUserId)
-                                throws RemoteException {
-                            synchronized(mMethodMap) {
-                                switchUserLocked(newUserId);
-                            }
-                        }
-
-                        @Override
-                        public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        }
-
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
-                        }
-                    });
             userId = ActivityManagerNative.getDefault().getCurrentUser().id;
         } catch (RemoteException e) {
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
