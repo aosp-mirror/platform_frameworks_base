@@ -3,6 +3,13 @@ page.tags="appwidget","home"
 page.metaDescription=Design guide to creating widgets that are easy to use and look great.
 @jd:body
 
+<a class="notice-developers" href="{@docRoot}guide/topics/appwidgets/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>App Widgets</p>
+  </div>
+</a>
+
 <p itemprop="description">Widgets are an essential aspect of home screen customization. You can imagine them as "at-a-glance" views of an app's most important data and functionality that is accessible right from the user's home screen. Users can move widgets across their home screen panels, and, if supported, resize them to tailor the amount of information within a widget to their preference.</p>
 
 <h2>Widget types</h2>
@@ -80,7 +87,10 @@ A music player widget is primarily a control widget, but also keeps the user inf
 <div class="cols">
   <div class="col-6">
     <h3>Widget resizing</h3>
-    <p>With version 3.1, Android introduced resizable widgets to the platform. Resizing allows users to adjust the height and/or the width of a widget within the constraints of the home panel placement grid. You can decide if your widget is freely resizable or if it is constrained to horizontal or vertical size changes. You do not have to support resizing if your particular widget is inherently fixed-size.</p>
+    <p>Resizing allows users to adjust the height and/or the width of a widget within the
+constraints of the home panel placement grid. You can decide if your widget is freely resizable or
+if it is constrained to horizontal or vertical size changes. You do not have to support resizing if
+your particular widget is inherently fixed-size.</p>
     <p>Allowing users to resize widgets has important benefits:</p>
     <ul>
       <li>They can fine-tune how much information they want to see on each widget.</li>
