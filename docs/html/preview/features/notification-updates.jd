@@ -36,9 +36,10 @@ notification API to support inline replies on handsets. This feature allows user
   notifications, individually from the notification shade.
 </p>
 
-<p>Last, Android N also adds two new custom view style APIs that
-allow you to leverage system decorations in your app’s customized notification
-views.</p>
+<p>Last, Android N also adds new APIs that allow you to leverage system
+decorations in your app’s customized notification views. These APIs help
+ensure that the notification views share a consistent presentation with
+standard templates.</p>
 
 <p>This document highlights some of the key changes that you should take into
  account when using the new notification features in your apps.</p>
@@ -184,7 +185,7 @@ When the user responds via {@link android.support.v4.app.RemoteInput},
 <h2 id="bundle">Bundled Notifications</h2>
 
 <p>Android N provides developers with a new way to represent
- a queue of notifications: <em>bundled notifications</em>. This is similar to the
+ a queue of notifications: <i>bundled notifications</i>. This is similar to the
   <a href="{@docRoot}/training/wearables/notifications/stacks.html">Notification
   Stacks</a> feature in Android Wear. For example, if your app creates notifications
   for received messages, when more than one message is received, bundle the
@@ -218,8 +219,10 @@ Each Notification to a Group</a>.</p>
 
 <h3 id="best-practices">Best practices for bundled notifications</h3>
 <p>This section provides guidelines about when to use notification groups instead
-of the {@link android.app.Notification.InboxStyle} notifications that have been available
- in earlier versions of the Android platform.</p>
+of the {@link android.app.Notification.InboxStyle InboxStyle}
+notifications that have been available in earlier versions of the
+Android platform.</p>
+
 <h3>When to use bundled notifications</h3>
 
 <p>You should use notification groups only if all of the following conditions are
@@ -241,9 +244,14 @@ true for your use case:</p>
 displaying a list of incoming messages, or an email app displaying a list of
 received emails.</p>
 
-<p>Examples of where a single notification (InboxStyle or BigTextStyle) is preferable
- include: Individual messages from a single person, or a list representation of
- single-line text items.</p>
+<p>
+Examples of cases where a single notification is preferable
+ include individual messages from a single person, or a list representation of
+ single-line text items. You can use
+({@link android.app.Notification.InboxStyle InboxStyle} or
+{@link android.app.Notification.BigTextStyle BigTextStyle}) to accomplish
+this.
+</p>
 
 <h3 id ="post">Displaying bundled notifications</h3>
 
@@ -281,18 +289,39 @@ Android 5.0 (API level 21). </p>
  The only action a Wear developer must take is to verify that the app behavior
  corresponds to the <a href="#best-practices">guidelines</a> described above.</p>
 
+<p>
+In order to support backwards compatibility, a developer should still post
+an
+{@link android.app.Notification.InboxStyle InboxStyle} or equivalent
+notification representative for the whole
+information content of the group. This applies to child notifications in
+Android 5.0 (API level 21) and above.
+</p>
+
+<p> 
+For convenience, apps can usually reuse the notification group summary
+and define it as an
+{@link android.app.Notification.InboxStyle InboxStyle} notification,
+with each line corresponding to a child notification.
+</p>
+
+
 <p>In order to support backward compatibility, an app should still have
-an inbox style or an equivalent notification representative for the whole information
- content of the group including the children on Android 5.0 and above.
-For convenience, an app can usually reuse the notification group summary and define
- it as an inbox-style notification, with each line corresponding to one child
- notification.
- </p>
+an {@link android.app.Notification.InboxStyle InboxStyle}
+or equivalent notification representative for the whole information
+content of the group including the children on Android 5.0 and above.
+</p>
+
+<p>
+For convenience, an app can usually reuse the notification group summary and
+define it as an {@link android.app.Notification.InboxStyle InboxStyle}
+notification, with each line corresponding to one child notification.
+</p>
 
 <h2 id="custom"> Custom Views</h2>
 <p>Starting from Android N, you can customize notification views and
-still obtain system decorations like notification headers, actions, and expandable
-layouts.</p>
+still obtain system decorations like notification headers, actions, and
+expandable layouts.</p>
 
 <p>To enable this capability, Android N adds the following APIs to style your
   custom view:</p>
