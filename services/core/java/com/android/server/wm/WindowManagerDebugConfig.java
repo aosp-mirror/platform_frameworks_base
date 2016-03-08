@@ -35,7 +35,7 @@ public class WindowManagerDebugConfig {
 
     static final boolean DEBUG_RESIZE = false;
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = true;
+    static final boolean DEBUG_ADD_REMOVE = false;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || false;
     static final boolean DEBUG_ANIM = false;
