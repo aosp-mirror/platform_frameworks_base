@@ -1078,8 +1078,7 @@ public final class ViewRootImpl implements ViewParent,
                 scheduleTraversals();
             } else {
                 if (mAttachInfo.mHardwareRenderer != null) {
-                    // TODO: Temporary to help track down b/27286867
-                    Log.d(mTag, "WindowStopped on " + getTitle());
+                    if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle());
                     mAttachInfo.mHardwareRenderer.updateSurface(null);
                     mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
                 }
