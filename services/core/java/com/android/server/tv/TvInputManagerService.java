@@ -1292,6 +1292,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void unblockContent(
                 IBinder sessionToken, String unblockedRating, int userId) {
+            ensureParentalControlsPermission();
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "unblockContent");
