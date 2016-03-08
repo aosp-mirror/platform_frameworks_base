@@ -3360,8 +3360,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             throws RemoteException {
         synchronized (mLock) {
             IShortcutService service = mShortcutKeyServices.get(shortcutCode);
-            if (service != null && service.asBinder().isBinderAlive()) {
-                    throw new RemoteException("Key already exists.");
+            if (service != null && service.asBinder().pingBinder()) {
+                throw new RemoteException("Key already exists.");
             }
 
             mShortcutKeyServices.put(shortcutCode, shortcutService);
