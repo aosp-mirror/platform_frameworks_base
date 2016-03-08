@@ -102,9 +102,6 @@ public abstract class ConditionProviderService extends Service {
      */
     abstract public void onConnected();
 
-    /**
-     * @removed
-     */
     @SystemApi
     public void onRequestConditions(int relevance) {}
 

@@ -34432,8 +34432,9 @@ package android.service.media {
 package android.service.notification {
 
   public class Condition implements android.os.Parcelable {
-    ctor public Condition(android.net.Uri, java.lang.String, java.lang.String, java.lang.String, int);
+    ctor public Condition(android.net.Uri, java.lang.String, int);
     ctor public Condition(android.net.Uri, java.lang.String, java.lang.String, java.lang.String, int, int, int);
+    ctor public Condition(android.os.Parcel);
     method public android.service.notification.Condition copy();
     method public int describeContents();
     method public static boolean isValidId(android.net.Uri, java.lang.String);
@@ -34464,6 +34465,7 @@ package android.service.notification {
     method public final void notifyConditions(android.service.notification.Condition...);
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract void onConnected();
+    method public void onRequestConditions(int);
     method public abstract void onSubscribe(android.net.Uri);
     method public abstract void onUnsubscribe(android.net.Uri);
     field public static final java.lang.String EXTRA_RULE_ID = "android.content.automatic.ruleId";
