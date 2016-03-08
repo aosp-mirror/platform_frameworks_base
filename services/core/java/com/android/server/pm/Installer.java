@@ -166,6 +166,10 @@ public final class Installer extends SystemService {
         mInstaller.execute("rmpackagedir", packageDir);
     }
 
+    public void rmProfiles(String pkgName) throws InstallerException {
+        mInstaller.execute("rmprofiles", pkgName);
+    }
+
     public void createUserConfig(int userid) throws InstallerException {
         mInstaller.execute("mkuserconfig", userid);
     }

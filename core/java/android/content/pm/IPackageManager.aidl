@@ -382,6 +382,13 @@ interface IPackageManager {
      */
     void clearApplicationUserData(in String packageName, IPackageDataObserver observer, int userId);
 
+    /**
+     * Clear the profile data of an application.
+     * @param packageName The package name of the application whose profile data
+     * need to be deleted
+     */
+    void clearApplicationProfileData(in String packageName);
+
    /**
      * Get package statistics including the code, data and cache size for
      * an already installed package
