@@ -40,6 +40,7 @@ import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -74,6 +75,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
@@ -444,9 +446,9 @@ final class TaskRecord {
             // task as having a true root activity.
             rootWasReset = true;
         }
-
         userId = UserHandle.getUserId(info.applicationInfo.uid);
-        mUserSetupComplete = mService.mUserController.isUserSetupCompleteLocked(userId);
+        mUserSetupComplete = Settings.Secure.getIntForUser(mService.mContext.getContentResolver(),
+                USER_SETUP_COMPLETE, 0, userId) != 0;
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
@@ -1570,6 +1572,7 @@ final class TaskRecord {
         pw.print(prefix); pw.print("userId="); pw.print(userId);
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
                 pw.print(" mCallingUid="); UserHandle.formatUid(pw, mCallingUid);
+                pw.print(" mUserSetupComplete="); pw.print(mUserSetupComplete);
                 pw.print(" mCallingPackage="); pw.println(mCallingPackage);
         if (affinity != null || rootAffinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.print(affinity);
