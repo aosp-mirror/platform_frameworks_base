@@ -114,6 +114,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     private final ManagedProfileController mProfileController;
     private final NextAlarmController mNextAlarmController;
     private View mHeader;
+    private int mCurrentUser;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
@@ -320,7 +321,8 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         }
         if (DEBUG) Log.d(TAG, "Recreating tiles");
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
-        if (tileSpecs.equals(mTileSpecs)) return;
+        int currentUser = ActivityManager.getCurrentUser();
+        if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
         for (Map.Entry<String, QSTile<?>> tile : mTiles.entrySet()) {
             if (!tileSpecs.contains(tile.getKey())) {
                 if (DEBUG) Log.d(TAG, "Destroying tile: " + tile.getKey());
@@ -329,15 +331,16 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         }
         final LinkedHashMap<String, QSTile<?>> newTiles = new LinkedHashMap<>();
         for (String tileSpec : tileSpecs) {
-            if (mTiles.containsKey(tileSpec)) {
-                QSTile<?> tile = mTiles.get(tileSpec);
+            QSTile<?> tile = mTiles.get(tileSpec);
+            if (tile != null && (!(tile instanceof CustomTile)
+                    || ((CustomTile) tile).getUser() == currentUser)) {
                 if (DEBUG) Log.d(TAG, "Adding " + tile);
                 tile.removeCallbacks();
                 newTiles.put(tileSpec, tile);
             } else {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
-                    QSTile<?> tile = createTile(tileSpec);
+                    tile = createTile(tileSpec);
                     if (tile != null && tile.isAvailable()) {
                         tile.setTileSpec(tileSpec);
                         newTiles.put(tileSpec, tile);
@@ -347,6 +350,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
                 }
             }
         }
+        mCurrentUser = currentUser;
         mTileSpecs.clear();
         mTileSpecs.addAll(tileSpecs);
         mTiles.clear();
