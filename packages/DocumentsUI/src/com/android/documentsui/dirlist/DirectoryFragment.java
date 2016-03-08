@@ -17,7 +17,6 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
 import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
@@ -1535,7 +1534,7 @@ public class DirectoryFragment extends Fragment
                         mRoot.authority, mRoot.rootId, mQuery)
                         : DocumentsContract.buildChildDocumentsUri(
                                 mDocument.authority, mDocument.documentId);
-                if (state.action == ACTION_MANAGE) {
+                if (mTuner.enableManagedMode()) {
                     contentsUri = DocumentsContract.setManageMode(contentsUri);
                 }
                 return new DirectoryLoader(
@@ -1544,6 +1543,7 @@ public class DirectoryFragment extends Fragment
             case TYPE_RECENT_OPEN:
                 final RootsCache roots = DocumentsApplication.getRootsCache(context);
                 return new RecentsLoader(context, roots, state);
+
             default:
                 throw new IllegalStateException("Unknown type " + mType);
         }
