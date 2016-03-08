@@ -43,9 +43,10 @@ public abstract class VrManagerInternal {
      * @param enabled {@code true} to enable VR mode.
      * @param packageName The package name of the requested VrListenerService to bind.
      * @param userId the user requesting the VrListenerService component.
+     * @param calling the component currently using VR mode, or null to leave unchanged.
      */
     public abstract void setVrMode(boolean enabled, @NonNull ComponentName packageName,
-            int userId);
+            int userId, @NonNull ComponentName calling);
 
     /**
      * Add a listener for VR mode state changes.

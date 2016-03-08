@@ -2168,17 +2168,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final ActivityRecord r = (ActivityRecord) msg.obj;
                 boolean vrMode;
                 ComponentName requestedPackage;
+                ComponentName callingPackage;
                 int userId;
                 synchronized (ActivityManagerService.this) {
                     vrMode = r.requestedVrComponent != null;
                     requestedPackage = r.requestedVrComponent;
                     userId = r.userId;
+                    callingPackage = r.info.getComponentName();
                     if (mInVrMode != vrMode) {
                         mInVrMode = vrMode;
                         mShowDialogs = shouldShowDialogs(mConfiguration, mInVrMode);
                     }
                 }
-                vrService.setVrMode(vrMode, requestedPackage, userId);
+                vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
             } break;
             }
         }
