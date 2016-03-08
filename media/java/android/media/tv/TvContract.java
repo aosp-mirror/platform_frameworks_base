@@ -575,16 +575,11 @@ public final class TvContract {
         /**
          * The original network ID of this TV channel.
          *
-         * <p>This is used to identify the originating delivery system, if applicable. Use the same
-         * coding for {@code original_network_id} in the underlying broadcast standard if it is
-         * defined there (e.g. ETSI EN 300 468/TR 101 211 and ARIB STD-B10). If channels cannot be
-         * globally identified by 2-tuple {{@link #COLUMN_TRANSPORT_STREAM_ID},
-         * {@link #COLUMN_SERVICE_ID}}, one must carefully assign a value to this field to form a
-         * unique 3-tuple identification {{@code COLUMN_ORIGINAL_NETWORK_ID},
-         * {@link #COLUMN_TRANSPORT_STREAM_ID}, {@link #COLUMN_SERVICE_ID}} for its channels.
+         * <p>It is used to identify the originating delivery system, if applicable. Use the same
+         * coding for {@code original_network_id} for ETSI EN 300 468/TR 101 211 and ARIB STD-B10.
          *
-         * <p>This is a required field if the channel cannot be uniquely identified by a 2-tuple
-         * {{@link #COLUMN_TRANSPORT_STREAM_ID}, {@link #COLUMN_SERVICE_ID}}.
+         * <p>This is a required field only if the underlying broadcast standard defines the same
+         * name field. Otherwise, leave empty.
          *
          * <p>Type: INTEGER
          */
@@ -593,13 +588,13 @@ public final class TvContract {
         /**
          * The transport stream ID of this channel.
          *
-         * <p>This is used to identify the Transport Stream that contains the current channel from
-         * any other multiplex within a network, if applicable. Use the same coding for
+         * <p>It is used to identify the Transport Stream that contains the current channel from any
+         * other multiplex within a network, if applicable. Use the same coding for
          * {@code transport_stream_id} defined in ISO/IEC 13818-1 if the channel is transmitted via
-         * the MPEG Transport Stream as is the case for many digital broadcast standards.
+         * the MPEG Transport Stream.
          *
-         * <p>This is a required field if the current channel is transmitted via the MPEG Transport
-         * Stream.
+         * <p>This is a required field only if the current channel is transmitted via the MPEG
+         * Transport Stream. Leave empty otherwise.
          *
          * <p>Type: INTEGER
          */
@@ -608,15 +603,13 @@ public final class TvContract {
         /**
          * The service ID of this channel.
          *
-         * <p>This is used to identify the current service (roughly equivalent to channel) from any
-         * other service within the Transport Stream, if applicable. Use the same coding for
-         * {@code service_id} in the underlying broadcast standard if it is defined there (e.g. ETSI
-         * EN 300 468 and ARIB STD-B10) or {@code program_number} (which usually has the same value
-         * as {@code service_id}) in ISO/IEC 13818-1 if the channel is transmitted via the MPEG
-         * Transport Stream.
+         * <p>It is used to identify the current service, or channel from any other services within
+         * a given Transport Stream, if applicable. Use the same coding for {@code service_id} in
+         * ETSI EN 300 468 and ARIB STD-B10 or {@code program_number} in ISO/IEC 13818-1.
          *
-         * <p>This is a required field if the current channel is transmitted via the MPEG Transport
-         * Stream.
+         * <p>This is a required field only if the underlying broadcast standard defines the same
+         * name field, or the current channel is transmitted via the MPEG Transport Stream. Leave
+         * empty otherwise.
          *
          * <p>Type: INTEGER
          */
