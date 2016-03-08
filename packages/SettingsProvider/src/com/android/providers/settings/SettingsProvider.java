@@ -1671,16 +1671,16 @@ public class SettingsProvider extends ContentProvider {
 
         private void migrateLegacySettingsForUserLocked(DatabaseHelper dbHelper,
                 SQLiteDatabase database, int userId) {
-            // Move over the global settings if owner.
-            if (userId == UserHandle.USER_SYSTEM) {
-                final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, userId);
-                ensureSettingsStateLocked(globalKey);
-                SettingsState globalSettings = mSettingsStates.get(globalKey);
-                migrateLegacySettingsLocked(globalSettings, database, TABLE_GLOBAL);
-                globalSettings.persistSyncLocked();
-            }
+            // Move over the system settings.
+            final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
+            ensureSettingsStateLocked(systemKey);
+            SettingsState systemSettings = mSettingsStates.get(systemKey);
+            migrateLegacySettingsLocked(systemSettings, database, TABLE_SYSTEM);
+            systemSettings.persistSyncLocked();
 
             // Move over the secure settings.
+            // Do this after System settings, since this is the first thing we check when deciding
+            // to skip over migration from db to xml for a secondary user.
             final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
             ensureSettingsStateLocked(secureKey);
             SettingsState secureSettings = mSettingsStates.get(secureKey);
@@ -1688,12 +1688,16 @@ public class SettingsProvider extends ContentProvider {
             ensureSecureSettingAndroidIdSetLocked(secureSettings);
             secureSettings.persistSyncLocked();
 
-            // Move over the system settings.
-            final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
-            ensureSettingsStateLocked(systemKey);
-            SettingsState systemSettings = mSettingsStates.get(systemKey);
-            migrateLegacySettingsLocked(systemSettings, database, TABLE_SYSTEM);
-            systemSettings.persistSyncLocked();
+            // Move over the global settings if owner.
+            // Do this last, since this is the first thing we check when deciding
+            // to skip over migration from db to xml for owner user.
+            if (userId == UserHandle.USER_SYSTEM) {
+                final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, userId);
+                ensureSettingsStateLocked(globalKey);
+                SettingsState globalSettings = mSettingsStates.get(globalKey);
+                migrateLegacySettingsLocked(globalSettings, database, TABLE_GLOBAL);
+                globalSettings.persistSyncLocked();
+            }
 
             // Drop the database as now all is moved and persisted.
             if (DROP_DATABASE_ON_MIGRATION) {
