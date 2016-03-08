@@ -110,7 +110,7 @@
 
  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
-      >Getting System Updates</a></div>
+      >Device Images</a></div>
   </li>
 
 
