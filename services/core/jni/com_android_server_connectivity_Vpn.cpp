@@ -158,7 +158,7 @@ static int set_addresses(const char *name, const char *addresses)
             }
 
             if (count) {
-                sprintf(ifr4.ifr_name, "%s:%d", name, count);
+                snprintf(ifr4.ifr_name, sizeof(ifr4.ifr_name), "%s:%d", name, count);
             }
             if (ioctl(inet4, SIOCSIFADDR, &ifr4)) {
                 count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;

@@ -69,7 +69,7 @@ String8 Asset::getAssetAllocations()
             res.append(cur->getAssetSource());
             off64_t size = (cur->getLength()+512)/1024;
             char buf[64];
-            sprintf(buf, ": %dK\n", (int)size);
+            snprintf(buf, sizeof(buf), ": %dK\n", (int)size);
             res.append(buf);
         }
         cur = cur->mNext;
