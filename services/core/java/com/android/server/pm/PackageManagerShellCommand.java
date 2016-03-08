@@ -1178,16 +1178,16 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
-        pw.println("  compile [-m MODE] [-f] (-a | TARGET-PACKAGE)");
+        pw.println("  compile [-m MODE] [-f] [-c] [--reset] (-a | TARGET-PACKAGE)");
         pw.println("    Trigger compilation of TARGET-PACKAGE or all packages if \"-a\".");
         pw.println("    Options:");
         pw.println("      -a: compile all packages");
         pw.println("      -c: clear profile data before compiling");
         pw.println("      -f: force compilation even if not needed");
         pw.println("      -m: select compilation mode");
-        pw.println("          MODE can be one of \"default\", \"full\", \"profile\","
+        pw.println("          MODE can be one of \"default\", \"full\", \"profile\"," +
                    " and \"extract\"");
-        pw.println("      --reset: restore the package to post-install state");
+        pw.println("      --reset: restore package to its post-install state");
         pw.println("          shorthand for \"-c -f -m extract\"");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
