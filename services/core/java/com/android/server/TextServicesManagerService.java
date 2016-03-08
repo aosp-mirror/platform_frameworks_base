@@ -115,6 +115,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         synchronized (mSpellCheckerMap) {
             if (!mSystemReady) {
                 mSystemReady = true;
+                switchUserLocked(mSettings.getCurrentUserId());
             }
         }
     }
@@ -142,14 +143,18 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         mMonitor = new TextServicesMonitor();
         mMonitor.register(context, null, true);
-        mSettings = new TextServicesSettings(context.getContentResolver(), userId);
+        // If the system is not ready, then we use copy-on-write settings.
+        final boolean useCopyOnWriteSettings = !mSystemReady;
+        mSettings = new TextServicesSettings(context.getContentResolver(), userId,
+                useCopyOnWriteSettings);
 
         // "switchUserLocked" initializes the states for the foreground user
         switchUserLocked(userId);
     }
 
     private void switchUserLocked(@UserIdInt int userId) {
-        mSettings.setCurrentUserId(userId);
+        final boolean useCopyOnWriteSettings = !mSystemReady;
+        mSettings.switchCurrentUser(userId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         unbindServiceLocked();
         buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
@@ -1023,33 +1028,70 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         private int[] mCurrentProfileIds = new int[0];
         private Object mLock = new Object();
 
-        public TextServicesSettings(ContentResolver resolver, @UserIdInt int userId) {
+        /**
+         * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
+         */
+        private final HashMap<String, String> mCopyOnWriteDataStore = new HashMap<>();
+        private boolean mCopyOnWrite = false;
+
+        public TextServicesSettings(ContentResolver resolver, @UserIdInt int userId,
+                boolean copyOnWrite) {
             mResolver = resolver;
-            mCurrentUserId = userId;
+            switchCurrentUser(userId, copyOnWrite);
         }
 
-        public void setCurrentUserId(@UserIdInt int userId) {
+        /**
+         * Must be called when the current user is changed.
+         *
+         * @param userId The user ID.
+         * @param copyOnWrite If {@code true}, for each settings key
+         * (e.g. {@link Settings.Secure#SELECTED_SPELL_CHECKER}) we use the actual settings on the
+         * {@link Settings.Secure} until we do the first write operation.
+         */
+        public void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
             if (DBG) {
                 Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to "
                         + userId + ", new ime = " + getSelectedSpellChecker());
             }
+            if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
+                mCopyOnWriteDataStore.clear();
+                // TODO: mCurrentProfileIds should be cleared here.
+            }
             // TSMS settings are kept per user, so keep track of current user
             mCurrentUserId = userId;
+            mCopyOnWrite = copyOnWrite;
+            // TODO: mCurrentProfileIds should be updated here.
         }
 
         private void putString(final String key, final String str) {
-            Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+            if (mCopyOnWrite) {
+                mCopyOnWriteDataStore.put(key, str);
+            } else {
+                Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+            }
         }
 
         private String getString(final String key) {
+            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
+                final String result = mCopyOnWriteDataStore.get(key);
+                return result != null ? result : "";
+            }
             return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
         }
 
         private void putInt(final String key, final int value) {
-            Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+            if (mCopyOnWrite) {
+                mCopyOnWriteDataStore.put(key, String.valueOf(value));
+            } else {
+                Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+            }
         }
 
         private int getInt(final String key, final int defaultValue) {
+            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
+                final String result = mCopyOnWriteDataStore.get(key);
+                return result != null ? Integer.valueOf(result) : 0;
+            }
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
 
@@ -1109,6 +1151,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public void dumpLocked(final PrintWriter pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
             pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
+            pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
         }
     }
 
