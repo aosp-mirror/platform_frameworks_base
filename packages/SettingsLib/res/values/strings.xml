@@ -677,7 +677,7 @@
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
     <string name="runningservices_settings_summary">View and control currently running services</string>
 
-    <!-- Developer settings: enable WebView multiprocess name [CHAR LIMIT=30] -->
+    <!-- Developer settings: enable WebView multiprocess name [CHAR LIMIT=50] -->
     <string name="enable_webview_multiprocess">Enable multiprocess WebView</string>
     <!-- Developer settings: enable WebView multiprocess summary [CHAR LIMIT=60] -->
     <string name="enable_webview_multiprocess_desc">Run WebView renderers in an isolated process.</string>
