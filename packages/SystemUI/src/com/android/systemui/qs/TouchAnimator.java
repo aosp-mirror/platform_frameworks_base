@@ -14,7 +14,11 @@
 
 package com.android.systemui.qs;
 
+import android.graphics.Path;
+import android.graphics.PathMeasure;
+import android.util.FloatProperty;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -74,6 +78,19 @@ public class TouchAnimator {
         }
     }
 
+    private static final FloatProperty<TouchAnimator> POSITION =
+            new FloatProperty<TouchAnimator>("position") {
+        @Override
+        public void setValue(TouchAnimator touchAnimator, float value) {
+            touchAnimator.setPosition(value);
+        }
+
+        @Override
+        public Float get(TouchAnimator touchAnimator) {
+            return touchAnimator.mLastT;
+        }
+    };
+
     public static class ListenerAdapter implements Listener {
         @Override
         public void onAnimationAtStart() { }
@@ -124,6 +141,19 @@ public class TouchAnimator {
             return this;
         }
 
+        public Builder addPath(Object target, String xProp, String yProp,
+                Path path) {
+            return addPath(target, target, xProp, yProp, path);
+        }
+
+        public Builder addPath(Object xTarget, Object yTarget, String xProp, String yProp,
+                Path path) {
+            add(new Pair<>(xTarget, yTarget),
+                    KeyframeSet.ofPath(getProperty(xTarget, xProp, float.class),
+                    getProperty(yTarget, yProp, float.class), path));
+            return this;
+        }
+
         private void add(Object target, KeyframeSet keyframeSet) {
             mTargets.add(target);
             mValues.add(keyframeSet);
@@ -151,6 +181,9 @@ public class TouchAnimator {
                     case "scaleY":
                         return View.SCALE_Y;
                 }
+            }
+            if (target instanceof TouchAnimator && "position".equals(property)) {
+                return POSITION;
             }
             return Property.of(target.getClass(), cls, property);
         }
@@ -208,6 +241,10 @@ public class TouchAnimator {
         public static KeyframeSet ofFloat(Property property, float... values) {
             return new FloatKeyframeSet((Property<?, Float>) property, values);
         }
+
+        public static KeyframeSet ofPath(Property xProp, Property yProp, Path path) {
+            return new PathKeyframeSet<>(xProp, yProp, path);
+        }
     }
 
     private static class FloatKeyframeSet<T> extends KeyframeSet {
@@ -243,6 +280,33 @@ public class TouchAnimator {
             int firstFloat = mValues[index - 1];
             int secondFloat = mValues[index];
             mProperty.set((T) target, (int) (firstFloat + (secondFloat - firstFloat) * amount));
+        }
+    }
+
+    private static class PathKeyframeSet<T> extends KeyframeSet {
+        private final Property<T, Float> mXProp;
+        private final Property<T, Float> mYProp;
+        private final Path mPath;
+        private final PathMeasure mPathMeasure;
+        private final float mLength;
+        private final float[] mPos;
+
+        public PathKeyframeSet(Property<T, Float> xProp, Property<T, Float> yProp, Path path) {
+            super(2);
+            mXProp = xProp;
+            mYProp = yProp;
+            mPath = path;
+            mPathMeasure = new PathMeasure(mPath, false);
+            mLength = mPathMeasure.getLength();
+            mPos = new float[2];
+        }
+
+        @Override
+        protected void interpolate(int index, float amount, Object target) {
+            Pair<Object, Object> targets = (Pair<Object, Object>) target;
+            mPathMeasure.getPosTan(amount * mLength, mPos, null);
+            mXProp.set((T) targets.first, mPos[0]);
+            mYProp.set((T) targets.second, mPos[1]);
         }
     }
 }
