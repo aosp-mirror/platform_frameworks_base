@@ -251,6 +251,30 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL = "carrier_wfc_ims_available_bool";
 
+    /**
+     * Default WFC_IMS_mode 0: WIFI_ONLY
+     *                      1: CELLULAR_PREFERRED
+     *                      2: WIFI_PREFERRED
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT =
+            "carrier_default_wfc_ims_mode_int";
+    /**
+     * Default WFC_IMS_enabled: true VoWiFi by default is on
+     *                          false VoWiFi by default is off
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL =
+            "carrier_default_wfc_ims_enabled_bool";
+
+    /**
+     * Default WFC_IMS_roaming_enabled: true VoWiFi roaming by default is on
+     *                                  false VoWiFi roaming by default is off
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL =
+            "carrier_default_wfc_ims_roaming_enabled_bool";
+
     /** Flag specifying whether provisioning is required for VOLTE. */
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
             = "carrier_volte_provisioning_required_bool";
@@ -613,6 +637,9 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);
+        sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
