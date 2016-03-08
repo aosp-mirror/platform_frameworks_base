@@ -36,6 +36,11 @@ public class AccelerationClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "ACC";
+    }
+
+    @Override
     public void onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
 

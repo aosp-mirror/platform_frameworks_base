@@ -35,6 +35,11 @@ public class ProximityClassifier extends GestureClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "PROX";
+    }
+
+    @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
             update(event.values[0] < event.sensor.getMaximumRange(), event.timestamp);

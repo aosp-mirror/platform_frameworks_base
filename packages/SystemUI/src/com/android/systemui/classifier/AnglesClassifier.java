@@ -54,6 +54,11 @@ public class AnglesClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "ANG";
+    }
+
+    @Override
     public void onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
 

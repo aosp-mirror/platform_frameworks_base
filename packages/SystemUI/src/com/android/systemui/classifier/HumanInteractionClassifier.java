@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayDeque;
@@ -43,14 +44,12 @@ public class HumanInteractionClassifier extends Classifier {
     private final Handler mHandler = new Handler();
     private final Context mContext;
 
-    private ArrayList<StrokeClassifier> mStrokeClassifiers = new ArrayList<>();
-    private ArrayList<GestureClassifier> mGestureClassifiers = new ArrayList<>();
-    private ArrayDeque<MotionEvent> mBufferedEvents = new ArrayDeque<>();
-    private final int mStrokeClassifiersSize;
-    private final int mGestureClassifiersSize;
+    private final StrokeClassifier[] mStrokeClassifiers;
+    private final GestureClassifier[] mGestureClassifiers;
+    private final ArrayDeque<MotionEvent> mBufferedEvents = new ArrayDeque<>();
+    private final HistoryEvaluator mHistoryEvaluator;
     private final float mDpi;
 
-    private HistoryEvaluator mHistoryEvaluator;
     private boolean mEnableClassifier = false;
     private int mCurrentType = Classifier.GENERIC;
 
@@ -68,25 +67,27 @@ public class HumanInteractionClassifier extends Classifier {
         // If the phone is rotated to landscape, the calculations would be wrong if xdpi and ydpi
         // were to be used separately. Due negligible differences in xdpi and ydpi we can just
         // take the average.
+        // TODO: make this respect DPI changes.
         mDpi = (displayMetrics.xdpi + displayMetrics.ydpi) / 2.0f;
         mClassifierData = new ClassifierData(mDpi);
         mHistoryEvaluator = new HistoryEvaluator();
 
-        mStrokeClassifiers.add(new AnglesClassifier(mClassifierData));
-        mStrokeClassifiers.add(new SpeedClassifier(mClassifierData));
-        mStrokeClassifiers.add(new DurationCountClassifier(mClassifierData));
-        mStrokeClassifiers.add(new EndPointRatioClassifier(mClassifierData));
-        mStrokeClassifiers.add(new EndPointLengthClassifier(mClassifierData));
-        mStrokeClassifiers.add(new AccelerationClassifier(mClassifierData));
-        mStrokeClassifiers.add(new SpeedAnglesClassifier(mClassifierData));
-        mStrokeClassifiers.add(new LengthCountClassifier(mClassifierData));
-        mStrokeClassifiers.add(new DirectionClassifier(mClassifierData));
+        mStrokeClassifiers = new StrokeClassifier[]{
+                new AnglesClassifier(mClassifierData),
+                new SpeedClassifier(mClassifierData),
+                new DurationCountClassifier(mClassifierData),
+                new EndPointRatioClassifier(mClassifierData),
+                new EndPointLengthClassifier(mClassifierData),
+                new AccelerationClassifier(mClassifierData),
+                new SpeedAnglesClassifier(mClassifierData),
+                new LengthCountClassifier(mClassifierData),
+                new DirectionClassifier(mClassifierData),
+        };
 
-        mGestureClassifiers.add(new PointerCountClassifier(mClassifierData));
-        mGestureClassifiers.add(new ProximityClassifier(mClassifierData));
-
-        mStrokeClassifiersSize = mStrokeClassifiers.size();
-        mGestureClassifiersSize = mGestureClassifiers.size();
+        mGestureClassifiers = new GestureClassifier[] {
+                new PointerCountClassifier(mClassifierData),
+                new ProximityClassifier(mClassifierData)
+        };
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(HIC_ENABLE), false,
@@ -150,21 +151,30 @@ public class HumanInteractionClassifier extends Classifier {
     private void addTouchEvent(MotionEvent event) {
         mClassifierData.update(event);
 
-        for (int i = 0; i < mStrokeClassifiersSize; i++) {
-            mStrokeClassifiers.get(i).onTouchEvent(event);
+        for (StrokeClassifier c : mStrokeClassifiers) {
+            c.onTouchEvent(event);
         }
 
-        for (int i = 0; i < mGestureClassifiersSize; i++) {
-            mGestureClassifiers.get(i).onTouchEvent(event);
+        for (GestureClassifier c : mGestureClassifiers) {
+            c.onTouchEvent(event);
         }
 
         int size = mClassifierData.getEndingStrokes().size();
         for (int i = 0; i < size; i++) {
             Stroke stroke = mClassifierData.getEndingStrokes().get(i);
             float evaluation = 0.0f;
-            for (int j = 0; j < mStrokeClassifiersSize; j++) {
-                evaluation += mStrokeClassifiers.get(j).getFalseTouchEvaluation(
-                        mCurrentType, stroke);
+            StringBuilder sb = FalsingLog.ENABLED ? new StringBuilder("stroke") : null;
+            for (StrokeClassifier c : mStrokeClassifiers) {
+                float e = c.getFalseTouchEvaluation(mCurrentType, stroke);
+                if (FalsingLog.ENABLED) {
+                    String tag = c.getTag();
+                    sb.append(" ").append(e >= 1f ? tag : tag.toLowerCase()).append("=").append(e);
+                }
+                evaluation += e;
+            }
+
+            if (FalsingLog.ENABLED) {
+                FalsingLog.i(" addTouchEvent", sb.toString());
             }
             mHistoryEvaluator.addStroke(evaluation);
         }
@@ -172,8 +182,17 @@ public class HumanInteractionClassifier extends Classifier {
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             float evaluation = 0.0f;
-            for (int i = 0; i < mGestureClassifiersSize; i++) {
-                evaluation += mGestureClassifiers.get(i).getFalseTouchEvaluation(mCurrentType);
+            StringBuilder sb = FalsingLog.ENABLED ? new StringBuilder("gesture") : null;
+            for (GestureClassifier c : mGestureClassifiers) {
+                float e = c.getFalseTouchEvaluation(mCurrentType);
+                if (FalsingLog.ENABLED) {
+                    String tag = c.getTag();
+                    sb.append(" ").append(e >= 1f ? tag : tag.toLowerCase()).append("=").append(e);
+                }
+                evaluation += e;
+            }
+            if (FalsingLog.ENABLED) {
+                FalsingLog.i(" addTouchEvent", sb.toString());
             }
             mHistoryEvaluator.addGesture(evaluation);
             setType(Classifier.GENERIC);
@@ -184,23 +203,35 @@ public class HumanInteractionClassifier extends Classifier {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        for (int i = 0; i < mStrokeClassifiers.size(); i++) {
-            mStrokeClassifiers.get(i).onSensorChanged(event);
+        for (Classifier c : mStrokeClassifiers) {
+            c.onSensorChanged(event);
         }
 
-        for (int i = 0; i < mGestureClassifiers.size(); i++) {
-            mGestureClassifiers.get(i).onSensorChanged(event);
+        for (Classifier c : mGestureClassifiers) {
+            c.onSensorChanged(event);
         }
     }
 
     public boolean isFalseTouch() {
         if (mEnableClassifier) {
-            return mHistoryEvaluator.getEvaluation() >= 5.0f;
+            float evaluation = mHistoryEvaluator.getEvaluation();
+            boolean result = evaluation >= 5.0f;
+            if (FalsingLog.ENABLED) {
+                FalsingLog.i("isFalseTouch", new StringBuilder()
+                        .append("eval=").append(evaluation).append(" result=")
+                        .append(result ? 1 : 0).toString());
+            }
+            return result;
         }
         return false;
     }
 
     public boolean isEnabled() {
         return mEnableClassifier;
+    }
+
+    @Override
+    public String getTag() {
+        return "HIC";
     }
 }
