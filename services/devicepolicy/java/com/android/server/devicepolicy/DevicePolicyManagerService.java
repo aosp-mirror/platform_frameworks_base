@@ -33,6 +33,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -3642,12 +3643,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (count == 0 ||
                     count > admin.maximumFailedPasswordsForWipe ||
                     (count == admin.maximumFailedPasswordsForWipe &&
-                            mUserManager.getUserInfo(userId).isPrimary())) {
+                            getUserInfo(userId).isPrimary())) {
                 count = admin.maximumFailedPasswordsForWipe;
                 strictestAdmin = admin;
             }
         }
         return strictestAdmin;
+    }
+
+    private UserInfo getUserInfo(@UserIdInt int userId) {
+        final long token = mInjector.binderClearCallingIdentity();
+        try {
+            return mUserManager.getUserInfo(userId);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -5913,7 +5923,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * - adb if there are not accounts.
      */
     private void enforceCanSetProfileOwnerLocked(int userHandle) {
-        UserInfo info = mUserManager.getUserInfo(userHandle);
+        UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
             throw new IllegalArgumentException(
@@ -6065,12 +6075,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isManagedProfile(int userHandle) {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            return mUserManager.getUserInfo(userHandle).isManagedProfile();
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        return getUserInfo(userHandle).isManagedProfile();
     }
 
     private void enableIfNecessary(String packageName, int userId) {
@@ -6409,7 +6414,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             // If we have an enabled packages list for a managed profile the packages
             // we should check are installed for the parent user.
-            UserInfo user = mUserManager.getUserInfo(userIdToCheck);
+            UserInfo user = getUserInfo(userIdToCheck);
             if (user.isManagedProfile()) {
                 userIdToCheck = user.profileGroupId;
             }
@@ -6455,7 +6460,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             List<AccessibilityServiceInfo> enabledServices = null;
             long id = mInjector.binderClearCallingIdentity();
             try {
-                UserInfo user = mUserManager.getUserInfo(userId);
+                UserInfo user = getUserInfo(userId);
                 if (user.isManagedProfile()) {
                     userId = user.profileGroupId;
                 }
@@ -6537,7 +6542,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (result != null) {
                 long id = mInjector.binderClearCallingIdentity();
                 try {
-                    UserInfo user = mUserManager.getUserInfo(userId);
+                    UserInfo user = getUserInfo(userId);
                     if (user.isManagedProfile()) {
                         userId = user.profileGroupId;
                     }
@@ -6591,7 +6596,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long token = mInjector.binderClearCallingIdentity();
         try {
             UserInfo currentUser;
-            UserInfo callingUser = mUserManager.getUserInfo(callingUserId);
+            UserInfo callingUser = getUserInfo(callingUserId);
             try {
                 currentUser = mInjector.getIActivityManager().getCurrentUser();
             } catch (RemoteException e) {
@@ -8223,13 +8228,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         }
         final int callingUserId = mInjector.userHandleGetCallingUserId();
-        final UserInfo user;
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            user = mUserManager.getUserInfo(callingUserId);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        final UserInfo user = getUserInfo(callingUserId);
         return user != null && user.isManagedProfile();
     }
 
