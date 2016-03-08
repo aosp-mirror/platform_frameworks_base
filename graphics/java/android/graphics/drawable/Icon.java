@@ -627,6 +627,11 @@ public final class Icon implements Parcelable {
         return this;
     }
 
+    /** @hide */
+    public boolean hasTint() {
+        return (mTintList != null) || (mTintMode != DEFAULT_TINT_MODE);
+    }
+
     /**
      * Create an Icon pointing to an image file specified by path.
      *

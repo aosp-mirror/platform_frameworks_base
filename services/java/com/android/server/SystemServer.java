@@ -726,9 +726,6 @@ public final class SystemServer {
                 // Always start the Device Policy Manager, so that the API is compatible with
                 // API8.
                 mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
-
-// TODO is this a good place?
-                mSystemServiceManager.startService(ShortcutService.Lifecycle.class);
             }
 
             if (!disableSystemUI) {
@@ -1139,6 +1136,8 @@ public final class SystemServer {
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
+            // LauncherAppsService uses ShortcutService.
+            mSystemServiceManager.startService(ShortcutService.Lifecycle.class);
 
             mSystemServiceManager.startService(LauncherAppsService.class);
         }

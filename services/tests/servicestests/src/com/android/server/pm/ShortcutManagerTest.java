@@ -25,19 +25,26 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
+
+import libcore.io.IoUtils;
 
 import org.junit.Assert;
 
@@ -45,13 +52,16 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
@@ -61,7 +71,11 @@ import java.util.Map;
  -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest \
  -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+
+ * TODO: Add checks with assertAllNotHaveIcon()
+ * TODO: Cross-user test (do in CTS?)
  */
+@SmallTest
 public class ShortcutManagerTest extends AndroidTestCase {
     private static final String TAG = "ShortcutManagerTest";
 
@@ -77,10 +91,19 @@ public class ShortcutManagerTest extends AndroidTestCase {
         public String getPackageName() {
             return mInjectedClientPackage;
         }
+
+        @Override
+        public Resources getResources() {
+            return ShortcutManagerTest.this.getContext().getResources();
+        }
     }
 
     /** Context used in the service side */
     private final class ServiceContext extends MockContext {
+        @Override
+        public Resources getResources() {
+            return ShortcutManagerTest.this.getContext().getResources();
+        }
     }
 
     /** ShortcutService with injection override methods. */
@@ -95,6 +118,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
             setResetIntervalForTest(INTERVAL);
             setMaxDynamicShortcutsForTest(MAX_SHORTCUTS);
             setMaxDailyUpdatesForTest(MAX_DAILY_UPDATES);
+            setMaxIconDimensionForTest(MAX_ICON_DIMENSION);
         }
 
         @Override
@@ -108,7 +132,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
         }
 
         @Override
-        int injectGetPackageUid(String packageName) {
+        int injectGetPackageUid(String packageName, int userId) {
             Integer uid = mInjectedPackageUidMap.get(packageName);
             return uid != null ? uid : -1;
         }
@@ -121,6 +145,11 @@ public class ShortcutManagerTest extends AndroidTestCase {
         @Override
         File injectUserDataPath(@UserIdInt int userId) {
             return new File(mInjectedFilePathRoot, "user-" + userId);
+        }
+
+        @Override
+        void injectValidateIconResPackage(ShortcutInfo shortcut, Icon icon) {
+            // Can't check
         }
     }
 
@@ -181,9 +210,11 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
     private static final long INTERVAL = 10000;
 
-    private static final int MAX_SHORTCUTS = 5;
+    private static final int MAX_SHORTCUTS = 10;
 
     private static final int MAX_DAILY_UPDATES = 3;
+
+    private static final int MAX_ICON_DIMENSION = 128;
 
     @Override
     protected void setUp() throws Exception {
@@ -233,7 +264,8 @@ public class ShortcutManagerTest extends AndroidTestCase {
     /** Replace the current calling package */
     private void setCaller(String packageName) {
         mInjectedClientPackage = packageName;
-        mInjectedCallingUid = Preconditions.checkNotNull(mInjectedPackageUidMap.get(packageName));
+        mInjectedCallingUid = Preconditions.checkNotNull(mInjectedPackageUidMap.get(packageName),
+                "Unknown package");
     }
 
     private String getCallingPackage() {
@@ -343,6 +375,28 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     /**
+     * Make a shortcut with an ID and icon.
+     */
+    private ShortcutInfo makeShortcutWithIcon(String id, Icon icon) {
+        return makeShortcut(
+                id, "Title-" + id, /* activity =*/ null, icon,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+    }
+
+    private ShortcutInfo makePackageShortcut(String packageName, String id) {
+        String origCaller = getCallingPackage();
+
+        setCaller(packageName);
+        ShortcutInfo s = makeShortcut(
+                id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+        setCaller(origCaller); // restore the caller
+
+        return s;
+    }
+
+
+    /**
      * Make multiple shortcuts with IDs.
      */
     private List<ShortcutInfo> makeShortcuts(String... ids) {
@@ -413,6 +467,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
     @NonNull
     private List<ShortcutInfo> assertShortcutIds(@NonNull List<ShortcutInfo> actualShortcuts,
             String... expectedIds) {
+        assertEquals(expectedIds.length, actualShortcuts.size());
         final HashSet<String> expected = new HashSet<>(Arrays.asList(expectedIds));
         final HashSet<String> actual = new HashSet<>();
         for (ShortcutInfo s : actualShortcuts) {
@@ -461,10 +516,57 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     @NonNull
+    private List<ShortcutInfo> assertAllNotHaveIcon(
+            @NonNull List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertNull("ID " + s.getId(), s.getIcon());
+        }
+        return actualShortcuts;
+    }
+
+    @NonNull
+    private List<ShortcutInfo> assertAllHaveIconResId(
+            @NonNull List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId() + " not have icon res ID", s.hasIconResource());
+            assertFalse("ID " + s.getId() + " shouldn't have icon FD", s.hasIconFile());
+        }
+        return actualShortcuts;
+    }
+
+    @NonNull
+    private List<ShortcutInfo> assertAllHaveIconFile(
+            @NonNull List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
+            assertTrue("ID " + s.getId() + " not have icon FD", s.hasIconFile());
+        }
+        return actualShortcuts;
+    }
+
+    @NonNull
     private List<ShortcutInfo> assertAllHaveFlags(@NonNull List<ShortcutInfo> actualShortcuts,
             int shortcutFlags) {
         for (ShortcutInfo s : actualShortcuts) {
             assertTrue("ID " + s.getId(), s.hasFlags(shortcutFlags));
+        }
+        return actualShortcuts;
+    }
+
+    @NonNull
+    private List<ShortcutInfo> assertAllKeyFieldsOnly(
+            @NonNull List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.hasKeyFieldsOnly());
+        }
+        return actualShortcuts;
+    }
+
+    @NonNull
+    private List<ShortcutInfo> assertAllNotKeyFieldsOnly(
+            @NonNull List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertFalse("ID " + s.getId(), s.hasKeyFieldsOnly());
         }
         return actualShortcuts;
     }
@@ -486,6 +588,31 @@ public class ShortcutManagerTest extends AndroidTestCase {
             assertTrue("ID " + s.getId(), s.isDynamic() || s.isPinned());
         }
         return actualShortcuts;
+    }
+
+    private void assertBitmapSize(int expectedWidth, int expectedHeight, @NonNull Bitmap bitmap) {
+        assertEquals("width", expectedWidth, bitmap.getWidth());
+        assertEquals("height", expectedHeight, bitmap.getHeight());
+    }
+
+    private <T> void assertAllUnique(Collection<T> list) {
+        final Set<Object> set = new HashSet<>();
+        for (T item : list) {
+            if (set.contains(item)) {
+                fail("Duplicate item found: " + item + " (in the list: " + list + ")");
+            }
+            set.add(item);
+        }
+    }
+
+    @NonNull
+    private Bitmap pfdToBitmap(@NonNull ParcelFileDescriptor pfd) {
+        Preconditions.checkNotNull(pfd);
+        try {
+            return BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+        } finally {
+            IoUtils.closeQuietly(pfd);
+        }
     }
 
     /**
@@ -594,13 +721,17 @@ public class ShortcutManagerTest extends AndroidTestCase {
         final ShortcutInfo si3 = makeShortcut("shortcut3");
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2)));
-        assertEquals(2, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1", "shortcut2");
         assertEquals(2, mManager.getRemainingCallCount());
 
         // TODO: Check fields
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
-        assertEquals(1, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1");
         assertEquals(1, mManager.getRemainingCallCount());
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList()));
@@ -629,16 +760,22 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(2, mManager.getRemainingCallCount());
-        assertEquals(1, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1");
 
         assertTrue(mManager.addDynamicShortcut(si2));
         assertEquals(1, mManager.getRemainingCallCount());
-        assertEquals(2, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1", "shortcut2");
 
         // Add with the same ID
         assertTrue(mManager.addDynamicShortcut(makeShortcut("shortcut1")));
         assertEquals(0, mManager.getRemainingCallCount());
-        assertEquals(2, mManager.getDynamicShortcuts().size()); // Still 2
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1", "shortcut2");
 
         // TODO Check max number
 
@@ -651,24 +788,35 @@ public class ShortcutManagerTest extends AndroidTestCase {
         final ShortcutInfo si3 = makeShortcut("shortcut3");
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2, si3)));
-        assertEquals(3, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1", "shortcut2", "shortcut3");
 
         assertEquals(2, mManager.getRemainingCallCount());
 
         mManager.deleteDynamicShortcut("shortcut1");
-        assertEquals(2, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut2", "shortcut3");
 
         mManager.deleteDynamicShortcut("shortcut1");
-        assertEquals(2, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut2", "shortcut3");
 
         mManager.deleteDynamicShortcut("shortcutXXX");
-        assertEquals(2, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut2", "shortcut3");
 
         mManager.deleteDynamicShortcut("shortcut2");
-        assertEquals(1, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut3");
 
         mManager.deleteDynamicShortcut("shortcut3");
-        assertEquals(0, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()));
 
         // Still 2 calls left.
         assertEquals(2, mManager.getRemainingCallCount());
@@ -682,7 +830,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
         final ShortcutInfo si3 = makeShortcut("shortcut3");
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2, si3)));
-        assertEquals(3, mManager.getDynamicShortcuts().size());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1", "shortcut2", "shortcut3");
 
         assertEquals(2, mManager.getRemainingCallCount());
 
@@ -732,7 +882,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         // Now it should work.
         mInjectedCurrentTimeLillis++;
-        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1))); // fail
         assertEquals(2, mManager.getRemainingCallCount());
 
         mInjectedCurrentTimeLillis++;
@@ -831,6 +981,226 @@ public class ShortcutManagerTest extends AndroidTestCase {
         assertFalse(mManager.setDynamicShortcuts(Arrays.asList(si2)));
     }
 
+    public void testIcons() {
+        final Icon res32x32 = Icon.createWithResource(mContext, R.drawable.black_32x32);
+        final Icon res64x64 = Icon.createWithResource(mContext, R.drawable.black_64x64);
+        final Icon res512x512 = Icon.createWithResource(mContext, R.drawable.black_512x512);
+
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), R.drawable.black_32x32));
+        final Icon bmp64x64 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), R.drawable.black_64x64));
+        final Icon bmp512x512 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), R.drawable.black_512x512));
+
+        // Set from package 1
+        setCaller(CALLING_PACKAGE_1);
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                makeShortcutWithIcon("res32x32", res32x32),
+                makeShortcutWithIcon("res64x64", res64x64),
+                makeShortcutWithIcon("bmp32x32", bmp32x32),
+                makeShortcutWithIcon("bmp64x64", bmp64x64),
+                makeShortcutWithIcon("bmp512x512", bmp512x512),
+                makeShortcut("none")
+        )));
+
+        // getDynamicShortcuts() shouldn't return icons, thus assertAllNotHaveIcon().
+        assertShortcutIds(assertAllNotHaveIcon(mManager.getDynamicShortcuts()),
+                "res32x32",
+                "res64x64",
+                "bmp32x32",
+                "bmp64x64",
+                "bmp512x512",
+                "none");
+
+        // Call from another caller with the same ID, just to make sure storage is per-package.
+        setCaller(CALLING_PACKAGE_2);
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                makeShortcutWithIcon("res32x32", res512x512),
+                makeShortcutWithIcon("res64x64", res512x512),
+                makeShortcutWithIcon("none", res512x512)
+        )));
+        assertShortcutIds(assertAllNotHaveIcon(mManager.getDynamicShortcuts()),
+                "res32x32",
+                "res64x64",
+                "none");
+
+        dumpsysOnLogcat();
+
+        // Load from launcher.
+        Bitmap bmp;
+
+        setCaller(LAUNCHER_1);
+
+        // Check hasIconResource()/hasIconFile().
+        assertShortcutIds(assertAllHaveIconResId(mInternal.getShortcutInfo(
+                getCallingPackage(), CALLING_PACKAGE_1, Arrays.asList("res32x32"),
+                getCallingUserId())), "res32x32");
+
+        assertShortcutIds(assertAllHaveIconResId(mInternal.getShortcutInfo(
+                getCallingPackage(), CALLING_PACKAGE_1, Arrays.asList("res64x64"),
+                getCallingUserId())), "res64x64");
+
+        assertShortcutIds(assertAllHaveIconFile(mInternal.getShortcutInfo(
+                getCallingPackage(), CALLING_PACKAGE_1, Arrays.asList("bmp32x32"),
+                getCallingUserId())), "bmp32x32");
+        assertShortcutIds(assertAllHaveIconFile(mInternal.getShortcutInfo(
+                getCallingPackage(), CALLING_PACKAGE_1, Arrays.asList("bmp64x64"),
+                getCallingUserId())), "bmp64x64");
+        assertShortcutIds(assertAllHaveIconFile(mInternal.getShortcutInfo(
+                getCallingPackage(), CALLING_PACKAGE_1, Arrays.asList("bmp512x512"),
+                getCallingUserId())), "bmp512x512");
+
+        // Check
+        assertEquals(
+                R.drawable.black_32x32,
+                mInternal.getShortcutIconResId(getCallingPackage(),
+                        makePackageShortcut(CALLING_PACKAGE_1, "res32x32"), getCallingUserId()));
+
+        assertEquals(
+                R.drawable.black_64x64,
+                mInternal.getShortcutIconResId(
+                        getCallingPackage(),
+                        makePackageShortcut(CALLING_PACKAGE_1, "res64x64"), getCallingUserId()));
+
+        assertEquals(
+                0, // because it's not a resource
+                mInternal.getShortcutIconResId(
+                        getCallingPackage(),
+                        makePackageShortcut(CALLING_PACKAGE_1, "bmp32x32"), getCallingUserId()));
+        assertEquals(
+                0, // because it's not a resource
+                mInternal.getShortcutIconResId(
+                        getCallingPackage(),
+                        makePackageShortcut(CALLING_PACKAGE_1, "bmp64x64"), getCallingUserId()));
+        assertEquals(
+                0, // because it's not a resource
+                mInternal.getShortcutIconResId(
+                        getCallingPackage(),
+                        makePackageShortcut(CALLING_PACKAGE_1, "bmp512x512"), getCallingUserId()));
+
+        bmp = pfdToBitmap(mInternal.getShortcutIconFd(
+                getCallingPackage(),
+                makePackageShortcut(CALLING_PACKAGE_1, "bmp32x32"), getCallingUserId()));
+        assertBitmapSize(32, 32, bmp);
+
+        bmp = pfdToBitmap(mInternal.getShortcutIconFd(
+                getCallingPackage(),
+                makePackageShortcut(CALLING_PACKAGE_1, "bmp64x64"), getCallingUserId()));
+        assertBitmapSize(64, 64, bmp);
+
+        bmp = pfdToBitmap(mInternal.getShortcutIconFd(
+                getCallingPackage(),
+                makePackageShortcut(CALLING_PACKAGE_1, "bmp512x512"), getCallingUserId()));
+        assertBitmapSize(128, 128, bmp);
+
+        // TODO Test the content URI case too.
+    }
+
+    private void checkShrinkBitmap(int expectedWidth, int expectedHeight, int resId, int maxSize) {
+        assertBitmapSize(expectedWidth, expectedHeight,
+                ShortcutService.shrinkBitmap(BitmapFactory.decodeResource(
+                        mContext.getResources(), resId),
+                        maxSize));
+    }
+
+    public void testShrinkBitmap() {
+        checkShrinkBitmap(32, 32, R.drawable.black_512x512, 32);
+        checkShrinkBitmap(511, 511, R.drawable.black_512x512, 511);
+        checkShrinkBitmap(512, 512, R.drawable.black_512x512, 512);
+
+        checkShrinkBitmap(1024, 4096, R.drawable.black_1024x4096, 4096);
+        checkShrinkBitmap(1024, 4096, R.drawable.black_1024x4096, 4100);
+        checkShrinkBitmap(512, 2048, R.drawable.black_1024x4096, 2048);
+
+        checkShrinkBitmap(4096, 1024, R.drawable.black_4096x1024, 4096);
+        checkShrinkBitmap(4096, 1024, R.drawable.black_4096x1024, 4100);
+        checkShrinkBitmap(2048, 512, R.drawable.black_4096x1024, 2048);
+    }
+
+    private File openIconFileForWriteAndGetPath(int userId, String packageName)
+            throws IOException {
+        // Shortcut IDs aren't used in the path, so just pass the same ID.
+        final FileOutputStreamWithPath out =
+                mService.openIconFileForWrite(userId, makePackageShortcut(packageName, "id"));
+        out.close();
+        return out.getFile();
+    }
+
+    public void testOpenIconFileForWrite() throws IOException {
+        mInjectedCurrentTimeLillis = 1000;
+
+        final File p10_1_1 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_1);
+        final File p10_1_2 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_1);
+
+        final File p10_2_1 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_2);
+        final File p10_2_2 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_2);
+
+        final File p11_1_1 = openIconFileForWriteAndGetPath(11, CALLING_PACKAGE_1);
+        final File p11_1_2 = openIconFileForWriteAndGetPath(11, CALLING_PACKAGE_1);
+
+        mInjectedCurrentTimeLillis++;
+
+        final File p10_1_3 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_1);
+        final File p10_1_4 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_1);
+        final File p10_1_5 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_1);
+
+        final File p10_2_3 = openIconFileForWriteAndGetPath(10, CALLING_PACKAGE_2);
+        final File p11_1_3 = openIconFileForWriteAndGetPath(11, CALLING_PACKAGE_1);
+
+        // Make sure their paths are all unique
+        assertAllUnique(Arrays.asList(
+                p10_1_1,
+                p10_1_2,
+                p10_1_3,
+                p10_1_4,
+                p10_1_5,
+
+                p10_2_1,
+                p10_2_2,
+                p10_2_3,
+
+                p11_1_1,
+                p11_1_2,
+                p11_1_3
+        ));
+
+        // Check each set has the same parent.
+        assertEquals(p10_1_1.getParent(), p10_1_2.getParent());
+        assertEquals(p10_1_1.getParent(), p10_1_3.getParent());
+        assertEquals(p10_1_1.getParent(), p10_1_4.getParent());
+        assertEquals(p10_1_1.getParent(), p10_1_5.getParent());
+
+        assertEquals(p10_2_1.getParent(), p10_2_2.getParent());
+        assertEquals(p10_2_1.getParent(), p10_2_3.getParent());
+
+        assertEquals(p11_1_1.getParent(), p11_1_2.getParent());
+        assertEquals(p11_1_1.getParent(), p11_1_3.getParent());
+
+        // Check the parents are still unique.
+        assertAllUnique(Arrays.asList(
+                p10_1_1.getParent(),
+                p10_2_1.getParent(),
+                p11_1_1.getParent()
+        ));
+
+        // All files created at the same time for the same package/user, expcet for the first ones,
+        // will have "_" in the path.
+        assertFalse(p10_1_1.getName().contains("_"));
+        assertTrue(p10_1_2.getName().contains("_"));
+        assertFalse(p10_1_3.getName().contains("_"));
+        assertTrue(p10_1_4.getName().contains("_"));
+        assertTrue(p10_1_5.getName().contains("_"));
+
+        assertFalse(p10_2_1.getName().contains("_"));
+        assertTrue(p10_2_2.getName().contains("_"));
+        assertFalse(p10_2_3.getName().contains("_"));
+
+        assertFalse(p11_1_1.getName().contains("_"));
+        assertTrue(p11_1_2.getName().contains("_"));
+        assertFalse(p11_1_3.getName().contains("_"));
+    }
+
     // TODO: updateShortcuts()
     // TODO: getPinnedShortcuts()
 
@@ -860,9 +1230,10 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         // Get dynamic
         assertAllDynamic(assertAllHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllNotKeyFieldsOnly(
                 mInternal.getShortcuts(getCallingPackage(), /* time =*/ 0, CALLING_PACKAGE_1,
                         /* activity =*/ null,
-                    ShortcutQuery.FLAG_GET_DYNAMIC, getCallingUserId()),
+                    ShortcutQuery.FLAG_GET_DYNAMIC, getCallingUserId())),
                 "s1", "s2"))));
 
         // Get pinned
@@ -874,18 +1245,20 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         // Get both, with timestamp
         assertAllDynamic(assertAllHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
-                mInternal.getShortcuts(getCallingPackage(),  /* time =*/ 1000, CALLING_PACKAGE_2,
+                assertAllNotKeyFieldsOnly(mInternal.getShortcuts(getCallingPackage(),
+                        /* time =*/ 1000, CALLING_PACKAGE_2,
                         /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_PINNED | ShortcutQuery.FLAG_GET_DYNAMIC,
-                        getCallingUserId()),
+                        getCallingUserId())),
                 "s2", "s3"))));
 
         // FLAG_GET_KEY_FIELDS_ONLY
         assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
-                mInternal.getShortcuts(getCallingPackage(), /* time =*/ 1000, CALLING_PACKAGE_2,
+                assertAllKeyFieldsOnly(mInternal.getShortcuts(getCallingPackage(),
+                        /* time =*/ 1000, CALLING_PACKAGE_2,
                         /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY,
-                        getCallingUserId()),
+                        getCallingUserId())),
                 "s2", "s3"))));
 
         // Pin some shortcuts.
@@ -894,19 +1267,20 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         // Pinned ones only
         assertAllPinned(assertAllHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
-                mInternal.getShortcuts(getCallingPackage(), /* time =*/ 1000, CALLING_PACKAGE_2,
+                assertAllNotKeyFieldsOnly(mInternal.getShortcuts(getCallingPackage(),
+                        /* time =*/ 1000, CALLING_PACKAGE_2,
                         /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_PINNED,
-                        getCallingUserId()),
+                        getCallingUserId())),
                 "s3"))));
 
         // All packages.
-        assertShortcutIds(
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mInternal.getShortcuts(getCallingPackage(),
                         /* time =*/ 5000, /* package= */ null,
                         /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED,
-                        getCallingUserId()),
+                        getCallingUserId())),
                 "s1", "s3");
 
         // TODO More tests: pinned but dynamic, filter by activity
@@ -968,8 +1342,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         // Note we don't guarantee the orders.
         list = assertShortcutIds(assertAllHaveTitle(assertAllNotHaveIntents(
+                assertAllNotKeyFieldsOnly(
                 mInternal.getShortcutInfo(getCallingPackage(), CALLING_PACKAGE_1,
-                Arrays.asList("s2", "s1", "s3", null), getCallingUserId()))),
+                Arrays.asList("s2", "s1", "s3", null), getCallingUserId())))),
                 "s1", "s2");
         assertEquals("Title 1", findById(list, "s1").getTitle());
         assertEquals("Title 2", findById(list, "s2").getTitle());
@@ -1036,19 +1411,19 @@ public class ShortcutManagerTest extends AndroidTestCase {
         setCaller(LAUNCHER_1);
 
         // CALLING_PACKAGE_1 deleted s2, but it's pinned, so it still exists.
-        assertShortcutIds(assertAllPinned(
+        assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
                 mInternal.getShortcuts(getCallingPackage(), /* time =*/ 0, CALLING_PACKAGE_1,
-                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED, getCallingUserId())),
+                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED, getCallingUserId()))),
                 "s2");
 
-        assertShortcutIds(assertAllPinned(
+        assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
                 mInternal.getShortcuts(getCallingPackage(), /* time =*/ 0, CALLING_PACKAGE_2,
-                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED, getCallingUserId())),
+                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED, getCallingUserId()))),
                 "s3", "s4");
 
-        assertShortcutIds(assertAllPinned(
+        assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
                 mInternal.getShortcuts(getCallingPackage(), /* time =*/ 0, CALLING_PACKAGE_3,
-                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED, getCallingUserId()))
+                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED, getCallingUserId())))
                 /* none */);
     }
 

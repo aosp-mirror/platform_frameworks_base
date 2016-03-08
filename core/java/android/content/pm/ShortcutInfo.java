@@ -19,9 +19,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -60,6 +62,9 @@ public class ShortcutInfo implements Parcelable {
     /* @hide */
     public static final int FLAG_HAS_ICON_FILE = 1 << 3;
 
+    /* @hide */
+    public static final int FLAG_KEY_FIELDS_ONLY = 1 << 4;
+
     /** @hide */
     @IntDef(flag = true,
             value = {
@@ -67,6 +72,7 @@ public class ShortcutInfo implements Parcelable {
             FLAG_PINNED,
             FLAG_HAS_ICON_RES,
             FLAG_HAS_ICON_FILE,
+            FLAG_KEY_FIELDS_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -114,10 +120,15 @@ public class ShortcutInfo implements Parcelable {
     @NonNull
     private String mTitle;
 
+    /**
+     * Intent *with extras removed*.
+     */
     @NonNull
     private Intent mIntent;
 
-    // Internal use only.
+    /**
+     * Extras for the intent.
+     */
     @NonNull
     private PersistableBundle mIntentPersistableExtras;
 
@@ -149,6 +160,11 @@ public class ShortcutInfo implements Parcelable {
         mIcon = b.mIcon;
         mTitle = b.mTitle;
         mIntent = b.mIntent;
+        final Bundle intentExtras = mIntent.getExtras();
+        if (intentExtras != null) {
+            mIntent.replaceExtras((Bundle) null);
+            mIntentPersistableExtras = new PersistableBundle(intentExtras);
+        }
         mWeight = b.mWeight;
         mExtras = b.mExtras;
         updateTimestamp();
@@ -170,11 +186,12 @@ public class ShortcutInfo implements Parcelable {
     private ShortcutInfo(ShortcutInfo source, @CloneFlags int cloneFlags) {
         mId = source.mId;
         mPackageName = source.mPackageName;
-        mActivityComponent = source.mActivityComponent;
         mFlags = source.mFlags;
         mLastChangedTimestamp = source.mLastChangedTimestamp;
 
         if ((cloneFlags & CLONE_REMOVE_NON_KEY_INFO) == 0) {
+            mActivityComponent = source.mActivityComponent;
+
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
             }
@@ -188,6 +205,10 @@ public class ShortcutInfo implements Parcelable {
             mExtras = source.mExtras;
             mIconResourceId = source.mIconResourceId;
             mBitmapPath = source.mBitmapPath;
+
+        } else {
+            // Set this bit.
+            mFlags |= FLAG_KEY_FIELDS_ONLY;
         }
     }
 
@@ -239,6 +260,39 @@ public class ShortcutInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public static Icon validateIcon(Icon icon) {
+        switch (icon.getType()) {
+            case Icon.TYPE_RESOURCE:
+            case Icon.TYPE_BITMAP:
+                break; // OK
+            case Icon.TYPE_URI:
+                if (ContentResolver.SCHEME_CONTENT.equals(icon.getUri().getScheme())) {
+                    break;
+                }
+                // Note "file:" is not supported, because depending on the path, system server
+                // cannot access it. // TODO Revisit "file:" icon support
+
+                // fall through
+            default:
+                throw getInvalidIconException();
+        }
+        if (icon.hasTint()) {
+            // TODO support it
+            throw new IllegalArgumentException("Icons with tints are not supported");
+        }
+
+        return icon;
+    }
+
+    /** @hide */
+    public static IllegalArgumentException getInvalidIconException() {
+        return new IllegalArgumentException("Unsupported icon type:"
+                +" only bitmap, resource and content URI are supported");
+    }
+
+    /**
      * Builder class for {@link ShortcutInfo} objects.
      */
     public static class Builder {
@@ -273,7 +327,9 @@ public class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Optionally sets the target activity.
+         * Optionally sets the target activity.  If it's not set, and if the caller application
+         * has multiple launcher icons, this shortcut will be shown on all those icons.
+         * If it's set, this shortcut will be only shown on this activity.
          */
         @NonNull
         public Builder setActivityComponent(@NonNull ComponentName activityComponent) {
@@ -284,15 +340,22 @@ public class ShortcutInfo implements Parcelable {
         /**
          * Optionally sets an icon.
          *
-         * - Tint is not supported TODO Either check and throw, or support it.
-         * - URI icons will be converted into Bitmap icons at the registration time.
+         * <ul>
+         *     <li>Tints are not supported.
+         *     <li>Bitmaps, resources and "content:" URIs are supported.
+         *     <li>"content:" URI will be fetched when a shortcut is registered to
+         *         {@link ShortcutManager}.  Changing the content from the same URI later will
+         *         not be reflected to launcher icons.
+         * </ul>
          *
-         * TODO Only allow Bitmap, Resource and URI types.  byte[] type can easily go over
-         * binder size limit.
+         * <p>For performance reasons, icons will <b>NOT</b> be available on instances
+         * returned by {@link ShortcutManager} or {@link LauncherApps}.  Launcher applications
+         * need to use {@link LauncherApps#getShortcutIconFd(ShortcutInfo, UserHandle)}
+         * and {@link LauncherApps#getShortcutIconResId(ShortcutInfo, UserHandle)}.
          */
         @NonNull
         public Builder setIcon(Icon icon) {
-            mIcon = icon;
+            mIcon = validateIcon(icon);
             return this;
         }
 
@@ -316,7 +379,7 @@ public class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Optionally sets the weight of a shortcut, which will be used by Launcher for sorting.
+         * Optionally sets the weight of a shortcut, which will be used by the launcher for sorting.
          * The larger the weight, the more "important" a shortcut is.
          */
         @NonNull
@@ -326,8 +389,8 @@ public class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Optional values that application can set.
-         * TODO: reserve keys starting with "android."
+         * Optional values that applications can set.  Applications can store any meta-data of
+         * shortcuts in this, and retrieve later from {@link ShortcutInfo#getExtras()}.
          */
         @NonNull
         public Builder setExtras(@NonNull PersistableBundle extras) {
@@ -353,7 +416,7 @@ public class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the ID of the shortcut.
+     * Return the package name of the creator application.
      */
     @NonNull
     public String getPackageName() {
@@ -374,7 +437,7 @@ public class ShortcutInfo implements Parcelable {
      *
      * For performance reasons, this will <b>NOT</b> be available when an instance is returned
      * by {@link ShortcutManager} or {@link LauncherApps}.  A launcher application needs to use
-     * other APIs in LauncherApps to fetch the bitmap.  TODO Add a precondition for it.
+     * other APIs in LauncherApps to fetch the bitmap.
      *
      * @hide
      */
@@ -385,22 +448,46 @@ public class ShortcutInfo implements Parcelable {
 
     /**
      * Return the shortcut title.
+     *
+     * <p>All shortcuts must have a non-empty title, but this method will return null when
+     * {@link #hasKeyFieldsOnly()} is true.
      */
-    @NonNull
+    @Nullable
     public String getTitle() {
         return mTitle;
     }
 
     /**
      * Return the intent.
-     * TODO Set mIntentPersistableExtras and before returning.
+     *
+     * <p>All shortcuts must have an intent, but this method will return null when
+     * {@link #hasKeyFieldsOnly()} is true.
      */
-    @NonNull
+    @Nullable
     public Intent getIntent() {
+        if (mIntent == null) {
+            return null;
+        }
+        final Intent intent = new Intent(mIntent);
+        intent.replaceExtras(
+                mIntentPersistableExtras != null ? new Bundle(mIntentPersistableExtras) : null);
+        return intent;
+    }
+
+    /**
+     * Return "raw" intent, which is the original intent without the extras.
+     * @hide
+     */
+    @Nullable
+    public Intent getIntentNoExtras() {
         return mIntent;
     }
 
-    /** @hide */
+    /**
+     * The extras in the intent.  We convert extras into {@link PersistableBundle} so we can
+     * persist them.
+     * @hide
+     */
     @Nullable
     public PersistableBundle getIntentPersistableExtras() {
         return mIntentPersistableExtras;
@@ -483,6 +570,23 @@ public class ShortcutInfo implements Parcelable {
         return hasFlags(FLAG_HAS_ICON_FILE);
     }
 
+    /**
+     * Return whether a shortcut only contains "key" information only or not.  If true, only the
+     * following fields are available.
+     * <ul>
+     *     <li>{@link #getId()}
+     *     <li>{@link #getPackageName()}
+     *     <li>{@link #getLastChangedTimestamp()}
+     *     <li>{@link #isDynamic()}
+     *     <li>{@link #isPinned()}
+     *     <li>{@link #hasIconResource()}
+     *     <li>{@link #hasIconFile()}
+     * </ul>
+     */
+    public boolean hasKeyFieldsOnly() {
+        return hasFlags(FLAG_KEY_FIELDS_ONLY);
+    }
+
     /** @hide */
     public void updateTimestamp() {
         mLastChangedTimestamp = System.currentTimeMillis();
@@ -495,33 +599,13 @@ public class ShortcutInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setIcon(Icon icon) {
-        mIcon = icon;
+    public void clearIcon() {
+        mIcon = null;
     }
 
     /** @hide */
-    public void setTitle(String title) {
-        mTitle = title;
-    }
-
-    /** @hide */
-    public void setIntent(Intent intent) {
-        mIntent = intent;
-    }
-
-    /** @hide */
-    public void setIntentPersistableExtras(PersistableBundle intentPersistableExtras) {
-        mIntentPersistableExtras = intentPersistableExtras;
-    }
-
-    /** @hide */
-    public void setWeight(int weight) {
-        mWeight = weight;
-    }
-
-    /** @hide */
-    public void setExtras(PersistableBundle extras) {
-        mExtras = extras;
+    public void setIconResourceId(int iconResourceId) {
+        mIconResourceId = iconResourceId;
     }
 
     /** @hide */
@@ -643,9 +727,10 @@ public class ShortcutInfo implements Parcelable {
         sb.append(", extras=");
         sb.append(mExtras);
 
+        sb.append(", flags=");
+        sb.append(mFlags);
+
         if (includeInternalData) {
-            sb.append(", flags=");
-            sb.append(mFlags);
 
             sb.append(", iconRes=");
             sb.append(mIconResourceId);
