@@ -58,6 +58,7 @@ public class CustomTile extends QSTile<QSTile.State> {
     private final IBinder mToken = new Binder();
     private final IQSTileService mService;
     private final TileServiceManager mServiceManager;
+    private final int mUser;
 
     private boolean mListening;
     private boolean mBound;
@@ -71,6 +72,7 @@ public class CustomTile extends QSTile<QSTile.State> {
         mServiceManager = host.getTileServices().getTileWrapper(this);
         mService = mServiceManager.getTileService();
         mTile = new Tile(mComponent);
+        mUser = ActivityManager.getCurrentUser();
         try {
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent, 0);
@@ -84,6 +86,10 @@ public class CustomTile extends QSTile<QSTile.State> {
         } catch (RemoteException e) {
             // Called through wrapper, won't happen here.
         }
+    }
+
+    public int getUser() {
+        return mUser;
     }
 
     public ComponentName getComponent() {
