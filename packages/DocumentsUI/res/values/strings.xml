@@ -213,4 +213,9 @@
         <item quantity="one">Delete <xliff:g id="count" example="1">%1$d</xliff:g> file?</item>
         <item quantity="other">Delete <xliff:g id="count" example="3">%1$d</xliff:g> files?</item>
     </plurals>
+    <!-- Label text showing user how many items are selected. Can be one or more elements. -->
+    <plurals name="elements_selected">
+        <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
+        <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
+    </plurals>
 </resources>
