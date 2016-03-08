@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.annotation.ColorInt;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources.Theme;
@@ -37,12 +38,47 @@ import android.util.Log;
 import android.util.Xml;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-
+/**
+ * Lets you define a gradient color, which is used inside
+ * {@link android.graphics.drawable.VectorDrawable}.
+ *
+ * {@link android.content.res.GradientColor}s are created from XML resource files defined in the
+ * "color" subdirectory directory of an application's resource directory.  The XML file contains
+ * a single "gradient" element with a number of attributes and elements inside.  For example:
+ * <pre>
+ * &lt;gradient xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+ *   &lt;android:startColor="?android:attr/colorPrimary"/&gt;
+ *   &lt;android:endColor="?android:attr/colorControlActivated"/&gt;
+ *   &lt;.../&gt;
+ *   &lt;android:type="linear"/&gt;
+ * &lt;/gradient&gt;
+ * </pre>
+ *
+ * This can describe either a {@link android.graphics.LinearGradient},
+ * {@link android.graphics.RadialGradient}, or {@link android.graphics.SweepGradient}.
+ *
+ * Note that different attributes are relevant for different types of gradient.
+ * For example, android:gradientRadius is only applied to RadialGradient.
+ * androd:centerX and android:centerY are only applied to SweepGradient or RadialGradient.
+ * android:startX, android:startY, android:endX and android:endY are only applied to LinearGradient.
+ *
+ * Also note if any color "item" element is defined, then startColor, centerColor and endColor will
+ * be ignored.
+ */
 public class GradientColor extends ComplexColor {
     private static final String TAG = "GradientColor";
 
     private static final boolean DBG_GRADIENT = false;
+
+    @IntDef({TILE_MODE_CLAMP, TILE_MODE_REPEAT, TILE_MODE_MIRROR})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface GradientTileMode {}
+    private static final int TILE_MODE_CLAMP = 0;
+    private static final int TILE_MODE_REPEAT = 1;
+    private static final int TILE_MODE_MIRROR = 2;
 
     /** Lazily-created factory for this GradientColor. */
     private GradientColorFactory mFactory;
@@ -54,7 +90,8 @@ public class GradientColor extends ComplexColor {
     // all the XML information.
     private Shader mShader = null;
 
-    // Below are the attributes at the root element <gradient>
+    // Below are the attributes at the root element <gradient>.
+    // NOTE: they need to be copied in the copy constructor!
     private int mGradientType = GradientDrawable.LINEAR_GRADIENT;
 
     private float mCenterX = 0f;
@@ -69,6 +106,8 @@ public class GradientColor extends ComplexColor {
     private int mCenterColor = 0;
     private int mEndColor = 0;
     private boolean mHasCenterColor = false;
+
+    private int mTileMode = 0; // Clamp mode.
 
     private float mGradientRadius = 0f;
 
@@ -100,6 +139,7 @@ public class GradientColor extends ComplexColor {
             mEndColor = copy.mEndColor;
             mHasCenterColor = copy.mHasCenterColor;
             mGradientRadius = copy.mGradientRadius;
+            mTileMode = copy.mTileMode;
 
             if (copy.mItemColors != null) {
                 mItemColors = copy.mItemColors.clone();
@@ -114,6 +154,20 @@ public class GradientColor extends ComplexColor {
             if (copy.mItemsThemeAttrs != null) {
                 mItemsThemeAttrs = copy.mItemsThemeAttrs.clone();
             }
+        }
+    }
+
+    // Set the default to clamp mode.
+    private static Shader.TileMode parseTileMode(@GradientTileMode int tileMode) {
+        switch (tileMode) {
+            case TILE_MODE_CLAMP:
+                return Shader.TileMode.CLAMP;
+            case TILE_MODE_REPEAT:
+                return Shader.TileMode.REPEAT;
+            case TILE_MODE_MIRROR:
+                return Shader.TileMode.MIRROR;
+            default:
+                return Shader.TileMode.CLAMP;
         }
     }
 
@@ -150,6 +204,9 @@ public class GradientColor extends ComplexColor {
         mEndColor = a.getColor(
                 R.styleable.GradientColor_endColor, mEndColor);
 
+        mTileMode = a.getInt(
+                R.styleable.GradientColor_tileMode, mTileMode);
+
         if (DBG_GRADIENT) {
             Log.v(TAG, "hasCenterColor is " + mHasCenterColor);
             if (mHasCenterColor) {
@@ -157,6 +214,7 @@ public class GradientColor extends ComplexColor {
             }
             Log.v(TAG, "startColor: " + mStartColor);
             Log.v(TAG, "endColor: " + mEndColor);
+            Log.v(TAG, "tileMode: " + mTileMode);
         }
 
         mGradientRadius = a.getFloat(R.styleable.GradientColor_gradientRadius,
@@ -406,11 +464,11 @@ public class GradientColor extends ComplexColor {
 
         if (mGradientType == GradientDrawable.LINEAR_GRADIENT) {
             mShader = new LinearGradient(mStartX, mStartY, mEndX, mEndY, tempColors, tempOffsets,
-                    Shader.TileMode.CLAMP);
+                    parseTileMode(mTileMode));
         } else {
             if (mGradientType == GradientDrawable.RADIAL_GRADIENT) {
                 mShader = new RadialGradient(mCenterX, mCenterY, mGradientRadius, tempColors,
-                        tempOffsets, Shader.TileMode.CLAMP);
+                        tempOffsets, parseTileMode(mTileMode));
             } else {
                 mShader = new SweepGradient(mCenterX, mCenterY, tempColors, tempOffsets);
             }
