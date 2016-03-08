@@ -27,7 +27,7 @@ page.keywords=preview,security,network
 
 
 <p>
-  The Android N Developer Preview includes a Network Security Configuration
+  Android N includes a Network Security Configuration
   feature that lets apps customize their network security settings in a safe,
   declarative configuration file without modifying app code. These settings can
   be configured for specific domains and for a specific app. The key

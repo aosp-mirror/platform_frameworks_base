@@ -17,7 +17,7 @@ page.tags="preview", "developer preview"
 </div>
 
 <p>
-  The Android M Developer Preview gives you an opportunity to ensure your apps work with the next
+  Android N gives you an opportunity to ensure your apps work with the next
   version of the platform. This preview includes a number of APIs and behavior changes that can
   impact your app, as described in the <a href="{@docRoot}preview/api-overview.html">API
   Overview</a> and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>. In testing
@@ -41,7 +41,8 @@ page.tags="preview", "developer preview"
 
 <p>
   For more information about how to set up devices or virtual devices with a preview system image
-  for testing, see <a href="{@docRoot}preview/setup-sdk.html">Set up the Preview SDK</a>.
+  for testing, see <a href="{@docRoot}preview/setup-sdk.html">Set up
+the Android N SDK</a>.
 </p>
 
 
@@ -105,7 +106,8 @@ page.tags="preview", "developer preview"
   paths that use the permission-protected services. You can do this through a combination of
   testing on the new platform and code analysis. In testing, you should focus on opting in to
   runtime permissions by changing the app’s {@code targetSdkVersion} to the preview version. For
-  more information, see <a href="{@docRoot}preview/setup-sdk.html#">Set up the Preview SDK</a>.
+  more information, see <a href="{@docRoot}preview/setup-sdk.html#">Set up
+the Android N SDK</a>.
 </p>
 
 <p>
@@ -138,7 +140,7 @@ page.tags="preview", "developer preview"
 <p>To test Doze with your app:</p>
 
 <ol>
-<li>Configure a hardware device or virtual device with a M Preview system image.</li>
+<li>Configure a hardware device or virtual device with an Android N system image.</li>
 <li>Connect the device to your development machine and install your app.</li>
 <li>Run your app and leave it active.</li>
 <li>Simulate the device going into Doze mode by running the following commands:
@@ -160,7 +162,7 @@ $ adb shell dumpsys deviceidle -h
 <p>To test the App Standby mode with your app:</p>
 
 <ol>
-  <li>Configure a hardware device or virtual device with a M Preview system image.</li>
+  <li>Configure a hardware device or virtual device with an Android N system image.</li>
   <li>Connect the device to your development machine and install your app.</li>
   <li>Run your app and leave it active.</li>
   <li>Simulate the app going into standby mode by running the following commands:

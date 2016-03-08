@@ -18,7 +18,7 @@ page.tags=androidn
 </div>
 
 <p>TV input services let the user pause and resume channel playback via
-time-shifting APIs. The Android N Developer Preview expands on time-shifting
+time-shifting APIs. Android N expands on time-shifting
 by letting the user save multiple recorded sessions.</p>
 
 <p>Users can schedule recordings in advance, or start a recording as they watch

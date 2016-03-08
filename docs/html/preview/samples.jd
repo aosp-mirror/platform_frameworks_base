@@ -4,7 +4,7 @@ page.image=images/cards/card-n-samples_2x.png
 @jd:body
 
 <p>
-  The following code samples are provided for the N Developer Preview. To
+  The following code samples are provided for Android N. To
   download the samples in Android Studio, select the <b>File &gt; Import
   Samples</b> menu option.
 </p>
@@ -29,7 +29,7 @@ page.image=images/cards/card-n-samples_2x.png
 <h3 id="notifications">Notifications</h3>
 <p>
   This sample is updated to demonstrates how to take advantage of new
-  notifications features available in the N Developer Preview.
+  notifications features available in Android N.
 </p>
 <p>
   <a href="https://github.com/googlesamples/android-Notifications">

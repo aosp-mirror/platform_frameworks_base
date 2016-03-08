@@ -24,7 +24,7 @@ page.keywords="android N", "data usage", "metered network"
 
 <p>
   Over the life of a smartphone, the cost of a cellular data plan can easily
-  exceed the cost of the device itself. In the N Developer Preview, users can
+  exceed the cost of the device itself. In Android N, users can
   enable Data Saver in order to use less data, whether roaming, near the end of
   the billing cycle, or on a small prepaid data pack.
 </p>
@@ -38,7 +38,7 @@ page.keywords="android N", "data usage", "metered network"
 </p>
 
 <p>
-  The N Developer Preview extends the {@link android.net.ConnectivityManager}
+  Android N extends the {@link android.net.ConnectivityManager}
   API to provide apps a way to <a href="#status">retrieve the user’s Data Saver
   preferences</a> and <a href="#monitor-changes">monitor preference
   changes</a>. It is considered good practice for apps to check whether the
@@ -51,7 +51,7 @@ page.keywords="android N", "data usage", "metered network"
 </h1>
 
 <p>
-  In the N Developer Preview, apps can use the {@link
+  In Android N, apps can use the {@link
   android.net.ConnectivityManager} API to determine what data usage
   restrictions are being applied. The {@code getRestrictBackgroundStatus()}
   method returns one of the following values:

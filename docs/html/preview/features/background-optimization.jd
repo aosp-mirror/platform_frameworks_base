@@ -57,12 +57,12 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
 </p>
 
 <p>
-  To alleviate this issue, the N Developer Preview applies the following
+  To alleviate this issue, Android N applies the following
   restrictions:
 </p>
 
 <ul>
-  <li>Apps targeting the N Developer Preview will not receive {@link
+  <li>Apps targeting Android N will not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
   register to receive them in their manifest. Apps running in the foreground
   can still listen for {@code CONNECTIVITY_CHANGE} on their main thread with a
@@ -100,7 +100,7 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
 </h2>
 
 <p>
-  Apps targeting the N Developer Preview do not receive {@link
+  Apps targeting Android N do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
   register to receive them in their manifest. This could pose a problem for
   apps that want to listen for network changes or perform bulk network
@@ -225,10 +225,10 @@ GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
 </h2>
 
 <p>
-  In the N Developer Preview, apps are not able to send or receive {@code
+  In Android N, apps are not able to send or receive {@code
   NEW_PICTURE} or {@code NEW_VIDEO} broadcasts. This restriction helps
   alleviate the performance and user experience impacts when several apps must
-  wake up in order to process them. The N Developer Preview extends {@link
+  wake up in order to process them. Android N extends {@link
   android.app.job.JobInfo} and {@link android.app.job.JobParameters} to provide
   an alternative solution.
 </p>
@@ -238,7 +238,7 @@ GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
 </h3>
 
 <p>
-  To help trigger jobs on content URI changes, the N Developer Preview extends
+  To help trigger jobs on content URI changes, Android N extends
   the {@link android.app.job.JobInfo} API with the following methods:
 </p>
 
@@ -313,7 +313,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  The N Developer Preview also extends {@link android.app.job.JobParameters} to
+  Android N also extends {@link android.app.job.JobParameters} to
   allow your app to receive useful information about what content authorities
   and URIs triggered the job:
 </p>
@@ -386,14 +386,14 @@ public boolean onStartJob(JobParameters params) {
   Optimizing your apps to run on low-memory devices, or in low-memory
   conditions, can improve performance and user experience. Eliminating the use
   of implicit broadcasts and background services is a great way to make sure
-  your app runs well on such devices. Although the N Developer Preview takes
+  your app runs well on such devices. Although Android N takes
   steps to limit the use of certain implicit broadcasts, consider optimizing
   your app to run without the use of implicit broadcasts and background
   services, entirely.</p>
 
 <p>
-  To help you test how your app behaves without those background processes, The
-  N Developer Preview introduces some additional <a href=
+  To help you test how your app behaves without those background processes,
+  Android N introduces some additional <a href=
   "{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> commands:
 </p>
 

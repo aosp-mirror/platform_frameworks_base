@@ -333,7 +333,8 @@ Preview partners:</p>
 </p>
 
 <ul>
-  <li> <a href="{@docRoot}preview/setup-sdk.html">Setting Up the SDK</a> has
+  <li> <a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for
+Android N</a> has
   step-by-step instructions for getting started.</li>
   <li> <a href="{@docRoot}preview/testing/guide.html">Testing Guide</a>
   and <a href="{@docRoot}preview/behavior-changes.html">Behavior
@@ -447,10 +448,10 @@ Preview partners:</p>
   href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
   and configuring test devices.</li>
   <li> Follow the <a href="https://developers.google.com/android/nexus/images">flashing
-  instructions</a> to flash the latest N Developer Preview system image for Nexus 5X,
+  instructions</a> to flash the latest Android N system image for Nexus 5X,
   6, 6P, 9, Pixel C, and Player. </li>
   <li> Review the <a href="{@docRoot}reference/packages.html">API Reference</a>
-  and <a href="{@docRoot}preview/samples.html">M Preview samples</a> to gain more
+  and <a href="{@docRoot}preview/samples.html">Android N samples</a> to gain more
   insight into new API features and how to use them in your app.
   <li> Join the <a href="https://developer.android.com/preview/dev-community">Android N
   Developer Community</a> to get the latest news and connect with other

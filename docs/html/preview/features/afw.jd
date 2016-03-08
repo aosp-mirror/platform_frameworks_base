@@ -1,5 +1,5 @@
 page.title=Android for Work Updates
-page.metaDescription=New Android for Work APIs and features in the N Developer Preview.
+page.metaDescription=New Android for Work APIs and features in Android N.
 page.keywords="android for work", "android N", "enterprise", "QR code"
 
 @jd:body
@@ -84,8 +84,8 @@ page.keywords="android for work", "android N", "enterprise", "QR code"
   </div>
 </div>
 
-<p>This document describes the new Android for Work features provided in the
-N Developer Preview.</p>
+<p>This document describes the new Android for Work features provided in
+Android N.</p>
 
 <h2 id="qr">QR Code Provisioning</h2>
 
@@ -310,7 +310,7 @@ N Developer Preview.</p>
 </p>
 
 <p>
-  The Preview includes the following API additions to support this feature. For
+  Android N includes the following API additions to support this feature. For
   details, see the <a href="{@docRoot}preview/download.html#docs">N Preview SDK
   Reference</a>.
 </p>
