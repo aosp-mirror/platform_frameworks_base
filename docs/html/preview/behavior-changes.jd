@@ -512,3 +512,37 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   been enabled on the device, this method returns a value of {@code null}.
   </li>
 </ul>
+
+<h2 id="other">Other important points</h2>
+
+<ul>
+<li>On Android N, apps should be able to gracefully handle an out-of-memory
+condition, or they might crash when the user changes display size and then
+restores the app from Recents.</li>
+
+<li>
+Apps running on Android N but targeting lower API levels must be able to
+gracefully handle their process being killed; they should
+not crash on subsequent launches.
+
+<p>
+You can diagnose this behavior by causing an identical crash
+when killing the app manually via DDMS or automatically in a low-
+or out-of-memory condition.
+</p>
+
+<p>
+Apps targeting N and above are not automatically killed on density changes;
+however, they may still respond poorly to configuration changes
+</p>
+</li>
+
+<li>
+Apps on Android N should be able to gracefully handle configuration changes,
+and should not crash on subsequent starts. You can verify app behavior
+by changing font size (<strong>Setting</strong> >
+<strong>Display</strong> > <strong>Font size</strong>), and then restoring
+the app from Recents.
+</li>
+</ul>
+
