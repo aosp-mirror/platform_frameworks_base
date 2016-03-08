@@ -15,4 +15,4 @@
 
 package android.media;
 
-parcelable AudioRecordConfiguration;
+parcelable AudioRecordingConfiguration;
