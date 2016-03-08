@@ -215,7 +215,7 @@ public class Editor {
 
     boolean mInBatchEditControllers;
     boolean mShowSoftInputOnFocus = true;
-    private boolean mPreserveDetachedSelection;
+    private boolean mPreserveSelection;
     boolean mTemporaryDetach;
 
     boolean mIsBeingLongClicked;
@@ -376,13 +376,7 @@ public class Editor {
         updateSpellCheckSpans(0, mTextView.getText().length(),
                 true /* create the spell checker if needed */);
 
-        if (mTextView.hasTransientState() &&
-                mTextView.getSelectionStart() != mTextView.getSelectionEnd()) {
-            // Since transient state is reference counted make sure it stays matched
-            // with our own calls to it for managing selection.
-            // The action mode callback will set this back again when/if the action mode starts.
-            mTextView.setHasTransientState(false);
-
+        if (mTextView.getSelectionStart() != mTextView.getSelectionEnd()) {
             // We had an active selection from before, start the selection mode.
             startSelectionActionMode();
         }
@@ -2113,9 +2107,9 @@ public class Editor {
     }
 
     private void stopTextActionModeWithPreservingSelection() {
-        mPreserveDetachedSelection = true;
+        mPreserveSelection = true;
         stopTextActionMode();
-        mPreserveDetachedSelection = false;
+        mPreserveSelection = false;
     }
 
     /**
@@ -2515,7 +2509,7 @@ public class Editor {
                 .setEnabled(mTextView.canSelectAllText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
-        mPreserveDetachedSelection = true;
+        mPreserveSelection = true;
     }
 
     private void replaceWithSuggestion(final SuggestionInfo suggestionInfo) {
@@ -3590,7 +3584,6 @@ public class Editor {
             }
 
             if (menu.hasVisibleItems() || mode.getCustomView() != null) {
-                mTextView.setHasTransientState(true);
                 return true;
             } else {
                 return false;
@@ -3690,15 +3683,14 @@ public class Editor {
                 customCallback.onDestroyActionMode(mode);
             }
 
-            /*
-             * If we're ending this mode because we're detaching from a window,
-             * we still have selection state to preserve. Don't clear it, we'll
-             * bring back the selection mode when (if) we get reattached.
-             */
-            if (!mPreserveDetachedSelection) {
+            if (!mPreserveSelection) {
+                /*
+                 * Leave current selection when we tentatively destroy action mode for the
+                 * selection. If we're detaching from a window, we'll bring back the selection
+                 * mode when (if) we get reattached.
+                 */
                 Selection.setSelection((Spannable) mTextView.getText(),
                         mTextView.getSelectionEnd());
-                mTextView.setHasTransientState(false);
             }
 
             if (mSelectionModifierCursorController != null) {
@@ -6037,7 +6029,7 @@ public class Editor {
         private boolean fireIntent(Intent intent) {
             if (intent != null && Intent.ACTION_PROCESS_TEXT.equals(intent.getAction())) {
                 intent.putExtra(Intent.EXTRA_PROCESS_TEXT, mTextView.getSelectedText());
-                mEditor.mPreserveDetachedSelection = true;
+                mEditor.mPreserveSelection = true;
                 mTextView.startActivityForResult(intent, TextView.PROCESS_TEXT_REQUEST_CODE);
                 return true;
             }
