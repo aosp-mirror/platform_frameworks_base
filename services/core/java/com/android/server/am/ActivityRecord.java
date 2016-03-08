@@ -1277,13 +1277,6 @@ final class ActivityRecord {
         }
     }
 
-    static void activityResumedLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        if (DEBUG_SAVED_STATE) Slog.i(TAG_STATES, "Resumed activity; dropping state of: " + r);
-        r.icicle = null;
-        r.haveState = false;
-    }
-
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null) {
