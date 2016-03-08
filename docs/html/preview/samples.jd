@@ -21,7 +21,7 @@ page.image=images/cards/card-n-samples_2x.png
   user interfaces with your app.
 </p>
 <p>
-  <a href="https://github.com/googlesamples/android-MultiwindowPlayground">
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
   Get it on GitHub</a>
 </p>
 
@@ -67,16 +67,5 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 <p>
   <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
-  Get it on GitHub</a>
-</p>
-
-
-<h3 id="AutomaticBackup">Drag and Drop</h3>
-<p>
-  This sample demonstrates how to use drag and drop user interface feature
-  between windows, when using a multi-window view.
-</p>
-<p>
-  <a href="https://github.com/googlesamples/android-DragAndDrop">
   Get it on GitHub</a>
 </p>
