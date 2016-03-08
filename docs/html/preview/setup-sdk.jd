@@ -35,8 +35,10 @@ compiler toolchain called JACK, which is currently supported only in
 Android Studio 2.1.
 </p>
 
+<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+
 <p>Android Studio 2.1 is currently available as a preview in the canary
-release channel&mdash;it is still in development. If you already
+release channel. If you already
 have Android Studio and don't want to update to the canary channel, you can
 download Android Studio 2.1 as a separate installation and use it
 for use with the N Preview, leaving your primary Android Studio environment
