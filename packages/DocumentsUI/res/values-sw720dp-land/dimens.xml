@@ -20,4 +20,5 @@
 
     <dimen name="list_divider_inset">80dp</dimen>
 
+    <dimen name="max_drawer_width">320dp</dimen>
 </resources>

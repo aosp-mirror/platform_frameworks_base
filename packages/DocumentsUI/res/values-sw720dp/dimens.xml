@@ -20,4 +20,5 @@
 
     <dimen name="list_item_padding">24dp</dimen>
 
+    <dimen name="max_drawer_width">320dp</dimen>
 </resources>
