@@ -21,6 +21,7 @@ import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.KeyEvent;
 
 import com.android.documentsui.model.RootInfo;
@@ -139,6 +140,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
     }
 
     // Tests that pressing tab switches focus between the roots and directory listings.
+    @Suppress
     public void testKeyboard_tab() throws Exception {
         bots.main.pressKey(KeyEvent.KEYCODE_TAB);
         bots.roots.assertHasFocus();
@@ -147,6 +149,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
     }
 
     // Tests that arrow keys do not switch focus away from the dir list.
+    @Suppress
     public void testKeyboard_arrowsDirList() throws Exception {
         for (int i = 0; i < 10; i++) {
             bots.main.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
