@@ -288,10 +288,34 @@ page.image=images/cards/card-n-changes_2x.png
 
 <p>
   Most apps do not need to make any changes to support this feature, provided
-  the apps follow Android best practices. You should verify that your app
-  behaves properly under Screen Zoom.
+  the apps follow Android best practices. Specific things to check for:
 </p>
 
+<ul>
+  <li>Test your app on a device with screen width <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code>
+  and be sure it performs adequately.
+  </li>
+
+  <li>When the device configuration changes, update any density-dependent
+  cached information, such as cached bitmaps or resources loaded from the
+  network. Check for configuration changes when the app resumes from the paused
+  state.
+    <p class="note">
+      <strong>Note:</strong> If you cache configuration-dependent data, it's a
+      good idea to include relevant metadata such as the appropriate screen
+      size or pixel density for that data. Saving this metadata allows you to
+      decide whether you need to refresh the cached data after a configuration
+      change.
+    </p>
+  </li>
+
+  <li>Avoid specifying dimensions with px units, since they do not scale with
+  screen density. Instead, specify dimensions with <a href=
+  "{@docRoot}guide/practices/screens_support.html">density-independent
+  pixel</a> (<code>dp</code>) units.
+  </li>
+</ul>
 
 <h3 id="vision-settings">Vision Settings in Setup Wizard</h3>
 
