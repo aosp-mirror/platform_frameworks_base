@@ -121,6 +121,8 @@ public final class TvTrackInfo implements Parcelable {
 
     /**
      * Returns the audio channel count. Valid only for {@link #TYPE_AUDIO} tracks.
+     *
+     * @throws IllegalStateException if not called on an audio track
      */
     public final int getAudioChannelCount() {
         if (mType != TYPE_AUDIO) {
@@ -131,6 +133,8 @@ public final class TvTrackInfo implements Parcelable {
 
     /**
      * Returns the audio sample rate, in the unit of Hz. Valid only for {@link #TYPE_AUDIO} tracks.
+     *
+     * @throws IllegalStateException if not called on an audio track
      */
     public final int getAudioSampleRate() {
         if (mType != TYPE_AUDIO) {
@@ -142,6 +146,8 @@ public final class TvTrackInfo implements Parcelable {
     /**
      * Returns the width of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
      * tracks.
+     *
+     * @throws IllegalStateException if not called on a video track
      */
     public final int getVideoWidth() {
         if (mType != TYPE_VIDEO) {
@@ -153,6 +159,8 @@ public final class TvTrackInfo implements Parcelable {
     /**
      * Returns the height of the video, in the unit of pixels. Valid only for {@link #TYPE_VIDEO}
      * tracks.
+     *
+     * @throws IllegalStateException if not called on a video track
      */
     public final int getVideoHeight() {
         if (mType != TYPE_VIDEO) {
@@ -164,6 +172,8 @@ public final class TvTrackInfo implements Parcelable {
     /**
      * Returns the frame rate of the video, in the unit of fps (frames per second). Valid only for
      * {@link #TYPE_VIDEO} tracks.
+     *
+     * @throws IllegalStateException if not called on a video track
      */
     public final float getVideoFrameRate() {
         if (mType != TYPE_VIDEO) {
@@ -175,6 +185,8 @@ public final class TvTrackInfo implements Parcelable {
     /**
      * Returns the pixel aspect ratio (the ratio of a pixel's width to its height) of the video.
      * Valid only for {@link #TYPE_VIDEO} tracks.
+     *
+     * @throws IllegalStateException if not called on a video track
      */
     public final float getVideoPixelAspectRatio() {
         if (mType != TYPE_VIDEO) {
@@ -189,6 +201,8 @@ public final class TvTrackInfo implements Parcelable {
      *
      * <p>The complete list of values are defined in ETSI TS 101 154 V1.7.1 Annex B, ATSC A/53 Part
      * 4 and SMPTE 2016-1-2007.
+     *
+     * @throws IllegalStateException if not called on a video track
      */
     public final byte getVideoActiveFormatDescription() {
         if (mType != TYPE_VIDEO) {
@@ -268,6 +282,8 @@ public final class TvTrackInfo implements Parcelable {
          * @param type The type of the track.
          * @param id The ID of the track that uniquely identifies the current track among all the
          *            other tracks in the same TV program.
+         * @throws IllegalArgumentException if the type is not any of {@link #TYPE_AUDIO},
+         *                                  {@link #TYPE_VIDEO} and {@link #TYPE_SUBTITLE}
          */
         public Builder(int type, @NonNull String id) {
             if (type != TYPE_AUDIO
@@ -304,6 +320,7 @@ public final class TvTrackInfo implements Parcelable {
          * Sets the audio channel count. Valid only for {@link #TYPE_AUDIO} tracks.
          *
          * @param audioChannelCount The audio channel count.
+         * @throws IllegalStateException if not called on an audio track
          */
         public final Builder setAudioChannelCount(int audioChannelCount) {
             if (mType != TYPE_AUDIO) {
@@ -318,6 +335,7 @@ public final class TvTrackInfo implements Parcelable {
          * tracks.
          *
          * @param audioSampleRate The audio sample rate.
+         * @throws IllegalStateException if not called on an audio track
          */
         public final Builder setAudioSampleRate(int audioSampleRate) {
             if (mType != TYPE_AUDIO) {
@@ -332,6 +350,7 @@ public final class TvTrackInfo implements Parcelable {
          * tracks.
          *
          * @param videoWidth The width of the video.
+         * @throws IllegalStateException if not called on a video track
          */
         public final Builder setVideoWidth(int videoWidth) {
             if (mType != TYPE_VIDEO) {
@@ -346,6 +365,7 @@ public final class TvTrackInfo implements Parcelable {
          * tracks.
          *
          * @param videoHeight The height of the video.
+         * @throws IllegalStateException if not called on a video track
          */
         public final Builder setVideoHeight(int videoHeight) {
             if (mType != TYPE_VIDEO) {
@@ -360,6 +380,7 @@ public final class TvTrackInfo implements Parcelable {
          * {@link #TYPE_VIDEO} tracks.
          *
          * @param videoFrameRate The frame rate of the video.
+         * @throws IllegalStateException if not called on a video track
          */
         public final Builder setVideoFrameRate(float videoFrameRate) {
             if (mType != TYPE_VIDEO) {
@@ -379,6 +400,7 @@ public final class TvTrackInfo implements Parcelable {
          * pixel aspect ratio for most video formats.
          *
          * @param videoPixelAspectRatio The pixel aspect ratio of the video.
+         * @throws IllegalStateException if not called on a video track
          */
         public final Builder setVideoPixelAspectRatio(float videoPixelAspectRatio) {
             if (mType != TYPE_VIDEO) {
@@ -398,6 +420,7 @@ public final class TvTrackInfo implements Parcelable {
          * 4 and SMPTE 2016-1-2007.
          *
          * @param videoActiveFormatDescription The AFD code of the video.
+         * @throws IllegalStateException if not called on a video track
          */
         public final Builder setVideoActiveFormatDescription(byte videoActiveFormatDescription) {
             if (mType != TYPE_VIDEO) {

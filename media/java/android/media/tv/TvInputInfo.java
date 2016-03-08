@@ -349,12 +349,12 @@ public final class TvInputInfo implements Parcelable {
     /**
      * Returns the number of tuners this TV input has.
      *
-     * <p>This method is valid only for the input of type {@link #TYPE_TUNER}.
+     * <p>This method is valid only for inputs of type {@link #TYPE_TUNER}. For inputs of other
+     * types, it returns 0.
      *
      * <p>Tuners correspond to physical/logical resources that allow reception of TV signal. Having
      * <i>N</i> tuners means that the TV input is capable of receiving <i>N</i> different channels
      * concurrently.
-     *
      */
     public int getTunerCount() {
         return mTunerCount;
