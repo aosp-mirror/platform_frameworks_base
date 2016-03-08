@@ -1899,7 +1899,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             case SYSTEM_USER_UNLOCK_MSG: {
                 final int userId = msg.arg1;
                 mSystemServiceManager.unlockUser(userId);
-                mRecentTasks.loadUserRecentsLocked(userId);
+                synchronized (ActivityManagerService.this) {
+                    mRecentTasks.loadUserRecentsLocked(userId);
+                }
                 if (userId == UserHandle.USER_SYSTEM) {
                     startPersistentApps(PackageManager.MATCH_ENCRYPTION_UNAWARE);
                 }
