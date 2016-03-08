@@ -3591,37 +3591,53 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Removes RemoteViews that were created for compatibility from {@param n}, if they did not
+         * change.
+         *
+         * @return {@param n}, if no stripping is needed, otherwise a stripped clone of {@param n}.
+         *
          * @hide
          */
-        public static void stripForDelivery(Notification n) {
+        public static Notification maybeCloneStrippedForDelivery(Notification n) {
             String templateClass = n.extras.getString(EXTRA_TEMPLATE);
-            if (TextUtils.isEmpty(templateClass)) {
-                return;
-            }
+
             // Only strip views for known Styles because we won't know how to
             // re-create them otherwise.
-            if (getNotificationStyleClass(templateClass) == null) {
-                return;
+            if (!TextUtils.isEmpty(templateClass)
+                    && getNotificationStyleClass(templateClass) == null) {
+                return n;
             }
-            // Get rid of unmodified BuilderRemoteViews.
-            if (n.contentView instanceof BuilderRemoteViews &&
+
+            // Only strip unmodified BuilderRemoteViews.
+            boolean stripContentView = n.contentView instanceof BuilderRemoteViews &&
                     n.extras.getInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT, -1) ==
-                            n.contentView.getSequenceNumber()) {
-                n.contentView = null;
-                n.extras.remove(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT);
-            }
-            if (n.bigContentView instanceof BuilderRemoteViews &&
+                            n.contentView.getSequenceNumber();
+            boolean stripBigContentView = n.bigContentView instanceof BuilderRemoteViews &&
                     n.extras.getInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT, -1) ==
-                            n.bigContentView.getSequenceNumber()) {
-                n.bigContentView = null;
-                n.extras.remove(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT);
-            }
-            if (n.headsUpContentView instanceof BuilderRemoteViews &&
+                            n.bigContentView.getSequenceNumber();
+            boolean stripHeadsUpContentView = n.headsUpContentView instanceof BuilderRemoteViews &&
                     n.extras.getInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT, -1) ==
-                            n.headsUpContentView.getSequenceNumber()) {
-                n.headsUpContentView = null;
-                n.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
+                            n.headsUpContentView.getSequenceNumber();
+
+            // Nothing to do here, no need to clone.
+            if (!stripContentView && !stripBigContentView && !stripHeadsUpContentView) {
+                return n;
             }
+
+            Notification clone = n.clone();
+            if (stripContentView) {
+                clone.contentView = null;
+                clone.extras.remove(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT);
+            }
+            if (stripBigContentView) {
+                clone.bigContentView = null;
+                clone.extras.remove(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT);
+            }
+            if (stripHeadsUpContentView) {
+                clone.headsUpContentView = null;
+                clone.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
+            }
+            return clone;
         }
 
         private int getBaseLayoutResource() {
