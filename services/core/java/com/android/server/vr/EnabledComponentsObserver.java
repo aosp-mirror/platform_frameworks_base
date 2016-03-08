@@ -227,10 +227,11 @@ public class EnabledComponentsObserver implements SettingChangeListener {
         return userIds;
     }
 
-    private ArraySet<ComponentName> loadComponentNamesForUser(int userId) {
+    public static ArraySet<ComponentName> loadComponentNames(PackageManager pm, int userId,
+            String serviceName, String permissionName) {
+
         ArraySet<ComponentName> installed = new ArraySet<>();
-        PackageManager pm = mContext.getPackageManager();
-        Intent queryIntent = new Intent(mServiceName);
+        Intent queryIntent = new Intent(serviceName);
         List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
                 queryIntent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
@@ -241,16 +242,21 @@ public class EnabledComponentsObserver implements SettingChangeListener {
                 ServiceInfo info = resolveInfo.serviceInfo;
 
                 ComponentName component = new ComponentName(info.packageName, info.name);
-                if (!mServicePermission.equals(info.permission)) {
+                if (!permissionName.equals(info.permission)) {
                     Slog.w(TAG, "Skipping service " + info.packageName + "/" + info.name
                             + ": it does not require the permission "
-                            + mServicePermission);
+                            + permissionName);
                     continue;
                 }
                 installed.add(component);
             }
         }
         return installed;
+    }
+
+    private ArraySet<ComponentName> loadComponentNamesForUser(int userId) {
+        return loadComponentNames(mContext.getPackageManager(), userId, mServiceName,
+                mServicePermission);
     }
 
     private ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,

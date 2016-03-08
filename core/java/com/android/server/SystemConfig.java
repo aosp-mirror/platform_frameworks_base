@@ -19,6 +19,7 @@ package com.android.server;
 import static com.android.internal.util.ArrayUtils.appendInt;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Environment;
@@ -115,6 +116,9 @@ public class SystemConfig {
     // These are the packages that should not run under system user
     final ArraySet<String> mSystemUserBlacklistedApps = new ArraySet<>();
 
+    // These are the components that are enabled by default as VR mode listener services.
+    final ArraySet<ComponentName> mDefaultVrComponents = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -166,6 +170,10 @@ public class SystemConfig {
 
     public ArraySet<String> getSystemUserBlacklistedApps() {
         return mSystemUserBlacklistedApps;
+    }
+
+    public ArraySet<ComponentName> getDefaultVrComponents() {
+        return mDefaultVrComponents;
     }
 
     SystemConfig() {
@@ -429,6 +437,19 @@ public class SystemConfig {
                                 + " at " + parser.getPositionDescription());
                     } else {
                         mSystemUserBlacklistedApps.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                } else if ("default-enabled-vr-app".equals(name) && allowAppConfigs) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    String clsname = parser.getAttributeValue(null, "class");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<default-enabled-vr-app without package in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else if (clsname == null) {
+                        Slog.w(TAG, "<default-enabled-vr-app without class in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else {
+                        mDefaultVrComponents.add(new ComponentName(pkgname, clsname));
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else {

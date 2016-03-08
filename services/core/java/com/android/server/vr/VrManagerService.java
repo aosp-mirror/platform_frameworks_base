@@ -16,16 +16,23 @@
 package com.android.server.vr;
 
 import android.app.AppOpsManager;
+import android.app.NotificationManager;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.vr.IVrListener;
 import android.service.vr.VrListenerService;
 import android.util.ArraySet;
@@ -38,7 +45,9 @@ import com.android.server.vr.EnabledComponentsObserver.EnabledComponentChangeLis
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 
+import java.lang.StringBuilder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -53,8 +62,8 @@ import java.util.Set;
  *  hardware/libhardware/modules/vr
  * <p/>
  * In general applications may enable or disable VR mode by calling
- * {@link android.app.Activity#setVrMode)}.  An application may also implement a service to be run
- * while in VR mode by implementing {@link android.service.vr.VrListenerService}.
+ * {@link android.app.Activity#setVrModeEnabled)}.  An application may also implement a service to
+ * be run while in VR mode by implementing {@link android.service.vr.VrListenerService}.
  *
  * @see {@link android.service.vr.VrListenerService}
  * @see {@link com.android.server.vr.VrManagerInternal}
@@ -74,13 +83,18 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private final IBinder mOverlayToken = new Binder();
 
     // State protected by mLock
-    private boolean mVrModeEnabled = false;
+    private boolean mVrModeEnabled;
     private final Set<VrStateListener> mListeners = new ArraySet<>();
     private EnabledComponentsObserver mComponentObserver;
     private ManagedApplicationService mCurrentVrService;
     private Context mContext;
     private ComponentName mCurrentVrModeComponent;
     private int mCurrentVrModeUser;
+    private boolean mWasDefaultGranted;
+    private boolean mGuard;
+    private final ArraySet<String> mPreviousToggledListenerSettings = new ArraySet<>();
+    private String mPreviousNotificationPolicyAccessPackage;
+    private String mPreviousManageOverlayPackage;
 
     private static final BinderChecker sBinderChecker = new BinderChecker() {
         @Override
@@ -234,61 +248,270 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      *
      * @return {@code true} if the component/user combination specified is valid.
      */
-    private boolean updateCurrentVrServiceLocked(boolean enabled,
-            @NonNull ComponentName component, int userId, ComponentName calling) {
+    private boolean updateCurrentVrServiceLocked(boolean enabled, @NonNull ComponentName component,
+            int userId, ComponentName calling) {
 
         boolean sendUpdatedCaller = false;
+        final long identity = Binder.clearCallingIdentity();
+        try {
 
-        boolean validUserComponent = (mComponentObserver.isValid(component, userId) ==
-                EnabledComponentsObserver.NO_ERROR);
+            boolean validUserComponent = (mComponentObserver.isValid(component, userId) ==
+                    EnabledComponentsObserver.NO_ERROR);
 
-        // Always send mode change events.
-        changeVrModeLocked(enabled, (enabled && validUserComponent) ? component : null);
+            // Always send mode change events.
+            changeVrModeLocked(enabled, (enabled && validUserComponent) ? component : null);
 
-        if (!enabled || !validUserComponent) {
-            // Unbind whatever is running
-            if (mCurrentVrService != null) {
-                Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() + " for user " +
-                        mCurrentVrService.getUserId());
-                mCurrentVrService.disconnect();
-                mCurrentVrService = null;
-            }
-        } else {
-            if (mCurrentVrService != null) {
-                // Unbind any running service that doesn't match the component/user selection
-                if (mCurrentVrService.disconnectIfNotMatching(component, userId)) {
+            if (!enabled || !validUserComponent) {
+                // Unbind whatever is running
+                if (mCurrentVrService != null) {
                     Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() + " for user " +
-                        mCurrentVrService.getUserId());
+                            mCurrentVrService.getUserId());
+                    mCurrentVrService.disconnect();
+                    disableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
+                            new UserHandle(mCurrentVrService.getUserId()));
+                    mCurrentVrService = null;
+                }
+            } else {
+                if (mCurrentVrService != null) {
+                    // Unbind any running service that doesn't match the component/user selection
+                    if (mCurrentVrService.disconnectIfNotMatching(component, userId)) {
+                        Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() +
+                                " for user " + mCurrentVrService.getUserId());
+                        disableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
+                                new UserHandle(mCurrentVrService.getUserId()));
+                        createAndConnectService(component, userId);
+                        enableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
+                                new UserHandle(mCurrentVrService.getUserId()));
+                        sendUpdatedCaller = true;
+                    }
+                    // The service with the correct component/user is bound
+                } else {
+                    // Nothing was previously running, bind a new service
                     createAndConnectService(component, userId);
+                    enableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
+                            new UserHandle(mCurrentVrService.getUserId()));
                     sendUpdatedCaller = true;
                 }
-                // The service with the correct component/user is bound
-            } else {
-                // Nothing was previously running, bind a new service
-                createAndConnectService(component, userId);
+            }
+
+            if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent))  {
+                mCurrentVrModeComponent = calling;
+                mCurrentVrModeUser = userId;
                 sendUpdatedCaller = true;
+            }
+
+            if (mCurrentVrService != null && sendUpdatedCaller) {
+                final ComponentName c = mCurrentVrModeComponent;
+                mCurrentVrService.sendEvent(new PendingEvent() {
+                    @Override
+                    public void runEvent(IInterface service) throws RemoteException {
+                        IVrListener l = (IVrListener) service;
+                        l.focusedActivityChanged(c);
+                    }
+                });
+            }
+
+            return validUserComponent;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Enable the permission given in {@link #IMPLIED_VR_LISTENER_PERMISSIONS} for the given
+     * component package and user.
+     *
+     * @param component the component whose package should be enabled.
+     * @param userId the user that owns the given component.
+     */
+    private void enableImpliedPermissionsLocked(ComponentName component, UserHandle userId) {
+        if (mGuard) {
+            // Impossible
+            throw new IllegalStateException("Enabling permissions without disabling.");
+        }
+        mGuard = true;
+
+        PackageManager pm = mContext.getPackageManager();
+
+        String pName = component.getPackageName();
+        if (pm == null) {
+            Slog.e(TAG, "Couldn't set implied permissions for " + pName +
+                ", PackageManager isn't running");
+            return;
+        }
+
+        ApplicationInfo info = null;
+        try {
+            info = pm.getApplicationInfo(pName, PackageManager.GET_META_DATA);
+        } catch (NameNotFoundException e) {
+        }
+
+        if (info == null) {
+            Slog.e(TAG, "Couldn't set implied permissions for " + pName + ", no such package.");
+            return;
+        }
+
+        if (!(info.isSystemApp() || info.isUpdatedSystemApp())) {
+            return; // Application is not pre-installed, avoid setting implied permissions
+        }
+
+        mWasDefaultGranted = true;
+
+        grantOverlayAccess(pName, userId);
+        grantNotificationPolicyAccess(pName);
+        grantNotificationListenerAccess(pName, userId);
+    }
+
+    /**
+     * Disable the permission given in {@link #IMPLIED_VR_LISTENER_PERMISSIONS} for the given
+     * component package and user.
+     *
+     * @param component the component whose package should be disabled.
+     * @param userId the user that owns the given component.
+     */
+    private void disableImpliedPermissionsLocked(ComponentName component, UserHandle userId) {
+        if (!mGuard) {
+            // Impossible
+            throw new IllegalStateException("Disabling permissions without enabling.");
+        }
+        mGuard = false;
+
+        PackageManager pm = mContext.getPackageManager();
+
+        if (pm == null) {
+            Slog.e(TAG, "Couldn't remove implied permissions for " + component +
+                ", PackageManager isn't running");
+            return;
+        }
+
+        String pName = component.getPackageName();
+        if (mWasDefaultGranted) {
+            revokeOverlayAccess(userId);
+            revokeNotificationPolicyAccess(pName);
+            revokeNotificiationListenerAccess();
+            mWasDefaultGranted = false;
+        }
+
+    }
+
+    private void grantOverlayAccess(String pkg, UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        boolean prev = (PackageManager.PERMISSION_GRANTED ==
+                pm.checkPermission(android.Manifest.permission.SYSTEM_ALERT_WINDOW, pkg));
+        mPreviousManageOverlayPackage = null;
+        if (!prev) {
+            pm.grantRuntimePermission(pkg, android.Manifest.permission.SYSTEM_ALERT_WINDOW,
+                    userId);
+            mPreviousManageOverlayPackage = pkg;
+        }
+    }
+
+    private void revokeOverlayAccess(UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        if (mPreviousManageOverlayPackage != null) {
+            pm.revokeRuntimePermission(mPreviousManageOverlayPackage,
+                    android.Manifest.permission.SYSTEM_ALERT_WINDOW, userId);
+            mPreviousManageOverlayPackage = null;
+        }
+    }
+
+
+    private void grantNotificationPolicyAccess(String pkg) {
+        NotificationManager nm = mContext.getSystemService(NotificationManager.class);
+        boolean prev = nm.isNotificationPolicyAccessGrantedForPackage(pkg);
+        mPreviousNotificationPolicyAccessPackage = null;
+        if (!prev) {
+            mPreviousNotificationPolicyAccessPackage = pkg;
+            nm.setNotificationPolicyAccessGranted(pkg, true);
+        }
+    }
+
+    private void revokeNotificationPolicyAccess(String pkg) {
+        NotificationManager nm = mContext.getSystemService(NotificationManager.class);
+        if (mPreviousNotificationPolicyAccessPackage != null) {
+            nm.setNotificationPolicyAccessGranted(mPreviousNotificationPolicyAccessPackage, false);
+            mPreviousNotificationPolicyAccessPackage = null;
+        }
+    }
+
+    private void grantNotificationListenerAccess(String pkg, UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        ArraySet<ComponentName> possibleServices = EnabledComponentsObserver.loadComponentNames(pm,
+                userId.getIdentifier(), NotificationListenerService.SERVICE_INTERFACE,
+                android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE);
+        ContentResolver resolver = mContext.getContentResolver();
+
+        ArraySet<String> current = getCurrentNotifListeners(resolver);
+
+        mPreviousToggledListenerSettings.clear();
+
+        for (ComponentName c : possibleServices) {
+            String flatName = c.flattenToString();
+            if (Objects.equals(c.getPackageName(), pkg)
+                    && !current.contains(flatName)) {
+                mPreviousToggledListenerSettings.add(flatName);
+                current.add(flatName);
             }
         }
 
-        if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent))  {
-            mCurrentVrModeComponent = calling;
-            mCurrentVrModeUser = userId;
-            sendUpdatedCaller = true;
+        if (current.size() > 0) {
+            String flatSettings = formatSettings(current);
+            Settings.Secure.putString(resolver, Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                    flatSettings);
         }
-
-        if (mCurrentVrService != null && sendUpdatedCaller) {
-            final ComponentName c = mCurrentVrModeComponent;
-            mCurrentVrService.sendEvent(new PendingEvent() {
-                @Override
-                public void runEvent(IInterface service) throws RemoteException {
-                    IVrListener l = (IVrListener) service;
-                    l.focusedActivityChanged(c);
-                }
-            });
-        }
-
-        return validUserComponent;
     }
+
+    private void revokeNotificiationListenerAccess() {
+        if (mPreviousToggledListenerSettings.isEmpty()) {
+            return;
+        }
+
+        ContentResolver resolver = mContext.getContentResolver();
+        ArraySet<String> current = getCurrentNotifListeners(resolver);
+
+        current.removeAll(mPreviousToggledListenerSettings);
+        mPreviousToggledListenerSettings.clear();
+
+        String flatSettings = formatSettings(current);
+        Settings.Secure.putString(resolver, Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                flatSettings);
+    }
+
+    private ArraySet<String> getCurrentNotifListeners(ContentResolver resolver) {
+        String flat = Settings.Secure.getString(resolver,
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+
+        ArraySet<String> current = new ArraySet<>();
+        if (flat != null) {
+            String[] allowed = flat.split(":");
+            for (String s : allowed) {
+                current.add(s);
+            }
+        }
+        return current;
+    }
+
+    private static String formatSettings(Collection<String> c) {
+        if (c == null || c.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder b = new StringBuilder();
+        boolean start = true;
+        for (String s : c) {
+            if ("".equals(s)) {
+                continue;
+            }
+            if (!start) {
+                b.append(':');
+            }
+            b.append(s);
+            start = false;
+        }
+        return b.toString();
+    }
+
+
 
     private void createAndConnectService(@NonNull ComponentName component, int userId) {
         mCurrentVrService = VrManagerService.create(mContext, component, userId);
