@@ -47,6 +47,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
@@ -1664,17 +1665,22 @@ public class Notification implements Parcelable
             SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
             for (Object span : spans) {
                 Object resultSpan = span;
-                if (span instanceof TextAppearanceSpan) {
-                    TextAppearanceSpan originalSpan = (TextAppearanceSpan) span;
+                if (resultSpan instanceof CharacterStyle) {
+                    resultSpan = ((CharacterStyle) span).getUnderlying();
+                }
+                if (resultSpan instanceof TextAppearanceSpan) {
+                    TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
                     resultSpan = new TextAppearanceSpan(
                             originalSpan.getFamily(),
                             originalSpan.getTextStyle(),
                             -1,
                             originalSpan.getTextColor(),
                             originalSpan.getLinkTextColor());
-                } else if (span instanceof RelativeSizeSpan
-                        || span instanceof AbsoluteSizeSpan) {
+                } else if (resultSpan instanceof RelativeSizeSpan
+                        || resultSpan instanceof AbsoluteSizeSpan) {
                     continue;
+                } else {
+                    resultSpan = span;
                 }
                 builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
                         ss.getSpanFlags(span));
