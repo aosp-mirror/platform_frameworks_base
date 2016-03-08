@@ -1738,7 +1738,10 @@ public class AudioRecord implements AudioRouting
     // TODO remove: implementation calls directly into implementation of native_release()
     private native final void native_finalize();
 
-    private native final void native_release();
+    /**
+     * @hide
+     */
+    public native final void native_release();
 
     private native final int native_start(int syncEvent, int sessionId);
 
