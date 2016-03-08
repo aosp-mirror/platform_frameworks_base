@@ -298,7 +298,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Sets the stack tasks of this TaskStackView from the given TaskStack.
      */
-    public void setTasks(TaskStack stack, boolean notifyStackChanges) {
+    public void setTasks(TaskStack stack, boolean notifyStackChanges, boolean relayoutTaskStack) {
         boolean isInitialized = mLayoutAlgorithm.isInitialized();
         mStack.setTasks(getContext(), stack.computeAllTasksList(),
                 notifyStackChanges && isInitialized);
@@ -307,15 +307,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // measure/layout pass
             updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
             updateToInitialState();
-            relayoutTaskViews(AnimationProps.IMMEDIATE);
 
-            // Rebind all the task views.  This will not trigger new resources to be loaded unless
-            // they have actually changed
-            List<TaskView> taskViews = getTaskViews();
-            int taskViewCount = taskViews.size();
-            for (int i = 0; i < taskViewCount; i++) {
-                TaskView tv = taskViews.get(i);
-                bindTaskView(tv, tv.getTask());
+            if (relayoutTaskStack) {
+                relayoutTaskViews(AnimationProps.IMMEDIATE);
+
+                // Rebind all the task views.  This will not trigger new resources to be loaded
+                // unless they have actually changed
+                List<TaskView> taskViews = getTaskViews();
+                int taskViewCount = taskViews.size();
+                for (int i = 0; i < taskViewCount; i++) {
+                    TaskView tv = taskViews.get(i);
+                    bindTaskView(tv, tv.getTask());
+                }
             }
         }
     }

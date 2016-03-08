@@ -184,7 +184,8 @@ public class RecentsView extends FrameLayout {
 
         // Update the stack
         mTaskStackView.onResume(isResumingFromVisible);
-        mTaskStackView.setTasks(stack, isResumingFromVisible /* notifyStackChanges */);
+        mTaskStackView.setTasks(stack, isResumingFromVisible /* notifyStackChanges */,
+                true /* relayoutTaskStack */);
 
         if (isResumingFromVisible) {
             // If we are already visible, then restore the background scrim
