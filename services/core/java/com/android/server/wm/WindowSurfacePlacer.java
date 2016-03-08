@@ -46,7 +46,6 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Debug;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -124,6 +123,8 @@ class WindowSurfacePlacer {
         public AppWindowToken token;
     }
     private final LayerAndToken mTmpLayerAndToken = new LayerAndToken();
+
+    private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
 
     public WindowSurfacePlacer(WindowManagerService service) {
         mService = service;
@@ -542,6 +543,7 @@ class WindowSurfacePlacer {
         mService.enableScreenIfNeededLocked();
 
         mService.scheduleAnimationLocked();
+        mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
                 "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
@@ -1618,6 +1620,25 @@ class WindowSurfacePlacer {
             mTraversalScheduled = true;
             mService.mH.sendEmptyMessage(DO_TRAVERSAL);
         }
+    }
+
+    /**
+     * Puts the {@param surface} into a pending list to be destroyed after the current transaction
+     * has been committed.
+     */
+    void destroyAfterTransaction(SurfaceControl surface) {
+        mPendingDestroyingSurfaces.add(surface);
+    }
+
+    /**
+     * Destroys any surfaces that have been put into the pending list with
+     * {@link #destroyAfterTransaction}.
+     */
+    void destroyPendingSurfaces() {
+        for (int i = mPendingDestroyingSurfaces.size() - 1; i >= 0; i--) {
+            mPendingDestroyingSurfaces.get(i).destroy();
+        }
+        mPendingDestroyingSurfaces.clear();
     }
 
     public void dump(PrintWriter pw, String prefix) {

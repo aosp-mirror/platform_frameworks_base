@@ -771,6 +771,7 @@ public class WindowAnimator {
         }
 
         mService.destroyPreservedSurfaceLocked();
+        mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
         if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
