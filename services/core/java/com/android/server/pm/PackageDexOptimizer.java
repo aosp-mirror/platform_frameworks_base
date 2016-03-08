@@ -145,8 +145,8 @@ final class PackageDexOptimizer {
                     dexoptNeeded = DexFile.DEX2OAT_NEEDED;
                 } else {
                     try {
-                        dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
-                                dexCodeInstructionSet, defer);
+                        dexoptNeeded = DexFile.getDexOptNeeded(path,
+                                dexCodeInstructionSet, DexFile.COMPILATION_TYPE_FULL);
                     } catch (IOException ioe) {
                         Slog.w(TAG, "IOException reading apk: " + path, ioe);
                         return DEX_OPT_FAILED;
