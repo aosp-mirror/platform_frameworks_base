@@ -123,7 +123,7 @@ notification action. </p>
 <img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png"
     srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
     {@docRoot}preview/images/inline-type-reply_2x.png 2x"
-    width="300">
+    itemprop="image" width="300">
 <p class="img-caption">
   <strong>Figure 2.</strong> The user inputs text from the notification shade.
 </p>
