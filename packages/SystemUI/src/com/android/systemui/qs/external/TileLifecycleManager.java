@@ -85,6 +85,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mHandler = handler;
         mIntent = intent;
         mUser = user;
+        if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
 
     public ComponentName getComponent() {
@@ -116,13 +117,13 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             if (!checkComponentState()) {
                 return;
             }
-            if (DEBUG) Log.d(TAG, "Binding service " + mIntent);
+            if (DEBUG) Log.d(TAG, "Binding service " + mIntent + " " + mUser);
             mBindTryCount++;
             mContext.bindServiceAsUser(mIntent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     mUser);
         } else {
-            if (DEBUG) Log.d(TAG, "Unbinding service " + mIntent);
+            if (DEBUG) Log.d(TAG, "Unbinding service " + mIntent + " " + mUser);
             // Give it another chance next time it needs to be bound, out of kindness.
             mBindTryCount = 0;
             mWrapper = null;
@@ -350,7 +351,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     @Override
     public void onClick(IBinder iBinder) {
-        if (DEBUG) Log.d(TAG, "onClick " + iBinder);
+        if (DEBUG) Log.d(TAG, "onClick " + iBinder + " " + mUser);
         if (mWrapper == null || !mWrapper.onClick(iBinder)) {
             mClickBinder = iBinder;
             queueMessage(MSG_ON_CLICK);
