@@ -81,6 +81,7 @@ public class TrustAgentWrapper {
     private boolean mBound;
     private long mScheduledRestartUptimeMillis;
     private long mMaximumTimeToLock; // from DevicePolicyManager
+    private boolean mPendingSuccessfulUnlock = false;
 
     // Trust state
     private boolean mTrusted;
@@ -234,6 +235,11 @@ public class TrustAgentWrapper {
             setCallback(mCallback);
             updateDevicePolicyFeatures();
 
+            if (mPendingSuccessfulUnlock) {
+                onUnlockAttempt(true);
+                mPendingSuccessfulUnlock = false;
+            }
+
             if (mTrustManagerService.isDeviceLockedInner(mUserId)) {
                 onDeviceLocked();
             } else {
@@ -302,7 +308,11 @@ public class TrustAgentWrapper {
      */
     public void onUnlockAttempt(boolean successful) {
         try {
-            if (mTrustAgentService != null) mTrustAgentService.onUnlockAttempt(successful);
+            if (mTrustAgentService != null) {
+                mTrustAgentService.onUnlockAttempt(successful);
+            } else {
+                mPendingSuccessfulUnlock = successful;
+            }
         } catch (RemoteException e) {
             onError(e);
         }
