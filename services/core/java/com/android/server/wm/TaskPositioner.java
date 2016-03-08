@@ -60,7 +60,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 class TaskPositioner implements DimLayer.DimLayerUser {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskPositioner" : TAG_WM;
+    private static final String TAG_LOCAL = "TaskPositioner";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? TAG_LOCAL : TAG_WM;
 
     // The margin the pointer position has to be within the side of the screen to be
     // considered at the side of the screen.
@@ -287,7 +288,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
         mService.pauseRotationLocked();
 
-        mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId());
+        mDimLayer = new DimLayer(mService, this, mDisplay.getDisplayId(), TAG_LOCAL);
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);

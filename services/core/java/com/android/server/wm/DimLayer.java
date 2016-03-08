@@ -84,10 +84,13 @@ public class DimLayer {
     /** The user of this dim layer. */
     private final DimLayerUser mUser;
 
-    DimLayer(WindowManagerService service, DimLayerUser user, int displayId) {
+    private final String mName;
+
+    DimLayer(WindowManagerService service, DimLayerUser user, int displayId, String name) {
         mUser = user;
         mDisplayId = displayId;
         mService = service;
+        mName = name;
         if (DEBUG_DIM_LAYER) Slog.v(TAG, "Ctor: displayId=" + displayId);
     }
 
@@ -100,7 +103,7 @@ public class DimLayer {
                     16, 16, PixelFormat.OPAQUE,
                     SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             } else {
-                mDimSurface = new SurfaceControl(service.mFxSession, TAG,
+                mDimSurface = new SurfaceControl(service.mFxSession, mName,
                     16, 16, PixelFormat.OPAQUE,
                     SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             }
