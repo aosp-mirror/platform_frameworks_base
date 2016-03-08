@@ -2902,8 +2902,18 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
             final boolean enable = data.readInt() == 1;
-            setVrMode(token, enable);
+            final ComponentName packageName = ComponentName.CREATOR.createFromParcel(data);
+            int res = setVrMode(token, enable, packageName);
             reply.writeNoException();
+            reply.writeInt(res);
+            return true;
+        }
+        case IS_VR_PACKAGE_ENABLED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final ComponentName packageName = ComponentName.CREATOR.createFromParcel(data);
+            boolean res = isVrModePackageEnabled(packageName);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
         case IS_APP_FOREGROUND_TRANSACTION: {
@@ -6247,16 +6257,34 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public void setVrMode(IBinder token, boolean enabled) throws RemoteException {
+    public int setVrMode(IBinder token, boolean enabled, ComponentName packageName)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         data.writeInt(enabled ? 1 : 0);
+        packageName.writeToParcel(data, 0);
         mRemote.transact(SET_VR_MODE_TRANSACTION, data, reply, 0);
         reply.readException();
+        int res = reply.readInt();
         data.recycle();
         reply.recycle();
+        return res;
+    }
+
+    public boolean isVrModePackageEnabled(ComponentName packageName)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        packageName.writeToParcel(data, 0);
+        mRemote.transact(IS_VR_PACKAGE_ENABLED_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res == 1;
     }
 
     @Override

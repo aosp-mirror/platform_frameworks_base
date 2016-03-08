@@ -1953,8 +1953,10 @@ message MetricsEvent {
     // a notification.
     ACTION_TOUCH_GEAR = 333;
 
+    // Logs that the user has edited the enabled VR listeners.
+    VR_MANAGE_LISTENERS = 334;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
-
   }
 }

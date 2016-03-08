@@ -33,6 +33,7 @@ import android.content.UriPermission;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
@@ -599,7 +600,10 @@ public interface IActivityManager extends IInterface {
 
     public void enterPictureInPicture(IBinder token) throws RemoteException;
 
-    public void setVrMode(IBinder token, boolean enabled) throws RemoteException;
+    public int setVrMode(IBinder token, boolean enabled, ComponentName packageName)
+            throws RemoteException;
+
+    public boolean isVrModePackageEnabled(ComponentName packageName) throws RemoteException;
 
     public boolean isAppForeground(int uid) throws RemoteException;
 
@@ -993,4 +997,5 @@ public interface IActivityManager extends IInterface {
     int SET_LENIENT_BACKGROUND_CHECK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+368;
     int GET_MEMORY_TRIM_LEVEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+369;
     int RESIZE_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 370;
+    int IS_VR_PACKAGE_ENABLED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 371;
 }

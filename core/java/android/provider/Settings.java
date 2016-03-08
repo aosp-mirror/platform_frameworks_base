@@ -1254,6 +1254,19 @@ public final class Settings {
     public static final String ACTION_SHOW_REMOTE_BUGREPORT_DIALOG
             = "android.settings.SHOW_REMOTE_BUGREPORT_DIALOG";
 
+    /**
+     * Activity Action: Show VR listener settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @see android.service.vr.VrListenerService
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VR_LISTENER_SETTINGS
+            = "android.settings.VR_LISTENER_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
@@ -6041,6 +6054,14 @@ public final class Settings {
         public static final String BRIGHTNESS_USE_TWILIGHT = "brightness_use_twilight";
 
         /**
+         * Names of the service components that the current user has explicitly allowed to
+         * be a VR mode listener, separated by ':'.
+         *
+         * @hide
+         */
+        public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -6067,6 +6088,7 @@ public final class Settings {
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
             ENABLED_NOTIFICATION_LISTENERS,
+            ENABLED_VR_LISTENERS,
             ENABLED_INPUT_METHODS,
             TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
             TOUCH_EXPLORATION_ENABLED,
