@@ -406,7 +406,9 @@ public abstract class AccessibilityService extends Service {
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
      *
-     * @param event An event.
+     * @param event The new event. This event is owned by the caller and cannot be used after
+     * this method returns. Services wishing to use the event after this method returns should
+     * make a copy.
      */
     public abstract void onAccessibilityEvent(AccessibilityEvent event);
 
@@ -493,7 +495,9 @@ public abstract class AccessibilityService extends Service {
      * functionality.
      * <p>
      *
-     * @param event The event to be processed.
+     * @param event The event to be processed. This event is owned by the caller and cannot be used
+     * after this method returns. Services wishing to use the event after this method returns should
+     * make a copy.
      * @return If true then the event will be consumed and not delivered to
      *         applications, otherwise it will be delivered as usual.
      */
