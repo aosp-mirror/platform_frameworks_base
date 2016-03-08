@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -301,7 +302,9 @@ abstract public class ManagedServices {
      * */
     public void registerGuestService(ManagedServiceInfo guest) {
         checkNotNull(guest.service);
-        checkType(guest.service);
+        if (!checkType(guest.service)) {
+            throw new IllegalArgumentException();
+        }
         if (registerServiceImpl(guest) != null) {
             onServiceAdded(guest);
         }
@@ -920,9 +923,9 @@ abstract public class ManagedServices {
 
     public static class UserProfiles {
         // Profiles of the current user.
-        private final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
+        private final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
 
-        public void updateCache(Context context) {
+        public void updateCache(@NonNull Context context) {
             UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
             if (userManager != null) {
                 int currentUserId = ActivityManager.getCurrentUser();
@@ -954,12 +957,12 @@ abstract public class ManagedServices {
         }
     }
 
-    protected static class Config {
-        String caption;
-        String serviceInterface;
-        String secureSettingName;
-        String bindPermission;
-        String settingsAction;
-        int clientLabel;
+    public static class Config {
+        public String caption;
+        public String serviceInterface;
+        public String secureSettingName;
+        public String bindPermission;
+        public String settingsAction;
+        public int clientLabel;
     }
 }
