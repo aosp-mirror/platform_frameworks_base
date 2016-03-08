@@ -24,9 +24,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A mapping from String values to various types that can be saved to persistent and later
@@ -82,6 +79,18 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         super(b);
     }
 
+
+    /**
+     * Constructs a PersistableBundle from a Bundle.
+     *
+     * @param b a Bundle to be copied.
+     *
+     * @throws IllegalArgumentException if any element of {@code b} cannot be persisted.
+     */
+    public PersistableBundle(Bundle b) {
+        this(b.getMap());
+    }
+
     /**
      * Constructs a PersistableBundle containing the mappings passed in.
      *
@@ -101,6 +110,8 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
             if (value instanceof ArrayMap) {
                 // Fix up any Maps by replacing them with PersistableBundles.
                 mMap.setValueAt(i, new PersistableBundle((ArrayMap<String, Object>) value));
+            } else if (value instanceof Bundle) {
+                mMap.setValueAt(i, new PersistableBundle(((Bundle) value)));
             } else if (!isValidType(value)) {
                 throw new IllegalArgumentException("Bad value in PersistableBundle key="
                         + mMap.keyAt(i) + " value=" + value);

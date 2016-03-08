@@ -235,6 +235,12 @@ public class BaseBundle {
         return mParcelledData != null;
     }
 
+    /** @hide */
+    ArrayMap<String, Object> getMap() {
+        unparcel();
+        return mMap;
+    }
+
     /**
      * Returns the number of mappings contained in this Bundle.
      *

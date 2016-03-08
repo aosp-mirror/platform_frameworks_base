@@ -494,7 +494,6 @@ class Owners {
         abstract void writeInner(XmlSerializer out) throws IOException;
 
         abstract boolean readInner(XmlPullParser parser, int depth, String tag);
-
     }
 
     private class DeviceOwnerReadWriter extends FileReadWriter {
