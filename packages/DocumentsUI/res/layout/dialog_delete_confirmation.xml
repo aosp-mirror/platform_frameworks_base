@@ -18,8 +18,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="30dp"
-    android:gravity="center"
+    android:paddingTop="24dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
     android:textAppearance="@android:style/TextAppearance.Material.Subhead"
     android:textColor="@*android:color/primary_text_default_material_light">
 </TextView>
