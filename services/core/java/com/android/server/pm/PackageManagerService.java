@@ -15154,6 +15154,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public void clearApplicationProfileData(String packageName) {
+        enforceSystemOrRoot("Only the system can clear all profile data");
+        try {
+            mInstaller.rmProfiles(packageName);
+        } catch (InstallerException ex) {
+            Log.e(TAG, "Could not clear profile data of package " + packageName);
+        }
+    }
+
+    @Override
     public void clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, final int userId) {
         mContext.enforceCallingOrSelfPermission(
