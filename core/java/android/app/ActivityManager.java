@@ -1575,6 +1575,7 @@ public class ActivityManager {
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             dest.writeInt(numActivities);
             dest.writeInt(numRunning);
+            dest.writeInt(isDockable ? 1 : 0);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1590,6 +1591,7 @@ public class ActivityManager {
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             numActivities = source.readInt();
             numRunning = source.readInt();
+            isDockable = source.readInt() != 0;
         }
 
         public static final Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
