@@ -1180,14 +1180,13 @@ public class BugreportProgressService extends Service {
      * Takes a screenshot and save it to the given location.
      */
     private static boolean takeScreenshot(Context context, String screenshotFile) {
-        ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE))
-                .vibrate(150);
         final ProcessBuilder screencap = new ProcessBuilder()
                 .command("/system/bin/screencap", "-p", screenshotFile);
         Log.d(TAG, "Taking screenshot using " + screencap.command());
         try {
             final int exitValue = screencap.start().waitFor();
             if (exitValue == 0) {
+                ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(150);
                 return true;
             }
             Log.e(TAG, "screencap (" + screencap.command() + ") failed: " + exitValue);
