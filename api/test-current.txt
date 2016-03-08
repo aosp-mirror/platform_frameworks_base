@@ -57501,7 +57501,23 @@ package java.util {
 
   public abstract interface Comparator {
     method public abstract int compare(T, T);
+    method public static java.util.Comparator<T> comparing(java.util.function.Function<? super T, ? extends U>, java.util.Comparator<? super U>);
+    method public static java.util.Comparator<T> comparing(java.util.function.Function<? super T, ? extends U>);
+    method public static java.util.Comparator<T> comparingDouble(java.util.function.ToDoubleFunction<? super T>);
+    method public static java.util.Comparator<T> comparingInt(java.util.function.ToIntFunction<? super T>);
+    method public static java.util.Comparator<T> comparingLong(java.util.function.ToLongFunction<? super T>);
     method public abstract boolean equals(java.lang.Object);
+    method public static java.util.Comparator<T> naturalOrder();
+    method public static java.util.Comparator<T> nullsFirst(java.util.Comparator<? super T>);
+    method public static java.util.Comparator<T> nullsLast(java.util.Comparator<? super T>);
+    method public static java.util.Comparator<T> reverseOrder();
+    method public default java.util.Comparator<T> reversed();
+    method public default java.util.Comparator<T> thenComparing(java.util.Comparator<? super T>);
+    method public default java.util.Comparator<T> thenComparing(java.util.function.Function<? super T, ? extends U>, java.util.Comparator<? super U>);
+    method public default java.util.Comparator<T> thenComparing(java.util.function.Function<? super T, ? extends U>);
+    method public default java.util.Comparator<T> thenComparingDouble(java.util.function.ToDoubleFunction<? super T>);
+    method public default java.util.Comparator<T> thenComparingInt(java.util.function.ToIntFunction<? super T>);
+    method public default java.util.Comparator<T> thenComparingLong(java.util.function.ToLongFunction<? super T>);
   }
 
   public class ConcurrentModificationException extends java.lang.RuntimeException {
