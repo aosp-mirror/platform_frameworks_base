@@ -56,7 +56,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -206,7 +205,7 @@ public class BugreportProgressService extends Service {
         mMainHandler = new ServiceHandler("BugreportProgressServiceMainThread");
         mScreenshotHandler = new ScreenshotHandler("BugreportProgressServiceScreenshotThread");
 
-        mScreenshotsDir = new File(new ContextWrapper(mContext).getFilesDir(), SCREENSHOT_DIR);
+        mScreenshotsDir = new File(getFilesDir(), SCREENSHOT_DIR);
         if (!mScreenshotsDir.exists()) {
             Log.i(TAG, "Creating directory " + mScreenshotsDir + " to store temporary screenshots");
             if (!mScreenshotsDir.mkdir()) {
@@ -877,6 +876,8 @@ public class BugreportProgressService extends Service {
             info = sharedInfo;
             Log.d(TAG, "shareBugreport(): no info for ID " + id + " on managed processes ("
                     + mProcesses + "), using info from intent instead (" + info + ")");
+        } else {
+            Log.v(TAG, "shareBugReport(): id " + id + " info = " + info);
         }
 
         addDetailsToZipFile(mContext, info);
@@ -1532,6 +1533,7 @@ public class BugreportProgressService extends Service {
                 final File newFile;
                 if (!newName.equals(oldName)) {
                     final File renamedFile = new File(screenshotDir, newName);
+                    Log.d(TAG, "Renaming screenshot file " + oldFile + " to " + renamedFile);
                     newFile = oldFile.renameTo(renamedFile) ? renamedFile : oldFile;
                 } else {
                     Log.w(TAG, "Name didn't change: " + oldName); // Shouldn't happen.
