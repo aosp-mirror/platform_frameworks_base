@@ -170,13 +170,18 @@ public abstract class NotificationListenerService extends Service {
 
     private INotificationManager mNoMan;
 
-    /** Only valid after a successful call to (@link registerAsService}. */
-    private int mCurrentUser;
+    /**
+     * Only valid after a successful call to (@link registerAsService}.
+     * @hide
+     */
+    protected int mCurrentUser;
 
-
-    // This context is required for system services since NotificationListenerService isn't
-    // started as a real Service and hence no context is available.
-    private Context mSystemContext;
+    /**
+     * This context is required for system services since NotificationListenerService isn't
+     * started as a real Service and hence no context is available..
+     * @hide
+     */
+    protected Context mSystemContext;
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -675,12 +680,18 @@ public abstract class NotificationListenerService extends Service {
     @SystemApi
     public void registerAsSystemService(Context context, ComponentName componentName,
             int currentUser) throws RemoteException {
+        registerAsSystemServiceImpl(context, componentName, currentUser, false /* asRanker */);
+    }
+
+    /** @hide */
+    protected void registerAsSystemServiceImpl(Context context, ComponentName componentName,
+            int currentUser, boolean asRanker) throws RemoteException {
         mSystemContext = context;
         if (mWrapper == null) {
             mWrapper = new NotificationListenerWrapper();
         }
         INotificationManager noMan = getNotificationInterface();
-        noMan.registerListener(mWrapper, componentName, currentUser);
+        noMan.registerListener(mWrapper, componentName, currentUser, asRanker);
         mCurrentUser = currentUser;
         mHandler = new MyHandler(context.getMainLooper());
     }
