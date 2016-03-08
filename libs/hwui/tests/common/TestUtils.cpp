@@ -21,9 +21,6 @@
 
 #include <utils/Unicode.h>
 
-#include <unistd.h>
-#include <signal.h>
-
 namespace android {
 namespace uirenderer {
 
@@ -144,27 +141,7 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
     canvas->drawTextOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
 }
 
-static void defaultCrashHandler() {
-    fprintf(stderr, "RenderThread crashed!");
-}
-
-static std::function<void()> gCrashHandler = defaultCrashHandler;
-static sighandler_t gPreviousSignalHandler;
-
-static void signalHandler(int sig) {
-    gCrashHandler();
-    if (gPreviousSignalHandler) {
-        gPreviousSignalHandler(sig);
-    }
-}
-
-void TestUtils::setRenderThreadCrashHandler(std::function<void()> crashHandler) {
-    gCrashHandler = crashHandler;
-}
-
 void TestUtils::TestTask::run() {
-    gPreviousSignalHandler = signal(SIGABRT, signalHandler);
-
     // RenderState only valid once RenderThread is running, so queried here
     RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
 
@@ -172,9 +149,6 @@ void TestUtils::TestTask::run() {
     rtCallback(renderthread::RenderThread::getInstance());
     renderState.flush(Caches::FlushMode::Full);
     renderState.onGLContextDestroyed();
-
-    // Restore the previous signal handler
-    signal(SIGABRT, gPreviousSignalHandler);
 }
 
 } /* namespace uirenderer */

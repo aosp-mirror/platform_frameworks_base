@@ -225,6 +225,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_STATIC_LIBRARIES := libhwui_static_null_gpu
+LOCAL_SHARED_LIBRARIES := libmemunreachable
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -DHWUI_NULL_GPU
@@ -232,9 +233,9 @@ LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
+    tests/unit/main.cpp \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
-    tests/unit/CrashHandlerInjector.cpp \
     tests/unit/DamageAccumulatorTests.cpp \
     tests/unit/DeviceInfoTests.cpp \
     tests/unit/FatVectorTests.cpp \
