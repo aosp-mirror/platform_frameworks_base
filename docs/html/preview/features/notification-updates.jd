@@ -170,11 +170,10 @@ For interactive apps (like chats), provide more context in the notification itse
   so that the user can respond appropriately.
 When the user responds via {@link android.support.v4.app.RemoteInput},
  include the text in the reply history with the {@code setRemoteInputHistory()}
- method.
+ method.</p>
 
 
-<img id="fig-chat-history" src=
-"{@docRoot}preview/images/inline-reply-sent.png">
+<img id="fig-chat-history" src="{@docRoot}preview/images/inline-reply-sent.png">
 <p class="img-caption">
   <strong>Figure 3.</strong> Screenshot of chat history in the notification
   shade.
@@ -193,12 +192,12 @@ Builder.setGroup()} method to bundle similar notifications.</p>
 
 <p>
   A notification group imposes a hierarchy on the notifications comprising it.
-  At the top of that hierarchy is a parent notification that displays the first
-  line of the first notification in the group. The user can progressively
+  At the top of that hierarchy is a parent notification that displays summary
+  information for the group. The user can progressively
   expand the notification group, and the system shows more information as the
-  user drills deeper. When the user expands the bundle, the system reveals the
-  first line of each notification within the bundle; when the user expands one
-  of those notifications, the system reveals its entire content.
+  user drills deeper. When the user expands the bundle, the system reveals more
+  information for all its child notifications; when the user
+  expands one of those notifications, the system reveals its entire content.
 </p>
 
 <img id="fig-bundles" src="{@docRoot}preview/images/bundles.png">
@@ -242,15 +241,20 @@ received emails.</p>
  single-line text items.</p>
 
 <h3 id ="post">Displaying bundled notifications</h3>
-<p>When a group only has a single child notification, the app should in general
-not post a notification group, but instead post that notification individually.
-Only if it accumulates more than one child should it display the notifications
- in a group.</p>
 
-<p>Similarly, when a user swipes away children of an expanded
-notification group, the app should remove the group as soon as there is only a
-single child left. It should then convert the child into a normal, single
- notification.</p>
+<p>
+  The app should always post a group summary, even if the group contains just a
+  single child. The system will suppress the summary and directly display the
+  child notification if it only contains a single notification. This ensures
+  that the system can provide a consistent experience when the user swipes away
+  children of a group.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> This version of the N Developer Preview does not yet
+  suppress the summary for notification groups containing a single child. This
+  functionality will be added in a later version of the N Developer Preview.
+</p>
 
 <h3>Peeking notifications</h3>
 
