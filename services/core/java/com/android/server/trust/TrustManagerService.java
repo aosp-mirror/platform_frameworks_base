@@ -19,7 +19,6 @@ package com.android.server.trust;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -104,7 +103,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_SET_DEVICE_LOCKED = 10;
     private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 11;
 
-    public static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
+    private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
@@ -136,13 +135,7 @@ public class TrustManagerService extends SystemService {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mLockPatternUtils = new LockPatternUtils(context);
-
-        mStrongAuthTracker = new StrongAuthTracker(context) {
-            @Override
-            public void onStrongAuthRequiredChanged(int userId) {
-                refreshAgentList(userId);
-            }
-        };
+        mStrongAuthTracker = new StrongAuthTracker(context);
     }
 
     @Override
@@ -231,24 +224,24 @@ public class TrustManagerService extends SystemService {
                 TRUST_USUALLY_MANAGED_FLUSH_DELAY);
     }
 
-    void refreshAgentList(int userId) {
-        if (DEBUG) Slog.d(TAG, "refreshAgentList()");
+    void refreshAgentList(int userIdOrAll) {
+        if (DEBUG) Slog.d(TAG, "refreshAgentList(" + userIdOrAll + ")");
         if (!mTrustAgentsCanRun) {
             return;
         }
-        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_SYSTEM) {
-            Log.e(TAG, "refreshAgentList(userId=" + userId + "): Invalid user handle,"
+        if (userIdOrAll != UserHandle.USER_ALL && userIdOrAll < UserHandle.USER_SYSTEM) {
+            Log.e(TAG, "refreshAgentList(userId=" + userIdOrAll + "): Invalid user handle,"
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
-            userId = UserHandle.USER_ALL;
+            userIdOrAll = UserHandle.USER_ALL;
         }
         PackageManager pm = mContext.getPackageManager();
 
         List<UserInfo> userInfos;
-        if (userId == UserHandle.USER_ALL) {
+        if (userIdOrAll == UserHandle.USER_ALL) {
             userInfos = mUserManager.getUsers(true /* excludeDying */);
         } else {
             userInfos = new ArrayList<>();
-            userInfos.add(mUserManager.getUserInfo(userId));
+            userInfos.add(mUserManager.getUserInfo(userIdOrAll));
         }
         LockPatternUtils lockPatternUtils = mLockPatternUtils;
 
@@ -261,7 +254,7 @@ public class TrustManagerService extends SystemService {
             if (!userInfo.supportsSwitchToByUser()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (!lockPatternUtils.isSecure(userInfo.id)) continue;
-            if (!mStrongAuthTracker.isTrustAllowedForUser(userInfo.id)) continue;
+            if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -302,7 +295,7 @@ public class TrustManagerService extends SystemService {
         boolean trustMayHaveChanged = false;
         for (int i = 0; i < obsoleteAgents.size(); i++) {
             AgentInfo info = obsoleteAgents.valueAt(i);
-            if (userId == UserHandle.USER_ALL || userId == info.userId) {
+            if (userIdOrAll == UserHandle.USER_ALL || userIdOrAll == info.userId) {
                 if (info.agent.isManagingTrust()) {
                     trustMayHaveChanged = true;
                 }
@@ -312,10 +305,10 @@ public class TrustManagerService extends SystemService {
         }
 
         if (trustMayHaveChanged) {
-            if (userId == UserHandle.USER_ALL) {
+            if (userIdOrAll == UserHandle.USER_ALL) {
                 updateTrustAll();
             } else {
-                updateTrust(userId, 0);
+                updateTrust(userIdOrAll, 0);
             }
         }
     }
@@ -578,6 +571,10 @@ public class TrustManagerService extends SystemService {
     }
 
     private void dispatchUnlockAttempt(boolean successful, int userId) {
+        if (successful) {
+            mStrongAuthTracker.allowTrustFromUnlock(userId);
+        }
+
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
@@ -608,6 +605,10 @@ public class TrustManagerService extends SystemService {
     }
 
     private void dispatchOnTrustChanged(boolean enabled, int userId, int flags) {
+        if (DEBUG) {
+            Log.i(TAG, "onTrustChanged(" + enabled + ", " + userId + ", 0x"
+                    + Integer.toHexString(flags) + ")");
+        }
         if (!enabled) flags = 0;
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
@@ -623,6 +624,9 @@ public class TrustManagerService extends SystemService {
     }
 
     private void dispatchOnTrustManagedChanged(boolean managed, int userId) {
+        if (DEBUG) {
+            Log.i(TAG, "onTrustManagedChanged(" + managed + ", " + userId + ")");
+        }
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
                 mTrustListeners.get(i).onTrustManagedChanged(managed, userId);
@@ -978,6 +982,63 @@ public class TrustManagerService extends SystemService {
                     filter,
                     null /* permission */,
                     null /* scheduler */);
+        }
+    }
+
+    private class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+
+        SparseBooleanArray mStartFromSuccessfulUnlock = new SparseBooleanArray();
+
+        public StrongAuthTracker(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStrongAuthRequiredChanged(int userId) {
+            mStartFromSuccessfulUnlock.delete(userId);
+
+            if (DEBUG) {
+                Log.i(TAG, "onStrongAuthRequiredChanged(" + userId + ") ->"
+                        + " trustAllowed=" + isTrustAllowedForUser(userId)
+                        + " agentsCanRun=" + canAgentsRunForUser(userId));
+            }
+
+            refreshAgentList(userId);
+
+            // The list of active trust agents may not have changed, if there was a previous call
+            // to allowTrustFromUnlock, so we update the trust here too.
+            updateTrust(userId, 0 /* flags */);
+        }
+
+        boolean canAgentsRunForUser(int userId) {
+            return mStartFromSuccessfulUnlock.get(userId)
+                    || super.isTrustAllowedForUser(userId);
+        }
+
+        /**
+         * Temporarily suppress strong auth requirements for {@param userId} until strong auth
+         * changes again. Must only be called when we know about a successful unlock already
+         * before the underlying StrongAuthTracker.
+         *
+         * Note that this only changes whether trust agents can be started, not the actual trusted
+         * value.
+         */
+        void allowTrustFromUnlock(int userId) {
+            if (userId < UserHandle.USER_SYSTEM) {
+                throw new IllegalArgumentException("userId must be a valid user: " + userId);
+            }
+            boolean previous = canAgentsRunForUser(userId);
+            mStartFromSuccessfulUnlock.put(userId, true);
+
+            if (DEBUG) {
+                Log.i(TAG, "allowTrustFromUnlock(" + userId + ") ->"
+                        + " trustAllowed=" + isTrustAllowedForUser(userId)
+                        + " agentsCanRun=" + canAgentsRunForUser(userId));
+            }
+
+            if (canAgentsRunForUser(userId) != previous) {
+                refreshAgentList(userId);
+            }
         }
     }
 }
