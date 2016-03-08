@@ -11,6 +11,13 @@
    zh-tw-lang="程式總覽">
    Program Overview</a></div>
   </li>
+
+
+  <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
+      Support and Release Notes</a></div>
+  </li>
+  
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/setup-sdk.html"
       es-lang="Configurar el SDK de la versión preliminar"
@@ -41,12 +48,9 @@
       <ul>
         <li><a href="<?cs var:toroot ?>preview/features/background-optimization.html"
         >Background Optimizations</a></li>
-        <li><a href="<?cs var:toroot ?>preview/features/notification-updates.html"
-        >Notifications</a></li>
         <li><a href="<?cs var:toroot ?>preview/features/multilingual-support.html"
         >Language and Locale</a></li>
-        <li><a href="<?cs var:toroot ?>preview/features/afw.html"
-        >Android for Work</a></li>      </ul>
+      </ul>
   </li>
 
   <li class="nav-section">
@@ -57,12 +61,15 @@
       pt-br-lang="Visão geral da API"
       ru-lang="Обзор API-интерфейсов"
       zh-cn-lang="API 概览"
-      zh-tw-lang="API 總覽">API Overview
+      zh-tw-lang="API 總覽">Android N for Developers
       </a></div>
       <ul>
 
         <li><a href="<?cs var:toroot ?>preview/features/multi-window.html"
         >Multi-Window Support</a></li>
+
+        <li><a href="<?cs var:toroot ?>preview/features/notification-updates.html"
+        >Notifications</a></li>
 
         <li><a href="<?cs var:toroot ?>preview/features/data-saver.html"
         >Data Saver</a></li>
@@ -76,8 +83,8 @@
         <li><a href="<?cs var:toroot ?>preview/features/icu4j-framework.html"
         >ICU4J Support</a></li>
 
-        <li><a href="<?cs var:toroot ?>preview/j8-jack.html"
-        >Java 8 Language Features</a></li>
+        <li><a href="<?cs var:toroot ?>preview/features/afw.html"
+        >Android for Work Updates</a></li>
       </ul>
   </li>
 
@@ -107,10 +114,9 @@
       Samples</a></div>
   </li>
 
-
-  <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/support.html">
-      Support and Release Notes</a></div>
+ <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
+      >Device Images</a></div>
   </li>
 
   <li class="nav-section">
