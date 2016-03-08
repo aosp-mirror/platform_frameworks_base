@@ -429,9 +429,10 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   </li>
 
   <li>Use of {@code property_get} symbol from {@code libcutils.so} can be
-    replaced with the public {@code alternative __system_property_get}:
+    replaced with the public {@code alternative __system_property_get}.
+   To do this, use {@code __system_property_get} with the following include:
 <pre>
-#include &lt;sys/system_properties.h&gt; and use __system_property_get
+#include &lt;sys/system_properties.h&gt;
 </pre>
   </li>
 
