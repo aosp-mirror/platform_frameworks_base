@@ -2634,6 +2634,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
 
                 mPrinterAvailabilityDetector.updatePrinter(currentPrinter);
+
+                // Force a reload of the enabled print services to update
+                // mAdvancedPrintOptionsActivity in onLoadFinished();
+                getLoaderManager().getLoader(LOADER_ID_ENABLED_PRINT_SERVICES).forceLoad();
             } else if (spinner == mMediaSizeSpinner) {
                 SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(position);
                 PrintAttributes attributes = mPrintJob.getAttributes();
