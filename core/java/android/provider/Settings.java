@@ -8282,6 +8282,13 @@ public final class Settings {
                 "allow_user_switching_when_system_user_locked";
 
         /**
+         * Boot count since the device starts running APK level 24.
+         * <p>
+         * Type: int
+         */
+        public static final String BOOT_COUNT = "boot_count";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
