@@ -3617,7 +3617,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_DIMMED
                 new AnimationFilter()
-                        .animateY()
                         .animateDimmed(),
 
                 // ANIMATION_TYPE_CHANGE_POSITION
