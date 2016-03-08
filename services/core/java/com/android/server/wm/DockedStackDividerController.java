@@ -16,6 +16,17 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
+import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
@@ -29,19 +40,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
-
-import java.util.ArrayList;
-
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
-import static android.view.WindowManager.DOCKED_TOP;
-import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
-import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 /**
  * Keeps information about the docked stack divider.
@@ -106,7 +104,8 @@ public class DockedStackDividerController implements DimLayerUser {
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         mDividerInsets = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_insets);
-        mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId());
+        mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId(),
+                "DockedStackDim");
         mMinimizedDockInterpolator = AnimationUtils.loadInterpolator(
                 context, android.R.interpolator.fast_out_slow_in);
     }
@@ -247,8 +246,9 @@ public class DockedStackDividerController implements DimLayerUser {
 
     void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
         SurfaceControl.openTransaction();
-        TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(targetStackId);
-        boolean visibleAndValid = visible && stack != null;
+        final TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(targetStackId);
+        final TaskStack dockedStack = mDisplayContent.getDockedStackLocked();
+        boolean visibleAndValid = visible && stack != null && dockedStack != null;
         if (visibleAndValid) {
             stack.getDimBounds(mTmpRect);
             if (mTmpRect.height() > 0 && mTmpRect.width() > 0) {
