@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import static android.widget.espresso.CustomViewActions.longPressAtRelativeCoordinates;
 import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
@@ -42,6 +43,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
+import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 import com.android.frameworks.coretests.R;
 
 import android.support.test.espresso.action.EspressoKey;
@@ -143,7 +145,9 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         // Move cursor somewhere else
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(helloWorld.indexOf("big")));
         // Long-press at end of line.
-        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(helloWorld.length()));
+        onView(withId(R.id.textview)).perform(longPressAtRelativeCoordinates(
+                RelativeCoordinatesProvider.HorizontalReference.RIGHT, -5,
+                RelativeCoordinatesProvider.VerticalReference.CENTER, 0));
 
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(helloWorld.length()));
     }
