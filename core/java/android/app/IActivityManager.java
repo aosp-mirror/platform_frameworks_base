@@ -475,8 +475,13 @@ public interface IActivityManager extends IInterface {
 
     public void keyguardWaitingForActivityDrawn() throws RemoteException;
 
-    public void keyguardGoingAway(boolean disableWindowAnimations,
-            boolean keyguardGoingToNotificationShade) throws RemoteException;
+    /**
+     * Notify the system that the keyguard is going away.
+     *
+     * @param flags See {@link android.view.WindowManagerPolicy#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
+     *              etc.
+     */
+    public void keyguardGoingAway(int flags) throws RemoteException;
 
     public boolean shouldUpRecreateTask(IBinder token, String destAffinity)
             throws RemoteException;

@@ -1542,13 +1542,22 @@ public class KeyguardViewMediator extends SystemUI {
             try {
                 mStatusBarKeyguardViewManager.keyguardGoingAway();
 
+                int flags = 0;
+                if (mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
+                        || mWakeAndUnlocking) {
+                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+                }
+                if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()) {
+                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+                }
+                if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
+                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+                }
+
                 // Don't actually hide the Keyguard at the moment, wait for window
                 // manager until it tells us it's safe to do so with
                 // startKeyguardExitAnimation.
-                ActivityManagerNative.getDefault().keyguardGoingAway(
-                        mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
-                                || mWakeAndUnlocking,
-                        mStatusBarKeyguardViewManager.isGoingToNotificationShade());
+                ActivityManagerNative.getDefault().keyguardGoingAway(flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error while calling WindowManager", e);
             }

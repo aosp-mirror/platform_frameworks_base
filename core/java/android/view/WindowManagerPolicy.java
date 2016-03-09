@@ -91,6 +91,11 @@ public interface WindowManagerPolicy {
     public final static int FLAG_INTERACTIVE = 0x20000000;
     public final static int FLAG_PASS_TO_USER = 0x40000000;
 
+    // Flags for IActivityManager.keyguardGoingAway()
+    public final static int KEYGUARD_GOING_AWAY_FLAG_TO_SHADE = 1 << 0;
+    public final static int KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS = 1 << 1;
+    public final static int KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER = 1 << 2;
+
     // Flags used for indicating whether the internal and/or external input devices
     // of some type are available.
     public final static int PRESENCE_INTERNAL = 1 << 0;

@@ -2307,7 +2307,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case KEYGUARD_GOING_AWAY_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            keyguardGoingAway(data.readInt() != 0, data.readInt() != 0);
+            keyguardGoingAway(data.readInt());
             reply.writeNoException();
             return true;
         }
@@ -5924,13 +5924,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void keyguardGoingAway(boolean disableWindowAnimations,
-            boolean keyguardGoingToNotificationShade) throws RemoteException {
+    public void keyguardGoingAway(int flags)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(disableWindowAnimations ? 1 : 0);
-        data.writeInt(keyguardGoingToNotificationShade ? 1 : 0);
+        data.writeInt(flags);
         mRemote.transact(KEYGUARD_GOING_AWAY_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

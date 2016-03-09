@@ -227,6 +227,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBarWindowManager.setKeyguardNeedsInput(needsInput);
     }
 
+    public boolean isUnlockWithWallpaper() {
+        return mStatusBarWindowManager.isShowingWallpaper();
+    }
+
     public void setOccluded(boolean occluded) {
         if (occluded && !mOccluded && mShowing) {
             if (mPhoneStatusBar.isInLaunchTransition()) {

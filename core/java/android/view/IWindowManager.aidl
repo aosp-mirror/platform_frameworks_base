@@ -193,8 +193,7 @@ interface IWindowManager
     boolean isKeyguardSecure();
     boolean inKeyguardRestrictedInputMode();
     void dismissKeyguard();
-    void keyguardGoingAway(boolean disableWindowAnimations,
-            boolean keyguardGoingToNotificationShade);
+    void keyguardGoingAway(int flags);
 
     void closeSystemDialogs(String reason);
 
