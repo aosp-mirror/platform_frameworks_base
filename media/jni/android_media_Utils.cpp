@@ -30,30 +30,78 @@
 
 namespace android {
 
+AssetStream::AssetStream(SkStream* stream)
+    : mStream(stream) {
+}
+
+AssetStream::~AssetStream() {
+}
+
+piex::Error AssetStream::GetData(
+        const size_t offset, const size_t length, std::uint8_t* data) {
+    // Seek first.
+    if (mPosition != offset) {
+        if (!mStream->seek(offset)) {
+            return piex::Error::kFail;
+        }
+    }
+
+    // Read bytes.
+    size_t size = mStream->read((void*)data, length);
+    mPosition += size;
+
+    return size == length ? piex::Error::kOk : piex::Error::kFail;
+}
+
+BufferedStream::BufferedStream(SkStream* stream)
+    : mStream(stream) {
+}
+
+BufferedStream::~BufferedStream() {
+}
+
+piex::Error BufferedStream::GetData(
+        const size_t offset, const size_t length, std::uint8_t* data) {
+    // Seek first.
+    if (offset + length > mStreamBuffer.bytesWritten()) {
+        size_t sizeToRead = offset + length - mStreamBuffer.bytesWritten();
+        if (sizeToRead <= kMinSizeToRead) {
+            sizeToRead = kMinSizeToRead;
+        }
+        void* tempBuffer = malloc(sizeToRead);
+        if (tempBuffer != NULL) {
+            size_t bytesRead = mStream->read(tempBuffer, sizeToRead);
+            if (bytesRead != sizeToRead) {
+                free(tempBuffer);
+                return piex::Error::kFail;
+            }
+            mStreamBuffer.write(tempBuffer, bytesRead);
+            free(tempBuffer);
+        }
+    }
+
+    // Read bytes.
+    if (mStreamBuffer.read((void*)data, offset, length)) {
+        return piex::Error::kOk;
+    } else {
+        return piex::Error::kFail;
+    }
+}
+
 FileStream::FileStream(const int fd)
-    : mPosition(0),
-      mSize(0) {
+    : mPosition(0) {
     mFile = fdopen(fd, "r");
     if (mFile == NULL) {
         return;
     }
-    // Get the size.
-    fseek(mFile, 0l, SEEK_END);
-    mSize = ftell(mFile);
-    fseek(mFile, 0l, SEEK_SET);
 }
 
 FileStream::FileStream(const String8 filename)
-    : mPosition(0),
-      mSize(0) {
+    : mPosition(0) {
     mFile = fopen(filename.string(), "r");
     if (mFile == NULL) {
         return;
     }
-    // Get the size.
-    fseek(mFile, 0l, SEEK_END);
-    mSize = ftell(mFile);
-    fseek(mFile, 0l, SEEK_SET);
 }
 
 FileStream::~FileStream() {
@@ -79,7 +127,7 @@ piex::Error FileStream::GetData(
     mPosition += size;
 
     // Handle errors.
-    if (ferror(mFile) || (size == 0 && feof(mFile))) {
+    if (ferror(mFile)) {
         ALOGV("GetData read failed: (offset: %zu, length: %zu)", offset, length);
         return piex::Error::kFail;
     }
@@ -90,20 +138,11 @@ bool FileStream::exists() const {
     return mFile != NULL;
 }
 
-size_t FileStream::size() const {
-    return mSize;
-}
-
 bool GetExifFromRawImage(
-        FileStream* stream, const String8& filename, piex::PreviewImageData& image_data) {
+        piex::StreamInterface* stream, const String8& filename,
+        piex::PreviewImageData& image_data) {
     // Reset the PreviewImageData to its default.
     image_data = piex::PreviewImageData();
-
-    if (!stream->exists()) {
-        // File is not exists.
-        ALOGV("File is not exists: %s", filename.string());
-        return false;
-    }
 
     if (!piex::IsRaw(stream)) {
         // Format not supported.
@@ -116,12 +155,6 @@ bool GetExifFromRawImage(
     if (err != piex::Error::kOk) {
         // The input data seems to be broken.
         ALOGV("Raw image not detected: %s (piex error code: %d)", filename.string(), (int32_t)err);
-        return false;
-    }
-
-    if (image_data.thumbnail_offset + image_data.thumbnail_length > stream->size()) {
-        // Corrupted image.
-        ALOGV("Corrupted file: %s", filename.string());
         return false;
     }
 
