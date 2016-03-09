@@ -1,0 +1,197 @@
+page.title=Known Issues
+@jd:body
+
+<p>Date: March 2016</p>
+<p>Builds: NPC56P, NPC56R (N Preview 1 Release)</p>
+<p>Emulator support: x86 & ARM 32/64-bit</p>
+<p>Google Play services: 8.4</p>
+
+<p>Two primary support channels are available to you when developing and testing
+with the Android N Developer Preview: Please file bugs at
+https://developer.android.com/preview/bug for device-specific, system, and Google App bugs.
+For issues in other apps, please contact the developer directly.</p>
+
+<p>To discuss issues or ideas with other developers working with Android M, join the Developer Preview Google+ community (not available yet).</p>
+
+<h2 id="general">General advisories</h2>
+
+<p>This Developer Preview release is for app developers only and is designed for use in compatibility testing and early development only. Please be aware of these general notes about the release:</p>
+
+<ul>
+   <li>This release has various stability and performance issues on all devices that make it <em>not suitable for daily use on phone or tablet</em>, especially for non-developers.</li>
+  <li>Performance and responsiveness are known to be slow in some areas and may become slower over prolonged use.
+  </li>
+  <li>Battery life may be regressed in this release for screen-on and screen-off use cases.</li>
+  <li>Some apps may not function normally on Developer Preview 1. This includes Google’s apps as well as other apps.</li>
+  <li>This early build is not Compatibility Test Suite (CTS) approved. Apps that depend on CTS approved builds (Android Pay for example) won’t work. </li>
+  <li>This preview release supports the following devices: Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, and Pixel C, as well as General Mobile 4G (Android One).</li>
+</ul>
+
+<h2 id="platform">Platform Issues</h2>
+
+<h3 id="performance">Performance and battery</h3>
+
+<ul>
+   <li>System and apps may be slow and experience periodic slowdowns and unresponsiveness.</li>
+  <li>Battery life may be regressed in this release for screen-on and screen-off use cases.</li>
+</ul>
+
+<h3 id="dialer">Dialer</h3>
+<ul>
+   <li>Dialer app does not support Direct boot. This will be addressed later in N Developer Preview.</li>
+   <li>Voicemail playback does not work.</li>
+</ul>
+
+<h3 id="ui">System UI</h3>
+
+<ul>
+   <li>Some new or modified strings in the system UI are not translated to all languages.</li>
+   <li>Overview UI is still in development, and subject to change. For example, we intend to
+   remove the timer that appears when the user switches between apps.</li>
+   <li>Settings controls and toggles may be slow or appear to be unresponsive.</li>
+   <li>Visual design of notifications is subject to change.</li>
+   <li>In the Gmail app, direct archiving of emails included in a notification bundle does not work properly.</li>
+</ul>
+
+<h3 id="afw">Android for Work</h3>
+
+<ul>
+   <li>Work Security Challenge
+   <ul>
+     <li>After migration to N, or after the user creates work profiles, work profiles can't create keys in the keystore until the user changes their pattern, PIN, or password, or sets up a Work Challenge.</li>
+     <li>In Direct boot mode, applying the passcode restrictions to the device causes the work profile to be unlocked, even though the device is locked. This makes the work profile accessible even though it should be protected by the device lock screen.</li>
+     <li>When the user enters a wrong password and pin, the system does not display any informational message; instead, it only clears the input field. This issue does not affect pattern or fingerprint input.</li>
+     <li>On a tablet, the background displayed with the work challenge is disproportionately small.</li>
+     <li>The version of Google Apps Device Policy that is bundled with N Developer Preview does not yet support the Work Profile Security Challenge feature. Developers should instead use TestDPC to test this feature.</li>
+   </ul>
+   </li>
+
+   <li>Always On VPN
+   <ul>
+     <li>If Always On VPN mode is turned on, but VPN is not available, apps not specified as exceptions to the Always On policy connect over the ordinary network. Unless specified as exceptions to Always On VPN policy, apps should be offline if they have no VPN connection available.
+    <ul>
+     <li>When Always On mode is on, a VPN connection is not established after a device reboots into Direct boot mode, even after the user unlocks the secure lock screen.</li>
+    </ul>
+      </li>
+  </ul>
+  </li>
+
+   <li>Improved Contacts
+   <ul>
+     <li>Bluetooth PBAP/MAP devices do not display Caller ID for work contacts. The next release of Preview resolves this issue.</li>
+   </ul>
+   </li>
+
+
+   <li>Work Mode
+   <ui>
+     <li>The Google Now Launcher does not display whether Work Mode is on or off. The Launcher also does not show app suspension state.</li>
+     <li>After the user turns Work Mode off and on, the system no longer shows Work profile app widgets, such as Calendar.</li>
+   </ui>
+   </li>
+
+   <li>Suspend Packages
+   <ui>
+     <li>Device admins can suspend critical system packages, which may lead to unexpected behavior, such as placing calls despite the Telephone disabled dialog’s being displayed.</li>
+   </ui>
+   </li>
+
+   <li>Other
+   <ul>
+      <li>The Settings app crashes on launch if  DISALLOW_MOUNT_PHYSICAL_MEDIA is set to true when the user inserts physical media such as an SD card.</li>
+      <li>The DPM.setPackagesSuspended state does not persist when the user uninstalls and then reinstalls an app. Either the app should remain suspended after uninstall/reinstall, or suspended apps should not be uninstallable</li>
+      <li>The first check-in in a Work Profile takes several minutes to complete. This may cause the device to take longer than normal to be visible in the Play EMM API.</li>
+      <li>Notifications from Work Profile apps are not visible to notification listeners installed in the personal profile. As a result, the system does not display Notifications as expected.</li>
+      <li>The version of Google Apps Device Policy that is bundled with N Developer Preview does not yet support the Work Profile Security Challenge feature. Developers should instead use TestDPC to test this feature.</li>
+   </ul>
+   </li>
+</ul>
+
+<h3 id="keyboard">Keyboard</h3>
+
+<ul>
+<li>Bluetooth pairing between keyboards and Android devices may be unstable. </li>
+</ul>
+
+<h3 id="video">Video</h3>
+
+<ul>
+<li>Video playback may lag and show interruptions.</li>
+</ul>
+
+<h3 id="wifi">Wi-Fi</h3>
+
+   <ul>
+   <li>Wi-Fi has undergone some refactoring which may change API corner case behavior. Specifically, applications which attempt to connect to specific networks, or attempt to reconnect to networks should retest.</li>
+   <li>The legacy DHCP client has been removed from the platform. The only DHCP client that the platform
+   supports is the DHCP client introduced in M.</li>
+   </ul>
+
+<h3 id="direct">Direct boot</h3>
+
+<ul>
+   <li>NFC doesn't function until first unlock.
+   <ul>
+      <li>When a phone with Bluetooth enabled is restarted, Bluetooth does not turn on automatically. You must manually re-enable Bluetooth.</li>
+      <li>Under some circumstances, the default ringtone may not sound for phone calls and messages. This behavior is fixed in the next N Preview release, with one exception (and workaround):</li>
+      <li>On a device that is not freshly wiped--one that has been booted at least once since being set to direct boot mode--the default notification ringtone does not sound. The user can work around this issue by manually selecting a ringtone from Settings.</li>
+      <li>Direct boot is not enabled by default on devices running an N Developer Preview build. To enable direct boot for testing and development, go to Developer Options and tap Convert to File Encryption. In this dev preview, this requires a factory reset to repartition and reformat your device for File-based Encryption.</li>
+   </ul>
+   </li>
+</ul>
+
+<h3 id="pip">Picture-in-picture for Android TV</h3>
+
+<ul>
+<li>The PIP integration in the Recents UI is not finalized, and is subject to change.
+   <ul>
+      <li>The animation of the PIP window is not smooth. Future releases of the Preview will improve this.</li>
+      </li>Future releases of the Preview will improve upon the visual design and layout alignment of PIP. </li>
+   </ul>
+</li>
+</ul>
+
+<h3 id="bugs">Bug reports</h3>
+
+<ul>
+   <li>Bug reports do not always complete successfully (as a workaround, sometimes they can still be accessed through the bug report document provider in internal storage).</li>
+</ul>
+
+<h3 id="split">Split-screen Multi-window</h3>
+
+<ul>
+   <li>Apps may experience crashes and unexpected UI behavior when put into split-screen mode. These are app issues that must be fixed by the app developer.</li>
+   <li>When an app targets a version of the Android platform earlier than N, the App may not work with split-screen toast may appear multiple times.</li>
+   <li>Long-pressing the Overview button while using an app with a fixed orientation may produce unexpected app behavior.</li>
+   <li>Apps may flicker while resizing.</li>
+   <li>Animations are not yet final.</li>
+</ul>
+
+<h3 id="ime">Input method</h3>
+
+<ul>
+   <li>
+   Google Keyboard unexpectedly falls back to the generic Google keyboard when <b>Use system language</b>, but Google Keyboard doesn’t support any of the languages selected in the system-language preferences. It should fall back to American English.
+
+   <p>You can work around this problem by adding at least one language that Google Keyboard supports.</p>
+   </li>
+</ul>
+
+
+<h3 id="accessibility">Accessibility</h3>
+
+<ul>
+   <li>TalkBack exhibits issues with features including Notifications, Quick Settings Tiles and Multi-window display that may cause system crashing or lack of spoken feedback from TalkBack. Future releases of the preview will address these issues.</li>
+</ul>
+
+<h2 id="device-sp">Device-Specific Notes and Issues</h2>
+
+<h3 id="player">Nexus Player</h3>
+<ul>
+<li>Video playback, app compatibility and stability issues are expected on Nexus Player in this release of the Preview.</li>
+</ul>
+
+<h3 id="pixelc">Pixel C</h3>
+<ul>
+<li>Multi-window resizing may cause crashing.</li>
+</ul>
