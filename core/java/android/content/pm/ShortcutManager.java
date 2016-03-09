@@ -239,6 +239,17 @@ public class ShortcutManager {
         }
     }
 
+    /**
+     * Return the max width and height for icons, in pixels.
+     */
+    public int getIconMaxDimensions() {
+        try {
+            return mService.getIconMaxDimensions(mContext.getPackageName(), injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide injection point */
     @VisibleForTesting
     protected int injectMyUserId() {

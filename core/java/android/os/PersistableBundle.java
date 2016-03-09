@@ -86,6 +86,8 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param b a Bundle to be copied.
      *
      * @throws IllegalArgumentException if any element of {@code b} cannot be persisted.
+     *
+     * @hide
      */
     public PersistableBundle(Bundle b) {
         this(b.getMap());

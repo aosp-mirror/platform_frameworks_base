@@ -183,7 +183,8 @@ public class LauncherApps {
         public static final int FLAG_GET_PINNED = 1 << 1;
 
         /**
-         * Requests "key" fields only.
+         * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
+         * fields are available.
          */
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
@@ -473,7 +474,11 @@ public class LauncherApps {
      */
     @RequiresPermission(permission.BIND_APPWIDGET)
     public int getShortcutIconResId(@NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
-        throw new RuntimeException("not implemented yet");
+        try {
+            return mService.getShortcutIconResId(mContext.getPackageName(), shortcut, user);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -488,7 +493,11 @@ public class LauncherApps {
     @RequiresPermission(permission.BIND_APPWIDGET)
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
-        throw new RuntimeException("not implemented yet");
+        try {
+            return mService.getShortcutIconFd(mContext.getPackageName(), shortcut, user);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

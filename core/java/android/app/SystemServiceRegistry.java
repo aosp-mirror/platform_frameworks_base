@@ -753,12 +753,11 @@ final class SystemServiceRegistry {
 
         registerService(Context.SHORTCUT_SERVICE, ShortcutManager.class,
                 new CachedServiceFetcher<ShortcutManager>() {
-                    @Override
-                    public ShortcutManager createService(ContextImpl ctx) {
-                        IBinder b = ServiceManager.getService(Context.SHORTCUT_SERVICE);
-                        return new ShortcutManager(ctx,
-                                IShortcutService.Stub.asInterface(b));
-                    }});
+            @Override
+            public ShortcutManager createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.SHORTCUT_SERVICE);
+                return new ShortcutManager(ctx, IShortcutService.Stub.asInterface(b));
+            }});
     }
 
     /**
