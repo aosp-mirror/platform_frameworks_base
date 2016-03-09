@@ -129,7 +129,7 @@ Android N Preview SDK in Android Studio as follows:</p>
   </tr>
   <tr>
     <td style="white-space: nowrap">
-    <a href="https://storage.googleapis.com/androiddevelopers/preview/n-preview-1-docs.zip"
+    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip"
       >n-preview-1-docs.zip</a></td>
     <td width="100%">
       MD5: 4ab33ccbe698f46f125cc5b807cf9c2f<br>
