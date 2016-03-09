@@ -3722,10 +3722,9 @@ public final class ActivityThread {
             } catch (RemoteException ex) {
                 if (ex instanceof TransactionTooLargeException
                         && activity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
-                    Log.e(TAG, "App tried sending too much data in instance state", ex);
+                    Log.e(TAG, "App sent too much data in instance state, so it was ignored", ex);
                     return;
                 }
-
                 throw ex.rethrowFromSystemServer();
             }
         }
