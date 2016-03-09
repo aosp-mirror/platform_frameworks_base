@@ -107,7 +107,8 @@ page.tags="preview", "developer", "android"
       </h5>
 
       <p>
-        Seamless over-the-air updates for any supported device through the Android Beta Program. No flashing is needed.
+        Seamless over-the-air updates for any supported device through the
+        Android Beta Program. No flashing is needed.
       </p>
     </div>
 
@@ -117,8 +118,10 @@ page.tags="preview", "developer", "android"
       </h5>
 
       <p>
-        Report issues and give us feedback using our <a href="https://code.google.com/p/android-developer-preview/">issue tracker</a>.
-        Connect with other developers in the <a href="http://developer.android.com/preview/dev-community">N&nbsp;Developer Community</a>.
+        Report issues and give us feedback using our
+        <a href="{@docRoot}preview/bug">issue tracker</a>. Connect with other
+        developers in the
+        <a href="{@docRoot}preview/dev-community">N&nbsp;Developer Community</a>.
       </p>
     </div>
   </div>
@@ -169,8 +172,8 @@ page.tags="preview", "developer", "android"
   compatibility issues in your current apps and plan migration or feature work
   needed to target the new platform. This is the priority period in which to
   give us your feedback on features and APIs and file compatibility issues
-  &mdash; for all of these, please use the issue tracker [link]. You can expect
-  some API changes across these updates.
+  &mdash; for all of these, please use the <a href="{@docRoot}preview/bug">issue
+  tracker</a>. You can expect some API changes across these updates.
 </p>
 
 <p>
@@ -239,7 +242,7 @@ page.tags="preview", "developer", "android"
 
 <p>
   You can download these Nexus hardware system images from the <a href=
-  "{@docRoot}preview/download.html">Downloads page</a>:
+  "{@docRoot}preview/download.html">Device Images</a> page:
 </p>
 
 <ul>
@@ -282,7 +285,8 @@ Preview partners:</p>
 </p>
 
 <p>
-  To enroll in the program visit the Android Beta Program site [LINK]. You’ll
+  To enroll in the program visit the <a href="https://g.co/androidbeta">Android
+  Beta Program</a> site. You’ll
   see all of the devices registered to your account that are eligible to enroll
   in Android Beta.
 </p>
@@ -316,7 +320,7 @@ Preview partners:</p>
   the device.
 </p>
 
-  <p class="note"><strong>Note</strong>: 
+  <p class="note"><strong>Note</strong>:
   When you un-enroll, <strong>your device will be factory reset</strong>
   to the latest version
   of Android 6.0 Marshmallow (not necessarily the version that you had
@@ -336,12 +340,11 @@ Preview partners:</p>
   <li> <a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for
 Android N</a> has
   step-by-step instructions for getting started.</li>
-  <li> <a href="{@docRoot}preview/testing/guide.html">Testing Guide</a>
-  and <a href="{@docRoot}preview/behavior-changes.html">Behavior
-  Changes</a> point you to key areas to test.</li>
+  <li> <a href="{@docRoot}preview/behavior-changes.html">Behavior
+  Changes</a> points you to key areas to test.</li>
   <li> Documentation of new APIs, including an <a
   href="{@docRoot}preview/api-overview.html">API Overview</a>, downloadable
-  <a href="{@docRoot}preview/download.html#docs">API
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API
   Reference</a>, and detailed developer guides on key features such as add
   here, and others.
   <li> <a href="{@docRoot}preview/samples.html">Sample code</a> that
@@ -354,8 +357,9 @@ Android N</a> has
 <h4 id="reference">Downloadable API Reference</h4>
 
 <p>
-  During the early preview updates, you can download the latest API reference
-  for the Android N platform as a separate zip archive. [LINK] The reference
+  During the early preview updates, you can download the latest
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference
+  for the Android N platform</a> as a separate zip archive. The reference
   download also includes a diff report that helps you identify API changes from
   API 23 and the previous update.
 </p>
@@ -397,7 +401,7 @@ Android N</a> has
   to opt out of compatibility behaviors to test your app (which is strongly
   recommended), you can target the preview version of Android N by setting your
   app's <code><a href=
-  "{@docRoot}guide/topics/manifest/uses-sdk-element.html">targetSdkVersion</a></code>
+  "{@docRoot}preview/setup-sdk.html#create-update">targetSdkVersion</a></code>
   to <code>“N”</code>.
 </p>
 
@@ -442,15 +446,16 @@ Android N</a> has
   <li> Review the <a href="{@docRoot}preview/api-overview.html">API Overview</a>
   and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a> to
   get an idea of what's new and how it affects your apps. In particular,
-  learn about the new <a href="{@docRoot}preview/features/runtime-permissions.html">runtime
-  permissions</a> model, power-saving features, and auto backup.</li>
+  learn about the new <a href="{@docRoot}preview/features/notification-updates.html"
+  >notifications</a> features and
+  <a href="{@docRoot}preview/features/multi-window.html">multi-window support</a>.</li>
   <li> Set up your environment by following the instructions for <a
   href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
   and configuring test devices.</li>
   <li> Follow the <a href="https://developers.google.com/android/nexus/images">flashing
   instructions</a> to flash the latest Android N system image for Nexus 5X,
   6, 6P, 9, Pixel C, and Player. </li>
-  <li> Review the <a href="{@docRoot}reference/packages.html">API Reference</a>
+  <li> Review the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>
   and <a href="{@docRoot}preview/samples.html">Android N samples</a> to gain more
   insight into new API features and how to use them in your app.
   <li> Join the <a href="https://developer.android.com/preview/dev-community">Android N
