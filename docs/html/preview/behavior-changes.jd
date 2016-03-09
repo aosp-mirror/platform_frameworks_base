@@ -136,10 +136,11 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 <p>
-  Similarly, apps can register to receive implicit {@code NEW_PICTURE} and
-  {@code NEW_VIDEO} broadcasts from other apps, such as Camera. When a user
-  takes a picture with the Camera app, these apps wake up to process the
-  broadcast.
+  Similarly, apps can register to receive implicit {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} and {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts from other apps, such as
+  Camera. When a user takes a picture with the Camera app, these apps wake up
+  to process the broadcast.
 </p>
 
 <p>
@@ -152,13 +153,14 @@ page.image=images/cards/card-n-changes_2x.png
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
   have manifest entries to request notification of these events. Apps running
   in the foreground can still listen for {@code CONNECTIVITY_CHANGE} on their
-  main thread if they request notification with a
-  {@link android.content.BroadcastReceiver}.
+  main thread if they request notification with a {@link
+  android.content.BroadcastReceiver}.
   </li>
 
-  <li>Apps cannot send or receive {@code NEW_PICTURE} or {@code NEW_VIDEO}
-  broadcasts. This optimization affects all apps, not only those
-  targeting Android N.
+  <li>Apps cannot send or receive {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This optimization
+  affects all apps, not only those targeting Android N.
   </li>
 </ul>
 

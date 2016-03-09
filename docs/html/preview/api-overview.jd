@@ -97,7 +97,7 @@ use. Some of the changes include:</p>
   <li> <strong>Template updates</strong>: We're updating notification templates to put a new emphasis on hero image and
 avatar. Developers will be able to take advantage of the new
 templates with minimal adjustments in their code.</li>
-  <li> <strong>Bundled notifications</strong>: The system can group messages together, for example by message topic, and display the group. A user can take actions, such as Dismiss or Archive, on them in place. If you’ve implemented notifications for Android Wear, you’ll already be familiar with this model. 
+  <li> <strong>Bundled notifications</strong>: The system can group messages together, for example by message topic, and display the group. A user can take actions, such as Dismiss or Archive, on them in place. If you’ve implemented notifications for Android Wear, you’ll already be familiar with this model.
   with this model. </li>
   <li> <strong>Direct reply</strong>: For real-time communication apps, the Android system supports inline replies
 so that users can quickly respond to an SMS or text message directly within the
@@ -118,7 +118,7 @@ headers and actions, when using custom views in notifications.</li>
 
 
 <p class="img-caption">
-  <strong>Figure 2.</strong> Bundled notifications and direct reply. 
+  <strong>Figure 2.</strong> Bundled notifications and direct reply.
 </p>
 
 <p>To learn how to implement the new features, see the <a href="{@docRoot}notification-updates.html">Notifications</a> guide.</p>
@@ -131,7 +131,7 @@ headers and actions, when using custom views in notifications.</li>
 <img src="{@docRoot}preview/images/quicksettings.png" style="padding-left:1.5em;">
 
 <p class="img-caption" style="padding-left:2em;">
-  <strong>Figure 3.</strong> Quick Settings tiles in the notification shade. 
+  <strong>Figure 3.</strong> Quick Settings tiles in the notification shade.
 </p>
 
 
@@ -160,7 +160,7 @@ urgently required or frequently used, and should not be used as shortcuts to lau
 <img src="{@docRoot}preview/images/datasaver.png" style="border:2px solid #ddd">
 
 <p class="img-caption" style="padding-right:2em;">
-  <strong>Figure 4.</strong> Data Saver in Settings. 
+  <strong>Figure 4.</strong> Data Saver in Settings.
 </p>
   </div>
 
@@ -326,7 +326,7 @@ For more information, see <a href="{@docRoot}preview/features/direct-boot.html">
 <p>Hardware-backed keystores provide a much safer method to create, store,
 and use cryptographic keys on Android devices. They protect keys from the
 Linux kernel, potential Android vulnerabilities, and extraction
-from rooted devices.</p> 
+from rooted devices.</p>
 
 <p>To make it easier and more secure to use hardware-backed keystores,
 Android N introduces Key Attestation. Apps and off-devices can use Key
@@ -568,7 +568,9 @@ deprecate some of the older patterns that can reduce system performance,
 especially on low-memory devices.</p>
 
 <p>In Android N we're removing three commonly-used implicit broadcasts &mdash;
- {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, <code>NEW_PICTURE</code>, and <code>NEW_VIDEO</code> &mdash; since those can wake the
+ {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE}, and {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} &mdash; since those can wake the
 background processes of multiple apps at once and strain memory and battery. If
 your app is receiving these, take advantage of the N Developer Preview to
   migrate to <code>JobScheduler</code> and related APIs instead. </p>
