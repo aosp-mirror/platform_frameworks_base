@@ -95,6 +95,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstallCommit();
                 case "install-create":
                     return runInstallCreate();
+                case "install-remove":
+                    return runInstallRemove();
                 case "install-write":
                     return runInstallWrite();
                 case "compile":
@@ -136,11 +138,12 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.println("Error: must either specify a package size or an APK file");
                 return 1;
             }
-            if (doWriteSession(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
+            if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
                     false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
                 return 1;
             }
-            if (doCommitSession(sessionId, false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+            if (doCommitSession(sessionId, false /*logSuccess*/)
+                    != PackageInstaller.STATUS_SUCCESS) {
                 return 1;
             }
             abandonSession = false;
@@ -225,7 +228,20 @@ class PackageManagerShellCommand extends ShellCommand {
         final int sessionId = Integer.parseInt(getNextArg());
         final String splitName = getNextArg();
         final String path = getNextArg();
-        return doWriteSession(sessionId, path, sizeBytes, splitName, true /*logSuccess*/);
+        return doWriteSplit(sessionId, path, sizeBytes, splitName, true /*logSuccess*/);
+    }
+
+    private int runInstallRemove() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+
+        final int sessionId = Integer.parseInt(getNextArg());
+
+        final String splitName = getNextArg();
+        if (splitName == null) {
+            pw.println("Error: split name not specified");
+            return 1;
+        }
+        return doRemoveSplit(sessionId, splitName, true /*logSuccess*/);
     }
 
     private int runCompile() throws RemoteException {
@@ -666,10 +682,16 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        String packageName = getNextArg();
+        final String packageName = getNextArg();
         if (packageName == null) {
             pw.println("Error: package name not specified");
             return 1;
+        }
+
+        // if a split is specified, just remove it and not the whole package
+        final String splitName = getNextArg();
+        if (splitName != null) {
+            return runRemoveSplit(packageName, splitName);
         }
 
         userId = translateUserId(userId, "runUninstall");
@@ -706,6 +728,36 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Failure ["
                     + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
             return 1;
+        }
+    }
+
+    private int runRemoveSplit(String packageName, String splitName) throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final SessionParams sessionParams = new SessionParams(SessionParams.MODE_INHERIT_EXISTING);
+        sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+        sessionParams.appPackageName = packageName;
+        final int sessionId =
+                doCreateSession(sessionParams, null /*installerPackageName*/, UserHandle.USER_ALL);
+        boolean abandonSession = true;
+        try {
+            if (doRemoveSplit(sessionId, splitName, false /*logSuccess*/)
+                    != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            if (doCommitSession(sessionId, false /*logSuccess*/)
+                    != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            abandonSession = false;
+            pw.println("Success");
+            return 0;
+        } finally {
+            if (abandonSession) {
+                try {
+                    doAbandonSession(sessionId, false /*logSuccess*/);
+                } catch (Exception ignore) {
+                }
+            }
         }
     }
 
@@ -948,7 +1000,7 @@ class PackageManagerShellCommand extends ShellCommand {
         return sessionId;
     }
 
-    private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName,
+    private int doWriteSplit(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         if ("-".equals(inPath)) {
@@ -1000,6 +1052,27 @@ class PackageManagerShellCommand extends ShellCommand {
         } finally {
             IoUtils.closeQuietly(out);
             IoUtils.closeQuietly(in);
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private int doRemoveSplit(int sessionId, String splitName, boolean logSuccess)
+            throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(sessionId));
+            session.removeSplit(splitName);
+
+            if (logSuccess) {
+                pw.println("Success");
+            }
+            return 0;
+        } catch (IOException e) {
+            pw.println("Error: failed to remove split; " + e.getMessage());
+            return 1;
+        } finally {
             IoUtils.closeQuietly(session);
         }
     }
