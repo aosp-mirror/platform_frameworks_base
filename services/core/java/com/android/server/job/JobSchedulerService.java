@@ -47,14 +47,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
-
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.app.ProcessStats;
@@ -1337,7 +1338,47 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 Binder.restoreCallingIdentity(identityToken);
             }
         }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ResultReceiver resultReceiver) throws RemoteException {
+                (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
+                        this, in, out, err, args, resultReceiver);
+        }
     };
+
+    // Shell command infrastructure: run the given job immediately
+    int executeRunCommand(String pkgName, int userId, int jobId, boolean force) {
+        if (DEBUG) {
+            Slog.v(TAG, "executeRunCommand(): " + pkgName + "/" + userId
+                    + " " + jobId + " f=" + force);
+        }
+
+        try {
+            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0, userId);
+            if (uid < 0) {
+                return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
+            }
+
+            synchronized (mLock) {
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
+                if (js == null) {
+                    return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
+                }
+
+                js.overrideState = (force) ? JobStatus.OVERRIDE_FULL : JobStatus.OVERRIDE_SOFT;
+                if (!js.isConstraintsSatisfied()) {
+                    js.overrideState = 0;
+                    return JobSchedulerShellCommand.CMD_ERR_CONSTRAINTS;
+                }
+
+                mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
+            }
+        } catch (RemoteException e) {
+            // can't happen
+        }
+        return 0;
+    }
 
     private String printContextIdToJobMap(JobStatus[] map, String initial) {
         StringBuilder s = new StringBuilder(initial + ": ");
