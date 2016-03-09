@@ -27,6 +27,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -80,6 +81,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private final ArrayList<SpellCheckerInfo> mSpellCheckerList = new ArrayList<>();
     private final HashMap<String, SpellCheckerBindGroup> mSpellCheckerBindGroups = new HashMap<>();
     private final TextServicesSettings mSettings;
+    @NonNull
+    private final UserManager mUserManager;
 
     public static final class Lifecycle extends SystemService {
         private TextServicesManagerService mService;
@@ -109,26 +112,45 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 mService.systemRunning();
             }
         }
+
+        @Override
+        public void onUnlockUser(@UserIdInt int userHandle) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
+            mService.onUnlockUser(userHandle);
+        }
     }
 
     void systemRunning() {
         synchronized (mSpellCheckerMap) {
             if (!mSystemReady) {
                 mSystemReady = true;
-                switchUserLocked(mSettings.getCurrentUserId());
+                resetInternalState(mSettings.getCurrentUserId());
             }
         }
     }
 
     void onSwitchUser(@UserIdInt int userId) {
         synchronized (mSpellCheckerMap) {
-            switchUserLocked(userId);
+            resetInternalState(userId);
+        }
+    }
+
+    void onUnlockUser(@UserIdInt int userId) {
+        synchronized(mSpellCheckerMap) {
+            final int currentUserId = mSettings.getCurrentUserId();
+            if (userId != currentUserId) {
+                return;
+            }
+            resetInternalState(currentUserId);
         }
     }
 
     public TextServicesManagerService(Context context) {
         mSystemReady = false;
         mContext = context;
+
+        mUserManager = mContext.getSystemService(UserManager.class);
 
         final IntentFilter broadcastFilter = new IntentFilter();
         broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
@@ -143,17 +165,18 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         mMonitor = new TextServicesMonitor();
         mMonitor.register(context, null, true);
-        // If the system is not ready, then we use copy-on-write settings.
-        final boolean useCopyOnWriteSettings = !mSystemReady;
+        final boolean useCopyOnWriteSettings =
+                !mSystemReady || !mUserManager.isUserUnlocked(userId);
         mSettings = new TextServicesSettings(context.getContentResolver(), userId,
                 useCopyOnWriteSettings);
 
-        // "switchUserLocked" initializes the states for the foreground user
-        switchUserLocked(userId);
+        // "resetInternalState" initializes the states for the foreground user
+        resetInternalState(userId);
     }
 
-    private void switchUserLocked(@UserIdInt int userId) {
-        final boolean useCopyOnWriteSettings = !mSystemReady;
+    private void resetInternalState(@UserIdInt int userId) {
+        final boolean useCopyOnWriteSettings =
+                !mSystemReady || !mUserManager.isUserUnlocked(userId);
         mSettings.switchCurrentUser(userId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         unbindServiceLocked();
@@ -171,8 +194,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     void updateCurrentProfileIds() {
-        List<UserInfo> profiles =
-                UserManager.get(mContext).getProfiles(mSettings.getCurrentUserId());
+        final List<UserInfo> profiles = mUserManager.getProfiles(mSettings.getCurrentUserId());
         int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
         for (int i = 0; i < currentProfileIds.length; i++) {
             currentProfileIds[i] = profiles.get(i).id;
@@ -237,6 +259,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         list.clear();
         map.clear();
         final PackageManager pm = context.getPackageManager();
+        // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
+        // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
+        // services depending on the unlock state for the specified user.
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(SpellCheckerService.SERVICE_INTERFACE), PackageManager.GET_META_DATA,
                 settings.getCurrentUserId());
