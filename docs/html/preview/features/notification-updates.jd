@@ -282,41 +282,25 @@ this.
 
 <h3>Backwards compatibility</h3>
 
-<p>On handhelds, notification groups are available beginning from
-Android N. However, on tablets, the notification groups API has been available since
-Android 5.0 (API level 21). </p>
-
-<p>All Android Wear devices have this feature, regardless of API level.
- The only action a Wear developer must take is to verify that the app behavior
- corresponds to the <a href="#best-practices">guidelines</a> described above.</p>
-
 <p>
-In order to support backwards compatibility, a developer should still post
-an
-{@link android.app.Notification.InboxStyle InboxStyle} or equivalent
-notification representative for the whole
-information content of the group. This applies to child notifications in
-Android 5.0 (API level 21) and above.
+  Both notification groups and remote input have been a part of the {@link
+  android.app.Notification} API since Android 5.0 (API level 21) to support
+  Android Wear devices. If you've already built notifications with these APIs,
+  the only action you must take is to verify that the app behavior corresponds
+  to the guidelines described above, and to consider implementing {@code
+  setRemoteInputHistory()}.
 </p>
 
 <p>
-For convenience, apps can usually reuse the notification group summary
-and define it as an
-{@link android.app.Notification.InboxStyle InboxStyle} notification,
-with each line corresponding to a child notification.
-</p>
-
-
-<p>In order to support backward compatibility, an app should still have
-an {@link android.app.Notification.InboxStyle InboxStyle}
-or equivalent notification representative for the whole information
-content of the group including the children on Android 5.0 and above.
-</p>
-
-<p>
-For convenience, an app can usually reuse the notification group summary and
-define it as an {@link android.app.Notification.InboxStyle InboxStyle}
-notification, with each line corresponding to one child notification.
+  In order to support backward compatibility, the same APIs are available with
+  the support library's {@link android.support.v4.app.NotificationCompat}
+  class, allowing you to build notifications that works on earlier Android
+  versions. On handhelds and tablets, users only see the summary notification,
+  so an app should still have an inbox style or an equivalent notification
+  representative for the whole information content of the group. As Android
+  Wear devices allow users to see all child notifications even on older
+  platform levels, you should build child notifications regardless of API
+  level.
 </p>
 
 <h2 id="custom"> Custom Views</h2>
