@@ -118,8 +118,13 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
 
+        boolean enabled = mEnv.isDocumentEnabled(docMimeType, docFlags);
+        boolean selected = mEnv.isSelected(modelId);
+        if (!enabled) {
+            assert(!selected);
+        }
+        holder.setEnabled(enabled);
         holder.setSelected(mEnv.isSelected(modelId));
-        holder.setEnabled(mEnv.isDocumentEnabled(docMimeType, docFlags));
 
         mEnv.onBindDocumentHolder(holder, cursor);
     }

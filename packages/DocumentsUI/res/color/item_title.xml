@@ -14,5 +14,12 @@
      limitations under the License.
 -->
 
-<resources>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_enabled="true"
+        android:color="?android:attr/textColorPrimary" />
+    <item
+        android:state_enabled="false"
+        android:color="?android:attr/textColorPrimary"
+        android:alpha="0.3" />
+</selector>

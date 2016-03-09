@@ -85,7 +85,7 @@
                 android:singleLine="true"
                 android:textAlignment="viewStart"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:textColor="@color/item_title" />
 
             <LinearLayout
                 android:id="@+id/line2"
@@ -102,8 +102,8 @@
                     android:ellipsize="end"
                     android:singleLine="true"
                     android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="@color/item_details" />
 
                 <TextView
                     android:id="@+id/size"
@@ -113,8 +113,8 @@
                     android:ellipsize="end"
                     android:singleLine="true"
                     android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="@color/item_details" />
 
                 <TextView
                     android:id="@android:id/summary"
@@ -125,8 +125,8 @@
                     android:ellipsize="end"
                     android:singleLine="true"
                     android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="@color/item_details" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
