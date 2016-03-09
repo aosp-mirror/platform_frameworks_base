@@ -2395,17 +2395,22 @@ public class Editor {
                 dragSourceEnd += shift;
             }
 
-            // Delete original selection
-            mTextView.deleteText_internal(dragSourceStart, dragSourceEnd);
+            mUndoInputFilter.setForceMerge(true);
+            try {
+                // Delete original selection
+                mTextView.deleteText_internal(dragSourceStart, dragSourceEnd);
 
-            // Make sure we do not leave two adjacent spaces.
-            final int prevCharIdx = Math.max(0,  dragSourceStart - 1);
-            final int nextCharIdx = Math.min(mTextView.getText().length(), dragSourceStart + 1);
-            if (nextCharIdx > prevCharIdx + 1) {
-                CharSequence t = mTextView.getTransformedText(prevCharIdx, nextCharIdx);
-                if (Character.isSpaceChar(t.charAt(0)) && Character.isSpaceChar(t.charAt(1))) {
-                    mTextView.deleteText_internal(prevCharIdx, prevCharIdx + 1);
+                // Make sure we do not leave two adjacent spaces.
+                final int prevCharIdx = Math.max(0,  dragSourceStart - 1);
+                final int nextCharIdx = Math.min(mTextView.getText().length(), dragSourceStart + 1);
+                if (nextCharIdx > prevCharIdx + 1) {
+                    CharSequence t = mTextView.getTransformedText(prevCharIdx, nextCharIdx);
+                    if (Character.isSpaceChar(t.charAt(0)) && Character.isSpaceChar(t.charAt(1))) {
+                        mTextView.deleteText_internal(prevCharIdx, prevCharIdx + 1);
+                    }
                 }
+            } finally {
+                mUndoInputFilter.setForceMerge(false);
             }
         }
     }
@@ -5497,6 +5502,9 @@ public class Editor {
         // rotates the screen during composition.
         private boolean mHasComposition;
 
+        // Whether to merge events into one operation.
+        private boolean mForceMerge;
+
         public UndoInputFilter(Editor editor) {
             mEditor = editor;
         }
@@ -5509,6 +5517,10 @@ public class Editor {
         public void restoreInstanceState(Parcel parcel) {
             mIsUserEdit = parcel.readInt() != 0;
             mHasComposition = parcel.readInt() != 0;
+        }
+
+        public void setForceMerge(boolean forceMerge) {
+            mForceMerge = forceMerge;
         }
 
         /**
@@ -5570,7 +5582,7 @@ public class Editor {
                 // Otherwise the user inserted the composition.
                 String newText = TextUtils.substring(source, start, end);
                 EditOperation edit = new EditOperation(mEditor, "", dstart, newText);
-                recordEdit(edit, false /* forceMerge */);
+                recordEdit(edit, mForceMerge);
                 return true;
             }
 
@@ -5584,7 +5596,7 @@ public class Editor {
             // the initial input filters run (e.g. a credit card formatter that adds spaces to a
             // string). This results in multiple filter() calls for what the user considers to be
             // a single operation. Always undo the whole set of changes in one step.
-            final boolean forceMerge = isInTextWatcher();
+            final boolean forceMerge = mForceMerge || isInTextWatcher();
 
             // Build a new operation with all the information from this edit.
             String newText = TextUtils.substring(source, start, end);

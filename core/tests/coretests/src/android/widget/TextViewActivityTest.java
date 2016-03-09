@@ -44,6 +44,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 import com.android.frameworks.coretests.R;
 
+import android.support.test.espresso.action.EspressoKey;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.KeyEvent;
@@ -172,6 +173,12 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection(""));
         assertNoSelectionHandles();
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex("abc ghi.def".length()));
+
+        // Test undo returns to the original state.
+        onView(withId(R.id.textview)).perform(pressKey(
+                (new EspressoKey.Builder()).withCtrlPressed(true).withKeyCode(KeyEvent.KEYCODE_Z)
+                        .build()));
+        onView(withId(R.id.textview)).check(matches(withText(text)));
     }
 
     @SmallTest
