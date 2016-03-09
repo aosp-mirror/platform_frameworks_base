@@ -380,6 +380,11 @@ to develop for Android N</a>, you can skip this part):
   </li>
 </ol>
 
+<p>You should now have <strong>Android SDK Built-Tools 24.0 0 rc1</strong>,
+<strong>Platform-Tools 24.0.0 rc1</strong>, and <strong>SDK Tools
+25.0.9</strong>. If you do not update the SDK Tools to 25.0.9, then you won't
+be able to run the x86_64 system images for Android N.</p>
+
 
 <p>Now create a virtual device with the Android N system image:</p>
 
@@ -399,12 +404,17 @@ for the Android N Preview.)
 
 <p>You can now launch the Android Emulator with the Android N Preview AVD.</p>
 
-<p class="note"><strong>Note:</strong>
+<p>
 For the best experience in the Android Emulator, install
 Android Studio 2.1 Preview, which supports the <a
 href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>
 with much faster performance compared to the Emulator in
 Android Studio 1.5.</p>
+
+<p class="note"><strong>Note:</strong>
+If you're currently using Android Studio 2.0 Beta, there's a known issue
+that prevents you from creating AVDs with the N Preview system images, so
+you currently need to use the Android Studio 2.1 preview to create AVDs.</p>
 
 <p>For more information about creating virtual devices, see <a href=
   "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
