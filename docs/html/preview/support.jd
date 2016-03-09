@@ -36,8 +36,7 @@ For issues in other apps, please contact the developer directly.</p>
 
 <ul>
    <li>This release has various stability and performance issues on all devices that make it <em>not suitable for daily use on phone or tablet</em>, especially for non-developers.</li>
-  <li>Performance and responsiveness are known to be slow in some areas and may become slower over prolonged use.
-  </li>
+   <li>System and app performance is known to be <strong>periodically slow / janky</strong>, and device may become occasionally unresponsive. These problems may become more acute with prolonged use.</li>
   <li>Battery life may be regressed in this release for screen-on and screen-off use cases.</li>
   <li>Some apps may not function normally on Developer Preview 1. This includes Google’s apps as well as other apps.</li>
   <li>This early build is not Compatibility Test Suite (CTS) approved. Apps that depend on CTS approved builds (Android Pay for example) won’t work. </li>
@@ -49,7 +48,7 @@ For issues in other apps, please contact the developer directly.</p>
 <h4 id="performance">Performance and battery</h4>
 
 <ul>
-   <li>System and apps may be slow and experience periodic slowdowns and unresponsiveness.</li>
+  <li>System and app performance is known to be <strong>periodically slow / janky</strong>, and device may become occasionally unresponsive. These problems may become more acute with prolonged use.</li>
   <li>Battery life may be regressed in this release for screen-on and screen-off use cases.</li>
 </ul>
 
