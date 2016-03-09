@@ -11,7 +11,6 @@ LOCAL_JAVA_LANGUAGE_VERSION := 1.8
 
 LOCAL_STATIC_JAVA_LIBRARIES := easymocklib \
     mockito-target \
-    core-tests \
     android-support-test \
     android-ex-camera2
 
