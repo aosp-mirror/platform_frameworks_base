@@ -795,6 +795,27 @@ public class PackageInstaller {
         }
 
         /**
+         * Removes a split.
+         * <p>
+         * Split removals occur prior to adding new APKs. If upgrading a feature
+         * split, it is not expected nor desirable to remove the split prior to
+         * upgrading.
+         * <p>
+         * When split removal is bundled with new APKs, the packageName must be
+         * identical.
+         */
+        public void removeSplit(@NonNull String splitName) throws IOException {
+            try {
+                mSession.removeSplit(splitName);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Attempt to commit everything staged in this session. This may require
          * user intervention, and so it may not happen immediately. The final
          * result of the commit will be reported through the given callback.
