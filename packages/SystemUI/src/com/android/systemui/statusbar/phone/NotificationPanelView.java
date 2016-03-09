@@ -281,7 +281,7 @@ public class NotificationPanelView extends PanelView implements
         if (lp.width != panelWidth) {
             lp.width = panelWidth;
             lp.gravity = panelGravity;
-            mQsContainer.setLayoutParams(lp);
+            mQsDensityContainer.setLayoutParams(lp);
             mQsContainer.post(mUpdateHeader);
         }
 

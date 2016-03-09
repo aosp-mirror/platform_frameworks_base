@@ -53,7 +53,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private boolean mOnFirstPage = true;
     private TouchAnimator mFirstPageAnimator;
     private TouchAnimator mFirstPageDelayedAnimator;
-    private TouchAnimator mTranslationAnimator;
+    private TouchAnimator mTranslationXAnimator;
+    private TouchAnimator mTranslationYAnimator;
     private TouchAnimator mNonfirstPageAnimator;
 
     private boolean mOnKeyguard;
@@ -189,10 +190,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             Path path = new Path();
             path.moveTo(0, 0);
             path.cubicTo(0, 0, 0, 1, 1, 1);
-            mTranslationAnimator = new TouchAnimator.Builder()
-                    .addPath(translationXBuilder.build(), translationYBuilder.build(),
-                            "position", "position", path)
-                    .build();
+            PathInterpolatorBuilder interpolatorBuilder = new PathInterpolatorBuilder(0, 0, 0, 1);
+            translationXBuilder.setInterpolator(interpolatorBuilder.getXInterpolator());
+            translationYBuilder.setInterpolator(interpolatorBuilder.getYInterpolator());
+            mTranslationXAnimator = translationXBuilder.build();
+            mTranslationYAnimator = translationYBuilder.build();
         }
         mNonfirstPageAnimator = new TouchAnimator.Builder()
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
@@ -230,7 +232,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mQuickQsPanel.setAlpha(1);
             mFirstPageAnimator.setPosition(position);
             mFirstPageDelayedAnimator.setPosition(position);
-            mTranslationAnimator.setPosition(position);
+            mTranslationXAnimator.setPosition(position);
+            mTranslationYAnimator.setPosition(position);
         } else {
             mNonfirstPageAnimator.setPosition(position);
         }
