@@ -32,31 +32,26 @@ page.keywords="android N", "Java 8", "Jack"
   </div>
 </div>
 
-<p>
-  The N Developer Preview introduces newly supported Java 8 language features
-  that you can use when developing apps that target the Preview. To start using
+<p>Android N introduces support for Java 8 language features
+  that you can use when developing apps that target the Android N. To start using
   these features, you need to download and set up Android Studio 2.1 (preview)
-  and the N Preview SDK, which include the required Jack toolchain and updated
-  Android Plugin for Gradle.
-</p>
+  and the Android N Preview SDK, which includes the required Jack toolchain and
+  updated Android Plugin for Gradle.</p>
+
+<p>If you haven't yet installed the Android N Preview SDK, follow the guide to
+<a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android
+N</a>.</p>
+
 
 <p>
-  To learn how to set up Android Studio for the Preview, <a href=
-  "{@docRoot}preview/setup-sdk.html">read the guide</a>. If you instead want to
-  simply test your app's forward-compatibility, follow the guide to <a href=
-  "{@docRoot}preview/run-app.html">run your app on
-  the N Preview</a>.
-</p>
-
-<p>
-  This document will discuss the new language features supported in the
+  This document describes the new language features supported in the Android N
   Preview, how to properly set up your project to use them, and any known
   issues you may encounter.
 </p>
 
 <p class="note">
   <strong>Note:</strong> Using the new Java 8 language features is not a
-  requirement for developing apps that target the N Developer Preview. After
+  requirement for developing apps that target the Android N Preview. After
   following the set up instructions in the <a href=
   "{@docRoot}preview/setup-sdk.html">Preview guide</a>, you may use
   the Java 7 language features already supported by Android 6.0 (API level 23)
@@ -143,7 +138,7 @@ page.keywords="android N", "Java 8", "Jack"
 </ul>
 
 <p class="note">
-  <strong>Note:</strong> The N Developer Preview bases its implementation of
+  <strong>Note:</strong> The Android N bases its implementation of
   lambda expressions on anonymous classes. This approach allows them to be
   backwards compatible and executable on earlier versions of Android. To test
   lambda expressions on earlier versions, remember to go to your {@code
