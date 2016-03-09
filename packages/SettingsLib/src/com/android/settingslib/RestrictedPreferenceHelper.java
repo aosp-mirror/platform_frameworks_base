@@ -155,9 +155,9 @@ public class RestrictedPreferenceHelper {
     public boolean setDisabledByAdmin(EnforcedAdmin admin) {
         final boolean disabled = (admin != null ? true : false);
         mEnforcedAdmin = (disabled ? admin : null);
+        mPreference.setEnabled(!disabled);
         if (mDisabledByAdmin != disabled) {
             mDisabledByAdmin = disabled;
-            mPreference.setEnabled(!disabled);
             return true;
         }
         return false;
