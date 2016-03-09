@@ -8123,7 +8123,7 @@ package android.content {
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
     field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
-    field public static final java.lang.String HARDWARE_PROPERTIES_SERVICE = "hardwareproperties";
+    field public static final java.lang.String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String JOB_SCHEDULER_SERVICE = "jobscheduler";
