@@ -24,6 +24,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TAG;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -364,9 +365,12 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
     private List<NetworkPolicy> getWifiPolicies() throws RemoteException {
         // First gets a list of saved wi-fi networks.
         final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
-        final Set<String> ssids = new HashSet<>(configs.size());
-        for (WifiConfiguration config : configs) {
-            ssids.add(removeDoubleQuotes(config.SSID));
+        final int size = configs != null ? configs.size() : 0;
+        final Set<String> ssids = new HashSet<>(size);
+        if (configs != null) {
+            for (WifiConfiguration config : configs) {
+                ssids.add(removeDoubleQuotes(config.SSID));
+            }
         }
 
         // Then gets the saved policies.
