@@ -1,5 +1,6 @@
 package android.net.wifi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -275,12 +277,13 @@ public class RttManager {
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<RttCapabilities> CREATOR =
             new Creator<RttCapabilities>() {
-               public RttCapabilities createFromParcel(Parcel in) {
+            @Override
+            public RttCapabilities createFromParcel(Parcel in) {
                     RttCapabilities capabilities = new RttCapabilities();
-                    capabilities.oneSidedRttSupported = in.readInt() == 1 ? true : false;
-                        capabilities.twoSided11McRttSupported = in.readInt() == 1 ? true : false;
-                        capabilities.lciSupported = in.readInt() == 1 ? true : false;
-                        capabilities.lcrSupported = in.readInt() == 1 ? true : false;
+                    capabilities.oneSidedRttSupported = (in.readInt() == 1);
+                        capabilities.twoSided11McRttSupported = (in.readInt() == 1);
+                        capabilities.lciSupported = (in.readInt() == 1);
+                        capabilities.lcrSupported = (in.readInt() == 1);
                         capabilities.preambleSupported = in.readInt();
                         capabilities.bwSupported = in.readInt();
                         capabilities.responderSupported = (in.readInt() == 1);
@@ -464,58 +467,57 @@ public class RttManager {
     /** pseudo-private class used to parcel arguments */
     public static class ParcelableRttParams implements Parcelable {
 
+        @NonNull
         public RttParams mParams[];
 
-        ParcelableRttParams(RttParams[] params) {
-            mParams = params;
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public ParcelableRttParams(RttParams[] params) {
+            mParams = (params == null ? new RttParams[0] : params);
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public int describeContents() {
             return 0;
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
-            if (mParams != null) {
-                dest.writeInt(mParams.length);
+            dest.writeInt(mParams.length);
 
-                for (RttParams params : mParams) {
-                    dest.writeInt(params.deviceType);
-                    dest.writeInt(params.requestType);
-                    dest.writeByte(params.secure ? (byte) 1 : 0);
-                    dest.writeString(params.bssid);
-                    dest.writeInt(params.channelWidth);
-                    dest.writeInt(params.frequency);
-                    dest.writeInt(params.centerFreq0);
-                    dest.writeInt(params.centerFreq1);
-                    dest.writeInt(params.numberBurst);
-                    dest.writeInt(params.interval);
-                    dest.writeInt(params.numSamplesPerBurst);
-                    dest.writeInt(params.numRetriesPerMeasurementFrame);
-                    dest.writeInt(params.numRetriesPerFTMR);
-                    dest.writeInt(params.LCIRequest ? 1 : 0);
-                    dest.writeInt(params.LCRRequest ? 1 : 0);
-                    dest.writeInt(params.burstTimeout);
-                    dest.writeInt(params.preamble);
-                    dest.writeInt(params.bandwidth);
-                }
-            } else {
-                dest.writeInt(0);
+            for (RttParams params : mParams) {
+                dest.writeInt(params.deviceType);
+                dest.writeInt(params.requestType);
+                dest.writeByte(params.secure ? (byte) 1 : 0);
+                dest.writeString(params.bssid);
+                dest.writeInt(params.channelWidth);
+                dest.writeInt(params.frequency);
+                dest.writeInt(params.centerFreq0);
+                dest.writeInt(params.centerFreq1);
+                dest.writeInt(params.numberBurst);
+                dest.writeInt(params.interval);
+                dest.writeInt(params.numSamplesPerBurst);
+                dest.writeInt(params.numRetriesPerMeasurementFrame);
+                dest.writeInt(params.numRetriesPerFTMR);
+                dest.writeInt(params.LCIRequest ? 1 : 0);
+                dest.writeInt(params.LCRRequest ? 1 : 0);
+                dest.writeInt(params.burstTimeout);
+                dest.writeInt(params.preamble);
+                dest.writeInt(params.bandwidth);
             }
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<ParcelableRttParams> CREATOR =
                 new Creator<ParcelableRttParams>() {
+                    @Override
                     public ParcelableRttParams createFromParcel(Parcel in) {
 
                         int num = in.readInt();
-
-                        if (num == 0) {
-                            return new ParcelableRttParams(null);
-                        }
-
                         RttParams params[] = new RttParams[num];
                         for (int i = 0; i < num; i++) {
                             params[i] = new RttParams();
@@ -532,8 +534,8 @@ public class RttManager {
                             params[i].numSamplesPerBurst = in.readInt();
                             params[i].numRetriesPerMeasurementFrame = in.readInt();
                             params[i].numRetriesPerFTMR = in.readInt();
-                            params[i].LCIRequest = in.readInt() == 1 ? true : false;
-                            params[i].LCRRequest = in.readInt() == 1 ? true : false;
+                            params[i].LCIRequest = (in.readInt() == 1);
+                            params[i].LCRRequest = (in.readInt() == 1);
                             params[i].burstTimeout = in.readInt();
                             params[i].preamble = in.readInt();
                             params[i].bandwidth = in.readInt();
@@ -543,6 +545,7 @@ public class RttManager {
                         return parcelableParams;
                     }
 
+                    @Override
                     public ParcelableRttParams[] newArray(int size) {
                         return new ParcelableRttParams[size];
                     }
@@ -715,11 +718,13 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public int describeContents() {
             return 0;
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             if (mResults != null) {
                 dest.writeInt(mResults.length);
@@ -764,6 +769,7 @@ public class RttManager {
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<ParcelableRttResults> CREATOR =
                 new Creator<ParcelableRttResults>() {
+                    @Override
                     public ParcelableRttResults createFromParcel(Parcel in) {
 
                         int num = in.readInt();
@@ -816,6 +822,7 @@ public class RttManager {
                         return parcelableResults;
                     }
 
+                    @Override
                     public ParcelableRttResults[] newArray(int size) {
                         return new ParcelableRttResults[size];
                     }
