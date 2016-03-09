@@ -56,6 +56,7 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -92,8 +93,6 @@ import java.util.function.Predicate;
 /**
  * TODO:
  *
- * - Implement launchShortcut
- *
  * - Detect when already registered instances are passed to APIs again, which might break
  *   internal bitmap handling.
  *
@@ -102,8 +101,6 @@ import java.util.function.Predicate;
  *   -> Clear data -> remove all dynamic?  but not the pinned?
  *
  * - Pinned per each launcher package (multiple launchers)
- *
- * - Load config from settings
  *
  * - Make save async (should we?)
  *
@@ -117,11 +114,26 @@ public class ShortcutService extends IShortcutService.Stub {
     private static final boolean DEBUG = true; // STOPSHIP if true
     private static final boolean DEBUG_LOAD = true; // STOPSHIP if true
 
-    private static final int DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
-    private static final int DEFAULT_MAX_DAILY_UPDATES = 10;
-    private static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 5;
-    private static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
-    private static final int DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP = 48;
+    @VisibleForTesting
+    static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
+
+    @VisibleForTesting
+    static final int DEFAULT_MAX_DAILY_UPDATES = 10;
+
+    @VisibleForTesting
+    static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 5;
+
+    @VisibleForTesting
+    static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
+
+    @VisibleForTesting
+    static final int DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP = 48;
+
+    @VisibleForTesting
+    static final String DEFAULT_ICON_PERSIST_FORMAT = CompressFormat.PNG.name();
+
+    @VisibleForTesting
+    static final int DEFAULT_ICON_PERSIST_QUALITY = 100;
 
     private static final int SAVE_DELAY_MS = 5000; // in milliseconds.
 
@@ -157,6 +169,44 @@ public class ShortcutService extends IShortcutService.Stub {
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_ICON_RES = "icon-res";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
+
+    @VisibleForTesting
+    interface ConfigConstants {
+        /**
+         * Key name for the throttling reset interval, in seconds. (long)
+         */
+        String KEY_RESET_INTERVAL_SEC = "reset_interval_sec";
+
+        /**
+         * Key name for the max number of modifying API calls per app for every interval. (int)
+         */
+        String KEY_MAX_DAILY_UPDATES = "max_daily_updates";
+
+        /**
+         * Key name for the max icon dimensions in DP, for non-low-memory devices.
+         */
+        String KEY_MAX_ICON_DIMENSION_DP = "max_icon_dimension_dp";
+
+        /**
+         * Key name for the max icon dimensions in DP, for low-memory devices.
+         */
+        String KEY_MAX_ICON_DIMENSION_DP_LOWRAM = "max_icon_dimension_dp_lowram";
+
+        /**
+         * Key name for the max dynamic shortcuts per app. (int)
+         */
+        String KEY_MAX_SHORTCUTS = "max_shortcuts";
+
+        /**
+         * Key name for icom compression quality, 0-100.
+         */
+        String KEY_ICON_QUALITY = "icon_quality";
+
+        /**
+         * Key name for icon compression format: "PNG", "JPEG" or "WEBP"
+         */
+        String KEY_ICON_FORMAT = "icon_format";
+    }
 
     private final Context mContext;
 
@@ -416,9 +466,8 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     private int mMaxIconDimension;
 
-    private CompressFormat mIconPersistFormat = CompressFormat.PNG;
-
-    private int mIconPersistQuality = 100;
+    private CompressFormat mIconPersistFormat;
+    private int mIconPersistQuality;
 
     public ShortcutService(Context context) {
         mContext = Preconditions.checkNotNull(context);
@@ -498,23 +547,76 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     private void initialize() {
         synchronized (mLock) {
-            injectLoadConfigurationLocked();
+            loadConfigurationLocked();
             loadBaseStateLocked();
         }
     }
 
-    // Test overrides it to inject different values.
-    @VisibleForTesting
-    void injectLoadConfigurationLocked() {
-        mResetInterval = DEFAULT_RESET_INTERVAL_SEC * 1000L;
-        mMaxDailyUpdates = DEFAULT_MAX_DAILY_UPDATES;
-        mMaxDynamicShortcuts = DEFAULT_MAX_SHORTCUTS_PER_APP;
+    /**
+     * Load the configuration from Settings.
+     */
+    private void loadConfigurationLocked() {
+        updateConfigurationLocked(injectShortcutManagerConstants());
+    }
 
-        final int iconDimensionDp = (injectIsLowRamDevice()
-                ? DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP : DEFAULT_MAX_ICON_DIMENSION_DP);
-        mMaxIconDimension =
-                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, iconDimensionDp,
-                        mContext.getResources().getDisplayMetrics());
+    /**
+     * Load the configuration from Settings.
+     */
+    @VisibleForTesting
+    boolean updateConfigurationLocked(String config) {
+        boolean result = true;
+
+        final KeyValueListParser parser = new KeyValueListParser(',');
+        try {
+            parser.setString(config);
+        } catch (IllegalArgumentException e) {
+            // Failed to parse the settings string, log this and move on
+            // with defaults.
+            Slog.e(TAG, "Bad shortcut manager settings", e);
+            result = false;
+        }
+
+        mResetInterval = parser.getLong(
+                ConfigConstants.KEY_RESET_INTERVAL_SEC, DEFAULT_RESET_INTERVAL_SEC)
+                * 1000L;
+
+        mMaxDailyUpdates = (int) parser.getLong(
+                ConfigConstants.KEY_MAX_DAILY_UPDATES, DEFAULT_MAX_DAILY_UPDATES);
+
+        mMaxDynamicShortcuts = (int) parser.getLong(
+                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP);
+
+        final int iconDimensionDp = injectIsLowRamDevice()
+                ? (int) parser.getLong(
+                    ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM,
+                    DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP)
+                : (int) parser.getLong(
+                    ConfigConstants.KEY_MAX_ICON_DIMENSION_DP,
+                    DEFAULT_MAX_ICON_DIMENSION_DP);
+
+        mMaxIconDimension = injectDipToPixel(iconDimensionDp);
+
+        mIconPersistFormat = CompressFormat.valueOf(
+                parser.getString(ConfigConstants.KEY_ICON_FORMAT, DEFAULT_ICON_PERSIST_FORMAT));
+
+        mIconPersistQuality = (int) parser.getLong(
+                ConfigConstants.KEY_ICON_QUALITY,
+                DEFAULT_ICON_PERSIST_QUALITY);
+
+        return result;
+    }
+
+    @VisibleForTesting
+    String injectShortcutManagerConstants() {
+        return android.provider.Settings.Global.getString(
+                mContext.getContentResolver(),
+                android.provider.Settings.Global.SHORTCUT_MANAGER_CONSTANTS);
+    }
+
+    @VisibleForTesting
+    int injectDipToPixel(int dip) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
+                mContext.getResources().getDisplayMetrics());
     }
 
     // === Persisting ===
@@ -1829,14 +1931,27 @@ public class ShortcutService extends IShortcutService.Stub {
                 return handleDefaultCommands(cmd);
             }
             final PrintWriter pw = getOutPrintWriter();
-            switch(cmd) {
+            int ret = 1;
+            switch (cmd) {
                 case "reset-package-throttling":
-                    return handleResetPackageThrottling();
+                    ret = handleResetPackageThrottling();
+                    break;
                 case "reset-throttling":
-                    return handleResetThrottling();
+                    ret = handleResetThrottling();
+                    break;
+                case "override-config":
+                    ret = handleOverrideConfig();
+                    break;
+                case "reset-config":
+                    ret = handleResetConfig();
+                    break;
                 default:
                     return handleDefaultCommands(cmd);
             }
+            if (ret == 0) {
+                pw.println("Success");
+            }
+            return ret;
         }
 
         @Override
@@ -1849,6 +1964,12 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println();
             pw.println("cmd shortcut reset-throttling");
             pw.println("    Reset throttling for all packages and users");
+            pw.println();
+            pw.println("cmd shortcut override-config CONFIG");
+            pw.println("    Override the configuration for testing (will last until reboot)");
+            pw.println();
+            pw.println("cmd shortcut reset-config");
+            pw.println("    Reset the configuration set with \"update-config\"");
             pw.println();
         }
 
@@ -1881,6 +2002,26 @@ public class ShortcutService extends IShortcutService.Stub {
 
             return 0;
         }
+
+        private int handleOverrideConfig() {
+            final PrintWriter pw = getOutPrintWriter();
+            final String config = getNextArgRequired();
+
+            synchronized (mLock) {
+                if (!updateConfigurationLocked(config)) {
+                    pw.println("override-config failed.  See logcat for details.");
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        private int handleResetConfig() {
+            synchronized (mLock) {
+                loadConfigurationLocked();
+            }
+            return 0;
+        }
     }
 
     // === Unit test support ===
@@ -1903,6 +2044,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return new File(Environment.getDataSystemCeDirectory(userId), DIRECTORY_PER_USER);
     }
 
+    @VisibleForTesting
     boolean injectIsLowRamDevice() {
         return ActivityManager.isLowRamDeviceStatic();
     }
@@ -1917,22 +2059,32 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @VisibleForTesting
-    void setMaxDynamicShortcutsForTest(int max) {
-        mMaxDynamicShortcuts = max;
+    int getMaxDynamicShortcutsForTest() {
+        return mMaxDynamicShortcuts;
     }
 
     @VisibleForTesting
-    void setMaxDailyUpdatesForTest(int max) {
-        mMaxDailyUpdates = max;
+    int getMaxDailyUpdatesForTest() {
+        return mMaxDailyUpdates;
     }
 
     @VisibleForTesting
-    void setMaxIconDimensionForTest(int dimension) {
-        mMaxIconDimension = dimension;
+    long getResetIntervalForTest() {
+        return mResetInterval;
     }
 
     @VisibleForTesting
-    public void setResetIntervalForTest(long interval) {
-        mResetInterval = interval;
+    int getMaxIconDimensionForTest() {
+        return mMaxIconDimension;
+    }
+
+    @VisibleForTesting
+    CompressFormat getIconPersistFormatForTest() {
+        return mIconPersistFormat;
+    }
+
+    @VisibleForTesting
+    int getIconPersistQualityForTest() {
+        return mIconPersistQuality;
     }
 }
