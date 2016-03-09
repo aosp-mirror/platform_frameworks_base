@@ -471,14 +471,13 @@ Preview.</p>
 
 <h2 id="scoped_directory_access">Scoped directory access</h2>
 
-<p><p>In Android Android N, apps can use new APIs to request access to specific <a
+<p>In Android N, apps can use new APIs to request access to specific <a
 href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">external
 storage</a> directories, including directories on removable media such as SD
 cards. The new APIs greatly simplify how your application accesses standard
 external storage directories, such as the <code>Pictures</code> directory. Apps
-like photo apps can use these APIs instead of using </p>
-
-<p><code>READ_EXTERNAL_STORAGE</code>, which grants access to all storage
+like photo apps can use these APIs instead of using
+<code>READ_EXTERNAL_STORAGE</code>, which grants access to all storage
 directories, or the Storage Access Framework, which makes the user navigate to
 the directory.</p>
 
