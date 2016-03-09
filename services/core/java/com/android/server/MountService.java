@@ -839,11 +839,11 @@ class MountService extends IMountService.Stub
         Slog.d(TAG, "Thinking about init, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
         if (mSystemReady && mDaemonConnected
-                && !StorageManager.isNativeFileBasedEncryptionEnabled()) {
+                && !StorageManager.isFileEncryptedNativeOnly()) {
             // When booting a device without native support, make sure that our
             // user directories are locked or unlocked based on the current
             // emulation status.
-            final boolean initLocked = StorageManager.isEmulatedFileBasedEncryptionEnabled();
+            final boolean initLocked = StorageManager.isFileEncryptedEmulatedOnly();
             Slog.d(TAG, "Setting up emulation state, initlocked=" + initLocked);
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
@@ -1940,7 +1940,7 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
-            if (StorageManager.isNativeFileBasedEncryptionEnabled()) {
+            if (StorageManager.isFileEncryptedNativeOnly()) {
                 throw new IllegalStateException(
                         "Emulation not available on device with native FBE");
             }
@@ -2811,7 +2811,7 @@ class MountService extends IMountService.Stub
 
     @Override
     public boolean isUserKeyUnlocked(int userId) {
-        if (StorageManager.isFileBasedEncryptionEnabled()) {
+        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
             synchronized (mLock) {
                 return ArrayUtils.contains(mLocalUnlockedUsers, userId);
             }
