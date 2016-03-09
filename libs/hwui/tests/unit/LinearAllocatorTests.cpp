@@ -113,3 +113,21 @@ TEST(LinearStdAllocator, simpleAllocate) {
     EXPECT_GT(lastLocation + 20, &v[0]);
 
 }
+
+TEST(LsaVector, dtorCheck) {
+    LinearAllocator allocator;
+    LinearStdAllocator<void*> stdAllocator(allocator);
+
+    for (int size : {1, 2, 3, 500}) {
+        int destroyed = 0;
+        {
+            LsaVector<std::unique_ptr<TestUtils::SignalingDtor> > vector(stdAllocator);
+            for (int i = 0; i < size; i++) {
+                vector.emplace_back(new TestUtils::SignalingDtor(&destroyed));
+            }
+            EXPECT_EQ(0, destroyed);
+            EXPECT_EQ(size, (int) vector.size());
+        }
+        EXPECT_EQ(size, destroyed);
+    }
+}
