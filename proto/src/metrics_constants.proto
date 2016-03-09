@@ -1956,6 +1956,43 @@ message MetricsEvent {
     // Logs that the user has edited the enabled VR listeners.
     VR_MANAGE_LISTENERS = 334;
 
+    // Settings -> Accessibility -> Click after pointer stops moving
+    ACCESSIBILITY_TOGGLE_AUTOCLICK = 335;
+    // Settings -> Sound
+    SOUND = 336;
+    // Settings -> Notifications -> Gear
+    CONFIGURE_NOTIFICATION = 337;
+    // Settings -> Wi-Fi -> Gear
+    CONFIGURE_WIFI = 338;
+    // Settings -> Display -> Display size
+    DISPLAY_SCREEN_ZOOM = 339;
+    // Settings -> Display -> Font size
+    ACCESSIBILITY_FONT_SIZE = 340;
+    // Settings -> Data usage -> Cellular/Wi-Fi data usage
+    DATA_USAGE_LIST = 341;
+    // Settings -> Data usage -> Billing cycle or DATA_USAGE_LIST -> Gear
+    BILLING_CYCLE = 342;
+    // DATA_USAGE_LIST -> Any item or App info -> Data usage
+    APP_DATA_USAGE = 343;
+    // Settings -> Language & input -> Language
+    USER_LOCALE_LIST = 344;
+    // Settings -> Language & input -> Virtual keyboard
+    VIRTUAL_KEYBOARDS = 345;
+    // Settings -> Language & input -> Physical keyboard
+    PHYSICAL_KEYBOARDS = 346;
+    // Settings -> Language & input -> Virtual keyboard -> Add a virtual keyboard
+    ENABLE_VIRTUAL_KEYBOARDS = 347;
+    // Settings -> Data usage -> Data Saver
+    DATA_SAVER_SUMMARY = 348;
+    // Settings -> Data usage -> Data Saver -> Unrestricted data access
+    DATA_USAGE_UNRESTRICTED_ACCESS = 349;
+
+    // Used for generic logging of Settings Preference Persistence, should not be used
+    // outside SharedPreferencesLogger.
+    ACTION_GENERIC_PACKAGE = 350;
+    // Settings -> Apps -> Gear -> Special access
+    SPECIAL_ACCESS = 351;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
