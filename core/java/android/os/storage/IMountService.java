@@ -2286,7 +2286,12 @@ public interface IMountService extends IInterface {
 
     /**
      * Determines the encryption state of the volume.
-     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible values.
+     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible
+     * values.
+     * Note that this has been replaced in most cases by the APIs in
+     * StorageManager (see isEncryptable and below)
+     * This is still useful to get the error state when encryption has failed
+     * and CryptKeeper needs to throw up a screen advising the user what to do
      */
     public int getEncryptionState() throws RemoteException;
 

@@ -29,6 +29,7 @@ import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.storage.StorageManager;
 import android.provider.Downloads;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -143,8 +144,7 @@ public class BootReceiver extends BroadcastReceiver {
         HashMap<String, Long> timestamps = readTimestamps();
 
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
-            if ("encrypted".equals(SystemProperties.get("ro.crypto.state"))
-                && "trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))) {
+            if (StorageManager.inCryptKeeperBounce()) {
                 // Encrypted, first boot to get PIN/pattern/password so data is tmpfs
                 // Don't set ro.runtime.firstboot so that we will do this again
                 // when data is properly mounted

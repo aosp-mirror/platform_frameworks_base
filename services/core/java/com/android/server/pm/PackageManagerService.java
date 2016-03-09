@@ -2449,7 +2449,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // since core system apps like SettingsProvider and SystemUI
             // can't wait for user to start
             final int storageFlags;
-            if (StorageManager.isFileBasedEncryptionEnabled()) {
+            if (StorageManager.isFileEncryptedNativeOrEmulated()) {
                 storageFlags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
@@ -3231,7 +3231,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Return if the user key is currently unlocked.
      */
     private boolean isUserKeyUnlocked(int userId) {
-        if (StorageManager.isFileBasedEncryptionEnabled()) {
+        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
             final IMountService mount = IMountService.Stub
                     .asInterface(ServiceManager.getService("mount"));
             if (mount == null) {
@@ -18313,7 +18313,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * the app.
      */
     private boolean maybeMigrateAppData(String volumeUuid, int userId, PackageParser.Package pkg) {
-        if (pkg.isSystemApp() && !StorageManager.isFileBasedEncryptionEnabled()
+        if (pkg.isSystemApp() && !StorageManager.isFileEncryptedNativeOrEmulated()
                 && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
             final int storageTarget = pkg.applicationInfo.isForceDeviceEncrypted()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;

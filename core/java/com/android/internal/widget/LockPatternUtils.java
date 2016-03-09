@@ -887,8 +887,7 @@ public class LockPatternUtils {
      * @return true if device encryption is enabled
      */
     public static boolean isDeviceEncryptionEnabled() {
-        final String status = SystemProperties.get("ro.crypto.state", "unsupported");
-        return "encrypted".equalsIgnoreCase(status);
+        return StorageManager.isEncrypted();
     }
 
     /**
@@ -896,7 +895,7 @@ public class LockPatternUtils {
      * @return true if device is file encrypted
      */
     public static boolean isFileEncryptionEnabled() {
-        return StorageManager.isFileBasedEncryptionEnabled();
+        return StorageManager.isFileEncryptedNativeOrEmulated();
     }
 
     /**
