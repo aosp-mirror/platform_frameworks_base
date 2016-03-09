@@ -71,7 +71,6 @@ class CarNavigationBarController {
     private List<CarNavigationButton> mNavButtons = new ArrayList<CarNavigationButton>();
 
     private int mCurrentFacetIndex;
-    private String mCurrentPackageName;
     private SparseBooleanArray mFacetHasMultipleAppsCache = new SparseBooleanArray();
 
     public CarNavigationBarController(Context context,
@@ -84,7 +83,6 @@ class CarNavigationBarController {
     }
 
     public void taskChanged(String packageName) {
-        mCurrentPackageName = packageName;
         // If the package name belongs to a filter, then highlight appropriate button in
         // the navigation bar.
         if (mFacetPackageMap.containsKey(packageName)) {
@@ -295,12 +293,6 @@ class CarNavigationBarController {
         String packageName = intent.getPackage();
 
         if (packageName == null) {
-            return;
-        }
-
-        // Don't launch the lens picker if it's already running and the
-        // user clicks the same facet
-        if (packageName.equals(mCurrentPackageName) && index == mCurrentFacetIndex) {
             return;
         }
 
