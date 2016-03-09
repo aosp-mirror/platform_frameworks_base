@@ -18,7 +18,7 @@ package android.net.wifi.nan;
 
 /**
  * A representation of a NAN subscribe session. Created when
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionListener, int)}
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback, int)}
  * is executed. The object can be used to stop and re-start (re-configure) the
  * subscribe session.
  *
@@ -34,7 +34,7 @@ public class WifiNanSubscribeSession extends WifiNanSession {
 
     /**
      * Restart/re-configure the subscribe session. Note that the
-     * {@link WifiNanSessionListener} is not replaced - the same listener used
+     * {@link WifiNanSessionCallback} is not replaced - the same listener used
      * at creation is still used.
      *
      * @param subscribeConfig The configuration ({@link SubscribeConfig}) of the
