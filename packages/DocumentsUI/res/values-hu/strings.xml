@@ -116,4 +116,5 @@
       <item quantity="other">Töröl <xliff:g id="COUNT_1">%1$d</xliff:g> fájlt?</item>
       <item quantity="one">Töröl <xliff:g id="COUNT_0">%1$d</xliff:g> fájlt?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

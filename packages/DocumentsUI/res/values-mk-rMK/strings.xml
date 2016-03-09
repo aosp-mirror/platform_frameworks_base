@@ -114,6 +114,7 @@
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
       <item quantity="one">Да се избрише <xliff:g id="COUNT_1">%1$d</xliff:g> датотека?</item>
-      <item quantity="other">Да се избрише <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки?</item>
+      <item quantity="other">Да се избришат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

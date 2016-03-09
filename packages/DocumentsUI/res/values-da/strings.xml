@@ -116,4 +116,5 @@
       <item quantity="one">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
       <item quantity="other">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

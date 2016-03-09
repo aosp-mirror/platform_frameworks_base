@@ -132,4 +132,5 @@
       <item quantity="many">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлів?</item>
       <item quantity="other">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлу?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

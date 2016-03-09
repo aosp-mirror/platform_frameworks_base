@@ -132,4 +132,5 @@
       <item quantity="other">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים?</item>
       <item quantity="one">האם למחוק קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>
