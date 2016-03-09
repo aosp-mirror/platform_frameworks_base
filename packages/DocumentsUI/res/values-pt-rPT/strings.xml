@@ -116,4 +116,8 @@
       <item quantity="other">Pretende eliminar <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros?</item>
       <item quantity="one">Pretende eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro?</item>
     </plurals>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selecionado</item>
+    </plurals>
 </resources>

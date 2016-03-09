@@ -132,4 +132,5 @@
       <item quantity="few">Želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke?</item>
       <item quantity="other">Želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datotek?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

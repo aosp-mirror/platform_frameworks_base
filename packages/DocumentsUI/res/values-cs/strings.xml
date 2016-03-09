@@ -132,4 +132,5 @@
       <item quantity="other">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů?</item>
       <item quantity="one">Smazat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>
