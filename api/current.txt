@@ -57593,6 +57593,17 @@ package java.util {
     method public abstract int size();
   }
 
+  public class DoubleSummaryStatistics implements java.util.function.DoubleConsumer {
+    ctor public DoubleSummaryStatistics();
+    method public void accept(double);
+    method public void combine(java.util.DoubleSummaryStatistics);
+    method public final double getAverage();
+    method public final long getCount();
+    method public final double getMax();
+    method public final double getMin();
+    method public final double getSum();
+  }
+
   public class DuplicateFormatFlagsException extends java.util.IllegalFormatException {
     ctor public DuplicateFormatFlagsException(java.lang.String);
     method public java.lang.String getFlags();
@@ -57815,6 +57826,17 @@ package java.util {
     ctor public InputMismatchException(java.lang.String);
   }
 
+  public class IntSummaryStatistics implements java.util.function.IntConsumer {
+    ctor public IntSummaryStatistics();
+    method public void accept(int);
+    method public void combine(java.util.IntSummaryStatistics);
+    method public final double getAverage();
+    method public final long getCount();
+    method public final int getMax();
+    method public final int getMin();
+    method public final long getSum();
+  }
+
   public class InvalidPropertiesFormatException extends java.io.IOException {
     ctor public InvalidPropertiesFormatException(java.lang.Throwable);
     ctor public InvalidPropertiesFormatException(java.lang.String);
@@ -58004,6 +58026,18 @@ package java.util {
     method public static final java.util.Locale.Category[] values();
     enum_constant public static final java.util.Locale.Category DISPLAY;
     enum_constant public static final java.util.Locale.Category FORMAT;
+  }
+
+  public class LongSummaryStatistics implements java.util.function.IntConsumer java.util.function.LongConsumer {
+    ctor public LongSummaryStatistics();
+    method public void accept(int);
+    method public void accept(long);
+    method public void combine(java.util.LongSummaryStatistics);
+    method public final double getAverage();
+    method public final long getCount();
+    method public final long getMax();
+    method public final long getMin();
+    method public final long getSum();
   }
 
   public abstract interface Map {
@@ -65358,4 +65392,3 @@ package org.xmlpull.v1.sax2 {
   }
 
 }
-
