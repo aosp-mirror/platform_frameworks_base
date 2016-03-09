@@ -10,7 +10,11 @@ page.image=images/cards/card-n-sdk_2x.png
   <div id="qv">
 <ol>
   <li><a href="#get-as13">Get Android Studio 2.1</a></li>
-  <li><a href="#get-sdk">Get the Android N SDK</a></li>
+  <li><a href="#get-sdk">Get the Android N SDK</a>
+    <ol>
+      <li><a href="#docs-dl">Reference documentation</a>
+    </ol>
+  </li>
   <li><a href="#java8">Get the Java 8 JDK and JRE</a></li>
   <li><a href="#create-update">Update or Create a Project</a></li>
   <li><a href="#next">Next Steps</a></li>
@@ -105,12 +109,18 @@ Android N Preview SDK in Android Studio as follows:</p>
   </li>
 </ol>
 
-<p>In addition to these preview components, you should download the Android
-N Preview API docs from the following table. This is an offline version
-of the developer.android.com web site, except it includes the updated
-API reference for the Android N APIs and an API difference report.</p>
 
-<table id="docs-dl">
+<h3 id="docs-dl">Get the N Preview reference documentation</h3>
+
+<p>
+  Detailed information about the Android N APIs is available in the N Preview
+  reference documentation, which you can download from the following table.
+  This package contains an abridged, offline version of the Android developer
+  web site, and includes an updated API reference for the Android N APIs and an
+  API difference report.
+</p>
+
+<table>
   <tr>
     <th scope="col">Documentation</th>
     <th scope="col">Checksums</th>

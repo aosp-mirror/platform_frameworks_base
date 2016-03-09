@@ -1,10 +1,6 @@
-page.title=Known Issues
-@jd:body
+page.title=Support and Release Notes
 
-<p>Date: March 2016</p>
-<p>Builds: NPC56P, NPC56R (N Preview 1 Release)</p>
-<p>Emulator support: x86 & ARM 32/64-bit</p>
-<p>Google Play services: 8.4</p>
+@jd:body
 
 <p>Two primary support channels are available to you when developing and testing
 with the Android N Developer Preview: Please file bugs at
@@ -14,7 +10,24 @@ For issues in other apps, please contact the developer directly.</p>
 <p>To discuss issues or ideas with other developers working with Android N, join the
 <a href="{@docRoot}preview/dev-community">Developer Preview Google+ community</a>.</p>
 
-<h2 id="general">General advisories</h2>
+
+<h2 id="dp1">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Date: March 2016<br>
+        Builds: NPC56P, NPC56R<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
+        Google Play services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<h3 id="general">General advisories</h3>
 
 <p>This Developer Preview release is for app developers only and is designed for use in compatibility testing and early development only. Please be aware of these general notes about the release:</p>
 
@@ -28,22 +41,22 @@ For issues in other apps, please contact the developer directly.</p>
   <li>This preview release supports the following devices: Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, and Pixel C, as well as General Mobile 4G (Android One).</li>
 </ul>
 
-<h2 id="platform">Platform Issues</h2>
+<h3 id="platform">Platform Issues</h3>
 
-<h3 id="performance">Performance and battery</h3>
+<h4 id="performance">Performance and battery</h4>
 
 <ul>
    <li>System and apps may be slow and experience periodic slowdowns and unresponsiveness.</li>
   <li>Battery life may be regressed in this release for screen-on and screen-off use cases.</li>
 </ul>
 
-<h3 id="dialer">Dialer</h3>
+<h4 id="dialer">Dialer</h4>
 <ul>
    <li>Dialer app does not support Direct boot. This will be addressed later in N Developer Preview.</li>
    <li>Voicemail playback does not work.</li>
 </ul>
 
-<h3 id="ui">System UI</h3>
+<h4 id="ui">System UI</h4>
 
 <ul>
    <li>Some new or modified strings in the system UI are not translated to all languages.</li>
@@ -54,7 +67,7 @@ For issues in other apps, please contact the developer directly.</p>
    <li>In the Gmail app, direct archiving of emails included in a notification bundle does not work properly.</li>
 </ul>
 
-<h3 id="afw">Android for Work</h3>
+<h4 id="afw">Android for Work</h4>
 
 <ul>
    <li>Work Security Challenge
@@ -114,19 +127,19 @@ For issues in other apps, please contact the developer directly.</p>
    </li>
 </ul>
 
-<h3 id="keyboard">Keyboard</h3>
+<h4 id="keyboard">Keyboard</h4>
 
 <ul>
 <li>Bluetooth pairing between keyboards and Android devices may be unstable. </li>
 </ul>
 
-<h3 id="video">Video</h3>
+<h4 id="video">Video</h4>
 
 <ul>
 <li>Video playback may lag and show interruptions.</li>
 </ul>
 
-<h3 id="wifi">Wi-Fi</h3>
+<h4 id="wifi">Wi-Fi</h4>
 
    <ul>
    <li>Wi-Fi has undergone some refactoring which may change API corner case behavior. Specifically, applications which attempt to connect to specific networks, or attempt to reconnect to networks should retest.</li>
@@ -134,7 +147,7 @@ For issues in other apps, please contact the developer directly.</p>
    supports is the DHCP client introduced in M.</li>
    </ul>
 
-<h3 id="direct">Direct boot</h3>
+<h4 id="direct">Direct boot</h4>
 
 <ul>
    <li>NFC doesn't function until first unlock.
@@ -147,7 +160,7 @@ For issues in other apps, please contact the developer directly.</p>
    </li>
 </ul>
 
-<h3 id="pip">Picture-in-picture for Android TV</h3>
+<h4 id="pip">Picture-in-picture for Android TV</h4>
 
 <ul>
 <li>The PIP integration in the Recents UI is not finalized, and is subject to change.
@@ -158,13 +171,13 @@ For issues in other apps, please contact the developer directly.</p>
 </li>
 </ul>
 
-<h3 id="bugs">Bug reports</h3>
+<h4 id="bugs">Bug reports</h4>
 
 <ul>
    <li>Bug reports do not always complete successfully (as a workaround, sometimes they can still be accessed through the bug report document provider in internal storage).</li>
 </ul>
 
-<h3 id="split">Split-screen Multi-window</h3>
+<h4 id="split">Split-screen Multi-window</h4>
 
 <ul>
    <li>Apps may experience crashes and unexpected UI behavior when put into split-screen mode. These are app issues that must be fixed by the app developer.</li>
@@ -174,7 +187,7 @@ For issues in other apps, please contact the developer directly.</p>
    <li>Animations are not yet final.</li>
 </ul>
 
-<h3 id="ime">Input method</h3>
+<h4 id="ime">Input method</h4>
 
 <ul>
    <li>
@@ -185,20 +198,20 @@ For issues in other apps, please contact the developer directly.</p>
 </ul>
 
 
-<h3 id="accessibility">Accessibility</h3>
+<h4 id="accessibility">Accessibility</h4>
 
 <ul>
    <li>TalkBack exhibits issues with features including Notifications, Quick Settings Tiles and Multi-window display that may cause system crashing or lack of spoken feedback from TalkBack. Future releases of the preview will address these issues.</li>
 </ul>
 
-<h2 id="device-sp">Device-Specific Notes and Issues</h2>
+<h3 id="device-sp">Device-Specific Notes and Issues</h3>
 
-<h3 id="player">Nexus Player</h3>
+<h4 id="player">Nexus Player</h4>
 <ul>
 <li>Video playback, app compatibility and stability issues are expected on Nexus Player in this release of the Preview.</li>
 </ul>
 
-<h3 id="pixelc">Pixel C</h3>
+<h4 id="pixelc">Pixel C</h4>
 <ul>
 <li>Multi-window resizing may cause crashing.</li>
 </ul>
