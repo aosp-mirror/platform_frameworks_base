@@ -26,7 +26,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.Condition;
@@ -63,15 +65,18 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private final ArraySet<Uri> mSubscriptions = new ArraySet<Uri>();
     private final SparseArray<CalendarTracker> mTrackers = new SparseArray<>();
     private final Handler mWorker;
+    private final HandlerThread mThread;
 
     private boolean mConnected;
     private boolean mRegistered;
     private boolean mBootComplete;  // don't hammer the calendar provider until boot completes.
     private long mNextAlarmTime;
 
-    public EventConditionProvider(Looper worker) {
+    public EventConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
-        mWorker = new Handler(worker);
+        mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        mThread.start();
+        mWorker = new Handler(mThread.getLooper());
     }
 
     @Override
