@@ -4448,7 +4448,7 @@ public final class ActivityThread {
         }
 
         VMRuntime.registerAppInfo(profileFile.getAbsolutePath(), appInfo.dataDir,
-                codePaths.toArray(new String[codePaths.size()]));
+                codePaths.toArray(new String[codePaths.size()]), null);
     }
 
     /*
