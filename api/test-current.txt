@@ -29141,6 +29141,7 @@ package android.os {
   public class Process {
     ctor public Process();
     method public static final long getElapsedCpuTime();
+    method public static final int[] getExclusiveCores();
     method public static final int getGidForName(java.lang.String);
     method public static final long getStartElapsedRealtime();
     method public static final long getStartUptimeMillis();
