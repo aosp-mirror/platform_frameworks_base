@@ -1281,14 +1281,15 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public Intent createShortcutIntent(@NonNull String callingPackage,
-                @NonNull ShortcutInfo shortcut, int userId) {
+                @NonNull String packageName, @NonNull String shortcutId, int userId) {
             // Calling permission must be checked by LauncherAppsImpl.
-            Preconditions.checkNotNull(shortcut, "shortcut");
+            Preconditions.checkStringNotEmpty(packageName, "packageName can't be empty");
+            Preconditions.checkStringNotEmpty(shortcutId, "shortcutId can't be empty");
 
             synchronized (mLock) {
                 final ShortcutInfo fullShortcut =
-                        getPackageShortcutsLocked(shortcut.getPackageName(), userId)
-                        .getShortcuts().get(shortcut.getId());
+                        getPackageShortcutsLocked(packageName, userId)
+                        .getShortcuts().get(shortcutId);
                 if (fullShortcut == null) {
                     return null;
                 } else {

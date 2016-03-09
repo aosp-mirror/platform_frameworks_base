@@ -52,7 +52,7 @@ public abstract class ShortcutServiceInternal {
             @NonNull List<String> shortcutIds, int userId);
 
     public abstract Intent createShortcutIntent(@NonNull String callingPackage,
-            @NonNull ShortcutInfo shortcut, int userId);
+            @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
 }
