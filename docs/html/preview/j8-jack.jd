@@ -1,0 +1,227 @@
+page.title=Using Java 8 Language Features
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      In this document
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#supported-features">Supported Java 8 Language Features and APIs</a>
+      </li>
+
+      <li>
+        <a href="#configuration">Enabling Java 8 Features and the Jack Toolchain</a>
+      </li>
+    </ol>
+
+    <h2>
+      See also
+    </h2>
+
+    <ol>
+      <li>
+        <a class="external-link" href=
+        "https://source.android.com/source/jack.html">Jack (Java Android Compiler
+        Kit)</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  The N Developer Preview introduces newly supported Java 8 language features
+  that you can use when developing apps that target the Preview. To start using
+  these features, you need to download and set up Android Studio 2.1 (preview)
+  and the N Preview SDK, which include the required Jack toolchain and updated
+  Android Plugin for Gradle.
+</p>
+
+<p>
+  To learn how to set up Android Studio for the Preview, <a href=
+  "{@docRoot}preview/setup-sdk.html">read the guide</a>. If you instead want to
+  simply test your app's forward-compatibility, follow the guide to <a href=
+  "{@docRoot}preview/run-app.html">run your app on
+  the N Preview</a>.
+</p>
+
+<p>
+  This document will discuss the new language features supported in the
+  Preview, how to properly set up your project to use them, and any known
+  issues you may encounter.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Using the new Java 8 language features is not a
+  requirement for developing apps that target the N Developer Preview. After
+  following the set up instructions in the <a href=
+  "{@docRoot}preview/setup-sdk.html">Preview guide</a>, you may use
+  the Java 7 language features already supported by Android 6.0 (API level 23)
+  and below.
+</p>
+
+<h2 id="supported-features">
+  Supported Java 8 Language Features and APIs
+</h2>
+
+<p>
+  Android does not currently support all Java 8 language features. However, the
+  following features are now available when developing apps targeting the N
+  Developer Preview:
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">Default
+    and static interface methods</a>
+  </li>
+
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
+    Lambda expressions</a>
+  </li>
+
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">Repeatable
+    annotations</a>
+  </li>
+
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">
+    Method References</a>
+  </li>
+
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/IandI/interfaceAsType.html">Type
+    Interface</a>
+  </li>
+</ul>
+
+
+<p>
+  Additionally, the following Java 8 language feature APIs are now available
+  with the Preview:
+</p>
+
+<ul>
+  <li>Reflection and language-related APIs:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.lang.FunctionalInterface}
+      </li>
+
+      <li>{@code java.lang.annotation.Repeatable}
+      </li>
+
+      <li>{@code java.lang.reflect.Method.isDefault()}
+      </li>
+
+      <li>and Reflection APIs associated with repeatable annotations, such as
+      {@code AnnotatedElement.getAnnotationsByType(Class)}
+      </li>
+    </ul>
+  </li>
+  <li>Utility APIs:
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>{@code java.util.function}
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note">
+  <strong>Note:</strong> The N Developer Preview bases its implementation of
+  lambda expressions on anonymous classes. This approach allows them to be
+  backwards compatible and executable on earlier versions of Android. To test
+  lambda expressions on earlier versions, remember to go to your {@code
+  build.gradle} file, and set {@code compileSdkVersion} and {@code
+  targetSdkVersion} to 23 or lower.
+</p>
+
+<h2 id="configuration">
+  Enabling Java 8 Features and the Jack Toolchain
+</h2>
+
+<p>
+  In order to use the new Java 8 language features, you need to also use the
+  new <a class="external-link" href=
+  "https://source.android.com/source/jack.html">Jack toolchain</a>. This new
+  Android toolchain compiles Java language source into Android-readable dex
+  bytecode, has its own {@code .jack} library format, and provides most tool chain
+  features as part of a single tool: repackaging, shrinking, obfuscation and
+  multidex.
+</p>
+
+<p>Here we compare the two toolchains used to build Android DEX files:</p>
+<ul>
+  <li>Legacy: javac ({@code .java} &gt; {@code .class}) &gt; dx ({@code
+  .class} &gt; {@code .dex})
+  </li>
+
+  <li>Modern: Jack ({@code .java} &gt; {@code .jack} &gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Configuring Gradle
+</h3>
+
+<p>
+  To enable the Java 8 language features and Jack for your project, enter the
+  following in your module-specific {@code build.gradle} file:
+</p>
+
+<pre>
+android {
+...
+  defaultConfig {
+  ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3>
+  Known Issues
+</h3>
+
+<p>
+  Instant Run, introduced in Android Studio 2.0 (Beta), does not currently work
+  with Jack and will be disabled while using the new toolchain.
+</p>
+
+<p>
+  Since Jack does not generate intermediate class files when compiling an app,
+  tools that depend on these files do not currently work with Jack. Some examples of
+  these tools are:
+</p>
+
+<ul>
+  <li>Lint detectors that operate on class files
+  </li>
+
+  <li>Tools and libraries that require the app’s class files (e.g. JaCoCo and Mockito)
+  </li>
+</ul>
+
+If you find other problems while using Jack, <a class="external-link" href=
+"http://tools.android.com/filing-bugs">please report bugs</a>.
