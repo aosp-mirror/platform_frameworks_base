@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"語音小幫手"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"超過 999"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"內容已隱藏"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"內容已依據政策隱藏"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
@@ -1136,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR 接聽器"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"條件提供者"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"通知小幫手"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN 已啟用"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> 已啟用 VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"輕觸即可管理網路。"</string>
@@ -1564,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資訊"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"음성 지원"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"지금 잠그기"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>개)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"숨겨진 콘텐츠"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"콘텐츠가 정책에 의해 숨겨졌습니다."</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
@@ -1052,16 +1051,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"버그 보고서 가져오는 중..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"버그 보고서를 공유하시겠습니까?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"버그 신고서 공유 중..."</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"IT 관리자가 이 기기의 문제해결을 위해 버그 보고서를 요청했습니다. 앱과 데이터가 공유될 수 있습니다."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"공유"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"거부"</string>
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"키보드 선택"</string>
     <string name="show_ime" msgid="2506087537466597099">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
@@ -1140,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"배경화면"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"배경화면 변경"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"알림 수신기"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"가상 현실 리스너"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"조건 제공자"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"알림 어시스턴트"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN이 활성화됨"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN이 <xliff:g id="APP">%s</xliff:g>에 의해 활성화됨"</string>
     <string name="vpn_text" msgid="3011306607126450322">"네트워크를 관리하려면 터치하세요."</string>
@@ -1568,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"고정 해제"</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>
