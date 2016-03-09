@@ -5270,6 +5270,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
+        int uid = Binder.getCallingUid();
+        int pid = Binder.getCallingPid();
+        userId = mUserController.handleIncomingUser(pid, uid, userId, false,
+                ALLOW_FULL_ONLY, "clearApplicationUserData", null);
 
         final DevicePolicyManagerInternal dpmi = LocalServices
                 .getService(DevicePolicyManagerInternal.class);
@@ -5277,10 +5281,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException("Cannot clear data for a device owner or a profile owner");
         }
 
-        int uid = Binder.getCallingUid();
-        int pid = Binder.getCallingPid();
-        userId = mUserController.handleIncomingUser(pid, uid, userId, false,
-                ALLOW_FULL_ONLY, "clearApplicationUserData", null);
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
