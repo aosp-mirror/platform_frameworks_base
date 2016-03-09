@@ -49,7 +49,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
@@ -263,7 +262,8 @@ public class WallpaperManager {
 
     static class Globals extends IWallpaperManagerCallback.Stub {
         private IWallpaperManager mService;
-        private Bitmap mWallpaper;
+        private Bitmap mCachedWallpaper;
+        private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
 
         Globals(Looper looper) {
@@ -296,33 +296,34 @@ public class WallpaperManager {
                         throw e.rethrowFromSystemServer();
                     }
                 }
-                if (mWallpaper != null) {
-                    return mWallpaper;
+                if (mCachedWallpaper != null && mCachedWallpaperUserId == userId) {
+                    return mCachedWallpaper;
                 }
-                if (mDefaultWallpaper != null) {
-                    return mDefaultWallpaper;
-                }
-                mWallpaper = null;
+                mCachedWallpaper = null;
+                mCachedWallpaperUserId = 0;
                 try {
-                    mWallpaper = getCurrentWallpaperLocked(userId);
+                    mCachedWallpaper = getCurrentWallpaperLocked(userId);
+                    mCachedWallpaperUserId = userId;
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "No memory load current wallpaper", e);
                 }
-                if (returnDefault) {
-                    if (mWallpaper == null) {
-                        mDefaultWallpaper = getDefaultWallpaperLocked(context);
-                        return mDefaultWallpaper;
-                    } else {
-                        mDefaultWallpaper = null;
-                    }
+                if (mCachedWallpaper != null) {
+                    return mCachedWallpaper;
                 }
-                return mWallpaper;
+                if (returnDefault) {
+                    if (mDefaultWallpaper == null) {
+                        mDefaultWallpaper = getDefaultWallpaperLocked(context);
+                    }
+                    return mDefaultWallpaper;
+                }
+                return null;
             }
         }
 
         public void forgetLoadedWallpaper() {
             synchronized (this) {
-                mWallpaper = null;
+                mCachedWallpaper = null;
+                mCachedWallpaperUserId = 0;
                 mDefaultWallpaper = null;
             }
         }
