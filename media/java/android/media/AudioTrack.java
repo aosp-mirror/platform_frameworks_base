@@ -2794,7 +2794,10 @@ public class AudioTrack implements AudioRouting
 
     private native final void native_finalize();
 
-    private native final void native_release();
+    /**
+     * @hide
+     */
+    public native final void native_release();
 
     private native final void native_start();
 
