@@ -125,9 +125,8 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
             @Nullable OnDateSetListener listener, int year, int month, int dayOfMonth) {
         this(context, themeResId);
 
-        mDateSetListener = listener;
-
         mDatePicker.updateDate(year, month, dayOfMonth);
+        mDateSetListener = listener;
     }
 
     static @StyleRes int resolveDialogTheme(@NonNull Context context, @StyleRes int themeResId) {
