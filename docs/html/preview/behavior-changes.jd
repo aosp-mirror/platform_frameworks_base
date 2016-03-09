@@ -217,7 +217,8 @@ page.image=images/cards/card-n-changes_2x.png
     <p>
       For more information about this intent, see the updated
       {@code Intent} reference documentation in the
-      <a href="{@docRoot}preview/download.html#docs">N Preview SDK Reference</a>.
+      <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+      Reference</a>.
     </p>
   </li>
 </ul>
