@@ -339,7 +339,7 @@ public class XmlConfigSource implements ConfigSource {
                 }
                 if (mDebugBuild) {
                     debugConfigBuilder =
-                            parseConfigEntry(parser, seenDomains, null, CONFIG_DEBUG).get(0).first;
+                            parseConfigEntry(parser, null, null, CONFIG_DEBUG).get(0).first;
                 } else {
                     XmlUtils.skipCurrentTag(parser);
                 }
@@ -347,6 +347,11 @@ public class XmlConfigSource implements ConfigSource {
             } else {
                 XmlUtils.skipCurrentTag(parser);
             }
+        }
+        // If debug is true and there was no debug-overrides in the file check for an extra
+        // _debug resource.
+        if (mDebugBuild && debugConfigBuilder == null) {
+            debugConfigBuilder = parseDebugOverridesResource();
         }
 
         // Use the platform default as the parent of the base config for any values not provided
@@ -383,6 +388,43 @@ public class XmlConfigSource implements ConfigSource {
         }
         mDefaultConfig = baseConfigBuilder.build();
         mDomainMap = configs;
+    }
+
+    private NetworkSecurityConfig.Builder parseDebugOverridesResource()
+            throws IOException, XmlPullParserException, ParserException {
+        Resources resources = mContext.getResources();
+        String packageName = resources.getResourcePackageName(mResourceId);
+        String entryName = resources.getResourceEntryName(mResourceId);
+        int resId = resources.getIdentifier(entryName + "_debug", "xml", packageName);
+        // No debug-overrides resource was found, nothing to parse.
+        if (resId == 0) {
+            return null;
+        }
+        NetworkSecurityConfig.Builder debugConfigBuilder = null;
+        // Parse debug-overrides out of the _debug resource.
+        try (XmlResourceParser parser = resources.getXml(resId)) {
+            XmlUtils.beginDocument(parser, "network-security-config");
+            int outerDepth = parser.getDepth();
+            boolean seenDebugOverrides = false;
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if ("debug-overrides".equals(parser.getName())) {
+                    if (seenDebugOverrides) {
+                        throw new ParserException(parser, "Only one debug-overrides allowed");
+                    }
+                    if (mDebugBuild) {
+                        debugConfigBuilder =
+                                parseConfigEntry(parser, null, null, CONFIG_DEBUG).get(0).first;
+                    } else {
+                        XmlUtils.skipCurrentTag(parser);
+                    }
+                    seenDebugOverrides = true;
+                } else {
+                    XmlUtils.skipCurrentTag(parser);
+                }
+            }
+        }
+
+        return debugConfigBuilder;
     }
 
     public static class ParserException extends Exception {
