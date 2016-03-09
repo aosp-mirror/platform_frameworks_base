@@ -56,7 +56,10 @@ interface. On a handheld, the inline reply action appears as an additional butto
      handheld app.
 
 
-<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png">
+<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png"
+  srcset="{@docRoot}preview/images/inline-reply.png 1x,
+  {@docRoot}preview/images/inline-reply_2x.png 2x"
+  width="400">
 <p class="img-caption">
   <strong>Figure 1.</strong> Android N adds the <strong>Reply</strong>
   action button.
@@ -176,13 +179,6 @@ When the user responds via {@link android.support.v4.app.RemoteInput},
  include the text in the reply history with the {@code setRemoteInputHistory()}
  method.</p>
 
-
-<img id="fig-chat-history" src="{@docRoot}preview/images/inline-reply-sent.png">
-<p class="img-caption">
-  <strong>Figure 3.</strong> Screenshot of chat history in the notification
-  shade.
-</p>
-
 <h2 id="bundle">Bundled Notifications</h2>
 
 <p>Android N provides developers with a new way to represent
@@ -209,7 +205,7 @@ Builder.setGroup()} method to bundle similar notifications.</p>
           {@docRoot}preview/images/bundles_2x.png 2x"
   width="300">
 <p class="img-caption">
-  <strong>Figure 4.</strong> The user can progressively expand the notification
+  <strong>Figure 3.</strong> The user can progressively expand the notification
   group.
 </p>
 
