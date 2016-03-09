@@ -3722,7 +3722,9 @@ public class DevicePolicyManager {
      * be hidden, it will not show up in recents, will not be able to show toasts or dialogs
      * or ring the device.
      *
-     * <p>The package must already be installed.
+     * <p>The package must already be installed. If the package is uninstalled while suspended
+     * the package will no longer be suspended. The admin can block this by using
+     * {@link #setUninstallBlocked}.
      *
      * @param admin The name of the admin component to check.
      * @param packageNames The package names to suspend or unsuspend.

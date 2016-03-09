@@ -5367,6 +5367,9 @@ public abstract class PackageManager {
      * will be hidden, the application will not show up in recents, will not be able to show
      * toasts or dialogs or ring the device.
      *
+     * <p>The package must already be installed. If the package is uninstalled while suspended
+     * the package will no longer be suspended.
+     *
      * @param packageNames The names of the packages to set the suspended status.
      * @param suspended If set to {@code true} than the packages will be suspended, if set to
      * {@code false} the packages will be unsuspended.
