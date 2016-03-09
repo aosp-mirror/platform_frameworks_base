@@ -35,6 +35,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Outline;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.os.Build;
@@ -307,7 +308,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     @Override
     public int getOpacity() {
-        return mAnimatedVectorState.mVectorDrawable.getOpacity();
+        return PixelFormat.TRANSLUCENT;
     }
 
     @Override
