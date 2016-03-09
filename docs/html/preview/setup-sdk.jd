@@ -115,7 +115,7 @@ API reference for the Android N APIs and an API difference report.</p>
   </tr>
   <tr>
     <td style="white-space: nowrap">
-    <a href="https://storage.googleapis.com/androiddevelopers/preview/n-preview-1-docs.zip"
+    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip"
       >n-preview-1-docs.zip</a></td>
     <td width="100%">
       MD5: 129c447102a9f1fb3712234e5268a708<br>

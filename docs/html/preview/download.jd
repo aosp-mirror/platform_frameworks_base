@@ -272,63 +272,72 @@ preview system image, you must perform another manual installation.
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >bullhead-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >bullhead-npc56p-preview-6c877a3d.tgz</a><br>
+      MD5: b5cf874021023b398f5b983b24913f5d<br>
+      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >shamu-npc56p-preview-54b13c67.tgz</a><br>
+      MD5: af183638cf34e0eb944a1957d7696f60<br>
+      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >angler-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >angler-npc56p-preview-85ffc1b1.tgz</a><br>
+      MD5: bc4934ea7bd325753eee1606d3725a24<br>
+      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
+      MD5: c901334c6158351e945f188167ae56f4<br>
+      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+    </td>
+  </tr>
+
+  <tr id="volantisg">
+    <td>Nexus 9G <br>"volantisg"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
+      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
+      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >fugu-npc56r-preview-7027d5b6.tgz</a><br>
+      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
+      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >ryu-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >ryu-npc56p-preview-335a86a4.tgz</a><br>
+      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
+      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
     </td>
   </tr>
 
   <tr id="one">
-    <td>Android One <br>"one"</td>
+    <td>General Mobile 4G (Android One) <br>"seed"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >one-Nxxxx-preview-xxxxxxx.tgz</a><br>
-      MD5: xxxxxxx<br>
-      SHA-1: xxxxxxx
+      >seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
+      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
+      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
     </td>
   </tr>
 
