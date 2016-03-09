@@ -748,8 +748,8 @@ public class ImageWriter implements AutoCloseable {
             final private int mPixelStride;
             final private int mRowStride;
 
-            // SurfacePlane instance is created by native code when a new
-            // SurfaceImage is created
+            // SurfacePlane instance is created by native code when SurfaceImage#getPlanes() is
+            // called
             private SurfacePlane(int rowStride, int pixelStride, ByteBuffer buffer) {
                 mRowStride = rowStride;
                 mPixelStride = pixelStride;
@@ -795,7 +795,7 @@ public class ImageWriter implements AutoCloseable {
 
         }
 
-        // this will create the SurfacePlane object and fill the information
+        // Create the SurfacePlane object and fill the information
         private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes, int writerFmt);
 
         private synchronized native int nativeGetWidth();

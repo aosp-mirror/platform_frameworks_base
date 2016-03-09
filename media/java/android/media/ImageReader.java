@@ -335,7 +335,6 @@ public class ImageReader implements AutoCloseable {
 
             switch (status) {
                 case ACQUIRE_SUCCESS:
-                    si.createSurfacePlanes();
                     si.mIsImageValid = true;
                 case ACQUIRE_NO_BUFS:
                 case ACQUIRE_MAX_IMAGES:
@@ -693,7 +692,7 @@ public class ImageReader implements AutoCloseable {
                     width = ImageReader.this.getWidth();
                     break;
                 default:
-                    width = nativeGetWidth(mFormat);
+                    width = nativeGetWidth();
             }
             return width;
         }
@@ -709,7 +708,7 @@ public class ImageReader implements AutoCloseable {
                     height = ImageReader.this.getHeight();
                     break;
                 default:
-                    height = nativeGetHeight(mFormat);
+                    height = nativeGetHeight();
             }
             return height;
         }
@@ -729,6 +728,10 @@ public class ImageReader implements AutoCloseable {
         @Override
         public Plane[] getPlanes() {
             throwISEIfImageIsInvalid();
+
+            if (mPlanes == null) {
+                mPlanes = nativeCreatePlanes(ImageReader.this.mNumPlanes, ImageReader.this.mFormat);
+            }
             // Shallow copy is fine.
             return mPlanes.clone();
         }
@@ -766,7 +769,8 @@ public class ImageReader implements AutoCloseable {
         }
 
         private void clearSurfacePlanes() {
-            if (mIsImageValid) {
+            // Image#getPlanes may not be called before the image is closed.
+            if (mIsImageValid && mPlanes != null) {
                 for (int i = 0; i < mPlanes.length; i++) {
                     if (mPlanes[i] != null) {
                         mPlanes[i].clearBuffer();
@@ -776,32 +780,25 @@ public class ImageReader implements AutoCloseable {
             }
         }
 
-        private void createSurfacePlanes() {
-            mPlanes = new SurfacePlane[ImageReader.this.mNumPlanes];
-            for (int i = 0; i < ImageReader.this.mNumPlanes; i++) {
-                mPlanes[i] = nativeCreatePlane(i, ImageReader.this.mFormat);
-            }
-        }
         private class SurfacePlane extends android.media.Image.Plane {
-            // SurfacePlane instance is created by native code when a new SurfaceImage is created
-            private SurfacePlane(int index, int rowStride, int pixelStride) {
-                mIndex = index;
+            // SurfacePlane instance is created by native code when SurfaceImage#getPlanes() is
+            // called
+            private SurfacePlane(int rowStride, int pixelStride, ByteBuffer buffer) {
                 mRowStride = rowStride;
                 mPixelStride = pixelStride;
+                mBuffer = buffer;
+                /**
+                 * Set the byteBuffer order according to host endianness (native
+                 * order), otherwise, the byteBuffer order defaults to
+                 * ByteOrder.BIG_ENDIAN.
+                 */
+                mBuffer.order(ByteOrder.nativeOrder());
             }
 
             @Override
             public ByteBuffer getBuffer() {
-                SurfaceImage.this.throwISEIfImageIsInvalid();
-                if (mBuffer != null) {
-                    return mBuffer;
-                } else {
-                    mBuffer = SurfaceImage.this.nativeImageGetBuffer(mIndex,
-                            ImageReader.this.mFormat);
-                    // Set the byteBuffer order according to host endianness (native order),
-                    // otherwise, the byteBuffer order defaults to ByteOrder.BIG_ENDIAN.
-                    return mBuffer.order(ByteOrder.nativeOrder());
-                }
+                throwISEIfImageIsInvalid();
+                return mBuffer;
             }
 
             @Override
@@ -837,7 +834,6 @@ public class ImageReader implements AutoCloseable {
                 mBuffer = null;
             }
 
-            final private int mIndex;
             final private int mPixelStride;
             final private int mRowStride;
 
@@ -860,10 +856,10 @@ public class ImageReader implements AutoCloseable {
         // If this image is detached from the ImageReader.
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
-        private synchronized native ByteBuffer nativeImageGetBuffer(int idx, int readerFormat);
-        private synchronized native SurfacePlane nativeCreatePlane(int idx, int readerFormat);
-        private synchronized native int nativeGetWidth(int format);
-        private synchronized native int nativeGetHeight(int format);
+        private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes,
+                int readerFormat);
+        private synchronized native int nativeGetWidth();
+        private synchronized native int nativeGetHeight();
         private synchronized native int nativeGetFormat(int readerFormat);
     }
 
