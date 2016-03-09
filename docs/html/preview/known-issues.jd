@@ -8,10 +8,11 @@ page.title=Known Issues
 
 <p>Two primary support channels are available to you when developing and testing
 with the Android N Developer Preview: Please file bugs at
-https://developer.android.com/preview/bug for device-specific, system, and Google App bugs.
+<a href="{@docRoot}preview/bug">https://developer.android.com/preview/bug</a> for device-specific, system, and Google App bugs.
 For issues in other apps, please contact the developer directly.</p>
 
-<p>To discuss issues or ideas with other developers working with Android M, join the Developer Preview Google+ community (not available yet).</p>
+<p>To discuss issues or ideas with other developers working with Android N, join the
+<a href="{@docRoot}preview/dev-community">Developer Preview Google+ community</a>.</p>
 
 <h2 id="general">General advisories</h2>
 
@@ -62,7 +63,11 @@ For issues in other apps, please contact the developer directly.</p>
      <li>In Direct boot mode, applying the passcode restrictions to the device causes the work profile to be unlocked, even though the device is locked. This makes the work profile accessible even though it should be protected by the device lock screen.</li>
      <li>When the user enters a wrong password and pin, the system does not display any informational message; instead, it only clears the input field. This issue does not affect pattern or fingerprint input.</li>
      <li>On a tablet, the background displayed with the work challenge is disproportionately small.</li>
-     <li>The version of Google Apps Device Policy that is bundled with N Developer Preview does not yet support the Work Profile Security Challenge feature. Developers should instead use TestDPC to test this feature.</li>
+     <li>The version of
+     <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.enterprise.dmagent">
+     Google Apps Device Policy</a> that is bundled with N Developer Preview does not yet support the Work Profile Security Challenge feature. Developers should instead use
+     <a href="https://play.google.com/store/apps/details?id=com.afwsamples.testdpc">TestDPC</a>
+     to test this feature.</li>
    </ul>
    </li>
 
@@ -98,8 +103,10 @@ For issues in other apps, please contact the developer directly.</p>
 
    <li>Other
    <ul>
-      <li>The Settings app crashes on launch if  DISALLOW_MOUNT_PHYSICAL_MEDIA is set to true when the user inserts physical media such as an SD card.</li>
-      <li>The DPM.setPackagesSuspended state does not persist when the user uninstalls and then reinstalls an app. Either the app should remain suspended after uninstall/reinstall, or suspended apps should not be uninstallable</li>
+      <li>The Settings app crashes on launch if
+      {@link android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} is set to true when the
+      user inserts physical media such as an SD card.</li>
+      <li>The {@code DPM.setPackagesSuspended} state does not persist when the user uninstalls and then reinstalls an app. Either the app should remain suspended after uninstall/reinstall, or suspended apps should not be uninstallable</li>
       <li>The first check-in in a Work Profile takes several minutes to complete. This may cause the device to take longer than normal to be visible in the Play EMM API.</li>
       <li>Notifications from Work Profile apps are not visible to notification listeners installed in the personal profile. As a result, the system does not display Notifications as expected.</li>
       <li>The version of Google Apps Device Policy that is bundled with N Developer Preview does not yet support the Work Profile Security Challenge feature. Developers should instead use TestDPC to test this feature.</li>
