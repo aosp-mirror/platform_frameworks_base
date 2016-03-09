@@ -586,18 +586,17 @@ public class DirectoryFragment extends Fragment
 
                 case R.id.menu_share:
                     shareDocuments(selection);
-                    mode.finish();
                     return true;
 
                 case R.id.menu_delete:
-                    // Exit selection mode first, so we avoid deselecting deleted documents.
-                    mode.finish();
-                    deleteDocuments(selection);
+                    // Pass mode along to the delete function so it can
+                    // end action mode when documents are deleted.
+                    // It won't end action mode if user cancels the delete.
+                    deleteDocuments(selection, mode);
                     return true;
 
                 case R.id.menu_copy_to:
                     transferDocuments(selection, FileOperationService.OPERATION_COPY);
-                    mode.finish();
                     return true;
 
                 case R.id.menu_move_to:
@@ -615,8 +614,10 @@ public class DirectoryFragment extends Fragment
                     return true;
 
                 case R.id.menu_rename:
-                    renameDocuments(selection);
+                    // Exit selection mode first, so we avoid deselecting deleted
+                    // (renamed) documents.
                     mode.finish();
+                    renameDocuments(selection);
                     return true;
 
                 default:
@@ -700,7 +701,7 @@ public class DirectoryFragment extends Fragment
         }.execute(selected);
     }
 
-    private void deleteDocuments(final Selection selected) {
+    private void deleteDocuments(final Selection selected, final ActionMode mode) {
         assert(!selected.isEmpty());
 
         final DocumentInfo srcParent = getDisplayState().stack.peek();
@@ -732,7 +733,15 @@ public class DirectoryFragment extends Fragment
                          android.R.string.yes,
                          new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                // Hide the files in the UI.
+                                // Finish selection mode first which clears selection so we
+                                // don't end up trying to deselect deleted documents.
+                                // This is done here, rather in the onActionItemClicked
+                                // so we can avoid de-selecting items in the case where
+                                // the user cancels the delete.
+                                mode.finish();
+                                // Hide the files in the UI...since the operation
+                                // might be queued up on FileOperationService.
+                                // We're walking a line here.
                                 mAdapter.hide(selected.getAll());
                                 FileOperations.delete(
                                         getActivity(), docs, srcParent, getDisplayState().stack);
