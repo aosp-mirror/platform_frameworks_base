@@ -203,7 +203,7 @@ page.tags="preview", "developer", "android"
 <p>
   We’ll notify you when preview updates are available via the <a href=
   "http://android-developers.blogspot.com/">Android Developers Blog</a>, as
-  well as this site and the <a href="https://developer.android.com/preview/dev-community">Android
+  well as this site and the <a href="{@docRoot}preview/dev-community">Android
   N Developer Community</a>.
 </p>
 
@@ -361,11 +361,11 @@ Android N</a> has
 <ul>
   <li> <a href="https://code.google.com/p/android-developer-preview/">N Developer Preview Issue
     Tracker</a> is your <strong>primary feedback channel.</strong> You can report bugs, performance
-    issues, and general feedback through the issue tracker. You can also check for <a
-    href="https://code.google.com/p/android-developer-preview/wiki/KnownIssues">known issues</a> and
+    issues, and general feedback through the issue tracker. You can also check for
+<a href="{@docRoot}preview/bug">known issues</a> and
     find workaround steps. We’ll keep you updated on your issue as it’s triaged and sent to
     the Android engineering team for review. </li>
-  <li> The <a href="https://developer.android.com/preview/dev-community">Android N Developer Community</a> is
+  <li> The <a href="{@docRoot}preview/dev-community">Android N Developer Community</a> is
     a Google+ community where you can <strong>connect with other developers</strong>working with
     Android N. You can share observations or ideas or find answers to
     questions about Android N. We’ll moderate the community and provide answers and
@@ -436,7 +436,7 @@ Android N</a> has
   <li> Review the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>
   and <a href="{@docRoot}preview/samples.html">Android N samples</a> to gain more
   insight into new API features and how to use them in your app.
-  <li> Join the <a href="https://developer.android.com/preview/dev-community">Android N
+  <li> Join the <a href="{@docRoot}preview/dev-community">Android N
   Developer Community</a> to get the latest news and connect with other
   developers working with the new platform.</li>
 </ol>

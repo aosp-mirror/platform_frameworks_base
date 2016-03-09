@@ -107,7 +107,7 @@ page.image=images/cards/card-n-changes_2x.png
   removes these processing restrictions. The additional behavior does not
   affect recommendations and best practices in adapting your app to the prior
   version of Doze introduced in Android 6.0 (API level 23), as discussed in
-  <a href="{@docRoot}/training/monitoring-device-state/doze-standby.html">
+  <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">
   Optimizing for Doze and App Standby</a>. You should still
   follow those recommendations, such as using Google Cloud Messaging (GCM) to
   send and receive messages, and start planning updates to accomodate the
