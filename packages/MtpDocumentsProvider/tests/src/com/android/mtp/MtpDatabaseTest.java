@@ -19,6 +19,7 @@ package com.android.mtp;
 import android.database.Cursor;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
+import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
@@ -26,6 +27,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 
 import static android.provider.DocumentsContract.Document.*;
 import static com.android.mtp.MtpDatabase.strings;
@@ -1021,6 +1023,62 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
                 null)));
         assertFalse(mDatabase.getMapper().stopAddingDocuments(null));
+    }
+
+    public void testSetBootCount() {
+        assertEquals(0, mDatabase.getLastBootCount());
+        mDatabase.setLastBootCount(10);
+        assertEquals(10, mDatabase.getLastBootCount());
+        try {
+            mDatabase.setLastBootCount(-1);
+            fail();
+        } catch (IllegalArgumentException e) {}
+    }
+
+    public void testCleanDatabase() throws FileNotFoundException {
+        // Add tree.
+        addTestDevice();
+        addTestStorage("1");
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
+                createDocument(100, "apple.txt", MtpConstants.FORMAT_TEXT, 1024),
+                createDocument(101, "orange.txt", MtpConstants.FORMAT_TEXT, 1024),
+        });
+        mDatabase.getMapper().stopAddingDocuments("2");
+
+        // Disconnect the device.
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        // Clean database.
+        mDatabase.cleanDatabase(new Uri[] {
+                DocumentsContract.buildDocumentUri(MtpDocumentsProvider.AUTHORITY, "3")
+        });
+
+        // Add tree again.
+        addTestDevice();
+        addTestStorage("1");
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
+                createDocument(100, "apple.txt", MtpConstants.FORMAT_TEXT, 1024),
+                createDocument(101, "orange.txt", MtpConstants.FORMAT_TEXT, 1024),
+        });
+        mDatabase.getMapper().stopAddingDocuments("2");
+
+        try (final Cursor cursor = mDatabase.queryChildDocuments(
+                strings(COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME), "2")) {
+            assertEquals(2, cursor.getCount());
+
+            // Persistent uri uses the same ID.
+            cursor.moveToNext();
+            assertEquals("3", cursor.getString(0));
+            assertEquals("apple.txt", cursor.getString(1));
+
+            // Others does not.
+            cursor.moveToNext();
+            assertEquals("5", cursor.getString(0));
+            assertEquals("orange.txt", cursor.getString(1));
+        }
     }
 
     private void addTestDevice() throws FileNotFoundException {

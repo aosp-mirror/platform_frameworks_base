@@ -30,7 +30,7 @@ import java.util.Map;
  * Class containing MtpDatabase constants.
  */
 class MtpDatabaseConstants {
-    static final int DATABASE_VERSION = 4;
+    static final int DATABASE_VERSION = 5;
     static final String DATABASE_NAME = "database";
 
     static final int FLAG_DATABASE_IN_MEMORY = 1;
@@ -48,6 +48,11 @@ class MtpDatabaseConstants {
     static final String TABLE_ROOT_EXTRA = "RootExtra";
 
     /**
+     * Table containing last boot count.
+     */
+    static final String TABLE_LAST_BOOT_COUNT = "LastBootCount";
+
+    /**
      * 'FROM' closure of joining TABLE_DOCUMENTS and TABLE_ROOT_EXTRA.
      */
     static final String JOIN_ROOTS = createJoinFromClosure(
@@ -62,7 +67,13 @@ class MtpDatabaseConstants {
     static final String COLUMN_PARENT_DOCUMENT_ID = "parent_document_id";
     static final String COLUMN_DOCUMENT_TYPE = "document_type";
     static final String COLUMN_ROW_STATE = "row_state";
-    static final String COLUMN_MAPPING_KEY = "column_mapping_key";
+    static final String COLUMN_MAPPING_KEY = "mapping_key";
+
+    /**
+     * Value for TABLE_LAST_BOOT_COUNT.
+     * Type: INTEGER
+     */
+    static final String COLUMN_VALUE = "value";
 
     /**
      * The state represents that the row has a valid object handle.
@@ -132,6 +143,9 @@ class MtpDatabaseConstants {
             Root.COLUMN_AVAILABLE_BYTES + " INTEGER," +
             Root.COLUMN_CAPACITY_BYTES + " INTEGER," +
             Root.COLUMN_MIME_TYPES + " TEXT NOT NULL);";
+
+    static final String QUERY_CREATE_LAST_BOOT_COUNT =
+            "CREATE TABLE " + TABLE_LAST_BOOT_COUNT + " (value INTEGER NOT NULL);";
 
     /**
      * Map for columns names to provide DocumentContract.Root compatible columns.
