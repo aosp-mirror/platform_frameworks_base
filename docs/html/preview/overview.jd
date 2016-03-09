@@ -58,7 +58,7 @@ page.tags="preview", "developer", "android"
       </h5>
 
       <p>
-        Run and test your apps on a range of devices, or on an emulator.
+        Run and test your apps on a range of devices or on an emulator.
 
       </p>
     </div>
@@ -234,7 +234,7 @@ page.tags="preview", "developer", "android"
 <h3 id="hardware_system_images">Hardware system images</h3>
 
 <p>
-  The N Developer Preview includes hardware system images that you can use when
+  The N Developer Preview includes Nexus hardware system images that you can use when
   testing and developing on physical devices. See the <a href=
   "{@docRoot}preview/download.html">Device Images</a> page for the full list
   of hardware images.

@@ -41,7 +41,7 @@ For issues in other apps, please contact the developer directly.</p>
   <li>Battery life may be regressed in this release for screen-on and screen-off use cases.</li>
   <li>Some apps may not function normally on Developer Preview 1. This includes Google’s apps as well as other apps.</li>
   <li>This early build is not Compatibility Test Suite (CTS) approved. Apps that depend on CTS approved builds (Android Pay for example) won’t work. </li>
-  <li>This preview release supports the following devices: Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, and Pixel C, as well as General Mobile 4G (Android One).</li>
+  <li>This preview release supports the following devices: Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, and Pixel C.</li>
 </ul>
 
 <h3 id="platform">Platform Issues</h3>

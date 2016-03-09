@@ -328,15 +328,6 @@ preview system image, you must perform another manual installation.
     </td>
   </tr>
 
-  <tr id="one">
-    <td>General Mobile 4G (Android One) <br>"seed"</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
-      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
-      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
-    </td>
-  </tr>
-
 </table>
 
 
