@@ -55,6 +55,11 @@ public final class JobStatus {
     static final int CONSTRAINT_APP_NOT_IDLE = 1<<6;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<7;
 
+    // Soft override: ignore constraints like time that don't affect API availability
+    public static final int OVERRIDE_SOFT = 1;
+    // Full override: ignore all constraints including API-affecting like connectivity
+    public static final int OVERRIDE_FULL = 2;
+
     final JobInfo job;
     /** Uid of the package requesting this job. */
     final int callingUid;
@@ -90,6 +95,9 @@ public final class JobStatus {
     public ArraySet<String> changedAuthorities;
 
     public int lastEvaluatedPriority;
+
+    // Used by shell commands
+    public int overrideState = 0;
 
     /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
@@ -370,7 +378,7 @@ public final class JobStatus {
      */
     public boolean isReady() {
         // Deadline constraint trumps other constraints (except for periodic jobs where deadline
-        // (is an implementation detail. A periodic job should only run if it's constraints are
+        // is an implementation detail. A periodic job should only run if its constraints are
         // satisfied).
         // AppNotIdle implicit constraint trumps all!
         return (isConstraintsSatisfied()
@@ -384,12 +392,27 @@ public final class JobStatus {
             CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED |
             CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
+    // Soft override covers all non-"functional" constraints
+    static final int SOFT_OVERRIDE_CONSTRAINTS =
+            CONSTRAINT_CHARGING | CONSTRAINT_TIMING_DELAY | CONSTRAINT_IDLE;
+
     /**
      * @return Whether the constraints set on this job are satisfied.
      */
     public boolean isConstraintsSatisfied() {
+        if (overrideState == OVERRIDE_FULL) {
+            // force override: the job is always runnable
+            return true;
+        }
+
         final int req = requiredConstraints & CONSTRAINTS_OF_INTEREST;
-        final int sat = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
+
+        int sat = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
+        if (overrideState == OVERRIDE_SOFT) {
+            // override: pretend all 'soft' requirements are satisfied
+            sat |= (requiredConstraints & SOFT_OVERRIDE_CONSTRAINTS);
+        }
+
         return (sat & req) == req;
     }
 
