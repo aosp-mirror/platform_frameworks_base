@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <benchmark/Benchmark.h>
+#include <benchmark/benchmark.h>
 
 #include "DisplayList.h"
 #if HWUI_NEW_OPS
@@ -23,7 +23,6 @@
 #include "DisplayListCanvas.h"
 #endif
 #include "tests/common/TestUtils.h"
-#include "tests/microbench/MicroBench.h"
 
 using namespace android;
 using namespace android::uirenderer;
@@ -34,74 +33,64 @@ typedef RecordingCanvas TestCanvas;
 typedef DisplayListCanvas TestCanvas;
 #endif
 
-BENCHMARK_NO_ARG(BM_DisplayList_alloc);
-void BM_DisplayList_alloc::Run(int iters) {
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+void BM_DisplayList_alloc(benchmark::State& benchState) {
+    while (benchState.KeepRunning()) {
         auto displayList = new DisplayList();
-        MicroBench::DoNotOptimize(displayList);
+        benchmark::DoNotOptimize(displayList);
         delete displayList;
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_DisplayList_alloc);
 
-BENCHMARK_NO_ARG(BM_DisplayList_alloc_theoretical);
-void BM_DisplayList_alloc_theoretical::Run(int iters) {
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+void BM_DisplayList_alloc_theoretical(benchmark::State& benchState) {
+    while (benchState.KeepRunning()) {
         auto displayList = new char[sizeof(DisplayList)];
-        MicroBench::DoNotOptimize(displayList);
+        benchmark::DoNotOptimize(displayList);
         delete[] displayList;
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_DisplayList_alloc_theoretical);
 
-BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_empty);
-void BM_DisplayListCanvas_record_empty::Run(int iters) {
+void BM_DisplayListCanvas_record_empty(benchmark::State& benchState) {
     TestCanvas canvas(100, 100);
     delete canvas.finishRecording();
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         canvas.resetRecording(100, 100);
-        MicroBench::DoNotOptimize(&canvas);
+        benchmark::DoNotOptimize(&canvas);
         delete canvas.finishRecording();
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_DisplayListCanvas_record_empty);
 
-BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_saverestore);
-void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
+void BM_DisplayListCanvas_record_saverestore(benchmark::State& benchState) {
     TestCanvas canvas(100, 100);
     delete canvas.finishRecording();
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         canvas.resetRecording(100, 100);
         canvas.save(SaveFlags::MatrixClip);
         canvas.save(SaveFlags::MatrixClip);
-        MicroBench::DoNotOptimize(&canvas);
+        benchmark::DoNotOptimize(&canvas);
         canvas.restore();
         canvas.restore();
         delete canvas.finishRecording();
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_DisplayListCanvas_record_saverestore);
 
-BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_translate);
-void BM_DisplayListCanvas_record_translate::Run(int iters) {
+void BM_DisplayListCanvas_record_translate(benchmark::State& benchState) {
     TestCanvas canvas(100, 100);
     delete canvas.finishRecording();
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         canvas.resetRecording(100, 100);
         canvas.scale(10, 10);
-        MicroBench::DoNotOptimize(&canvas);
+        benchmark::DoNotOptimize(&canvas);
         delete canvas.finishRecording();
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_DisplayListCanvas_record_translate);
 
 /**
  * Simulate a simple view drawing a background, overlapped by an image.
@@ -109,16 +98,14 @@ void BM_DisplayListCanvas_record_translate::Run(int iters) {
  * Note that the recording commands are intentionally not perfectly efficient, as the
  * View system frequently produces unneeded save/restores.
  */
-BENCHMARK_NO_ARG(BM_DisplayListCanvas_record_simpleBitmapView);
-void BM_DisplayListCanvas_record_simpleBitmapView::Run(int iters) {
+void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) {
     TestCanvas canvas(100, 100);
     delete canvas.finishRecording();
 
     SkPaint rectPaint;
     SkBitmap iconBitmap = TestUtils::createSkBitmap(80, 80);
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         canvas.resetRecording(100, 100);
         {
             canvas.save(SaveFlags::MatrixClip);
@@ -131,11 +118,11 @@ void BM_DisplayListCanvas_record_simpleBitmapView::Run(int iters) {
             canvas.drawBitmap(iconBitmap, 0, 0, nullptr);
             canvas.restore();
         }
-        MicroBench::DoNotOptimize(&canvas);
+        benchmark::DoNotOptimize(&canvas);
         delete canvas.finishRecording();
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_DisplayListCanvas_record_simpleBitmapView);
 
 class NullClient: public CanvasStateClient {
     void onViewportInitialized() override {}
@@ -143,48 +130,42 @@ class NullClient: public CanvasStateClient {
     GLuint getTargetFbo() const override { return 0; }
 };
 
-BENCHMARK_NO_ARG(BM_CanvasState_saverestore);
-void BM_CanvasState_saverestore::Run(int iters) {
+void BM_CanvasState_saverestore(benchmark::State& benchState) {
     NullClient client;
     CanvasState state(client);
     state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         state.save(SaveFlags::MatrixClip);
         state.save(SaveFlags::MatrixClip);
-        MicroBench::DoNotOptimize(&state);
+        benchmark::DoNotOptimize(&state);
         state.restore();
         state.restore();
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_CanvasState_saverestore);
 
-BENCHMARK_NO_ARG(BM_CanvasState_init);
-void BM_CanvasState_init::Run(int iters) {
+void BM_CanvasState_init(benchmark::State& benchState) {
     NullClient client;
     CanvasState state(client);
     state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
-        MicroBench::DoNotOptimize(&state);
+        benchmark::DoNotOptimize(&state);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_CanvasState_init);
 
-BENCHMARK_NO_ARG(BM_CanvasState_translate);
-void BM_CanvasState_translate::Run(int iters) {
+void BM_CanvasState_translate(benchmark::State& benchState) {
     NullClient client;
     CanvasState state(client);
     state.initializeSaveStack(100, 100, 0, 0, 100, 100, Vector3());
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; ++i) {
+    while (benchState.KeepRunning()) {
         state.translate(5, 5, 0);
-        MicroBench::DoNotOptimize(&state);
+        benchmark::DoNotOptimize(&state);
         state.translate(-5, -5, 0);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_CanvasState_translate);

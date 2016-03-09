@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <benchmark/Benchmark.h>
+#include <benchmark/benchmark.h>
 
 #include "BakedOpState.h"
 #include "BakedOpDispatcher.h"
@@ -27,7 +27,6 @@
 #include "tests/common/TestScene.h"
 #include "tests/common/TestUtils.h"
 #include "Vector.h"
-#include "tests/microbench/MicroBench.h"
 
 #include <vector>
 
@@ -62,38 +61,34 @@ static std::vector<sp<RenderNode>> createTestNodeList() {
     return vec;
 }
 
-BENCHMARK_NO_ARG(BM_FrameBuilder_defer);
-void BM_FrameBuilder_defer::Run(int iters) {
+void BM_FrameBuilder_defer(benchmark::State& state) {
     auto nodes = createTestNodeList();
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
                 nodes, sLightGeometry, nullptr);
-        MicroBench::DoNotOptimize(&frameBuilder);
+        benchmark::DoNotOptimize(&frameBuilder);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_FrameBuilder_defer);
 
-BENCHMARK_NO_ARG(BM_FrameBuilder_deferAndRender);
-void BM_FrameBuilder_deferAndRender::Run(int iters) {
-    TestUtils::runOnRenderThread([this, iters](RenderThread& thread) {
+void BM_FrameBuilder_deferAndRender(benchmark::State& state) {
+    TestUtils::runOnRenderThread([&state](RenderThread& thread) {
         auto nodes = createTestNodeList();
 
         RenderState& renderState = thread.renderState();
         Caches& caches = Caches::getInstance();
 
-        StartBenchmarkTiming();
-        for (int i = 0; i < iters; i++) {
+        while (state.KeepRunning()) {
             FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
                     nodes, sLightGeometry, nullptr);
 
             BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
-            MicroBench::DoNotOptimize(&renderer);
+            benchmark::DoNotOptimize(&renderer);
         }
-        StopBenchmarkTiming();
     });
 }
+BENCHMARK(BM_FrameBuilder_deferAndRender);
 
 static std::vector<sp<RenderNode>> getSyncedSceneNodes(const char* sceneName) {
     gDisplay = getBuiltInDisplay(); // switch to real display if present
@@ -113,47 +108,41 @@ static std::vector<sp<RenderNode>> getSyncedSceneNodes(const char* sceneName) {
     return nodes;
 }
 
-static void benchDeferScene(testing::Benchmark& benchmark, int iters, const char* sceneName) {
+static auto SCENES = {
+        "listview",
+};
+
+void BM_FrameBuilder_defer_scene(benchmark::State& state) {
+    const char* sceneName = *(SCENES.begin() + state.range_x());
+    state.SetLabel(sceneName);
     auto nodes = getSyncedSceneNodes(sceneName);
-    benchmark.StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
                 SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
                 nodes, sLightGeometry, nullptr);
-        MicroBench::DoNotOptimize(&frameBuilder);
+        benchmark::DoNotOptimize(&frameBuilder);
     }
-    benchmark.StopBenchmarkTiming();
 }
+BENCHMARK(BM_FrameBuilder_defer_scene)->DenseRange(0, SCENES.size() - 1);
 
-static void benchDeferAndRenderScene(testing::Benchmark& benchmark,
-        int iters, const char* sceneName) {
-    TestUtils::runOnRenderThread([&benchmark, iters, sceneName](RenderThread& thread) {
+void BM_FrameBuilder_deferAndRender_scene(benchmark::State& state) {
+    TestUtils::runOnRenderThread([&state](RenderThread& thread) {
+        const char* sceneName = *(SCENES.begin() + state.range_x());
+        state.SetLabel(sceneName);
         auto nodes = getSyncedSceneNodes(sceneName);
 
         RenderState& renderState = thread.renderState();
         Caches& caches = Caches::getInstance();
 
-        benchmark.StartBenchmarkTiming();
-        for (int i = 0; i < iters; i++) {
+        while (state.KeepRunning()) {
             FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
                     SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
                     nodes, sLightGeometry, nullptr);
 
             BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
-            MicroBench::DoNotOptimize(&renderer);
+            benchmark::DoNotOptimize(&renderer);
         }
-        benchmark.StopBenchmarkTiming();
     });
 }
-
-BENCHMARK_NO_ARG(BM_FrameBuilder_listview_defer);
-void BM_FrameBuilder_listview_defer::Run(int iters) {
-    benchDeferScene(*this, iters, "listview");
-}
-
-BENCHMARK_NO_ARG(BM_FrameBuilder_listview_deferAndRender);
-void BM_FrameBuilder_listview_deferAndRender::Run(int iters) {
-    benchDeferAndRenderScene(*this, iters, "listview");
-}
-
+BENCHMARK(BM_FrameBuilder_deferAndRender_scene)->DenseRange(0, SCENES.size() - 1);
