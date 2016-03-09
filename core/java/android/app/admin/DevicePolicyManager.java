@@ -2774,18 +2774,19 @@ public class DevicePolicyManager {
      * certificate and corresponding private key. All apps within the profile will be able to access
      * the certificate and use the private key, given direct user approval.
      *
-     * <p>The caller of this API may grant itself access to the credential immediately, without user
-     * approval. It is a best practice not to request this unless strictly necessary since it opens
-     * up additional security vulnerabilities.
+     * <p>The caller of this API may grant itself access to the certificate and private key
+     * immediately, without user approval. It is a best practice not to request this unless strictly
+     * necessary since it opens up additional security vulnerabilities.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if calling from a delegated certificate installer.
      * @param privKey The private key to install.
      * @param cert The certificate to install.
      * @param alias The private key alias under which to install the certificate. If a certificate
-     * with that alias already exists, it will be overwritten.
+     *        with that alias already exists, it will be overwritten.
      * @param requestAccess {@code true} to request that the calling app be granted access to the
-     * credentials immediately. Otherwise, access to the credentials will be gated by user approval.
+     *        credentials immediately. Otherwise, access to the credentials will be gated by user
+     *        approval.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
@@ -2806,13 +2807,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to remove all user
-     * credentials installed under a given alias.
+     * Called by a device or profile owner, or delegated certificate installer, to remove a
+     * certificate and private key pair installed under a given alias.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if calling from a delegated certificate installer.
      * @param alias The private key alias under which the certificate is installed.
-     * @return {@code true} if the certificate alias no longer exists, {@code false} otherwise.
+     * @return {@code true} if the private key alias no longer exists, {@code false} otherwise.
      */
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
         try {
