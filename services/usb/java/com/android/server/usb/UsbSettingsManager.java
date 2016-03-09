@@ -738,7 +738,7 @@ class UsbSettingsManager {
         // Send broadcast to running activity with registered intent
         mUserContext.sendBroadcast(intent);
 
-        if (MtpNotificationManager.isMtpDevice(device)) {
+        if (MtpNotificationManager.shouldShowNotification(mPackageManager, device)) {
             // Show notification if the device is MTP storage.
             mMtpNotificationManager.showNotification(device);
         } else {
@@ -769,9 +769,7 @@ class UsbSettingsManager {
         if (DEBUG) Slog.d(TAG, "usbDeviceRemoved, sending " + intent);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
-        if (MtpNotificationManager.isMtpDevice(device)) {
-            mMtpNotificationManager.hideNotification(device);
-        }
+        mMtpNotificationManager.hideNotification(device.getDeviceId());
     }
 
     public void accessoryAttached(UsbAccessory accessory) {

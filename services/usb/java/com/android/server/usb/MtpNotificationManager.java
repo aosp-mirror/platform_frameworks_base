@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -101,8 +102,8 @@ class MtpNotificationManager {
                 TAG, device.getDeviceId(), notification);
     }
 
-    void hideNotification(UsbDevice device) {
-        mContext.getSystemService(NotificationManager.class).cancel(TAG, device.getDeviceId());
+    void hideNotification(int deviceId) {
+        mContext.getSystemService(NotificationManager.class).cancel(TAG, deviceId);
     }
 
     private class Receiver extends BroadcastReceiver {
@@ -121,7 +122,13 @@ class MtpNotificationManager {
         }
     }
 
-    static boolean isMtpDevice(UsbDevice device) {
+    static boolean shouldShowNotification(PackageManager packageManager, UsbDevice device) {
+        // We don't show MTP notification for devices that has FEATURE_AUTOMOTIVE.
+        return !packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE) &&
+                isMtpDevice(device);
+    }
+
+    private static boolean isMtpDevice(UsbDevice device) {
         for (int i = 0; i < device.getInterfaceCount(); i++) {
             final UsbInterface usbInterface = device.getInterface(i);
             if ((usbInterface.getInterfaceClass() == UsbConstants.USB_CLASS_STILL_IMAGE &&
