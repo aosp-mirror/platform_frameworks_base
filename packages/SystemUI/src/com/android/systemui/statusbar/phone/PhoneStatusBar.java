@@ -4493,7 +4493,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         private void handlePulseWhileDozing(@NonNull PulseCallback callback, int reason) {
-            mDozeScrimController.pulse(callback, reason);
+            mDozeScrimController.pulse(new PulseCallback() {
+
+                @Override
+                public void onPulseStarted() {
+                    callback.onPulseStarted();
+                    mStackScroller.setPulsing(true);
+                }
+
+                @Override
+                public void onPulseFinished() {
+                    callback.onPulseFinished();
+                    mStackScroller.setPulsing(false);
+                }
+            }, reason);
         }
 
         private void handleStopDozing() {

@@ -324,6 +324,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
+    private boolean mPulsing;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -2194,7 +2195,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateNotificationAnimationStates() {
-        boolean running = mAnimationsEnabled;
+        boolean running = mAnimationsEnabled || mPulsing;
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -2204,7 +2205,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAnimationState(View child) {
-        updateAnimationState(mAnimationsEnabled && (mIsExpanded || isPinnedHeadsUp(child)), child);
+        updateAnimationState((mAnimationsEnabled || mPulsing)
+                && (mIsExpanded || isPinnedHeadsUp(child)), child);
     }
 
 
@@ -3320,6 +3322,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public boolean isExpanded() {
         return mIsExpanded;
+    }
+
+    public void setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
+        updateNotificationAnimationStates();
     }
 
     /**
