@@ -1073,7 +1073,7 @@ include $(BUILD_DROIDDOC)
 
 static_doc_index_redirect := $(out_dir)/index.html
 $(static_doc_index_redirect): \
-	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
+	$(LOCAL_PATH)/docs/docs-preview-index.html | $(ACP)
 	$(hide) mkdir -p $(dir $@)
 	$(hide) $(ACP) $< $@
 
