@@ -684,7 +684,7 @@ public class KeyguardViewMediator extends SystemUI {
             doKeyguardLocked(null);
             mUpdateMonitor.registerCallback(mUpdateCallback);
         }
-        mIsPerUserLock = StorageManager.isFileBasedEncryptionEnabled();
+        mIsPerUserLock = StorageManager.isFileEncryptedNativeOrEmulated();
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
         maybeSendUserPresentBroadcast();

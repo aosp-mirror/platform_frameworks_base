@@ -1637,9 +1637,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // Still at the first stage of CryptKeeper double bounce, mOwners.hasDeviceOwner is
         // always false at this point.
-        if ("encrypted".equals(mInjector.systemPropertiesGet("ro.crypto.state"))
-                && "trigger_restart_min_framework".equals(
-                        mInjector.systemPropertiesGet("vold.decrypt"))){
+        if (StorageManager.inCryptKeeperBounce()) {
             return;
         }
 
@@ -4864,17 +4862,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
     private int getEncryptionStatus() {
-        String status = mInjector.systemPropertiesGet("ro.crypto.state", "unsupported");
-        if ("encrypted".equalsIgnoreCase(status)) {
-            final long token = mInjector.binderClearCallingIdentity();
-            try {
-                return LockPatternUtils.isDeviceEncrypted()
-                        ? DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
-                        : DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
-            } finally {
-                mInjector.binderRestoreCallingIdentity(token);
-            }
-        } else if ("unencrypted".equalsIgnoreCase(status)) {
+        if (!StorageManager.isNonDefaultBlockEncrypted()) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
+        } else if (StorageManager.isEncrypted()) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
+        } else if (StorageManager.isEncryptable()) {
             return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else {
             return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;

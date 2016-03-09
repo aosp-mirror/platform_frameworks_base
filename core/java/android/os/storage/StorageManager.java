@@ -1025,19 +1025,117 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
-    public static boolean isFileBasedEncryptionEnabled() {
-        return isNativeFileBasedEncryptionEnabled() || isEmulatedFileBasedEncryptionEnabled();
+    /** {@hide}
+     * Is this device encryptable or already encrypted?
+     * @return true for encryptable or encrypted
+     *         false not encrypted and not encryptable
+     */
+    public static boolean isEncryptable() {
+        final String state = SystemProperties.get("ro.crypto.state", "unsupported");
+        return !"unsupported".equalsIgnoreCase(state);
+    }
+
+    /** {@hide}
+     * Is this device already encrypted?
+     * @return true for encrypted. (Implies isEncryptable() == true)
+     *         false not encrypted
+     */
+    public static boolean isEncrypted() {
+        final String state = SystemProperties.get("ro.crypto.state", "");
+        return "encrypted".equalsIgnoreCase(state);
+    }
+
+    /** {@hide}
+     * Is this device file encrypted?
+     * @return true for file encrypted. (Implies isEncrypted() == true)
+     *         false not encrypted or block encrypted
+     */
+    public static boolean isFileEncryptedNativeOnly() {
+        if (!isEncrypted()) {
+            return false;
+        }
+
+        final String status = SystemProperties.get("ro.crypto.type", "");
+        return "file".equalsIgnoreCase(status);
+    }
+
+    /** {@hide}
+     * Is this device block encrypted?
+     * @return true for block encrypted. (Implies isEncrypted() == true)
+     *         false not encrypted or file encrypted
+     */
+    public static boolean isBlockEncrypted() {
+        if (!isEncrypted()) {
+            return false;
+        }
+        final String status = SystemProperties.get("ro.crypto.type", "");
+        return "block".equalsIgnoreCase(status);
+    }
+
+    /** {@hide}
+     * Is this device block encrypted with credentials?
+     * @return true for crediential block encrypted.
+     *         (Implies isBlockEncrypted() == true)
+     *         false not encrypted, file encrypted or default block encrypted
+     */
+    public static boolean isNonDefaultBlockEncrypted() {
+        if (!isBlockEncrypted()) {
+            return false;
+        }
+
+        try {
+            IMountService mountService = IMountService.Stub.asInterface(
+                    ServiceManager.getService("mount"));
+            return mountService.getPasswordType() != CRYPT_TYPE_DEFAULT;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error getting encryption type");
+            return false;
+        }
+    }
+
+    /** {@hide}
+     * Is this device in the process of being block encrypted?
+     * @return true for encrypting.
+     *         false otherwise
+     * Whether device isEncrypted at this point is undefined
+     * Note that only system services and CryptKeeper will ever see this return
+     * true - no app will ever be launched in this state.
+     * Also note that this state will not change without a teardown of the
+     * framework, so no service needs to check for changes during their lifespan
+     */
+    public static boolean isBlockEncrypting() {
+        final String state = SystemProperties.get("vold.encrypt_progress", "");
+        return !"".equalsIgnoreCase(state);
+    }
+
+    /** {@hide}
+     * Is this device non default block encrypted and in the process of
+     * prompting for credentials?
+     * @return true for prompting for credentials.
+     *         (Implies isNonDefaultBlockEncrypted() == true)
+     *         false otherwise
+     * Note that only system services and CryptKeeper will ever see this return
+     * true - no app will ever be launched in this state.
+     * Also note that this state will not change without a teardown of the
+     * framework, so no service needs to check for changes during their lifespan
+     */
+    public static boolean inCryptKeeperBounce() {
+        final String status = SystemProperties.get("vold.decrypt");
+        return "trigger_restart_min_framework".equals(status);
     }
 
     /** {@hide} */
-    public static boolean isNativeFileBasedEncryptionEnabled() {
-        return "file".equals(SystemProperties.get("ro.crypto.type", "none"));
-    }
-
-    /** {@hide} */
-    public static boolean isEmulatedFileBasedEncryptionEnabled() {
+    public static boolean isFileEncryptedEmulatedOnly() {
         return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
+    }
+
+    /** {@hide}
+     * Is this device running in a file encrypted mode, either native or emulated?
+     * @return true for file encrypted, false otherwise
+     */
+    public static boolean isFileEncryptedNativeOrEmulated() {
+        return isFileEncryptedNativeOnly()
+               || isFileEncryptedEmulatedOnly();
     }
 
     /** {@hide} */

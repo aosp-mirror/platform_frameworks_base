@@ -80,7 +80,7 @@ public class DiskStatsService extends Binder {
         reportFreeSpace(Environment.getDownloadCacheDirectory(), "Cache", pw);
         reportFreeSpace(new File("/system"), "System", pw);
 
-        if (StorageManager.isNativeFileBasedEncryptionEnabled()) {
+        if (StorageManager.isFileEncryptedNativeOnly()) {
             pw.println("File-based Encryption: true");
         }
 
