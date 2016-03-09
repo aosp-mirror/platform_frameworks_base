@@ -138,6 +138,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         firstPageBuilder.setListener(this);
         // Fade in the tiles/labels as we reach the final position.
         firstPageDelayedBuilder.addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1);
+        clearAnimationState();
         mAllViews.clear();
         mTopFiveQs.clear();
         mAllViews.add((View) mQsPanel.getTileLayout());
