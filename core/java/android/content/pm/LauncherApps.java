@@ -496,18 +496,21 @@ public class LauncherApps {
      *
      * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
      *
-     * @param shortcut The target shortcut.
+     * @param packageName The target shortcut package name.
+     * @param shortcutId The target shortcut ID.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
      * @param user The UserHandle of the profile.
+     * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
+     *   has been uninstalled). {@code true} when the shortcut is still valid.
      */
     @RequiresPermission(permission.BIND_APPWIDGET)
-    public void startShortcut(@NonNull ShortcutInfo shortcut,
+    public boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             @NonNull UserHandle user) {
         try {
-            mService.startShortcut(mContext.getPackageName(), shortcut, sourceBounds,
-                    startActivityOptions, user);
+            return mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
+                    sourceBounds, startActivityOptions, user);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

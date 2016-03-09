@@ -1101,15 +1101,15 @@ public class ShortcutManagerTest extends AndroidTestCase {
         setCaller(LAUNCHER_1);
         Intent intent;
         intent = mInternal.createShortcutIntent(getCallingPackage(),
-                s1_1.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO), getCallingUserId());
+                CALLING_PACKAGE_1, "s1", getCallingUserId());
         assertEquals(ShortcutActivity2.class.getName(), intent.getComponent().getClassName());
 
         intent = mInternal.createShortcutIntent(getCallingPackage(),
-                s1_2.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO), getCallingUserId());
+                CALLING_PACKAGE_1, "s2", getCallingUserId());
         assertEquals(ShortcutActivity3.class.getName(), intent.getComponent().getClassName());
 
         intent = mInternal.createShortcutIntent(getCallingPackage(),
-                s2_1.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO), getCallingUserId());
+                CALLING_PACKAGE_2, "s1", getCallingUserId());
         assertEquals(ShortcutActivity.class.getName(), intent.getComponent().getClassName());
 
         // TODO Check extra, etc

@@ -9458,7 +9458,7 @@ package android.content.pm {
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
     method public void startAppDetailsActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
     method public void startMainActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
-    method public void startShortcut(android.content.pm.ShortcutInfo, android.graphics.Rect, android.os.Bundle, android.os.UserHandle);
+    method public boolean startShortcut(java.lang.String, java.lang.String, android.graphics.Rect, android.os.Bundle, android.os.UserHandle);
     method public void unregisterCallback(android.content.pm.LauncherApps.Callback);
   }
 

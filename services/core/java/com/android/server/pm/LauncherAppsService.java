@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -328,16 +329,29 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void startShortcut(String callingPackage, ShortcutInfo shortcut, Rect sourceBounds,
-                Bundle startActivityOptions, UserHandle user) throws RemoteException {
+        public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
+                Rect sourceBounds, Bundle startActivityOptions, UserHandle user)
+                throws RemoteException {
             enforceShortcutPermission(user);
             verifyCallingPackage(callingPackage);
 
             final Intent intent = mShortcutServiceInternal.createShortcutIntent(callingPackage,
-                    shortcut, user.getIdentifier());
-            // TODO
-            Slog.e(TAG, "startShortcut() not implemented yet, but the intent is " + intent);
-            throw new RuntimeException("not implemented yet");
+                    packageName, shortcutId, user.getIdentifier());
+            if (intent == null) {
+                return false;
+            }
+            // Note the target activity doesn't have to be exported.
+
+            intent.setSourceBounds(sourceBounds);
+            prepareIntentForLaunch(intent, sourceBounds);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mContext.startActivityAsUser(intent, startActivityOptions, user);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            return true;
         }
 
         @Override
@@ -369,9 +383,7 @@ public class LauncherAppsService extends SystemService {
 
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            launchIntent.setSourceBounds(sourceBounds);
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            prepareIntentForLaunch(launchIntent, sourceBounds);
             launchIntent.setPackage(component.getPackageName());
 
             long ident = Binder.clearCallingIdentity();
@@ -406,6 +418,13 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        private void prepareIntentForLaunch(@NonNull Intent launchIntent,
+                @Nullable Rect sourceBounds) {
+            launchIntent.setSourceBounds(sourceBounds);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         }
 
         @Override
