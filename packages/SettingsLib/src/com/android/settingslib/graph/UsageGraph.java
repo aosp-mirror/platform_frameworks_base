@@ -43,6 +43,7 @@ public class UsageGraph extends View {
     private final Paint mDottedPaint;
 
     private final Drawable mDivider;
+    private final Drawable mTintedDivider;
     private final int mDividerSize;
 
     private final Path mPath = new Path();
@@ -51,6 +52,7 @@ public class UsageGraph extends View {
     private final SparseIntArray mPaths = new SparseIntArray();
     // Paths in local coordinates for drawing.
     private final SparseIntArray mLocalPaths = new SparseIntArray();
+    private final int mCornerRadius;
 
     private int mAccentColor;
     private boolean mShowProjection;
@@ -58,6 +60,10 @@ public class UsageGraph extends View {
 
     private float mMaxX = 100;
     private float mMaxY = 100;
+
+    private float mMiddleDividerLoc = .5f;
+    private int mMiddleDividerTint = -1;
+    private int mTopDividerTint = -1;
 
     public UsageGraph(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -68,8 +74,8 @@ public class UsageGraph extends View {
         mLinePaint.setStrokeCap(Cap.ROUND);
         mLinePaint.setStrokeJoin(Join.ROUND);
         mLinePaint.setAntiAlias(true);
-        mLinePaint.setPathEffect(new CornerPathEffect(resources.getDimensionPixelSize(
-                R.dimen.usage_graph_line_corner_radius)));
+        mCornerRadius = resources.getDimensionPixelSize(R.dimen.usage_graph_line_corner_radius);
+        mLinePaint.setPathEffect(new CornerPathEffect(mCornerRadius));
         mLinePaint.setStrokeWidth(resources.getDimensionPixelSize(R.dimen.usage_graph_line_width));
 
         mFillPaint = new Paint(mLinePaint);
@@ -86,6 +92,7 @@ public class UsageGraph extends View {
         TypedValue v = new TypedValue();
         context.getTheme().resolveAttribute(com.android.internal.R.attr.listDivider, v, true);
         mDivider = context.getDrawable(v.resourceId);
+        mTintedDivider = context.getDrawable(v.resourceId);
         mDividerSize = resources.getDimensionPixelSize(R.dimen.usage_graph_divider_size);
     }
 
@@ -96,6 +103,15 @@ public class UsageGraph extends View {
     void setMax(int maxX, int maxY) {
         mMaxX = maxX;
         mMaxY = maxY;
+    }
+
+    void setDividerLoc(int height) {
+        mMiddleDividerLoc = 1 - height / mMaxY;
+    }
+
+    void setDividerColors(int middleColor, int topColor) {
+        mMiddleDividerTint = middleColor;
+        mTopDividerTint = topColor;
     }
 
     public void addPath(SparseIntArray points) {
@@ -150,7 +166,7 @@ public class UsageGraph extends View {
                 if (mLocalPaths.size() > 0) {
                     int lastX = mLocalPaths.keyAt(mLocalPaths.size() - 1);
                     int lastY = mLocalPaths.valueAt(mLocalPaths.size() - 1);
-                    if (lastY != PATH_DELIM && (lastX == lx || lastY == ly)) {
+                    if (lastY != PATH_DELIM && !hasDiff(lastX, lx) && !hasDiff(lastY, ly)) {
                         pendingYLoc = ly;
                         continue;
                     }
@@ -158,6 +174,10 @@ public class UsageGraph extends View {
                 mLocalPaths.put(lx, ly);
             }
         }
+    }
+
+    private boolean hasDiff(int x1, int x2) {
+        return Math.abs(x2 - x1) >= mCornerRadius;
     }
 
     private int getX(float x) {
@@ -180,9 +200,12 @@ public class UsageGraph extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         // Draw lines across the top, middle, and bottom.
-        drawDivider(0, canvas);
-        drawDivider((canvas.getHeight() - mDividerSize) / 2, canvas);
-        drawDivider(canvas.getHeight() - mDividerSize, canvas);
+        if (mMiddleDividerLoc != 0) {
+            drawDivider(0, canvas, mTopDividerTint);
+        }
+        drawDivider((int) ((canvas.getHeight() - mDividerSize) * mMiddleDividerLoc), canvas,
+                mMiddleDividerTint);
+        drawDivider(canvas.getHeight() - mDividerSize, canvas, -1);
 
         if (mLocalPaths.size() == 0) {
             return;
@@ -242,8 +265,13 @@ public class UsageGraph extends View {
         canvas.drawPath(mPath, mFillPaint);
     }
 
-    private void drawDivider(int y, Canvas canvas) {
-        mDivider.setBounds(0, y, canvas.getWidth(), y + mDividerSize);
-        mDivider.draw(canvas);
+    private void drawDivider(int y, Canvas canvas, int tintColor) {
+        Drawable d = mDivider;
+        if (tintColor != -1) {
+            mTintedDivider.setTint(tintColor);
+            d = mTintedDivider;
+        }
+        d.setBounds(0, y, canvas.getWidth(), y + mDividerSize);
+        d.draw(canvas);
     }
 }

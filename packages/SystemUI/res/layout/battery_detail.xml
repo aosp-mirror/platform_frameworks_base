@@ -33,7 +33,7 @@
     <com.android.settingslib.graph.UsageView
         android:id="@+id/battery_usage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="141dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="24dp"
         systemui:sideLabels="@array/battery_labels"
