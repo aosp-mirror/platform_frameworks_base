@@ -117,11 +117,6 @@
       Samples</a></div>
   </li>
 
- <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
-      >Device Images</a></div>
-  </li>
-
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/license.html"
       es-lang="Contrato de licencia"
