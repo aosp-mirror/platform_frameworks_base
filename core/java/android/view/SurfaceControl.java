@@ -57,6 +57,7 @@ public class SurfaceControl {
     private static native void nativeSetMatrix(long nativeObject, float dsdx, float dtdx, float dsdy, float dtdy);
     private static native void nativeSetFlags(long nativeObject, int flags, int mask);
     private static native void nativeSetWindowCrop(long nativeObject, int l, int t, int r, int b);
+    private static native void nativeSetFinalCrop(long nativeObject, int l, int t, int r, int b);
     private static native void nativeSetLayerStack(long nativeObject, int layerStack);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
@@ -453,6 +454,16 @@ public class SurfaceControl {
                 crop.left, crop.top, crop.right, crop.bottom);
         } else {
             nativeSetWindowCrop(mNativeObject, 0, 0, 0, 0);
+        }
+    }
+
+    public void setFinalCrop(Rect crop) {
+        checkNotReleased();
+        if (crop != null) {
+            nativeSetFinalCrop(mNativeObject,
+                crop.left, crop.top, crop.right, crop.bottom);
+        } else {
+            nativeSetFinalCrop(mNativeObject, 0, 0, 0, 0);
         }
     }
 
