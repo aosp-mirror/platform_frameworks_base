@@ -171,7 +171,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             // Fetch a ModelData instance from the hash map. Creates a new one if none
             // exists.
-            ModelData modelData = getOrCreateGenericModelData(modelId);
+            ModelData modelData = getOrCreateGenericModelDataLocked(modelId);
 
             IRecognitionStatusCallback oldCallback = modelData.getCallback();
             if (oldCallback != null) {
@@ -373,7 +373,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             // Also clear the internal state once the recognition has been stopped.
             modelData.setLoaded();
             modelData.clearCallback();
-            if (!computeRecognitionRunning()) {
+            if (!computeRecognitionRunningLocked()) {
                 internalClearGlobalStateLocked();
             }
             return status;
@@ -505,12 +505,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (modelId == null || mModule == null) {
             return STATUS_ERROR;
         }
-        ModelData modelData = mGenericModelDataMap.get(modelId);
-        if (modelData == null) {
-            Slog.w(TAG, "Unload error: Attempting unload invalid generic model with id:" + modelId);
-            return STATUS_ERROR;
-        }
         synchronized (mLock) {
+            ModelData modelData = mGenericModelDataMap.get(modelId);
+            if (modelData == null) {
+                Slog.w(TAG, "Unload error: Attempting unload invalid generic model with id:" + modelId);
+                return STATUS_ERROR;
+            }
             if (!modelData.isModelLoaded()) {
                 // Nothing to do here.
                 Slog.i(TAG, "Unload: Given generic model is not loaded:" + modelId);
@@ -530,7 +530,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 Slog.w(TAG, "unloadGenericSoundModel() force-marking model as unloaded.");
             }
             mGenericModelDataMap.remove(modelId);
-            if (DBG) dumpGenericModelState();
+            if (DBG) dumpGenericModelStateLocked();
             return status;
         }
     }
@@ -580,7 +580,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (event.status != SoundTrigger.RECOGNITION_STATUS_SUCCESS) {
             return;
         }
-        ModelData model = getModelDataFor(event.soundModelHandle);
+        ModelData model = getModelDataForLocked(event.soundModelHandle);
         if (model == null) {
             Slog.w(TAG, "Generic recognition event: Model does not exist for handle: " +
                     event.soundModelHandle);
@@ -919,7 +919,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         mIsPowerSaveMode = mPowerManager.isPowerSaveMode();
     }
 
-    private ModelData getOrCreateGenericModelData(UUID modelId) {
+    private ModelData getOrCreateGenericModelDataLocked(UUID modelId) {
         ModelData modelData = mGenericModelDataMap.get(modelId);
         if (modelData == null) {
             modelData = new ModelData(modelId);
@@ -932,7 +932,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // Instead of maintaining a second hashmap of modelHandle -> ModelData, we just
     // iterate through to find the right object (since we don't expect 100s of models
     // to be stored).
-    private ModelData getModelDataFor(int modelHandle) {
+    private ModelData getModelDataForLocked(int modelHandle) {
         // Fetch ModelData object corresponding to the model handle.
         for (ModelData model : mGenericModelDataMap.values()) {
             if (model.getHandle() == modelHandle) {
@@ -988,7 +988,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         }
-        if (DBG) dumpGenericModelState();
+        if (DBG) dumpGenericModelStateLocked();
         return status;
     }
 
@@ -1017,11 +1017,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         }
-        if (DBG) dumpGenericModelState();
+        if (DBG) dumpGenericModelStateLocked();
         return status;
     }
 
-    private void dumpGenericModelState() {
+    private void dumpGenericModelStateLocked() {
         for (UUID modelId : mGenericModelDataMap.keySet()) {
             ModelData modelData = mGenericModelDataMap.get(modelId);
             Slog.i(TAG, "Model :" + modelData.toString());
@@ -1030,28 +1030,24 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     // Computes whether we have any recognition running at all (voice or generic). Sets
     // the mRecognitionRunning variable with the result.
-    private boolean computeRecognitionRunning() {
-        synchronized (mLock) {
-            if (mModuleProperties == null || mModule == null) {
-                mRecognitionRunning = false;
-                return mRecognitionRunning;
-            }
-            if (mKeyphraseListener != null &&
-                    mKeyphraseStarted &&
-                    mCurrentKeyphraseModelHandle != INVALID_VALUE &&
-                    mCurrentSoundModel != null) {
+    private boolean computeRecognitionRunningLocked() {
+        if (mModuleProperties == null || mModule == null) {
+            mRecognitionRunning = false;
+            return mRecognitionRunning;
+        }
+        if (mKeyphraseListener != null && mKeyphraseStarted &&
+            mCurrentKeyphraseModelHandle != INVALID_VALUE && mCurrentSoundModel != null) {
+            mRecognitionRunning = true;
+            return mRecognitionRunning;
+        }
+        for (UUID modelId : mGenericModelDataMap.keySet()) {
+            ModelData modelData = mGenericModelDataMap.get(modelId);
+            if (modelData.isModelStarted()) {
                 mRecognitionRunning = true;
                 return mRecognitionRunning;
             }
-            for (UUID modelId : mGenericModelDataMap.keySet()) {
-                ModelData modelData = mGenericModelDataMap.get(modelId);
-                if (modelData.isModelStarted()) {
-                    mRecognitionRunning = true;
-                    return mRecognitionRunning;
-                }
-            }
-            mRecognitionRunning = false;
         }
+        mRecognitionRunning = false;
         return mRecognitionRunning;
     }
 
