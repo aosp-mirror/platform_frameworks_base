@@ -273,9 +273,9 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.DROPBOX_SERVICE, DropBoxManager.class,
-                new StaticServiceFetcher<DropBoxManager>() {
+                new CachedServiceFetcher<DropBoxManager>() {
             @Override
-            public DropBoxManager createService() {
+            public DropBoxManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.DROPBOX_SERVICE);
                 IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
                 if (service == null) {
@@ -285,7 +285,7 @@ final class SystemServiceRegistry {
                     // DROPBOX_SERVICE is registered.
                     return null;
                 }
-                return new DropBoxManager(service);
+                return new DropBoxManager(ctx, service);
             }});
 
         registerService(Context.INPUT_SERVICE, InputManager.class,
