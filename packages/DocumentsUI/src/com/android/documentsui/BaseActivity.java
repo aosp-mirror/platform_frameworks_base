@@ -154,7 +154,7 @@ public abstract class BaseActivity extends Activity
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
         // Search uses backend ranking; no sorting, recents doesn't support sort.
-        sort.setVisible(!inRecents && !mSearchManager.isSearching());
+        sort.setEnabled(!inRecents && !mSearchManager.isSearching());
         sortSize.setVisible(mState.showSize); // Only sort by size when file sizes are visible
         fileSize.setVisible(!mState.forceSize);
 
@@ -244,6 +244,7 @@ public abstract class BaseActivity extends Activity
                 return true;
 
             case R.id.menu_search:
+                // SearchViewManager listens for this directly.
                 return false;
 
             case R.id.menu_sort_name:
@@ -366,6 +367,7 @@ public abstract class BaseActivity extends Activity
         assert(canSearchRoot());
 
         reloadSearch(query);
+        invalidateOptionsMenu();
     }
 
     private void reloadSearch(String query) {
