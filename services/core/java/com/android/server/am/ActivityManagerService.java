@@ -537,8 +537,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ActivityStarter mActivityStarter;
 
     /** Task stack change listeners. */
-    private RemoteCallbackList<ITaskStackListener> mTaskStackListeners =
+    private final RemoteCallbackList<ITaskStackListener> mTaskStackListeners =
             new RemoteCallbackList<ITaskStackListener>();
+
+    final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
     public IntentFirewall mIntentFirewall;
 
@@ -17796,17 +17798,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException e) {
             }
             if (ii == null) {
-                reportStartInstrumentationFailure(watcher, className,
+                reportStartInstrumentationFailureLocked(watcher, className,
                         "Unable to find instrumentation info for: " + className);
                 return false;
             }
             if (ai == null) {
-                reportStartInstrumentationFailure(watcher, className,
+                reportStartInstrumentationFailureLocked(watcher, className,
                         "Unable to find instrumentation target package: " + ii.targetPackage);
                 return false;
             }
             if (!ai.hasCode()) {
-                reportStartInstrumentationFailure(watcher, className,
+                reportStartInstrumentationFailureLocked(watcher, className,
                         "Instrumentation target has no code: " + ii.targetPackage);
                 return false;
             }
@@ -17821,7 +17823,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " not allowed because package " + ii.packageName
                         + " does not have a signature matching the target "
                         + ii.targetPackage;
-                reportStartInstrumentationFailure(watcher, className, msg);
+                reportStartInstrumentationFailureLocked(watcher, className, msg);
                 throw new SecurityException(msg);
             }
 
@@ -17852,31 +17854,21 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param cn The component name of the instrumentation.
      * @param report The error report.
      */
-    private void reportStartInstrumentationFailure(IInstrumentationWatcher watcher,
+    private void reportStartInstrumentationFailureLocked(IInstrumentationWatcher watcher,
             ComponentName cn, String report) {
         Slog.w(TAG, report);
-        try {
-            if (watcher != null) {
-                Bundle results = new Bundle();
-                results.putString(Instrumentation.REPORT_KEY_IDENTIFIER, "ActivityManagerService");
-                results.putString("Error", report);
-                watcher.instrumentationStatus(cn, -1, results);
-            }
-        } catch (RemoteException e) {
-            Slog.w(TAG, e);
+        if (watcher != null) {
+            Bundle results = new Bundle();
+            results.putString(Instrumentation.REPORT_KEY_IDENTIFIER, "ActivityManagerService");
+            results.putString("Error", report);
+            mInstrumentationReporter.reportStatus(watcher, cn, -1, results);
         }
     }
 
     void finishInstrumentationLocked(ProcessRecord app, int resultCode, Bundle results) {
         if (app.instrumentationWatcher != null) {
-            try {
-                // NOTE:  IInstrumentationWatcher *must* be oneway here
-                app.instrumentationWatcher.instrumentationFinished(
-                    app.instrumentationClass,
-                    resultCode,
-                    results);
-            } catch (RemoteException e) {
-            }
+            mInstrumentationReporter.reportFinished(app.instrumentationWatcher,
+                    app.instrumentationClass, resultCode, results);
         }
 
         // Can't call out of the system process with a lock held, so post a message.
