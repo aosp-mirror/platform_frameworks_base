@@ -25,6 +25,8 @@
 #include <JNIHelp.h>
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
+#include <gui/CpuConsumer.h>
+#include <camera3.h>
 
 namespace android {
 
@@ -68,6 +70,33 @@ status_t ConvertMessageToMap(
 status_t ConvertKeyValueArraysToMessage(
         JNIEnv *env, jobjectArray keys, jobjectArray values,
         sp<AMessage> *msg);
+
+// -----------Utility functions used by ImageReader/Writer JNI-----------------
+
+typedef CpuConsumer::LockedBuffer LockedImage;
+
+bool usingRGBAToJpegOverride(int32_t imageFormat, int32_t containerFormat);
+
+int32_t applyFormatOverrides(int32_t imageFormat, int32_t containerFormat);
+
+uint32_t Image_getJpegSize(LockedImage* buffer, bool usingRGBAOverride);
+
+bool isFormatOpaque(int format);
+
+bool isPossiblyYUV(PixelFormat format);
+
+status_t getLockedImageInfo(LockedImage* buffer, int idx, int32_t containerFormat,
+        uint8_t **base, uint32_t *size, int *pixelStride, int *rowStride);
+
+status_t lockImageFromBuffer(sp<GraphicBuffer> buffer, uint32_t inUsage,
+        const Rect& rect, int fenceFd, LockedImage* outputImage);
+
+status_t lockImageFromBuffer(BufferItem* bufferItem, uint32_t inUsage,
+        int fenceFd, LockedImage* outputImage);
+
+int getBufferWidth(BufferItem *buffer);
+
+int getBufferHeight(BufferItem *buffer);
 
 };  // namespace android
 
