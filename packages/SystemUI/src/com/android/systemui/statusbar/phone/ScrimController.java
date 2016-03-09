@@ -89,6 +89,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mForceHideScrims;
     private boolean mSkipFirstFrame;
     private boolean mDontAnimateBouncerChanges;
+    private boolean mKeyguardFadingOutInProgress;
 
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim) {
         mScrimBehind = scrimBehind;
@@ -342,12 +343,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 if (mOnAnimationFinished != null) {
                     mOnAnimationFinished.run();
                     mOnAnimationFinished = null;
+                    mKeyguardFadingOutInProgress = false;
                 }
                 scrim.setTag(TAG_KEY_ANIM, null);
                 scrim.setTag(TAG_KEY_ANIM_TARGET, null);
             }
         });
         anim.start();
+        if (mAnimateKeyguardFadingOut) {
+            mKeyguardFadingOutInProgress = true;
+        }
         if (mSkipFirstFrame) {
             anim.setCurrentPlayTime(16);
         }
@@ -382,6 +387,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 && mOnAnimationFinished != null) {
             mOnAnimationFinished.run();
             mOnAnimationFinished = null;
+            mKeyguardFadingOutInProgress = false;
         }
     }
 
@@ -422,6 +428,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void updateScrim(boolean animate, View scrim, float alpha, float currentAlpha) {
+        if (mKeyguardFadingOutInProgress) {
+            return;
+        }
+
         ValueAnimator previousAnimator = StackStateAnimator.getChildTag(scrim,
                 TAG_KEY_ANIM);
         float animEndValue = -1;
