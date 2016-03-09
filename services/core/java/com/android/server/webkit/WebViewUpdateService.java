@@ -190,7 +190,7 @@ public class WebViewUpdateService extends SystemService {
         userAddedFilter.addAction(Intent.ACTION_USER_ADDED);
         getContext().registerReceiver(mWebViewUpdatedReceiver, userAddedFilter);
 
-        publishBinderService("webviewupdate", new BinderService());
+        publishBinderService("webviewupdate", new BinderService(), true /*allowIsolated*/);
     }
 
     private static boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
