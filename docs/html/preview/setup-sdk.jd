@@ -115,11 +115,11 @@ API reference for the Android N APIs and an API difference report.</p>
   </tr>
   <tr>
     <td style="white-space: nowrap">
-    <a href="https://storage.googleapis.com/androiddevelopers/n-preview/n-preview-1-docs.zip"
+    <a href="https://storage.googleapis.com/androiddevelopers/preview/n-preview-1-docs.zip"
       >n-preview-1-docs.zip</a></td>
     <td width="100%">
-      MD5: xxxx<br>
-      SHA-1: xxxx
+      MD5: 129c447102a9f1fb3712234e5268a708<br>
+      SHA-1: 2200b3b530ed15c8d48f768d6b00d2082d01c9c5
     </td>
   </tr>
 <table>
@@ -131,11 +131,8 @@ API reference for the Android N APIs and an API difference report.</p>
 <p>
   The Java 8 Development Kit (JDK) is required to develop apps with Android
   N, and the Java 8 Runtime Environment (JRE) is required to run some
-  tools included in Android Studio 2.1.
-</p>
-<p>So, if you don't have the latest version of each already,
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">download JDK 8</a> and
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">download JRE 8</a> now.</p>
+  tools included in Android Studio 2.1. So, if you don't have the latest
+  version of each already, download JDK 8 and download JRE 8 now.</p>
 
 <p>With Java 8 installed, set the JDK version in Android Studio as follows:</p>
 
@@ -203,7 +200,7 @@ android {
 <p>Now that you've set up Android Studio 2.1 (preview), follow the guide
 to <a
 href="{@docRoot}preview/run-app.html">Run Your App on Android N</a>.
-And learn more about the Android N platform with 
+And learn more about the Android N platform with
 <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>
 and <a href="{@docRoot}preview/api-overview.html">Android N APIs
 and Features</a>.</p>
