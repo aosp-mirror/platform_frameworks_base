@@ -18,24 +18,23 @@ page.image=images/cards/card-n-sdk_2x.png
   </div>
 </div>
 
-<p>
-To develop apps for Android using new APIs in Android N and new language
-features of Java 8, you need to set up Android Studio 2.1 (preview) as described
-on this page.</p>
+<p>To develop apps for the Android N Preview, you need to make some updates
+to your developer environment, as described on this page.</p>
 
-<p>If you instead want to simply test your app's forward-compatibility on the
-Android N system image, you can instead follow the guide to <a
+<p>To instead simply test your app's compatibility on the
+Android N system image, follow the guide to <a
 href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
-
 
 <img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
 
 
 <h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
 
-<p>Developing for the Android N platform requires Java 8 and a new
-compiler toolchain called JACK, which is currently supported only in
-Android Studio 2.1.
+<p>The Android N platform adds support for Java 8 language features,
+which are supported only with a new compiler called Jack. The latest Jack
+compiler is currently supported only in Android Studio 2.1. So if you want to
+use Java 8 language features, then you need to use Android Studio 2.1 to
+build your app.
 </p>
 
 <iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
@@ -78,8 +77,8 @@ existing installation, skip to step 4):</p>
 
 <h2 id="get-sdk">Get the N Preview SDK</h2>
 
-<p>Now add the N Preview SDK to your Android Studio 2.1 development
-  environment as follows:</p>
+<p>To start developing with Android N APIs, you need to install the
+Android N Preview SDK in Android Studio as follows:</p>
 
 <ol>
   <li>While still viewing the Updates panel from the previous
@@ -106,8 +105,8 @@ existing installation, skip to step 4):</p>
   </li>
 </ol>
 
-<p>In addition to these preview components, you should download the
-N Preview developer docs from the following table. This is an offline version
+<p>In addition to these preview components, you should download the Android
+N Preview API docs from the following table. This is an offline version
 of the developer.android.com web site, except it includes the updated
 API reference for the Android N APIs and an API difference report.</p>
 
@@ -118,7 +117,7 @@ API reference for the Android N APIs and an API difference report.</p>
   </tr>
   <tr>
     <td style="white-space: nowrap">
-    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip"
+    <a href="https://storage.googleapis.com/androiddevelopers/preview/n-preview-1-docs.zip"
       >n-preview-1-docs.zip</a></td>
     <td width="100%">
       MD5: 129c447102a9f1fb3712234e5268a708<br>
@@ -131,11 +130,10 @@ API reference for the Android N APIs and an API difference report.</p>
 
 <h2 id="java8">Get the Java 8 JDK and JRE</h2>
 
-<p>
-  The Java 8 Development Kit (JDK) is required to develop apps with Android
-  N, and the Java 8 Runtime Environment (JRE) is required to run some
+<p>You also need to update your JDK for Java 8 and install the
+  Java 8 Runtime Environment (JRE) to run some
   tools included in Android Studio 2.1. So, if you don't have the latest
-  version of each already, download JDK 8 and download JRE 8 now.</p>
+  version of each already, download JDK 8 and JRE 8 now.</p>
 
 <p>With Java 8 installed, set the JDK version in Android Studio as follows:</p>
 
@@ -157,6 +155,11 @@ API reference for the Android N APIs and an API difference report.</p>
 <p>
   To use the Android N APIs, your project must be configured appropriately.
 </p>
+
+<p>If you plan to use Java 8 language features, you should read
+<a href="{@docRoot}preview/j8-jack.html">Using Java 8 Language Features</a>
+for information about how to configure your project and the supported
+Java 8 features.</p>
 
 
 <h3 id="update">Update an existing project</h3>
@@ -185,7 +188,7 @@ android {
 <h3 id="create">Create a new project</h3>
 
 
-<p>To create a new project for development with the N Preview SDK:</p>
+<p>To create a new project for development with the Android N Preview SDK:</p>
 
 <ol>
   <li>Click <strong>File > New Project</strong>. and follow the steps until
@@ -200,11 +203,12 @@ android {
 
 <h2 id="next">Next Steps</h2>
 
-<p>Now that you've set up Android Studio 2.1 (preview), follow the guide
-to <a
-href="{@docRoot}preview/download.html">Test on an Android N Device</a>.
-And learn more about the Android N platform with
+<ul>
+  <li>Follow the guide to <a
+href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</li>
+  <li>Learn more about the Android N platform with
 <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>
 and <a href="{@docRoot}preview/api-overview.html">Android N APIs
-and Features</a>.</p>
+and Features</a>.</li>
+</ul>
 
