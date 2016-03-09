@@ -78,7 +78,7 @@ page.keywords="android for work", "android N", "enterprise", "QR code"
 
     <h2>See Also</h2>
     <ul>
-      <li><a href="{@docRoot}preview/download.html#docs">N Preview SDK
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
             Reference</a></li>
     </ul>
   </div>
@@ -134,8 +134,8 @@ Android N.</p>
 
 <p>
   For details on the new methods and constants, see the
-  <code>DevicePolicyManager</code> reference page in the <a href=
-  "{@docRoot}preview/download.html#docs">N Preview SDK Reference</a>.
+  <code>DevicePolicyManager</code> reference page in the <a
+  href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK Reference</a>.
 </p>
 
 <h2 id="suspend">Disable Access to Apps</h2>
@@ -311,7 +311,7 @@ Android N.</p>
 
 <p>
   Android N includes the following API additions to support this feature. For
-  details, see the <a href="{@docRoot}preview/download.html#docs">N Preview SDK
+  details, see the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
   Reference</a>.
 </p>
 
