@@ -65,9 +65,10 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
   android.content.Context#registerReceiver Context.registerReceiver()}.
   </li>
 
-  <li>Apps cannot send or receive {@code NEW_PICTURE} or {@code NEW_VIDEO}
-  broadcasts. This optimization affects all apps, not only those targeting the
-  Preview.
+  <li>Apps cannot send or receive {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This optimization
+  affects all apps, not only those targeting the Preview.
   </li>
 </ul>
 
@@ -194,8 +195,9 @@ public static void scheduleJob(Context context) {
 </h2>
 
 <p>
-  In the N Developer Preview, apps are not able to send or receive {@code
-  NEW_PICTURE} or {@code NEW_VIDEO} broadcasts. This restriction helps
+  In the N Developer Preview, apps are not able to send or receive {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This restriction helps
   alleviate the performance and user experience impacts when several apps must
   wake up in order to process a new image or video. The N Developer Preview
   extends {@link android.app.job.JobInfo} and {@link
