@@ -24,7 +24,7 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN publish session. Built using
  * {@link PublishConfig.Builder}. Publish is done using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionListener, int)} or
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback, int)} or
  * {@link WifiNanPublishSession#publish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
@@ -402,8 +402,8 @@ public class PublishConfig implements Parcelable {
          * Sets the number of times a solicited (
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will transmit a packet. When the count is reached an event will be
-         * generated for {@link WifiNanSessionListener#onPublishTerminated(int)}
-         * with reason={@link WifiNanSessionListener#TERMINATE_REASON_DONE}.
+         * generated for {@link WifiNanSessionCallback#onPublishTerminated(int)}
+         * with reason={@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param publishCount Number of publish packets to transmit.
          * @return The builder to facilitate chaining
@@ -422,8 +422,8 @@ public class PublishConfig implements Parcelable {
          * {@link PublishConfig.Builder#setPublishCount(int)}) publish session
          * will be alive - i.e. transmitting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanSessionListener#onPublishTerminated(int)} with reason=
-         * {@link WifiNanSessionListener#TERMINATE_REASON_DONE}.
+         * {@link WifiNanSessionCallback#onPublishTerminated(int)} with reason=
+         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
          * @return The builder to facilitate chaining
