@@ -48,4 +48,6 @@ public abstract class Classifier {
      */
     public void onSensorChanged(SensorEvent event) {
     }
+
+    public abstract String getTag();
 }

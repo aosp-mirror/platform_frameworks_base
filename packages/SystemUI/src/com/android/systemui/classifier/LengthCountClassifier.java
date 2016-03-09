@@ -28,6 +28,11 @@ public class LengthCountClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "LEN_CNT";
+    }
+
+    @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         return LengthCountEvaluator.evaluate(stroke.getTotalLength()
                 / Math.max(1.0f, stroke.getCount() - 2));

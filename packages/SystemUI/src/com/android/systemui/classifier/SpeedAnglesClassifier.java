@@ -41,6 +41,11 @@ public class SpeedAnglesClassifier extends StrokeClassifier {
     }
 
     @Override
+    public String getTag() {
+        return "SPD_ANG";
+    }
+
+    @Override
     public void onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
 
