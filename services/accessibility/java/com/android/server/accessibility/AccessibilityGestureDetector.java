@@ -121,9 +121,9 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // movement when gesturing, and touch exploring.  Based on user testing,
     // all gestures started with the initial movement taking less than 100ms.
     // When touch exploring, the first movement almost always takes longer than
-    // 200ms.  From this data, 150ms seems the best value to decide what
+    // 200ms.  From this data, 200ms seems the best value to decide what
     // kind of interaction it is.
-    private static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 150;
+    private static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 200;
 
     // Time threshold used to determine if a gesture should be cancelled.  If
     // the finger pauses for longer than this delay, the ongoing gesture is
