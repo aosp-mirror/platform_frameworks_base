@@ -641,9 +641,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If we had a deferred animation, cancel that
         mDeferredTaskViewLayoutAnimation = null;
 
-        // Cancel all task view animations
-        cancelAllTaskViewAnimations();
-
         // Synchronize the current set of TaskViews
         bindVisibleTaskViews(mStackScroller.getStackScroll(), ignoreTasksSet,
                 false /* ignoreTaskOverrides */);
@@ -678,6 +675,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void updateTaskViewToTransform(TaskView taskView, TaskViewTransform transform,
             AnimationProps animation) {
+        if (taskView.isAnimatingTo(transform)) {
+            return;
+        }
+        taskView.cancelTransformAnimation();
         taskView.updateViewPropertiesToTaskTransform(transform, animation,
                 mRequestUpdateClippingListener);
     }

@@ -47,7 +47,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
@@ -66,7 +66,6 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewScroller;
@@ -569,7 +568,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Make sure we inform DividerView before we actually start the activity so we can change
         // the resize mode already.
         if (ssp.moveTaskToDockedStack(topTaskId, stackCreateMode, initialBounds)) {
-            EventBus.getDefault().send(new DockingTopTaskEvent(dragMode));
+            EventBus.getDefault().send(new DockedTopTaskEvent(dragMode, initialBounds));
             showRecents(
                     false /* triggeredFromAltTab */,
                     dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS,

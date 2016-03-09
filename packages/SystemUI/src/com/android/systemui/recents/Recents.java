@@ -43,7 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -577,14 +577,15 @@ public class Recents extends SystemUI
         }
     }
 
-    public final void onBusEvent(final DockingTopTaskEvent event) {
+    public final void onBusEvent(final DockedTopTaskEvent event) {
         int processUser = sSystemServicesProxy.getProcessUser();
         if (!sSystemServicesProxy.isSystemUser(processUser)) {
             postToSystemUser(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        mUserToSystemCallbacks.sendDockingTopTaskEvent(event.dragMode);
+                        mUserToSystemCallbacks.sendDockingTopTaskEvent(event.dragMode,
+                                event.initialRect);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
