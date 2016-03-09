@@ -304,15 +304,15 @@ LOCAL_MODULE_STEM_64 := hwuimicro64
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -DHWUI_NULL_GPU
-LOCAL_C_INCLUDES += \
-        bionic/benchmarks/ \
-        $(hwui_c_includes)
+
+LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_null_gpu
-LOCAL_STATIC_LIBRARIES := libbenchmark libbase
+LOCAL_STATIC_LIBRARIES := libgoogle-benchmark
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
+    tests/microbench/main.cpp \
     tests/microbench/DisplayListCanvasBench.cpp \
     tests/microbench/LinearAllocatorBench.cpp \
     tests/microbench/PathParserBench.cpp \

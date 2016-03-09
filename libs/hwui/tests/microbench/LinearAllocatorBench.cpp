@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include <benchmark/Benchmark.h>
+#include <benchmark/benchmark.h>
 
-#include "tests/microbench/MicroBench.h"
 #include "utils/LinearAllocator.h"
 
 #include <vector>
@@ -24,30 +23,26 @@
 using namespace android;
 using namespace android::uirenderer;
 
-BENCHMARK_NO_ARG(BM_LinearStdAllocator_vectorBaseline);
-void BM_LinearStdAllocator_vectorBaseline::Run(int iters) {
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+static void BM_LinearStdAllocator_vectorBaseline(benchmark::State& state) {
+    while (state.KeepRunning()) {
         std::vector<char> v;
         for (int j = 0; j < 200; j++) {
             v.push_back(j);
         }
-        MicroBench::DoNotOptimize(&v);
+        benchmark::DoNotOptimize(&v);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_LinearStdAllocator_vectorBaseline);
 
-BENCHMARK_NO_ARG(BM_LinearStdAllocator_vector);
-void BM_LinearStdAllocator_vector::Run(int iters) {
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+static void BM_LinearStdAllocator_vector(benchmark::State& state) {
+    while (state.KeepRunning()) {
         LinearAllocator la;
         LinearStdAllocator<void*> stdAllocator(la);
         std::vector<char, LinearStdAllocator<char> > v(stdAllocator);
         for (int j = 0; j < 200; j++) {
             v.push_back(j);
         }
-        MicroBench::DoNotOptimize(&v);
+        benchmark::DoNotOptimize(&v);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_LinearStdAllocator_vector);

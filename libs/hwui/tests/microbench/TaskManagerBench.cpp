@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include <benchmark/Benchmark.h>
+#include <benchmark/benchmark.h>
 
 #include "thread/Task.h"
 #include "thread/TaskManager.h"
 #include "thread/TaskProcessor.h"
-#include "tests/microbench/MicroBench.h"
 
 #include <vector>
 
@@ -39,55 +38,51 @@ public:
     }
 };
 
-BENCHMARK_NO_ARG(BM_TaskManager_allocateTask);
-void BM_TaskManager_allocateTask::Run(int iters) {
+void BM_TaskManager_allocateTask(benchmark::State& state) {
     std::vector<sp<TrivialTask> > tasks;
-    tasks.reserve(iters);
+    tasks.reserve(state.max_iterations);
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         tasks.emplace_back(new TrivialTask);
-        MicroBench::DoNotOptimize(tasks.back());
+        benchmark::DoNotOptimize(tasks.back());
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_TaskManager_allocateTask);
 
-BENCHMARK_NO_ARG(BM_TaskManager_enqueueTask);
-void BM_TaskManager_enqueueTask::Run(int iters) {
+void BM_TaskManager_enqueueTask(benchmark::State& state) {
     TaskManager taskManager;
     sp<TrivialProcessor> processor(new TrivialProcessor(&taskManager));
     std::vector<sp<TrivialTask> > tasks;
-    tasks.reserve(iters);
+    tasks.reserve(state.max_iterations);
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         tasks.emplace_back(new TrivialTask);
-        MicroBench::DoNotOptimize(tasks.back());
+        benchmark::DoNotOptimize(tasks.back());
         processor->add(tasks.back());
     }
-    StopBenchmarkTiming();
 
     for (sp<TrivialTask>& task : tasks) {
         task->getResult();
     }
 }
+BENCHMARK(BM_TaskManager_enqueueTask);
 
-BENCHMARK_NO_ARG(BM_TaskManager_enqueueRunDeleteTask);
-void BM_TaskManager_enqueueRunDeleteTask::Run(int iters) {
+void BM_TaskManager_enqueueRunDeleteTask(benchmark::State& state) {
     TaskManager taskManager;
     sp<TrivialProcessor> processor(new TrivialProcessor(&taskManager));
     std::vector<sp<TrivialTask> > tasks;
-    tasks.reserve(iters);
+    tasks.reserve(state.max_iterations);
 
-    StartBenchmarkTiming();
-    for (int i = 0; i < iters; i++) {
+    while (state.KeepRunning()) {
         tasks.emplace_back(new TrivialTask);
-        MicroBench::DoNotOptimize(tasks.back());
+        benchmark::DoNotOptimize(tasks.back());
         processor->add(tasks.back());
     }
+    state.ResumeTiming();
     for (sp<TrivialTask>& task : tasks) {
-        MicroBench::DoNotOptimize(task->getResult());
+        benchmark::DoNotOptimize(task->getResult());
     }
     tasks.clear();
-    StopBenchmarkTiming();
+    state.PauseTiming();
 }
+BENCHMARK(BM_TaskManager_enqueueRunDeleteTask);
