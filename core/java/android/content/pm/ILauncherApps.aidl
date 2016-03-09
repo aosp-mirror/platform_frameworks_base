@@ -50,6 +50,6 @@ interface ILauncherApps {
             in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
-    void startShortcut(String callingPackage, in ShortcutInfo shortcut, in Rect sourceBounds,
-            in Bundle startActivityOptions, in UserHandle user);
+    boolean startShortcut(String callingPackage, String packageName, String id,
+            in Rect sourceBounds, in Bundle startActivityOptions, in UserHandle user);
 }
