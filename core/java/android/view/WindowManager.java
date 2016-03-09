@@ -135,6 +135,18 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * Message for taking fullscreen screenshot
+     * @hide
+     */
+    final int TAKE_SCREENSHOT_FULLSCREEN = 1;
+
+    /**
+     * Message for taking screenshot of selected region.
+     * @hide
+     */
+    final int TAKE_SCREENSHOT_SELECTED_REGION = 2;
+
+    /**
      * @hide
      */
     public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";
@@ -269,6 +281,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING, to = "TYPE_VOICE_INTERACTION_STARTING"),
             @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER, to = "TYPE_DOCK_DIVIDER"),
             @ViewDebug.IntToString(from = TYPE_QS_DIALOG, to = "TYPE_QS_DIALOG"),
+            @ViewDebug.IntToString(from = TYPE_SCREENSHOT, to = "TYPE_SCREENSHOT")
         })
         public int type;
 
@@ -620,6 +633,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_QS_DIALOG = FIRST_SYSTEM_WINDOW+35;
+
+        /**
+         * Window type: shares similar characteristics with {@link #TYPE_DREAM}. The layer is
+         * reserved for screenshot region selection.
+         * @hide
+         */
+        public static final int TYPE_SCREENSHOT = FIRST_SYSTEM_WINDOW + 36;
 
         /**
          * End of types of system windows.

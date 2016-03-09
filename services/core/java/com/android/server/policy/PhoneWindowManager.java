@@ -28,6 +28,8 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
+import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
@@ -1239,7 +1241,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
                 mScreenshotChordVolumeDownKeyConsumed = true;
                 cancelPendingPowerKeyAction();
-
+                mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
                 mHandler.postDelayed(mScreenshotRunnable, getScreenshotChordLongPressDelay());
             }
         }
@@ -1269,12 +1271,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    private final Runnable mScreenshotRunnable = new Runnable() {
+    private class ScreenshotRunnable implements Runnable {
+        private int mScreenshotType = TAKE_SCREENSHOT_FULLSCREEN;
+
+        public void setScreenshotType(int screenshotType) {
+            mScreenshotType = screenshotType;
+        }
+
         @Override
         public void run() {
-            takeScreenshot();
+            takeScreenshot(mScreenshotType);
         }
-    };
+    }
+
+    private final ScreenshotRunnable mScreenshotRunnable = new ScreenshotRunnable();
 
     @Override
     public void showGlobalActions() {
@@ -2304,29 +2314,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_NAVIGATION_BAR_PANEL:
             // some panels (e.g. search) need to show on top of the navigation bar
             return 22;
+        case TYPE_SCREENSHOT:
+            // screenshot selection layer shouldn't go above system error, but it should cover
+            // navigation bars at the very least.
+            return 23;
         case TYPE_SYSTEM_ERROR:
             // system-level error dialogs
-            return 23;
+            return 24;
         case TYPE_MAGNIFICATION_OVERLAY:
             // used to highlight the magnified portion of a display
-            return 24;
+            return 25;
         case TYPE_DISPLAY_OVERLAY:
             // used to simulate secondary display devices
-            return 25;
+            return 26;
         case TYPE_DRAG:
             // the drag layer: input for drag-and-drop is associated with this window,
             // which sits above all other focusable windows
-            return 26;
+            return 27;
         case TYPE_ACCESSIBILITY_OVERLAY:
             // overlay put by accessibility services to intercept user interaction
-            return 27;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 28;
-        case TYPE_BOOT_PROGRESS:
+        case TYPE_SECURE_SYSTEM_OVERLAY:
             return 29;
+        case TYPE_BOOT_PROGRESS:
+            return 30;
         case TYPE_POINTER:
             // the (mouse) pointer layer
-            return 30;
+            return 31;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return 2;
@@ -3026,6 +3040,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
+        } else if (keyCode == KeyEvent.KEYCODE_S && event.isMetaPressed()
+                && event.isCtrlPressed()) {
+            if (down && repeatCount == 0) {
+                int type = event.isShiftPressed() ? TAKE_SCREENSHOT_SELECTED_REGION
+                        : TAKE_SCREENSHOT_FULLSCREEN;
+                mScreenshotRunnable.setScreenshotType(type);
+                mHandler.post(mScreenshotRunnable);
+                return -1;
+            }
         } else if (keyCode == KeyEvent.KEYCODE_SLASH && event.isMetaPressed()) {
             if (down) {
                 if (repeatCount == 0) {
@@ -3073,6 +3096,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
             if (down && repeatCount == 0) {
+                mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
                 mHandler.post(mScreenshotRunnable);
             }
             return -1;
@@ -4402,9 +4426,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     "Laying out navigation bar window: (%d,%d - %d,%d)",
                                     pf.left, pf.top, pf.right, pf.bottom));
                 } else if ((attrs.type == TYPE_SECURE_SYSTEM_OVERLAY
-                                || attrs.type == TYPE_BOOT_PROGRESS)
+                                || attrs.type == TYPE_BOOT_PROGRESS
+                                || attrs.type == TYPE_SCREENSHOT)
                         && ((fl & FLAG_FULLSCREEN) != 0)) {
-                    // Fullscreen secure system overlays get what they ask for.
+                    // Fullscreen secure system overlays get what they ask for. Screenshot region
+                    // selection overlay should also expand to full screen.
                     pf.left = df.left = of.left = cf.left = mOverscanScreenLeft;
                     pf.top = df.top = of.top = cf.top = mOverscanScreenTop;
                     pf.right = df.right = of.right = cf.right = mOverscanScreenLeft
@@ -5159,7 +5185,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     // Assume this is called from the Handler thread.
-    private void takeScreenshot() {
+    private void takeScreenshot(final int screenshotType) {
         synchronized (mScreenshotLock) {
             if (mScreenshotConnection != null) {
                 return;
@@ -5176,7 +5202,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             return;
                         }
                         Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, 1);
+                        Message msg = Message.obtain(null, screenshotType);
                         final ServiceConnection myConn = this;
                         Handler h = new Handler(mHandler.getLooper()) {
                             @Override
