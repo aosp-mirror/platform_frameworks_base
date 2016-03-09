@@ -780,9 +780,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Math.min(mStableFrame.bottom, frame.bottom));
         }
 
-        if (!windowsAreFloating) {
-            // Windows from floating tasks (e.g. freeform, pinned) may be positioned outside
-            // of the display frame, but that is not a reason to provide them with overscan insets.
+        if (fullscreenTask && !windowsAreFloating) {
+            // Windows that are not fullscreen can be positioned outside of the display frame,
+            // but that is not a reason to provide them with overscan insets.
             mOverscanInsets.set(Math.max(mOverscanFrame.left - frame.left, 0),
                     Math.max(mOverscanFrame.top - frame.top, 0),
                     Math.max(frame.right - mOverscanFrame.right, 0),
@@ -2257,7 +2257,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // background.
         return (mDisplayContent.mDividerControllerLocked.isResizing()
                         || mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) &&
-                !task.inFreeformWorkspace() && isVisibleLw();
+                !task.inFreeformWorkspace() && !isGoneForLayoutLw();
 
     }
 
