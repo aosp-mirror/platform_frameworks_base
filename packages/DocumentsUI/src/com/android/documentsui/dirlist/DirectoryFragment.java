@@ -63,6 +63,7 @@ import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -545,6 +546,8 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mRecView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+
             int size = mSelectionManager.getSelection().size();
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
             mode.setTitle(TextUtils.formatSelectedCount(size));
