@@ -5185,6 +5185,10 @@ public final class ContactsContract {
          *     <li>
          *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
          *     </li>
+         *     <li>
+         *     Returned work contact IDs and lookup keys are not accepted in places that not
+         *     explicitly say to accept them.
+         *     </li>
          * </ul>
          * <p>
          * A contact lookup URL built by
@@ -6193,6 +6197,10 @@ public final class ContactsContract {
              *     </li>
              *     <li>
              *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
+             *     </li>
+             *     <li>
+             *     Returned work contact IDs and lookup keys are not accepted in places that not
+             *     explicitly say to accept them.
              *     </li>
              * </ul>
              * <p>
@@ -8466,7 +8474,9 @@ public final class ContactsContract {
          *            around this {@link View}.
          * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
          *            {@link #MODE_LARGE}, indicating the desired dialog size,
          *            when supported.
@@ -8500,7 +8510,9 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
          *            {@link #MODE_LARGE}, indicating the desired dialog size,
          *            when supported.
@@ -8531,7 +8543,9 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
          *            to exclude when showing this dialog. For example, when
          *            already viewing the contact details card, this can be used
@@ -8569,7 +8583,9 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
          *            to exclude when showing this dialog. For example, when
          *            already viewing the contact details card, this can be used
