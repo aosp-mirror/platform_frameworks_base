@@ -64,6 +64,7 @@ public class Watchdog extends Thread {
 
     // Which native processes to dump into dropbox's stack traces
     public static final String[] NATIVE_STACKS_OF_INTEREST = new String[] {
+        "/system/bin/audioserver",
         "/system/bin/mediaserver",
         "/system/bin/sdcard",
         "/system/bin/surfaceflinger"
