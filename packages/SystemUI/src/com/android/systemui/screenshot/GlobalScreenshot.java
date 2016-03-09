@@ -39,6 +39,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -407,6 +408,7 @@ class GlobalScreenshot {
 
     private Bitmap mScreenBitmap;
     private View mScreenshotLayout;
+    private ScreenshotSelectorView mScreenshotSelectorView;
     private ImageView mBackgroundView;
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
@@ -437,7 +439,11 @@ class GlobalScreenshot {
         mBackgroundView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_background);
         mScreenshotView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot);
         mScreenshotFlash = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
+        mScreenshotSelectorView = (ScreenshotSelectorView) mScreenshotLayout.findViewById(
+                R.id.global_screenshot_selector);
         mScreenshotLayout.setFocusable(true);
+        mScreenshotSelectorView.setFocusable(true);
+        mScreenshotSelectorView.setFocusableInTouchMode(true);
         mScreenshotLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -449,7 +455,7 @@ class GlobalScreenshot {
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
-                WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.TYPE_SCREENSHOT,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -525,7 +531,8 @@ class GlobalScreenshot {
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible) {
+    void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible,
+            int x, int y, int width, int height) {
         // We need to orient the screenshot correctly (and the Surface api seems to take screenshots
         // only in the natural orientation of the device :!)
         mDisplay.getRealMetrics(mDisplayMetrics);
@@ -565,6 +572,13 @@ class GlobalScreenshot {
             mScreenBitmap = ss;
         }
 
+        if (width != mDisplayMetrics.widthPixels || height != mDisplayMetrics.heightPixels) {
+            // Crop the screenshot to selected region
+            Bitmap cropped = Bitmap.createBitmap(mScreenBitmap, x, y, width, height);
+            mScreenBitmap.recycle();
+            mScreenBitmap = cropped;
+        }
+
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
@@ -574,6 +588,71 @@ class GlobalScreenshot {
                 statusBarVisible, navBarVisible);
     }
 
+    void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible) {
+        mDisplay.getRealMetrics(mDisplayMetrics);
+        takeScreenshot(finisher, statusBarVisible, navBarVisible, 0, 0, mDisplayMetrics.widthPixels,
+                mDisplayMetrics.heightPixels);
+    }
+
+    /**
+     * Displays a screenshot selector
+     */
+    void takeScreenshotPartial(final Runnable finisher, final boolean statusBarVisible,
+            final boolean navBarVisible) {
+        mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
+        mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                ScreenshotSelectorView view = (ScreenshotSelectorView) v;
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        view.startSelection((int) event.getX(), (int) event.getY());
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        view.updateSelection((int) event.getX(), (int) event.getY());
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        view.setVisibility(View.GONE);
+                        mWindowManager.removeView(mScreenshotLayout);
+                        final Rect rect = view.getSelectionRect();
+                        if (rect != null) {
+                            if (rect.width() != 0 && rect.height() != 0) {
+                                // Need mScreenshotLayout to handle it after the view disappears
+                                mScreenshotLayout.post(new Runnable() {
+                                    public void run() {
+                                        takeScreenshot(finisher, statusBarVisible, navBarVisible,
+                                                rect.left, rect.top, rect.width(), rect.height());
+                                    }
+                                });
+                            }
+                        }
+
+                        view.stopSelection();
+                        return true;
+                }
+
+                return false;
+            }
+        });
+        mScreenshotLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mScreenshotSelectorView.setVisibility(View.VISIBLE);
+                mScreenshotSelectorView.requestFocus();
+            }
+        });
+    }
+
+    /**
+     * Cancels screenshot request
+     */
+    void stopScreenshot() {
+        // If the selector layer still presents on screen, we remove it and resets its state.
+        if (mScreenshotSelectorView.getSelectionRect() != null) {
+            mWindowManager.removeView(mScreenshotLayout);
+            mScreenshotSelectorView.stopSelection();
+        }
+    }
 
     /**
      * Starts the animation after taking the screenshot
