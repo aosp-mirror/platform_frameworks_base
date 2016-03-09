@@ -5357,9 +5357,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     void offsetRectBetweenParentAndChild(View descendant, Rect rect,
             boolean offsetFromChildToParent, boolean clipToBounds) {
 
-        final RectF rectF = mAttachInfo != null ? mAttachInfo.mTmpTransformRect1 : new RectF();
-        final Matrix inverse = mAttachInfo != null ? mAttachInfo.mTmpMatrix : new Matrix();
-
         // already in the same coord system :)
         if (descendant == this) {
             return;
@@ -5373,16 +5370,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 && (theParent != this)) {
 
             if (offsetFromChildToParent) {
-                rect.offset(-descendant.mScrollX, -descendant.mScrollY);
-
-                if (!descendant.hasIdentityMatrix()) {
-                    rectF.set(rect);
-                    descendant.getMatrix().mapRect(rectF);
-                    rectF.roundOut(rect);
-                }
-
-                rect.offset(descendant.mLeft, descendant.mTop);
-
+                rect.offset(descendant.mLeft - descendant.mScrollX,
+                        descendant.mTop - descendant.mScrollY);
                 if (clipToBounds) {
                     View p = (View) theParent;
                     boolean intersected = rect.intersect(0, 0, p.mRight - p.mLeft,
@@ -5400,16 +5389,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         rect.setEmpty();
                     }
                 }
-                rect.offset(-descendant.mLeft, -descendant.mTop);
-
-                if (!descendant.hasIdentityMatrix()) {
-                    descendant.getMatrix().invert(inverse);
-                    rectF.set(rect);
-                    inverse.mapRect(rectF);
-                    rectF.roundOut(rect);
-                }
-
-                rect.offset(descendant.mScrollX, descendant.mScrollY);
+                rect.offset(descendant.mScrollX - descendant.mLeft,
+                        descendant.mScrollY - descendant.mTop);
             }
 
             descendant = (View) theParent;
@@ -5420,26 +5401,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // to get into our coordinate space
         if (theParent == this) {
             if (offsetFromChildToParent) {
-                rect.offset(-descendant.mScrollX, -descendant.mScrollY);
-
-                if (!descendant.hasIdentityMatrix()) {
-                    rectF.set(rect);
-                    descendant.getMatrix().mapRect(rectF);
-                    rectF.roundOut(rect);
-                }
-
-                rect.offset(descendant.mLeft, descendant.mTop);
+                rect.offset(descendant.mLeft - descendant.mScrollX,
+                        descendant.mTop - descendant.mScrollY);
             } else {
-                rect.offset(-descendant.mLeft, -descendant.mTop);
-
-                if (!descendant.hasIdentityMatrix()) {
-                    descendant.getMatrix().invert(inverse);
-                    rectF.set(rect);
-                    inverse.mapRect(rectF);
-                    rectF.roundOut(rect);
-                }
-
-                rect.offset(descendant.mScrollX, descendant.mScrollY);
+                rect.offset(descendant.mScrollX - descendant.mLeft,
+                        descendant.mScrollY - descendant.mTop);
             }
         } else {
             throw new IllegalArgumentException("parameter must be a descendant of this view");
