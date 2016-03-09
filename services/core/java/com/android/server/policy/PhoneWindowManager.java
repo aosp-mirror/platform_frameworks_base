@@ -211,6 +211,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP = 0;
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME = 1;
 
+    // Controls navigation bar opacity depending on which workspace stacks are currently
+    // visible.
+    // Nav bar is always opaque when either the freeform stack or docked stack is visible.
+    static final int NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED = 0;
+    // Nav bar is always translucent when the freeform stack is visible, otherwise always opaque.
+    static final int NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE = 1;
+
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
@@ -539,7 +546,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
     private boolean mForceStatusBarTransparent;
-    boolean mForceNavBarOpaque;
+    int mNavBarOpacityMode = NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED;
     boolean mHideLockScreen;
     boolean mForcingShowNavBar;
     int mForcingShowNavBarLayer;
@@ -1729,8 +1736,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mShortPressWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
 
-        mForceNavBarOpaque = res.getBoolean(
-                com.android.internal.R.bool.config_forceNavBarAlwaysOpaque);
+        mNavBarOpacityMode = res.getInteger(
+                com.android.internal.R.integer.config_navBarOpacityMode);
     }
 
     @Override
@@ -7093,7 +7100,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // is visible but also when we are resizing for the transitions when docked stack
         // visibility changes.
         mForceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing;
-        final boolean forceOpaqueSystemBars = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
+        final boolean forceOpaqueStatusBar = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
 
         // apply translucent bar vis flags
         WindowState transWin = isStatusBarKeyguard() && !mHideLockScreen
@@ -7118,14 +7125,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if ((!areTranslucentBarsAllowed() && transWin != mStatusBar)
-                || forceOpaqueSystemBars) {
-            vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
-                    | View.SYSTEM_UI_TRANSPARENT);
+                || forceOpaqueStatusBar) {
+            vis &= ~(View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT);
         }
 
-        if (mForceNavBarOpaque) {
-            vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT);
-        }
+        vis = configureNavBarOpacity(vis, dockedStackVisible, freeformStackVisible, resizing);
 
         if (mForceWindowDrawsStatusBarBackground) {
             vis |= View.STATUS_BAR_TRANSPARENT;
@@ -7197,6 +7201,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
 
         return vis;
+    }
+
+    /**
+     * @return the current visibility flags with the nav-bar opacity related flags toggled based
+     *         on the nav bar opacity rules chosen by {@link #mNavBarOpacityMode}.
+     */
+    private int configureNavBarOpacity(int visibility, boolean dockedStackVisible,
+            boolean freeformStackVisible, boolean isDockedDividerResizing) {
+        if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
+            if (dockedStackVisible || freeformStackVisible || isDockedDividerResizing) {
+                visibility = setNavBarOpaqueFlag(visibility);
+            }
+        } else if (mNavBarOpacityMode == NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE) {
+            if (isDockedDividerResizing) {
+                visibility = setNavBarOpaqueFlag(visibility);
+            } else if (freeformStackVisible) {
+                visibility = setNavBarTranslucentFlag(visibility);
+            } else {
+                visibility = setNavBarOpaqueFlag(visibility);
+            }
+        }
+
+        if (!areTranslucentBarsAllowed()) {
+            visibility &= ~View.NAVIGATION_BAR_TRANSLUCENT;
+        }
+        return visibility;
+    }
+
+    private int setNavBarOpaqueFlag(int visibility) {
+        return visibility &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT);
+    }
+
+    private int setNavBarTranslucentFlag(int visibility) {
+        visibility &= ~View.NAVIGATION_BAR_TRANSPARENT;
+        return visibility |= View.NAVIGATION_BAR_TRANSLUCENT;
     }
 
     private void clearClearableFlagsLw() {
