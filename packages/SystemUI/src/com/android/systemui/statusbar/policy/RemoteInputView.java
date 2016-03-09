@@ -248,9 +248,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         @Override
-        protected void onFocusLost() {
-            super.onFocusLost();
-            defocusIfNeeded();
+        protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
+            super.onFocusChanged(focused, direction, previouslyFocusedRect);
+            if (!focused) {
+                defocusIfNeeded();
+            }
         }
 
         @Override
