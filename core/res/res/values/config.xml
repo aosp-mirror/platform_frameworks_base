@@ -2440,9 +2440,13 @@
          flag). -->
     <bool name="config_forceWindowDrawsStatusBarBackground">true</bool>
 
-    <!-- If set, this will force the navigation bar to always be drawn with an opaque
-         background. -->
-    <bool name="config_forceNavBarAlwaysOpaque">false</bool>
+    <!-- Controls the opacity of the navigation bar depending on the visibility of the
+         various workspace stacks.
+         0 - Nav bar is always opaque when either the freeform stack or docked stack is visible.
+         1 - Nav bar is always translucent when the freeform stack is visible, otherwise always
+         opaque.
+         -->
+    <integer name="config_navBarOpacityMode">0</integer>
 
     <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
     <string translatable="false" name="config_defaultPictureInPictureBounds">"0 0 100 100"</string>
