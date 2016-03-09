@@ -63,7 +63,8 @@ import java.util.TreeMap;
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
  */
-public class CameraDeviceImpl extends CameraDevice {
+public class CameraDeviceImpl extends CameraDevice
+        implements IBinder.DeathRecipient {
     private final String TAG;
     private final boolean DEBUG = false;
 
@@ -261,13 +262,34 @@ public class CameraDeviceImpl extends CameraDevice {
         return mCallbacks;
     }
 
-    public void setRemoteDevice(ICameraDeviceUser remoteDevice) {
+    /**
+     * Set remote device, which triggers initial onOpened/onUnconfigured callbacks
+     *
+     * <p>This function may post onDisconnected and throw CAMERA_DISCONNECTED if remoteDevice dies
+     * during setup.</p>
+     *
+     */
+    public void setRemoteDevice(ICameraDeviceUser remoteDevice) throws CameraAccessException {
         synchronized(mInterfaceLock) {
             // TODO: Move from decorator to direct binder-mediated exceptions
             // If setRemoteFailure already called, do nothing
             if (mInError) return;
 
             mRemoteDevice = new ICameraDeviceUserWrapper(remoteDevice);
+
+            IBinder remoteDeviceBinder = remoteDevice.asBinder();
+            // For legacy camera device, remoteDevice is in the same process, and
+            // asBinder returns NULL.
+            if (remoteDeviceBinder != null) {
+                try {
+                    remoteDeviceBinder.linkToDeath(this, /*flag*/ 0);
+                } catch (RemoteException e) {
+                    CameraDeviceImpl.this.mDeviceHandler.post(mCallOnDisconnected);
+
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                            "The camera device has encountered a serious error");
+                }
+            }
 
             mDeviceHandler.post(mCallOnOpened);
             mDeviceHandler.post(mCallOnUnconfigured);
@@ -1962,4 +1984,28 @@ public class CameraDeviceImpl extends CameraDevice {
         return mCharacteristics;
     }
 
+    /**
+     * Listener for binder death.
+     *
+     * <p> Handle binder death for ICameraDeviceUser. Trigger onError.</p>
+     */
+    public void binderDied() {
+        Log.w(TAG, "CameraDevice " + mCameraId + " died unexpectedly");
+
+        if (mRemoteDevice == null) {
+            return; // Camera already closed
+        }
+
+        mInError = true;
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                if (!isClosed()) {
+                    mDeviceCallback.onError(CameraDeviceImpl.this,
+                            CameraDeviceCallbacks.ERROR_CAMERA_SERVICE);
+                }
+            }
+        };
+        CameraDeviceImpl.this.mDeviceHandler.post(r);
+    }
 }

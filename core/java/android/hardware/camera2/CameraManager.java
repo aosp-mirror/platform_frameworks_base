@@ -358,6 +358,8 @@ public final class CameraManager {
             // TODO: factor out callback to be non-nested, then move setter to constructor
             // For now, calling setRemoteDevice will fire initial
             // onOpened/onUnconfigured callbacks.
+            // This function call may post onDisconnected and throw CAMERA_DISCONNECTED if
+            // cameraUser dies during setup.
             deviceImpl.setRemoteDevice(cameraUser);
             device = deviceImpl;
         }
