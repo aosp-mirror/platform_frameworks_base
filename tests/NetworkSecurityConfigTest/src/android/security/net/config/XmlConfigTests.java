@@ -431,4 +431,37 @@ public class XmlConfigTests extends AndroidTestCase {
         TestUtils.assertConnectionSucceeds(context, "android.com", 443);
         TestUtils.assertUrlConnectionSucceeds(context, "android.com", 443);
     }
+
+    public void testExtraDebugResource() throws Exception {
+        XmlConfigSource source =
+                new XmlConfigSource(getContext(), R.xml.extra_debug_resource, true);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        assertFalse(appConfig.hasPerDomainConfigs());
+        NetworkSecurityConfig config = appConfig.getConfigForHostname("");
+        MoreAsserts.assertNotEmpty(config.getTrustAnchors());
+
+        // Check that the _debug file is ignored if debug is false.
+        source = new XmlConfigSource(getContext(), R.xml.extra_debug_resource, false);
+        appConfig = new ApplicationConfig(source);
+        assertFalse(appConfig.hasPerDomainConfigs());
+        config = appConfig.getConfigForHostname("");
+        MoreAsserts.assertEmpty(config.getTrustAnchors());
+    }
+
+    public void testExtraDebugResourceIgnored() throws Exception {
+        // Verify that parsing the extra debug config resource fails only when debugging is true.
+        XmlConfigSource source =
+                new XmlConfigSource(getContext(), R.xml.bad_extra_debug_resource, false);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        // Force parsing the config file.
+        appConfig.getConfigForHostname("");
+
+        source = new XmlConfigSource(getContext(), R.xml.bad_extra_debug_resource, true);
+        appConfig = new ApplicationConfig(source);
+        try {
+            appConfig.getConfigForHostname("");
+            fail("Bad extra debug resource did not fail to parse");
+        } catch (RuntimeException expected) {
+        }
+    }
 }

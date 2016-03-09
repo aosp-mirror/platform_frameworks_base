@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- debug-overrides not inside network-security-config should cause a parsing error -->
+<debug-overrides>
+  <trust-anchors>
+    <certificates src="system" />
+  </trust-anchors>
+</debug-overrides>
