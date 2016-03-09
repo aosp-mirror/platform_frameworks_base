@@ -26,25 +26,34 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 
-<h3 id="notifications">Notifications</h3>
+<h3 id="an">Active Notifications</h3>
 <p>
-  This sample is updated to demonstrates how to take advantage of new
-  notifications features available in Android N.
+  This is a pre-existing sample which shows a simple service that sends
+  notifications using NotificationCompat. Each unread conversation from a user
+  is sent as a distinct notification.
 </p>
 <p>
-  <a href="https://github.com/googlesamples/android-Notifications">
+  This sample has been updated to take advantage of new notification features
+  available in Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
   Get it on GitHub</a>
 </p>
 
 
-<h3 id="jobsched">JobScheduler</h3>
+<h3 id="ms">Messaging Service</h3>
 <p>
-  This sample demonstrates how to use the JobScheduler API to schedule
-  background tasks when certain conditions apply, such as network or charging
-  state.
+  This is a pre-existing sample which demonstrates how to use
+  NotificationManager to tell how many notifications an application is currently
+  showing.
 </p>
 <p>
-  <a href="https://github.com/googlesamples/android-JobScheduler">
+  This sample has been updated to take advantage of new notification features
+  available in Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
   Get it on GitHub</a>
 </p>
 
