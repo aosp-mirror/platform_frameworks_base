@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Isisekeli sezwi"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Khiya manje"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Okuqukethwe kufihliwe"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Okuqukethwe kufihlwe inqubomgomo"</string>
     <string name="safeMode" msgid="2788228061547930246">"Imodi ephephile"</string>
@@ -1052,16 +1051,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Thinta ukuze uthole ezinye izinketho."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Thinta ukwenza ukuthi ukudibhaga kwe-USB kungasebenzi."</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Ithatha umbiko wesiphazamisi..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Yabelana ngombiko wesiphazamisi?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Yabelana ngombiko wesiphazamisi..."</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Umqondisi wakho we-IT ucele umbiko wesiphazamisi ukukusiza ukuxazulula inkinga kule divayisi. Izinhlelo zokusebenza nedatha ingabiwa."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"YABELANA"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"YENQABA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Shintsha ikhibhodi"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Khetha amakhibhodi"</string>
     <string name="show_ime" msgid="2506087537466597099">"Yigcine kusikrini ngenkathi kusebenza ikhibhodi ephathekayo"</string>
@@ -1140,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Iphephadonga"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Shintsha iphephadonga"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Umlaleli wesaziso"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Isilaleli se-VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Umhlinzeki wesimo"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Umsizi wesaziso"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"I-VPN isiyasebenza"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"i-VPN ivuswe ngu <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Thinta ukuze wengamele inethiwekhi."</string>
@@ -1568,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Susa ukuphina"</string>
     <string name="app_info" msgid="6856026610594615344">"Ulwazi lohlelo lokusebenza"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

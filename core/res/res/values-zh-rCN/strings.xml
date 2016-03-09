@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"（<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g> 条）"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"内容已隐藏（根据政策规定）"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
@@ -1052,16 +1051,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"触摸以查看更多选项。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在生成错误报告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享错误报告吗？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享错误报告…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"您的 IT 管理员希望获取错误报告，以便排查此设备的问题。报告可能会透露您设备上的应用和数据。"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"分享"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"拒绝"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"选择键盘"</string>
     <string name="show_ime" msgid="2506087537466597099">"连接到实体键盘时使其在屏幕上保持显示状态"</string>
@@ -1140,8 +1135,11 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁纸"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知侦听器"</string>
+    <!-- no translation found for vr_listener_binding_label (4316591939343607306) -->
+    <skip />
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"条件提供程序"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"通知助手"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"已激活VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g>已激活VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>
@@ -1336,9 +1334,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量调高到推荐水平以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用无障碍功能。"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"无障碍功能已启用。"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消无障碍功能。"</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"正在将<xliff:g id="NAME">%1$s</xliff:g>退出帐号…"</string>
@@ -1568,4 +1566,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

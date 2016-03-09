@@ -231,7 +231,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistent vocal"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Blocați acum"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Conținutul este ascuns"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Conținutul este ascuns conform politicii"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod sigur"</string>
@@ -1060,16 +1059,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Atingeți pentru mai multe opțiuni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depanarea USB este conectată"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeți pentru a dezactiva depanarea USB."</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Se creează un raport de eroare…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Trimiteți raportul de eroare?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Se trimite raportul de eroare…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Administratorul IT a solicitat un raport de eroare pentru a remedia problemele acestui dispozitiv. Este posibil să se permită accesul la date și aplicații."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"TRIMITEȚI"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUZAȚI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Schimbați tastatura"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Alegeți tastaturi"</string>
     <string name="show_ime" msgid="2506087537466597099">"Se păstrează pe ecran cât timp este activată tastatura fizică"</string>
@@ -1148,8 +1143,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagine de fundal"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Modificați imaginea de fundal"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviciu de citire a notificărilor"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Instrument de ascultare pentru Realitatea virtuală"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Furnizor de condiții"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Asistent pentru notificări"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN activat"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN este activată de <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Atingeți pentru a gestiona rețeaua."</string>
@@ -1587,4 +1584,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Anulați fixarea"</string>
     <string name="app_info" msgid="6856026610594615344">"Informații despre aplicație"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

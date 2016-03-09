@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"အသံ အကူအညီ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ယခု သော့ပိတ်ရန်"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"၉၉၉+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"အကြောင်းအရာများ ဝှက်ထား"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"မူဝါဒမှ အကြောင်းအရာများကို ဝှက်ထားသည်"</string>
     <string name="safeMode" msgid="2788228061547930246">"အန္တရာယ်ကင်းမှု စနစ်(Safe mode)"</string>
@@ -1052,16 +1051,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ထပ်မံရွေးချယ်စရာများအတွက် ထိပါ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ဒီဘာဂင် ပိတ်ရန် ထိပါ။"</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ချွတ်ယွင်းမှုအစီရင်ခံစာ မျှဝေနေသည်…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ဤစက်ပစ္စည်းကို ပြဿနာအဖြေရှာရာတွင် ကူညီရန် သင့်အိုင်တီစီမံခန့်ခွဲသူသည် ချွတ်ယွင်းချက်အစီရင်ခံစာကို တောင်းဆိုထားသည်။ အက်ပ်များနှင့် ဒေတာကိုမျှဝေထားနိုင်ပါသည်။"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"မျှဝေပါ"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ငြင်းပယ်ပါ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ကီးဘုတ်များကို ရွေးရန်"</string>
     <string name="show_ime" msgid="2506087537466597099">"စက်၏ကီးဘုတ်ကိုအသုံးပြုနေစဉ် ၎င်းကိုမျက်နှာပြင်ပေါ်တွင် ထားပါ"</string>
@@ -1140,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"နောက်ခံ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"နောက်ခံပြောင်းခြင်း"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"အကြောင်းကြားချက် နားတောင်သူ"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR နားထောင်မှုစနစ်"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"အခြေအနေ စီမံပေးသူ"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"သတိပေးချက် အကူ"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN ဖွင့်ထားပါသည်"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g>မှVPNအလုပ်လုပ်နေသည်"</string>
     <string name="vpn_text" msgid="3011306607126450322">"ကွန်ရက် ထိန်းသိမ်းရန် တို့ထိပါ"</string>
@@ -1568,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"ဖြုတ်ပါ"</string>
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

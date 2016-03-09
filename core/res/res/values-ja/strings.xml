@@ -213,8 +213,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"対話型レポート"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報を確認することができます。レポート作成に時間がかかってもあまり使用されないセクションは省略されることがあります。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完全レポート"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"端末の反応がないとき、または速度が遅すぎるときにシステムへの影響を最小限に抑えたい場合は、このオプションを使用します。またすべてのレポート セクションを表示したい場合にもこのオプションを使用します。スクリーンショットは作成されず、詳細情報も表示できません。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
@@ -230,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"音声アシスト"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"今すぐロック"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"（<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g> 件）"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"コンテンツが非表示"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"ポリシーによって非表示になっているコンテンツ"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
@@ -1053,16 +1051,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"タップしてその他のオプションを表示"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"バグレポートを取得しています…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"バグレポートを共有しますか？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"バグレポートの共有中…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"IT 管理者からこの端末のトラブルシューティングに役立てるためバグレポートを共有するようリクエストがありました。アプリやデータが共有されることがあります。"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"共有する"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"共有しない"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"キーボードの選択"</string>
     <string name="show_ime" msgid="2506087537466597099">"物理キーボードが有効になっている間は、画面に表示されます"</string>
@@ -1141,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁紙"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"壁紙を変更"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知リスナー"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR リスナー"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"コンディションプロバイダ"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"通知アシスタント"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPNが有効になりました"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPNが<xliff:g id="APP">%s</xliff:g>により有効化されました"</string>
     <string name="vpn_text" msgid="3011306607126450322">"タップしてネットワークを管理します。"</string>
@@ -1551,16 +1547,11 @@
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"言語の候補"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"すべての言語"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"検索"</string>
-    <!-- no translation found for work_mode_off_title (8954725060677558855) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (3286169091278094476) -->
-    <skip />
-    <!-- no translation found for work_mode_turn_on (2062544985670564875) -->
-    <skip />
-    <!-- no translation found for suspended_package_title (3408150347778524435) -->
-    <skip />
-    <!-- no translation found for suspended_package_message (6341091587106868601) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Work モード OFF"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"仕事用プロファイルで、アプリ、バックグラウンド同期などの関連機能の使用を許可します。"</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"ON にする"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$sが無効です"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s管理者によって無効になっています。詳しくは管理者までお問い合わせください。"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"新着メッセージがあります"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"表示するには SMS アプリを開きます"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"一部機能が制限されている可能性"</string>
@@ -1574,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"固定を解除"</string>
     <string name="app_info" msgid="6856026610594615344">"アプリ情報"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>
