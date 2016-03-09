@@ -303,8 +303,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixação de tela"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pesquisar"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Não foi possível iniciar <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"O app <xliff:g id="APP">%s</xliff:g> está desativado no modo de segurança."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Histórico"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Limpar"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Este app não é compatível com o modo de várias janelas"</string>
