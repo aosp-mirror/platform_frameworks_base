@@ -22,6 +22,8 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.LauncherApps.ShortcutQuery;
+import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 
 import java.util.List;
 
@@ -55,4 +57,10 @@ public abstract class ShortcutServiceInternal {
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
+
+    public abstract int getShortcutIconResId(@NonNull String callingPackage,
+            @NonNull ShortcutInfo shortcut, int userId);
+
+    public abstract ParcelFileDescriptor getShortcutIconFd(@NonNull String callingPackage,
+            @NonNull ShortcutInfo shortcut, int userId);
 }

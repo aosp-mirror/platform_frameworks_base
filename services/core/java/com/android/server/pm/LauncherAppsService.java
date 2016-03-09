@@ -42,6 +42,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IInterface;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -326,6 +327,26 @@ public class LauncherAppsService extends SystemService {
 
             mShortcutServiceInternal.pinShortcuts(callingPackage, packageName,
                     ids, user.getIdentifier());
+        }
+
+        @Override
+        public int getShortcutIconResId(String callingPackage, ShortcutInfo shortcut,
+                UserHandle user) {
+            enforceShortcutPermission(user);
+            verifyCallingPackage(callingPackage);
+
+            return mShortcutServiceInternal.getShortcutIconResId(callingPackage, shortcut,
+                    user.getIdentifier());
+        }
+
+        @Override
+        public ParcelFileDescriptor getShortcutIconFd(String callingPackage, ShortcutInfo shortcut,
+                UserHandle user) {
+            enforceShortcutPermission(user);
+            verifyCallingPackage(callingPackage);
+
+            return mShortcutServiceInternal.getShortcutIconFd(callingPackage, shortcut,
+                    user.getIdentifier());
         }
 
         @Override

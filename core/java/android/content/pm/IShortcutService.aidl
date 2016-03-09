@@ -44,5 +44,7 @@ interface IShortcutService {
 
     long getRateLimitResetTime(String packageName, int userId);
 
+    int getIconMaxDimensions(String packageName, int userId);
+
     void resetThrottling(); // system only API for developer opsions
 }
