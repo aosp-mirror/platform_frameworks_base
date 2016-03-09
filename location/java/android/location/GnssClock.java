@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -48,13 +49,19 @@ public final class GnssClock implements Parcelable {
     private double mDriftUncertaintyNanosPerSecond;
     private int mHardwareClockDiscontinuityCount;
 
-    GnssClock() {
+    /**
+     * @hide
+     */
+    @TestApi
+    public GnssClock() {
         initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
+     * @hide
      */
+    @TestApi
     public void set(GnssClock clock) {
         mFlags = clock.mFlags;
         mLeapSecond = clock.mLeapSecond;
@@ -70,7 +77,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets all the contents to its original state.
+     * @hide
      */
+    @TestApi
     public void reset() {
         initialize();
     }
@@ -95,7 +104,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the leap second associated with the clock's time.
+     * @hide
      */
+    @TestApi
     public void setLeapSecond(int leapSecond) {
         setFlag(HAS_LEAP_SECOND);
         mLeapSecond = leapSecond;
@@ -103,7 +114,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets the leap second associated with the clock's time.
+     * @hide
      */
+    @TestApi
     public void resetLeapSecond() {
         resetFlag(HAS_LEAP_SECOND);
         mLeapSecond = Integer.MIN_VALUE;
@@ -129,7 +142,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the GNSS receiver internal clock in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setTimeNanos(long timeNanos) {
         mTimeNanos = timeNanos;
     }
@@ -153,7 +168,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setTimeUncertaintyNanos(double timeUncertaintyNanos) {
         setFlag(HAS_TIME_UNCERTAINTY);
         mTimeUncertaintyNanos = timeUncertaintyNanos;
@@ -161,7 +178,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void resetTimeUncertaintyNanos() {
         resetFlag(HAS_TIME_UNCERTAINTY);
         mTimeUncertaintyNanos = Double.NaN;
@@ -193,7 +212,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the full bias in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setFullBiasNanos(long value) {
         setFlag(HAS_FULL_BIAS);
         mFullBiasNanos = value;
@@ -201,7 +222,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets the full bias in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void resetFullBiasNanos() {
         resetFlag(HAS_FULL_BIAS);
         mFullBiasNanos = Long.MIN_VALUE;
@@ -226,7 +249,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the sub-nanosecond bias.
+     * @hide
      */
+    @TestApi
     public void setBiasNanos(double biasNanos) {
         setFlag(HAS_BIAS);
         mBiasNanos = biasNanos;
@@ -234,7 +259,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets the clock's Bias in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void resetBiasNanos() {
         resetFlag(HAS_BIAS);
         mBiasNanos = Double.NaN;
@@ -258,7 +285,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void setBiasUncertaintyNanos(double biasUncertaintyNanos) {
         setFlag(HAS_BIAS_UNCERTAINTY);
         mBiasUncertaintyNanos = biasUncertaintyNanos;
@@ -266,7 +295,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
+     * @hide
      */
+    @TestApi
     public void resetBiasUncertaintyNanos() {
         resetFlag(HAS_BIAS_UNCERTAINTY);
         mBiasUncertaintyNanos = Double.NaN;
@@ -292,7 +323,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the clock's Drift in nanoseconds per second.
+     * @hide
      */
+    @TestApi
     public void setDriftNanosPerSecond(double driftNanosPerSecond) {
         setFlag(HAS_DRIFT);
         mDriftNanosPerSecond = driftNanosPerSecond;
@@ -300,7 +333,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Resets the clock's Drift in nanoseconds per second.
+     * @hide
      */
+    @TestApi
     public void resetDriftNanosPerSecond() {
         resetFlag(HAS_DRIFT);
         mDriftNanosPerSecond = Double.NaN;
@@ -324,7 +359,9 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
+     * @hide
      */
+    @TestApi
     public void setDriftUncertaintyNanosPerSecond(double driftUncertaintyNanosPerSecond) {
         setFlag(HAS_DRIFT_UNCERTAINTY);
         mDriftUncertaintyNanosPerSecond = driftUncertaintyNanosPerSecond;
@@ -339,14 +376,18 @@ public final class GnssClock implements Parcelable {
 
     /**
      * Sets count of last hardware clock discontinuity.
+     * @hide
      */
+    @TestApi
     public void setHardwareClockDiscontinuityCount(int value) {
         mHardwareClockDiscontinuityCount = value;
     }
 
     /**
      * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
+     * @hide
      */
+    @TestApi
     public void resetDriftUncertaintyNanosPerSecond() {
         resetFlag(HAS_DRIFT_UNCERTAINTY);
         mDriftUncertaintyNanosPerSecond = Double.NaN;

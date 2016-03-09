@@ -19236,6 +19236,7 @@ package android.location {
   }
 
   public final class GnssClock implements android.os.Parcelable {
+    ctor public GnssClock();
     method public int describeContents();
     method public double getBiasNanos();
     method public double getBiasUncertaintyNanos();
@@ -19276,6 +19277,7 @@ package android.location {
   }
 
   public final class GnssMeasurement implements android.os.Parcelable {
+    ctor public GnssMeasurement();
     method public int describeContents();
     method public double getAccumulatedDeltaRangeMeters();
     method public int getAccumulatedDeltaRangeState();
@@ -19318,6 +19320,7 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
+    method public void setPseudorangeRateCorrected(boolean);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
@@ -19368,6 +19371,7 @@ package android.location {
   }
 
   public final class GnssNavigationMessage implements android.os.Parcelable {
+    ctor public GnssNavigationMessage();
     method public int describeContents();
     method public byte[] getData();
     method public int getMessageId();

@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.TestApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
@@ -86,13 +87,19 @@ public final class GnssNavigationMessage implements Parcelable {
     private byte[] mData;
     private int mStatus;
 
-    GnssNavigationMessage() {
+    /**
+     * @hide
+     */
+    @TestApi
+    public GnssNavigationMessage() {
         initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
+     * @hide
      */
+    @TestApi
     public void set(GnssNavigationMessage navigationMessage) {
         mType = navigationMessage.mType;
         mSvid = navigationMessage.mSvid;
@@ -104,7 +111,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Resets all the contents to its original state.
+     * @hide
      */
+    @TestApi
     public void reset() {
         initialize();
     }
@@ -119,7 +128,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Sets the type of the navigation message.
+     * @hide
      */
+    @TestApi
     public void setType(@GnssNavigationMessageType int value) {
         mType = value;
     }
@@ -165,7 +176,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Sets the Pseud-random number.
+     * @hide
      */
+    @TestApi
     public void setSvid(int value) {
         mSvid = value;
     }
@@ -182,7 +195,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Sets the Message Identifier.
+     * @hide
      */
+    @TestApi
     public void setMessageId(int value) {
         mMessageId = value;
     }
@@ -199,7 +214,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Sets the Sub-message identifier.
+     * @hide
      */
+    @TestApi
     public void setSubmessageId(int value) {
         mSubmessageId = value;
     }
@@ -215,7 +232,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Sets the data associated with the Navigation Message.
+     * @hide
      */
+    @TestApi
     public void setData(byte[] value) {
         if (value == null) {
             throw new InvalidParameterException("Data must be a non-null array");
@@ -233,7 +252,9 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /**
      * Sets the status of the navigation message.
+     * @hide
      */
+    @TestApi
     public void setStatus(int value) {
         mStatus = value;
     }
