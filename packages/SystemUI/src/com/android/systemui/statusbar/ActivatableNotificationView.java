@@ -148,7 +148,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         public void onAnimationEnd(Animator animation) {
             super.onAnimationEnd(animation);
             mFadeInFromDarkAnimator = null;
-            updateOutlineAlpha();
+            updateBackground();
         }
     };
     private ValueAnimator.AnimatorUpdateListener mUpdateOutlineListener
@@ -340,9 +340,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    if (mDimmed) {
-                        mBackgroundNormal.setVisibility(View.INVISIBLE);
-                    }
+                    updateBackground();
                 }
             });
             animator.start();
@@ -371,14 +369,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     public void makeInactive(boolean animate) {
         if (mActivated) {
+            mActivated = false;
             if (mDimmed) {
                 if (animate) {
                     startActivateAnimation(true /* reverse */);
                 } else {
-                    mBackgroundNormal.setVisibility(View.INVISIBLE);
+                    updateBackground();
                 }
             }
-            mActivated = false;
         }
         if (mOnActivatedListener != null) {
             mOnActivatedListener.onActivationReset(this);
@@ -408,20 +406,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return;
         }
         mDark = dark;
+        updateBackground();
         if (!dark && fade && !shouldHideBackground()) {
-            if (mActivated) {
-                mBackgroundDimmed.setVisibility(View.VISIBLE);
-                mBackgroundNormal.setVisibility(View.VISIBLE);
-            } else if (mDimmed) {
-                mBackgroundDimmed.setVisibility(View.VISIBLE);
-                mBackgroundNormal.setVisibility(View.INVISIBLE);
-            } else {
-                mBackgroundDimmed.setVisibility(View.INVISIBLE);
-                mBackgroundNormal.setVisibility(View.VISIBLE);
-            }
             fadeInFromDark(delay);
-        } else {
-            updateBackground();
         }
         updateOutlineAlpha();
     }
@@ -528,6 +515,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void fadeInFromDark(long delay) {
         final View background = mDimmed ? mBackgroundDimmed : mBackgroundNormal;
         background.setAlpha(0f);
+        mBackgroundVisibilityUpdater.onAnimationUpdate(null);
         background.setPivotX(mBackgroundDimmed.getWidth() / 2f);
         background.setPivotY(getActualHeight() / 2f);
         background.setScaleX(DARK_EXIT_SCALE_START);
@@ -565,6 +553,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void fadeDimmedBackground() {
         mBackgroundDimmed.animate().cancel();
         mBackgroundNormal.animate().cancel();
+        if (mActivated) {
+            updateBackground();
+            return;
+        }
         if (!shouldHideBackground()) {
             if (mDimmed) {
                 mBackgroundDimmed.setVisibility(View.VISIBLE);
@@ -594,11 +586,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mDimmed) {
-                    mBackgroundNormal.setVisibility(View.INVISIBLE);
-                } else {
-                    mBackgroundDimmed.setVisibility(View.INVISIBLE);
-                }
+                updateBackground();
                 mBackgroundAnimator = null;
             }
         });
@@ -613,12 +601,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else if (mDimmed) {
             mBackgroundDimmed.setVisibility(View.VISIBLE);
-            mBackgroundNormal.setVisibility(View.INVISIBLE);
+            mBackgroundNormal.setVisibility(mActivated ? View.VISIBLE : View.INVISIBLE);
         } else {
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.VISIBLE);
             mBackgroundNormal.setAlpha(1f);
             removeCallbacks(mTapTimeoutRunnable);
+            // make in inactive to avoid it sticking around active
+            makeInactive(false /* animate */);
         }
         setNormalBackgroundVisibilityAmount(
                 mBackgroundNormal.getVisibility() == View.VISIBLE ? 1.0f : 0.0f);
