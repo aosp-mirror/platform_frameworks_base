@@ -16,9 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.StubProvider.ROOT_0_ID;
-
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 @LargeTest
 public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
@@ -73,6 +72,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         device.pressBack();
     }
 
+    @Suppress
     public void testRenameFile_OkButton() throws Exception {
         bots.directory.selectDocument(fileName1);
         bots.main.openOverflowMenu();
@@ -101,6 +101,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bots.directory.assertDocumentsCount(4);
     }
 
+    @Suppress
     public void testRenameFile_Cancel() throws Exception {
         bots.directory.selectDocument(fileName1);
         bots.main.openOverflowMenu();
