@@ -26,6 +26,8 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.ParcelFileDescriptor;
+
 import java.util.List;
 
 /**
@@ -52,4 +54,8 @@ interface ILauncherApps {
             in UserHandle user);
     boolean startShortcut(String callingPackage, String packageName, String id,
             in Rect sourceBounds, in Bundle startActivityOptions, in UserHandle user);
+
+    int getShortcutIconResId(String callingPackage, in ShortcutInfo shortcut, in UserHandle user);
+    ParcelFileDescriptor getShortcutIconFd(String callingPackage, in ShortcutInfo shortcut,
+            in UserHandle user);
 }

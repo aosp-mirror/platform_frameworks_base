@@ -10008,6 +10008,7 @@ package android.content.pm {
     method public int getWeight();
     method public boolean hasIconFile();
     method public boolean hasIconResource();
+    method public boolean hasKeyFieldsOnly();
     method public boolean isDynamic();
     method public boolean isPinned();
     method public void writeToParcel(android.os.Parcel, int);
@@ -10018,6 +10019,7 @@ package android.content.pm {
     field public static final int FLAG_DYNAMIC = 1; // 0x1
     field public static final int FLAG_HAS_ICON_FILE = 8; // 0x8
     field public static final int FLAG_HAS_ICON_RES = 4; // 0x4
+    field public static final int FLAG_KEY_FIELDS_ONLY = 16; // 0x10
     field public static final int FLAG_PINNED = 2; // 0x2
   }
 
@@ -10038,6 +10040,7 @@ package android.content.pm {
     method public void deleteAllDynamicShortcuts();
     method public void deleteDynamicShortcut(java.lang.String);
     method public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
+    method public int getIconMaxDimensions();
     method public int getMaxDynamicShortcutCount();
     method public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
     method public long getRateLimitResetTime();
@@ -29101,7 +29104,6 @@ package android.os {
     ctor public PersistableBundle();
     ctor public PersistableBundle(int);
     ctor public PersistableBundle(android.os.PersistableBundle);
-    ctor public PersistableBundle(android.os.Bundle);
     method public java.lang.Object clone();
     method public android.os.PersistableBundle deepcopy();
     method public int describeContents();

@@ -18,7 +18,9 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IShortcutService;
@@ -30,24 +32,33 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SELinux;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -70,6 +81,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -79,22 +91,28 @@ import java.util.function.Predicate;
 
 /**
  * TODO:
- * - Make save async
  *
- * - Add Bitmap support
+ * - Implement launchShortcut
  *
- * - Implement updateShortcuts
+ * - Detect when already registered instances are passed to APIs again, which might break
+ *   internal bitmap handling.
  *
  * - Listen to PACKAGE_*, remove orphan info, update timestamp for icon res
+ *   -> Need to scan all packages when a user starts too.
+ *   -> Clear data -> remove all dynamic?  but not the pinned?
  *
  * - Pinned per each launcher package (multiple launchers)
  *
- * - Dev option to reset all counts for QA (for now use "adb shell cmd shortcut reset-throttling")
- *
  * - Load config from settings
+ *
+ * - Make save async (should we?)
+ *
+ * - Scan and remove orphan bitmaps (just in case).
+ *
+ * - Backup & restore
  */
 public class ShortcutService extends IShortcutService.Stub {
-    private static final String TAG = "ShortcutService";
+    static final String TAG = "ShortcutService";
 
     private static final boolean DEBUG = true; // STOPSHIP if true
     private static final boolean DEBUG_LOAD = true; // STOPSHIP if true
@@ -102,6 +120,8 @@ public class ShortcutService extends IShortcutService.Stub {
     private static final int DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
     private static final int DEFAULT_MAX_DAILY_UPDATES = 10;
     private static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 5;
+    private static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
+    private static final int DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP = 48;
 
     private static final int SAVE_DELAY_MS = 5000; // in milliseconds.
 
@@ -114,11 +134,29 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     static final String FILENAME_USER_PACKAGES = "shortcuts.xml";
 
-    private static final String DIRECTORY_BITMAPS = "bitmaps";
+    static final String DIRECTORY_BITMAPS = "bitmaps";
 
     private static final String TAG_ROOT = "root";
+    private static final String TAG_PACKAGE = "package";
     private static final String TAG_LAST_RESET_TIME = "last_reset_time";
+    private static final String TAG_INTENT_EXTRAS = "intent-extras";
+    private static final String TAG_EXTRAS = "extras";
+    private static final String TAG_SHORTCUT = "shortcut";
+
     private static final String ATTR_VALUE = "value";
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_DYNAMIC_COUNT = "dynamic-count";
+    private static final String ATTR_CALL_COUNT = "call-count";
+    private static final String ATTR_LAST_RESET = "last-reset";
+    private static final String ATTR_ID = "id";
+    private static final String ATTR_ACTIVITY = "activity";
+    private static final String ATTR_TITLE = "title";
+    private static final String ATTR_INTENT = "intent";
+    private static final String ATTR_WEIGHT = "weight";
+    private static final String ATTR_TIMESTAMP = "timestamp";
+    private static final String ATTR_FLAGS = "flags";
+    private static final String ATTR_ICON_RES = "icon-res";
+    private static final String ATTR_BITMAP_PATH = "bitmap-path";
 
     private final Context mContext;
 
@@ -136,8 +174,16 @@ public class ShortcutService extends IShortcutService.Stub {
      * All the information relevant to shortcuts from a single package (per-user).
      *
      * TODO Move the persisting code to this class.
+     *
+     * Only save/load/dump should look/touch inside this class.
      */
     private static class PackageShortcuts {
+        @UserIdInt
+        private final int mUserId;
+
+        @NonNull
+        private final String mPackageName;
+
         /**
          * All the shortcuts from the package, keyed on IDs.
          */
@@ -151,20 +197,38 @@ public class ShortcutService extends IShortcutService.Stub {
         /**
          * # of times the package has called rate-limited APIs.
          */
-        private int mApiCallCountInner;
+        private int mApiCallCount;
 
         /**
-         * When {@link #mApiCallCountInner} was reset last time.
+         * When {@link #mApiCallCount} was reset last time.
          */
         private long mLastResetTime;
 
-        /**
-         * @return the all shortcuts.  Note DO NOT add/remove or touch the flags of the result
-         * directly, which would cause {@link #mDynamicShortcutCount} to be out of sync.
-         */
+        private PackageShortcuts(int userId, String packageName) {
+            mUserId = userId;
+            mPackageName = packageName;
+        }
+
         @GuardedBy("mLock")
-        public ArrayMap<String, ShortcutInfo> getShortcuts() {
-            return mShortcuts;
+        @Nullable
+        public ShortcutInfo findShortcutById(String id) {
+            return mShortcuts.get(id);
+        }
+
+        private ShortcutInfo deleteShortcut(@NonNull ShortcutService s,
+                @NonNull String id) {
+            final ShortcutInfo shortcut = mShortcuts.remove(id);
+            if (shortcut != null) {
+                s.removeIcon(mUserId, shortcut);
+                shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED);
+            }
+            return shortcut;
+        }
+
+        void addShortcut(@NonNull ShortcutService s, @NonNull ShortcutInfo newShortcut) {
+            deleteShortcut(s, newShortcut.getId());
+            s.saveIconAndFixUpShortcut(mUserId, newShortcut);
+            mShortcuts.put(newShortcut.getId(), newShortcut);
         }
 
         /**
@@ -195,40 +259,44 @@ public class ShortcutService extends IShortcutService.Stub {
             // Okay, make it dynamic and add.
             newShortcut.addFlags(oldFlags);
 
-            mShortcuts.put(newShortcut.getId(), newShortcut);
+            addShortcut(s, newShortcut);
             mDynamicShortcutCount = newDynamicCount;
         }
 
-        @GuardedBy("mLock")
-        public void deleteAllDynamicShortcuts() {
+        /**
+         * Remove all shortcuts that aren't pinned nor dynamic.
+         */
+        private void removeOrphans(@NonNull ShortcutService s) {
             ArrayList<String> removeList = null; // Lazily initialize.
 
             for (int i = mShortcuts.size() - 1; i >= 0; i--) {
                 final ShortcutInfo si = mShortcuts.valueAt(i);
 
-                if (!si.isDynamic()) {
-                    continue;
+                if (si.isPinned() || si.isDynamic()) continue;
+
+                if (removeList == null) {
+                    removeList = new ArrayList<>();
                 }
-                if (si.isPinned()) {
-                    // Still pinned, so don't remove; just make it non-dynamic.
-                    si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
-                } else {
-                    if (removeList == null) {
-                        removeList = new ArrayList<>();
-                    }
-                    removeList.add(si.getId());
-                }
+                removeList.add(si.getId());
             }
             if (removeList != null) {
                 for (int i = removeList.size() - 1 ; i >= 0; i--) {
-                    mShortcuts.remove(removeList.get(i));
+                    deleteShortcut(s, removeList.get(i));
                 }
             }
+        }
+
+        @GuardedBy("mLock")
+        public void deleteAllDynamicShortcuts(@NonNull ShortcutService s) {
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+            }
+            removeOrphans(s);
             mDynamicShortcutCount = 0;
         }
 
         @GuardedBy("mLock")
-        public void deleteDynamicWithId(@NonNull String shortcutId) {
+        public void deleteDynamicWithId(@NonNull ShortcutService s, @NonNull String shortcutId) {
             final ShortcutInfo oldShortcut = mShortcuts.get(shortcutId);
 
             if (oldShortcut == null) {
@@ -240,18 +308,30 @@ public class ShortcutService extends IShortcutService.Stub {
             if (oldShortcut.isPinned()) {
                 oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
             } else {
-                mShortcuts.remove(shortcutId);
+                deleteShortcut(s, shortcutId);
             }
         }
 
         @GuardedBy("mLock")
-        public void pinAll(List<String> shortcutIds) {
+        public void replacePinned(@NonNull ShortcutService s, String launcherPackage,
+                List<String> shortcutIds) {
+
+            // TODO Should be per launcherPackage.
+
+            // First, un-pin all shortcuts
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_PINNED);
+            }
+
+            // Then pin ALL
             for (int i = shortcutIds.size() - 1; i >= 0; i--) {
                 final ShortcutInfo shortcut = mShortcuts.get(shortcutIds.get(i));
                 if (shortcut != null) {
                     shortcut.addFlags(ShortcutInfo.FLAG_PINNED);
                 }
             }
+
+            removeOrphans(s);
         }
 
         /**
@@ -261,16 +341,22 @@ public class ShortcutService extends IShortcutService.Stub {
         public int getApiCallCount(@NonNull ShortcutService s) {
             final long last = s.getLastResetTimeLocked();
 
+            final long now = s.injectCurrentTimeMillis();
+            if (mLastResetTime > now) {
+                // Clock rewound. // TODO Test it
+                mLastResetTime = now;
+            }
+
             // If not reset yet, then reset.
             if (mLastResetTime < last) {
-                mApiCallCountInner = 0;
+                mApiCallCount = 0;
                 mLastResetTime = last;
             }
-            return mApiCallCountInner;
+            return mApiCallCount;
         }
 
         /**
-         * If the caller app hasn't been throttled yet, increment {@link #mApiCallCountInner}
+         * If the caller app hasn't been throttled yet, increment {@link #mApiCallCount}
          * and return true.  Otherwise just return false.
          */
         @GuardedBy("mLock")
@@ -278,13 +364,13 @@ public class ShortcutService extends IShortcutService.Stub {
             if (getApiCallCount(s) >= s.mMaxDailyUpdates) {
                 return false;
             }
-            mApiCallCountInner++;
+            mApiCallCount++;
             return true;
         }
 
         @GuardedBy("mLock")
         public void resetRateLimitingForCommandLine() {
-            mApiCallCountInner = 0;
+            mApiCallCount = 0;
             mLastResetTime = 0;
         }
 
@@ -313,20 +399,26 @@ public class ShortcutService extends IShortcutService.Stub {
     /**
      * Max number of dynamic shortcuts that each application can have at a time.
      */
-    @GuardedBy("mLock")
     private int mMaxDynamicShortcuts;
 
     /**
      * Max number of updating API calls that each application can make a day.
      */
-    @GuardedBy("mLock")
     private int mMaxDailyUpdates;
 
     /**
      * Actual throttling-reset interval.  By default it's a day.
      */
-    @GuardedBy("mLock")
     private long mResetInterval;
+
+    /**
+     * Icon max width/height in pixels.
+     */
+    private int mMaxIconDimension;
+
+    private CompressFormat mIconPersistFormat = CompressFormat.PNG;
+
+    private int mIconPersistQuality = 100;
 
     public ShortcutService(Context context) {
         mContext = Preconditions.checkNotNull(context);
@@ -417,9 +509,15 @@ public class ShortcutService extends IShortcutService.Stub {
         mResetInterval = DEFAULT_RESET_INTERVAL_SEC * 1000L;
         mMaxDailyUpdates = DEFAULT_MAX_DAILY_UPDATES;
         mMaxDynamicShortcuts = DEFAULT_MAX_SHORTCUTS_PER_APP;
+
+        final int iconDimensionDp = (injectIsLowRamDevice()
+                ? DEFAULT_MAX_ICON_DIMENSION_LOWRAM_DP : DEFAULT_MAX_ICON_DIMENSION_DP);
+        mMaxIconDimension =
+                (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, iconDimensionDp,
+                        mContext.getResources().getDisplayMetrics());
     }
 
-    // === Persistings ===
+    // === Persisting ===
 
     @Nullable
     private String parseStringAttribute(XmlPullParser parser, String attribute) {
@@ -605,23 +703,24 @@ public class ShortcutService extends IShortcutService.Stub {
             // Body.
             for (int i = 0; i < packages.size(); i++) {
                 final String packageName = packages.keyAt(i);
-                final PackageShortcuts shortcuts = packages.valueAt(i);
+                final PackageShortcuts packageShortcuts = packages.valueAt(i);
 
                 // TODO Move this to PackageShortcuts.
 
-                out.startTag(null, "package");
+                out.startTag(null, TAG_PACKAGE);
 
-                writeAttr(out, "name", packageName);
-                writeAttr(out, "dynamic-count", shortcuts.mDynamicShortcutCount);
-                writeAttr(out, "call-count", shortcuts.mApiCallCountInner);
-                writeAttr(out, "last-reset", shortcuts.mLastResetTime);
+                writeAttr(out, ATTR_NAME, packageName);
+                writeAttr(out, ATTR_DYNAMIC_COUNT, packageShortcuts.mDynamicShortcutCount);
+                writeAttr(out, ATTR_CALL_COUNT, packageShortcuts.mApiCallCount);
+                writeAttr(out, ATTR_LAST_RESET, packageShortcuts.mLastResetTime);
 
-                final int size = shortcuts.getShortcuts().size();
+                final ArrayMap<String, ShortcutInfo> shortcuts = packageShortcuts.mShortcuts;
+                final int size = shortcuts.size();
                 for (int j = 0; j < size; j++) {
-                    saveShortcut(out, shortcuts.getShortcuts().valueAt(j));
+                    saveShortcut(out, shortcuts.valueAt(j));
                 }
 
-                out.endTag(null, "package");
+                out.endTag(null, TAG_PACKAGE);
             }
 
             // Epilogue.
@@ -638,23 +737,23 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void saveShortcut(XmlSerializer out, ShortcutInfo si)
             throws IOException, XmlPullParserException {
-        out.startTag(null, "shortcut");
-        writeAttr(out, "id", si.getId());
+        out.startTag(null, TAG_SHORTCUT);
+        writeAttr(out, ATTR_ID, si.getId());
         // writeAttr(out, "package", si.getPackageName()); // not needed
-        writeAttr(out, "activity", si.getActivityComponent());
+        writeAttr(out, ATTR_ACTIVITY, si.getActivityComponent());
         // writeAttr(out, "icon", si.getIcon());  // We don't save it.
-        writeAttr(out, "title", si.getTitle());
-        writeAttr(out, "intent", si.getIntent());
-        writeAttr(out, "weight", si.getWeight());
-        writeAttr(out, "timestamp", si.getLastChangedTimestamp());
-        writeAttr(out, "flags", si.getFlags());
-        writeAttr(out, "icon-res", si.getIconResourceId());
-        writeAttr(out, "bitmap-path", si.getBitmapPath());
+        writeAttr(out, ATTR_TITLE, si.getTitle());
+        writeAttr(out, ATTR_INTENT, si.getIntentNoExtras());
+        writeAttr(out, ATTR_WEIGHT, si.getWeight());
+        writeAttr(out, ATTR_TIMESTAMP, si.getLastChangedTimestamp());
+        writeAttr(out, ATTR_FLAGS, si.getFlags());
+        writeAttr(out, ATTR_ICON_RES, si.getIconResourceId());
+        writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
 
-        writeTagExtra(out, "intent-extras", si.getIntentPersistableExtras());
-        writeTagExtra(out, "extras", si.getExtras());
+        writeTagExtra(out, TAG_INTENT_EXTRAS, si.getIntentPersistableExtras());
+        writeTagExtra(out, TAG_EXTRAS, si.getExtras());
 
-        out.endTag(null, "shortcut");
+        out.endTag(null, TAG_SHORTCUT);
     }
 
     private static IOException throwForInvalidTag(int depth, String tag) throws IOException {
@@ -710,24 +809,27 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
                     case 2: {
                         switch (tag) {
-                            case "package":
-                                packageName = parseStringAttribute(parser, "name");
-                                shortcuts = new PackageShortcuts();
+                            case TAG_PACKAGE:
+                                packageName = parseStringAttribute(parser, ATTR_NAME);
+                                shortcuts = new PackageShortcuts(userId, packageName);
                                 ret.put(packageName, shortcuts);
 
                                 shortcuts.mDynamicShortcutCount =
-                                        (int) parseLongAttribute(parser, "dynamic-count");
-                                shortcuts.mApiCallCountInner =
-                                        (int) parseLongAttribute(parser, "call-count");
-                                shortcuts.mLastResetTime = parseLongAttribute(parser, "last-reset");
+                                        (int) parseLongAttribute(parser, ATTR_DYNAMIC_COUNT);
+                                shortcuts.mApiCallCount =
+                                        (int) parseLongAttribute(parser, ATTR_CALL_COUNT);
+                                shortcuts.mLastResetTime = parseLongAttribute(parser,
+                                        ATTR_LAST_RESET);
                                 continue;
                         }
                         break;
                     }
                     case 3: {
                         switch (tag) {
-                            case "shortcut":
+                            case TAG_SHORTCUT:
                                 final ShortcutInfo si = parseShortcut(parser, packageName);
+
+                                // Don't use addShortcut(), we don't need to save the icon.
                                 shortcuts.mShortcuts.put(si.getId(), si);
                                 continue;
                         }
@@ -760,15 +862,15 @@ public class ShortcutService extends IShortcutService.Stub {
         int iconRes;
         String bitmapPath;
 
-        id = parseStringAttribute(parser, "id");
-        activityComponent = parseComponentNameAttribute(parser, "activity");
-        title = parseStringAttribute(parser, "title");
-        intent = parseIntentAttribute(parser, "intent");
-        weight = (int) parseLongAttribute(parser, "weight");
-        lastChangedTimestamp = (int) parseLongAttribute(parser, "timestamp");
-        flags = (int) parseLongAttribute(parser, "flags");
-        iconRes = (int) parseLongAttribute(parser, "icon-res");
-        bitmapPath = parseStringAttribute(parser, "bitmap-path");
+        id = parseStringAttribute(parser, ATTR_ID);
+        activityComponent = parseComponentNameAttribute(parser, ATTR_ACTIVITY);
+        title = parseStringAttribute(parser, ATTR_TITLE);
+        intent = parseIntentAttribute(parser, ATTR_INTENT);
+        weight = (int) parseLongAttribute(parser, ATTR_WEIGHT);
+        lastChangedTimestamp = (int) parseLongAttribute(parser, ATTR_TIMESTAMP);
+        flags = (int) parseLongAttribute(parser, ATTR_FLAGS);
+        iconRes = (int) parseLongAttribute(parser, ATTR_ICON_RES);
+        bitmapPath = parseStringAttribute(parser, ATTR_BITMAP_PATH);
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -784,10 +886,10 @@ public class ShortcutService extends IShortcutService.Stub {
                         depth, type, tag));
             }
             switch (tag) {
-                case "intent-extras":
+                case TAG_INTENT_EXTRAS:
                     intentPersistableExtras = PersistableBundle.restoreFromXml(parser);
                     continue;
-                case "extras":
+                case TAG_EXTRAS:
                     extras = PersistableBundle.restoreFromXml(parser);
                     continue;
             }
@@ -875,10 +977,199 @@ public class ShortcutService extends IShortcutService.Stub {
         final ArrayMap<String, PackageShortcuts> userPackages = getUserShortcutsLocked(userId);
         PackageShortcuts shortcuts = userPackages.get(packageName);
         if (shortcuts == null) {
-            shortcuts = new PackageShortcuts();
+            shortcuts = new PackageShortcuts(userId, packageName);
             userPackages.put(packageName, shortcuts);
         }
         return shortcuts;
+    }
+
+    // === Caller validation ===
+
+    void removeIcon(@UserIdInt int userId, ShortcutInfo shortcut) {
+        if (shortcut.getBitmapPath() != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Removing " + shortcut.getBitmapPath());
+            }
+            new File(shortcut.getBitmapPath()).delete();
+
+            shortcut.setBitmapPath(null);
+            shortcut.setIconResourceId(0);
+            shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES);
+        }
+    }
+
+    @VisibleForTesting
+    static class FileOutputStreamWithPath extends FileOutputStream {
+        private final File mFile;
+
+        public FileOutputStreamWithPath(File file) throws FileNotFoundException {
+            super(file);
+            mFile = file;
+        }
+
+        public File getFile() {
+            return mFile;
+        }
+    }
+
+    /**
+     * Build the cached bitmap filename for a shortcut icon.
+     *
+     * The filename will be based on the ID, except certain characters will be escaped.
+     */
+    @VisibleForTesting
+    FileOutputStreamWithPath openIconFileForWrite(@UserIdInt int userId, ShortcutInfo shortcut)
+            throws IOException {
+        final File packagePath = new File(getUserBitmapFilePath(userId),
+                shortcut.getPackageName());
+        if (!packagePath.isDirectory()) {
+            packagePath.mkdirs();
+            if (!packagePath.isDirectory()) {
+                throw new IOException("Unable to create directory " + packagePath);
+            }
+            SELinux.restorecon(packagePath);
+        }
+
+        final String baseName = String.valueOf(injectCurrentTimeMillis());
+        for (int suffix = 0;; suffix++) {
+            final String filename = (suffix == 0 ? baseName : baseName + "_" + suffix) + ".png";
+            final File file = new File(packagePath, filename);
+            if (!file.exists()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Saving icon to " + file.getAbsolutePath());
+                }
+                return new FileOutputStreamWithPath(file);
+            }
+        }
+    }
+
+    void saveIconAndFixUpShortcut(@UserIdInt int userId, ShortcutInfo shortcut) {
+        if (shortcut.hasIconFile() || shortcut.hasIconResource()) {
+            return;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Clear icon info on the shortcut.
+            shortcut.setIconResourceId(0);
+            shortcut.setBitmapPath(null);
+
+            final Icon icon = shortcut.getIcon();
+            if (icon == null) {
+                return; // has no icon
+            }
+
+            Bitmap bitmap = null;
+            try {
+                switch (icon.getType()) {
+                    case Icon.TYPE_RESOURCE: {
+                        injectValidateIconResPackage(shortcut, icon);
+
+                        shortcut.setIconResourceId(icon.getResId());
+                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_RES);
+                        return;
+                    }
+                    case Icon.TYPE_BITMAP: {
+                        bitmap = icon.getBitmap();
+                        break;
+                    }
+                    case Icon.TYPE_URI: {
+                        final Uri uri = ContentProvider.maybeAddUserId(icon.getUri(), userId);
+
+                        try (InputStream is = mContext.getContentResolver().openInputStream(uri)) {
+
+                            bitmap = BitmapFactory.decodeStream(is);
+
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Unable to load icon from " + uri);
+                            return;
+                        }
+                        break;
+                    }
+                    default:
+                        // This shouldn't happen because we've already validated the icon, but
+                        // just in case.
+                        throw ShortcutInfo.getInvalidIconException();
+                }
+                if (bitmap == null) {
+                    Slog.e(TAG, "Null bitmap detected");
+                    return;
+                }
+                // Shrink and write to the file.
+                File path = null;
+                try {
+                    final FileOutputStreamWithPath out = openIconFileForWrite(userId, shortcut);
+                    try {
+                        path = out.getFile();
+
+                        shrinkBitmap(bitmap, mMaxIconDimension)
+                                .compress(mIconPersistFormat, mIconPersistQuality, out);
+
+                        shortcut.setBitmapPath(out.getFile().getAbsolutePath());
+                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_FILE);
+                    } finally {
+                        IoUtils.closeQuietly(out);
+                    }
+                } catch (IOException|RuntimeException e) {
+                    // STOPSHIP Change wtf to e
+                    Slog.wtf(ShortcutService.TAG, "Unable to write bitmap to file", e);
+                    if (path != null && path.exists()) {
+                        path.delete();
+                    }
+                }
+            } finally {
+                if (bitmap != null) {
+                    bitmap.recycle();
+                }
+                // Once saved, we won't use the original icon information, so null it out.
+                shortcut.clearIcon();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Unfortunately we can't do this check in unit tests because we fake creator package names,
+    // so override in unit tests.
+    // TODO CTS this case.
+    void injectValidateIconResPackage(ShortcutInfo shortcut, Icon icon) {
+        if (!shortcut.getPackageName().equals(icon.getResPackage())) {
+            throw new IllegalArgumentException(
+                    "Icon resource must reside in shortcut owner package");
+        }
+    }
+
+    @VisibleForTesting
+    static Bitmap shrinkBitmap(Bitmap in, int maxSize) {
+        // Original width/height.
+        final int ow = in.getWidth();
+        final int oh = in.getHeight();
+        if ((ow <= maxSize) && (oh <= maxSize)) {
+            if (DEBUG) {
+                Slog.d(TAG, String.format("Icon size %dx%d, no need to shrink", ow, oh));
+            }
+            return in;
+        }
+        final int longerDimension = Math.max(ow, oh);
+
+        // New width and height.
+        final int nw = ow * maxSize / longerDimension;
+        final int nh = oh * maxSize / longerDimension;
+        if (DEBUG) {
+            Slog.d(TAG, String.format("Icon size %dx%d, shrinking to %dx%d",
+                    ow, oh, nw, nh));
+        }
+
+        final Bitmap scaledBitmap = Bitmap.createBitmap(nw, nh, Bitmap.Config.ARGB_8888);
+        final Canvas c = new Canvas(scaledBitmap);
+
+        final RectF dst = new RectF(0, 0, nw, nh);
+
+        c.drawBitmap(in, /*src=*/ null, dst, /* paint =*/ null);
+
+        in.recycle();
+
+        return scaledBitmap;
     }
 
     // === Caller validation ===
@@ -915,31 +1206,21 @@ public class ShortcutService extends IShortcutService.Stub {
         if (UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Invalid user-ID");
         }
-        verifyCallingPackage(packageName);
-    }
-
-    private void verifyCallingPackage(@NonNull String packageName) {
-        Preconditions.checkStringNotEmpty(packageName, "packageName");
-
-        if (isCallerSystem()) {
-            return; // no check
-        }
-
-        if (injectGetPackageUid(packageName) == injectBinderCallingUid()) {
+        if (injectGetPackageUid(packageName, userId) == injectBinderCallingUid()) {
             return; // Caller is valid.
         }
         throw new SecurityException("Caller UID= doesn't own " + packageName);
     }
 
     // Test overrides it.
-    int injectGetPackageUid(String packageName) {
+    int injectGetPackageUid(@NonNull String packageName, @UserIdInt int userId) {
         try {
 
             // TODO Is MATCH_UNINSTALLED_PACKAGES correct to get SD card app info?
 
-            return mContext.getPackageManager().getPackageUid(packageName,
+            return mContext.getPackageManager().getPackageUidAsUser(packageName,
                     PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                            | PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
         } catch (NameNotFoundException e) {
             return -1;
         }
@@ -983,8 +1264,10 @@ public class ShortcutService extends IShortcutService.Stub {
      * - Make sure the intent's extras are persistable, and them to set
      *  {@link ShortcutInfo#mIntentPersistableExtras}.  Also clear its extras.
      * - Clear flags.
+     *
+     * TODO Detailed unit tests
      */
-    private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut) {
+    private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut, boolean forUpdate) {
         Preconditions.checkNotNull(shortcut, "Null shortcut detected");
         if (shortcut.getActivityComponent() != null) {
             Preconditions.checkState(
@@ -993,22 +1276,58 @@ public class ShortcutService extends IShortcutService.Stub {
                     "Activity package name mismatch");
         }
 
-        shortcut.enforceMandatoryFields();
-
-        final Intent intent = shortcut.getIntent();
-        final Bundle intentExtras = intent.getExtras();
-        if (intentExtras != null && intentExtras.size() > 0) {
-            intent.replaceExtras((Bundle) null);
-
-            // PersistableBundle's constructor will throw IllegalArgumentException if original
-            // extras contain something not persistable.
-            shortcut.setIntentPersistableExtras(new PersistableBundle(intentExtras));
+        if (!forUpdate) {
+            shortcut.enforceMandatoryFields();
+        }
+        if (shortcut.getIcon() != null) {
+            ShortcutInfo.validateIcon(shortcut.getIcon());
         }
 
-        // TODO Save the icon
-        shortcut.setIcon(null);
+        validateForXml(shortcut.getId());
+        validateForXml(shortcut.getTitle());
+        validatePersistableBundleForXml(shortcut.getIntentPersistableExtras());
+        validatePersistableBundleForXml(shortcut.getExtras());
 
         shortcut.setFlags(0);
+    }
+
+    // KXmlSerializer is strict and doesn't allow certain characters, so we disallow those
+    // characters.
+
+    private static void validatePersistableBundleForXml(PersistableBundle b) {
+        if (b == null || b.size() == 0) {
+            return;
+        }
+        for (String key : b.keySet()) {
+            validateForXml(key);
+            final Object value = b.get(key);
+            if (value == null) {
+                continue;
+            } else if (value instanceof String) {
+                validateForXml((String) value);
+            } else if (value instanceof String[]) {
+                for (String v : (String[]) value) {
+                    validateForXml(v);
+                }
+            } else if (value instanceof PersistableBundle) {
+                validatePersistableBundleForXml((PersistableBundle) value);
+            }
+        }
+    }
+
+    private static void validateForXml(String s) {
+        if (TextUtils.isEmpty(s)) {
+            return;
+        }
+        for (int i = s.length() - 1; i >= 0; i--) {
+            if (!isAllowedInXml(s.charAt(i))) {
+                throw new IllegalArgumentException("Unsupported character detected in: " + s);
+            }
+        }
+    }
+
+    private static boolean isAllowedInXml(char c) {
+        return (c >= 0x20 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xfffd);
     }
 
     // === APIs ===
@@ -1032,11 +1351,11 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Validate the shortcuts.
             for (int i = 0; i < size; i++) {
-                fixUpIncomingShortcutInfo(newShortcuts.get(i));
+                fixUpIncomingShortcutInfo(newShortcuts.get(i), /* forUpdate= */ false);
             }
 
             // First, remove all un-pinned; dynamic shortcuts
-            ps.deleteAllDynamicShortcuts();
+            ps.deleteAllDynamicShortcuts(this);
 
             // Then, add/update all.  We need to make sure to take over "pinned" flag.
             for (int i = 0; i < size; i++) {
@@ -1046,7 +1365,6 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
         userPackageChanged(packageName, userId);
-
         return true;
     }
 
@@ -1056,15 +1374,34 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
+        final int size = newShortcuts.size();
 
         synchronized (mLock) {
+            final PackageShortcuts ps = getPackageShortcutsLocked(packageName, userId);
 
-            if (true) {
-                throw new RuntimeException("not implemented yet");
+            // Throttling.
+            if (!ps.tryApiCall(this)) {
+                return false;
             }
 
-            // TODO Similar to setDynamicShortcuts, but don't add new ones, and don't change flags.
-            // Update non-null fields only.
+            for (int i = 0; i < size; i++) {
+                final ShortcutInfo source = newShortcuts.get(i);
+                fixUpIncomingShortcutInfo(source, /* forUpdate= */ true);
+
+                final ShortcutInfo target = ps.findShortcutById(source.getId());
+                if (target != null) {
+                    final boolean replacingIcon = (source.getIcon() != null);
+                    if (replacingIcon) {
+                        removeIcon(userId, target);
+                    }
+
+                    target.copyNonNullFieldsFrom(source);
+
+                    if (replacingIcon) {
+                        saveIconAndFixUpShortcut(userId, target);
+                    }
+                }
+            }
         }
         userPackageChanged(packageName, userId);
 
@@ -1085,7 +1422,7 @@ public class ShortcutService extends IShortcutService.Stub {
             }
 
             // Validate the shortcut.
-            fixUpIncomingShortcutInfo(newShortcut);
+            fixUpIncomingShortcutInfo(newShortcut, /* forUpdate= */ false);
 
             // Add it.
             newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
@@ -1103,7 +1440,7 @@ public class ShortcutService extends IShortcutService.Stub {
         Preconditions.checkStringNotEmpty(shortcutId, "shortcutId must be provided");
 
         synchronized (mLock) {
-            getPackageShortcutsLocked(packageName, userId).deleteDynamicWithId(shortcutId);
+            getPackageShortcutsLocked(packageName, userId).deleteDynamicWithId(this, shortcutId);
         }
         userPackageChanged(packageName, userId);
     }
@@ -1113,7 +1450,7 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
-            getPackageShortcutsLocked(packageName, userId).deleteAllDynamicShortcuts();
+            getPackageShortcutsLocked(packageName, userId).deleteAllDynamicShortcuts(this);
         }
         userPackageChanged(packageName, userId);
     }
@@ -1177,6 +1514,13 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @Override
+    public int getIconMaxDimensions(String packageName, int userId) throws RemoteException {
+        synchronized (mLock) {
+            return mMaxIconDimension;
+        }
+    }
+
     /**
      * Reset all throttling, for developer options and command line.  Only system/shell can call it.
      */
@@ -1193,6 +1537,7 @@ public class ShortcutService extends IShortcutService.Stub {
             mRawLastResetTime = injectCurrentTimeMillis();
         }
         scheduleSaveBaseState();
+        Slog.i(TAG, "ShortcutManager: throttling counter reset");
     }
 
     /**
@@ -1217,7 +1562,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 } else {
                     final ArrayMap<String, PackageShortcuts> packages =
                             getUserShortcutsLocked(userId);
-                    for (int i = 0; i < packages.size(); i++) {
+                    for (int i = packages.size() - 1; i >= 0; i--) {
                         getShortcutsInnerLocked(
                                 packages.keyAt(i),
                                 changedSince, componentName, queryFlags, userId, ret, cloneFlag);
@@ -1274,7 +1619,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
             synchronized (mLock) {
-                getPackageShortcutsLocked(packageName, userId).pinAll(shortcutIds);
+                getPackageShortcutsLocked(packageName, userId).replacePinned(
+                        ShortcutService.this, callingPackage, shortcutIds);
             }
             userPackageChanged(packageName, userId);
         }
@@ -1289,18 +1635,8 @@ public class ShortcutService extends IShortcutService.Stub {
             synchronized (mLock) {
                 final ShortcutInfo fullShortcut =
                         getPackageShortcutsLocked(packageName, userId)
-                        .getShortcuts().get(shortcutId);
-                if (fullShortcut == null) {
-                    return null;
-                } else {
-                    final Intent intent = fullShortcut.getIntent();
-                    final PersistableBundle extras = fullShortcut.getIntentPersistableExtras();
-                    if (extras != null) {
-                        intent.replaceExtras(new Bundle(extras));
-                    }
-
-                    return intent;
-                }
+                        .findShortcutById(shortcutId);
+                return fullShortcut == null ? null : fullShortcut.getIntent();
             }
         }
 
@@ -1308,6 +1644,41 @@ public class ShortcutService extends IShortcutService.Stub {
         public void addListener(@NonNull ShortcutChangeListener listener) {
             synchronized (mLock) {
                 mListeners.add(Preconditions.checkNotNull(listener));
+            }
+        }
+
+        @Override
+        public int getShortcutIconResId(@NonNull String callingPackage,
+                @NonNull ShortcutInfo shortcut, int userId) {
+            Preconditions.checkNotNull(shortcut, "shortcut");
+
+            synchronized (mLock) {
+                final ShortcutInfo shortcutInfo = getPackageShortcutsLocked(
+                        shortcut.getPackageName(), userId).findShortcutById(shortcut.getId());
+                return (shortcutInfo != null && shortcutInfo.hasIconResource())
+                        ? shortcutInfo.getIconResourceId() : 0;
+            }
+        }
+
+        @Override
+        public ParcelFileDescriptor getShortcutIconFd(@NonNull String callingPackage,
+                @NonNull ShortcutInfo shortcut, int userId) {
+            Preconditions.checkNotNull(shortcut, "shortcut");
+
+            synchronized (mLock) {
+                final ShortcutInfo shortcutInfo = getPackageShortcutsLocked(
+                        shortcut.getPackageName(), userId).findShortcutById(shortcut.getId());
+                if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
+                    return null;
+                }
+                try {
+                    return ParcelFileDescriptor.open(
+                            new File(shortcutInfo.getBitmapPath()),
+                            ParcelFileDescriptor.MODE_READ_ONLY);
+                } catch (FileNotFoundException e) {
+                    Slog.e(TAG, "Icon file not found: " + shortcutInfo.getBitmapPath());
+                    return null;
+                }
             }
         }
     }
@@ -1336,22 +1707,31 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.print(now);
             pw.print("] ");
             pw.print(formatTime(now));
+
             pw.print("  Raw last reset: [");
             pw.print(mRawLastResetTime);
             pw.print("] ");
             pw.print(formatTime(mRawLastResetTime));
 
             final long last = getLastResetTimeLocked();
-            final long next = getNextResetTimeLocked();
             pw.print("  Last reset: [");
             pw.print(last);
             pw.print("] ");
             pw.print(formatTime(last));
 
+            final long next = getNextResetTimeLocked();
             pw.print("  Next reset: [");
             pw.print(next);
             pw.print("] ");
             pw.print(formatTime(next));
+            pw.println();
+
+            pw.print("  Max icon dim: ");
+            pw.print(mMaxIconDimension);
+            pw.print("  Icon format: ");
+            pw.print(mIconPersistFormat);
+            pw.print("  Icon quality: ");
+            pw.print(mIconPersistQuality);
             pw.println();
 
             pw.println();
@@ -1359,7 +1739,6 @@ public class ShortcutService extends IShortcutService.Stub {
             for (int i = 0; i < mShortcuts.size(); i++) {
                 dumpUserLocked(pw, mShortcuts.keyAt(i));
             }
-
         }
     }
 
@@ -1379,8 +1758,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void dumpPackageLocked(PrintWriter pw, int userId, String packageName) {
-        final PackageShortcuts shortcuts = mShortcuts.get(userId).get(packageName);
-        if (shortcuts == null) {
+        final PackageShortcuts packageShortcuts = mShortcuts.get(userId).get(packageName);
+        if (packageShortcuts == null) {
             return;
         }
 
@@ -1389,22 +1768,38 @@ public class ShortcutService extends IShortcutService.Stub {
         pw.println();
 
         pw.print("      Calls: ");
-        pw.print(shortcuts.getApiCallCount(this));
+        pw.print(packageShortcuts.getApiCallCount(this));
         pw.println();
 
         // This should be after getApiCallCount(), which may update it.
         pw.print("      Last reset: [");
-        pw.print(shortcuts.mLastResetTime);
+        pw.print(packageShortcuts.mLastResetTime);
         pw.print("] ");
-        pw.print(formatTime(shortcuts.mLastResetTime));
+        pw.print(formatTime(packageShortcuts.mLastResetTime));
         pw.println();
 
         pw.println("      Shortcuts:");
-        final int size = shortcuts.getShortcuts().size();
+        long totalBitmapSize = 0;
+        final ArrayMap<String, ShortcutInfo> shortcuts = packageShortcuts.mShortcuts;
+        final int size = shortcuts.size();
         for (int i = 0; i < size; i++) {
+            final ShortcutInfo si = shortcuts.valueAt(i);
             pw.print("        ");
-            pw.println(shortcuts.getShortcuts().valueAt(i).toInsecureString());
+            pw.println(si.toInsecureString());
+            if (si.hasIconFile()) {
+                final long len = new File(si.getBitmapPath()).length();
+                pw.print("          ");
+                pw.print("bitmap size=");
+                pw.println(len);
+
+                totalBitmapSize += len;
+            }
         }
+        pw.print("      Total bitmap size: ");
+        pw.print(totalBitmapSize);
+        pw.print(" (");
+        pw.print(Formatter.formatFileSize(mContext, totalBitmapSize));
+        pw.println(")");
     }
 
     private static String formatTime(long time) {
@@ -1505,7 +1900,15 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     File injectUserDataPath(@UserIdInt int userId) {
-        return new File(Environment.getDataSystemDeDirectory(userId), DIRECTORY_PER_USER);
+        return new File(Environment.getDataSystemCeDirectory(userId), DIRECTORY_PER_USER);
+    }
+
+    boolean injectIsLowRamDevice() {
+        return ActivityManager.isLowRamDeviceStatic();
+    }
+
+    File getUserBitmapFilePath(@UserIdInt int userId) {
+        return new File(injectUserDataPath(userId), DIRECTORY_BITMAPS);
     }
 
     @VisibleForTesting
@@ -1521,6 +1924,11 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void setMaxDailyUpdatesForTest(int max) {
         mMaxDailyUpdates = max;
+    }
+
+    @VisibleForTesting
+    void setMaxIconDimensionForTest(int dimension) {
+        mMaxIconDimension = dimension;
     }
 
     @VisibleForTesting
