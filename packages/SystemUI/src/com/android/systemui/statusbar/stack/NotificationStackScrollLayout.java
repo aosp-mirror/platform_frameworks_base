@@ -2252,8 +2252,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         int currentIndex = indexOfChild(child);
         if (child != null && child.getParent() == this && currentIndex != newIndex) {
             mChangePositionInProgress = true;
+            ((ExpandableView)child).setChangingPosition(true);
             removeView(child);
             addView(child, newIndex);
+            ((ExpandableView)child).setChangingPosition(false);
             mChangePositionInProgress = false;
             if (mIsExpanded && mAnimationsEnabled && child.getVisibility() != View.GONE) {
                 mChildrenChangingPositions.add(child);
