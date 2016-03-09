@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistente voz"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloquear ahora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt; 999"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenidos ocultos"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Contenidos ocultos por política"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
@@ -276,7 +275,7 @@
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Permite que una aplicación añada accesos directos a la pantalla de inicio sin intervención del usuario."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstalar accesos directos"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Permite que la aplicación elimine accesos directos de la pantalla de inicio sin la intervención del usuario."</string>
-    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redireccionar llamadas salientes"</string>
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"redirigir llamadas salientes"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Permite que la aplicación vea el número que se marca al realizar una llamada con la opción de redirigir la llamada a otro número o cancelar la llamada."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"recibir mensajes de texto (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
@@ -1136,8 +1135,9 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fondo de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambiar fondo de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Detector de notificaciones"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Procesador de Realidad Virtual"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveedor de condiciones"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Asistente de notificaciones"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servicio de clasificación de notificaciones"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN activada por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toca para administrar la red."</string>
@@ -1446,7 +1446,7 @@
       <item quantity="one">Vuelve a intentarlo en 1 segundo</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Volver a intentar más tarde"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"Mostrando pantalla completa"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Modo de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Para salir, desliza hacia abajo desde arriba."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Entendido"</string>
     <string name="done_label" msgid="2093726099505892398">"Listo"</string>
@@ -1568,4 +1568,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"No fijar"</string>
     <string name="app_info" msgid="6856026610594615344">"Información de la aplicación"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="audit_safemode_notification" msgid="6351827251856877200">"Restablece los datos de fábrica para utilizar este dispositivo con normalidad"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca para obtener más información."</string>
 </resources>

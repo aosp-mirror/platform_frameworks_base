@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"व्हॉइस सहाय्य"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"आता लॉक करा"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"लपविलेली सामग्री"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"धोरणाद्वारे सामग्री लपविली"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
@@ -1136,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदला"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"सूचना ऐकणारा"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR श्रोता"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"अट प्रदाता"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"सूचना सहाय्यक"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN सक्रिय"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> द्वारे VPN सक्रिय केले आहे"</string>
     <string name="vpn_text" msgid="3011306607126450322">"नेटवर्क व्यवस्थापित करण्यासाठी स्पर्श करा."</string>
@@ -1564,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन करा"</string>
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

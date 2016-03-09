@@ -233,7 +233,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Аудиоподсказки"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Заблокировать"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Содержимое скрыто"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Содержимое скрыто в соответствии с заданными правилами"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
@@ -1152,8 +1151,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Фоновый рисунок"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Сменить обои"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Служба просмотра уведомлений"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR-режим"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Поставщик условий"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Ассистент уведомлений"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"Сеть VPN активна"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Сеть VPN активирована приложением <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Нажмите, чтобы открыть настройки."</string>
@@ -1602,4 +1603,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Открепить"</string>
     <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

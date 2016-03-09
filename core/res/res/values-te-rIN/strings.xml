@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"వాయిస్ సహాయకం"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ఇప్పుడు లాక్ చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"కంటెంట్‌లు దాచబడ్డాయి"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"విధానం ద్వారా కంటెంట్‌లు దాచబడ్డాయి"</string>
     <string name="safeMode" msgid="2788228061547930246">"సురక్షిత మోడ్"</string>
@@ -1136,8 +1135,9 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"వాల్‌పేపర్"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"వాల్‌పేపర్‌ను మార్చండి"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"నోటిఫికేషన్ పరిశీలన"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR పరిశీలన"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"షరతు ప్రదాత"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"నోటిఫికేషన్ సహాయకం"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"నోటిఫికేషన్ ర్యాంకర్ సేవ"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN సక్రియం చేయబడింది"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ద్వారా VPN సక్రియం చేయబడింది"</string>
     <string name="vpn_text" msgid="3011306607126450322">"నెట్‌వర్క్‌ను నిర్వహించడానికి తాకండి."</string>
@@ -1564,4 +1564,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"అన్‌‌పిన్‌ ‌చేయి"</string>
     <string name="app_info" msgid="6856026610594615344">"అనువర్తన సమాచారం"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="audit_safemode_notification" msgid="6351827251856877200">"ఈ పరికరాన్ని సాధారణంగా ఉపయోగించడానికి ఫ్యాక్టరీ రీసెట్ చేయండి"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"మరింత తెలుసుకోవడానికి తాకండి."</string>
 </resources>

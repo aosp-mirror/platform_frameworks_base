@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"വോയ്‌സ് സഹായം"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ഇപ്പോൾ ലോക്കുചെയ്യുക"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"കോൺടാക്‌റ്റുകൾ മറച്ചു"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"നയം അനുസരിച്ച് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="safeMode" msgid="2788228061547930246">"സുരക്ഷിത മോഡ്"</string>
@@ -1136,8 +1135,10 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"വാൾപേപ്പർ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"വാൾപേപ്പർ മാറ്റുക"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"അറിയിപ്പ് ലിസണർ"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR ലിസണർ"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"കണ്ടീഷൻ ദാതാവ്"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"അറിയിപ്പ് സഹായി"</string>
+    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
+    <skip />
     <string name="vpn_title" msgid="19615213552042827">"VPN സജീവമാക്കി"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ഉപയോഗിച്ച് VPN പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="vpn_text" msgid="3011306607126450322">"നെറ്റ്‌വർക്ക് നിയന്ത്രിക്കാൻ സ്‌പർശിക്കുക."</string>
@@ -1564,4 +1565,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"അൺപിൻ ചെയ്യുക"</string>
     <string name="app_info" msgid="6856026610594615344">"ആപ്പ് വിവരം"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
+    <skip />
+    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
+    <skip />
 </resources>

@@ -229,7 +229,6 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"የድምጽ እርዳታ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"አሁን ቆልፍ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"ይዘቶች ተደብቀዋል"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"ይዘቶች በመመሪያ ተደብቀዋል"</string>
     <string name="safeMode" msgid="2788228061547930246">"የሚያስተማምን ሁነታ"</string>
@@ -1052,16 +1051,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ለተጨማሪ አማራጮች ነካ ያድርጉ።"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB አድስ ተያይዟል"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ማረሚያ ላለማንቃት ዳስስ።"</string>
-    <!-- no translation found for taking_remote_bugreport_notification_title (6742483073875060934) -->
-    <skip />
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"የሳንካ ሪፖርትን በመውሰድ ላይ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"የሳንካ ሪፖርት ይጋራ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"የሳንካ ሪፖርትን በማጋራት ላይ…"</string>
-    <!-- no translation found for share_remote_bugreport_notification_message_finished (8610614010660772643) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_action (6249476773913384948) -->
-    <skip />
-    <!-- no translation found for decline_remote_bugreport_action (6230987241608770062) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"የእርስዎ አይቲ አስተዳዳሪ ለዚህ መሣሪያ መላ ለመፈለግ የሳንካ ሪፖርት ጠይቀዋል። መተግበሪያዎች እና ውሂብ ሊጋሩ ይችላሉ።"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"አጋራ"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"አትቀበል"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ቁልፍ ሰሌዳ ይቀይሩ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ቁልፍ ሰሌዳዎችን ምረጥ"</string>
     <string name="show_ime" msgid="2506087537466597099">"አካላዊ የቁልፍ ሰሌዳ ገቢር ሆኖ ሳለ በማያ ገጽ ላይ አቆየው"</string>
@@ -1140,8 +1135,9 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ልጣፍ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ልጣፍ ለውጥ"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"ማሳወቂያ አዳማጭ"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"የምናባዊ እውነታ አዳማጭ"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"የሁኔታ አቅራቢ"</string>
-    <string name="notification_assistant_binding_label" msgid="909456055569102952">"የማሳወቂያ ረዳት"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"የማሳወቂያ ደረጃ ሰጪ አገልግሎት"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN ነቅቷል።"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN በ<xliff:g id="APP">%s</xliff:g>ገብሯል"</string>
     <string name="vpn_text" msgid="3011306607126450322">"አውታረመረብ ለማደራጀት  ንካ።"</string>
@@ -1568,4 +1564,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"ንቀል"</string>
     <string name="app_info" msgid="6856026610594615344">"የመተግበሪያ መረጃ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="audit_safemode_notification" msgid="6351827251856877200">"ይህን መሣሪያ በመደበኛነት ለመጠቀም የፋብሪካ ዳግም ያስጀምሩ"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"የበለጠ ለመረዳት ይንኩ።"</string>
 </resources>
