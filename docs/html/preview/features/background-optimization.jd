@@ -25,11 +25,6 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
       </li>
 
       <li>
-        <a href="#persistant-monitor-conn">Persistent Monitoring of Network
-        Connectivity</a>
-      </li>
-
-      <li>
         <a href="#media-broadcasts">Restrictions on NEW_PICTURE and
         NEW_VIDEO</a>
       </li>
@@ -50,27 +45,29 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
 </div>
 
 <p>
-  Background processes can be memory and battery intensive. For example,
-  Implicit broadcasts frequently start background apps that have registered to
-  listen for them. This can have a substantial impact on device performance and
-  user experience.
+  Background processes can be memory- and battery-intensive. For example, an
+  implicit broadcast may start many background processes that have registered
+  to listen for it, even if those processes may not do much work. This can have
+  a substantial impact on both device performance and user experience.
 </p>
 
 <p>
-  To alleviate this issue, Android N applies the following
+  To alleviate this issue, the N Developer Preview applies the following
   restrictions:
 </p>
 
 <ul>
-  <li>Apps targeting Android N will not receive {@link
+  <li>Apps targeting the Preview do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
   register to receive them in their manifest. Apps running in the foreground
-  can still listen for {@code CONNECTIVITY_CHANGE} on their main thread with a
-  registered {@link android.content.BroadcastReceiver}.
+  can still listen for {@code CONNECTIVITY_CHANGE} on their main thread by
+  registering a {@link android.content.BroadcastReceiver} with {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}.
   </li>
 
-  <li>Apps will not be able to to send or receive {@code NEW_PICTURE} or {@code
-  NEW_VIDEO} broadcasts.
+  <li>Apps cannot send or receive {@code NEW_PICTURE} or {@code NEW_VIDEO}
+  broadcasts. This optimization affects all apps, not only those targeting the
+  Preview.
   </li>
 </ul>
 
@@ -79,12 +76,11 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
   these implicit broadcasts. For example, {@link android.app.job.JobScheduler}
   and <a href=
   "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
-  GcmNetworkManager</a> provide robust mechanisms to schedule network
+  {@code GcmNetworkManager}</a> provide robust mechanisms to schedule network
   operations when specified conditions, such as a connection to an unmetered
-  network, are met. You can also use {@link android.app.job.JobScheduler} to
-  react to changes to content providers. {@link android.app.job.JobInfo}
-  objects, built by the {@link android.app.job.JobInfo.Builder JobInfo.Builder}
-  class, encapsulate the parameters that {@link android.app.job.JobScheduler}
+  network, are met. You can now also use {@link android.app.job.JobScheduler}
+  to react to changes to content providers. {@link android.app.job.JobInfo}
+  objects encapsulate the parameters that {@link android.app.job.JobScheduler}
   uses to schedule your job. When the conditions of the job are met, the system
   executes this job on your app's {@link android.app.job.JobService}.
 </p>
@@ -100,20 +96,20 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
 </h2>
 
 <p>
-  Apps targeting Android N do not receive {@link
-  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
-  register to receive them in their manifest. This could pose a problem for
-  apps that want to listen for network changes or perform bulk network
-  activities when the device connects to an unmetered network. Several
-  solutions to get around this restriction already exist in the Android
-  framework, but choosing the right one depends on what you want your app to
-  accomplish.
+  Apps targeting the N Developer Preview do not receive {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
+  register to receive them in their manifest, and processes that depend on this
+  broadcast will not start. This could pose a problem for apps that want
+  to listen for network changes or perform bulk network activities when the
+  device connects to an unmetered network. Several solutions to get around this
+  restriction already exist in the Android framework, but choosing the right
+  one depends on what you want your app to accomplish.
 </p>
 
 <p class="note">
   <strong>Note:</strong> A {@link android.content.BroadcastReceiver} registered with
   {@link android.content.Context#registerReceiver Context.registerReceiver()}
-  continues to receive these broadcasts on the app’s main activity thread.
+  continues to receive these broadcasts while the app is in the foreground.
 </p>
 
 <h3 id="sched-jobs">
@@ -126,8 +122,8 @@ page.keywords="android N", "implicit broadcasts", "job scheduler"
   android.app.job.JobInfo.Builder#setRequiredNetworkType
   setRequiredNetworkType()} method and pass {@link android.app.job.JobInfo
   JobInfo.NETWORK_TYPE_UNMETERED} as a job parameter. The following code sample
-  schedules a service when the device connects to an unmetered network and is
-  charging:
+  schedules a service to run when the device connects to an unmetered
+  network and is charging:
 </p>
 
 <pre>
@@ -138,7 +134,7 @@ public static void scheduleJob(Context context) {
       (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
   JobInfo job = new JobInfo.Builder(
     MY_BACKGROUND_JOB,
-    new ComponentName(context, JobService.class))
+    new ComponentName(context, MyJobService.class))
       .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
       .setRequiresCharging(true)
       .build();
@@ -155,10 +151,10 @@ public static void scheduleJob(Context context) {
 </p>
 
 <p>
-Applications that use GMSCore services, and target Android 5.0 (API level 21)
-or lower, should use <a href=
-"https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
-GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
+  Applications that use GMSCore services, and target Android 5.0 (API level 21)
+  or lower, can use <a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
 </p>
 
 <h3 id="monitor-conn">
@@ -170,7 +166,7 @@ GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
   CONNECTIVITY_CHANGE} with a registered {@link
   android.content.BroadcastReceiver}. However, the {@link
   android.net.ConnectivityManager} API provides a more robust method to request
-  a callback during specified network conditions.
+  a callback only when specified network conditions are met.
 </p>
 
 <p>
@@ -193,44 +189,17 @@ GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
   unregisterNetworkCallback()}.
 </p>
 
-<h3 id="persistant-monitor-conn">
-  Persistent Monitoring of Network Connectivity
-</h3>
-
-<p>
-  The {@link android.net.ConnectivityManager} API also provides a method to
-  persistently monitor network connectivity. Due to its impact on performance,
-  however, it should be used with caution.
-</p>
-
-<p>
-  An app may use {@link
-  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
-  android.app.PendingIntent) registerNetworkCallback()} to register a {@link
-  android.app.PendingIntent} rather than a {@link
-  android.net.ConnectivityManager.NetworkCallback}. The request may outlive the
-  calling app and require it to start up in order to process a callback.
-</p>
-
-<p>
-  Before considering this option, think twice about whether this solution is
-  actually necessary, and consider the impact to performance and user
-  experience when doing so. Only apps that have a real need to start up on a
-  network change should implement this solution. Otherwise, every effort should
-  be taken to <a href="#connectivity-action">implement the alternatives</a>.
-</p>
-
 <h2 id="media-broadcasts">
   Restrictions on NEW_PICTURE and NEW_VIDEO
 </h2>
 
 <p>
-  In Android N, apps are not able to send or receive {@code
+  In the N Developer Preview, apps are not able to send or receive {@code
   NEW_PICTURE} or {@code NEW_VIDEO} broadcasts. This restriction helps
   alleviate the performance and user experience impacts when several apps must
-  wake up in order to process them. Android N extends {@link
-  android.app.job.JobInfo} and {@link android.app.job.JobParameters} to provide
-  an alternative solution.
+  wake up in order to process a new image or video. The N Developer Preview
+  extends {@link android.app.job.JobInfo} and {@link
+  android.app.job.JobParameters} to provide an alternative solution.
 </p>
 
 <h3 id="new-jobinfo">
@@ -238,7 +207,7 @@ GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
 </h3>
 
 <p>
-  To help trigger jobs on content URI changes, Android N extends
+  To trigger jobs on content URI changes, the N Developer Preview extends
   the {@link android.app.job.JobInfo} API with the following methods:
 </p>
 
@@ -257,8 +226,8 @@ GcmNetworkManager</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
 
   <dd>
     Passes a {@code TriggerContentUri} object to {@link
-    android.app.job.JobInfo}. The encapsulated content URI is monitored with a
-    {@link android.database.ContentObserver}. If there are multiple {@code
+    android.app.job.JobInfo}. A {@link android.database.ContentObserver}
+    monitors the encapsulated content URI. If there are multiple {@code
     TriggerContentUri} objects associated with a job, the system provides a
     callback even if it reports a change in only one of the content URIs.
   </dd>
@@ -313,7 +282,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  Android N also extends {@link android.app.job.JobParameters} to
+  The N Developer Preview also extends {@link android.app.job.JobParameters} to
   allow your app to receive useful information about what content authorities
   and URIs triggered the job:
 </p>
@@ -384,17 +353,18 @@ public boolean onStartJob(JobParameters params) {
 
 <p>
   Optimizing your apps to run on low-memory devices, or in low-memory
-  conditions, can improve performance and user experience. Eliminating the use
-  of implicit broadcasts and background services is a great way to make sure
-  your app runs well on such devices. Although Android N takes
-  steps to limit the use of certain implicit broadcasts, consider optimizing
-  your app to run without the use of implicit broadcasts and background
-  services, entirely.</p>
+  conditions, can improve performance and user experience. Removing
+  dependencies on background services and statically-registered implicit
+  broadcast receivers can help your app run better on such devices. Although
+  the N Developer Preview takes steps to reduce some of these issues, it is
+  recommended that you optimize your app to run without the use of these
+  background processes entirely.
+</p>
 
 <p>
-  To help you test how your app behaves without those background processes,
-  Android N introduces some additional <a href=
-  "{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> commands:
+  The N Developer Preview introduces some additional <a href=
+  "{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> commands that
+  you can use to test app behavior with those background processes disabled:
 </p>
 
 <ul>
@@ -418,9 +388,3 @@ public boolean onStartJob(JobParameters params) {
 </pre>
   </li>
 </ul>
-
-<p>
-  The Android framework is constantly evolving to help apps run great on a wide
-  variety of devices. To learn more and join the discussion, <a href=
-  "{@docRoot}">read this blog post!</a>
-</p>
