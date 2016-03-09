@@ -116,4 +116,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरूलाई मेट्ने हो?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> फाइललाई मेट्ने हो?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

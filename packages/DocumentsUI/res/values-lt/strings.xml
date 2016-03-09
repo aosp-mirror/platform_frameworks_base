@@ -132,4 +132,5 @@
       <item quantity="many">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failo?</item>
       <item quantity="other">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failų?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

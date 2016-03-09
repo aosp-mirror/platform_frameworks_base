@@ -116,4 +116,5 @@
       <item quantity="other">Radera <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
       <item quantity="one">Radera <xliff:g id="COUNT_0">%1$d</xliff:g> fil?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

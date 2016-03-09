@@ -124,4 +124,5 @@
       <item quantity="few">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке?</item>
       <item quantity="other">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотека?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>
