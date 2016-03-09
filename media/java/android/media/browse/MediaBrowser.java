@@ -370,7 +370,7 @@ public final class MediaBrowser {
         if (options == null) {
             throw new IllegalArgumentException("options are null");
         }
-        subscribeInternal(parentId, options, callback);
+        subscribeInternal(parentId, new Bundle(options), callback);
     }
 
     /**
@@ -1121,7 +1121,7 @@ public final class MediaBrowser {
                 }
             }
             mCallbacks.add(callback);
-            mOptionsList.add(options == null ? null : new Bundle(options));
+            mOptionsList.add(options);
         }
 
         public boolean removeCallback(Bundle options) {
