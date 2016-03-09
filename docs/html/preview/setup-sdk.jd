@@ -191,7 +191,7 @@ how to configure your project with the Jack compiler.</p>
 <pre>
 android {
   compileSdkVersion <strong>'android-N'</strong>
-  buildToolsVersion <strong>24.0.0</strong>
+  buildToolsVersion <strong>24.0.0 rc1</strong>
   ...
 
   defaultConfig {
