@@ -27,7 +27,7 @@ footer.hide=1
           Get ready for Android N!
           <strong>Test your apps</strong> on Nexus and other devices. Support new system
           behaviors to <strong>save power and memory</strong>.
-          Extend your apps with <strong>multiwindow UI</strong>,
+          Extend your apps with <strong>multi-window UI</strong>,
           <strong>direct reply notifications</strong> and more.
         </p>
 
@@ -70,13 +70,13 @@ footer.hide=1
       <li class="dac-action">
         <a class="dac-action-link" href="{@docRoot}preview/support.html">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
-          See known issues
+          See release notes
         </a>
       </li>
       <li class="dac-action">
         <a class="dac-action-link" href="{@docRoot}preview/dev-community">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
-          Watch stories
+          Join dev community
         </a>
       </li>
     </ul>
@@ -93,11 +93,11 @@ footer.hide=1
       </a></div>
       <div><a href="{@docRoot}preview/support.html">
         <span class="dac-sprite dac-auto-chevron-large"></span>
-        See known issues
+        See release notes
       </a></div>
       <div><a href="{@docRoot}preview/dev-community">
         <span class="dac-sprite dac-auto-chevron-large"></span>
-        Join Dev Community
+        Join dev community
       </a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
