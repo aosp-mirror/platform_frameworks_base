@@ -12907,7 +12907,8 @@ package android.graphics.drawable {
     method public int getGradientType();
     method public int getOpacity();
     method public android.graphics.drawable.GradientDrawable.Orientation getOrientation();
-    method public boolean isUseLevel();
+    method public int getShape();
+    method public boolean getUseLevel();
     method public void setAlpha(int);
     method public void setColor(int);
     method public void setColor(android.content.res.ColorStateList);
