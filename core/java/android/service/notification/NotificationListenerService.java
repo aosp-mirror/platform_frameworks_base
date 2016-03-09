@@ -680,18 +680,12 @@ public abstract class NotificationListenerService extends Service {
     @SystemApi
     public void registerAsSystemService(Context context, ComponentName componentName,
             int currentUser) throws RemoteException {
-        registerAsSystemServiceImpl(context, componentName, currentUser, false /* asRanker */);
-    }
-
-    /** @hide */
-    protected void registerAsSystemServiceImpl(Context context, ComponentName componentName,
-            int currentUser, boolean asRanker) throws RemoteException {
-        mSystemContext = context;
         if (mWrapper == null) {
             mWrapper = new NotificationListenerWrapper();
         }
+        mSystemContext = context;
         INotificationManager noMan = getNotificationInterface();
-        noMan.registerListener(mWrapper, componentName, currentUser, asRanker);
+        noMan.registerListener(mWrapper, componentName, currentUser);
         mCurrentUser = currentUser;
         mHandler = new MyHandler(context.getMainLooper());
     }
