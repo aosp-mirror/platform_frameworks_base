@@ -31,10 +31,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.Xml;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -55,7 +57,7 @@ public final class SpellCheckerInfo implements Parcelable {
     /**
      * The array of subtypes.
      */
-    private final ArrayList<SpellCheckerSubtype> mSubtypes = new ArrayList<SpellCheckerSubtype>();
+    private final ArrayList<SpellCheckerSubtype> mSubtypes = new ArrayList<>();
 
     /**
      * Constructor.
@@ -266,5 +268,23 @@ public final class SpellCheckerInfo implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * @hide
+     */
+    public void dump(final PrintWriter pw, final String prefix) {
+        pw.println(prefix + "mId=" + mId);
+        pw.println(prefix + "mSettingsActivityName=" + mSettingsActivityName);
+        pw.println(prefix + "Service:");
+        mService.dump(new PrintWriterPrinter(pw), prefix + "  ");
+        final int N = getSubtypeCount();
+        for (int i = 0; i < N; i++) {
+            final SpellCheckerSubtype st = getSubtypeAt(i);
+            pw.println(prefix + "  " + "Subtype #" + i + ":");
+            pw.println(prefix + "    " + "locale=" + st.getLocale()
+                    + " languageTag=" + st.getLanguageTag());
+            pw.println(prefix + "    " + "extraValue=" + st.getExtraValue());
+        }
     }
 }

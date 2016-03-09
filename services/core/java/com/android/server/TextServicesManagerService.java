@@ -774,50 +774,36 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         synchronized(mSpellCheckerMap) {
             pw.println("Current Text Services Manager state:");
-            pw.println("  Spell Checker Map:");
-            for (Map.Entry<String, SpellCheckerInfo> ent : mSpellCheckerMap.entrySet()) {
-                pw.print("    "); pw.print(ent.getKey()); pw.println(":");
-                SpellCheckerInfo info = ent.getValue();
-                pw.print("      "); pw.print("id="); pw.println(info.getId());
-                pw.print("      "); pw.print("comp=");
-                        pw.println(info.getComponent().toShortString());
-                int NS = info.getSubtypeCount();
-                for (int i=0; i<NS; i++) {
-                    SpellCheckerSubtype st = info.getSubtypeAt(i);
-                    pw.print("      "); pw.print("Subtype #"); pw.print(i); pw.println(":");
-                    pw.print("        "); pw.print("locale="); pw.println(st.getLocale());
-                    pw.print("        "); pw.print("extraValue=");
-                            pw.println(st.getExtraValue());
-                }
+            pw.println("  Spell Checkers:");
+            int spellCheckerIndex = 0;
+            for (final SpellCheckerInfo info : mSpellCheckerMap.values()) {
+                pw.println("  Spell Checker #" + spellCheckerIndex);
+                info.dump(pw, "    ");
+                ++spellCheckerIndex;
             }
             pw.println("");
             pw.println("  Spell Checker Bind Groups:");
-            for (Map.Entry<String, SpellCheckerBindGroup> ent
+            for (final Map.Entry<String, SpellCheckerBindGroup> ent
                     : mSpellCheckerBindGroups.entrySet()) {
-                SpellCheckerBindGroup grp = ent.getValue();
-                pw.print("    "); pw.print(ent.getKey()); pw.print(" ");
-                        pw.print(grp); pw.println(":");
-                pw.print("      "); pw.print("mInternalConnection=");
-                        pw.println(grp.mInternalConnection);
-                pw.print("      "); pw.print("mSpellChecker=");
-                        pw.println(grp.mSpellChecker);
-                pw.print("      "); pw.print("mBound="); pw.print(grp.mBound);
-                        pw.print(" mConnected="); pw.println(grp.mConnected);
-                int NL = grp.mListeners.size();
-                for (int i=0; i<NL; i++) {
-                    InternalDeathRecipient listener = grp.mListeners.get(i);
-                    pw.print("      "); pw.print("Listener #"); pw.print(i); pw.println(":");
-                    pw.print("        "); pw.print("mTsListener=");
-                            pw.println(listener.mTsListener);
-                    pw.print("        "); pw.print("mScListener=");
-                            pw.println(listener.mScListener);
-                    pw.print("        "); pw.print("mGroup=");
-                            pw.println(listener.mGroup);
-                    pw.print("        "); pw.print("mScLocale=");
-                            pw.print(listener.mScLocale);
-                            pw.print(" mUid="); pw.println(listener.mUid);
+                final SpellCheckerBindGroup grp = ent.getValue();
+                pw.println("    " + ent.getKey() + " " + grp + ":");
+                pw.println("      " + "mInternalConnection=" + grp.mInternalConnection);
+                pw.println("      " + "mSpellChecker=" + grp.mSpellChecker);
+                pw.println("      " + "mBound=" + grp.mBound + " mConnected=" + grp.mConnected);
+                final int N = grp.mListeners.size();
+                for (int i = 0; i < N; i++) {
+                    final InternalDeathRecipient listener = grp.mListeners.get(i);
+                    pw.println("      " + "Listener #" + i + ":");
+                    pw.println("        " + "mTsListener=" + listener.mTsListener);
+                    pw.println("        " + "mScListener=" + listener.mScListener);
+                    pw.println("        " + "mGroup=" + listener.mGroup);
+                    pw.println("        " + "mScLocale=" + listener.mScLocale
+                            + " mUid=" + listener.mUid);
                 }
             }
+            pw.println("");
+            pw.println("  mSettings:");
+            mSettings.dumpLocked(pw, "    ");
         }
     }
 
@@ -1118,6 +1104,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         public boolean isSpellCheckerEnabled() {
             return getBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, true);
+        }
+
+        public void dumpLocked(final PrintWriter pw, final String prefix) {
+            pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
+            pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
         }
     }
 
