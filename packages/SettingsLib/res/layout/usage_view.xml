@@ -22,7 +22,8 @@
     <LinearLayout
         android:id="@+id/graph_label_group"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/usage_graph_area_height"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="horizontal"
         android:clipChildren="false"
         android:clipToPadding="false">
@@ -37,6 +38,7 @@
                 layout="@layout/usage_side_label" />
 
             <Space
+                android:id="@+id/space1"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
@@ -45,6 +47,7 @@
                 layout="@layout/usage_side_label" />
 
             <Space
+                android:id="@+id/space2"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1" />

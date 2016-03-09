@@ -20,6 +20,7 @@ import android.util.AttributeSet;
 import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -96,6 +97,26 @@ public class UsageView extends FrameLayout {
 
     public void setAccentColor(int color) {
         mUsageGraph.setAccentColor(color);
+    }
+
+    public void setDividerLoc(int dividerLoc) {
+        mUsageGraph.setDividerLoc(dividerLoc);
+    }
+
+    public void setDividerColors(int middleColor, int topColor) {
+        mUsageGraph.setDividerColors(middleColor, topColor);
+    }
+
+    public void setSideLabelWeights(float before, float after) {
+        setWeight(R.id.space1, before);
+        setWeight(R.id.space2, after);
+    }
+
+    private void setWeight(int id, float weight) {
+        View v = findViewById(id);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) v.getLayoutParams();
+        params.weight = weight;
+        v.setLayoutParams(params);
     }
 
     public void setSideLabels(CharSequence[] labels) {
