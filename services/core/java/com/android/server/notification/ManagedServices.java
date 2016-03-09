@@ -328,12 +328,16 @@ abstract public class ManagedServices {
                     component.flattenToShortString());
         }
 
-        final int[] userIds = mUserProfiles.getCurrentProfileIds();
-        for (int userId : userIds) {
-            if (enabled) {
-                registerServiceLocked(component, userId);
-            } else {
-                unregisterServiceLocked(component, userId);
+
+        synchronized (mMutex) {
+            final int[] userIds = mUserProfiles.getCurrentProfileIds();
+
+            for (int userId : userIds) {
+                if (enabled) {
+                    registerServiceLocked(component, userId);
+                } else {
+                    unregisterServiceLocked(component, userId);
+                }
             }
         }
     }
@@ -453,7 +457,7 @@ abstract public class ManagedServices {
         return queryPackageForServices(packageName, userId, null);
     }
 
-    protected Set<ComponentName> queryPackageForServices(String packageName, int userId,
+    public Set<ComponentName> queryPackageForServices(String packageName, int userId,
             String category) {
         Set<ComponentName> installed = new ArraySet<>();
         final PackageManager pm = mContext.getPackageManager();
@@ -636,7 +640,21 @@ abstract public class ManagedServices {
         }
     }
 
+    /**
+     * Inject a system service into the management list.
+     */
+    public void registerSystemService(final ComponentName name, final int userid) {
+        synchronized (mMutex) {
+            registerServiceLocked(name, userid, true /* isSystem */);
+        }
+    }
+
     private void registerServiceLocked(final ComponentName name, final int userid) {
+        registerServiceLocked(name, userid, false /* isSystem */);
+    }
+
+    private void registerServiceLocked(final ComponentName name, final int userid,
+            final boolean isSystem) {
         if (DEBUG) Slog.v(TAG, "registerService: " + name + " u=" + userid);
 
         final String servicesBindingTag = name.toString() + "/" + userid;
@@ -694,7 +712,7 @@ abstract public class ManagedServices {
                         try {
                             mService = asInterface(binder);
                             info = newServiceInfo(mService, name,
-                                userid, false /*isSystem*/, this, targetSdkVersion);
+                                userid, isSystem, this, targetSdkVersion);
                             binder.linkToDeath(info, 0);
                             added = mServices.add(info);
                         } catch (RemoteException e) {
@@ -890,6 +908,7 @@ abstract public class ManagedServices {
                 return false;
             }
             if (this.userid == UserHandle.USER_ALL) return true;
+            if (this.userid == UserHandle.USER_SYSTEM) return true;
             if (nid == UserHandle.USER_ALL || nid == this.userid) return true;
             return supportsProfiles() && mUserProfiles.isCurrentProfile(nid);
         }
