@@ -11,7 +11,7 @@ page.keywords="android N", "data usage", "metered network"
 
     <ol>
       <li>
-        <a href="#status">Checking User Data Saver Preferences</a>
+        <a href="#status">Checking Data Saver Preferences</a>
       </li>
 
       <li>
@@ -24,9 +24,9 @@ page.keywords="android N", "data usage", "metered network"
 
 <p>
   Over the life of a smartphone, the cost of a cellular data plan can easily
-  exceed the cost of the device itself. In Android N, users can
-  enable Data Saver in order to use less data, whether roaming, near the end of
-  the billing cycle, or on a small prepaid data pack.
+  exceed the cost of the device itself. In the N Developer Preview, users can
+  enable Data Saver on a device-wide basis in order to use less data, whether
+  roaming, near the end of the billing cycle, or on a small prepaid data pack.
 </p>
 
 <p>
@@ -38,20 +38,20 @@ page.keywords="android N", "data usage", "metered network"
 </p>
 
 <p>
-  Android N extends the {@link android.net.ConnectivityManager}
-  API to provide apps a way to <a href="#status">retrieve the user’s Data Saver
-  preferences</a> and <a href="#monitor-changes">monitor preference
+  The N Developer Preview extends the {@link android.net.ConnectivityManager}
+  API to provide apps with a way to <a href="#status">retrieve the user’s Data
+  Saver preferences</a> and <a href="#monitor-changes">monitor preference
   changes</a>. It is considered good practice for apps to check whether the
   user has enabled Data Saver and make an effort to limit foreground and
   background data usage.
 </p>
 
-<h1 id="status">
-  Checking the User's Data Saver Preferences
-</h1>
+<h2 id="status">
+  Checking Data Saver Preferences
+</h2>
 
 <p>
-  In Android N, apps can use the {@link
+  In the N Developer Preview, apps can use the {@link
   android.net.ConnectivityManager} API to determine what data usage
   restrictions are being applied. The {@code getRestrictBackgroundStatus()}
   method returns one of the following values:
@@ -121,9 +121,9 @@ if (connMgr.isActiveNetworkMetered()) {
 }
 </pre>
 
-<h1 id="monitor-changes">
+<h2 id="monitor-changes">
   Monitoring Changes to Data Saver Preferences
-</h1>
+</h2>
 
 <p>
   Apps can monitor changes to Data Saver preferences by creating a {@link
