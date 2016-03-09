@@ -34,6 +34,7 @@ import android.media.session.MediaSessionManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.systemui.Prefs;
@@ -51,7 +52,8 @@ import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SH
 public class PipManager {
     private static final String TAG = "PipManager";
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_FORCE_ONBOARDING = false;
+    private static final boolean DEBUG_FORCE_ONBOARDING =
+            SystemProperties.getBoolean("debug.tv.pip_force_onboarding", false);
 
     private static PipManager sPipManager;
 
