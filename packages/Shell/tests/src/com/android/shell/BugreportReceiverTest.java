@@ -130,6 +130,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final boolean RENAMED_SCREENSHOTS = true;
     private static final boolean DIDNT_RENAME_SCREENSHOTS = false;
 
+    private static final boolean PENDING_SCREENSHOT = true;
+    private static final boolean NOT_PENDING_SCREENSHOT = false;
+
     private String mDescription;
 
     private String mPlainTextPath;
@@ -409,9 +412,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         sendBugreportStarted(ID2, PID2, NAME2, 1000);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mZipPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NEW_NAME, TITLE, DESCRIPTION, 1, RENAMED_SCREENSHOTS);
+        sendBugreportFinished(ID, mZipPath, mScreenshotPath);
+        Bundle extras = acceptBugreportAndGetSharedIntent(ID, PENDING_SCREENSHOT);
 
         detailsUi = new DetailsUi(mUiBot, ID2);
         detailsUi.assertName(NAME2);
@@ -602,7 +604,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private Bundle sendBugreportFinishedAndGetSharedIntent(int id, String bugreportPath,
             String screenshotPath) {
         sendBugreportFinished(id, bugreportPath, screenshotPath);
-        return acceptBugreportAndGetSharedIntent(id);
+        return acceptBugreportAndGetSharedIntent(id, NOT_PENDING_SCREENSHOT);
     }
 
     /**
@@ -611,7 +613,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * @return extras sent in the shared intent.
      */
     private Bundle acceptBugreportAndGetSharedIntent(int id) {
-        acceptBugreport(id);
+        return acceptBugreportAndGetSharedIntent(id, NOT_PENDING_SCREENSHOT);
+    }
+
+    private Bundle acceptBugreportAndGetSharedIntent(int id, boolean pendingScreenshot) {
+        acceptBugreport(id, pendingScreenshot);
         mUiBot.chooseActivity(UI_NAME);
         return mListener.getExtras();
     }
@@ -627,7 +633,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * Accepts the notification to share the finished bugreport.
      */
     private void acceptBugreport(int id) {
-        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title, id));
+        acceptBugreport(id, NOT_PENDING_SCREENSHOT);
+    }
+
+    private void acceptBugreport(int id, boolean pendingScreenshot) {
+        final int res = pendingScreenshot ? R.string.bugreport_finished_pending_screenshot_title
+                : R.string.bugreport_finished_title;
+        mUiBot.clickOnNotification(mContext.getString(res, id));
     }
 
     /**

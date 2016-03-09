@@ -714,7 +714,7 @@ public class BugreportProgressService extends Service {
             if (info.finished) {
                 Log.d(TAG, "Screenshot finished after bugreport; updating share notification");
                 info.renameScreenshots(mScreenshotsDir);
-                sendBugreportNotification(mContext, info);
+                sendBugreportNotification(mContext, info, mTakingScreenshot);
             }
             msg = mContext.getString(R.string.bugreport_screenshot_taken);
         } else {
@@ -803,10 +803,10 @@ public class BugreportProgressService extends Service {
         boolean isPlainText = info.bugreportFile.getName().toLowerCase().endsWith(".txt");
         if (!isPlainText) {
             // Already zipped, send it right away.
-            sendBugreportNotification(context, info);
+            sendBugreportNotification(context, info, mTakingScreenshot);
         } else {
             // Asynchronously zip the file first, then send it.
-            sendZippedBugreportNotification(context, info);
+            sendZippedBugreportNotification(context, info, mTakingScreenshot);
         }
     }
 
@@ -903,7 +903,8 @@ public class BugreportProgressService extends Service {
     /**
      * Sends a notification indicating the bugreport has finished so use can share it.
      */
-    private static void sendBugreportNotification(Context context, BugreportInfo info) {
+    private static void sendBugreportNotification(Context context, BugreportInfo info,
+            boolean takingScreenshot) {
 
         // Since adding the details can take a while, do it before notifying user.
         addDetailsToZipFile(context, info);
@@ -914,12 +915,20 @@ public class BugreportProgressService extends Service {
         shareIntent.putExtra(EXTRA_ID, info.id);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title = context.getString(R.string.bugreport_finished_title, info.id);
+        final String title, content;
+        if (takingScreenshot) {
+            title = context.getString(R.string.bugreport_finished_pending_screenshot_title,
+                    info.id);
+            content = context.getString(R.string.bugreport_finished_pending_screenshot_text);
+        } else {
+            title = context.getString(R.string.bugreport_finished_title, info.id);
+            content = context.getString(R.string.bugreport_finished_text);
+        }
         final Notification.Builder builder = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setContentTitle(title)
                 .setTicker(title)
-                .setContentText(context.getString(R.string.bugreport_finished_text))
+                .setContentText(content)
                 .setContentIntent(PendingIntent.getService(context, info.id, shareIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setDeleteIntent(newCancelIntent(context, info))
@@ -958,12 +967,12 @@ public class BugreportProgressService extends Service {
      * Sends a zipped bugreport notification.
      */
     private static void sendZippedBugreportNotification(final Context context,
-            final BugreportInfo info) {
+            final BugreportInfo info, final boolean takingScreenshot) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 zipBugreport(info);
-                sendBugreportNotification(context, info);
+                sendBugreportNotification(context, info, takingScreenshot);
                 return null;
             }
         }.execute();
