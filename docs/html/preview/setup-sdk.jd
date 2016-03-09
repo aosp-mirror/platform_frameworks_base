@@ -28,6 +28,9 @@ Android N system image, you can instead follow the guide to <a
 href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
 
 
+<img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
+
+
 <h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
 
 <p>Developing for the Android N platform requires Java 8 and a new
