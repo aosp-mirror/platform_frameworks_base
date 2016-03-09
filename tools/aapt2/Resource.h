@@ -77,7 +77,7 @@ struct ResourceName {
     ResourceType type;
     std::u16string entry;
 
-    ResourceName() = default;
+    ResourceName() : type(ResourceType::kRaw) {}
     ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e);
 
     bool isValid() const;

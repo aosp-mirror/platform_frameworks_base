@@ -729,12 +729,18 @@ public:
 
         std::string outPath = mOptions.generateJavaClassPath.value();
         file::appendPath(&outPath, file::packageToPath(util::utf16ToUtf8(outPackage)));
-        file::mkdirs(outPath);
+        if (!file::mkdirs(outPath)) {
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed to create directory '" << outPath << "'");
+            return false;
+        }
+
         file::appendPath(&outPath, "R.java");
 
         std::ofstream fout(outPath, std::ofstream::binary);
         if (!fout) {
-            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed writing to '" << outPath << "': " << strerror(errno));
             return false;
         }
 
@@ -742,6 +748,11 @@ public:
         if (!generator.generate(packageNameToGenerate, outPackage, &fout)) {
             mContext->getDiagnostics()->error(DiagMessage(outPath) << generator.getError());
             return false;
+        }
+
+        if (!fout) {
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed writing to '" << outPath << "': " << strerror(errno));
         }
         return true;
     }
@@ -754,12 +765,18 @@ public:
         std::string outPath = mOptions.generateJavaClassPath.value();
         file::appendPath(&outPath,
                          file::packageToPath(util::utf16ToUtf8(mContext->getCompilationPackage())));
-        file::mkdirs(outPath);
+        if (!file::mkdirs(outPath)) {
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed to create directory '" << outPath << "'");
+            return false;
+        }
+
         file::appendPath(&outPath, "Manifest.java");
 
         std::ofstream fout(outPath, std::ofstream::binary);
         if (!fout) {
-            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed writing to '" << outPath << "': " << strerror(errno));
             return false;
         }
 
@@ -770,7 +787,8 @@ public:
         }
 
         if (!fout) {
-            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed writing to '" << outPath << "': " << strerror(errno));
             return false;
         }
         return true;
@@ -781,15 +799,18 @@ public:
             return true;
         }
 
-        std::ofstream fout(mOptions.generateProguardRulesPath.value(), std::ofstream::binary);
+        const std::string& outPath = mOptions.generateProguardRulesPath.value();
+        std::ofstream fout(outPath, std::ofstream::binary);
         if (!fout) {
-            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed to open '" << outPath << "': " << strerror(errno));
             return false;
         }
 
         proguard::writeKeepSet(&fout, keepSet);
         if (!fout) {
-            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(
+                    DiagMessage() << "failed writing to '" << outPath << "': " << strerror(errno));
             return false;
         }
         return true;

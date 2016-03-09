@@ -90,6 +90,7 @@ testSources := \
 	proto/TableProtoSerializer_test.cpp \
 	split/TableSplitter_test.cpp \
 	util/BigBuffer_test.cpp \
+	util/Files_test.cpp \
 	util/Maybe_test.cpp \
 	util/StringPiece_test.cpp \
 	util/Util_test.cpp \

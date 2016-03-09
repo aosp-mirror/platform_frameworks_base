@@ -96,7 +96,7 @@ bool mkdirs(const StringPiece& path) {
     const char* start = path.begin();
     const char* end = path.end();
     for (const char* current = start; current != end; ++current) {
-        if (*current == sDirSep) {
+        if (*current == sDirSep && current != start) {
             StringPiece parentPath(start, current - start);
             int result = mkdirImpl(parentPath);
             if (result < 0 && errno != EEXIST) {
@@ -137,6 +137,20 @@ StringPiece getExtension(const StringPiece& path) {
         return StringPiece(c, end - c);
     }
     return {};
+}
+
+void appendPath(std::string* base, StringPiece part) {
+    assert(base);
+    const bool baseHasTrailingSep = (!base->empty() && *(base->end() - 1) == sDirSep);
+    const bool partHasLeadingSep = (!part.empty() && *(part.begin()) == sDirSep);
+    if (baseHasTrailingSep && partHasLeadingSep) {
+        // Remove the part's leading sep
+        part = part.substr(1, part.size() - 1);
+    } else if (!baseHasTrailingSep && !partHasLeadingSep) {
+        // None of the pieces has a separator.
+        *base += sDirSep;
+    }
+    base->append(part.data(), part.size());
 }
 
 std::string packageToPath(const StringPiece& package) {
