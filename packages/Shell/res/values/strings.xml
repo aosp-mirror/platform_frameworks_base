@@ -20,6 +20,8 @@
     <string name="bugreport_in_progress_title">Bug report <xliff:g id="id">#%d</xliff:g> is being generated</string>
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
     <string name="bugreport_finished_title">Bug report <xliff:g id="id">#%d</xliff:g> captured</string>
+    <!-- Title of notification indicating a bugreport has been successfully captured, but screenshot is not finished yet. [CHAR LIMIT=50] -->
+    <string name="bugreport_finished_pending_screenshot_title">Bug report <xliff:g id="id">#%d</xliff:g> captured but screenshot pending</string>
     <!-- Title of notification indicating a bugreport is being updated before it can be shared. [CHAR LIMIT=50] -->
     <string name="bugreport_updating_title">Adding details to the bug report</string>
     <!-- Content notification indicating a bugreport is being updated before it can be shared, asking the user to wait [CHAR LIMIT=50] -->
@@ -29,7 +31,10 @@
     <string name="bugreport_finished_text" product="watch">Swipe left to share your bug report</string>
     <!-- Text of notification indicating that tapping will share the captured bugreport. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_text" product="default">Tap to share your bug report</string>
-
+    <!-- Text of notification indicating that swipe left will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_pending_screenshot_text" product="watch">Tap to share your bug report without a screenshot or wait for the screenshot to finish</string>
+    <!-- Text of notification indicating that tapping will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_pending_screenshot_text" product="default">Tap to share your bug report without a screenshot or wait for the screenshot to finish</string>
 
     <!-- Body of dialog informing user about contents of a bugreport. [CHAR LIMIT=NONE] -->
     <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, including personal and private information.  Only share bug reports with apps and people you trust.</string>
