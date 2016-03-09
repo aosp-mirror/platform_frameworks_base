@@ -22,9 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceViewHolder;
-import android.text.Spanned;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -39,8 +36,6 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 public class RestrictedPreferenceHelper {
     private final Context mContext;
     private final Preference mPreference;
-    private final Drawable mRestrictedPadlock;
-    private final int mRestrictedPadlockPadding;
 
     private boolean mDisabledByAdmin;
     private EnforcedAdmin mEnforcedAdmin;
@@ -51,10 +46,6 @@ public class RestrictedPreferenceHelper {
             AttributeSet attrs) {
         mContext = context;
         mPreference = preference;
-
-        mRestrictedPadlock = RestrictedLockUtils.getRestrictedPadlock(mContext);
-        mRestrictedPadlockPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.restricted_icon_padding);
 
         if (attrs != null) {
             final TypedArray attributes = context.obtainStyledAttributes(attrs,
