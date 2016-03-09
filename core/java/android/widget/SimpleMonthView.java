@@ -47,6 +47,7 @@ import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -55,13 +56,15 @@ import java.util.Locale;
  * within the specified month.
  */
 class SimpleMonthView extends View {
+    private static final String LOG_TAG = "SimpleMonthView";
+
     private static final int DAYS_IN_WEEK = 7;
     private static final int MAX_WEEKS_IN_MONTH = 6;
 
     private static final int DEFAULT_SELECTED_DAY = -1;
     private static final int DEFAULT_WEEK_START = Calendar.SUNDAY;
 
-    private static final String DEFAULT_TITLE_FORMAT = "MMMMy";
+    private static final String MONTH_YEAR_FORMAT = "MMMMy";
     private static final String DAY_OF_WEEK_FORMAT = "EEEEE";
 
     private static final int SELECTED_HIGHLIGHT_ALPHA = 0xB0;
@@ -73,13 +76,13 @@ class SimpleMonthView extends View {
     private final Paint mDayHighlightPaint = new Paint();
     private final Paint mDayHighlightSelectorPaint = new Paint();
 
-    private final Calendar mCalendar = Calendar.getInstance();
-    private final Calendar mDayOfWeekLabelCalendar = Calendar.getInstance();
+    private final String[] mDayOfWeekLabels = new String[7];
+
+    private final Calendar mCalendar;
+    private final Locale mLocale;
 
     private final MonthViewTouchHelper mTouchHelper;
 
-    private final SimpleDateFormat mTitleFormatter;
-    private final SimpleDateFormat mDayOfWeekFormatter;
     private final NumberFormat mDayFormatter;
 
     // Desired dimensions.
@@ -89,7 +92,7 @@ class SimpleMonthView extends View {
     private final int mDesiredCellWidth;
     private final int mDesiredDaySelectorRadius;
 
-    private CharSequence mTitle;
+    private String mMonthYearLabel;
 
     private int mMonth;
     private int mYear;
@@ -168,13 +171,32 @@ class SimpleMonthView extends View {
         setAccessibilityDelegate(mTouchHelper);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
 
-        final Locale locale = res.getConfiguration().locale;
-        final String titleFormat = DateFormat.getBestDateTimePattern(locale, DEFAULT_TITLE_FORMAT);
-        mTitleFormatter = new SimpleDateFormat(titleFormat, locale);
-        mDayOfWeekFormatter = new SimpleDateFormat(DAY_OF_WEEK_FORMAT, locale);
-        mDayFormatter = NumberFormat.getIntegerInstance(locale);
+        mLocale = res.getConfiguration().locale;
+        mCalendar = Calendar.getInstance(mLocale);
+
+        mDayFormatter = NumberFormat.getIntegerInstance(mLocale);
+
+        updateMonthYearLabel();
+        updateDayOfWeekLabels();
 
         initPaints(res);
+    }
+
+    private void updateMonthYearLabel() {
+        final String format = DateFormat.getBestDateTimePattern(mLocale, MONTH_YEAR_FORMAT);
+        final SimpleDateFormat formatter = new SimpleDateFormat(format, mLocale);
+        mMonthYearLabel = formatter.format(mCalendar.getTime());
+    }
+
+    private void updateDayOfWeekLabels() {
+        final Calendar calendar = Calendar.getInstance(mLocale);
+        calendar.setFirstDayOfWeek(mWeekStart);
+
+        final SimpleDateFormat formatter = new SimpleDateFormat(DAY_OF_WEEK_FORMAT, mLocale);
+        for (int i = 0; i < 7; i++) {
+            calendar.set(Calendar.DAY_OF_WEEK, i);
+            mDayOfWeekLabels[i] = formatter.format(calendar.getTime());
+        }
     }
 
     /**
@@ -234,13 +256,6 @@ class SimpleMonthView extends View {
         }
 
         invalidate();
-    }
-
-    public CharSequence getTitle() {
-        if (mTitle == null) {
-            mTitle = mTitleFormatter.format(mCalendar.getTime());
-        }
-        return mTitle;
     }
 
     /**
@@ -607,7 +622,11 @@ class SimpleMonthView extends View {
         final float lineHeight = mMonthPaint.ascent() + mMonthPaint.descent();
         final float y = (mMonthHeight - lineHeight) / 2f;
 
-        canvas.drawText(getTitle().toString(), x, y, mMonthPaint);
+        canvas.drawText(mMonthYearLabel, x, y, mMonthPaint);
+    }
+
+    public String getMonthYearLabel() {
+        return mMonthYearLabel;
     }
 
     private void drawDaysOfWeek(Canvas canvas) {
@@ -630,14 +649,9 @@ class SimpleMonthView extends View {
             }
 
             final int dayOfWeek = (col + mWeekStart) % DAYS_IN_WEEK;
-            final String label = getDayOfWeekLabel(dayOfWeek);
+            final String label = mDayOfWeekLabels[dayOfWeek];
             canvas.drawText(label, colCenterRtl, rowCenter - halfLineHeight, p);
         }
-    }
-
-    private String getDayOfWeekLabel(int dayOfWeek) {
-        mDayOfWeekLabelCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-        return mDayOfWeekFormatter.format(mDayOfWeekLabelCalendar.getTime());
     }
 
     /**
@@ -752,6 +766,8 @@ class SimpleMonthView extends View {
             mWeekStart = mCalendar.getFirstDayOfWeek();
         }
 
+        updateDayOfWeekLabels();
+
         // Invalidate cached accessibility information.
         mTouchHelper.invalidateRoot();
         invalidate();
@@ -807,11 +823,10 @@ class SimpleMonthView extends View {
         mEnabledDayStart = MathUtils.constrain(enabledDayStart, 1, mDaysInMonth);
         mEnabledDayEnd = MathUtils.constrain(enabledDayEnd, mEnabledDayStart, mDaysInMonth);
 
-        // Invalidate the old title.
-        mTitle = null;
-
         // Invalidate cached accessibility information.
         mTouchHelper.invalidateRoot();
+
+        updateMonthYearLabel();
     }
 
     private static int getDaysInMonth(int month, int year) {

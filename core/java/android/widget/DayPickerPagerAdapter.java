@@ -282,7 +282,7 @@ class DayPickerPagerAdapter extends PagerAdapter {
     public CharSequence getPageTitle(int position) {
         final SimpleMonthView v = mItems.get(position).calendar;
         if (v != null) {
-            return v.getTitle();
+            return v.getMonthYearLabel();
         }
         return null;
     }
