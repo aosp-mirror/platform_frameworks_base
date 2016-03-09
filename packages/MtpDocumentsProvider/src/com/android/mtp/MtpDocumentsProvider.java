@@ -17,6 +17,7 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
+import android.content.UriPermission;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -25,6 +26,7 @@ import android.graphics.Point;
 import android.media.MediaFile;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
@@ -33,6 +35,8 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -42,6 +46,7 @@ import com.android.mtp.exceptions.BusyDeviceException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -95,6 +100,21 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         mIntentSender = new ServiceIntentSender(getContext());
+
+        // Check boot count and cleans database if it's first time to launch MtpDocumentsProvider
+        // after booting.
+        final int bootCount = Settings.Global.getInt(mResolver, Settings.Global.BOOT_COUNT, -1);
+        final int lastBootCount = mDatabase.getLastBootCount();
+        if (bootCount != -1 && bootCount != lastBootCount) {
+            mDatabase.setLastBootCount(bootCount);
+            final List<UriPermission> permissions = mResolver.getOutgoingPersistedUriPermissions();
+            final Uri[] uris = new Uri[permissions.size()];
+            for (int i = 0; i < permissions.size(); i++) {
+                uris[i] = permissions.get(i).getUri();
+            }
+            mDatabase.cleanDatabase(uris);
+        }
+
         // TODO: Mount AppFuse on demands.
         try {
             mAppFuse.mount(getContext().getSystemService(StorageManager.class));
@@ -122,6 +142,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         mIntentSender = intentSender;
+
         // TODO: Mount AppFuse on demands.
         try {
             mAppFuse.mount(storageManager);
