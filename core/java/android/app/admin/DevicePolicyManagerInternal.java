@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import android.os.UserHandle;
+
 import java.util.List;
 
 /**
@@ -71,8 +73,8 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
 
     /**
-     * Checks if a given package has a device or a profile owner for the given user
-     *
+     * Checks if a given package has a device or a profile owner for the given user.
+     * </br><em>Does <b>not</b> support negative userIds like {@link UserHandle#USER_ALL}</em>
      * @param packageName The package to check
      * @param userId the userId to check for.
      * @return true if package has a device or profile owner, false otherwise.
