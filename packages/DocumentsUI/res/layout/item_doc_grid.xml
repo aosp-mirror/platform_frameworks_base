@@ -93,7 +93,7 @@
             android:ellipsize="end"
             android:textAlignment="viewStart"
             android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-            android:textColor="@*android:color/primary_text_default_material_light" />
+            android:textColor="@color/item_title" />
 
         <TextView
             android:id="@+id/size"
@@ -106,7 +106,7 @@
             android:ellipsize="end"
             android:textAlignment="viewStart"
             android:textAppearance="@android:style/TextAppearance.Material.Caption"
-            android:textColor="@*android:color/primary_text_default_material_light" />
+            android:textColor="@color/item_details" />
 
         <TextView
             android:id="@+id/date"
@@ -118,7 +118,7 @@
             android:ellipsize="end"
             android:textAlignment="viewStart"
             android:textAppearance="@android:style/TextAppearance.Material.Caption"
-            android:textColor="@*android:color/primary_text_default_material_light" />
+            android:textColor="@color/item_details" />
 
     </RelativeLayout>
 
