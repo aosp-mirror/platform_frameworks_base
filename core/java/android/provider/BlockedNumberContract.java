@@ -29,11 +29,14 @@ import android.os.Bundle;
  * <p>
  * The content provider exposes a table containing blocked numbers. The columns and URIs for
  * accessing this table are defined by the {@link BlockedNumbers} class. Messages, and calls from
- * blocked numbers are discarded by the platform. If the user contacts emergency
- * services, number blocking is disabled by the platform for a duration defined by
+ * blocked numbers are discarded by the platform. Notifications upon provider changes can be
+ * received using a {@link android.database.ContentObserver}.
+ * </p>
+ * <p>
+ * The platform will not block messages, and calls from emergency numbers as defined by
+ * {@link android.telephony.PhoneNumberUtils#isEmergencyNumber(String)}. If the user contacts
+ * emergency services, number blocking is disabled by the platform for a duration defined by
  * {@link android.telephony.CarrierConfigManager#KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT}.
- * Notifications upon provider changes can be received using a
- * {@link android.database.ContentObserver}.
  * </p>
  *
  * <h3> Permissions </h3>
