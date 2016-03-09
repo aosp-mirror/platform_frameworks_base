@@ -160,7 +160,7 @@ public class AppLaunch extends InstrumentationTestCase {
         for (String pair : appNames) {
             String[] parts = pair.split("\\^");
             if (parts.length != 2) {
-                Log.e(TAG, "The apps key is incorectly formatted");
+                Log.e(TAG, "The apps key is incorrectly formatted");
                 fail();
             }
 
@@ -176,6 +176,10 @@ public class AppLaunch extends InstrumentationTestCase {
         }
     }
 
+    private boolean hasLeanback(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+    }
+
     private void createMappings() {
         mNameToIntent = new LinkedHashMap<String, Intent>();
         mNameToProcess = new LinkedHashMap<String, String>();
@@ -183,9 +187,12 @@ public class AppLaunch extends InstrumentationTestCase {
         PackageManager pm = getInstrumentation().getContext()
                 .getPackageManager();
         Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
-        intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+        intentToResolve.addCategory(hasLeanback(getInstrumentation().getContext()) ?
+                Intent.CATEGORY_LEANBACK_LAUNCHER :
+                Intent.CATEGORY_LAUNCHER);
         List<ResolveInfo> ris = pm.queryIntentActivities(intentToResolve, 0);
         resolveLoop(ris, intentToResolve, pm);
+        // For Wear
         intentToResolve = new Intent(WEARABLE_ACTION_GOOGLE);
         ris = pm.queryIntentActivities(intentToResolve, 0);
         resolveLoop(ris, intentToResolve, pm);
@@ -232,7 +239,7 @@ public class AppLaunch extends InstrumentationTestCase {
         // report error if any of the following is true:
         // * launch thread is alive
         // * result is not null, but:
-        //   * result is not START_SUCESS
+        //   * result is not START_SUCCESS
         //   * or in case of no force stop, result is not TASK_TO_FRONT either
         if (t.isAlive() || (result != null
                 && ((result.result != ActivityManager.START_SUCCESS)
