@@ -25,7 +25,7 @@ on this page.</p>
 
 <p>If you instead want to simply test your app's forward-compatibility on the
 Android N system image, you can instead follow the guide to <a
-href="{@docRoot}preview/run-app.html">Run Your App on Android N</a>.</p>
+href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
 
 
 <h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
@@ -199,7 +199,7 @@ android {
 
 <p>Now that you've set up Android Studio 2.1 (preview), follow the guide
 to <a
-href="{@docRoot}preview/run-app.html">Run Your App on Android N</a>.
+href="{@docRoot}preview/download.html">Test on an Android N Device</a>.
 And learn more about the Android N platform with
 <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>
 and <a href="{@docRoot}preview/api-overview.html">Android N APIs

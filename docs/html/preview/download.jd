@@ -1,4 +1,4 @@
-page.title=Device Images
+page.title=Test on an Android N Device
 page.image=images/cards/card-download_16-9_2x.png
 meta.tags="preview", "system image"
 page.tags="preview", "developer preview"
@@ -170,34 +170,41 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#device-preview">Getting Android N on Devices</a>
+        <li><a href="#device-preview">Install on a Device</a>
           <ol>
-            <li><a href="#ota">Over the air updates</a></li>
-            <li><a href="#flash">Installing system images</a></li>
+            <li><a href="#ota">Get over-the-air updates</a></li>
+            <li><a href="#flash">Download the system image</a></li>
+            <li><a href="#revertDevice">Revert to factory specifications</a></li>
           </ol>
         </li>
-        <li><a href="#revertDevice">Revert to Factory Specifications</a></li>
+        <li><a href="#setupAVD">Use the Emulator</a></li>
       </ol>
   </div>
 </div>
 
 
-<p>
-  The Android N Developer Preview includes device system images to help you
-  test your app and the new APIs coming in the next release of the platform.
-  This document describes how to get Android N system images on a device for
-  testing.
-</p>
 
-<h2 id="device-preview">Getting Android N on Devices</h2>
 
-<p>
-  In order to effectively test your apps with Android N, use
-  an Android N emulator provided with the N Preview SDK or configure a device
-  with an Android N system image. Android N allows you to update
-  devices for use in testing the functionality of the Android N APIs and system
-  behaviors with your apps. You can get Android N on a device by opting a
-  device into the Android Beta Program or by downloading an Android N system
+
+
+
+<p>To run the Android N Preview so you can test your apps, you can either
+install the Android N Preview on one of several supported devices or run it on
+the Android Emulator.</p>
+
+<p>Simply installing your app onto Android N this way does not require
+any changes to your app source code. If, however, you want to update your
+app to use new Android N APIs and Java 8 language features,
+then you need to download Android Studio 2.1 (preview) as described in
+<a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android N</a>.
+
+
+
+<h2 id="device-preview">Install on a Device</h2>
+
+<p>You can get the Android N Preview on a device by opting into
+  the Android Beta Program to receive over-the-air updates to your device
+  or by downloading an Android N Preview system
   image and installing it on a device.
 </p>
 
@@ -211,14 +218,8 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   cause your phone and installed services and applications to stop working.
 </p>
 
-<p>
-  You can create emulators containing Android N within the Preview SDK.
-  For more information about getting the Preview SDK, see
-  <a href="{@docRoot}preview/setup-sdk.html">Set Up the SDK</a>.
-</p>
 
-
-<h3 id="ota">Over the air updates</h3>
+<h3 id="ota">Get over-the-air updates</h3>
 
 <p>
   You can receive preview versions of Android on compatible devices by
@@ -236,19 +237,30 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <p class="warning">
   <strong>Warning:</strong> If you enroll a device for receiving a preview
   version of Android, and then later opt-out of receiving those updates on
-  the device, all user data on that device is removed.
+  the device, all user data on that device will be removed.
 </p>
 
 
-<h3 id="flash">Installing system images</h3>
+<h3 id="flash">Download the system image</h3>
 
-<p>
-  These system images allow you to install a preview version of the platform on
-  a physical device for testing. By configuring a device with one of these
-  images, you can install and test your app to see how it performs on the next
-  version of the platform. The process of installing a system image on a device
-  <em>removes all data from the device</em>, so you should back up your data
-  before installing a system image.
+<p>To instead manually flash the system image to your device and control
+the updates yourself, you can download the appropriate system image for your
+device from the table below.</p>
+
+<p>The process of installing a system image on a device <em>removes all data
+from the device</em>, so you should back up your data before installing a
+system image.</p>
+
+<p>After you back up your device data and download the system image below that
+matches your device, follow the instructions at <a href=
+"https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+to flash the image onto your device.</p>
+
+<p class="note">
+<strong>Note:</strong> If you manually install a preview system image on a
+device, that device <em>will not</em> receive additional over-the-air updates
+(either production or preview). If you want to update a device with a new
+preview system image, you must perform another manual installation.
 </p>
 
 <table>
@@ -323,30 +335,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </table>
 
 
-<h4 id="install-image">Install an Image to a Device</h4>
-
-<p>
-  In order to use a device image for testing, you must install it on a
-  compatible device. Follow the instructions below to install a system image:
-</p>
-
-<ol>
-  <li>Download and uncompress one of the system image packages listed here.</li>
-  <li>Backup any data you want to preserve from the device.</li>
-  <li>Follow the instructions at
-    <a href="https://developers.google.com/android/nexus/images#instructions">
-    developers.google.com/android</a> to flash the image onto your device.</li>
-</ol>
-
-<p class="note">
-  <strong>Note:</strong> If you manually install a preview system image on a
-  device, that device <em>does not</em> automatically receive additional preview
-  updates. If you want to update a device with a new preview system image, you
-  must perform another manual installation.
-</p>
-
-
-<h2 id="revertDevice">Revert to Factory Specifications</h2>
+<h3 id="revertDevice">Revert to factory specifications</h3>
 
 <p>
   If you want to uninstall the preview and revert the device to factory
@@ -360,6 +349,73 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <strong>Warning:</strong> Installing a factory image causes all user data on
   the device to be removed.
 </p>
+
+
+
+
+<h2 id="setupAVD">Use the Emulator</h2>
+
+<p>To use the Android Emulator to run the Android N Preview you need to download
+the Android N Preview SDK and create a virtual device for the emulator.
+</p>
+
+<p>First, download the Android N Preview SDK as follows (if you
+already got it while <a href="{@docRoot}preview/setup-sdk.html">setting up
+Android Studio 2.1</a>, you can skip this part):
+
+<ol>
+  <li>In Android Studio, open the Settings dialog
+    (<strong>File &gt; Settings</strong> on Windows/Linux, or
+    <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
+    panel, select <strong>Appearance &amp; Behavior &gt;
+  System Settings &gt; Android SDK</strong>.
+
+  <li>Click the <strong>SDK Platforms</strong> tab, then select the
+  <strong>Android N Preview</strong> check box.</li>
+
+  <li>Click the <strong>SDK Tools</strong> tab, then select the
+    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
+    Platform-Tools</strong>, and <strong>Android SDK Tools</strong> check
+    boxes.
+  </li>
+
+  <li>Click <strong>OK</strong> and accept the license
+    agreements for any packages to be installed.
+  </li>
+</ol>
+
+
+<p>Now create a virtual device with the Android N system image:</p>
+
+<ol>
+  <li>Open the AVD Manager by selecting <strong>Tools > Android >
+    AVD Manager</strong>.</li>
+  <li>Click <strong>Create Virtual Device</strong>.</li>
+  <li>Select a device such as Nexus 5X, Nexus 6P, Nexus 9, or Android TV,
+    then click <strong>Next</strong>.</li>
+  <li>Select the <strong>N</strong> system image (with the
+    <strong>x86</strong> ABI), then click <strong>Next</strong>.
+  <li>Complete the rest of the AVD configuration and click
+    <strong>Finish</strong>.</li>
+</ol>
+
+<p>You can now launch the Android Emulator with the Android N Preview AVD.</p>
+
+<p>For more information about creating virtual devices, see <a href=
+  "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   </div><!-- landing -->

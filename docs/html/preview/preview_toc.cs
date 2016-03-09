@@ -23,8 +23,8 @@
       Set Up to Develop</a></div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/run-app.html">
-      Run Your App</a></div>
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html">
+      Test on a Device</a></div>
   </li>
 
 
@@ -102,11 +102,6 @@
       zh-cn-lang="示例"
       zh-tw-lang="範例">
       Samples</a></div>
-  </li>
-
- <li class="nav-section">
-    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/download.html"
-      >Device Images</a></div>
   </li>
 
 
