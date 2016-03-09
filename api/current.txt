@@ -2752,14 +2752,10 @@ package android.accessibilityservice {
   }
 
   public final class GestureDescription {
-    method public static android.accessibilityservice.GestureDescription createClick(int, int);
-    method public static android.accessibilityservice.GestureDescription createLongClick(int, int);
-    method public static android.accessibilityservice.GestureDescription createPinch(int, int, int, int, float, long);
-    method public static android.accessibilityservice.GestureDescription createSwipe(int, int, int, int, long);
+    method public static long getMaxGestureDuration();
+    method public static int getMaxStrokeCount();
     method public android.accessibilityservice.GestureDescription.StrokeDescription getStroke(int);
     method public int getStrokeCount();
-    field public static final long MAX_GESTURE_DURATION_MS = 60000L; // 0xea60L
-    field public static final int MAX_STROKE_COUNT = 10; // 0xa
   }
 
   public static class GestureDescription.Builder {
