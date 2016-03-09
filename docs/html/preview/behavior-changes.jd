@@ -88,7 +88,7 @@ page.image=images/cards/card-n-changes_2x.png
   shuts off app network access, and defers jobs and syncs. If the device is
   stationary for a certain time after entering Doze, the system applies the
   rest of the Doze restrictions to {@link android.os.PowerManager.WakeLock},
-  {@link android.app.AlarmManager} alarms, GPS, and Wi-Fi scans.. Regardless of
+  {@link android.app.AlarmManager} alarms, GPS, and Wi-Fi scans. Regardless of
   whether some or all Doze restrictions are being applied, the system wakes the
   device for brief maintenance windows, during which applications are allowed
   network access and can execute any deferred jobs/syncs.
@@ -107,7 +107,7 @@ page.image=images/cards/card-n-changes_2x.png
   removes these processing restrictions. The additional behavior does not
   affect recommendations and best practices in adapting your app to the prior
   version of Doze introduced in Android 6.0 (API level 23), as discussed in
-  <a href=”{@docRoot}/training/monitoring-device-state/doze-standby.html”>
+  <a href="{@docRoot}/training/monitoring-device-state/doze-standby.html">
   Optimizing for Doze and App Standby</a>. You should still
   follow those recommendations, such as using Google Cloud Messaging (GCM) to
   send and receive messages, and start planning updates to accomodate the
@@ -345,9 +345,10 @@ page.image=images/cards/card-n-changes_2x.png
   <li>The {@code ArrayList} private field array is removed.
     <p>
       If your app, or a library it used, was dependent on a private field of
-      the ArrayList class, you may encounter an exception such as:
+      the <code>ArrayList</code> class, you may encounter an exception such as:
     </p>
-<pre>
+
+<pre class="no-pretty-print">
 java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
 </pre>
   </li>
@@ -370,8 +371,8 @@ java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
 
     <p>
       The reason apps use this provider is to take advantage of its
-      SecureRandom implementation. If your app was relying on setSeed() to
-      derive keys from strings, you must either switch to using SecretKeySpec
+      <code>SecureRandom</code> implementation. If your app was relying on <code>setSeed()</code> to
+      derive keys from strings, you must either switch to using <code>SecretKeySpec</code>
       to load raw key bytes directly, or use a real key derivation function
       (KDF).
     </p>
@@ -428,13 +429,13 @@ java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
 </p>
 
 <p>Example Java error:</p>
-<pre>
+<pre class="no-pretty-print">
 java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
     is not accessible for the namespace "classloader-namespace"
 </pre>
 
 <p>Example NDK error:</p>
-<pre>
+<pre class="no-pretty-print">
 dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
 </pre>
 
@@ -446,7 +447,7 @@ dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
 <ul>
   <li>Use of getJavaVM and getJNIEnv from libandroid_runtime.so can be replaced
   with standard JNI functions:
-<pre>
+<pre class="no-pretty-print">
 AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
 AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
 JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
@@ -488,18 +489,18 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   </li>
 
   <li>Reset password restrictions for device admins now apply to profile
-  owners.Device admins can no longer use
-  <code>DevicePolicyManager.resetPassword()</code>to clear passwords or change
+  owners. Device admins can no longer use
+  <code>DevicePolicyManager.resetPassword()</code> to clear passwords or change
   ones that are already set. Device admins can still set a password, but only
   when the device has no password, PIN, or pattern.
   </li>
 
   <li>Device and profile owners can manage accounts even if restrictions are
-  set.Device owners and profile owners can call the Account Management APIs
+  set. Device owners and profile owners can call the Account Management APIs
   even if <code>DISALLOW_MODIFY_ACCOUNTS</code> user restrictions are in place.
   </li>
 
-  <li>Device owners can manage secondary users more easily.When a device is
+  <li>Device owners can manage secondary users more easily. When a device is
   running in device owner mode, the <code>DISALLOW_ADD_USER</code> restriction
   is automatically set. This prevents users from creating unmanaged secondary
   users. In addition, the <code>CreateUser()</code> and
@@ -507,12 +508,17 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   <code>DevicePolicyManager.createAndManageUser()</code> method replaces them.
   </li>
 
-  <li>Device owners can access device identifiers.A Device owner can access the
+  <li>Device owners can access device identifiers. A Device owner can access the
   Wi-Fi MAC address of a device, using
-  <code>DevicePolicyManagewr.getWifiMacAddress()</code> . If Wi-Fi has never
+  <code>DevicePolicyManagewr.getWifiMacAddress()</code>. If Wi-Fi has never
   been enabled on the device, this method returns a value of {@code null}.
   </li>
 </ul>
+
+<p>
+  For more information about changes to Android for Work in Android N, see
+  <a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.
+</p>
 
 <h2 id="other">Other important points</h2>
 

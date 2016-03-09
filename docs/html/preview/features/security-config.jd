@@ -244,12 +244,8 @@ page.keywords=preview,security,network
   protocol instead of HTTPS) to those destinations. This option helps prevent
   accidental regressions in apps due to changes in URLs provided by external
   sources such as backend servers.
-</p>
-
-<p>
-  See the reference documentation for \
-  {@code android.security.NetworkSecurityPolicy} class
-  {@code isCleartextTrafficPermitted()} method for more details.
+  See {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()} for more details.
 </p>
 
 <p>
