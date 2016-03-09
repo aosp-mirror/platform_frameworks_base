@@ -34,6 +34,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
@@ -58,6 +59,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.MathUtils;
@@ -77,6 +79,7 @@ import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapt
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +89,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstaller";
     private static final boolean LOGD = true;
+    private static final String REMOVE_SPLIT_MARKER_EXTENSION = ".removed";
 
     private static final int MSG_COMMIT = 0;
 
@@ -170,6 +174,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final List<String> mResolvedInstructionSets = new ArrayList<>();
     @GuardedBy("mLock")
     private File mInheritedFilesBase;
+
+    private static final FileFilter sAddedFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            // Installers can't stage directories, so it's fine to ignore
+            // entries like "lost+found".
+            if (file.isDirectory()) return false;
+            if (file.getName().endsWith(REMOVE_SPLIT_MARKER_EXTENSION)) return false;
+            return true;
+        }
+    };
+    private static final FileFilter sRemovedFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            if (file.isDirectory()) return false;
+            if (!file.getName().endsWith(REMOVE_SPLIT_MARKER_EXTENSION)) return false;
+            return true;
+        }
+    };
 
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
@@ -342,6 +365,32 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return resolveStageDir().list();
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    @Override
+    public void removeSplit(String splitName) {
+        if (TextUtils.isEmpty(params.appPackageName)) {
+            throw new IllegalStateException("Must specify package name to remove a split");
+        }
+        try {
+            createRemoveSplitMarker(splitName);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private void createRemoveSplitMarker(String splitName) throws IOException {
+        try {
+            final String markerName = splitName + REMOVE_SPLIT_MARKER_EXTENSION;
+            if (!FileUtils.isValidExtFilename(markerName)) {
+                throw new IllegalArgumentException("Invalid marker: " + markerName);
+            }
+            final File target = new File(resolveStageDir(), markerName);
+            target.createNewFile();
+            Os.chmod(target.getAbsolutePath(), 0 /*mode*/);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
         }
     }
 
@@ -608,22 +657,28 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedStagedFiles.clear();
         mResolvedInheritedFiles.clear();
 
-        final File[] files = mResolvedStageDir.listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+        final File[] removedFiles = mResolvedStageDir.listFiles(sRemovedFilter);
+        final List<String> removeSplitList = new ArrayList<>();
+        if (!ArrayUtils.isEmpty(removedFiles)) {
+            for (File removedFile : removedFiles) {
+                final String fileName = removedFile.getName();
+                final String splitName = fileName.substring(
+                        0, fileName.length() - REMOVE_SPLIT_MARKER_EXTENSION.length());
+                removeSplitList.add(splitName);
+            }
         }
 
+        final File[] addedFiles = mResolvedStageDir.listFiles(sAddedFilter);
+        if (ArrayUtils.isEmpty(addedFiles) && removeSplitList.size() == 0) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
+        }
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
-        for (File file : files) {
-
-            // Installers can't stage directories, so it's fine to ignore
-            // entries like "lost+found".
-            if (file.isDirectory()) continue;
-
+        for (File addedFile : addedFiles) {
             final ApkLite apk;
             try {
-                apk = PackageParser.parseApkLite(file, PackageParser.PARSE_COLLECT_CERTIFICATES);
+                apk = PackageParser.parseApkLite(
+                        addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw PackageManagerException.from(e);
             }
@@ -642,7 +697,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mSignatures = apk.signatures;
             }
 
-            assertApkConsistent(String.valueOf(file), apk);
+            assertApkConsistent(String.valueOf(addedFile), apk);
 
             // Take this opportunity to enforce uniform naming
             final String targetName;
@@ -657,8 +712,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             final File targetFile = new File(mResolvedStageDir, targetName);
-            if (!file.equals(targetFile)) {
-                file.renameTo(targetFile);
+            if (!addedFile.equals(targetFile)) {
+                addedFile.renameTo(targetFile);
             }
 
             // Base is coming from session
@@ -667,6 +722,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mResolvedStagedFiles.add(targetFile);
+        }
+
+        if (removeSplitList.size() > 0) {
+            // validate split names marked for removal
+            final int flags = mSignatures == null ? PackageManager.GET_SIGNATURES : 0;
+            final PackageInfo pkg = mPm.getPackageInfo(params.appPackageName, flags, userId);
+            for (String splitName : removeSplitList) {
+                if (!ArrayUtils.contains(pkg.splitNames, splitName)) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Split not found: " + splitName);
+                }
+            }
+
+            // ensure we've got appropriate package name, version code and signatures
+            if (mPackageName == null) {
+                mPackageName = pkg.packageName;
+                mVersionCode = pkg.versionCode;
+            }
+            if (mSignatures == null) {
+                mSignatures = pkg.signatures;
+            }
         }
 
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
@@ -707,8 +783,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 for (int i = 0; i < existing.splitNames.length; i++) {
                     final String splitName = existing.splitNames[i];
                     final File splitFile = new File(existing.splitCodePaths[i]);
-
-                    if (!stagedSplits.contains(splitName)) {
+                    final boolean splitRemoved = removeSplitList.contains(splitName);
+                    if (!stagedSplits.contains(splitName) && !splitRemoved) {
                         mResolvedInheritedFiles.add(splitFile);
                     }
                 }
@@ -747,6 +823,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (!mPackageName.equals(apk.packageName)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag + " package "
                     + apk.packageName + " inconsistent with " + mPackageName);
+        }
+        if (params.appPackageName != null && !params.appPackageName.equals(apk.packageName)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
+                    + " specified package " + params.appPackageName
+                    + " inconsistent with " + apk.packageName);
         }
         if (mVersionCode != apk.versionCode) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
