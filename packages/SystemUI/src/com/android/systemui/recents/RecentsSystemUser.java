@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.EventLog;
@@ -26,7 +27,7 @@ import android.util.SparseArray;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 
@@ -91,8 +92,8 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     }
 
     @Override
-    public void sendDockingTopTaskEvent(int dragMode) throws RemoteException {
-        EventBus.getDefault().post(new DockingTopTaskEvent(dragMode));
+    public void sendDockingTopTaskEvent(int dragMode, Rect initialRect) throws RemoteException {
+        EventBus.getDefault().post(new DockedTopTaskEvent(dragMode, initialRect));
     }
 
     @Override

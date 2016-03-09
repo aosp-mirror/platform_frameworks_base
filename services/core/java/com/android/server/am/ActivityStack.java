@@ -414,6 +414,12 @@ final class ActivityStack {
             mTaskPositioner.reset();
         }
         mWindowManager.detachStack(mStackId);
+        if (mStackId == DOCKED_STACK_ID) {
+            // If we removed a docked stack we want to resize it so it resizes all other stacks
+            // in the system to fullscreen.
+            mStackSupervisor.resizeDockedStackLocked(
+                    null, null, null, null, null, PRESERVE_WINDOWS);
+        }
     }
 
     public void getDisplaySize(Point out) {

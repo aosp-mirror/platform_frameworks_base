@@ -121,6 +121,18 @@ public class TaskViewTransform {
     }
 
     /**
+     * @return whether {@param other} is the same transform as this
+     */
+    public boolean isSame(TaskViewTransform other) {
+        return translationZ == other.translationZ
+                && scale == other.scale
+                && other.alpha == alpha
+                && dimAlpha == other.dimAlpha
+                && visible == other.visible
+                && rect.equals(other.rect);
+    }
+
+    /**
      * Resets the current transform.
      */
     public void reset() {

@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import android.graphics.Rect;
+
 /**
  * Due to the fact that RecentsActivity is per-user, we need to establish an
  * interface (this) for the non-system user to register itself for callbacks and to
@@ -27,6 +29,6 @@ oneway interface IRecentsSystemUserCallbacks {
     void updateRecentsVisibility(boolean visible);
     void startScreenPinning();
     void sendRecentsDrawnEvent();
-    void sendDockingTopTaskEvent(int dragMode);
+    void sendDockingTopTaskEvent(int dragMode, in Rect initialRect);
     void sendLaunchRecentsEvent();
 }

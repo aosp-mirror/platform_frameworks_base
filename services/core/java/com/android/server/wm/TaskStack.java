@@ -148,9 +148,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     boolean setBounds(
             Rect stackBounds, SparseArray<Configuration> configs, SparseArray<Rect> taskBounds,
             SparseArray<Rect> taskTempInsetBounds) {
-        if (!setBounds(stackBounds)) {
-            return false;
-        }
+        setBounds(stackBounds);
 
         // Update bounds of containing tasks.
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -608,13 +606,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         updateDisplayInfo(bounds);
-
-        if (mStackId == DOCKED_STACK_ID) {
-            // Attaching a docked stack to the display affects the size of all other static
-            // stacks since the docked stack occupies a dedicated region on screen.
-            // Resize existing static stacks so they are pushed to the side of the docked stack.
-            resizeNonDockedStacks(!FULLSCREEN, mBounds);
-        }
     }
 
     void getStackDockedModeBoundsLocked(Rect outBounds, boolean ignoreVisibility) {
@@ -723,36 +714,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         DockedDividerUtils.sanitizeStackBounds(outBounds, !dockOnTopOrLeft);
     }
 
-    /** Resizes all non-docked stacks in the system to either fullscreen or the appropriate size
-     * based on the presence of a docked stack.
-     * @param fullscreen If true the stacks will be resized to fullscreen, else they will be
-     *                   resized to the appropriate size based on the presence of a docked stack.
-     * @param dockedBounds Bounds of the docked stack.
-     */
-    private void resizeNonDockedStacks(boolean fullscreen, Rect dockedBounds) {
-        // Not using mTmpRect because we are posting the object in a message.
-        final Rect bounds = new Rect();
-        mDisplayContent.getLogicalDisplayRect(bounds);
-        if (!fullscreen) {
-            final boolean dockedOnTopOrLeft = mService.mDockedStackCreateMode
-                    == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-            getStackDockedModeBounds(bounds, bounds, FULLSCREEN_WORKSPACE_STACK_ID, dockedBounds,
-                    mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
-        }
-
-        final int count = mService.mStackIdToStack.size();
-        for (int i = 0; i < count; i++) {
-            final TaskStack otherStack = mService.mStackIdToStack.valueAt(i);
-            final int otherStackId = otherStack.mStackId;
-            if (StackId.isResizeableByDockedStack(otherStackId)
-                    && !otherStack.mBounds.equals(bounds)) {
-                mService.mH.sendMessage(
-                        mService.mH.obtainMessage(RESIZE_STACK, otherStackId,
-                                1 /*allowResizeInDockedMode*/, fullscreen ? null : bounds));
-            }
-        }
-    }
-
     void resetDockedStackToMiddle() {
         if (mStackId != DOCKED_STACK_ID) {
             throw new IllegalStateException("Not a docked stack=" + this);
@@ -784,12 +745,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
         if (doAnotherLayoutPass) {
             mService.mWindowPlacerLocked.requestTraversal();
-        }
-
-        if (mStackId == DOCKED_STACK_ID) {
-            // Docked stack was detached from the display, so we no longer need to restrict the
-            // region of the screen other static stacks occupy. Go ahead and make them fullscreen.
-            resizeNonDockedStacks(FULLSCREEN, null);
         }
 
         close();

@@ -71,6 +71,8 @@ public class TaskStackAnimationHelper {
 
     public static final int ENTER_FROM_HOME_ALPHA_DURATION = 100;
     public static final int ENTER_FROM_HOME_TRANSLATION_DURATION = 333;
+    public static final int ENTER_WHILE_DOCKING_DURATION = 150;
+
     private static final PathInterpolator ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR =
             new PathInterpolator(0, 0, 0, 1f);
     private static final PathInterpolator ENTER_FROM_HOME_ALPHA_INTERPOLATOR =
@@ -89,6 +91,9 @@ public class TaskStackAnimationHelper {
             new PathInterpolator(0, 0, 0, 1f);
     private static final PathInterpolator FOCUS_BEHIND_NEXT_TASK_INTERPOLATOR =
             new PathInterpolator(0.4f, 0, 0.2f, 1f);
+
+    private static final PathInterpolator ENTER_WHILE_DOCKING_INTERPOLATOR =
+            new PathInterpolator(0, 0, 0.2f, 1f);
 
     private TaskStackView mStackView;
 
@@ -122,6 +127,8 @@ public class TaskStackAnimationHelper {
         int offscreenYOffset = stackLayout.mStackRect.height();
         int taskViewAffiliateGroupEnterOffset = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_affiliate_group_enter_offset);
+        int launchedWhileDockingOffset = res.getDimensionPixelSize(
+                R.dimen.recents_task_view_launched_while_docking_offset);
 
         // Prepare each of the task views for their enter animation from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -141,7 +148,7 @@ public class TaskStackAnimationHelper {
                 tv.setVisibility(View.INVISIBLE);
             } else if (launchState.launchedHasConfigurationChanged) {
                 // Just load the views as-is
-            } else if (launchState.launchedFromApp) {
+            } else if (launchState.launchedFromApp && !launchState.launchedWhileDocking) {
                 if (task.isLaunchTarget) {
                     tv.onPrepareLaunchTargetForEnterAnimation();
                 } else if (currentTaskOccludesLaunchTarget) {
@@ -157,6 +164,11 @@ public class TaskStackAnimationHelper {
                 // Move the task view off screen (below) so we can animate it in
                 RectF bounds = new RectF(mTmpTransform.rect);
                 bounds.offset(0, offscreenYOffset);
+                tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
+                        (int) bounds.bottom);
+            } else if (launchState.launchedWhileDocking) {
+                RectF bounds = new RectF(mTmpTransform.rect);
+                bounds.offset(0, launchedWhileDockingOffset);
                 tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
                         (int) bounds.bottom);
             }
@@ -192,6 +204,7 @@ public class TaskStackAnimationHelper {
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             int taskIndexFromFront = taskViewCount - i - 1;
+            int taskIndexFromBack = i;
             final TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
             boolean currentTaskOccludesLaunchTarget = false;
@@ -205,7 +218,7 @@ public class TaskStackAnimationHelper {
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
 
-            if (launchState.launchedFromApp) {
+            if (launchState.launchedFromApp && !launchState.launchedWhileDocking) {
                 if (task.isLaunchTarget) {
                     tv.onStartLaunchTargetEnterAnimation(mTmpTransform,
                             taskViewEnterFromAppDuration, mStackView.mScreenPinningEnabled,
@@ -238,6 +251,16 @@ public class TaskStackAnimationHelper {
                                 ENTER_FROM_HOME_TRANSLATION_INTERPOLATOR)
                         .setInterpolator(AnimationProps.ALPHA,
                                 ENTER_FROM_HOME_ALPHA_INTERPOLATOR)
+                        .setListener(postAnimationTrigger.decrementOnAnimationEnd());
+                postAnimationTrigger.increment();
+                mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
+            } else if (launchState.launchedWhileDocking) {
+                // Animate the tasks up
+                AnimationProps taskAnimation = new AnimationProps()
+                        .setDuration(AnimationProps.BOUNDS, (int) (ENTER_WHILE_DOCKING_DURATION +
+                                                        (taskIndexFromBack * 2f * FRAME_OFFSET_MS)))
+                        .setInterpolator(AnimationProps.BOUNDS,
+                                ENTER_WHILE_DOCKING_INTERPOLATOR)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
