@@ -19,12 +19,15 @@
 
 #include "android_media_Utils.h"
 
+#include "android/graphics/CreateJavaOutputStreamAdaptor.h"
 #include "src/piex_types.h"
 #include "src/piex.h"
 
 #include <jni.h>
 #include <JNIHelp.h>
+#include <androidfw/Asset.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android/graphics/Utils.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include <utils/Log.h>
@@ -34,6 +37,9 @@
 // ----------------------------------------------------------------------------
 
 using namespace android;
+
+static const char kJpegSignatureChars[] = {(char)0xff, (char)0xd8, (char)0xff};
+static const int kJpegSignatureSize = 3;
 
 #define FIND_CLASS(var, className) \
     var = env->FindClass(className); \
@@ -82,18 +88,48 @@ static void ExifInterface_initRaw(JNIEnv *env) {
                   "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 }
 
-static jobject ExifInterface_getRawMetadata(
-        JNIEnv* env, jclass /* clazz */, jobject jfileDescriptor) {
-    int fd = jniGetFDFromFileDescriptor(env, jfileDescriptor);
-    if (fd < 0) {
-        ALOGI("Invalid file descriptor");
+static bool is_asset_stream(const SkStream& stream) {
+    return stream.hasLength() && stream.hasPosition();
+}
+
+static jobject ExifInterface_getThumbnailFromAsset(
+        JNIEnv* env, jclass /* clazz */, jlong jasset, jint jthumbnailOffset,
+        jint jthumbnailLength) {
+    Asset* asset = reinterpret_cast<Asset*>(jasset);
+    std::unique_ptr<AssetStreamAdaptor> stream(new AssetStreamAdaptor(asset));
+
+    std::unique_ptr<jbyte[]> thumbnailData(new jbyte[(int)jthumbnailLength]);
+    if (thumbnailData.get() == NULL) {
+        ALOGI("No memory to get thumbnail");
         return NULL;
     }
 
-    piex::PreviewImageData image_data;
-    std::unique_ptr<FileStream> stream(new FileStream(fd));
+    // Do not know the current offset. So rewind it.
+    stream->rewind();
 
-    if (!GetExifFromRawImage(stream.get(), String8("[file descriptor]"), image_data)) {
+    // Read thumbnail.
+    stream->skip((int)jthumbnailOffset);
+    stream->read((void*)thumbnailData.get(), (int)jthumbnailLength);
+
+    // Copy to the byte array.
+    jbyteArray byteArray = env->NewByteArray(jthumbnailLength);
+    env->SetByteArrayRegion(byteArray, 0, jthumbnailLength, thumbnailData.get());
+    return byteArray;
+}
+
+static jobject getRawAttributes(JNIEnv* env, SkStream* stream, bool returnThumbnail) {
+    std::unique_ptr<SkStream> streamDeleter(stream);
+
+    std::unique_ptr<::piex::StreamInterface> piexStream;
+    if (is_asset_stream(*stream)) {
+        piexStream.reset(new AssetStream(streamDeleter.release()));
+    } else {
+        piexStream.reset(new BufferedStream(streamDeleter.release()));
+    }
+
+    piex::PreviewImageData image_data;
+
+    if (!GetExifFromRawImage(piexStream.get(), String8("[piex stream]"), image_data)) {
         ALOGI("Raw image not detected");
         return NULL;
     }
@@ -253,7 +289,117 @@ static jobject ExifInterface_getRawMetadata(
         }
     }
 
-    return KeyedVectorToHashMap(env, map);
+    jobject hashMap = KeyedVectorToHashMap(env, map);
+
+    if (returnThumbnail) {
+        std::unique_ptr<jbyte[]> thumbnailData(new jbyte[image_data.thumbnail.length]);
+        if (thumbnailData.get() == NULL) {
+            ALOGE("No memory to parse a thumbnail");
+            return NULL;
+        }
+        jbyteArray jthumbnailByteArray = env->NewByteArray(image_data.thumbnail.length);
+        if (jthumbnailByteArray == NULL) {
+            ALOGE("No memory to parse a thumbnail");
+            return NULL;
+        }
+        piexStream.get()->GetData(image_data.thumbnail.offset, image_data.thumbnail.length,
+                (uint8_t*)thumbnailData.get());
+        env->SetByteArrayRegion(
+                jthumbnailByteArray, 0, image_data.thumbnail.length, thumbnailData.get());
+        jstring jkey = env->NewStringUTF(String8("thumbnailData"));
+        env->CallObjectMethod(hashMap, gFields.hashMap.put, jkey, jthumbnailByteArray);
+        env->DeleteLocalRef(jkey);
+        env->DeleteLocalRef(jthumbnailByteArray);
+    }
+    return hashMap;
+}
+
+static jobject ExifInterface_getRawAttributesFromAsset(
+        JNIEnv* env, jclass /* clazz */, jlong jasset) {
+    std::unique_ptr<char[]> jpegSignature(new char[kJpegSignatureSize]);
+    if (jpegSignature.get() == NULL) {
+        ALOGE("No enough memory to parse");
+        return NULL;
+    }
+
+    Asset* asset = reinterpret_cast<Asset*>(jasset);
+    std::unique_ptr<AssetStreamAdaptor> stream(new AssetStreamAdaptor(asset));
+
+    if (stream.get()->read(jpegSignature.get(), kJpegSignatureSize) != kJpegSignatureSize) {
+        // Rewind the stream.
+        stream.get()->rewind();
+
+        ALOGI("Corrupted image.");
+        return NULL;
+    }
+
+    // Rewind the stream.
+    stream.get()->rewind();
+
+    if (memcmp(jpegSignature.get(), kJpegSignatureChars, kJpegSignatureSize) == 0) {
+        ALOGI("Should be a JPEG stream.");
+        return NULL;
+    }
+
+    // Try to parse from the given stream.
+    jobject result = getRawAttributes(env, stream.get(), false);
+
+    // Rewind the stream for the chance to read JPEG.
+    if (result == NULL) {
+        stream.get()->rewind();
+    }
+    return result;
+}
+
+static jobject ExifInterface_getRawAttributesFromFileDescriptor(
+        JNIEnv* env, jclass /* clazz */, jobject jfileDescriptor) {
+    std::unique_ptr<char[]> jpegSignature(new char[kJpegSignatureSize]);
+    if (jpegSignature.get() == NULL) {
+        ALOGE("No enough memory to parse");
+        return NULL;
+    }
+
+    int fd = jniGetFDFromFileDescriptor(env, jfileDescriptor);
+    if (fd < 0) {
+        ALOGI("Invalid file descriptor");
+        return NULL;
+    }
+
+    // Restore the file descriptor's offset on exiting this function.
+    AutoFDSeek autoRestore(fd);
+
+    int dupFd = dup(fd);
+
+    FILE* file = fdopen(dupFd, "r");
+    if (file == NULL) {
+        ALOGI("Failed to open the file descriptor");
+        return NULL;
+    }
+
+    if (fgets(jpegSignature.get(), kJpegSignatureSize, file) == NULL) {
+        ALOGI("Corrupted image.");
+        return NULL;
+    }
+
+    if (memcmp(jpegSignature.get(), kJpegSignatureChars, kJpegSignatureSize) == 0) {
+        ALOGI("Should be a JPEG stream.");
+        return NULL;
+    }
+
+    // Rewind the file descriptor.
+    fseek(file, 0L, SEEK_SET);
+
+    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file,
+                SkFILEStream::kCallerPasses_Ownership));
+    return getRawAttributes(env, fileStream.get(), false);
+}
+
+static jobject ExifInterface_getRawAttributesFromInputStream(
+        JNIEnv* env, jclass /* clazz */, jobject jinputStream) {
+    jbyteArray byteArray = env->NewByteArray(8*1024);
+    ScopedLocalRef<jbyteArray> scoper(env, byteArray);
+    std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, jinputStream, scoper.get()));
+    return getRawAttributes(env, stream.get(), true);
 }
 
 } // extern "C"
@@ -261,9 +407,14 @@ static jobject ExifInterface_getRawMetadata(
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    { "initRawNative", "()V", (void *)ExifInterface_initRaw },
-    { "getRawAttributesNative", "(Ljava/io/FileDescriptor;)Ljava/util/HashMap;",
-      (void*)ExifInterface_getRawMetadata },
+    { "nativeInitRaw", "()V", (void *)ExifInterface_initRaw },
+    { "nativeGetThumbnailFromAsset", "(JII)[B", (void *)ExifInterface_getThumbnailFromAsset },
+    { "nativeGetRawAttributesFromAsset", "(J)Ljava/util/HashMap;",
+      (void*)ExifInterface_getRawAttributesFromAsset },
+    { "nativeGetRawAttributesFromFileDescriptor", "(Ljava/io/FileDescriptor;)Ljava/util/HashMap;",
+      (void*)ExifInterface_getRawAttributesFromFileDescriptor },
+    { "nativeGetRawAttributesFromInputStream", "(Ljava/io/InputStream;)Ljava/util/HashMap;",
+      (void*)ExifInterface_getRawAttributesFromInputStream },
 };
 
 int register_android_media_ExifInterface(JNIEnv *env) {
