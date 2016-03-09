@@ -539,7 +539,7 @@ GPS/Wi-Fi scans.</p>
 <p>The best practices for adapting your app to Doze are the same whether the
 device is moving or not, so if you already updated your app to gracefully
 handle Doze, you're all set. If not, start <a
-href=”{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app”>adapting
+href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">adapting
 your app to Doze</a> now.</p>
 
 <h2 id="background_optimizations">Project Svelte: Background optimizations</h2>
@@ -558,8 +558,13 @@ for users. Apps can schedule jobs while letting the system optimize based on
 memory, power, and connectivity conditions. JobScheduler offers control and
 simplicity, and we want all apps to use it. </p>
 
-  <p>Another good option is <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager"><code>GCMNetworkManager</a>, part of Google Pl</p>ay Services, which offers similar job scheduling with
-compatibility across legacy versions of Android.</p>
+<p>
+  Another good option is <a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  <code>GCMNetworkManager</code></a>, part of Google Play Services, which
+  offers similar job scheduling with compatibility across legacy versions of
+  Android.
+</p>
 
   <p>We're continuing to extend <code>JobScheduler</code> and <code>GCMNetworkManager</code> to meet more of
 your use cases &mdash; for example, in Android N you can now schedule background
