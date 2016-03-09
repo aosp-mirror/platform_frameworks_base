@@ -718,7 +718,8 @@ public class Vpn {
     public void onUserAdded(int userHandle) {
         // If the user is restricted tie them to the parent user's VPN
         UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
-        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle
+                && mVpnUsers != null) {
             synchronized(Vpn.this) {
                 try {
                     addVpnUserLocked(userHandle);
@@ -736,7 +737,8 @@ public class Vpn {
     public void onUserRemoved(int userHandle) {
         // clean up if restricted
         UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
-        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle
+                && mVpnUsers != null) {
             synchronized(Vpn.this) {
                 try {
                     removeVpnUserLocked(userHandle);
