@@ -1,61 +1,41 @@
-page.title=Using Java 8 Language Features
+page.title=Java 8 Language Features
 page.keywords="android N", "Java 8", "Jack"
 @jd:body
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>
-      In this document
-    </h2>
-
     <ol>
       <li>
         <a href="#supported-features">Supported Java 8 Language Features and APIs</a>
       </li>
-
       <li>
         <a href="#configuration">Enabling Java 8 Features and the Jack Toolchain</a>
-      </li>
-    </ol>
-
-    <h2>
-      See also
-    </h2>
-
-    <ol>
-      <li>
-        <a class="external-link" href=
-        "https://source.android.com/source/jack.html">Jack (Java Android Compiler
-        Kit)</a>
       </li>
     </ol>
   </div>
 </div>
 
 <p>Android N introduces support for Java 8 language features
-  that you can use when developing apps that target the Android N. To start using
-  these features, you need to download and set up Android Studio 2.1 (preview)
-  and the Android N Preview SDK, which includes the required Jack toolchain and
-  updated Android Plugin for Gradle.</p>
-
-<p>If you haven't yet installed the Android N Preview SDK, follow the guide to
-<a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android
-N</a>.</p>
-
-
-<p>
-  This document describes the new language features supported in the Android N
+  that you can use when developing apps that target Android N.
+  This page describes the new language features supported in the Android N
   Preview, how to properly set up your project to use them, and any known
   issues you may encounter.
 </p>
 
+<p>To start using these features, you need to download and set up Android
+Studio 2.1 (preview) and the Android N Preview SDK, which includes the required
+Jack toolchain and updated Android Plugin for Gradle. If you haven't yet
+installed the Android N Preview SDK, see <a href=
+"{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android N</a>.</p>
+
+
+
 <p class="note">
   <strong>Note:</strong> Using the new Java 8 language features is not a
-  requirement for developing apps that target the Android N Preview. After
-  following the set up instructions in the <a href=
-  "{@docRoot}preview/setup-sdk.html">Preview guide</a>, you may use
-  the Java 7 language features already supported by Android 6.0 (API level 23)
-  and below.
+  requirement for developing apps that target the Android N platform. If you
+  don't want to write code with Java 8 language features, you can keep your
+  project's source and target compatibility values set to Java 7, but you still
+  must compile with JDK 8 to build against the Android N platform.
 </p>
 
 <h2 id="supported-features">
@@ -64,8 +44,8 @@ N</a>.</p>
 
 <p>
   Android does not currently support all Java 8 language features. However, the
-  following features are now available when developing apps targeting the N
-  Developer Preview:
+  following features are now available when developing apps targeting the
+  Android N Preview:
 </p>
 
 <ul>
@@ -90,8 +70,7 @@ N</a>.</p>
 
 
 <p>
-  Additionally, the following Java 8 language feature APIs are now available
-  with the Preview:
+  Additionally, the following Java 8 language feature APIs are now available:
 </p>
 
 <ul>
@@ -143,18 +122,20 @@ N</a>.</p>
   new <a class="external-link" href=
   "https://source.android.com/source/jack.html">Jack toolchain</a>. This new
   Android toolchain compiles Java language source into Android-readable dex
-  bytecode, has its own {@code .jack} library format, and provides most tool chain
+  bytecode, has its own {@code .jack} library format, and provides most toolchain
   features as part of a single tool: repackaging, shrinking, obfuscation and
   multidex.
 </p>
 
-<p>Here we compare the two toolchains used to build Android DEX files:</p>
+<p>Here is a comparison the two toolchains used to build Android DEX files:</p>
 <ul>
-  <li>Legacy: javac ({@code .java} &gt; {@code .class}) &gt; dx ({@code
-  .class} &gt; {@code .dex})
+  <li>Legacy javac toolchain:<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
   </li>
 
-  <li>Modern: Jack ({@code .java} &gt; {@code .jack} &gt; {@code .dex})
+  <li>New Jack toolchain:<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
   </li>
 </ul>
 
@@ -169,9 +150,9 @@ N</a>.</p>
 
 <pre>
 android {
-...
-  defaultConfig {
   ...
+  defaultConfig {
+    ...
     jackOptions {
       enabled true
     }
@@ -192,19 +173,17 @@ android {
   with Jack and will be disabled while using the new toolchain.
 </p>
 
-<p>
-  Since Jack does not generate intermediate class files when compiling an app,
-  tools that depend on these files do not currently work with Jack. Some examples of
-  these tools are:
-</p>
+<p>Because Jack does not generate intermediate class files when compiling an
+app, tools that depend on these files do not currently work with Jack. Some
+examples of these tools are:</p>
 
 <ul>
   <li>Lint detectors that operate on class files
   </li>
 
-  <li>Tools and libraries that require the app’s class files (e.g. JaCoCo and Mockito)
-  </li>
+  <li>Tools and libraries that require the app’s class files (such as JaCoCo
+  and Mockito)</li>
 </ul>
 
-If you find other problems while using Jack, <a class="external-link" href=
-"http://tools.android.com/filing-bugs">please report bugs</a>.
+<p>If you find other problems while using Jack, <a href=
+"http://tools.android.com/filing-bugs">please report bugs</a>.</p>

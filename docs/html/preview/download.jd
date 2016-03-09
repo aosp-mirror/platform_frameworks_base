@@ -188,14 +188,13 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 
 
-<p>To run the Android N Preview so you can test your apps, you can either
+<p>To run the Android N Preview and test your apps, you can either
 install the Android N Preview on one of several supported devices or run it on
 the Android Emulator.</p>
 
 <p>Simply installing your app onto Android N this way does not require
 any changes to your app source code. If, however, you want to update your
-app to use new Android N APIs and Java 8 language features,
-then you need to download Android Studio 2.1 (preview) as described in
+app to use new Android N APIs, see
 <a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android N</a>.
 
 
@@ -221,22 +220,19 @@ then you need to download Android Studio 2.1 (preview) as described in
 
 <h3 id="ota">Get over-the-air updates</h3>
 
-<p>
-  You can receive preview versions of Android on compatible devices by
-  enrolling them in the Android Beta Program. Once you enroll a device in
-  this program, it receives preview versions of Android over-the-air (OTA).
-  These updates are automatically downloaded and can installed just like
-  official updates.
-</p>
+<p>You can receive over-the-air updates to preview versions of Android by
+enrolling your compatible device in the Android Beta Program.
+These updates are automatically downloaded and will update your device just like
+official system updates.</p>
 
 <p>
-  For more information on the Android Beta Program and to enroll devices, see
+  For more information and to enroll your device, see
   the <a href="https://g.co/androidbeta">Android Beta Program</a> web site.
 </p>
 
 <p class="warning">
-  <strong>Warning:</strong> If you enroll a device for receiving a preview
-  version of Android, and then later opt-out of receiving those updates on
+  <strong>Warning:</strong> If you enroll a device in the Android Beta Program,
+  then later opt-out of receiving updates on
   the device, all user data on that device will be removed.
 </p>
 
@@ -247,7 +243,7 @@ then you need to download Android Studio 2.1 (preview) as described in
 the updates yourself, you can download the appropriate system image for your
 device from the table below.</p>
 
-<p>The process of installing a system image on a device <em>removes all data
+<p>Installing a system image on a device <em>removes all data
 from the device</em>, so you should back up your data before installing a
 system image.</p>
 
@@ -355,8 +351,8 @@ preview system image, you must perform another manual installation.
 </p>
 
 <p class="warning">
-  <strong>Warning:</strong> Installing a factory image causes all user data on
-  the device to be removed.
+  <strong>Warning:</strong> Just like when flashing a preview image,
+  installing a factory image removes all user data on the device.
 </p>
 
 
@@ -364,13 +360,13 @@ preview system image, you must perform another manual installation.
 
 <h2 id="setupAVD">Use the Emulator</h2>
 
-<p>To use the Android Emulator to run the Android N Preview you need to download
-the Android N Preview SDK and create a virtual device for the emulator.
-</p>
+<p>To use the Android Emulator to run the Android N Preview, you need to
+download the Android N Preview SDK and create a virtual device for the
+emulator.</p>
 
 <p>First, download the Android N Preview SDK as follows (if you
 already got it while <a href="{@docRoot}preview/setup-sdk.html">setting up
-Android Studio 2.1</a>, you can skip this part):
+to develop for Android N</a>, you can skip this part):
 
 <ol>
   <li>In Android Studio, open the Settings dialog
@@ -404,11 +400,20 @@ Android Studio 2.1</a>, you can skip this part):
     then click <strong>Next</strong>.</li>
   <li>Select the <strong>N</strong> system image (with the
     <strong>x86</strong> ABI), then click <strong>Next</strong>.
+    (Only x86 system images are currently supported with the Android Emulator
+for the Android N Preview.)
   <li>Complete the rest of the AVD configuration and click
     <strong>Finish</strong>.</li>
 </ol>
 
 <p>You can now launch the Android Emulator with the Android N Preview AVD.</p>
+
+<p class="note"><strong>Note:</strong>
+For the best experience in the Android Emulator, install
+Android Studio 2.1 Preview, which supports the <a
+href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>
+with much faster performance compared to the Emulator in
+Android Studio 1.5.</p>
 
 <p>For more information about creating virtual devices, see <a href=
   "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.

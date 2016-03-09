@@ -25,7 +25,7 @@ page.image=images/cards/card-n-sdk_2x.png
 <p>To develop apps for the Android N Preview, you need to make some updates
 to your developer environment, as described on this page.</p>
 
-<p>To instead simply test your app's compatibility on the
+<p>To simply test your app's compatibility on the
 Android N system image, follow the guide to <a
 href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
 
@@ -34,11 +34,14 @@ href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</p>
 
 <h2 id="get-as13">Get Android Studio 2.1 (preview)</h2>
 
-<p>The Android N platform adds support for Java 8 language features,
-which are supported only with a new compiler called Jack. The latest Jack
-compiler is currently supported only in Android Studio 2.1. So if you want to
-use Java 8 language features, then you need to use Android Studio 2.1 to
-build your app.
+<p>The Android N platform adds support for <a
+href="{@docRoot}preview/j8-jack.html">Java 8 language features</a>,
+which require a new compiler called Jack. The latest version of Jack
+is currently supported only in Android Studio 2.1. So if you want to
+use Java 8 language features, you need to use Android Studio 2.1 to
+build your app. Otherwise, you don't need to use the Jack compiler, but you
+still need to update to JDK 8 to compile against the Android N platform,
+as described below.
 </p>
 
 <iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
@@ -47,8 +50,8 @@ build your app.
 release channel. If you already
 have Android Studio and don't want to update to the canary channel, you can
 download Android Studio 2.1 as a separate installation and use it
-with Android N, leaving your primary Android Studio environment
-unaffected.</p>
+for development with Android N, leaving your primary Android Studio
+environment unaffected.</p>
 
 <p>To download Android Studio 2.1 as a separate installation, follow these
 steps (or if you want to receive Android Studio 2.1 as an update to your
@@ -85,8 +88,8 @@ existing installation, skip to step 4):</p>
 Android N Preview SDK in Android Studio as follows:</p>
 
 <ol>
-  <li>While still viewing the Updates panel from the previous
-  procedure, select the <strong>Automatically
+  <li>While still viewing the Updates panel (step 4 from above),
+  select the <strong>Automatically
     check updates for Android SDK</strong> check box and select
     <strong>Preview Channel</strong> from the drop-down list.
   </li>
@@ -108,7 +111,6 @@ Android N Preview SDK in Android Studio as follows:</p>
     agreements for any packages that need to be installed.
   </li>
 </ol>
-
 
 <h3 id="docs-dl">Get the N Preview reference documentation</h3>
 
@@ -140,24 +142,31 @@ Android N Preview SDK in Android Studio as follows:</p>
 
 <h2 id="java8">Get the Java 8 JDK and JRE</h2>
 
-<p>You also need to update your JDK for Java 8 and install the
-  Java 8 Runtime Environment (JRE) to run some
-  tools included in Android Studio 2.1. So, if you don't have the latest
-  version of each already, download JDK 8 and JRE 8 now.</p>
+<p>To compile your app against the Android N platform, you need to use
+the Java 8 Developer Kit (JDK 8), and in order to use some tools with Android
+Studio 2.1, you need to install the Java 8 Runtime Environment (JRE 8). So, if
+you don't have the latest version of each already, download JDK 8 and JRE 8
+now.</p>
 
-<p>With Java 8 installed, set the JDK version in Android Studio as follows:</p>
+<p>Then set the JDK version in Android Studio as follows:</p>
 
 <ol>
   <li>Open an Android project in Android Studio, then open the
     Project Structure dialog by selecting <strong>File &gt;
-        Project Structure</strong>.
+        Project Structure</strong>. (Alternatively, you can set the default
+        for all projects by selecting <strong>File &gt; Other Settings &gt;
+        Default Project Structure</strong>.)
    </li>
    <li>In the left panel of the dialog, click <strong>SDK Location</strong>.
    </li>
    <li>In the <strong>JDK Location</strong> field, enter the location of the
-    Java 8 JDK, then click <strong>OK</strong>.
+    Java 8 JDK (click the button on the right
+    to browse your files), then click <strong>OK</strong>.
    </li>
 </ol>
+
+<img src="{@docRoot}preview/images/studio-jdk-location.jpg" width="700"
+  alt="" />
 
 
 <h2 id="create-update">Update or Create a Project</h2>
@@ -166,10 +175,10 @@ Android N Preview SDK in Android Studio as follows:</p>
   To use the Android N APIs, your project must be configured appropriately.
 </p>
 
-<p>If you plan to use Java 8 language features, you should read
-<a href="{@docRoot}preview/j8-jack.html">Using Java 8 Language Features</a>
-for information about how to configure your project and the supported
-Java 8 features.</p>
+<p>If you plan to use Java 8 language features, you should also read
+<a href="{@docRoot}preview/j8-jack.html">Java 8 Language Features</a>
+for information about the supported Java 8 features and
+how to configure your project with the Jack compiler.</p>
 
 
 <h3 id="update">Update an existing project</h3>
@@ -186,7 +195,6 @@ android {
   ...
 
   defaultConfig {
-     ...
      minSdkVersion <strong>'N'</strong>
      targetSdkVersion <strong>'N'</strong>
      ...
