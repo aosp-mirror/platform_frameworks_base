@@ -20,6 +20,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,6 +38,7 @@ import com.android.documentsui.Shared;
 import com.android.documentsui.State;
 
 final class GridDocumentHolder extends DocumentHolder {
+
     private static boolean mHideTitles;
 
     final TextView mTitle;
@@ -48,8 +50,12 @@ final class GridDocumentHolder extends DocumentHolder {
     final ImageView mIconCheck;
     final IconHelper mIconHelper;
 
+    private final @ColorInt int mDisabledBgColor;
+
     public GridDocumentHolder(Context context, ViewGroup parent, IconHelper iconHelper) {
         super(context, parent, R.layout.item_doc_grid);
+
+        mDisabledBgColor = context.getColor(R.color.item_doc_background_disabled);
 
         mTitle = (TextView) itemView.findViewById(android.R.id.title);
         mDate = (TextView) itemView.findViewById(R.id.date);
@@ -64,11 +70,33 @@ final class GridDocumentHolder extends DocumentHolder {
 
     @Override
     public void setSelected(boolean selected) {
-        super.setSelected(selected);
+        // We always want to make sure our check box disappears if we're not selected,
+        // even if the item is disabled. This is because this object can be reused
+        // and this method will be called to setup initial state.
         float checkAlpha = selected ? 1f : 0f;
-
         mIconCheck.animate().alpha(checkAlpha).start();
+
+        // But it should be an error to be set to selected && be disabled.
+        if (!itemView.isEnabled()) {
+            assert(!selected);
+            return;
+        }
+
+        super.setSelected(selected);
+
         mIconMimeSm.animate().alpha(1f - checkAlpha).start();
+    }
+
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+
+        // Text colors enabled/disabled is handle via a color set.
+        itemView.setBackgroundColor(enabled ? mDefaultBgColor : mDisabledBgColor);
+        float imgAlpha = enabled ? 1f : DISABLED_ALPHA;
+
+        mIconMimeLg.setAlpha(imgAlpha);
+        mIconMimeSm.setAlpha(imgAlpha);
+        mIconThumb.setAlpha(imgAlpha);
     }
 
     /**

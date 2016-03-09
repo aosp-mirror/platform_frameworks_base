@@ -16,6 +16,7 @@
 
 package com.android.documentsui.dirlist;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Rect;
@@ -35,16 +36,18 @@ public abstract class DocumentHolder
         extends RecyclerView.ViewHolder
         implements View.OnKeyListener {
 
+    static final float DISABLED_ALPHA = 0.3f;
+
     public @Nullable String modelId;
 
-    final int mSelectedItemColor;
-    final int mDefaultItemColor;
-    final boolean mAlwaysShowSummary;
     final Context mContext;
+    final @ColorInt int mDefaultBgColor;
+    final @ColorInt int mSelectedBgColor;
 
     DocumentHolder.EventListener mEventListener;
     private View.OnKeyListener mKeyListener;
     private View mSelectionHotspot;
+
 
     public DocumentHolder(Context context, ViewGroup parent, int layout) {
         this(context, inflateLayout(context, parent, layout));
@@ -57,9 +60,8 @@ public abstract class DocumentHolder
 
         mContext = context;
 
-        mDefaultItemColor = context.getColor(R.color.item_doc_background);
-        mSelectedItemColor = context.getColor(R.color.item_doc_background_selected);
-        mAlwaysShowSummary = context.getResources().getBoolean(R.bool.always_show_summary);
+        mDefaultBgColor = context.getColor(R.color.item_doc_background);
+        mSelectedBgColor = context.getColor(R.color.item_doc_background_selected);
 
         mSelectionHotspot = itemView.findViewById(R.id.icon_check);
     }
@@ -80,7 +82,7 @@ public abstract class DocumentHolder
      */
     public void setSelected(boolean selected) {
         itemView.setActivated(selected);
-        itemView.setBackgroundColor(selected ? mSelectedItemColor : mDefaultItemColor);
+        itemView.setBackgroundColor(selected ? mSelectedBgColor : mDefaultBgColor);
     }
 
     /**
@@ -88,7 +90,11 @@ public abstract class DocumentHolder
      * @param highlighted
      */
     public void setHighlighted(boolean highlighted) {
-        itemView.setBackgroundColor(highlighted ? mSelectedItemColor : mDefaultItemColor);
+        itemView.setBackgroundColor(highlighted ? mSelectedBgColor : mDefaultBgColor);
+    }
+
+    public void setEnabled(boolean enabled) {
+        setEnabledRecursive(itemView, enabled);
     }
 
     @Override
@@ -109,10 +115,6 @@ public abstract class DocumentHolder
         // Just handle one for now; switch to a list if necessary.
         assert(mKeyListener == null);
         mKeyListener = listener;
-    }
-
-    public void setEnabled(boolean enabled) {
-        setEnabledRecursive(itemView, enabled);
     }
 
     public boolean onSingleTapUp(MotionEvent event) {
