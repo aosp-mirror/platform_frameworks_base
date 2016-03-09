@@ -3442,7 +3442,7 @@ package android.app {
     method public android.view.View getCurrentFocus();
     method public android.app.FragmentManager getFragmentManager();
     method public android.content.Intent getIntent();
-    method public deprecated java.lang.Object getLastNonConfigurationInstance();
+    method public java.lang.Object getLastNonConfigurationInstance();
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.LoaderManager getLoaderManager();
     method public java.lang.String getLocalClassName();
@@ -3543,7 +3543,7 @@ package android.app {
     method protected void onRestoreInstanceState(android.os.Bundle);
     method public void onRestoreInstanceState(android.os.Bundle, android.os.PersistableBundle);
     method protected void onResume();
-    method public deprecated java.lang.Object onRetainNonConfigurationInstance();
+    method public java.lang.Object onRetainNonConfigurationInstance();
     method protected void onSaveInstanceState(android.os.Bundle);
     method public void onSaveInstanceState(android.os.Bundle, android.os.PersistableBundle);
     method public boolean onSearchRequested(android.view.SearchEvent);
