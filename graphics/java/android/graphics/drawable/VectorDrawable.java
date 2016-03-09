@@ -364,7 +364,9 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return PixelFormat.TRANSLUCENT;
+        // We can't tell whether the drawable is fully opaque unless we examine all the pixels,
+        // but we could tell it is transparent if the root alpha is 0.
+        return getAlpha() == 0 ? PixelFormat.TRANSPARENT : PixelFormat.TRANSLUCENT;
     }
 
     @Override
