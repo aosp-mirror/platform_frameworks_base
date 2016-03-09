@@ -27,6 +27,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -80,6 +81,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private final ArrayList<SpellCheckerInfo> mSpellCheckerList = new ArrayList<>();
     private final HashMap<String, SpellCheckerBindGroup> mSpellCheckerBindGroups = new HashMap<>();
     private final TextServicesSettings mSettings;
+    @NonNull
+    private final UserManager mUserManager;
 
     public static final class Lifecycle extends SystemService {
         private TextServicesManagerService mService;
@@ -109,25 +112,45 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 mService.systemRunning();
             }
         }
+
+        @Override
+        public void onUnlockUser(@UserIdInt int userHandle) {
+            // Called on the system server's main looper thread.
+            // TODO: Dispatch this to a worker thread as needed.
+            mService.onUnlockUser(userHandle);
+        }
     }
 
     void systemRunning() {
         synchronized (mSpellCheckerMap) {
             if (!mSystemReady) {
                 mSystemReady = true;
+                resetInternalState(mSettings.getCurrentUserId());
             }
         }
     }
 
     void onSwitchUser(@UserIdInt int userId) {
         synchronized (mSpellCheckerMap) {
-            switchUserLocked(userId);
+            resetInternalState(userId);
+        }
+    }
+
+    void onUnlockUser(@UserIdInt int userId) {
+        synchronized(mSpellCheckerMap) {
+            final int currentUserId = mSettings.getCurrentUserId();
+            if (userId != currentUserId) {
+                return;
+            }
+            resetInternalState(currentUserId);
         }
     }
 
     public TextServicesManagerService(Context context) {
         mSystemReady = false;
         mContext = context;
+
+        mUserManager = mContext.getSystemService(UserManager.class);
 
         final IntentFilter broadcastFilter = new IntentFilter();
         broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
@@ -142,14 +165,19 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         mMonitor = new TextServicesMonitor();
         mMonitor.register(context, null, true);
-        mSettings = new TextServicesSettings(context.getContentResolver(), userId);
+        final boolean useCopyOnWriteSettings =
+                !mSystemReady || !mUserManager.isUserUnlocked(userId);
+        mSettings = new TextServicesSettings(context.getContentResolver(), userId,
+                useCopyOnWriteSettings);
 
-        // "switchUserLocked" initializes the states for the foreground user
-        switchUserLocked(userId);
+        // "resetInternalState" initializes the states for the foreground user
+        resetInternalState(userId);
     }
 
-    private void switchUserLocked(@UserIdInt int userId) {
-        mSettings.setCurrentUserId(userId);
+    private void resetInternalState(@UserIdInt int userId) {
+        final boolean useCopyOnWriteSettings =
+                !mSystemReady || !mUserManager.isUserUnlocked(userId);
+        mSettings.switchCurrentUser(userId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         unbindServiceLocked();
         buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap, mSettings);
@@ -166,8 +194,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     void updateCurrentProfileIds() {
-        List<UserInfo> profiles =
-                UserManager.get(mContext).getProfiles(mSettings.getCurrentUserId());
+        final List<UserInfo> profiles = mUserManager.getProfiles(mSettings.getCurrentUserId());
         int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
         for (int i = 0; i < currentProfileIds.length; i++) {
             currentProfileIds[i] = profiles.get(i).id;
@@ -232,6 +259,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         list.clear();
         map.clear();
         final PackageManager pm = context.getPackageManager();
+        // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
+        // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
+        // services depending on the unlock state for the specified user.
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(SpellCheckerService.SERVICE_INTERFACE), PackageManager.GET_META_DATA,
                 settings.getCurrentUserId());
@@ -1023,33 +1053,70 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         private int[] mCurrentProfileIds = new int[0];
         private Object mLock = new Object();
 
-        public TextServicesSettings(ContentResolver resolver, @UserIdInt int userId) {
+        /**
+         * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
+         */
+        private final HashMap<String, String> mCopyOnWriteDataStore = new HashMap<>();
+        private boolean mCopyOnWrite = false;
+
+        public TextServicesSettings(ContentResolver resolver, @UserIdInt int userId,
+                boolean copyOnWrite) {
             mResolver = resolver;
-            mCurrentUserId = userId;
+            switchCurrentUser(userId, copyOnWrite);
         }
 
-        public void setCurrentUserId(@UserIdInt int userId) {
+        /**
+         * Must be called when the current user is changed.
+         *
+         * @param userId The user ID.
+         * @param copyOnWrite If {@code true}, for each settings key
+         * (e.g. {@link Settings.Secure#SELECTED_SPELL_CHECKER}) we use the actual settings on the
+         * {@link Settings.Secure} until we do the first write operation.
+         */
+        public void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
             if (DBG) {
                 Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to "
                         + userId + ", new ime = " + getSelectedSpellChecker());
             }
+            if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
+                mCopyOnWriteDataStore.clear();
+                // TODO: mCurrentProfileIds should be cleared here.
+            }
             // TSMS settings are kept per user, so keep track of current user
             mCurrentUserId = userId;
+            mCopyOnWrite = copyOnWrite;
+            // TODO: mCurrentProfileIds should be updated here.
         }
 
         private void putString(final String key, final String str) {
-            Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+            if (mCopyOnWrite) {
+                mCopyOnWriteDataStore.put(key, str);
+            } else {
+                Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+            }
         }
 
         private String getString(final String key) {
+            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
+                final String result = mCopyOnWriteDataStore.get(key);
+                return result != null ? result : "";
+            }
             return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
         }
 
         private void putInt(final String key, final int value) {
-            Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+            if (mCopyOnWrite) {
+                mCopyOnWriteDataStore.put(key, String.valueOf(value));
+            } else {
+                Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+            }
         }
 
         private int getInt(final String key, final int defaultValue) {
+            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
+                final String result = mCopyOnWriteDataStore.get(key);
+                return result != null ? Integer.valueOf(result) : 0;
+            }
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
 
@@ -1109,6 +1176,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public void dumpLocked(final PrintWriter pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
             pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
+            pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
         }
     }
 
