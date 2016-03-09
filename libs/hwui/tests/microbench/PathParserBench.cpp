@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <benchmark/Benchmark.h>
+#include <benchmark/benchmark.h>
 
 #include "PathParser.h"
 #include "VectorDrawable.h"
@@ -26,26 +26,26 @@ using namespace android::uirenderer;
 
 static const char* sPathString = "M 1 1 m 2 2, l 3 3 L 3 3 H 4 h4 V5 v5, Q6 6 6 6 q 6 6 6 6t 7 7 T 7 7 C 8 8 8 8 8 8 c 8 8 8 8 8 8 S 9 9 9 9 s 9 9 9 9 A 10 10 0 1 1 10 10 a 10 10 0 1 1 10 10";
 
-BENCHMARK_NO_ARG(BM_PathParser_parseStringPathForSkPath);
-void BM_PathParser_parseStringPathForSkPath::Run(int iter) {
+void BM_PathParser_parseStringPathForSkPath(benchmark::State& state) {
     SkPath skPath;
     size_t length = strlen(sPathString);
     PathParser::ParseResult result;
-    StartBenchmarkTiming();
-    for (int i = 0; i < iter; i++) {
+    while (state.KeepRunning()) {
         PathParser::parseStringForSkPath(&skPath, &result, sPathString, length);
+        benchmark::DoNotOptimize(&result);
+        benchmark::DoNotOptimize(&skPath);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_PathParser_parseStringPathForSkPath);
 
-BENCHMARK_NO_ARG(BM_PathParser_parseStringPathForPathData);
-void BM_PathParser_parseStringPathForPathData::Run(int iter) {
+void BM_PathParser_parseStringPathForPathData(benchmark::State& state) {
     size_t length = strlen(sPathString);
     PathData outData;
     PathParser::ParseResult result;
-    StartBenchmarkTiming();
-    for (int i = 0; i < iter; i++) {
+    while (state.KeepRunning()) {
         PathParser::getPathDataFromString(&outData, &result, sPathString, length);
+        benchmark::DoNotOptimize(&result);
+        benchmark::DoNotOptimize(&outData);
     }
-    StopBenchmarkTiming();
 }
+BENCHMARK(BM_PathParser_parseStringPathForPathData);
