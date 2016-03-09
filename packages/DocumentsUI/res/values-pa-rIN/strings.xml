@@ -116,4 +116,8 @@
       <item quantity="one">ਕੀ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?</item>
       <item quantity="other">ਕੀ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?</item>
     </plurals>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣੀ ਗਈ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣੀਆਂ ਗਈਆਂ</item>
+    </plurals>
 </resources>

@@ -116,4 +116,8 @@
       <item quantity="other">Töröl <xliff:g id="COUNT_1">%1$d</xliff:g> fájlt?</item>
       <item quantity="one">Töröl <xliff:g id="COUNT_0">%1$d</xliff:g> fájlt?</item>
     </plurals>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> kiválasztva</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kiválasztva</item>
+    </plurals>
 </resources>

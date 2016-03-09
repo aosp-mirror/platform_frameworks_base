@@ -132,4 +132,10 @@
       <item quantity="many">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлів?</item>
       <item quantity="other">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлу?</item>
     </plurals>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="few">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="many">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
 </resources>

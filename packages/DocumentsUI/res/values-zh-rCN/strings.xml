@@ -113,7 +113,8 @@
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="other">要删除 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件吗？</item>
-      <item quantity="one">要删除 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件吗？</item>
+      <item quantity="other">删除 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件？</item>
+      <item quantity="one">删除 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件？</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

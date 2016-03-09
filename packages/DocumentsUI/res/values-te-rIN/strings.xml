@@ -116,4 +116,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను తొలగించాలా?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను తొలగించాలా?</item>
     </plurals>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఎంచుకోబడ్డాయి</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఎంచుకోబడింది</item>
+    </plurals>
 </resources>

@@ -132,4 +132,5 @@
       <item quantity="other">Usunąć <xliff:g id="COUNT_1">%1$d</xliff:g> pliku?</item>
       <item quantity="one">Usunąć <xliff:g id="COUNT_0">%1$d</xliff:g> plik?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

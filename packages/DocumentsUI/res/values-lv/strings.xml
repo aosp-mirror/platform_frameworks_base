@@ -124,4 +124,5 @@
       <item quantity="one">Vai izdzēst <xliff:g id="COUNT_1">%1$d</xliff:g> failu?</item>
       <item quantity="other">Vai izdzēst <xliff:g id="COUNT_1">%1$d</xliff:g> failus?</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>

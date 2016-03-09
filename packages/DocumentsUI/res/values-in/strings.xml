@@ -116,4 +116,8 @@
       <item quantity="other">Hapus <xliff:g id="COUNT_1">%1$d</xliff:g> file?</item>
       <item quantity="one">Hapus <xliff:g id="COUNT_0">%1$d</xliff:g> file?</item>
     </plurals>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> dipilih</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dipilih</item>
+    </plurals>
 </resources>

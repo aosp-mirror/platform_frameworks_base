@@ -116,4 +116,5 @@
       <item quantity="other">ลบ <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์ใช่ไหม</item>
       <item quantity="one">ลบ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์ใช่ไหม</item>
     </plurals>
+    <!-- no translation found for elements_selected (1376955402452875047) -->
 </resources>
