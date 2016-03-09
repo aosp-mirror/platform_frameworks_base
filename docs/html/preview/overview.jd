@@ -58,9 +58,7 @@ page.tags="preview", "developer", "android"
       </h5>
 
       <p>
-        Run and test your apps on Nexus 5X, 6, 6P, 9,
-        Pixel C, and Player, as well as other hardware
-        devices and emulator.
+        Run and test your apps on a range of devices, or on an emulator.
 
       </p>
     </div>
@@ -237,29 +235,10 @@ page.tags="preview", "developer", "android"
 
 <p>
   The N Developer Preview includes hardware system images that you can use when
-  testing and developing on physical devices.
+  testing and developing on physical devices. See the <a href=
+  "{@docRoot}preview/download.html">Device Images</a> page for the full list
+  of hardware images.
 </p>
-
-<p>
-  You can download these Nexus hardware system images from the <a href=
-  "{@docRoot}preview/download.html">Device Images</a> page:
-</p>
-
-<ul>
-  <li> <strong>Nexus 5X</strong> (GSM/LTE) "bullhead" device system image</li>
-  <li> <strong>Nexus 6 (GSM/LTE)</strong> "shamu" device system image</li>
-  <li> <strong>Nexus 6P (GSM/LTE)</strong> "angler" device system image</li>
-  <li> <strong>Nexus 9</strong> (Wi-Fi) "volantis" device system image</li>
-  <li> <strong>Nexus Player</strong> (Android TV) "fugu" device system image</li>
-  <li> <strong>Pixel C</strong> "ryu" device system image</li>
-</ul>
-
-<p>In addition, you can download these hardware system images from our Developer
-Preview partners:</p>
-
-<ul>
-  <li><strong>General Mobile 4G Dual (Android One)</strong> "seed" device system image</li>
-</ul>
 
 <p>
   We’ll deliver updated system images for these devices at each milestone. You
@@ -453,8 +432,7 @@ Android N</a> has
   href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
   and configuring test devices.</li>
   <li> Follow the <a href="https://developers.google.com/android/nexus/images">flashing
-  instructions</a> to flash the latest Android N system image for Nexus 5X,
-  6, 6P, 9, Pixel C, and Player. </li>
+  instructions</a> to flash the latest Android N system image for your device. </li>
   <li> Review the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>
   and <a href="{@docRoot}preview/samples.html">Android N samples</a> to gain more
   insight into new API features and how to use them in your app.

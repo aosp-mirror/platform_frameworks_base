@@ -67,8 +67,7 @@ Android Studio 2.1</a>, you can skip this part):
   <li>Open the AVD Manager by selecting <strong>Tools > Android >
     AVD Manager</strong>.</li>
   <li>Click <strong>Create Virtual Device</strong>.</li>
-  <li>Select a device such as Nexus 5X, Nexus 6P, Nexus 9, or Android TV,
-    then click <strong>Next</strong>.</li>
+  <li>Select your device, then click <strong>Next</strong>.</li>
   <li>Select the <strong>N</strong> system image (with the
     <strong>x86</strong> ABI), then click <strong>Next</strong>.
   <li>Complete the rest of the AVD configuration and click
@@ -85,15 +84,14 @@ Android Studio 2.1</a>, you can skip this part):
 
 <h2 id="setup-device">Set Up a Hardware Device</h2>
 
-<p>If you have a Nexus 5X, Nexus 6P, Nexus 9, Pixel C, or Nexus Player, you can
-install Android N for testing your app.</p>
+<p>
+  If you have a supported device, you can install Android N for testing your
+  app. For full instructions, including the current list of supported devices,
+  see the <a href="{@docRoot}preview/download.html">Device Images</a> page.
+</p>
 
 <p class="caution">
   <strong>Important:</strong> Installing a preview image on a device
   <em>removes all data from it</em>, so you should backup any data before
   installing a preview image.
 </p>
-
-<p><strong>TODO(smain/joefernandez): Merge as appropriate with <a href=
-"{@docRoot}preview/download.html">Image Downloads and OTA
-Updates</a>.</strong></p>
