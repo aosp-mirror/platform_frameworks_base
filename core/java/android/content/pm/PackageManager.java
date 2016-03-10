@@ -1596,9 +1596,9 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: If this feature is supported, the Vulkan native API will enumerate
-     * at least one {@code VkPhysicalDevice}, and the feature version will indicate what
-     * level of optional hardware features limits it supports.
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the Vulkan native API
+     * will enumerate at least one {@code VkPhysicalDevice}, and the feature version will indicate
+     * what level of optional hardware features limits it supports.
      * <p>
      * Level 0 includes the base Vulkan requirements as well as:
      * <ul><li>{@code VkPhysicalDeviceFeatures::textureCompressionETC2}</li></ul>
@@ -1623,7 +1623,7 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The version of this feature indicates the highest
+     * {@link #hasSystemFeature(String, int)}: The version of this feature indicates the highest
      * {@code VkPhysicalDeviceProperties::apiVersion} supported by the physical devices that support
      * the hardware level indicated by {@link #FEATURE_VULKAN_HARDWARE_LEVEL}. The feature version
      * uses the same encoding as Vulkan version numbers:
