@@ -9564,6 +9564,7 @@ package android.content.pm {
     method public java.lang.String[] getNames() throws java.io.IOException;
     method public java.io.InputStream openRead(java.lang.String) throws java.io.IOException;
     method public java.io.OutputStream openWrite(java.lang.String, long, long) throws java.io.IOException;
+    method public void removeSplit(java.lang.String) throws java.io.IOException;
     method public void setStagingProgress(float);
   }
 
