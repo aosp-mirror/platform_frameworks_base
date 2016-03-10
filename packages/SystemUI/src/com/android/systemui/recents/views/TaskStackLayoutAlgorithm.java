@@ -514,7 +514,10 @@ public class TaskStackLayoutAlgorithm {
                     (mHeaderBarHeight * 1f) + 1;
             float initialFocusedOffsetPct = initialFocusedOffset / mStackRect.height();
             float initialFocusedNormX = mUnfocusedCurveInterpolator.getX(initialFocusedOffsetPct);
-            float initialBottomOffset = mStackBottomOffset + mInitialBottomPeekHeight;
+            float initialBottomOffset = mStackBottomOffset +
+                    (ssp.hasDockedTask()
+                        ? mHeaderBarHeight
+                        : mInitialBottomPeekHeight);
             float initialBottomOffsetPct = initialBottomOffset / mStackRect.height();
             float initialBottomNormX = mUnfocusedCurveInterpolator.getX(initialBottomOffsetPct);
             /*
