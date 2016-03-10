@@ -89,6 +89,12 @@ public class Resources_Delegate {
         // first get the String related to this id in the framework
         Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
 
+        // Set the layoutlib callback and context for resources
+        if (resources != Resources.mSystem && resources.mLayoutlibCallback == null) {
+            resources.mLayoutlibCallback = Resources.mSystem.mLayoutlibCallback;
+            resources.mContext = Resources.mSystem.mContext;
+        }
+
         if (resourceInfo != null) {
             platformResFlag_out[0] = true;
             String attributeName = resourceInfo.getSecond();
@@ -96,12 +102,6 @@ public class Resources_Delegate {
             return Pair.of(attributeName,
                     resources.mContext.getRenderResources().getFrameworkResource(
                             resourceInfo.getFirst(), attributeName));
-        }
-
-        // Set the layoutlib callback and context for resources
-        if (resources != Resources.mSystem && resources.mLayoutlibCallback == null) {
-            resources.mLayoutlibCallback = Resources.mSystem.mLayoutlibCallback;
-            resources.mContext = Resources.mSystem.mContext;
         }
 
         // didn't find a match in the framework? look in the project.
