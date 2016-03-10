@@ -1444,16 +1444,7 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void unregisterListener(INotificationListener token, int userid) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                if(mRankerServices.checkServiceTokenLocked(token) != null) {
-                    mRankerServices.unregisterService(token, userid);
-                } else {
-                    mListeners.unregisterService(token, userid);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            mListeners.unregisterService(token, userid);
         }
 
         /**

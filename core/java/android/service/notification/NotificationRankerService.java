@@ -119,7 +119,13 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     @Override
     public void registerAsSystemService(Context context, ComponentName componentName,
             int currentUser)  {
-        throw new IllegalStateException("the ranker may not start itself.");
+        throw new UnsupportedOperationException("the ranker lifecycle is managed by the system.");
+    }
+
+    /** @hide */
+    @Override
+    public void unregisterAsSystemService()  {
+        throw new UnsupportedOperationException("the ranker lifecycle is managed by the system.");
     }
 
     @Override
