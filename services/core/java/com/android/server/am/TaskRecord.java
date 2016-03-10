@@ -1332,8 +1332,13 @@ final class TaskRecord {
         if (bounds == null) {
             return;
         }
-        final int minimalSize = mMinimalSize == -1
-                ? mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask : mMinimalSize;
+        int minimalSize = mMinimalSize;
+        // If the task has no requested minimal size, we'd like to enforce a minimal size
+        // so that the user can not render the task too small to manipulate. We don't need
+        // to do this for the pinned stack as the bounds are controlled by the system.
+        if (minimalSize == -1 && stack.mStackId != PINNED_STACK_ID) {
+            minimalSize = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
+        }
         final boolean adjustWidth = minimalSize > bounds.width();
         final boolean adjustHeight = minimalSize > bounds.height();
         if (!(adjustWidth || adjustHeight)) {
