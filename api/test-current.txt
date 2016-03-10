@@ -23165,6 +23165,7 @@ package android.media.tv {
     method public void notifyError(int);
     method public void notifyRecordingStopped(android.net.Uri);
     method public void notifyTuned(android.net.Uri);
+    method public void onAppPrivateCommand(java.lang.String, android.os.Bundle);
     method public abstract void onRelease();
     method public abstract void onStartRecording(android.net.Uri);
     method public abstract void onStopRecording();
@@ -23182,6 +23183,7 @@ package android.media.tv {
     method public void notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public void notifyVideoAvailable();
     method public void notifyVideoUnavailable(int);
+    method public void onAppPrivateCommand(java.lang.String, android.os.Bundle);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
@@ -23213,6 +23215,7 @@ package android.media.tv {
   public class TvRecordingClient {
     ctor public TvRecordingClient(android.content.Context, java.lang.String, android.media.tv.TvRecordingClient.RecordingCallback, android.os.Handler);
     method public void release();
+    method public void sendAppPrivateCommand(java.lang.String, android.os.Bundle);
     method public void startRecording(android.net.Uri);
     method public void stopRecording();
     method public void tune(java.lang.String, android.net.Uri);
@@ -23274,6 +23277,7 @@ package android.media.tv {
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
     method public void selectTrack(int, java.lang.String);
+    method public void sendAppPrivateCommand(java.lang.String, android.os.Bundle);
     method public void setCallback(android.media.tv.TvView.TvInputCallback);
     method public void setCaptionEnabled(boolean);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);

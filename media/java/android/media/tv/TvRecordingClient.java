@@ -200,16 +200,14 @@ public class TvRecordingClient {
     }
 
     /**
-     * Calls {@link TvInputService.RecordingSession#appPrivateCommand(String, Bundle)} for the
-     * current recording session.
+     * Sends a private command to the underlying TV input. This can be used to provide
+     * domain-specific features that are only known between certain clients and their TV inputs.
      *
      * @param action The name of the private command to send. This <em>must</em> be a scoped name,
      *            i.e. prefixed with a package name you own, so that different developers will not
      *            create conflicting commands.
      * @param data An optional bundle to send with the command.
-     * @hide
      */
-    @SystemApi
     public void sendAppPrivateCommand(@NonNull String action, Bundle data) {
         if (TextUtils.isEmpty(action)) {
             throw new IllegalArgumentException("action cannot be null or an empty string");
