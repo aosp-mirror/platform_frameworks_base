@@ -105,4 +105,34 @@
         <item>1</item>
         <item />
     </array>
+    <array name="volantis_jpg">
+        <item>false</item>
+        <item>0</item>
+        <item>0</item>
+        <item>true</item>
+        <item>37.423</item>
+        <item>-122.162</item>
+        <item>0.0</item>
+        <item>htc</item>
+        <item>Nexus 9</item>
+        <item>1.2904</item>
+        <item>2016:03:09 17:36:42</item>
+        <item>0.0083</item>
+        <item>64</item>
+        <item>3097/1000</item>
+        <item />
+        <item />
+        <item>2016:03:09</item>
+        <item>37/1,25/1,2291/100</item>
+        <item>N</item>
+        <item>122/1,9/1,4330/100</item>
+        <item>W</item>
+        <item />
+        <item>08:35:34</item>
+        <item>720</item>
+        <item>1280</item>
+        <item>175</item>
+        <item>1</item>
+        <item>0</item>
+    </array>
 </resources>

@@ -1560,8 +1560,6 @@ public class ExifInterface {
                 StringBuilder stringBuilder = new StringBuilder();
                 while (true) {
                     int ch = bytes[index];
-                    if (ch < 0)
-                        throw new EOFException();
                     if (ch == 0)
                         break;
                     if (ch >= 32)
