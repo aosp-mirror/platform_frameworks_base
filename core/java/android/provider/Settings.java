@@ -7786,6 +7786,31 @@ public final class Settings {
         public static final String ALARM_MANAGER_CONSTANTS = "alarm_manager_constants";
 
         /**
+         * ShortcutManager specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "reset_interval_sec=86400,max_daily_updates=5"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * reset_interval_sec              (long)
+         * max_daily_updates               (int)
+         * max_icon_dimension_dp           (int, DP)
+         * max_icon_dimension_dp_lowram    (int, DP)
+         * max_shortcuts                   (int)
+         * icon_quality                    (int, 0-100)
+         * icon_format                     (String)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.pm.ShortcutService.ConfigConstants
+         */
+        public static final String SHORTCUT_MANAGER_CONSTANTS = "shortcut_manager_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */

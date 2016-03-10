@@ -27,6 +27,7 @@ import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import com.android.frameworks.servicestests.R;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 
 import libcore.io.IoUtils;
@@ -114,11 +116,20 @@ public class ShortcutManagerTest extends AndroidTestCase {
         }
 
         @Override
-        void injectLoadConfigurationLocked() {
-            setResetIntervalForTest(INTERVAL);
-            setMaxDynamicShortcutsForTest(MAX_SHORTCUTS);
-            setMaxDailyUpdatesForTest(MAX_DAILY_UPDATES);
-            setMaxIconDimensionForTest(MAX_ICON_DIMENSION);
+        String injectShortcutManagerConstants() {
+            return ConfigConstants.KEY_RESET_INTERVAL_SEC + "=" + (INTERVAL / 1000) + ","
+                    + ConfigConstants.KEY_MAX_SHORTCUTS + "=" + MAX_SHORTCUTS + ","
+                    + ConfigConstants.KEY_MAX_DAILY_UPDATES + "=" + MAX_DAILY_UPDATES + ","
+                    + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP + "=" + MAX_ICON_DIMENSION + ","
+                    + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM + "="
+                    + MAX_ICON_DIMENSION_LOWRAM + ","
+                    + ConfigConstants.KEY_ICON_FORMAT + "=PNG,"
+                    + ConfigConstants.KEY_ICON_QUALITY + "=100";
+        }
+
+        @Override
+        int injectDipToPixel(int dip) {
+            return dip;
         }
 
         @Override
@@ -150,6 +161,11 @@ public class ShortcutManagerTest extends AndroidTestCase {
         @Override
         void injectValidateIconResPackage(ShortcutInfo shortcut, Icon icon) {
             // Can't check
+        }
+
+        @Override
+        boolean injectIsLowRamDevice() {
+            return mInjectdIsLowRamDevice;
         }
     }
 
@@ -186,6 +202,8 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
     private long mInjectedCurrentTimeLillis;
 
+    private boolean mInjectdIsLowRamDevice;
+
     private int mInjectedCallingUid;
     private String mInjectedClientPackage;
 
@@ -215,6 +233,8 @@ public class ShortcutManagerTest extends AndroidTestCase {
     private static final int MAX_DAILY_UPDATES = 3;
 
     private static final int MAX_ICON_DIMENSION = 128;
+
+    private static final int MAX_ICON_DIMENSION_LOWRAM = 32;
 
     @Override
     protected void setUp() throws Exception {
@@ -674,6 +694,44 @@ public class ShortcutManagerTest extends AndroidTestCase {
      */
     public void testLoadFromBrokenFile() {
         // TODO Add various broken cases.
+    }
+
+    public void testLoadConfig() {
+        mService.updateConfigurationLocked(
+                ConfigConstants.KEY_RESET_INTERVAL_SEC + "=123,"
+                        + ConfigConstants.KEY_MAX_SHORTCUTS + "=4,"
+                        + ConfigConstants.KEY_MAX_DAILY_UPDATES + "=5,"
+                        + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP + "=100,"
+                        + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM + "=50,"
+                        + ConfigConstants.KEY_ICON_FORMAT + "=WEBP,"
+                        + ConfigConstants.KEY_ICON_QUALITY + "=75");
+        assertEquals(123000, mService.getResetIntervalForTest());
+        assertEquals(4, mService.getMaxDynamicShortcutsForTest());
+        assertEquals(5, mService.getMaxDailyUpdatesForTest());
+        assertEquals(100, mService.getMaxIconDimensionForTest());
+        assertEquals(CompressFormat.WEBP, mService.getIconPersistFormatForTest());
+        assertEquals(75, mService.getIconPersistQualityForTest());
+
+        mInjectdIsLowRamDevice = true;
+        mService.updateConfigurationLocked(
+                ConfigConstants.KEY_MAX_ICON_DIMENSION_DP + "=100,"
+                        + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM + "=50,"
+                        + ConfigConstants.KEY_ICON_FORMAT + "=JPEG");
+        assertEquals(ShortcutService.DEFAULT_RESET_INTERVAL_SEC * 1000,
+                mService.getResetIntervalForTest());
+
+        assertEquals(ShortcutService.DEFAULT_MAX_SHORTCUTS_PER_APP,
+                mService.getMaxDynamicShortcutsForTest());
+
+        assertEquals(ShortcutService.DEFAULT_MAX_DAILY_UPDATES,
+                mService.getMaxDailyUpdatesForTest());
+
+        assertEquals(50, mService.getMaxIconDimensionForTest());
+
+        assertEquals(CompressFormat.JPEG, mService.getIconPersistFormatForTest());
+
+        assertEquals(ShortcutService.DEFAULT_ICON_PERSIST_QUALITY,
+                mService.getIconPersistQualityForTest());
     }
 
     // === Test for app side APIs ===
