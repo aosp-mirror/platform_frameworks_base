@@ -61,14 +61,7 @@ std::vector<std::string> listFiles(const StringPiece& root);
 /*
  * Appends a path to `base`, separated by the directory separator.
  */
-void appendPath(std::string* base, const StringPiece& part);
-
-/*
- * Appends a series of paths to `base`, separated by the
- * system directory separator.
- */
-template <typename... Ts >
-void appendPath(std::string* base, const StringPiece& part, const Ts&... parts);
+void appendPath(std::string* base, StringPiece part);
 
 /*
  * Makes all the directories in `path`. The last element in the path
@@ -138,20 +131,6 @@ private:
     IDiagnostics* mDiag;
     std::vector<std::string> mPatternTokens;
 };
-
-inline void appendPath(std::string* base, const StringPiece& part) {
-    assert(base);
-    *base += sDirSep;
-    base->append(part.data(), part.size());
-}
-
-template <typename... Ts >
-void appendPath(std::string* base, const StringPiece& part, const Ts&... parts) {
-    assert(base);
-    *base += sDirSep;
-    base->append(part.data(), part.size());
-    appendPath(base, parts...);
-}
 
 } // namespace file
 } // namespace aapt
