@@ -105,7 +105,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 if (mSelectedUser != null && mSelectedUser.getIdentifier() != mCurrentUserId) {
                     // When selected user is different from the current user, show the selected
                     // user's static wallpaper.
-                    mWallpaperManager.forgetLoadedWallpaper();
                     mCache = mWallpaperManager.getBitmapAsUser(mSelectedUser.getIdentifier());
                 } else {
                     // When there is no selected user, or it's same as the current user, show the
