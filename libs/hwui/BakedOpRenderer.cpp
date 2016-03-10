@@ -324,7 +324,7 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
     }
 }
 
-void BakedOpRenderer::renderGlop(const Rect* dirtyBounds, const ClipBase* clip,
+void BakedOpRenderer::renderGlopImpl(const Rect* dirtyBounds, const ClipBase* clip,
         const Glop& glop) {
     prepareRender(dirtyBounds, clip);
     mRenderState.render(glop, mRenderTarget.orthoMatrix);
