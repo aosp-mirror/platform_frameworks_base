@@ -1,0 +1,39 @@
+<html>
+<body>
+
+The android.os.health package contains a set of classes to provide data
+to track the system resources of applications.
+<p>
+Applications running in the background are responsible for a significant amount 
+of battery usage on a typical android device. There are several things that 
+applications can do in order to reduce their impact. For example, by using 
+{@link android.app.job.JobScheduler JobScheduler}, an application does not need 
+to independently monitor whether the network is available, whether the device is 
+plugged in, etc.  In addition to being simpler to use, the application's 
+services are only started when the required conditions have been met.  But even 
+when using the appropriate helper APIs, applications still can reduce their 
+footprint. This package provides more insight into what is going on behind the 
+scenes when an application is running.
+<p>
+Application data is tracked by which user id (uid) is using particular 
+resources. A snapshot of an application's measurements can be taken with the
+{@link android.os.health.SystemHealthManager#takeMyUidSnapshot() SystemHealth.takeMyUidSnapshot()} 
+method. The {@link android.os.health.HealthStats} object returned contains the 
+statistics.
+<p>
+<b>HealthStats</b><br>
+In order to be returned efficiently, the {@link android.os.health.HealthStats} 
+class uses a set of int keys to identify the data returned. The
+{@link android.os.health.UidHealthStats}, {@link android.os.health.PidHealthStats},
+{@link android.os.health.PackageHealthStats} , {@link android.os.health.ProcessHealthStats},
+and {@link android.os.health.ServiceHealthStats} classes provide those constants.
+Each {@link android.os.health.HealthStats} object will be associated with
+exactly one of those classes. The object returned from
+{@link android.os.health.SystemHealthManager#takeMyUidSnapshot() SystemHealth.takeMyUidSnapshot()}
+will be using the {@link android.os.health.UidHealthStats} keys, as it contains all
+of the data available for that uid.
+
+
+</body>
+</html>
+

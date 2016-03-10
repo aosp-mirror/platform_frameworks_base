@@ -465,6 +465,7 @@ public abstract class BatteryStats implements Parcelable {
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);
+        public abstract Timer getProcessStateTimer(int state);
 
         public abstract Timer getVibratorOnTimer();
 

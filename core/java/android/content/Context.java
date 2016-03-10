@@ -3585,6 +3585,15 @@ public abstract class Context {
     public static final String SHORTCUT_SERVICE = "shortcut";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.health.SystemHealthManager} for accessing system health (battery, power,
+     * memory, etc) metrics.
+     *
+     * @see #getSystemService
+     */
+    public static final String SYSTEM_HEALTH_SERVICE = "systemhealth";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

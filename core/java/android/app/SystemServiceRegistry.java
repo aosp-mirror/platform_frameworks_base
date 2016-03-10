@@ -103,6 +103,7 @@ import android.os.SystemVibrator;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
@@ -747,7 +748,6 @@ final class SystemServiceRegistry {
             @Override
             public SoundTriggerManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE);
-                Log.i(TAG, "Creating new instance of SoundTriggerManager object.");
                 return new SoundTriggerManager(ctx, ISoundTriggerService.Stub.asInterface(b));
             }});
 
@@ -757,6 +757,13 @@ final class SystemServiceRegistry {
             public ShortcutManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.SHORTCUT_SERVICE);
                 return new ShortcutManager(ctx, IShortcutService.Stub.asInterface(b));
+            }});
+
+        registerService(Context.SYSTEM_HEALTH_SERVICE, SystemHealthManager.class,
+                new CachedServiceFetcher<SystemHealthManager>() {
+            @Override
+            public SystemHealthManager createService(ContextImpl ctx) {
+                return new SystemHealthManager();
             }});
     }
 

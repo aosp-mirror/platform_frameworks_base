@@ -5300,6 +5300,12 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public Timer getProcessStateTimer(int state) {
+            if (state < 0 || state >= NUM_PROCESS_STATE) return null;
+            return mProcessStateTimer[state];
+        }
+
+        @Override
         public Timer getVibratorOnTimer() {
             return mVibratorOnTimer;
         }
