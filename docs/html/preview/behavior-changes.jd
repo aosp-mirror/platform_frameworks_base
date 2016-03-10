@@ -25,7 +25,6 @@ page.image=images/cards/card-n-changes_2x.png
       <li><a href="#vision-settings">Vision Settings in Setup Wizard</a></li>
     </ol>
   </li>
-  <li><a href="#open-jdk">Platform Migration toward OpenJDK 8</a></li>
   <li><a href="#ndk">NDK Apps Linking to Platform Libraries</a></li>
   <li><a href="#afw">Android for Work</a></li>
 </ol>
@@ -332,55 +331,6 @@ page.image=images/cards/card-n-changes_2x.png
   settings enabled. You can find the settings under <strong>Settings &gt;
   Accessibility</strong>.
 </p>
-
-
-<h2 id="open-jdk">Platform Migration toward OpenJDK 8</h2>
-
-<p>
-  Android N moves Android’s Java language libraries to an OpenJDK-based
-  approach, creating a common code base for developers to build apps and
-  services. If your app depends on a private implementation of Java or
-  unspecified behavior, you should be aware of these known issues:
-</p>
-
-<ul>
-  <li>The {@code ArrayList} private field array is removed.
-    <p>
-      If your app, or a library it used, was dependent on a private field of
-      the <code>ArrayList</code> class, you may encounter an exception such as:
-    </p>
-
-<pre class="no-pretty-print">
-java.lang.NoSuchFieldException: No field array in class Ljava/util/ArrayList;
-</pre>
-  </li>
-
-  <li>Calling a {@code Comparator} implementation with equal elements is
-  possible.
-    <p>
-      You can now call implementations of Comparator to compare an element to
-      itself. However, doing so may cause problems if the Comparator expects to
-      be called only with unique arguments.
-    </p>
-  </li>
-
-  <li>Crypto security provider has been removed.
-    <p>
-      You should only call to the Java Cryptography Extension (JCE) APIs with a
-      provider listed if the provider is included in the code of the APK.
-      Otherwise, your app needs to be able to handle the provider’s absence.
-    </p>
-
-    <p>
-      The reason apps use this provider is to take advantage of its
-      <code>SecureRandom</code> implementation. If your app was relying on <code>setSeed()</code> to
-      derive keys from strings, you must either switch to using <code>SecretKeySpec</code>
-      to load raw key bytes directly, or use a real key derivation function
-      (KDF).
-    </p>
-  </li>
-</ul>
-
 
 <h2 id="ndk">NDK Apps Linking to Platform Libraries</h2>
 
