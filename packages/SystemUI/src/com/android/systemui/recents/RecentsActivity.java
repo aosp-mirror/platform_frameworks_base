@@ -431,13 +431,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         mIgnoreAltTabRelease = false;
         mIterateTrigger.stopDozing();
-
-        // Workaround for b/22542869, if the RecentsActivity is started again, but without going
-        // through SystemUI, we need to reset the config launch flags to ensure that we do not
-        // wait on the system to send a signal that was never queued.
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        launchState.reset();
     }
 
     @Override
@@ -453,6 +446,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mIsVisible = false;
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
+
+        // Workaround for b/22542869, if the RecentsActivity is started again, but without going
+        // through SystemUI, we need to reset the config launch flags to ensure that we do not
+        // wait on the system to send a signal that was never queued.
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
+        launchState.reset();
     }
 
     @Override

@@ -99,6 +99,9 @@
     <!-- The top padding for the task stack. -->
     <dimen name="recents_stack_top_padding">40dp</dimen>
 
+    <!-- The size of the initial peek area at the bottom of the stack (above the nav bar). -->
+    <dimen name="recents_initial_bottom_peek_size">100dp</dimen>
+
     <!-- The side padding for the task stack. -->
     <dimen name="recents_stack_left_right_padding">64dp</dimen>
 </resources>
