@@ -651,8 +651,11 @@ public class RestrictedLockUtils {
             final int disabledColor = context.getColor(R.color.disabled_text_color);
             sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            final ImageSpan image = new RestrictedLockImageSpan(context);
-            sb.append(" ", image, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            textView.setCompoundDrawables(null, null, getRestrictedPadlock(context), null);
+            textView.setCompoundDrawablePadding(context.getResources().getDimensionPixelSize(
+                    R.dimen.restricted_icon_padding));
+        } else {
+            textView.setCompoundDrawables(null, null, null, null);
         }
         textView.setText(sb);
     }
