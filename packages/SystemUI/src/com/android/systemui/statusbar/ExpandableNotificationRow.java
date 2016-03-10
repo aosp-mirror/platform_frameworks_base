@@ -1349,7 +1349,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         float y = event.getY();
         NotificationHeaderView header = getVisibleNotificationHeader();
         if (header != null) {
-            return header.isInTouchRect(x, y);
+            return header.isInTouchRect(x - getTranslation(), y);
         }
         return super.disallowSingleClick(event);
     }
