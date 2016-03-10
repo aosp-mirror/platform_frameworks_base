@@ -95,3 +95,14 @@ $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 
 build-one-font-module :=
 font_src_files :=
+
+
+# Run sanity tests on fonts on checkbuild
+checkbuild: fontchain_lint
+
+FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
+
+.PHONY: fontchain_lint
+fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml
+	PYTHONPATH=$$PYTHONPATH:external/fonttools/Lib \
+	python $(FONTCHAIN_LINTER) $(TARGET_OUT)
