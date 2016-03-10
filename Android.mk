@@ -874,7 +874,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.preview.version 1 \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
 		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
-		-hdf sdk.preview 1
+		-hdf sdk.preview 2
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
