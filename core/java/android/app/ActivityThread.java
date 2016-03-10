@@ -1793,24 +1793,9 @@ public final class ActivityThread {
      * Resources if one has already been created.
      */
     Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
-            String[] libDirs, int displayId, Configuration overrideConfiguration,
-            LoadedApk pkgInfo) {
-        return mResourcesManager.getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
-                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo(),
-                pkgInfo.getClassLoader());
-    }
-
-    /**
-     * Creates a new top level resources for the given package. Will always create a new
-     * Resources, regardless if one has already been created.
-     */
-    Resources getNewTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
-            String[] libDirs, int displayId, Configuration overrideConfiguration,
-            LoadedApk pkgInfo) {
-        mResourcesManager.removeTopLevelResources(
-                resDir, displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo());
-        return getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
-                displayId, overrideConfiguration, pkgInfo);
+            String[] libDirs, int displayId, LoadedApk pkgInfo) {
+        return mResourcesManager.getResources(null, resDir, splitResDirs, overlayDirs, libDirs,
+                displayId, null, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader());
     }
 
     final Handler getHandler() {
@@ -2624,7 +2609,7 @@ public final class ActivityThread {
         }
 
         ContextImpl appContext = ContextImpl.createActivityContext(
-                this, r.packageInfo, displayId, r.overrideConfig);
+                this, r.packageInfo, r.token, displayId, r.overrideConfig);
         appContext.setOuterContext(activity);
         Context baseContext = appContext;
 
@@ -3481,14 +3466,9 @@ public final class ActivityThread {
             if (!r.activity.mFinished && willBeVisible
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
-                    r.tmpConfig.setTo(r.newConfig);
-                    if (r.overrideConfig != null) {
-                        r.tmpConfig.updateFrom(r.overrideConfig);
-                    }
+                    performConfigurationChangedForActivity(r, r.newConfig, REPORT_TO_ACTIVITY);
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Resuming activity "
-                            + r.activityInfo.name + " with newConfig " + r.tmpConfig);
-                    performConfigurationChanged(r.activity, r.tmpConfig, REPORT_TO_ACTIVITY);
-                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
+                            + r.activityInfo.name + " with newConfig " + r.activity.mCurrentConfig);
                     r.newConfig = null;
                 }
                 if (localLOGV) Slog.v(TAG, "Resuming " + r + " with isForward="
@@ -3833,14 +3813,10 @@ public final class ActivityThread {
                     }
                 }
                 if (r.newConfig != null) {
-                    r.tmpConfig.setTo(r.newConfig);
-                    if (r.overrideConfig != null) {
-                        r.tmpConfig.updateFrom(r.overrideConfig);
-                    }
+                    performConfigurationChangedForActivity(r, r.newConfig, REPORT_TO_ACTIVITY);
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
-                            + r.activityInfo.name + " with new config " + r.tmpConfig);
-                    performConfigurationChanged(r.activity, r.tmpConfig, REPORT_TO_ACTIVITY);
-                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
+                            + r.activityInfo.name + " with new config "
+                            + r.activity.mCurrentConfig);
                     r.newConfig = null;
                 }
             } else {
@@ -4545,8 +4521,44 @@ public final class ActivityThread {
         return callbacks;
     }
 
-    private static void performConfigurationChanged(ComponentCallbacks2 cb, Configuration config,
-            boolean reportToActivity) {
+    /**
+     * Updates the configuration for an Activity. The ActivityClientRecord's
+     * {@link ActivityClientRecord#overrideConfig} is used to compute the final Configuration for
+     * that Activity. {@link ActivityClientRecord#tmpConfig} is used as a temporary for delivering
+     * the updated Configuration.
+     * @param r ActivityClientRecord representing the Activity.
+     * @param newBaseConfig The new configuration to use. This may be augmented with
+     *                      {@link ActivityClientRecord#overrideConfig}.
+     * @param reportToActivity true if the change should be reported to the Activity's callback.
+     */
+    private void performConfigurationChangedForActivity(ActivityClientRecord r,
+                                                        Configuration newBaseConfig,
+                                                        boolean reportToActivity) {
+        r.tmpConfig.setTo(newBaseConfig);
+        if (r.overrideConfig != null) {
+            r.tmpConfig.updateFrom(r.overrideConfig);
+        }
+        performConfigurationChanged(r.activity, r.token, r.tmpConfig, r.overrideConfig,
+                reportToActivity);
+        freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
+    }
+
+    /**
+     * Decides whether to update an Activity's configuration and whether to tell the
+     * Activity/Component about it.
+     * @param cb The component callback to notify of configuration change.
+     * @param activityToken The Activity binder token for which this configuration change happened.
+     *                      If the change is global, this is null.
+     * @param newConfig The new configuration.
+     * @param overrideConfig The override config that differentiates the Activity's configuration
+     *                       from the base global configuration.
+     * @param reportToActivity Notify the Activity of the change.
+     */
+    private void performConfigurationChanged(ComponentCallbacks2 cb,
+                                             IBinder activityToken,
+                                             Configuration newConfig,
+                                             Configuration overrideConfig,
+                                             boolean reportToActivity) {
         // Only for Activity objects, check that they actually call up to their
         // superclass implementation.  ComponentCallbacks2 is an interface, so
         // we check the runtime type and act accordingly.
@@ -4563,7 +4575,7 @@ public final class ActivityThread {
             // If the new config is the same as the config this Activity
             // is already running with then don't bother calling
             // onConfigurationChanged
-            int diff = activity.mCurrentConfig.diff(config);
+            int diff = activity.mCurrentConfig.diff(newConfig);
             if (diff != 0) {
                 // If this activity doesn't handle any of the config changes then don't bother
                 // calling onConfigurationChanged as we're going to destroy it.
@@ -4578,21 +4590,31 @@ public final class ActivityThread {
             }
         }
 
-        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Config callback " + cb
-                + ": shouldChangeConfig=" + shouldChangeConfig);
+        if (DEBUG_CONFIGURATION) {
+            Slog.v(TAG, "Config callback " + cb + ": shouldChangeConfig=" + shouldChangeConfig);
+        }
+
         if (shouldChangeConfig) {
+            if (activityToken != null) {
+                // We only update an Activity's configuration if this is not a global
+                // configuration change. This must also be done before the callback,
+                // or else we violate the contract that the new resources are available
+                // in {@link ComponentCallbacks2#onConfigurationChanged(Configuration)}.
+                mResourcesManager.updateResourcesForActivity(activityToken, overrideConfig);
+            }
+
             if (reportToActivity) {
-                cb.onConfigurationChanged(config);
+                cb.onConfigurationChanged(newConfig);
             }
 
             if (activity != null) {
                 if (reportToActivity && !activity.mCalled) {
                     throw new SuperNotCalledException(
                             "Activity " + activity.getLocalClassName() +
-                        " did not call through to super.onConfigurationChanged()");
+                            " did not call through to super.onConfigurationChanged()");
                 }
                 activity.mConfigChangeFlags = 0;
-                activity.mCurrentConfig = new Configuration(config);
+                activity.mCurrentConfig = new Configuration(newConfig);
             }
         }
     }
@@ -4609,7 +4631,8 @@ public final class ActivityThread {
             mCompatConfiguration = new Configuration();
         }
         mCompatConfiguration.setTo(mConfiguration);
-        if (mResourcesManager.applyCompatConfiguration(displayDensity, mCompatConfiguration)) {
+        if (mResourcesManager.applyCompatConfigurationLocked(displayDensity,
+                mCompatConfiguration)) {
             config = mCompatConfiguration;
         }
         return config;
@@ -4661,7 +4684,8 @@ public final class ActivityThread {
         if (callbacks != null) {
             final int N = callbacks.size();
             for (int i=0; i<N; i++) {
-                performConfigurationChanged(callbacks.get(i), config, REPORT_TO_ACTIVITY);
+                performConfigurationChanged(callbacks.get(i), null, config, null,
+                        REPORT_TO_ACTIVITY);
             }
         }
     }
@@ -4687,15 +4711,8 @@ public final class ActivityThread {
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                 + r.activityInfo.name + ", with callback=" + reportToActivity);
 
-        r.tmpConfig.setTo(mCompatConfiguration);
-        if (data.overrideConfig != null) {
-            r.overrideConfig = data.overrideConfig;
-            r.tmpConfig.updateFrom(data.overrideConfig);
-        }
-        performConfigurationChanged(r.activity, r.tmpConfig, reportToActivity);
-
-        freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(mCompatConfiguration));
-
+        r.overrideConfig = data.overrideConfig;
+        performConfigurationChangedForActivity(r, mCompatConfiguration, reportToActivity);
         mSomeActivitiesChanged = true;
     }
 
@@ -5032,21 +5049,25 @@ public final class ActivityThread {
          */
         TimeZone.setDefault(null);
 
-        /*
-         * Initialize the default locales in this process for the reasons we set the time zone.
-         *
-         * We do this through ResourcesManager, since we need to do locale negotiation.
-         */
-        mResourcesManager.setDefaultLocalesLocked(data.config.getLocales());
+        synchronized (mResourcesManager) {
+            /*
+             * Initialize the default locales in this process for the reasons we set the time zone.
+             *
+             * We do this through ResourcesManager, since we need to do locale negotiation.
+             */
+            mResourcesManager.setDefaultLocalesLocked(data.config.getLocales());
 
-        /*
-         * Update the system configuration since its preloaded and might not
-         * reflect configuration changes. The configuration object passed
-         * in AppBindData can be safely assumed to be up to date
-         */
-        mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
-        mCurDefaultDisplayDpi = data.config.densityDpi;
-        applyCompatConfiguration(mCurDefaultDisplayDpi);
+            /*
+             * Update the system configuration since its preloaded and might not
+             * reflect configuration changes. The configuration object passed
+             * in AppBindData can be safely assumed to be up to date
+             */
+            mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
+            mCurDefaultDisplayDpi = data.config.densityDpi;
+
+            // This calls mResourcesManager so keep it within the synchronized block.
+            applyCompatConfiguration(mCurDefaultDisplayDpi);
+        }
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 

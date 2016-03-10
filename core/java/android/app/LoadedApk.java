@@ -283,9 +283,9 @@ public final class LoadedApk {
         synchronized (this) {
             mClassLoader = createOrUpdateClassLoaderLocked(addedPaths);
             if (mResources != null) {
-                mResources = mActivityThread.getNewTopLevelResources(mResDir, mSplitResDirs,
+                mResources = mActivityThread.getTopLevelResources(mResDir, mSplitResDirs,
                         mOverlayDirs, mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
-                        null /*overrideConfiguration*/, this);
+                        this);
             }
         }
     }
@@ -668,7 +668,7 @@ public final class LoadedApk {
     public Resources getResources(ActivityThread mainThread) {
         if (mResources == null) {
             mResources = mainThread.getTopLevelResources(mResDir, mSplitResDirs, mOverlayDirs,
-                    mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY, null, this);
+                    mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY, this);
         }
         return mResources;
     }

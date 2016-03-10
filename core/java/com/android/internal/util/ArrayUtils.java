@@ -27,6 +27,7 @@ import libcore.util.EmptyArray;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -476,5 +477,49 @@ public class ArrayUtils {
             diff |= a.get(i) != b.get(i);
         }
         return !diff;
+    }
+
+    /**
+     * Removes elements that match the predicate in an efficient way that alters the order of
+     * elements in the collection. This should only be used if order is not important.
+     * @param collection The ArrayList from which to remove elements.
+     * @param predicate The predicate that each element is tested against.
+     * @return the number of elements removed.
+     */
+    public static <T> int unstableRemoveIf(@Nullable ArrayList<T> collection,
+                                           @NonNull java.util.function.Predicate<T> predicate) {
+        if (collection == null) {
+            return 0;
+        }
+
+        final int size = collection.size();
+        int leftIdx = 0;
+        int rightIdx = size - 1;
+        while (leftIdx <= rightIdx) {
+            // Find the next element to remove moving left to right.
+            while (leftIdx < size && !predicate.test(collection.get(leftIdx))) {
+                leftIdx++;
+            }
+
+            // Find the next element to keep moving right to left.
+            while (rightIdx > leftIdx && predicate.test(collection.get(rightIdx))) {
+                rightIdx--;
+            }
+
+            if (leftIdx >= rightIdx) {
+                // Done.
+                break;
+            }
+
+            Collections.swap(collection, leftIdx, rightIdx);
+            leftIdx++;
+            rightIdx--;
+        }
+
+        // leftIdx is now at the end.
+        for (int i = size - 1; i >= leftIdx; i--) {
+            collection.remove(i);
+        }
+        return size - leftIdx;
     }
 }

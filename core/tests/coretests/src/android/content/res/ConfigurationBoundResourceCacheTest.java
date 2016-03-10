@@ -17,19 +17,17 @@
 package android.content.res;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.TypedValue;
 
 import com.android.frameworks.coretests.R;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class ConfigurationBoundResourceCacheTest
         extends ActivityInstrumentationTestCase2<ResourceCacheActivity> {
 
     ConfigurationBoundResourceCache<Float> mCache;
-
-    Method mCalcConfigChanges;
 
     public ConfigurationBoundResourceCacheTest() {
         super(ResourceCacheActivity.class);
@@ -41,33 +39,42 @@ public class ConfigurationBoundResourceCacheTest
         mCache = new ConfigurationBoundResourceCache<>();
     }
 
+    @SmallTest
     public void testGetEmpty() {
-        assertNull(mCache.get(-1, null));
+        final Resources res = getActivity().getResources();
+        assertNull(mCache.getInstance(-1, res, null));
     }
 
+    @SmallTest
     public void testSetGet() {
         mCache.put(1, null, new DummyFloatConstantState(5f));
-        assertEquals(5f, mCache.get(1, null));
-        assertNotSame(5f, mCache.get(1, null));
-        assertEquals(null, mCache.get(1, getActivity().getTheme()));
+        final Resources res = getActivity().getResources();
+        assertEquals(5f, mCache.getInstance(1, res, null));
+        assertNotSame(5f, mCache.getInstance(1, res, null));
+        assertEquals(null, mCache.getInstance(1, res, getActivity().getTheme()));
     }
 
+    @SmallTest
     public void testSetGetThemed() {
         mCache.put(1, getActivity().getTheme(), new DummyFloatConstantState(5f));
-        assertEquals(null, mCache.get(1, null));
-        assertEquals(5f, mCache.get(1, getActivity().getTheme()));
-        assertNotSame(5f, mCache.get(1, getActivity().getTheme()));
+        final Resources res = getActivity().getResources();
+        assertEquals(null, mCache.getInstance(1, res, null));
+        assertEquals(5f, mCache.getInstance(1, res, getActivity().getTheme()));
+        assertNotSame(5f, mCache.getInstance(1, res, getActivity().getTheme()));
     }
 
+    @SmallTest
     public void testMultiThreadPutGet() {
         mCache.put(1, getActivity().getTheme(), new DummyFloatConstantState(5f));
         mCache.put(1, null, new DummyFloatConstantState(10f));
-        assertEquals(10f, mCache.get(1, null));
-        assertNotSame(10f, mCache.get(1, null));
-        assertEquals(5f, mCache.get(1, getActivity().getTheme()));
-        assertNotSame(5f, mCache.get(1, getActivity().getTheme()));
+        final Resources res = getActivity().getResources();
+        assertEquals(10f, mCache.getInstance(1, res, null));
+        assertNotSame(10f, mCache.getInstance(1, res, null));
+        assertEquals(5f, mCache.getInstance(1, res, getActivity().getTheme()));
+        assertNotSame(5f, mCache.getInstance(1, res, getActivity().getTheme()));
     }
 
+    @SmallTest
     public void testVoidConfigChange()
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         TypedValue staticValue = new TypedValue();
@@ -83,11 +90,12 @@ public class ConfigurationBoundResourceCacheTest
                 Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
         int changes = calcConfigChanges(res, newCnf);
-        assertEquals(staticDim, mCache.get(key, getActivity().getTheme()));
+        assertEquals(staticDim, mCache.getInstance(key, res, getActivity().getTheme()));
         mCache.onConfigurationChange(changes);
-        assertEquals(staticDim, mCache.get(key, getActivity().getTheme()));
+        assertEquals(staticDim, mCache.getInstance(key, res, getActivity().getTheme()));
     }
 
+    @SmallTest
     public void testEffectiveConfigChange()
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         TypedValue changingValue = new TypedValue();
@@ -105,11 +113,12 @@ public class ConfigurationBoundResourceCacheTest
                 Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
         int changes = calcConfigChanges(res, newCnf);
-        assertEquals(changingDim, mCache.get(key, getActivity().getTheme()));
+        assertEquals(changingDim, mCache.getInstance(key, res, getActivity().getTheme()));
         mCache.onConfigurationChange(changes);
         assertNull(mCache.get(key, getActivity().getTheme()));
     }
 
+    @SmallTest
     public void testConfigChangeMultipleResources()
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         TypedValue staticValue = new TypedValue();
@@ -130,17 +139,19 @@ public class ConfigurationBoundResourceCacheTest
                 Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
         int changes = calcConfigChanges(res, newCnf);
-        assertEquals(staticDim, mCache.get(R.dimen.resource_cache_test_generic,
+        assertEquals(staticDim, mCache.getInstance(R.dimen.resource_cache_test_generic, res,
                 getActivity().getTheme()));
-        assertEquals(changingDim, mCache.get(R.dimen.resource_cache_test_orientation_dependent,
-                getActivity().getTheme()));
+        assertEquals(changingDim,
+                mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
+                        getActivity().getTheme()));
         mCache.onConfigurationChange(changes);
-        assertEquals(staticDim, mCache.get(R.dimen.resource_cache_test_generic,
+        assertEquals(staticDim, mCache.getInstance(R.dimen.resource_cache_test_generic, res,
                 getActivity().getTheme()));
-        assertNull(mCache.get(R.dimen.resource_cache_test_orientation_dependent,
+        assertNull(mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
                 getActivity().getTheme()));
     }
 
+    @SmallTest
     public void testConfigChangeMultipleThemes()
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         TypedValue[] staticValues = new TypedValue[]{new TypedValue(), new TypedValue()};
@@ -172,31 +183,27 @@ public class ConfigurationBoundResourceCacheTest
         int changes = calcConfigChanges(res, newCnf);
         for (int i = 0; i < 2; i++) {
             final Resources.Theme theme = i == 0 ? getActivity().getTheme() : null;
-            assertEquals(staticDim, mCache.get(R.dimen.resource_cache_test_generic, theme));
+            assertEquals(staticDim,
+                    mCache.getInstance(R.dimen.resource_cache_test_generic, res, theme));
             assertEquals(changingDim,
-                    mCache.get(R.dimen.resource_cache_test_orientation_dependent, theme));
+                    mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
+                            theme));
         }
         mCache.onConfigurationChange(changes);
         for (int i = 0; i < 2; i++) {
             final Resources.Theme theme = i == 0 ? getActivity().getTheme() : null;
-            assertEquals(staticDim, mCache.get(R.dimen.resource_cache_test_generic, theme));
-            assertNull(mCache.get(R.dimen.resource_cache_test_orientation_dependent, theme));
+            assertEquals(staticDim,
+                    mCache.getInstance(R.dimen.resource_cache_test_generic, res, theme));
+            assertNull(mCache.getInstance(R.dimen.resource_cache_test_orientation_dependent, res,
+                    theme));
         }
     }
 
-    private int calcConfigChanges(Resources resources, Configuration configuration)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (mCalcConfigChanges == null) {
-            mCalcConfigChanges = Resources.class.getDeclaredMethod("calcConfigChanges",
-                    Configuration.class);
-            mCalcConfigChanges.setAccessible(true);
-        }
-        return (Integer) mCalcConfigChanges.invoke(resources, configuration);
-
+    private static int calcConfigChanges(Resources resources, Configuration configuration) {
+        return resources.calcConfigChanges(configuration);
     }
 
-    static class DummyFloatConstantState extends
-            ConstantState<Float> {
+    static class DummyFloatConstantState extends ConstantState<Float> {
 
         final Float mObj;
 
