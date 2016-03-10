@@ -24,8 +24,8 @@
 namespace android {
 namespace uirenderer {
 
-
-static Rect sUnreasonablyLargeBounds(-10000, -10000, 10000, 10000);
+#define MIL_PIX 1000000
+static Rect sUnreasonablyLargeBounds(-MIL_PIX, -MIL_PIX, MIL_PIX, MIL_PIX);
 
 static const Rect& getConservativeOpBounds(const ClipBase* clip) {
     // if op is clipped, that rect can be used, but otherwise just use a conservatively large rect
@@ -595,7 +595,7 @@ void RecordingCanvas::callDrawGLFunction(Functor* functor) {
     mDisplayList->functors.push_back(functor);
     auto clip = getRecordedClip();
     addOp(alloc().create_trivial<FunctorOp>(
-            getConservativeOpBounds(clip), // TODO: explicitly define bounds
+            getConservativeOpBounds(clip),
             *(mState.currentSnapshot()->transform),
             clip,
             functor));
