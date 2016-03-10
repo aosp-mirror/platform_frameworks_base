@@ -51753,25 +51753,6 @@ package java.lang.annotation {
 
 }
 
-package java.lang.invoke {
-
-  public final class SerializedLambda implements java.io.Serializable {
-    ctor public SerializedLambda(java.lang.Class<?>, java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object[]);
-    method public java.lang.Object getCapturedArg(int);
-    method public int getCapturedArgCount();
-    method public java.lang.String getCapturingClass();
-    method public java.lang.String getFunctionalInterfaceClass();
-    method public java.lang.String getFunctionalInterfaceMethodName();
-    method public java.lang.String getFunctionalInterfaceMethodSignature();
-    method public java.lang.String getImplClass();
-    method public int getImplMethodKind();
-    method public java.lang.String getImplMethodName();
-    method public java.lang.String getImplMethodSignature();
-    method public final java.lang.String getInstantiatedMethodType();
-  }
-
-}
-
 package java.lang.ref {
 
   public class PhantomReference extends java.lang.ref.Reference {
@@ -65732,3 +65713,4 @@ package org.xmlpull.v1.sax2 {
   }
 
 }
+
