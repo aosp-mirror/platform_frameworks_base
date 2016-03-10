@@ -46,7 +46,7 @@ namespace string {
 
 namespace integer {
     enum {
-        number1     = 0x7f040000,   // default, sv
+        number1     = 0x7f040000,   // default, sv, vs
         number2     = 0x7f040001,   // default
 
         test3       = 0x7f090000,   // default (in feature)

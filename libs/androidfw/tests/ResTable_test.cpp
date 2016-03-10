@@ -282,4 +282,46 @@ TEST(ResTableTest, U16StringToInt) {
     testU16StringToInt(u"0x1ffffffff", 0U, false, true);
 }
 
+TEST(ResTableTest, ShareButDontModifyResTable) {
+    ResTable sharedTable;
+    ASSERT_EQ(NO_ERROR, sharedTable.add(basic_arsc, basic_arsc_len));
+
+    ResTable_config param;
+    memset(&param, 0, sizeof(param));
+    param.language[0] = 'v';
+    param.language[1] = 's';
+    sharedTable.setParameters(&param);
+
+    // Check that we get the default value for @integer:number1
+    Res_value val;
+    ssize_t block = sharedTable.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG);
+    ASSERT_GE(block, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(600), val.data);
+
+    // Create a new table that shares the entries of the shared table.
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.add(&sharedTable, false));
+
+    // Set a new configuration on the new table.
+    memset(&param, 0, sizeof(param));
+    param.language[0] = 's';
+    param.language[1] = 'v';
+    param.country[0] = 'S';
+    param.country[1] = 'E';
+    table.setParameters(&param);
+
+    // Check that we get a new value in the new table.
+    block = table.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG);
+    ASSERT_GE(block, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(400), val.data);
+
+    // Check that we still get the old value in the shared table.
+    block = sharedTable.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG);
+    ASSERT_GE(block, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(600), val.data);
 }
+
+} // namespace
