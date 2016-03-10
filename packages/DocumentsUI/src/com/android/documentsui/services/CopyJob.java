@@ -299,18 +299,15 @@ class CopyJob extends Job {
             if ((src.flags & Document.FLAG_SUPPORTS_COPY) != 0) {
                 try {
                     if (DocumentsContract.copyDocument(getClient(src), src.derivedUri,
-                            dstDirInfo.derivedUri) == null) {
-                        throw new ResourceException("Provider side copy failed for document %s.",
-                                src.derivedUri);
+                            dstDirInfo.derivedUri) != null) {
+                        return;
                     }
-                } catch (ResourceException e) {
-                    throw e;
                 } catch (RemoteException | RuntimeException e) {
-                    throw new ResourceException(
-                            "Provider side copy failed for document %s due to an exception.",
-                            src.derivedUri, e);
+                    Log.e(TAG, "Provider side copy failed for: " + src.derivedUri
+                            + " due to an exception: " + e);
                 }
-                return;
+                // If optimized copy fails, then fallback to byte-by-byte copy.
+                if (DEBUG) Log.d(TAG, "Fallback to byte-by-byte copy for: " + src.derivedUri);
             }
         }
 
