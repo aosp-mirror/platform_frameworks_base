@@ -249,7 +249,8 @@ system image.</p>
 
 <p>After you back up your device data and download the system image below that
 matches your device, follow the instructions at <a href=
-"https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+"https://developers.google.com/android/nexus/images#instructions"
+>developers.google.com/android/nexus</a>
 to flash the image onto your device.</p>
 
 <p class="note">
@@ -336,7 +337,8 @@ preview system image, you must perform another manual installation.
 <p>
   If you want to uninstall the preview and revert the device to factory
   specifications, go to
-  <a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a>
+  <a href="http://developers.google.com/android/nexus/images"
+  >developers.google.com/android/nexus</a>
   and download the image you want to flash to for your device. Follow the
   instructions on that page to flash the image to your device.
 </p>
