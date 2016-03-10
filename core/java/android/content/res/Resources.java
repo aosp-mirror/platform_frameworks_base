@@ -54,6 +54,7 @@ import android.util.TypedValue;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.XmlUtils;
 
@@ -62,6 +63,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * Class for accessing an application's resources.  This sits on top of the
@@ -111,6 +114,13 @@ public class Resources {
     private TypedValue mTmpValue = new TypedValue();
 
     final ClassLoader mClassLoader;
+
+    /**
+     * WeakReferences to Themes that were constructed from this Resources object.
+     * We keep track of these in case our underlying implementation is changed, in which case
+     * the Themes must also get updated ThemeImpls.
+     */
+    private final ArrayList<WeakReference<Theme>> mThemeRefs = new ArrayList<>();
 
     /**
      * Returns the most appropriate default theme for the specified target SDK version.
@@ -231,10 +241,42 @@ public class Resources {
     }
 
     /**
+     * Set the underlying implementation (containing all the resources and caches)
+     * and updates all Theme references to new implementations as well.
      * @hide
      */
     public void setImpl(ResourcesImpl impl) {
+        if (impl == mResourcesImpl) {
+            return;
+        }
+
         mResourcesImpl = impl;
+
+        // Create new ThemeImpls that are identical to the ones we have.
+        synchronized (mThemeRefs) {
+            final int count = mThemeRefs.size();
+            for (int i = 0; i < count; i++) {
+                WeakReference<Theme> weakThemeRef = mThemeRefs.get(i);
+                Theme theme = weakThemeRef != null ? weakThemeRef.get() : null;
+                if (theme != null) {
+                    theme.setImpl(mResourcesImpl.newThemeImpl(theme.getKey()));
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public ResourcesImpl getImpl() {
+        return mResourcesImpl;
+    }
+
+    /**
+     * @hide
+     */
+    public ClassLoader getClassLoader() {
+        return mClassLoader;
     }
 
     /**
@@ -1683,6 +1725,7 @@ public class Resources {
     public final Theme newTheme() {
         Theme theme = new Theme();
         theme.setImpl(mResourcesImpl.newThemeImpl());
+        mThemeRefs.add(new WeakReference<>(theme));
         return theme;
     }
 
@@ -1785,6 +1828,7 @@ public class Resources {
      * This is just for testing.
      * @hide
      */
+    @VisibleForTesting
     public void setCompatibilityInfo(CompatibilityInfo ci) {
         if (ci != null) {
             mResourcesImpl.updateConfiguration(null, null, ci);
@@ -2066,6 +2110,15 @@ public class Resources {
     XmlResourceParser loadXmlResourceParser(String file, int id, int assetCookie,
                                             String type) throws NotFoundException {
         return mResourcesImpl.loadXmlResourceParser(file, id, assetCookie, type);
+    }
+
+    /**
+     * Called by ConfigurationBoundResourceCacheTest.
+     * @hide
+     */
+    @VisibleForTesting
+    public int calcConfigChanges(Configuration config) {
+        return mResourcesImpl.calcConfigChanges(config);
     }
 
     /**
