@@ -437,8 +437,16 @@ void Matrix4::mapPoint(float& x, float& y) const {
     y = dy * dz;
 }
 
+/**
+ * Set the contents of the rect to be the bounding rect around each of the corners, mapped by the
+ * matrix.
+ *
+ * NOTE: an empty rect to an arbitrary matrix isn't guaranteed to have an empty output, since that's
+ * important for conservative bounds estimation (e.g. rotate45Matrix.mapRect of Rect(0, 10) should
+ * result in non-empty.
+ */
 void Matrix4::mapRect(Rect& r) const {
-    if (isIdentity() || r.isEmpty()) return;
+    if (isIdentity()) return;
 
     if (isSimple()) {
         MUL_ADD_STORE(r.left, data[kScaleX], data[kTranslateX]);
