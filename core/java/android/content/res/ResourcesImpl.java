@@ -713,9 +713,11 @@ public class ResourcesImpl {
         }
 
         if (complexColor != null) {
+            complexColor.setBaseChangingConfigurations(value.changingConfigurations);
+
             if (mPreloading) {
-                if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
-                        "color")) {
+                if (verifyPreloadConfig(complexColor.getChangingConfigurations(),
+                        0, value.resourceId, "color")) {
                     sPreloadedComplexColors.put(key, complexColor.getConstantState());
                 }
             } else {

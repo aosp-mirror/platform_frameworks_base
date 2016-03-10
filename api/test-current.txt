@@ -10126,7 +10126,6 @@ package android.content.res {
     method public static deprecated android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public int describeContents();
-    method public int getChangingConfigurations();
     method public int getColorForState(int[], int);
     method public int getDefaultColor();
     method public boolean isOpaque();
@@ -10138,6 +10137,7 @@ package android.content.res {
 
   public abstract class ComplexColor {
     ctor public ComplexColor();
+    method public int getChangingConfigurations();
     method public abstract int getDefaultColor();
     method public boolean isStateful();
   }

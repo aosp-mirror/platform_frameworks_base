@@ -25,6 +25,8 @@ import android.graphics.Color;
  * {@link android.content.res.ColorStateList} or {@link android.content.res.GradientColor}
  */
 public abstract class ComplexColor {
+    private int mChangingConfigurations;
+
     /**
      * @return {@code true}  if this ComplexColor changes color based on state, {@code false}
      * otherwise.
@@ -52,4 +54,24 @@ public abstract class ComplexColor {
      * @hide only for resource preloading
      */
     public abstract ComplexColor obtainForTheme(Theme t);
+
+    /**
+     * @hide only for resource preloading
+     */
+    final void setBaseChangingConfigurations(int changingConfigurations) {
+        mChangingConfigurations = changingConfigurations;
+    }
+
+    /**
+     * Returns a mask of the configuration parameters for which this color
+     * may change, requiring that it be re-created.
+     *
+     * @return a mask of the changing configuration parameters, as defined by
+     *         {@link android.content.pm.ActivityInfo}
+     *
+     * @see android.content.pm.ActivityInfo
+     */
+    public int getChangingConfigurations() {
+        return mChangingConfigurations;
+    }
 }
