@@ -68,8 +68,8 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
 
     // Tests that the item count is correct.
     public void testHide_ItemCount() {
-        List<String> ids = mModel.getModelIds();
-        mAdapter.hide(ids.get(0), ids.get(1));
+        String[] ids = mModel.getModelIds();
+        mAdapter.hide(ids[0], ids[1]);
         assertEquals(mModel.getItemCount() - 2, mAdapter.getItemCount());
     }
 
