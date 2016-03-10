@@ -4862,10 +4862,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
     private int getEncryptionStatus() {
-        if (!StorageManager.isNonDefaultBlockEncrypted()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
-        } else if (StorageManager.isEncrypted()) {
-            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
+        if (StorageManager.isEncrypted()) {
+            return StorageManager.isNonDefaultBlockEncrypted() ?
+                      DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
+                    : DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
         } else if (StorageManager.isEncryptable()) {
             return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else {
