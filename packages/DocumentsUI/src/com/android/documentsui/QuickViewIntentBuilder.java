@@ -113,8 +113,8 @@ final class QuickViewIntentBuilder {
     }
 
     private int collectViewableUris(ArrayList<Uri> uris) {
-        final List<String> siblingIds = mModel.getModelIds();
-        uris.ensureCapacity(siblingIds.size());
+        final String[] siblingIds = mModel.getModelIds();
+        uris.ensureCapacity(siblingIds.length);
 
         int documentLocation = 0;
         Cursor cursor;
@@ -124,8 +124,8 @@ final class QuickViewIntentBuilder {
         Uri uri;
 
         // Cursor's are not guaranteed to be immutable. Hence, traverse it only once.
-        for (int i = 0; i < siblingIds.size(); i++) {
-            cursor = mModel.getItem(siblingIds.get(i));
+        for (int i = 0; i < siblingIds.length; i++) {
+            cursor = mModel.getItem(siblingIds[i]);
 
             mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
             if (Document.MIME_TYPE_DIR.equals(mimeType)) {

@@ -107,7 +107,7 @@ public class ModelTest extends AndroidTestCase {
 
         assertTrue(model.isEmpty());
         assertEquals(0, model.getItemCount());
-        assertEquals(0, model.getModelIds().size());
+        assertEquals(0, model.getModelIds().length);
     }
 
     // Tests that the item count is correct.
@@ -165,10 +165,10 @@ public class ModelTest extends AndroidTestCase {
 
     // Tests the base case for Model.getItem.
     public void testGetItem() {
-        List<String> ids = model.getModelIds();
-        assertEquals(ITEM_COUNT, ids.size());
+        String[] ids = model.getModelIds();
+        assertEquals(ITEM_COUNT, ids.length);
         for (int i = 0; i < ITEM_COUNT; ++i) {
-            Cursor c = model.getItem(ids.get(i));
+            Cursor c = model.getItem(ids[i]);
             assertEquals(i, c.getPosition());
         }
     }
@@ -292,14 +292,14 @@ public class ModelTest extends AndroidTestCase {
         r.sortOrder = State.SORT_ORDER_LAST_MODIFIED;
         model.update(r);
 
-        List<String> ids = model.getModelIds();
+        String[] ids = model.getModelIds();
 
         // Check that all items were accounted for
-        assertEquals(ITEM_COUNT + DL_COUNT, ids.size());
+        assertEquals(ITEM_COUNT + DL_COUNT, ids.length);
 
         // Check that active downloads are sorted to the top.
         for (int i = 0; i < DL_COUNT; i++) {
-            assertTrue(currentDownloads.contains(ids.get(i)));
+            assertTrue(currentDownloads.contains(ids[i]));
         }
     }
 
@@ -316,11 +316,11 @@ public class ModelTest extends AndroidTestCase {
     }
 
     private Selection positionToSelection(int... positions) {
-        List<String> ids = model.getModelIds();
+        String[] ids = model.getModelIds();
         Selection s = new Selection();
         // Construct a selection of the given positions.
         for (int p: positions) {
-            s.add(ids.get(p));
+            s.add(ids[p]);
         }
         return s;
     }
