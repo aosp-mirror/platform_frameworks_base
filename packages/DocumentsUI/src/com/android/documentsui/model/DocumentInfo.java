@@ -245,10 +245,6 @@ public class DocumentInfo implements Durable, Parcelable {
         return (flags & Document.FLAG_SUPPORTS_RENAME) != 0;
     }
 
-    public boolean isGridTitlesHidden() {
-        return (flags & Document.FLAG_DIR_HIDE_GRID_TITLES) != 0;
-    }
-
     public boolean isArchive() {
         return (flags & Document.FLAG_ARCHIVE) != 0;
     }

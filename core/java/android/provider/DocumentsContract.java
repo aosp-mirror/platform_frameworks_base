@@ -383,18 +383,6 @@ public final class DocumentsContract {
          */
 
         public static final int FLAG_ARCHIVE = 1 << 15;
-        /**
-         * Flag indicating that document titles should be hidden when viewing
-         * this directory in a larger format grid. For example, a directory
-         * containing only images may want the image thumbnails to speak for
-         * themselves. Only valid when {@link #COLUMN_MIME_TYPE} is
-         * {@link #MIME_TYPE_DIR}.
-         *
-         * @see #COLUMN_FLAGS
-         * @see #FLAG_DIR_PREFERS_GRID
-         * @hide
-         */
-        public static final int FLAG_DIR_HIDE_GRID_TITLES = 1 << 16;
     }
 
     /**
