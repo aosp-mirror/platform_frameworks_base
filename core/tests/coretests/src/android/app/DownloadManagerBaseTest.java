@@ -81,8 +81,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected static final int DEFAULT_WAIT_POLL_TIME = 5 * 1000;  // 5 seconds
 
     protected static final int WAIT_FOR_DOWNLOAD_POLL_TIME = 1 * 1000;  // 1 second
-    protected static final int MAX_WAIT_FOR_DOWNLOAD_TIME = 5 * 60 * 1000; // 5 minutes
-    protected static final int MAX_WAIT_FOR_LARGE_DOWNLOAD_TIME = 15 * 60 * 1000; // 15 minutes
+    protected static final int MAX_WAIT_FOR_DOWNLOAD_TIME = 30 * 1000; // 30 seconds
 
     protected static final int DOWNLOAD_TO_SYSTEM_CACHE = 1;
     protected static final int DOWNLOAD_TO_DOWNLOAD_CACHE_DIR = 2;
@@ -970,7 +969,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected void verifyInt(Cursor cursor, String columnName, int expected) {
         int index = cursor.getColumnIndex(columnName);
         int actual = cursor.getInt(index);
-        assertEquals(expected, actual);
+        assertEquals(String.format("Expected = %d : Actual = %d", expected, actual), expected, actual);
     }
 
     /**
