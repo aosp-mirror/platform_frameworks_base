@@ -4073,7 +4073,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public boolean isHandlingAccessibilityEvents() {
-            return !mBoundServices.isEmpty() || !mBoundServices.isEmpty();
+            return !mBoundServices.isEmpty() || !mBindingServices.isEmpty();
         }
 
         public void onSwitchToAnotherUser() {
