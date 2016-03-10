@@ -2070,6 +2070,24 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_SCENE_MODE_FACE_PRIORITY_LOW_LIGHT = 19;
 
+    /**
+     * <p>Scene mode values within the range of
+     * <code>[DEVICE_CUSTOM_START, DEVICE_CUSTOM_END]</code> are reserved for device specific
+     * customized scene modes.</p>
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_DEVICE_CUSTOM_START = 100;
+
+    /**
+     * <p>Scene mode values within the range of
+     * <code>[DEVICE_CUSTOM_START, DEVICE_CUSTOM_END]</code> are reserved for device specific
+     * customized scene modes.</p>
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_DEVICE_CUSTOM_END = 127;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
     //
