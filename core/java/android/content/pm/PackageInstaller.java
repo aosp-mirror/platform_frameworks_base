@@ -1000,8 +1000,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Optionally set the URI where this package was downloaded from. Used for
-         * verification purposes.
+         * Optionally set the URI where this package was downloaded from. This is
+         * informational and may be used as a signal for anti-malware purposes.
          *
          * @see Intent#EXTRA_ORIGINATING_URI
          */
@@ -1010,7 +1010,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets the UID that initiated package installation. Used for verification purposes.
+         * Sets the UID that initiated package installation. This is informational
+         * and may be used as a signal for anti-malware purposes.
          *
          * @see PackageManager#EXTRA_VERIFICATION_INSTALLER_UID
          */
@@ -1019,8 +1020,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Optionally set the URI that referred you to install this package. Used
-         * for verification purposes.
+         * Optionally set the URI that referred you to install this package. This is
+         * informational and may be used as a signal for anti-malware purposes.
          *
          * @see Intent#EXTRA_REFERRER
          */
