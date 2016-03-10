@@ -145,11 +145,6 @@ public class AccessibilityUtils {
         Settings.Secure.putStringForUser(context.getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 enabledServicesBuilder.toString(), userId);
-
-        // Update accessibility enabled.
-        Settings.Secure.putIntForUser(context.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_ENABLED, accessibilityEnabled ? 1 : 0,
-                userId);
     }
 
     private static Set<ComponentName> getInstalledServices(Context context) {
