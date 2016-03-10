@@ -85,7 +85,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
      * Whether to enable dump or not.  Should be only true when debugging to avoid bugs where
      * dump affecting the behavior.
      */
-    private static final boolean ENABLE_DUMP = true; // DO NOT SUBMIT WITH true
+    private static final boolean ENABLE_DUMP = false; // DO NOT SUBMIT WITH true
 
     /** Context used in the client side */
     private final class ClientContext extends MockContext {
@@ -145,7 +145,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
         @Override
         int injectGetPackageUid(String packageName, int userId) {
             Integer uid = mInjectedPackageUidMap.get(packageName);
-            return uid != null ? uid : -1;
+            return UserHandle.getUid(getCallingUserId(), (uid != null ? uid : 0));
         }
 
         @Override
@@ -224,6 +224,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
     private static final String LAUNCHER_2 = "com.android.launcher.2";
     private static final int LAUNCHER_UID_2 = 10012;
 
+    private static final int USER_10 = 10;
+    private static final int USER_11 = 11;
+
     private static final long START_TIME = 1234560000000L;
 
     private static final long INTERVAL = 10000;
@@ -282,14 +285,30 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     /** Replace the current calling package */
-    private void setCaller(String packageName) {
+    private void setCaller(String packageName, int userId) {
         mInjectedClientPackage = packageName;
-        mInjectedCallingUid = Preconditions.checkNotNull(mInjectedPackageUidMap.get(packageName),
-                "Unknown package");
+        mInjectedCallingUid = UserHandle.getUid(userId,
+                Preconditions.checkNotNull(mInjectedPackageUidMap.get(packageName),
+                        "Unknown package"));
+    }
+
+    private void setCaller(String packageName) {
+        setCaller(packageName, UserHandle.USER_SYSTEM);
     }
 
     private String getCallingPackage() {
         return mInjectedClientPackage;
+    }
+
+    private void runWithCaller(String packageName, int userId, Runnable r) {
+        final String previousPackage = mInjectedClientPackage;
+        final int previousUid = mInjectedCallingUid;
+
+        setCaller(packageName, userId);
+
+        r.run();
+
+        setCaller(previousPackage, previousUid);
     }
 
     private int getCallingUserId() {
@@ -565,6 +584,15 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     @NonNull
+    private List<ShortcutInfo> assertAllHaveIcon(
+            @NonNull List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.hasIconFile() || s.hasIconResource());
+        }
+        return actualShortcuts;
+    }
+
+    @NonNull
     private List<ShortcutInfo> assertAllHaveFlags(@NonNull List<ShortcutInfo> actualShortcuts,
             int shortcutFlags) {
         for (ShortcutInfo s : actualShortcuts) {
@@ -633,6 +661,18 @@ public class ShortcutManagerTest extends AndroidTestCase {
         } finally {
             IoUtils.closeQuietly(pfd);
         }
+    }
+
+    private ShortcutInfo getPackageShortcut(String packageName, String shortcutId, int userId) {
+        return mService.getPackageShortcutForTest(packageName, shortcutId, userId);
+    }
+
+    private ShortcutInfo getPackageShortcut(String packageName, String shortcutId) {
+        return getPackageShortcut(packageName, shortcutId, getCallingUserId());
+    }
+
+    private ShortcutInfo getCallerShortcut(String shortcutId) {
+        return getPackageShortcut(getCallingPackage(), shortcutId, getCallingUserId());
     }
 
     /**
@@ -1083,7 +1123,8 @@ public class ShortcutManagerTest extends AndroidTestCase {
                 "res64x64",
                 "none");
 
-        dumpsysOnLogcat();
+        // Re-initialize and load from the files.
+        initService();
 
         // Load from launcher.
         Bitmap bmp;
@@ -1568,35 +1609,87 @@ public class ShortcutManagerTest extends AndroidTestCase {
      */
     public void testSaveAndLoadUser() {
         // First, create some shortcuts and save.
-        final Icon icon1 = Icon.createWithResource(mContext, R.drawable.icon1);
-        final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                mContext.getResources(), R.drawable.icon2));
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            final Icon icon1 = Icon.createWithResource(mContext, R.drawable.black_64x16);
+            final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                    mContext.getResources(), R.drawable.icon2));
 
-        final ShortcutInfo si1 = makeShortcut(
-                "shortcut1",
-                "Title 1",
-                makeComponent(ShortcutActivity.class),
-                icon1,
-                makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
-                        "key1", "val1", "nest", makeBundle("key", 123)),
-                /* weight */ 10);
+            final ShortcutInfo si1 = makeShortcut(
+                    "s1",
+                    "title1-1",
+                    makeComponent(ShortcutActivity.class),
+                    icon1,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                        /* weight */ 10);
 
-        final ShortcutInfo si2 = makeShortcut(
-                "shortcut2",
-                "Title 2",
-                /* activity */ null,
-                icon2,
-                makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
-                /* weight */ 12);
+            final ShortcutInfo si2 = makeShortcut(
+                    "s2",
+                    "title1-2",
+                        /* activity */ null,
+                    icon2,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                        /* weight */ 12);
 
-        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2)));
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2)));
 
-        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
-        assertEquals(2, mManager.getRemainingCallCount());
+            assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
+            final Icon icon1 = Icon.createWithResource(mContext, R.drawable.black_16x64);
+            final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                    mContext.getResources(), R.drawable.icon2));
 
-        Log.i(TAG, "Saved state");
-        dumpsysOnLogcat();
-        dumpUserFile(0);
+            final ShortcutInfo si1 = makeShortcut(
+                    "s1",
+                    "title2-1",
+                    makeComponent(ShortcutActivity.class),
+                    icon1,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                        /* weight */ 10);
+
+            final ShortcutInfo si2 = makeShortcut(
+                    "s2",
+                    "title2-2",
+                        /* activity */ null,
+                    icon2,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                        /* weight */ 12);
+
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2)));
+
+            assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            final Icon icon1 = Icon.createWithResource(mContext, R.drawable.black_64x64);
+            final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                    mContext.getResources(), R.drawable.icon2));
+
+            final ShortcutInfo si1 = makeShortcut(
+                    "s1",
+                    "title10-1-1",
+                    makeComponent(ShortcutActivity.class),
+                    icon1,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                        /* weight */ 10);
+
+            final ShortcutInfo si2 = makeShortcut(
+                    "s2",
+                    "title10-1-2",
+                        /* activity */ null,
+                    icon2,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                        /* weight */ 12);
+
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1, si2)));
+
+            assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
 
         // Restore.
         initService();
@@ -1610,26 +1703,40 @@ public class ShortcutManagerTest extends AndroidTestCase {
         // Now it's loaded.
         assertEquals(1, mService.getShortcutsForTest().size());
 
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            assertShortcutIds(assertAllDynamic(assertAllHaveIntents(assertAllHaveIcon(
+                    mManager.getDynamicShortcuts()))), "s1", "s2");
+            assertEquals(2, mManager.getRemainingCallCount());
+
+            assertEquals("title1-1", getCallerShortcut("s1").getTitle());
+            assertEquals("title1-2", getCallerShortcut("s2").getTitle());
+        });
+        runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
+            assertShortcutIds(assertAllDynamic(assertAllHaveIntents(assertAllHaveIcon(
+                    mManager.getDynamicShortcuts()))), "s1", "s2");
+            assertEquals(2, mManager.getRemainingCallCount());
+
+            assertEquals("title2-1", getCallerShortcut("s1").getTitle());
+            assertEquals("title2-2", getCallerShortcut("s2").getTitle());
+        });
+
         // Start another user
-        mService.onStartUserLocked(10);
+        mService.onStartUserLocked(USER_10);
 
         // Now the size is 2.
         assertEquals(2, mService.getShortcutsForTest().size());
 
-        Log.i(TAG, "Dumping the new instance");
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertShortcutIds(assertAllDynamic(assertAllHaveIntents(assertAllHaveIcon(
+                    mManager.getDynamicShortcuts()))), "s1", "s2");
+            assertEquals(2, mManager.getRemainingCallCount());
 
-        List<ShortcutInfo> loaded = mManager.getDynamicShortcuts();
-
-        Log.i(TAG, "Loaded state");
-        dumpsysOnLogcat();
-
-        assertEquals(2, loaded.size());
-
-        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
-        assertEquals(2, mManager.getRemainingCallCount());
+            assertEquals("title10-1-1", getCallerShortcut("s1").getTitle());
+            assertEquals("title10-1-2", getCallerShortcut("s2").getTitle());
+        });
 
         // Try stopping the user
-        mService.onCleanupUserInner(UserHandle.USER_SYSTEM);
+        mService.onCleanupUserInner(USER_10);
 
         // Now it's unloaded.
         assertEquals(1, mService.getShortcutsForTest().size());
