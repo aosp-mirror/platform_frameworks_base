@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_BAKED_OP_RENDERER_H
-#define ANDROID_HWUI_BAKED_OP_RENDERER_H
+#pragma once
 
 #include "BakedOpState.h"
 #include "Matrix.h"
@@ -41,6 +40,7 @@ struct ClipBase;
  */
 class BakedOpRenderer {
 public:
+    typedef void (*GlopReceiver)(BakedOpRenderer&, const Rect*, const ClipBase*, const Glop&);
     /**
      * Position agnostic shadow lighting info. Used with all shadow ops in scene.
      */
@@ -54,8 +54,10 @@ public:
         uint8_t spotShadowAlpha;
     };
 
-    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque, const LightInfo& lightInfo)
-            : mRenderState(renderState)
+    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque,
+            const LightInfo& lightInfo)
+            : mGlopReceiver(DefaultGlopReceiver)
+            , mRenderState(renderState)
             , mCaches(caches)
             , mOpaque(opaque)
             , mLightInfo(lightInfo) {
@@ -81,7 +83,9 @@ public:
     }
     void renderFunctor(const FunctorOp& op, const BakedOpState& state);
 
-    void renderGlop(const Rect* dirtyBounds, const ClipBase* clip, const Glop& glop);
+    void renderGlop(const Rect* dirtyBounds, const ClipBase* clip, const Glop& glop) {
+        mGlopReceiver(*this, dirtyBounds, clip, glop);
+    }
     bool offscreenRenderTarget() { return mRenderTarget.offscreenBuffer != nullptr; }
     void dirtyRenderTarget(const Rect& dirtyRect);
     bool didDraw() const { return mHasDrawn; }
@@ -95,7 +99,14 @@ public:
         drawRects(ltrb, 4, paint);
     }
     void drawRects(const float* rects, int count, const SkPaint* paint);
+protected:
+    GlopReceiver mGlopReceiver;
 private:
+    static void DefaultGlopReceiver(BakedOpRenderer& renderer, const Rect* dirtyBounds,
+            const ClipBase* clip, const Glop& glop) {
+        renderer.renderGlopImpl(dirtyBounds, clip, glop);
+    }
+    void renderGlopImpl(const Rect* dirtyBounds, const ClipBase* clip, const Glop& glop);
     void setViewport(uint32_t width, uint32_t height);
     void clearColorBuffer(const Rect& clearRect);
     void prepareRender(const Rect* dirtyBounds, const ClipBase* clip);
@@ -136,5 +147,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_BAKED_OP_RENDERER_H
