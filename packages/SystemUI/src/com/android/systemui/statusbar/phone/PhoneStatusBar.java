@@ -1946,6 +1946,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
+                    mBackdropBack.setImageDrawable(null);
                 } else {
                     mBackdrop.animate()
                             // Never let the alpha become zero - otherwise the RenderNode
@@ -1961,7 +1962,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 public void run() {
                                     mBackdrop.setVisibility(View.GONE);
                                     mBackdropFront.animate().cancel();
-                                    mBackdropBack.animate().cancel();
+                                    mBackdropBack.setImageDrawable(null);
                                     mHandler.post(mHideBackdropFront);
                                 }
                             });
