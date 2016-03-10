@@ -43,6 +43,7 @@ public abstract class ExpandableView extends FrameLayout {
     private boolean mWillBeGone;
     private int mMinClipTopAmount = 0;
     private boolean mClipToActualHeight = true;
+    private boolean mChangingPosition = false;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -405,6 +406,14 @@ public abstract class ExpandableView extends FrameLayout {
 
     public int getOutlineTranslation() {
         return 0;
+    }
+
+    public void setChangingPosition(boolean changingPosition) {
+        mChangingPosition = changingPosition;
+    }
+
+    public boolean isChangingPosition() {
+        return mChangingPosition;
     }
 
     /**
