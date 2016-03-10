@@ -48,6 +48,13 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
+ * The implementation of Resource access. This class contains the AssetManager and all caches
+ * associated with it.
+ *
+ * {@link Resources} is just a thing wrapper around this class. When a configuration change
+ * occurs, clients can retain the same {@link Resources} reference because the underlying
+ * {@link ResourcesImpl} object will be updated or re-created.
+ *
  * @hide
  */
 public class ResourcesImpl {
@@ -126,14 +133,14 @@ public class ResourcesImpl {
      * @param compatInfo this resource's compatibility info. Must not be null.
      */
     public ResourcesImpl(AssetManager assets, DisplayMetrics metrics, Configuration config,
-                         CompatibilityInfo compatInfo) {
+            CompatibilityInfo compatInfo) {
         mAssets = assets;
         mMetrics.setToDefaults();
         updateConfiguration(config, metrics, compatInfo);
         mAssets.ensureStringBlocks();
     }
 
-    AssetManager getAssets() {
+    public AssetManager getAssets() {
         return mAssets;
     }
 
@@ -174,7 +181,7 @@ public class ResourcesImpl {
     }
 
     void getValueForDensity(@AnyRes int id, int density, TypedValue outValue,
-                            boolean resolveRefs) throws NotFoundException {
+            boolean resolveRefs) throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, density, outValue, resolveRefs);
         if (found) {
             return;
@@ -298,8 +305,8 @@ public class ResourcesImpl {
         return mStateListAnimatorCache;
     }
 
-    void updateConfiguration(Configuration config, DisplayMetrics metrics,
-                             CompatibilityInfo compat) {
+    public void updateConfiguration(Configuration config, DisplayMetrics metrics,
+                                    CompatibilityInfo compat) {
         synchronized (mAccessLock) {
             if (false) {
                 Slog.i(TAG, "**** Updating config of " + this + ": old config is "
@@ -388,9 +395,9 @@ public class ResourcesImpl {
     }
 
     /**
-     * Called by ConfigurationBoundResourceCacheTest via reflection.
+     * Called by ConfigurationBoundResourceCacheTest.
      */
-    private int calcConfigChanges(Configuration config) {
+    public int calcConfigChanges(Configuration config) {
         int configChanges = 0xfffffff;
         if (config != null) {
             mTmpConfig.setTo(config);
@@ -460,7 +467,7 @@ public class ResourcesImpl {
 
     @Nullable
     Drawable loadDrawable(Resources wrapper, TypedValue value, int id, Resources.Theme theme,
-                          boolean useCache) throws NotFoundException {
+            boolean useCache) throws NotFoundException {
         try {
             if (TRACE_FOR_PRELOAD) {
                 // Log only framework resources
@@ -553,7 +560,7 @@ public class ResourcesImpl {
     }
 
     private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCache caches,
-                               Resources.Theme theme, boolean usesTheme, long key, Drawable dr) {
+            Resources.Theme theme, boolean usesTheme, long key, Drawable dr) {
         final Drawable.ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
@@ -587,7 +594,7 @@ public class ResourcesImpl {
     }
 
     private boolean verifyPreloadConfig(int changingConfigurations, int allowVarying,
-                                        int resourceId, String name) {
+            int resourceId, String name) {
         // We allow preloading of resources even if they vary by font scale (which
         // doesn't impact resource selection) or density (which we handle specially by
         // simply turning off all preloading), as well as any other configs specified
@@ -625,7 +632,7 @@ public class ResourcesImpl {
      * Loads a drawable from XML or resources stream.
      */
     private Drawable loadDrawableForCookie(Resources wrapper, TypedValue value, int id,
-                                           Resources.Theme theme) {
+            Resources.Theme theme) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
                     + Integer.toHexString(id) + ") is not a Drawable (color or path): " + value);
@@ -681,7 +688,7 @@ public class ResourcesImpl {
      * Last, parse the XML and generate the CSL.
      */
     private ComplexColor loadComplexColorFromName(Resources wrapper, Resources.Theme theme,
-                                                  TypedValue value, int id) {
+            TypedValue value, int id) {
         final long key = (((long) value.assetCookie) << 32) | value.data;
         final ConfigurationBoundResourceCache<ComplexColor> cache = mComplexColorCache;
         ComplexColor complexColor = cache.getInstance(key, wrapper, theme);
@@ -714,7 +721,7 @@ public class ResourcesImpl {
 
     @Nullable
     ComplexColor loadComplexColor(Resources wrapper, @NonNull TypedValue value, int id,
-                                  Resources.Theme theme) {
+            Resources.Theme theme) {
         if (TRACE_FOR_PRELOAD) {
             // Log only framework resources
             if ((id >>> 24) == 0x1) {
@@ -755,7 +762,7 @@ public class ResourcesImpl {
 
     @Nullable
     ColorStateList loadColorStateList(Resources wrapper, TypedValue value, int id,
-                                      Resources.Theme theme)
+            Resources.Theme theme)
             throws NotFoundException {
         if (TRACE_FOR_PRELOAD) {
             // Log only framework resources
@@ -815,7 +822,7 @@ public class ResourcesImpl {
      */
     @Nullable
     private ComplexColor loadComplexColorForCookie(Resources wrapper, TypedValue value, int id,
-                                                   Resources.Theme theme) {
+            Resources.Theme theme) {
         if (value.string == null) {
             throw new UnsupportedOperationException(
                     "Can't convert to ComplexColor: type=0x" + value.type);
@@ -893,8 +900,8 @@ public class ResourcesImpl {
      * @throws NotFoundException if the file could not be loaded
      */
     @NonNull
-    XmlResourceParser loadXmlResourceParser(@NonNull String file, @AnyRes int id,
-                                            int assetCookie, @NonNull String type)
+    XmlResourceParser loadXmlResourceParser(@NonNull String file, @AnyRes int id, int assetCookie,
+            @NonNull String type)
             throws NotFoundException {
         if (id != 0) {
             try {
@@ -975,6 +982,16 @@ public class ResourcesImpl {
         return new ThemeImpl();
     }
 
+    /**
+     * Creates a new ThemeImpl which is already set to the given Resources.ThemeKey.
+     */
+    ThemeImpl newThemeImpl(Resources.ThemeKey key) {
+        ThemeImpl impl = new ThemeImpl();
+        impl.mKey.setTo(key);
+        impl.rebase();
+        return impl;
+    }
+
     public class ThemeImpl {
         /**
          * Unique key for the series of styles applied to this theme.
@@ -1035,10 +1052,10 @@ public class ResourcesImpl {
 
         @NonNull
         TypedArray obtainStyledAttributes(@NonNull Resources.Theme wrapper,
-                                          AttributeSet set,
-                                          @StyleableRes int[] attrs,
-                                          @AttrRes int defStyleAttr,
-                                          @StyleRes int defStyleRes) {
+                AttributeSet set,
+                @StyleableRes int[] attrs,
+                @AttrRes int defStyleAttr,
+                @StyleRes int defStyleRes) {
             synchronized (mKey) {
                 final int len = attrs.length;
                 final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
@@ -1060,8 +1077,8 @@ public class ResourcesImpl {
 
         @NonNull
         TypedArray resolveAttributes(@NonNull Resources.Theme wrapper,
-                                     @NonNull int[] values,
-                                     @NonNull int[] attrs) {
+                @NonNull int[] values,
+                @NonNull int[] attrs) {
             synchronized (mKey) {
                 final int len = attrs.length;
                 if (values == null || len != values.length) {
