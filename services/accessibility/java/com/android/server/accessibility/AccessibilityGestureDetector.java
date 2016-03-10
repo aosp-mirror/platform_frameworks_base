@@ -37,7 +37,8 @@ import java.util.ArrayList;
 
 /**
  * This class handles gesture detection for the Touch Explorer.  It collects
- * touch events, and sends events to mListener as gestures are recognized.
+ * touch events and determines when they match a gesture, as well as when they
+ * won't match a gesture.  These state changes are then surfaced to mListener.
  */
 class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListener {
 
@@ -46,12 +47,66 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // Tag for logging received events.
     private static final String LOG_TAG = "AccessibilityGestureDetector";
 
+    /**
+     * Listener functions are called as a result of onMoveEvent().  The current
+     * MotionEvent in the context of these functions is the event passed into
+     * onMotionEvent.
+     */
     public interface Listener {
-        public void onDoubleTapAndHold(MotionEvent event, int policyFlags);
-        public boolean onDoubleTap(MotionEvent event, int policyFlags);
-        public boolean onGestureCompleted(int gestureId);
-        public void onGestureStarted();
-        public void onGestureCancelled(MotionEvent event, int policyFlags);
+        /**
+         * Called when the user has performed a double tap and then held down
+         * the second tap.
+         *
+         * @param event The most recent MotionEvent received.
+         * @param policyFlags The policy flags of the most recent event.
+         */
+        void onDoubleTapAndHold(MotionEvent event, int policyFlags);
+
+        /**
+         * Called when the user touches the screen on the second tap of a double
+         * tap.
+         *
+         * @return true if the event is consumed, else false
+         */
+        boolean onDoubleTapStarted();
+
+        /**
+         * Called when the user lifts their finger on the second tap of a double
+         * tap.
+         *
+         * @param event The most recent MotionEvent received.
+         * @param policyFlags The policy flags of the most recent event.
+         *
+         * @return true if the event is consumed, else false
+         */
+        boolean onDoubleTap(MotionEvent event, int policyFlags);
+
+        /**
+         * Called when the system has decided the event stream is a gesture.
+         *
+         * @return true if the event is consumed, else false
+         */
+        boolean onGestureStarted();
+
+        /**
+         * Called when an event stream is recognized as a gesture.
+         *
+         * @param gestureId ID of the gesture that was recognized.
+         *
+         * @return true if the event is consumed, else false
+         */
+        boolean onGestureCompleted(int gestureId);
+
+        /**
+         * Called when the system has decided an event stream doesn't match any
+         * known gesture.
+         *
+         * @param event The most recent MotionEvent received.
+         * @param policyFlags The policy flags of the most recent event.
+         *
+         * @return true if the event is consumed, else false
+         */
+        public boolean onGestureCancelled(MotionEvent event, int policyFlags);
     }
 
     private final Listener mListener;
@@ -145,6 +200,18 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 context.getResources().getDisplayMetrics()) * GESTURE_CONFIRM_MM;
     }
 
+    /**
+     * Handle a motion event.  If an action is completed, the appropriate
+     * callback on mListener is called, and the return value of the callback is
+     * passed to the caller.
+     *
+     * @param event The raw motion event.  It's important that this be the raw
+     * event, before any transformations have been applied, so that measurements
+     * can be made in physical units.
+     * @param policyFlags Policy flags for the event.
+     *
+     * @return true if the event is consumed, else false
+     */
     public boolean onMotionEvent(MotionEvent event, int policyFlags) {
         final float x = event.getX();
         final float y = event.getY();
@@ -183,7 +250,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                         // the event.
                         if (!mGestureStarted) {
                             mGestureStarted = true;
-                            mListener.onGestureStarted();
+                            return mListener.onGestureStarted();
                         }
                     } else {
                         final long timeDelta = time - mBaseTime;
@@ -195,8 +262,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                         // timeout, cancel gesture detection.
                         if (timeDelta > threshold) {
                             cancelGesture();
-                            mListener.onGestureCancelled(event, policyFlags);
-                            return false;
+                            return mListener.onGestureCancelled(event, policyFlags);
                         }
                     }
 
@@ -211,16 +277,13 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (maybeFinishDoubleTap(event, policyFlags)) {
-                    return true;
+                if (mDoubleTapDetected) {
+                    return finishDoubleTap(event, policyFlags);
                 }
                 if (mGestureStarted) {
                     mStrokeBuffer.add(new GesturePoint(x, y, time));
 
-                    if (!recognizeGesture()) {
-                        mListener.onGestureCancelled(event, policyFlags);
-                    }
-                    return true;
+                    return recognizeGesture(event, policyFlags);
                 }
                 break;
 
@@ -244,8 +307,8 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
             case MotionEvent.ACTION_POINTER_UP:
                 // If we're detecting taps on the second finger, see if we
                 // should finish the double tap.
-                if (mSecondFingerDoubleTap && maybeFinishDoubleTap(event, policyFlags)) {
-                    return true;
+                if (mSecondFingerDoubleTap && mDoubleTapDetected) {
+                    return finishDoubleTap(event, policyFlags);
                 }
                 break;
 
@@ -308,7 +371,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         // The processing of the double tap is deferred until the finger is
         // lifted, so that we can detect a long press on the second tap.
         mDoubleTapDetected = true;
-        return true;
+        return mListener.onDoubleTapStarted();
     }
 
     private void maybeSendLongPress(MotionEvent event, int policyFlags) {
@@ -321,11 +384,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mListener.onDoubleTapAndHold(event, policyFlags);
     }
 
-    private boolean maybeFinishDoubleTap(MotionEvent event, int policyFlags) {
-        if (!mDoubleTapDetected) {
-            return false;
-        }
-
+    private boolean finishDoubleTap(MotionEvent event, int policyFlags) {
         clear();
 
         return mListener.onDoubleTap(event, policyFlags);
@@ -337,7 +396,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mStrokeBuffer.clear();
     }
 
-    private boolean recognizeGesture() {
+    private boolean recognizeGesture(MotionEvent event, int policyFlags) {
         Gesture gesture = new Gesture();
         gesture.addStroke(new GestureStroke(mStrokeBuffer));
 
@@ -351,16 +410,14 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 }
                 try {
                     final int gestureId = Integer.parseInt(bestPrediction.name);
-                    if (mListener.onGestureCompleted(gestureId)) {
-                        return true;
-                    }
+                    return mListener.onGestureCompleted(gestureId);
                 } catch (NumberFormatException nfe) {
                     Slog.w(LOG_TAG, "Non numeric gesture id:" + bestPrediction.name);
                 }
             }
         }
 
-        return false;
+        return mListener.onGestureCancelled(event, policyFlags);
     }
 
     private MotionEvent mapSecondPointerToFirstPointer(MotionEvent event) {
