@@ -17,18 +17,31 @@
 package com.android.systemui.shortcut;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.settingslib.accessibility.AccessibilityUtils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.DividerView;
+import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 
 import java.util.List;
 import java.util.Set;
@@ -42,12 +55,16 @@ public class ShortcutKeyDispatcher extends SystemUI
     private static final String TAG = "ShortcutKeyDispatcher";
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
-    private IWindowManager windowManagerService = WindowManagerGlobal.getWindowManagerService();
+    private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
+    private IActivityManager mActivityManager = ActivityManagerNative.getDefault();
 
     protected final long META_MASK = ((long) KeyEvent.META_META_ON) << Integer.SIZE;
     protected final long ALT_MASK = ((long) KeyEvent.META_ALT_ON) << Integer.SIZE;
     protected final long CTRL_MASK = ((long) KeyEvent.META_CTRL_ON) << Integer.SIZE;
     protected final long SHIFT_MASK = ((long) KeyEvent.META_SHIFT_ON) << Integer.SIZE;
+
+    protected final long SC_DOCK_LEFT = META_MASK | KeyEvent.KEYCODE_LEFT_BRACKET;
+    protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     /**
      * Registers a shortcut key to window manager.
@@ -55,15 +72,53 @@ public class ShortcutKeyDispatcher extends SystemUI
      */
     public void registerShortcutKey(long shortcutCode) {
         try {
-            windowManagerService.registerShortcutKey(shortcutCode, mShortcutKeyServiceProxy);
+            mWindowManagerService.registerShortcutKey(shortcutCode, mShortcutKeyServiceProxy);
         } catch (RemoteException e) {
             // Do nothing
         }
     }
 
     @Override
-    public void onShortcutKeyPressed(long shortcutCode) {}
+    public void onShortcutKeyPressed(long shortcutCode) {
+        int orientation = mContext.getResources().getConfiguration().orientation;
+        if ((shortcutCode == SC_DOCK_LEFT || shortcutCode == SC_DOCK_RIGHT)
+                && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            handleDockKey(shortcutCode);
+        }
+    }
 
     @Override
-    public void start() {}
+    public void start() {
+        registerShortcutKey(SC_DOCK_LEFT);
+        registerShortcutKey(SC_DOCK_RIGHT);
+    }
+
+    private void handleDockKey(long shortcutCode) {
+        try {
+            int dockSide = mWindowManagerService.getDockedStackSide();
+            if (dockSide == WindowManager.DOCKED_INVALID) {
+                // If there is no window docked, we dock the top-most window.
+                Recents recents = getComponent(Recents.class);
+                int dockMode = (shortcutCode == SC_DOCK_LEFT)
+                        ? ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                        : ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                recents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE, dockMode, null);
+                MetricsLogger.action(mContext, MetricsEvent.WINDOW_DOCK_SHORTCUTS);
+            } else {
+                // If there is already a docked window, we respond by resizing the docking pane.
+                DividerView dividerView = getComponent(Divider.class).getView();
+                DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
+                int dividerPosition = dividerView.getCurrentPosition();
+                DividerSnapAlgorithm.SnapTarget currentTarget =
+                        snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
+                int increment = (shortcutCode == SC_DOCK_LEFT) ? -1 : 1;
+                DividerSnapAlgorithm.SnapTarget target = snapAlgorithm.cycleNonDismissTarget(
+                        currentTarget, increment);
+                dividerView.startDragging(true /* animate */, false /* touching */);
+                dividerView.stopDragging(target.position, 0f, true /* avoidDismissStart */);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "handleDockKey() failed.");
+        }
+    }
 }
