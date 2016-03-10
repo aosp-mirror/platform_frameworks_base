@@ -51,10 +51,12 @@ public class ExifInterfaceTest extends AndroidTestCase {
     private static final String EXIF_BYTE_ORDER_II_JPEG = "image_exif_byte_order_ii.jpg";
     private static final String EXIF_BYTE_ORDER_MM_JPEG = "image_exif_byte_order_mm.jpg";
     private static final String LG_G4_ISO_800_DNG = "lg_g4_iso_800.dng";
+    private static final String VOLANTIS_JPEG = "volantis.jpg";
     private static final int[] IMAGE_RESOURCES = new int[] {
-            R.raw.image_exif_byte_order_ii,  R.raw.image_exif_byte_order_mm, R.raw.lg_g4_iso_800 };
+            R.raw.image_exif_byte_order_ii,  R.raw.image_exif_byte_order_mm, R.raw.lg_g4_iso_800,
+            R.raw.volantis };
     private static final String[] IMAGE_FILENAMES = new String[] {
-            EXIF_BYTE_ORDER_II_JPEG, EXIF_BYTE_ORDER_MM_JPEG, LG_G4_ISO_800_DNG };
+            EXIF_BYTE_ORDER_II_JPEG, EXIF_BYTE_ORDER_MM_JPEG, LG_G4_ISO_800_DNG, VOLANTIS_JPEG };
 
     private static final String[] EXIF_TAGS = {
             ExifInterface.TAG_MAKE,
@@ -415,7 +417,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
         testExifInterfaceForRaw(LG_G4_ISO_800_DNG, R.array.lg_g4_iso_800_dng);
     }
 
-    public void testCorruptedImage() {
+    public void testCorruptedImage() throws Throwable {
         byte[] bytes = new byte[1024];
         try {
             new ExifInterface(new ByteArrayInputStream(bytes));
@@ -423,5 +425,10 @@ public class ExifInterfaceTest extends AndroidTestCase {
         } catch (IOException e) {
             // Success
         }
+    }
+
+    public void testReadExifDataFromVolantisJpg() throws Throwable {
+        // Test if it is possible to parse the volantis generated JPEG smoothly.
+        testExifInterfaceForJpeg(VOLANTIS_JPEG, R.array.volantis_jpg);
     }
 }
