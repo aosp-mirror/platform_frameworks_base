@@ -279,6 +279,26 @@ public class DividerSnapAlgorithm {
     }
 
     /**
+     * Cycles through all non-dismiss targets with a stepping of {@param increment}. It moves left
+     * if {@param increment} is negative and moves right otherwise.
+     */
+    public SnapTarget cycleNonDismissTarget(SnapTarget snapTarget, int increment) {
+        int index = mTargets.indexOf(snapTarget);
+        if (index != -1) {
+            SnapTarget newTarget = mTargets.get((index + mTargets.size() + increment)
+                    % mTargets.size());
+            if (newTarget == mDismissStartTarget) {
+                return mLastSplitTarget;
+            } else if (newTarget == mDismissEndTarget) {
+                return mFirstSplitTarget;
+            } else {
+                return newTarget;
+            }
+        }
+        return snapTarget;
+    }
+
+    /**
      * Represents a snap target for the divider.
      */
     public static class SnapTarget {

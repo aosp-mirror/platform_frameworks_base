@@ -23,7 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -387,6 +389,13 @@ public class Recents extends SystemUI
         // recents
         if (!isUserSetup()) {
             return false;
+        }
+
+        Point realSize = new Point();
+        if (initialBounds == null) {
+            mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
+                    .getRealSize(realSize);
+            initialBounds = new Rect(0, 0, realSize.x, realSize.y);
         }
 
         int currentUser = sSystemServicesProxy.getCurrentUser();
