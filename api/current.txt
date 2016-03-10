@@ -58686,6 +58686,15 @@ package java.util {
     method public synchronized int search(java.lang.Object);
   }
 
+  public final class StringJoiner {
+    ctor public StringJoiner(java.lang.CharSequence);
+    ctor public StringJoiner(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
+    method public java.util.StringJoiner add(java.lang.CharSequence);
+    method public int length();
+    method public java.util.StringJoiner merge(java.util.StringJoiner);
+    method public java.util.StringJoiner setEmptyValue(java.lang.CharSequence);
+  }
+
   public class StringTokenizer implements java.util.Enumeration {
     ctor public StringTokenizer(java.lang.String, java.lang.String, boolean);
     ctor public StringTokenizer(java.lang.String, java.lang.String);
