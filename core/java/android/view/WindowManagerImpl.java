@@ -125,7 +125,8 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
-    public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver) {
+    public void requestAppKeyboardShortcuts(
+            final KeyboardShortcutsReceiver receiver, int deviceId) {
         IResultReceiver resultReceiver = new IResultReceiver.Stub() {
             @Override
             public void send(int resultCode, Bundle resultData) throws RemoteException {
@@ -136,7 +137,7 @@ public final class WindowManagerImpl implements WindowManager {
         };
         try {
             WindowManagerGlobal.getWindowManagerService()
-                .requestAppKeyboardShortcuts(resultReceiver);
+                .requestAppKeyboardShortcuts(resultReceiver, deviceId);
         } catch (RemoteException e) {
         }
     }

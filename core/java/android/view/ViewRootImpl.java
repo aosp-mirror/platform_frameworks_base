@@ -3594,8 +3594,9 @@ public final class ViewRootImpl implements ViewParent,
                 handleDispatchWindowShown();
             } break;
             case MSG_REQUEST_KEYBOARD_SHORTCUTS: {
-                IResultReceiver receiver = (IResultReceiver) msg.obj;
-                handleRequestKeyboardShortcuts(receiver);
+                final IResultReceiver receiver = (IResultReceiver) msg.obj;
+                final int deviceId = msg.arg1;
+                handleRequestKeyboardShortcuts(receiver, deviceId);
             } break;
             case MSG_UPDATE_POINTER_ICON: {
                 MotionEvent event = (MotionEvent) msg.obj;
@@ -5516,11 +5517,11 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mTreeObserver.dispatchOnWindowShown();
     }
 
-    public void handleRequestKeyboardShortcuts(IResultReceiver receiver) {
+    public void handleRequestKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
         Bundle data = new Bundle();
         ArrayList<KeyboardShortcutGroup> list = new ArrayList<>();
         if (mView != null) {
-            mView.requestKeyboardShortcuts(list);
+            mView.requestKeyboardShortcuts(list, deviceId);
         }
         data.putParcelableArrayList(WindowManager.PARCEL_KEY_SHORTCUTS_ARRAY, list);
         try {
@@ -6482,8 +6483,9 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public void dispatchRequestKeyboardShortcuts(IResultReceiver receiver) {
-        mHandler.obtainMessage(MSG_REQUEST_KEYBOARD_SHORTCUTS, receiver).sendToTarget();
+    public void dispatchRequestKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
+        mHandler.obtainMessage(
+                MSG_REQUEST_KEYBOARD_SHORTCUTS, deviceId, 0, receiver).sendToTarget();
     }
 
     /**
@@ -7060,11 +7062,11 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void requestAppKeyboardShortcuts(IResultReceiver receiver) {
-          ViewRootImpl viewAncestor = mViewAncestor.get();
-          if (viewAncestor != null) {
-            viewAncestor.dispatchRequestKeyboardShortcuts(receiver);
-          }
+        public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
+            ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchRequestKeyboardShortcuts(receiver, deviceId);
+            }
         }
     }
 

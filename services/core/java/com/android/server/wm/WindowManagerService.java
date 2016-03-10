@@ -10515,9 +10515,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void requestAppKeyboardShortcuts(IResultReceiver receiver) {
+    public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
         try {
-            getFocusedWindow().mClient.requestAppKeyboardShortcuts(receiver);
+            getFocusedWindow().mClient.requestAppKeyboardShortcuts(receiver, deviceId);
         } catch (RemoteException e) {
         }
     }

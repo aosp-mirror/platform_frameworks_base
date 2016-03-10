@@ -66,6 +66,6 @@ public class WindowManagerImpl implements WindowManager {
 
     @Override
     public void requestAppKeyboardShortcuts(
-            KeyboardShortcutsReceiver receiver) {
+            KeyboardShortcutsReceiver receiver, int deviceId) {
     }
 }

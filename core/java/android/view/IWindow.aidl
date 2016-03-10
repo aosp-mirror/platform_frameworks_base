@@ -95,5 +95,5 @@ oneway interface IWindow {
     /**
      * Called when Keyboard Shortcuts are requested for the window.
      */
-    void requestAppKeyboardShortcuts(IResultReceiver receiver);
+    void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId);
 }

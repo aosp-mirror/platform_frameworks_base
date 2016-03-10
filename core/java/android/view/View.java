@@ -22187,7 +22187,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    public void requestKeyboardShortcuts(List<KeyboardShortcutGroup> data) {
+    public void requestKeyboardShortcuts(List<KeyboardShortcutGroup> data, int deviceId) {
         // Do nothing.
     }
 

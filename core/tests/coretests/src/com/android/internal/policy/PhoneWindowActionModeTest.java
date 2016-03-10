@@ -291,9 +291,6 @@ public final class PhoneWindowActionModeTest
 
         @Override
         public void onActionModeFinished(ActionMode mode) {}
-
-        @Override
-        public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {}
     }
 
     private static final class MockActionModeCallback implements ActionMode.Callback {

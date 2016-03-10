@@ -1026,8 +1026,9 @@ public class SystemServicesProxy {
         return dividerWindowWidth - 2 * dividerInsets;
     }
 
-    public void requestKeyboardShortcuts(Context context, KeyboardShortcutsReceiver receiver) {
-        mWm.requestAppKeyboardShortcuts(receiver);
+    public void requestKeyboardShortcuts(
+            Context context, KeyboardShortcutsReceiver receiver, int deviceId) {
+        mWm.requestAppKeyboardShortcuts(receiver, deviceId);
     }
 
     public void getStableInsets(Rect outStableInsets) {
