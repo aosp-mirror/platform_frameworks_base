@@ -59,6 +59,21 @@ public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
         mDocs.assertChildCount(mSrcRoot, 1);
     }
 
+    public void testMove_BackendSideVirtualTypedFile_Fallback() throws Exception {
+        Uri testFile = mDocs.createDocumentWithFlags(
+                mSrcRoot.documentId, "virtual/mime-type", "tokyo.sth",
+                Document.FLAG_VIRTUAL_DOCUMENT | Document.FLAG_SUPPORTS_COPY
+                        | Document.FLAG_SUPPORTS_MOVE, "application/pdf");
+
+        createJob(newArrayList(testFile)).run();
+        mJobListener.waitForFinished();
+
+        // Should have failed, source not deleted. Moving by bytes for virtual files
+        // is not supported.
+        mDocs.assertChildCount(mDestRoot, 0);
+        mDocs.assertChildCount(mSrcRoot, 1);
+    }
+
     public void testMoveEmptyDir() throws Exception {
         runCopyEmptyDirTest();
 

@@ -518,28 +518,29 @@ public class StubProvider extends DocumentsProvider {
         String rootId = extras.getString(EXTRA_PARENT_ID);
         String mimeType = extras.getString(Document.COLUMN_MIME_TYPE);
         String name = extras.getString(Document.COLUMN_DISPLAY_NAME);
+        List<String> streamTypes = extras.getStringArrayList(EXTRA_STREAM_TYPES);
         int flags = extras.getInt(EXTRA_FLAGS);
 
         Bundle out = new Bundle();
         String documentId = null;
         try {
-            documentId = createDocument(rootId, mimeType, name, flags);
+            documentId = createDocument(rootId, mimeType, name, flags, streamTypes);
             Uri uri = DocumentsContract.buildDocumentUri(mAuthority, documentId);
             out.putParcelable(DocumentsContract.EXTRA_URI, uri);
         } catch (FileNotFoundException e) {
-            Log.d(TAG, "Cretaing document with flags failed" + name);
+            Log.d(TAG, "Creating document with flags failed" + name);
         }
         return out;
     }
 
-    public String createDocument(String parentId, String mimeType, String displayName, int flags)
-            throws FileNotFoundException {
+    public String createDocument(String parentId, String mimeType, String displayName, int flags,
+            List<String> streamTypes) throws FileNotFoundException {
 
         StubDocument parent = mStorage.get(parentId);
         File file = createFile(parent, mimeType, displayName);
 
         final StubDocument document = StubDocument.createDocumentWithFlags(file, mimeType, parent,
-                flags);
+                flags, streamTypes);
         mStorage.put(document.documentId, document);
         Log.d(TAG, "Created document " + document.documentId);
         notifyParentChanged(document.parentId);
@@ -787,8 +788,9 @@ public class StubProvider extends DocumentsProvider {
         }
 
         public static StubDocument createDocumentWithFlags(
-                File file, String mimeType, StubDocument parent, int flags) {
-            return new StubDocument(file, mimeType, new ArrayList<String>(), flags, parent);
+                File file, String mimeType, StubDocument parent, int flags,
+                List<String> streamTypes) {
+            return new StubDocument(file, mimeType, streamTypes, flags, parent);
         }
 
         public static StubDocument createVirtualDocument(
