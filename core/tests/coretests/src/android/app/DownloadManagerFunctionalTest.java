@@ -23,8 +23,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
 import com.google.mockwebserver.MockResponse;
 
 import java.io.File;
@@ -96,7 +94,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Test a basic download of a binary file 500k in size.
      */
-    @MediumTest
+    @LargeTest
     public void testBinaryDownloadToSystemCache() throws Exception {
         int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
@@ -109,7 +107,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests the basic downloading of a text file 300000 bytes in size.
      */
-    @MediumTest
+    @LargeTest
     public void testTextDownloadToSystemCache() throws Exception {
         int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.TEXT);
@@ -149,7 +147,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests trying to download to SD card when the file with same name already exists.
      */
-    @MediumTest
+    @LargeTest
     public void testDownloadToExternal_fileExists() throws Exception {
         File existentFile = createFileOnSD(null, 1, DataType.TEXT, null);
         byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
@@ -182,7 +180,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests trying to download a file to SD card.
      */
-    @MediumTest
+    @LargeTest
     public void testDownloadToExternal() throws Exception {
         String localDownloadDirectory = Environment.getExternalStorageDirectory().getPath();
         File downloadedFile = new File(localDownloadDirectory, DEFAULT_FILENAME);
@@ -217,7 +215,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests trying to download a file to the system partition.
      */
-    @MediumTest
+    @LargeTest
     public void testDownloadToProhibitedDirectory() throws Exception {
         File downloadedFile = new File(PROHIBITED_DIRECTORY, DEFAULT_FILENAME);
         try {
@@ -247,7 +245,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests that we get the correct download ID from the download notification.
      */
-    @MediumTest
+    @LargeTest
     public void testGetDownloadIdOnNotification() throws Exception {
         byte[] blobData = generateData(3000, DataType.TEXT);  // file size = 3000 bytes
 
@@ -265,7 +263,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests the download failure error after too many redirects (>5).
      */
-    @MediumTest
+    @LargeTest
     public void testErrorTooManyRedirects() throws Exception {
         Uri uri = getServerUri(DEFAULT_FILENAME);
 
@@ -305,7 +303,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests that we can remove a download from the download manager.
      */
-    @MediumTest
+    @LargeTest
     public void testRemoveDownload() throws Exception {
         int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
@@ -325,7 +323,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     /**
      * Tests that we can set the title of a download.
      */
-    @MediumTest
+    @LargeTest
     public void testSetTitle() throws Exception {
         int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
