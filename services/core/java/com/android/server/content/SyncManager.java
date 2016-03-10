@@ -192,6 +192,13 @@ public class SyncManager {
      */
     private static final long SYNC_DELAY_ON_CONFLICT = 10*1000; // 10 seconds
 
+    /**
+     * Generate job ids in the range [MIN_SYNC_JOB_ID, MAX_SYNC_JOB_ID) to avoid conflicts with
+     * other jobs scheduled by the system process.
+     */
+    private static final int MIN_SYNC_JOB_ID = 100000;
+    private static final int MAX_SYNC_JOB_ID = 110000;
+
     private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*/";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
@@ -249,7 +256,7 @@ public class SyncManager {
         synchronized (mScheduledSyncs) {
             int newJobId;
             do {
-                newJobId = mRand.nextInt(Integer.MAX_VALUE);
+                newJobId = MIN_SYNC_JOB_ID + mRand.nextInt(MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID);
             } while (isJobIdInUseLockedH(newJobId));
             return newJobId;
         }
