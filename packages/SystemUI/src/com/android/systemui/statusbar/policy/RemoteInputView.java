@@ -155,8 +155,21 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mEntry.row.isChangingPosition()) {
+            if (getVisibility() == VISIBLE && mEditText.isFocusable()) {
+                mEditText.requestFocus();
+            }
+        }
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (mEntry.row.isChangingPosition()) {
+            return;
+        }
         mController.removeRemoteInput(mEntry);
     }
 
@@ -229,6 +242,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         private void defocusIfNeeded() {
+            if (mDefocusListener.mEntry.row.isChangingPosition()) {
+                return;
+            }
             if (isFocusable() && isEnabled()) {
                 setInnerFocusable(false);
                 if (mDefocusListener != null) {
