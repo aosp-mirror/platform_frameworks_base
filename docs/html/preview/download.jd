@@ -1,7 +1,6 @@
-page.title=Test on an Android N Device
-page.image=images/cards/card-download_16-9_2x.png
-meta.tags="preview", "system image"
-page.tags="preview", "developer preview"
+page.title=Test on a Device
+meta.tags="preview", "nexus","system image"
+page.tags="preview", "androidn"
 page.image=images/cards/card-n-downloads_2x.png
 
 @jd:body
@@ -170,94 +169,120 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <div id="qv">
     <h2>In this document</h2>
       <ol>
-        <li><a href="#device-preview">Install on a Device</a>
+        <li><a href="#device-preview">Set up a hardware device</a>
           <ol>
             <li><a href="#ota">Get over-the-air updates</a></li>
-            <li><a href="#flash">Download the system image</a></li>
-            <li><a href="#revertDevice">Revert to factory specifications</a></li>
+            <li><a href="#flash">Manually flash a device</a></li>
+            <li><a href="#revertDevice">Uninstalling</a></li>
           </ol>
         </li>
-        <li><a href="#setupAVD">Use the Emulator</a></li>
+        <li><a href="#setupAVD">Set up an emulator</a></li>
       </ol>
   </div>
 </div>
 
-
-
-
-
-
-
-<p>To run the Android N Preview and test your apps, you can either
-install the Android N Preview on one of several supported devices or run it on
-the Android Emulator.</p>
-
-<p>Simply installing your app onto Android N this way does not require
-any changes to your app source code. If, however, you want to update your
-app to use new Android N APIs, see
-<a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android N</a>.
-
-
-
-<h2 id="device-preview">Install on a Device</h2>
-
-<p>You can get the Android N Preview on a device by opting into
-  the Android Beta Program to receive over-the-air updates to your device
-  or by downloading an Android N Preview system
-  image and installing it on a device.
+<p>
+  To run and test your app on the new platform you need to set up an Android N
+  runtime environment. You can do that in either of these ways:
 </p>
 
-<p class="warning">
-  <strong>Warning:</strong> The Android system images are previews
-  and are subject to change. Your use of the system images is governed by the
-  Android SDK Preview License Agreement. The Android preview system images are
-  not stable releases, and may contain errors and defects that can result in
-  damage to your computer systems, devices, and data. The preview Android
-  system images are not subject to the same testing as the factory OS and can
-  cause your phone and installed services and applications to stop working.
+<ul>
+  <li>Install Android N on a supported hardware device, or</li>
+  <li>Set up an Android emulator running Android N</li>
+</ul>
+
+<p>
+  If you want an environment for basic compatibility testing of your app on the
+  new platform, all you need is your current APK and a hardware device or
+  emulator. You don't necessarily need to update your full development
+  environment to do basic testing.
+</p>
+
+<p>
+  If you want to modify your app to target Android N or use new Android N APIs,
+  you need to set up a development environment that's updated to support
+  Android N. <a href="{@docRoot}preview/setup-sdk.html">Set Up to Develop for
+  Android N</a> has details.
 </p>
 
 
-<h3 id="ota">Get over-the-air updates</h3>
+<h2 id="device-preview">Set up a hardware device</h2>
 
-<p>You can receive over-the-air updates to preview versions of Android by
-enrolling your compatible device in the Android Beta Program.
-These updates are automatically downloaded and will update your device just like
-official system updates.</p>
+<p>
+  The N Developer Preview offers system updates for a range of hardware devices
+  that you can use for testing your app, from phones to tablets and TV.
+</p>
+
+<p>
+  If you have access to a supported device, you can update it to a Developer
+  Preview milestone build in one of these ways:
+</p>
+
+<ul>
+  <li><strong>Enroll the device in automatic OTA system updates</strong> through the
+  Android Beta program. Once enrolled, your device will receive regular
+  over-the-air (OTA) updates of all milestone builds in the N Developer Preview. This
+  approach is recommended because it lets you seamlessly transition from your current
+  environment through the various releases of the N Developer Preview.</li>
+  <li><strong>Download a Developer Preview system image and flash the device</strong>.
+  OTA updates are not provided automatically for devices that you flash manually. This
+  approach is recommended if you need precise control over the test environment or need
+  to reinstall frequently, such as for automated testing.  </li>
+</ul>
+
+<h3 id="ota">Enroll the device in automatic OTA updates</h3>
+
+<p>
+  If you have access to a supported device (see the list in the Downloads
+  table), you can receive over-the-air updates to preview versions of Android
+  by enrolling that device in the Android Beta Program. These updates are
+  automatically downloaded and will update your device just like official
+  system updates.
+</p>
+
+<p>
+  You can un-enroll a device at any time. The device will receive an OTA update
+  to the most recent production version of Android available for that device
+  (for example, Android 6.0 Marshmallow). The update requires a full device
+  reset, so user data on the device will be removed. Make sure to <strong>back
+  up important data</strong> before un-enrolling a device.
+</p>
 
 <p>
   For more information and to enroll your device, see
   the <a href="https://g.co/androidbeta">Android Beta Program</a> web site.
 </p>
 
-<p class="warning">
-  <strong>Warning:</strong> If you enroll a device in the Android Beta Program,
-  then later opt-out of receiving updates on
-  the device, all user data on that device will be removed.
+<p class="note"><strong>Note:</strong>
+  Un-enrolling requires a full device reset. Back up
+  important data first.
 </p>
 
+<h3 id="flash">Flashing a device manually</h3>
 
-<h3 id="flash">Download the system image</h3>
+<p>
+  At any time you can download the latest Developer Preview system image and
+  manually flash it to your device. See the table below to download the system
+  image for your test device.
+</p>
 
-<p>To instead manually flash the system image to your device and control
-the updates yourself, you can download the appropriate system image for your
-device from the table below.</p>
+<p>
+  Installing a system image on a device <strong>removes all data from the
+  device</strong>, so you should back up your data first.
+</p>
 
-<p>Installing a system image on a device <em>removes all data
-from the device</em>, so you should back up your data before installing a
-system image.</p>
+<p>
+  After you back up your device data and download the system image below that
+  matches your device, follow the instructions at <a href=
+  "https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
+  to flash the image onto your device.
+</p>
 
-<p>After you back up your device data and download the system image below that
-matches your device, follow the instructions at <a href=
-"https://developers.google.com/android/nexus/images#instructions"
->developers.google.com/android/nexus</a>
-to flash the image onto your device.</p>
-
-<p class="note">
-<strong>Note:</strong> If you manually install a preview system image on a
-device, that device <em>will not</em> receive additional over-the-air updates
-(either production or preview). If you want to update a device with a new
-preview system image, you must perform another manual installation.
+<p class="note"><strong>Note:</strong>
+  Manually flashed system images <em>will not</em>
+  automatically receive subsequent OTA updates to later Developer Preview
+  milestone builds. Make sure to keep your environment up-to-date and flash a
+  new system image at each Developer Preview milestone.
 </p>
 
 <table>
@@ -328,30 +353,56 @@ preview system image, you must perform another manual installation.
       SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
     </td>
   </tr>
+  <tr id="seed">
+    <td>General Mobile 4G (Android One) <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
+      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
+      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
+    </td>
+  </tr>
 
 </table>
 
-
-<h3 id="revertDevice">Revert to factory specifications</h3>
+<h3 id="revertDevice">Uninstalling the Preview from a device</h3>
 
 <p>
-  If you want to uninstall the preview and revert the device to factory
-  specifications, go to
-  <a href="http://developers.google.com/android/nexus/images"
-  >developers.google.com/android/nexus</a>
-  and download the image you want to flash to for your device. Follow the
-  instructions on that page to flash the image to your device.
+  If you want to uninstall the preview from a device, you can do so in one of
+  these ways: </p>
+  <ul>
+    <li><strong>Obtain a factory spec system image</strong> and then manually
+    flash it to the device.
+      <ul>
+          <li>For <strong>Nexus devices and Pixel C devices</strong>, see
+        the <a href="http://developers.google.com/android/nexus/images">Factory Images
+        for Nexus Devices</a> page for downloads. </li>
+        <li>For <strong>other devices</strong>, please contact the device manufacturer
+        directly. Alternatively, if the device is supported
+        in the Android Beta Program, you can enroll the device in the
+        program and then un-enroll it (see below).</li>
+      </ul>
+    </li>
+    <li><strong>Un-enroll the device from Android Beta Program</strong>. If the
+    device is enrolled in the <a href="https://g.co/androidbeta">Android Beta
+    Program</a>, regardless of device, you can simply un-enroll it from the program.
+  <p>
+    The device will receive an OTA update to the most recent production version
+    of Android available for that device (for example, Android 6.0 Marshmallow).
+    The update requires a full device reset, so user data on the device will be
+    removed. Make sure to <strong>back up important data</strong> before
+    un-enrolling a device.
+  </p>
+  </li>
+</ul>
+
+<p class="note"><strong>Note:</strong>
+  Uninstalling a Developer Preview system image prior to
+  the end of the program requires a full device reset and removes all user data
+  on the device.
 </p>
 
-<p class="warning">
-  <strong>Warning:</strong> Just like when flashing a preview image,
-  installing a factory image removes all user data on the device.
-</p>
 
-
-
-
-<h2 id="setupAVD">Use the Emulator</h2>
+<h2 id="setupAVD">Set up an emulator</h2>
 
 <p>To use the Android Emulator to run the Android N Preview, you need to
 download the Android N Preview SDK and create a virtual device for the
@@ -414,9 +465,10 @@ with much faster performance compared to the Emulator in
 Android Studio 1.5.</p>
 
 <p class="note"><strong>Note:</strong>
-If you're currently using Android Studio 2.0 Beta, there's a known issue
-that prevents you from creating AVDs with the N Preview system images, so
-you currently need to use the Android Studio 2.1 preview to create AVDs.</p>
+  If you're currently using Android Studio 2.0 Beta, there's a known issue
+  that prevents you from creating AVDs with the N Preview system images, so
+  you currently need to use the Android Studio 2.1 preview to create AVDs.
+</p>
 
 <p>For more information about creating virtual devices, see <a href=
   "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
