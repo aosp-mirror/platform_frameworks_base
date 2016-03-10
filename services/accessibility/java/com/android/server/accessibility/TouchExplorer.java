@@ -390,6 +390,11 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     }
 
     @Override
+    public boolean onDoubleTapStarted() {
+        return true;
+    }
+
+    @Override
     public boolean onDoubleTap(MotionEvent event, int policyFlags) {
         // Ignore the event if we aren't touch exploring.
         if (mCurrentState != STATE_TOUCH_EXPLORING) {
@@ -437,6 +442,20 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     }
 
     @Override
+    public boolean onGestureStarted() {
+      // We have to perform gesture detection, so
+      // clear the current state and try to detect.
+      mCurrentState = STATE_GESTURE_DETECTING;
+      mSendHoverEnterAndMoveDelayed.cancel();
+      mSendHoverExitDelayed.cancel();
+      mExitGestureDetectionModeDelayed.post();
+      // Send accessibility event to announce the start
+      // of gesture recognition.
+      sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_START);
+      return false;
+    }
+
+    @Override
     public boolean onGestureCompleted(int gestureId) {
         if (mCurrentState != STATE_GESTURE_DETECTING) {
             return false;
@@ -450,36 +469,26 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     }
 
     @Override
-    public void onGestureStarted() {
-      // We have to perform gesture detection, so
-      // clear the current state and try to detect.
-      mCurrentState = STATE_GESTURE_DETECTING;
-      mSendHoverEnterAndMoveDelayed.cancel();
-      mSendHoverExitDelayed.cancel();
-      mExitGestureDetectionModeDelayed.post();
-      // Send accessibility event to announce the start
-      // of gesture recognition.
-      sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_START);
-    }
+    public boolean onGestureCancelled(MotionEvent event, int policyFlags) {
+        if (mCurrentState == STATE_GESTURE_DETECTING) {
+            endGestureDetection();
+            return true;
+        } else if (mCurrentState == STATE_TOUCH_EXPLORING) {
+            // If the finger is still moving, pass the event on.
+            if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
+                final int pointerIdBits = (1 << pointerId);
 
-    @Override
-    public void onGestureCancelled(MotionEvent event, int policyFlags) {
-      if (mCurrentState == STATE_GESTURE_DETECTING) {
-          endGestureDetection();
-      } else if (mCurrentState == STATE_TOUCH_EXPLORING) {
-          // If the finger is still moving, pass the event on.
-          if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-              final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
-              final int pointerIdBits = (1 << pointerId);
-
-              // We have just decided that the user is touch,
-              // exploring so start sending events.
-              mSendHoverEnterAndMoveDelayed.addEvent(event);
-              mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
-              mSendHoverExitDelayed.cancel();
-              sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits, policyFlags);
-          }
-      }
+                // We have just decided that the user is touch,
+                // exploring so start sending events.
+                mSendHoverEnterAndMoveDelayed.addEvent(event);
+                mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
+                mSendHoverExitDelayed.cancel();
+                sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits, policyFlags);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
