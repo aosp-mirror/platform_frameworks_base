@@ -985,11 +985,16 @@ public class AlarmManager {
     /**
      * Gets information about the next alarm clock currently scheduled.
      *
-     * The alarm clocks considered are those scheduled by {@link #setAlarmClock}
-     * from any package of the calling user.
+     * The alarm clocks considered are those scheduled by any application
+     * using the {@link #setAlarmClock} method.
+     *
+     * @return An {@link AlarmClockInfo} object describing the next upcoming alarm
+     *   clock event that will occur.  If there are no alarm clock events currently
+     *   scheduled, this method will return {@code null}.
      *
      * @see #setAlarmClock
      * @see AlarmClockInfo
+     * @see #ACTION_NEXT_ALARM_CLOCK_CHANGED
      */
     public AlarmClockInfo getNextAlarmClock() {
         return getNextAlarmClock(UserHandle.myUserId());
@@ -998,11 +1003,16 @@ public class AlarmManager {
     /**
      * Gets information about the next alarm clock currently scheduled.
      *
-     * The alarm clocks considered are those scheduled by {@link #setAlarmClock}
-     * from any package of the given {@parm userId}.
+     * The alarm clocks considered are those scheduled by any application
+     * using the {@link #setAlarmClock} method within the given user.
+     *
+     * @return An {@link AlarmClockInfo} object describing the next upcoming alarm
+     *   clock event that will occur within the given user.  If there are no alarm clock
+     *   events currently scheduled in that user, this method will return {@code null}.
      *
      * @see #setAlarmClock
      * @see AlarmClockInfo
+     * @see #ACTION_NEXT_ALARM_CLOCK_CHANGED
      *
      * @hide
      */
@@ -1015,7 +1025,7 @@ public class AlarmManager {
     }
 
     /**
-     * An immutable description of an alarm clock.
+     * An immutable description of a scheduled "alarm clock" event.
      *
      * @see AlarmManager#setAlarmClock
      * @see AlarmManager#getNextAlarmClock
