@@ -50,6 +50,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -758,23 +759,28 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public ParcelFileDescriptor getUserIcon(int userId) {
+    public ParcelFileDescriptor getUserIcon(int targetUserId) {
         String iconPath;
         synchronized (mPackagesLock) {
-            UserInfo info = getUserInfoNoChecks(userId);
-            if (info == null || info.partial) {
-                Slog.w(LOG_TAG, "getUserIcon: unknown user #" + userId);
+            UserInfo targetUserInfo = getUserInfoNoChecks(targetUserId);
+            if (targetUserInfo == null || targetUserInfo.partial) {
+                Slog.w(LOG_TAG, "getUserIcon: unknown user #" + targetUserId);
                 return null;
             }
-            int callingGroupId = getUserInfoNoChecks(UserHandle.getCallingUserId()).profileGroupId;
-            if (callingGroupId == UserInfo.NO_PROFILE_GROUP_ID
-                    || callingGroupId != info.profileGroupId) {
+
+            final int callingUserId = UserHandle.getCallingUserId();
+            final int callingGroupId = getUserInfoNoChecks(callingUserId).profileGroupId;
+            final int targetGroupId = targetUserInfo.profileGroupId;
+            final boolean sameGroup = (callingGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                    && callingGroupId == targetGroupId);
+            if ((callingUserId != targetUserId) && !sameGroup) {
                 checkManageUsersPermission("get the icon of a user who is not related");
             }
-            if (info.iconPath == null) {
+
+            if (targetUserInfo.iconPath == null) {
                 return null;
             }
-            iconPath = info.iconPath;
+            iconPath = targetUserInfo.iconPath;
         }
 
         try {
@@ -1229,7 +1235,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             FileOutputStream os;
             if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, os = new FileOutputStream(tmp))
-                    && tmp.renameTo(file)) {
+                    && tmp.renameTo(file) && SELinux.restorecon(file)) {
                 info.iconPath = file.getAbsolutePath();
             }
             try {
