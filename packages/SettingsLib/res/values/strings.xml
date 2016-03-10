@@ -687,7 +687,7 @@
     <!-- Developer settings: select WebView provider dialog title [CHAR LIMIT=30] -->
     <string name="select_webview_provider_dialog_title">Set WebView implementation</string>
     <!-- Developer settings: text for the WebView provider selection toast shown if an invalid provider was chosen (i.e. the setting list was stale). [CHAR LIMIT=NONE] -->
-    <string name="select_webview_provider_toast_text">The chosen WebView implementation is invalid because the list of implementation choices grew stale. The list should now be updated.</string>
+    <string name="select_webview_provider_toast_text">This choice is no longer valid. Try again.</string>
 
     <!-- Developer settings screen, convert userdata to file encryption option name -->
     <string name="convert_to_file_encryption">Convert to file encryption</string>
