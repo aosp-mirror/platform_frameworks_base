@@ -37406,7 +37406,8 @@ package android.telephony {
     method public java.lang.String getDeviceSoftwareVersion();
     method public java.lang.String getGroupIdLevel1();
     method public java.lang.String getGroupIdLevel1(int);
-    method public java.lang.String getIccSimChallengeResponse(int, java.lang.String);
+    method public java.lang.String getIccAuthentication(int, int, java.lang.String);
+    method public java.lang.String getIccAuthentication(int, int, int, java.lang.String);
     method public java.lang.String getLine1AlphaTag(int);
     method public java.lang.String getLine1Number();
     method public java.lang.String getLine1Number(int);
@@ -37475,6 +37476,13 @@ package android.telephony {
     field public static final java.lang.String ACTION_CONFIGURE_VOICEMAIL = "android.telephony.action.CONFIGURE_VOICEMAIL";
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
+    field public static final int APPTYPE_CSIM = 4; // 0x4
+    field public static final int APPTYPE_ISIM = 5; // 0x5
+    field public static final int APPTYPE_RUIM = 3; // 0x3
+    field public static final int APPTYPE_SIM = 1; // 0x1
+    field public static final int APPTYPE_USIM = 2; // 0x2
+    field public static final int AUTHTYPE_EAP_AKA = 129; // 0x81
+    field public static final int AUTHTYPE_EAP_SIM = 128; // 0x80
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1

@@ -196,8 +196,9 @@ interface IPhoneSubInfo {
      *
      * @param subId subscription ID to be queried
      * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
+     * @param authType Authentication type, see PhoneConstants#AUTHTYPE_xxx
      * @param data authentication challenge data
      * @return challenge response
      */
-    String getIccSimChallengeResponse(int subId, int appType, String data);
+    String getIccSimChallengeResponse(int subId, int appType, int authType, String data);
 }
