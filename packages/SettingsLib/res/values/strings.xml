@@ -775,7 +775,7 @@
 
     <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
     <string name="enabled_by_admin">Enabled by administrator</string>
-    <!-- Summary for switch preference to denote it is switched on [CHAR LIMIT=50] -->
+    <!-- Summary for switch preference to denote it is switched off [CHAR LIMIT=50] -->
     <string name="disabled_by_admin">Disabled by administrator</string>
 
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
