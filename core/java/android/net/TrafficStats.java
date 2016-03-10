@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.SystemApi;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.RemoteException;
@@ -33,12 +34,16 @@ import java.net.Socket;
 import java.net.SocketException;
 
 /**
- * Class that provides network traffic statistics.  These statistics include
+ * Class that provides network traffic statistics. These statistics include
  * bytes transmitted and received and network packets transmitted and received,
  * over all interfaces, over the mobile interface, and on a per-UID basis.
  * <p>
- * These statistics may not be available on all platforms.  If the statistics
- * are not supported by this device, {@link #UNSUPPORTED} will be returned.
+ * These statistics may not be available on all platforms. If the statistics are
+ * not supported by this device, {@link #UNSUPPORTED} will be returned.
+ * <p>
+ * Note that the statistics returned by this class reset and start from zero
+ * after every reboot. To access more robust historical network statistics data,
+ * use {@link NetworkStatsManager} instead.
  */
 public class TrafficStats {
     /**
@@ -497,14 +502,27 @@ public class TrafficStats {
      * monotonically since device boot. Statistics are measured at the network
      * layer, so they include both TCP and UDP usage.
      * <p>
-     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
-     * {@link #UNSUPPORTED} on devices where statistics aren't available.
+     * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may
+     * return {@link #UNSUPPORTED} on devices where statistics aren't available.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#N} this will only
+     * report traffic statistics for the calling UID. It will return
+     * {@link #UNSUPPORTED} for all other UIDs for privacy reasons. To access
+     * historical network statistics belonging to other UIDs, use
+     * {@link NetworkStatsManager}.
      *
      * @see android.os.Process#myUid()
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidTxBytes(int uid) {
-        return nativeGetUidStat(uid, TYPE_TX_BYTES);
+        // This isn't actually enforcing any security; it just returns the
+        // unsupported value. The real filtering is done at the kernel level.
+        final int callingUid = android.os.Process.myUid();
+        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
+            return nativeGetUidStat(uid, TYPE_TX_BYTES);
+        } else {
+            return UNSUPPORTED;
+        }
     }
 
     /**
@@ -515,12 +533,25 @@ public class TrafficStats {
      * <p>
      * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#N} this will only
+     * report traffic statistics for the calling UID. It will return
+     * {@link #UNSUPPORTED} for all other UIDs for privacy reasons. To access
+     * historical network statistics belonging to other UIDs, use
+     * {@link NetworkStatsManager}.
      *
      * @see android.os.Process#myUid()
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidRxBytes(int uid) {
-        return nativeGetUidStat(uid, TYPE_RX_BYTES);
+        // This isn't actually enforcing any security; it just returns the
+        // unsupported value. The real filtering is done at the kernel level.
+        final int callingUid = android.os.Process.myUid();
+        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
+            return nativeGetUidStat(uid, TYPE_RX_BYTES);
+        } else {
+            return UNSUPPORTED;
+        }
     }
 
     /**
@@ -531,12 +562,25 @@ public class TrafficStats {
      * <p>
      * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#N} this will only
+     * report traffic statistics for the calling UID. It will return
+     * {@link #UNSUPPORTED} for all other UIDs for privacy reasons. To access
+     * historical network statistics belonging to other UIDs, use
+     * {@link NetworkStatsManager}.
      *
      * @see android.os.Process#myUid()
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidTxPackets(int uid) {
-        return nativeGetUidStat(uid, TYPE_TX_PACKETS);
+        // This isn't actually enforcing any security; it just returns the
+        // unsupported value. The real filtering is done at the kernel level.
+        final int callingUid = android.os.Process.myUid();
+        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
+            return nativeGetUidStat(uid, TYPE_TX_PACKETS);
+        } else {
+            return UNSUPPORTED;
+        }
     }
 
     /**
@@ -547,12 +591,25 @@ public class TrafficStats {
      * <p>
      * Before {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}, this may return
      * {@link #UNSUPPORTED} on devices where statistics aren't available.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#N} this will only
+     * report traffic statistics for the calling UID. It will return
+     * {@link #UNSUPPORTED} for all other UIDs for privacy reasons. To access
+     * historical network statistics belonging to other UIDs, use
+     * {@link NetworkStatsManager}.
      *
      * @see android.os.Process#myUid()
      * @see android.content.pm.ApplicationInfo#uid
      */
     public static long getUidRxPackets(int uid) {
-        return nativeGetUidStat(uid, TYPE_RX_PACKETS);
+        // This isn't actually enforcing any security; it just returns the
+        // unsupported value. The real filtering is done at the kernel level.
+        final int callingUid = android.os.Process.myUid();
+        if (callingUid == android.os.Process.SYSTEM_UID || callingUid == uid) {
+            return nativeGetUidStat(uid, TYPE_RX_PACKETS);
+        } else {
+            return UNSUPPORTED;
+        }
     }
 
     /**
