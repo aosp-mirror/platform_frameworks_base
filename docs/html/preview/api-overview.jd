@@ -250,7 +250,8 @@ that it resolves resources. Make sure that you test and verify that your apps
 working as expected with the new resource resolution logic.</p>
 
 <p>To learn about the new resource-resolution behavior and the best practices you
-should follow, see <a href="{@docRoot}preview/features/multilingual-support.html">Multilingual Support</a>.</p>
+should follow, see <a href="{@docRoot}preview/features/multilingual-support.html"
+>Multilingual Support</a>.</p>
 
 <h2 id="icu4">ICU4J APIs in Android</h2>
 
@@ -410,12 +411,13 @@ Execution Environment (TEE)</a>:</p>
 
 <ul>
 <li>The OS version and patch level installed on the device</li>
-<li>The <a class="external-link" href="https://source.android.com/security/verifiedboot/index.html">Verified
-Boot</a> public key and lock status</li>
+<li>The <a href="https://source.android.com/security/verifiedboot/index.html"
+class="external-link" >Verified Boot</a> public key and lock status</li>
   </ul>
 
 <p>For more information about the hardware-backed keystore feature,
-see the guide for <a href="">Hardware-backed Keystore</a>.
+see the guide for <a href="https://source.android.com/security/keystore/"
+class="external-link">Hardware-backed Keystore</a>.</p>
 
   <p>In addition to Key Attestation, Android N also introduces
   fingerprint-bound keys that are not revoked on fingerprint enrollment.</p>
@@ -625,7 +627,8 @@ can make your user experience amazing &mdash; immediate, fast, and context-aware
 When not handled right, background processing can needlessly consume RAM (and
 battery) and affect system performance for other apps. </p>
 
-<p>Since Android 5.0, {@link android.app.job.JobScheduler} has been the preferred way of performing background work in a way that's good
+<p>Since Android 5.0, {@link android.app.job.JobScheduler} has been the
+preferred way of performing background work in a way that's good
 for users. Apps can schedule jobs while letting the system optimize based on
 memory, power, and connectivity conditions. JobScheduler offers control and
 simplicity, and we want all apps to use it. </p>
@@ -638,7 +641,8 @@ simplicity, and we want all apps to use it. </p>
   Android.
 </p>
 
-<p>We're continuing to extend <code>JobScheduler</code> and <code>GCMNetworkManager</code> to meet more of
+<p>We're continuing to extend <code>JobScheduler</code> and
+<code>GCMNetworkManager</code> to meet more of
 your use cases &mdash; for example, in Android N you can now schedule background
 work based on changes in Content Providers. At the same time we're starting to
 deprecate some of the older patterns that can reduce system performance,
