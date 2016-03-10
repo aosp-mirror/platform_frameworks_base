@@ -349,6 +349,29 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
     EXPECT_EQ(1, renderer.getIndex());
 }
 
+TEST(FrameBuilder, functor_reject) {
+    class FunctorTestRenderer : public TestRendererBase {
+    public:
+        void onFunctorOp(const FunctorOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+        }
+    };
+    Functor noopFunctor;
+
+    // 1 million pixel tall view, scrolled down 80%
+    auto scrolledFunctorView = TestUtils::createNode(0, 0, 400, 1000000,
+            [&noopFunctor](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.translate(0, -800000);
+        canvas.callDrawGLFunction(&noopFunctor);
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            TestUtils::createSyncedNodeList(scrolledFunctorView), sLightGeometry, nullptr);
+    FunctorTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex()) << "Functor should not be rejected";
+}
+
 TEST(FrameBuilder, renderNode) {
     class RenderNodeTestRenderer : public TestRendererBase {
     public:
@@ -391,6 +414,7 @@ TEST(FrameBuilder, renderNode) {
             TestUtils::createSyncedNodeList(parent), sLightGeometry, nullptr);
     RenderNodeTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
 }
 
 TEST(FrameBuilder, clipped) {
