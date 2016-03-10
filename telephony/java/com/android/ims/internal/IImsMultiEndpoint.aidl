@@ -34,5 +34,5 @@ interface IImsMultiEndpoint {
      * Query api to get the latest Dialog Event Package information
      * Should be invoked only after setListener is done
      */
-    void requestDialogEventPackageState();
+    void requestImsExternalCallStateInfo();
 }

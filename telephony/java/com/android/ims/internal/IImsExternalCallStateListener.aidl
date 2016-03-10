@@ -32,7 +32,7 @@ interface IImsExternalCallStateListener {
      *
      * @return void.
      */
-    void notifyRefreshExternalCallState(in List<ImsExternalCallState> externalCallDialogs);
+    void onImsExternalCallStateUpdate(in List<ImsExternalCallState> externalCallDialogs);
 
 }
 
