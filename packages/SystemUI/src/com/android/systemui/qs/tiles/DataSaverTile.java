@@ -73,6 +73,15 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
     }
 
     @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(R.string.accessibility_quick_settings_data_saver_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_data_saver_changed_off);
+        }
+    }
+
+    @Override
     public void onDataSaverChanged(boolean isDataSaving) {
         refreshState(isDataSaving);
     }
