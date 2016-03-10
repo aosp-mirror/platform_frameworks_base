@@ -286,7 +286,8 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Rect& rect) {
         if (rect.isEmpty()) {
-            return os << "empty";
+            // Print empty, but continue, since empty rects may still have useful coordinate info
+            os << "(empty)";
         }
 
         if (rect.left == 0 && rect.top == 0) {
