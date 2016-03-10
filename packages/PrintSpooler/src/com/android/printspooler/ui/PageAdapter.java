@@ -93,6 +93,7 @@ public final class PageAdapter extends Adapter<ViewHolder> {
     private PageRange[] mSelectedPages;
 
     private BitmapDrawable mEmptyState;
+    private BitmapDrawable mErrorState;
 
     private int mDocumentPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
     private int mSelectedPageCount;
@@ -329,7 +330,7 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         } else {
             onSelectedPageNotInFile(pageInDocument);
         }
-        content.init(provider, mEmptyState, mMediaSize, mMinMargins);
+        content.init(provider, mEmptyState, mErrorState, mMediaSize, mMinMargins);
 
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
             page.setSelected(true, false);
@@ -448,19 +449,35 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         // Now update the empty state drawable, as it depends on the page
         // size and is reused for all views for better performance.
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        View content = inflater.inflate(R.layout.preview_page_loading, null, false);
-        content.measure(MeasureSpec.makeMeasureSpec(mPageContentWidth, MeasureSpec.EXACTLY),
+        View loadingContent = inflater.inflate(R.layout.preview_page_loading, null, false);
+        loadingContent.measure(MeasureSpec.makeMeasureSpec(mPageContentWidth, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mPageContentHeight, MeasureSpec.EXACTLY));
-        content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
+        loadingContent.layout(0, 0, loadingContent.getMeasuredWidth(),
+                loadingContent.getMeasuredHeight());
 
-        Bitmap bitmap = Bitmap.createBitmap(mPageContentWidth, mPageContentHeight,
+        Bitmap loadingBitmap = Bitmap.createBitmap(mPageContentWidth, mPageContentHeight,
                 Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        content.draw(canvas);
+        loadingContent.draw(new Canvas(loadingBitmap));
 
         // Do not recycle the old bitmap if such as it may be set as an empty
         // state to any of the page views. Just let the GC take care of it.
-        mEmptyState = new BitmapDrawable(mContext.getResources(), bitmap);
+        mEmptyState = new BitmapDrawable(mContext.getResources(), loadingBitmap);
+
+        // Now update the empty state drawable, as it depends on the page
+        // size and is reused for all views for better performance.
+        View errorContent = inflater.inflate(R.layout.preview_page_error, null, false);
+        errorContent.measure(MeasureSpec.makeMeasureSpec(mPageContentWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mPageContentHeight, MeasureSpec.EXACTLY));
+        errorContent.layout(0, 0, errorContent.getMeasuredWidth(),
+                errorContent.getMeasuredHeight());
+
+        Bitmap errorBitmap = Bitmap.createBitmap(mPageContentWidth, mPageContentHeight,
+                Bitmap.Config.ARGB_8888);
+        errorContent.draw(new Canvas(errorBitmap));
+
+        // Do not recycle the old bitmap if such as it may be set as an error
+        // state to any of the page views. Just let the GC take care of it.
+        mErrorState = new BitmapDrawable(mContext.getResources(), errorBitmap);
     }
 
     private PageRange[] computeSelectedPages() {
@@ -742,7 +759,7 @@ public final class PageAdapter extends Adapter<ViewHolder> {
     private void recyclePageView(PageContentView page, int pageIndexInAdapter) {
         PageContentProvider provider = page.getPageContentProvider();
         if (provider != null) {
-            page.init(null, mEmptyState, mMediaSize, mMinMargins);
+            page.init(null, mEmptyState, mErrorState, mMediaSize, mMinMargins);
             mPageContentRepository.releasePageContentProvider(provider);
         }
         mBoundPagesInAdapter.remove(pageIndexInAdapter);
