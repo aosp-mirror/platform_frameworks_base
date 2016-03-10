@@ -32,6 +32,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFormatException;
+import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
@@ -39,6 +40,9 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.health.HealthStatsParceler;
+import android.os.health.HealthStatsWriter;
+import android.os.health.UidHealthStats;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
@@ -65,7 +69,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -1419,4 +1425,88 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
         }
     }
+
+    /**
+     * Gets a snapshot of the system health for a particular uid.
+     */
+    @Override
+    public HealthStatsParceler takeUidSnapshot(int requestUid) {
+        if (requestUid != Binder.getCallingUid()) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.BATTERY_STATS, null);
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            updateExternalStats("get-health-stats-for-uid",
+                    BatteryStatsImpl.ExternalStatsSync.UPDATE_ALL);
+            synchronized (mStats) {
+                return getHealthStatsForUidLocked(requestUid);
+            }
+        } catch (Exception ex) {
+            Slog.d(TAG, "Crashed while writing for takeUidSnapshot(" + requestUid + ")", ex);
+            throw ex;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Gets a snapshot of the system health for a number of uids.
+     */
+    @Override
+    public HealthStatsParceler[] takeUidSnapshots(int[] requestUids) {
+        if (!onlyCaller(requestUids)) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.BATTERY_STATS, null);
+        }
+        long ident = Binder.clearCallingIdentity();
+        int i=-1;
+        try {
+            updateExternalStats("get-health-stats-for-uids",
+                    BatteryStatsImpl.ExternalStatsSync.UPDATE_ALL);
+            synchronized (mStats) {
+                final int N = requestUids.length;
+                final HealthStatsParceler[] results = new HealthStatsParceler[N];
+                for (i=0; i<N; i++) {
+                    results[i] = getHealthStatsForUidLocked(requestUids[i]);
+                }
+                return results;
+            }
+        } catch (Exception ex) {
+            Slog.d(TAG, "Crashed while writing for takeUidSnapshots("
+                    + Arrays.toString(requestUids) + ") i=" + i, ex);
+            throw ex;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Returns whether the Binder.getCallingUid is the only thing in requestUids.
+     */
+    private static boolean onlyCaller(int[] requestUids) {
+        final int caller = Binder.getCallingUid();
+        final int N = requestUids.length;
+        for (int i=0; i<N; i++) {
+            if (requestUids[i] != caller) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Gets a HealthStatsParceler for the given uid. You should probably call
+     * updateExternalStats first.
+     */
+    HealthStatsParceler getHealthStatsForUidLocked(int requestUid) {
+        final HealthStatsBatteryStatsWriter writer = new HealthStatsBatteryStatsWriter();
+        final HealthStatsWriter uidWriter = new HealthStatsWriter(UidHealthStats.CONSTANTS);
+        final BatteryStats.Uid uid = mStats.getUidStats().get(requestUid);
+        if (uid != null) {
+            writer.writeUid(uidWriter, mStats, uid);
+        }
+        return new HealthStatsParceler(uidWriter);
+    }
+
 }

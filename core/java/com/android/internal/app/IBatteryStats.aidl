@@ -20,6 +20,7 @@ import com.android.internal.os.BatteryStatsImpl;
 
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
+import android.os.health.HealthStatsParceler;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 
@@ -125,4 +126,7 @@ interface IBatteryStats {
     void noteBleScanStarted(in WorkSource ws);
     void noteBleScanStopped(in WorkSource ws);
     void noteResetBleScan();
+
+    HealthStatsParceler takeUidSnapshot(int uid);
+    HealthStatsParceler[] takeUidSnapshots(in int[] uid);
 }
