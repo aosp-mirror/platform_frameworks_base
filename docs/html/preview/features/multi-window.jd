@@ -146,15 +146,13 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <p>
-  If the user is resizes a window and makes it larger in either dimension,
-  the system fills in the expanded
-  area with the color specified by the {@link android.R.attr#windowBackground
-  windowBackground} attribute, or by the default
-  <code>windowBackgroundFallback</code> style attribute. When the user finishes
-  resizing the window, the activity is redrawn with its new dimensions, as
-  described in <a href=
-  "{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
-  Changes</a>.
+  If the user is resizing a window and makes it larger in either dimension, the
+  system resizes the activity to match the user action and issues <a href=
+  "{@docRoot}guide/topics/resources/runtime-changes.html">runtime changes</a>
+  as needed. If the app lags behind in drawing in newly-exposed areas, the
+  system temporarily fills those areas with the color specified by the {@link
+  android.R.attr#windowBackground windowBackground} attribute or by the default
+  <code>windowBackgroundFallback</code> style attribute.
 </p>
 
 <h2 id="configuring">Configuring Your App for Multi-Window Mode</h2>
