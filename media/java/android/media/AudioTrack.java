@@ -526,11 +526,18 @@ public class AudioTrack implements AudioRouting
      * the AudioTrackRoutingProxy subclass.
      * @param nativeTrackInJavaObj a C/C++ pointer to a native AudioTrack
      * (associated with an OpenSL ES player).
+     * IMPORTANT: For "N", this method is ONLY called to setup a Java routing proxy,
+     * i.e. IAndroidConfiguration::AcquireJavaProxy(). If we call with a 0 in nativeTrackInJavaObj
+     * it means that the OpenSL player interface hasn't been realized, so there is no native
+     * Audiotrack to connect to. In this case wait to call deferred_connect() until the
+     * OpenSLES interface is realized.
      */
     /*package*/ AudioTrack(long nativeTrackInJavaObj) {
         // "final"s
         mAttributes = null;
         mAppOps = null;
+        mNativeTrackInJavaObj = 0;
+        mJniData = 0;
 
         // remember which looper is associated with the AudioTrack instantiation
         Looper looper;
@@ -540,28 +547,41 @@ public class AudioTrack implements AudioRouting
         mInitializationLooper = looper;
 
         // other initialization...
-        // Note that for this native_setup, we are providing an already created/initialized
-        // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
-        int[] session = { 0 };
-        int[] rates = { 0 };
-        int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                null /*mAttributes - NA*/,
-                rates /*sampleRate - NA*/,
-                0 /*mChannelMask - NA*/,
-                0 /*mChannelIndexMask - NA*/,
-                0 /*mAudioFormat - NA*/,
-                0 /*mNativeBufferSizeInBytes - NA*/,
-                0 /*mDataLoadMode - NA*/,
-                session,
-                nativeTrackInJavaObj);
-        if (initResult != SUCCESS) {
-            loge("Error code "+initResult+" when initializing AudioTrack.");
-            return; // with mState == STATE_UNINITIALIZED
+        if (nativeTrackInJavaObj != 0) {
+            deferred_connect(nativeTrackInJavaObj);
+        } else {
+            mState = STATE_UNINITIALIZED;
         }
+    }
 
-        mSessionId = session[0];
+    /**
+     * @hide
+     */
+    /* package */ void deferred_connect(long nativeTrackInJavaObj) {
+        if (mState != STATE_INITIALIZED) {
+            // Note that for this native_setup, we are providing an already created/initialized
+            // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
+            int[] session = { 0 };
+            int[] rates = { 0 };
+            int initResult = native_setup(new WeakReference<AudioTrack>(this),
+                    null /*mAttributes - NA*/,
+                    rates /*sampleRate - NA*/,
+                    0 /*mChannelMask - NA*/,
+                    0 /*mChannelIndexMask - NA*/,
+                    0 /*mAudioFormat - NA*/,
+                    0 /*mNativeBufferSizeInBytes - NA*/,
+                    0 /*mDataLoadMode - NA*/,
+                    session,
+                    nativeTrackInJavaObj);
+            if (initResult != SUCCESS) {
+                loge("Error code "+initResult+" when initializing AudioTrack.");
+                return; // with mState == STATE_UNINITIALIZED
+            }
 
-        mState = STATE_INITIALIZED;
+            mSessionId = session[0];
+
+            mState = STATE_INITIALIZED;
+        }
     }
 
     /**
