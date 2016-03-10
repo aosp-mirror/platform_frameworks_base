@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
@@ -1404,22 +1405,37 @@ final class ActivityStack {
      * needed. A stack is considered translucent if it don't contain a visible or
      * starting (about to be visible) activity that is fullscreen (opaque).
      * @param starting The currently starting activity or null if there is none.
+     * @param stackBehindId The id of the stack directly behind this one.
      */
-    private boolean isStackTranslucent(ActivityRecord starting) {
+    private boolean isStackTranslucent(ActivityRecord starting, int stackBehindId) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
 
-                // Conditions for an activity to obscure the stack we're
-                // examining:
-                // 1. Not Finishing AND (Visible or the Starting activity) AND:
-                // 2. Either:
-                // - Full Screen Activity OR
-                // - On top of Home and our stack is NOT home
-                if (!r.finishing && (r.visible || r == starting) && (r.fullscreen ||
-                        (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()))) {
+                if (r.finishing) {
+                    // We don't factor in finishing activities when determining translucency since
+                    // they will be gone soon.
+                    continue;
+                }
+
+                if (!r.visible && r != starting) {
+                    // Also ignore invisible activities that are not the currently starting
+                    // activity (about to be visible).
+                    continue;
+                }
+
+                if (r.fullscreen) {
+                    // Stack isn't translucent if it has at least one fullscreen activity
+                    // that is visible.
+                    return false;
+                }
+
+                if (!isHomeStack() && r.frontOfTask
+                        && task.isOverHomeStack() && stackBehindId != HOME_STACK_ID) {
+                    // Stack isn't translucent if it's top activity should have the home stack
+                    // behind it and the stack currently behind it isn't the home stack.
                     return false;
                 }
             }
@@ -1475,30 +1491,33 @@ final class ActivityStack {
                     : STACK_INVISIBLE;
         }
 
-        // Find the first stack below focused stack that actually got something visible.
-        int belowFocusedIndex = mStacks.indexOf(focusedStack) - 1;
-        while (belowFocusedIndex >= 0 &&
-                mStacks.get(belowFocusedIndex).topRunningActivityLocked() == null) {
-            belowFocusedIndex--;
+        // Find the first stack behind focused stack that actually got something visible.
+        int stackBehindFocusedIndex = mStacks.indexOf(focusedStack) - 1;
+        while (stackBehindFocusedIndex >= 0 &&
+                mStacks.get(stackBehindFocusedIndex).topRunningActivityLocked() == null) {
+            stackBehindFocusedIndex--;
         }
         if ((focusedStackId == DOCKED_STACK_ID || focusedStackId == PINNED_STACK_ID)
-                && stackIndex == belowFocusedIndex) {
+                && stackIndex == stackBehindFocusedIndex) {
             // Stacks directly behind the docked or pinned stack are always visible.
             return STACK_VISIBLE;
         }
 
+        final int stackBehindFocusedId = (stackBehindFocusedIndex >= 0)
+                ? mStacks.get(stackBehindFocusedIndex).mStackId : INVALID_STACK_ID;
+
         if (focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                && focusedStack.isStackTranslucent(starting)) {
+                && focusedStack.isStackTranslucent(starting, stackBehindFocusedId)) {
             // Stacks behind the fullscreen stack with a translucent activity are always
             // visible so they can act as a backdrop to the translucent activity.
             // For example, dialog activities
-            if (stackIndex == belowFocusedIndex) {
+            if (stackIndex == stackBehindFocusedIndex) {
                 return STACK_VISIBLE;
             }
-            if (belowFocusedIndex >= 0) {
-                final ActivityStack stack = mStacks.get(belowFocusedIndex);
-                if ((stack.mStackId == DOCKED_STACK_ID || stack.mStackId == PINNED_STACK_ID)
-                        && stackIndex == (belowFocusedIndex - 1)) {
+            if (stackBehindFocusedIndex >= 0) {
+                if ((stackBehindFocusedId == DOCKED_STACK_ID
+                        || stackBehindFocusedId == PINNED_STACK_ID)
+                        && stackIndex == (stackBehindFocusedIndex - 1)) {
                     // The stack behind the docked or pinned stack is also visible so we can have a
                     // complete backdrop to the translucent activity when the docked stack is up.
                     return STACK_VISIBLE;
@@ -1523,7 +1542,7 @@ final class ActivityStack {
                 return STACK_INVISIBLE;
             }
 
-            if (!stack.isStackTranslucent(starting)) {
+            if (!stack.isStackTranslucent(starting, INVALID_STACK_ID)) {
                 return STACK_INVISIBLE;
             }
         }
