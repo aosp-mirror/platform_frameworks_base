@@ -83,6 +83,10 @@ public class State implements android.os.Parcelable {
     public boolean showSize;
     public boolean localOnly;
     public boolean restored;
+    /*
+     * Indicates handler was an external app, like photos.
+     */
+    public boolean external;
 
     // Indicates that a copy operation (or move) includes a directory.
     // Why? Directory creation isn't supported by some roots (like Downloads).
@@ -180,6 +184,7 @@ public class State implements android.os.Parcelable {
         out.writeInt(showSize ? 1 : 0);
         out.writeInt(localOnly ? 1 : 0);
         out.writeInt(restored ? 1 : 0);
+        out.writeInt(external ? 1 : 0);
         DurableUtils.writeToParcel(out, stack);
         out.writeMap(dirState);
         out.writeParcelable(selectedDocuments, 0);
@@ -208,6 +213,7 @@ public class State implements android.os.Parcelable {
             state.showSize = in.readInt() != 0;
             state.localOnly = in.readInt() != 0;
             state.restored = in.readInt() != 0;
+            state.external = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
             in.readMap(state.dirState, loader);
             state.selectedDocuments = in.readParcelable(loader);

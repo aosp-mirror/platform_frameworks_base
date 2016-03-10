@@ -22,6 +22,7 @@ import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 
 import android.content.Context;
 import android.provider.DocumentsContract.Document;
@@ -157,8 +158,27 @@ public abstract class FragmentTuner {
 
         @Override
         void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
+            boolean showDrawer = false;
+
+            if (mState.restored) {
+                showDrawer = true;
+            }
+            if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
+                showDrawer = false;
+            }
+            if (mState.external && mState.action == ACTION_GET_CONTENT) {
+                showDrawer = true;
+            }
+            if (mState.action == ACTION_PICK_COPY_DESTINATION) {
+                showDrawer = true;
+            }
+
             // When launched into empty root, open drawer.
-            if (model.isEmpty() && !mState.hasInitialLocationChanged() && !isSearch) {
+            if (model.isEmpty()) {
+                showDrawer = true;
+            }
+
+            if (showDrawer && !mState.hasInitialLocationChanged() && !isSearch) {
                 // This noops on layouts without drawer, so no need to guard.
                 ((BaseActivity) mContext).setRootsDrawerOpen(true);
             }
