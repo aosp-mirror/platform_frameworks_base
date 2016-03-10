@@ -140,8 +140,8 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
             Log.d(TAG, "Updating model with hidden ids: " + mHiddenIds);
         }
 
-        List<String> modelIds = model.getModelIds();
-        mModelIds = new ArrayList<>(modelIds.size());
+        String[] modelIds = model.getModelIds();
+        mModelIds = new ArrayList<>(modelIds.length);
         for (String id : modelIds) {
             if (!mHiddenIds.contains(id)) {
                 mModelIds.add(id);
