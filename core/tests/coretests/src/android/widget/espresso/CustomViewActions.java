@@ -50,7 +50,7 @@ public final class CustomViewActions {
         return actionWithAssertions(
                 new GeneralClickAction(
                         Tap.LONG,
-                        new RelativeCoordinatesProvider(hRef, vRef, hDelta, vDelta),
+                        new RelativeCoordinatesProvider(hRef, hDelta, vRef, vDelta),
                         Press.FINGER));
     }
 
