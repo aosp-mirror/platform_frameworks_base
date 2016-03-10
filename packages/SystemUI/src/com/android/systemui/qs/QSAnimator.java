@@ -198,6 +198,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
         mNonfirstPageAnimator = new TouchAnimator.Builder()
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
+                .setListener(mNonFirstPageListener)
                 .setEndDelay(.5f)
                 .build();
     }
@@ -267,7 +268,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private void clearAnimationState() {
         final int N = mAllViews.size();
         mQuickQsPanel.setAlpha(0);
-        mQuickQsPanel.setVisibility(View.VISIBLE);
+        mQuickQsPanel.setVisibility(View.INVISIBLE);
         for (int i = 0; i < N; i++) {
             View v = mAllViews.get(i);
             v.setAlpha(1);
@@ -292,6 +293,14 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         // hooked up to the new views.
         mQsPanel.post(mUpdateAnimators);
     }
+
+    private final TouchAnimator.Listener mNonFirstPageListener =
+            new TouchAnimator.ListenerAdapter() {
+                @Override
+                public void onAnimationStarted() {
+                    mQuickQsPanel.setVisibility(View.VISIBLE);
+                }
+            };
 
     private Runnable mUpdateAnimators = new Runnable() {
         @Override
