@@ -1087,8 +1087,25 @@ template<>
 const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
 
 #define SET(setter, value) object.callSetter("set" # setter, (value))
-#define SET_IF(flag, setter, value) \
-        if (flags & (flag)) object.callSetter("set" # setter, (value))
+
+// If you want to check if a flag is not set, use SET_IF_NOT(FLAG, setter,
+// value) to do that. SET_IF(!FLAG, setter, value) won't compile.
+//
+// This macros generates compilation error if the provided 'flag' is not a
+// single token. For example, 'GNSS_CLOCK_HAS_BIAS' can be accepted, but
+// '!GNSS_CLOCK_HAS_DRIFT' will fail to compile.
+#define SET_IF(flag, setter, value) do { \
+        if (flags & flag) { \
+            JavaObject& name_check_##flag = object; \
+            name_check_##flag.callSetter("set" # setter, (value)); \
+        } \
+    } while (false)
+#define SET_IF_NOT(flag, setter, value) do { \
+        if (!(flags & flag)) { \
+            JavaObject& name_check_##flag = object; \
+            name_check_##flag.callSetter("set" # setter, (value)); \
+        } \
+    } while (false)
 
 static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
     static uint32_t discontinuity_count_to_handle_old_lock_type = 0;
@@ -1209,9 +1226,9 @@ static jobject translate_gps_measurement(JNIEnv* env,
         static_cast<int32_t>(measurement->multipath_indicator));
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
 
-    SET_IF(!GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE,
-           PseudorangeRateCorrected,
-           true);
+    SET_IF_NOT(GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE,
+               PseudorangeRateCorrected,
+               true);
 
     return object.get();
 }
