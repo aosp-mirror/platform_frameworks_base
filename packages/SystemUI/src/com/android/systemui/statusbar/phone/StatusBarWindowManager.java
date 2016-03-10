@@ -173,7 +173,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
     private void applyInputFeatures(State state) {
         if (state.isKeyguardShowingAndNotOccluded()
                 && state.statusBarState == StatusBarState.KEYGUARD
-                && !state.qsExpanded) {
+                && !state.qsExpanded && !state.forceUserActivity) {
             mLpChanged.inputFeatures |=
                     WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
         } else {
@@ -265,6 +265,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         apply(mCurrentState);
     }
 
+    public void setForceUserActivity(boolean forceUserActivity) {
+        mCurrentState.forceUserActivity = forceUserActivity;
+        apply(mCurrentState);
+    }
+
     public void setHeadsUpShowing(boolean showing) {
         mCurrentState.headsUpShowing = showing;
         apply(mCurrentState);
@@ -332,6 +337,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         boolean forceStatusBarVisible;
         boolean forceCollapsed;
         boolean forceDozeBrightness;
+        boolean forceUserActivity;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.
