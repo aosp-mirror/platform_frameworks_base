@@ -1436,16 +1436,20 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public ParcelFileDescriptor getShortcutIconFd(@NonNull String callingPackage,
-                @NonNull ShortcutInfo shortcut, int userId) {
-            Preconditions.checkNotNull(shortcut, "shortcut");
+                @NonNull ShortcutInfo shortcutIn, int userId) {
+            Preconditions.checkNotNull(shortcutIn, "shortcut");
 
             synchronized (mLock) {
                 final ShortcutInfo shortcutInfo = getPackageShortcutsLocked(
-                        shortcut.getPackageName(), userId).findShortcutById(shortcut.getId());
+                        shortcutIn.getPackageName(), userId).findShortcutById(shortcutIn.getId());
                 if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
                     return null;
                 }
                 try {
+                    if (shortcutInfo.getBitmapPath() == null) {
+                        Slog.w(TAG, "null bitmap detected in getShortcutIconFd()");
+                        return null;
+                    }
                     return ParcelFileDescriptor.open(
                             new File(shortcutInfo.getBitmapPath()),
                             ParcelFileDescriptor.MODE_READ_ONLY);
@@ -1977,7 +1981,7 @@ class PackageShortcuts {
             final ShortcutInfo si = shortcuts.valueAt(i);
             pw.print("        ");
             pw.println(si.toInsecureString());
-            if (si.hasIconFile()) {
+            if (si.getBitmapPath() != null) {
                 final long len = new File(si.getBitmapPath()).length();
                 pw.print("          ");
                 pw.print("bitmap size=");
