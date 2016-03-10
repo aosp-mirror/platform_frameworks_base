@@ -1642,7 +1642,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (!TextUtils.isEmpty(mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT))) {
-            Slog.wtf(LOG_TAG, "Trying to set ro.device_owner, but it has already been set?");
+            Slog.w(LOG_TAG, "Trying to set ro.device_owner, but it has already been set?");
         } else {
             if (mOwners.hasDeviceOwner()) {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
