@@ -295,6 +295,9 @@
     <!-- The size of the initial peek area at the top of the stack (below the status bar). -->
     <dimen name="recents_initial_top_peek_size">8dp</dimen>
 
+    <!-- The size of the initial peek area at the bottom of the stack (above the nav bar). -->
+    <dimen name="recents_initial_bottom_peek_size">100dp</dimen>
+
     <!-- The size of the peek area at the top of the stack (below the status bar). -->
     <dimen name="recents_layout_focused_top_peek_size">@dimen/recents_history_button_height</dimen>
 

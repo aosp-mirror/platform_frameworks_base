@@ -105,6 +105,9 @@ public class RecentsTransitionHelper {
             animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
                 @Override
                 public void onAnimationStarted() {
+                    // If we are launching into another task, cancel the previous task's
+                    // window transition
+                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
 
                     if (screenPinningRequested) {
@@ -119,6 +122,9 @@ public class RecentsTransitionHelper {
             animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
                 @Override
                 public void onAnimationStarted() {
+                    // If we are launching into another task, cancel the previous task's
+                    // window transition
+                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
                 }
             };
@@ -146,10 +152,6 @@ public class RecentsTransitionHelper {
                         animStartedListener);
             }
         }
-
-        // If we are launching into another task, cancel the previous task's
-        // window transition
-        EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
     }
 
     /**
@@ -278,7 +280,8 @@ public class RecentsTransitionHelper {
             } else {
                 layoutAlgorithm.getStackTransformScreenCoordinates(task, stackScroll, mTmpTransform,
                         null);
-                specs.add(composeAnimationSpec(taskView, mTmpTransform, true /* addHeaderBitmap */));
+                specs.add(composeAnimationSpec(stackView, taskView, mTmpTransform,
+                        true /* addHeaderBitmap */));
             }
             return specs;
         }
@@ -299,7 +302,8 @@ public class RecentsTransitionHelper {
                 } else {
                     layoutAlgorithm.getStackTransformScreenCoordinates(t, stackScroll,
                             mTmpTransform, null);
-                    specs.add(composeAnimationSpec(tv, mTmpTransform, true /* addHeaderBitmap */));
+                    specs.add(composeAnimationSpec(stackView, tv, mTmpTransform,
+                            true /* addHeaderBitmap */));
                 }
             }
         }
@@ -318,8 +322,8 @@ public class RecentsTransitionHelper {
     /**
      * Composes a single animation spec for the given {@link TaskView}
      */
-    private static AppTransitionAnimationSpec composeAnimationSpec(TaskView taskView,
-            TaskViewTransform transform, boolean addHeaderBitmap) {
+    private static AppTransitionAnimationSpec composeAnimationSpec(TaskStackView stackView,
+            TaskView taskView, TaskViewTransform transform, boolean addHeaderBitmap) {
         Bitmap b = null;
         if (addHeaderBitmap) {
             float scale = transform.scale;
@@ -341,6 +345,10 @@ public class RecentsTransitionHelper {
 
         Rect taskRect = new Rect();
         transform.rect.round(taskRect);
+        if (stackView.getStack().getStackFrontMostTask(false /* includeFreeformTasks */) !=
+                taskView.getTask()) {
+            taskRect.bottom = 2 * Recents.getSystemServices().getDisplayRect().height();
+        }
         return new AppTransitionAnimationSpec(taskView.getTask().key.id, b, taskRect);
     }
 }
