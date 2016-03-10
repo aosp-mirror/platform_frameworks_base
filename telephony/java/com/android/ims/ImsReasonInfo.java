@@ -241,12 +241,12 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_ANSWERED_ELSEWHERE = 1014;
 
     /**
-     * Call pull request failure from the network.
+     * For MultiEndpoint - Call Pull request has failed
      */
     public static final int CODE_CALL_PULL_OUT_OF_SYNC = 1015;
 
     /**
-     * Call ended due to being pulled onto another device.
+     * For MultiEndpoint - Call has been pulled from primary to secondary
      */
     public static final int CODE_CALL_END_CAUSE_CALL_PULL = 1016;
 
