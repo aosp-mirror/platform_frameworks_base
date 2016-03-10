@@ -504,7 +504,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public void onStartUser(int userId) {
+        public void onUnlockUser(int userId) {
             synchronized (mService.mLock) {
                 mService.onStartUserLocked(userId);
             }
@@ -868,7 +868,6 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
             Slog.i(TAG, "Loading from " + path);
         }
-        path.mkdirs();
         final AtomicFile file = new AtomicFile(path);
 
         final FileInputStream in;
