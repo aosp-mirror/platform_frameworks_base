@@ -451,6 +451,21 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
     EXPECT_EQ(3, count);
 }
 
+TEST(RecordingCanvas, drawRenderNode_rejection) {
+    auto child = TestUtils::createNode(50, 50, 150, 150,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [&child](RecordingCanvas& canvas) {
+        canvas.clipRect(0, 0, 0, 0, SkRegion::kIntersect_Op); // empty clip, reject node
+        canvas.drawRenderNode(child.get()); // shouldn't crash when rejecting node...
+    });
+    ASSERT_TRUE(dl->isEmpty());
+}
+
 TEST(RecordingCanvas, drawRenderNode_projection) {
     sp<RenderNode> background = TestUtils::createNode(50, 50, 150, 150,
             [](RenderProperties& props, RecordingCanvas& canvas) {

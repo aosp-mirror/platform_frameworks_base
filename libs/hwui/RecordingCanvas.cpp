@@ -564,15 +564,17 @@ void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
             getRecordedClip(),
             renderNode);
     int opIndex = addOp(op);
-    int childIndex = mDisplayList->addChild(op);
+    if (CC_LIKELY(opIndex >= 0)) {
+        int childIndex = mDisplayList->addChild(op);
 
-    // update the chunk's child indices
-    DisplayList::Chunk& chunk = mDisplayList->chunks.back();
-    chunk.endChildIndex = childIndex + 1;
+        // update the chunk's child indices
+        DisplayList::Chunk& chunk = mDisplayList->chunks.back();
+        chunk.endChildIndex = childIndex + 1;
 
-    if (renderNode->stagingProperties().isProjectionReceiver()) {
-        // use staging property, since recording on UI thread
-        mDisplayList->projectionReceiveIndex = opIndex;
+        if (renderNode->stagingProperties().isProjectionReceiver()) {
+            // use staging property, since recording on UI thread
+            mDisplayList->projectionReceiveIndex = opIndex;
+        }
     }
 }
 
