@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "DngCreator_JNI"
 #include <inttypes.h>
 #include <string.h>
@@ -1792,6 +1792,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
     {
         // Set up orientation tags.
+        // Note: There's only one orientation field for the whole file, in IFD0
+        // The main image and any thumbnails therefore have the same orientation.
         uint16_t orientation = nativeContext->getOrientation();
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_ORIENTATION, 1, &orientation, TIFF_IFD_0),
                 env, TAG_ORIENTATION, writer);
@@ -1873,7 +1875,6 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         }
 
         Vector<uint16_t> tagsToMove;
-        tagsToMove.add(TAG_ORIENTATION);
         tagsToMove.add(TAG_NEWSUBFILETYPE);
         tagsToMove.add(TAG_ACTIVEAREA);
         tagsToMove.add(TAG_BITSPERSAMPLE);
@@ -1902,12 +1903,6 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         if (moveEntries(writer, TIFF_IFD_0, TIFF_IFD_SUB1, tagsToMove) != OK) {
             jniThrowException(env, "java/lang/IllegalStateException", "Failed to move entries");
             return nullptr;
-        }
-
-        // Make sure both IFDs get the same orientation tag
-        sp<TiffEntry> orientEntry = writer->getEntry(TAG_ORIENTATION, TIFF_IFD_SUB1);
-        if (orientEntry.get() != nullptr) {
-            writer->addEntry(orientEntry, TIFF_IFD_0);
         }
 
         // Setup thumbnail tags
