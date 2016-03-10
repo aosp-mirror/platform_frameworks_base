@@ -222,9 +222,11 @@ public class TaskStackLayoutAlgorithm {
     private Range mUnfocusedRange;
     private Range mFocusedRange;
 
-    // The initial offset from the top of the stack
+    // The initial offset from the top and bottom of the stack
     @ViewDebug.ExportedProperty(category="recents")
     private int mInitialTopPeekHeight;
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mInitialBottomPeekHeight;
 
     // The offset from the top when scrolled to the top of the stack
     @ViewDebug.ExportedProperty(category="recents")
@@ -322,6 +324,8 @@ public class TaskStackLayoutAlgorithm {
                 res.getFloat(R.integer.recents_layout_unfocused_range_max));
         mFocusState = getInitialFocusState();
         mInitialTopPeekHeight = res.getDimensionPixelSize(R.dimen.recents_initial_top_peek_size);
+        mInitialBottomPeekHeight =
+                res.getDimensionPixelSize(R.dimen.recents_initial_bottom_peek_size);
         mFocusedTopPeekHeight =
                 res.getDimensionPixelSize(R.dimen.recents_layout_focused_top_peek_size);
         mFocusedBottomTaskPeekHeight =
@@ -508,10 +512,10 @@ public class TaskStackLayoutAlgorithm {
             float initialPeekOffsetNormX = mUnfocusedCurveInterpolator.getX(initialPeekOffsetPct);
             float initialFocusedOffset = mStackRect.height() - mInitialTopPeekHeight -
                     (mHeaderBarHeight * 1f) + 1;
-            float initialFocusedOffsetPct = (float) initialFocusedOffset / mStackRect.height();
+            float initialFocusedOffsetPct = initialFocusedOffset / mStackRect.height();
             float initialFocusedNormX = mUnfocusedCurveInterpolator.getX(initialFocusedOffsetPct);
-            int initialBottomOffset = mStackBottomOffset + mHeaderBarHeight;
-            float initialBottomOffsetPct = (float) initialBottomOffset / mStackRect.height();
+            float initialBottomOffset = mStackBottomOffset + mInitialBottomPeekHeight;
+            float initialBottomOffsetPct = initialBottomOffset / mStackRect.height();
             float initialBottomNormX = mUnfocusedCurveInterpolator.getX(initialBottomOffsetPct);
             /*
             // If we want to offset the top card slightly
