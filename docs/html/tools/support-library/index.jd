@@ -59,9 +59,314 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
-  <p id="rev23-2-0">
+  <p id="rev23-2-1">
     <a href="#" onclick="return toggleContent(this)"><img src=
     "{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    alt="">Android Support Library, revision 23.2.1</a> <em>(March
+    2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an exception in {@link
+          android.support.v4.graphics.drawable.DrawableCompat#wrap
+          DrawableCompat.wrap()} and {@link android.graphics.drawable.LayerDrawable} on
+          API levels 17 to 19. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201817">Issue 201817</a>)
+          </li>
+
+          <li>Fixed an {@code ArrayIndexOutOfBoundsException} in {@link
+          android.support.v4.widget.ViewDragHelper#shouldInterceptTouchEvent
+          ViewDragHelper.shouldInterceptTouchEvent()}. (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=182262">Issue
+            182262</a>)
+          </li>
+
+          <li>Fixed a bug in {@link android.support.v4.view.ViewPager} related to
+          scroll calculation for size changes.
+          </li>
+
+          <li>Fixed a {@code NullPointerException} when {@code
+          DrawerLayout.removeDrawerListener()} is called without a set {@link
+          android.support.v4.widget.DrawerLayout.DrawerListener
+          DrawerLayout.DrawerListener}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202478">Issue 202478</a>)
+          </li>
+
+          <li>Fixed a bug where {@link android.support.v4.view.ViewPager} does not set
+          {@link android.view.accessibility.AccessibilityEvent} parameters properly
+          when scrolling.
+          </li>
+
+          <li>Fixed an issue that caused lag during device rotation when using
+          {@link android.support.v4.graphics.drawable.DrawableCompat#wrap
+          Drawable.wrap()}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201924">Issue 201924</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Reverted dependency on vector assets so that developers using the
+            <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">appcompat
+            library</a> are not forced to use {@link
+            android.graphics.drawable.VectorDrawable} and its associated build flags.
+          </li>
+
+          <li>Fixed a compatibility issue with Night Mode and API level 23.
+            (<a class="external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=201910">Issue
+            201910</a>)
+          </li>
+
+          <li>Fixed a compatibility issue with {@link
+          android.support.v7.widget.SwitchCompat} and API level 7. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201942">Issue 201942</a>)
+          </li>
+
+          <li>Fixed an issue with propagating configuration values in Resources objects
+          <a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201928">Issue 201928</a>
+          </li>
+
+          <li>Fixed a compatibility issue where the {@link
+          android.support.v7.app.NotificationCompat.MediaStyle
+          NotificationCompat.MediaStyle} cancel button becomes invisible on API level
+          21 and below. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202156">Issue 202156</a>)
+          </li>
+
+          <li>Fixed a compatibility crash with {@link
+          android.support.v7.widget.AppCompatSpinner} on API level 21 and below.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202246">Issue 202246</a>)
+          </li>
+
+          <li>Fixed an issue where the {@code app:textAllCaps = "false"} style did not
+          work. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202117">Issue 202117</a>)
+          </li>
+
+          <li>Fixed a crash when restoring {@link android.widget.SearchView}.
+            (<a class="external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=201836">Issue
+            201836</a>)
+          </li>
+
+          <li>Fixed a memory leak that occurs when tinting drawable resources using
+          AppCompat. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202379">Issue 202379</a>)
+          </li>
+
+          <li>Fixed an issue with {@link android.view.KeyEvent} on API level 11 and
+          lower. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202939">Issue 202939</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-cardview">v7 cardview
+        library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added Night Mode support for {@link
+          android.support.v7.widget.CardView}. (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=194497">Issue
+            194497</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-recyclerview">v7
+        recyclerview library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed bugs related to various measure-spec methods. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201856">Issue
+          201856</a>)
+          </li>
+
+          <li>Reduced the lockdown period in which {@link
+          android.support.v7.widget.RecyclerView} does not allow adapter
+          changes while calculating a layout or scroll. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202046">Issue
+          202046</a>)
+          </li>
+
+          <li>Fixed a crash when calling {@link
+          android.support.v7.widget.RecyclerView.Adapter#notifyItemChanged
+          notifyItemChanged()} on an item that is out of view. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202136">Issue
+          202136</a>)
+          </li>
+
+          <li>Fixed a crash that occurs when {@link
+          android.support.v7.widget.RecyclerView.LayoutManager
+          RecyclerView.LayoutManager} adds and removes a view in the same
+          measurement pass. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=193958">Issue
+          193958</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-mediarouter">v7
+        mediarouter library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a crash that occurs when calling {@link
+          android.support.v7.media.MediaRouter#getInstance
+          MediaRouter.getInstance()} on API level 17. (<a class="external-link"
+            href=
+            "https://code.google.com/p/android/issues/detail?id=180654">Issue
+            180654</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v17-leanback">v17
+        Leanback Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue with {@code GridLayout.onAddFocusables()} that
+          caused the wrong item to be selected.
+          </li>
+
+          <li>Fixed issue with {@link
+          android.support.v17.leanback.app.GuidedStepFragment} actions
+          disappearing after an action was collapsed.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a {@link android.support.design.widget.TabLayout} crash
+          caused by tab-pooling. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201827">Issue
+          201827</a>)
+          </li>
+
+          <li>Fixed a bug in {@link
+          android.support.design.widget.NavigationView} that caused the wrong
+          color to be selected. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201951">Issue
+          201951</a>)
+          </li>
+
+          <li>Fixed a bug where {@link
+          android.support.design.widget.FloatingActionButton#setBackgroundTintList
+          setBackgroundTintList()} was no longer able to change the background
+          color. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201873">Issue
+          201873</a>)
+          </li>
+
+          <li>Fixed an issue where {@link
+          android.support.design.widget.AppBarLayout} did not completely scroll
+          out of view when used with {@code android:fitsSystemWindows = “true”}.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201822">Issue
+          201822</a>)
+          </li>
+
+          <li>Fixed an issue where {@code BottomSheetDialog} did not display
+          short content views correctly. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201793">Issue
+          201793</a>)
+          </li>
+
+          <li>Fixed an issue where {@code BottomSheetDialogFragment} moved
+          sporadically when content inside was changed. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202125">Issue
+          202125</a>)
+          </li>
+
+          <li>Fixed a crash in TextInputLayout counter <a class="external-link"
+            href=
+            "https://code.google.com/p/android/issues/detail?id=202051">link</a>
+          </li>
+
+          <li>Fixed a crash that occured when {@link
+          android.support.design.widget.TextInputLayout#getCounterMaxLength
+          TextInputLayout.getCounterMaxLength()} restored a saved state.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202375">Issue
+          202375</a>)
+          </li>
+
+          <li>Fixed a {@code ClassCastException} that occurred when restoring a
+          {@link android.support.design.widget.CoordinatorLayout} using the
+          saved state of a view that was not a {@link
+          android.support.design.widget.CoordinatorLayout}.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for VectorDrawableCompat:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where the wrong variable was read for {@code
+          android:tintMode}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201907">Issue
+          201907</a>)
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+<!-- end of collapsible section -->
+
+<div class="toggle-content closed">
+  <p id="rev23-2-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
     alt="">Android Support Library, revision 23.2.0</a> <em>(February
     2016)</em>
   </p>
