@@ -16,6 +16,10 @@
 
 package com.android.documentsui.services;
 
+import static com.google.common.collect.Lists.newArrayList;
+
+import android.net.Uri;
+import android.provider.DocumentsContract.Document;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -36,6 +40,21 @@ public class CopyJobTest extends AbstractCopyJobTest<CopyJob> {
 
     public void testCopyVirtualNonTypedFile() throws Exception {
         runCopyVirtualNonTypedFileTest();
+    }
+
+    public void testCopy_BackendSideVirtualTypedFile_Fallback() throws Exception {
+        mDocs.assertChildCount(mDestRoot, 0);
+
+        Uri testFile = mDocs.createDocumentWithFlags(
+                mSrcRoot.documentId, "virtual/mime-type", "tokyo.sth",
+                Document.FLAG_VIRTUAL_DOCUMENT | Document.FLAG_SUPPORTS_COPY
+                        | Document.FLAG_SUPPORTS_MOVE, "application/pdf");
+
+        createJob(newArrayList(testFile)).run();
+
+        mJobListener.waitForFinished();
+        mDocs.assertChildCount(mDestRoot, 1);
+        mDocs.assertHasFile(mDestRoot, "tokyo.sth.pdf");  // Copy should convert file to PDF.
     }
 
     public void testCopyEmptyDir() throws Exception {

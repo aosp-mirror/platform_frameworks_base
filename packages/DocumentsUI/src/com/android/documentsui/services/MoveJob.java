@@ -16,6 +16,7 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 
 import android.app.Notification;
@@ -24,6 +25,7 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.util.Log;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -33,6 +35,8 @@ import java.util.List;
 
 // TODO: Stop extending CopyJob.
 final class MoveJob extends CopyJob {
+
+    private static final String TAG = "MoveJob";
 
     final DocumentInfo mSrcParent;
 
@@ -89,16 +93,15 @@ final class MoveJob extends CopyJob {
                 try {
                     if (DocumentsContract.moveDocument(getClient(src), src.derivedUri,
                             srcParent != null ? srcParent.derivedUri : mSrcParent.derivedUri,
-                            dest.derivedUri) == null) {
-                        throw new ResourceException("Provider side move failed for document %s.",
-                                src.derivedUri);
+                            dest.derivedUri) != null) {
+                        return;
                     }
-                } catch (RuntimeException | RemoteException e) {
-                    throw new ResourceException(
-                            "Provider side move failed for document %s due to an exception.",
-                            src.derivedUri, e);
+                } catch (RemoteException | RuntimeException e) {
+                    Log.e(TAG, "Provider side move failed for: " + src.derivedUri
+                            + " due to an exception: " + e);
                 }
-                return;
+                // If optimized move fails, then fallback to byte-by-byte copy.
+                if (DEBUG) Log.d(TAG, "Fallback to byte-by-byte move for: " + src.derivedUri);
             }
         }
 
