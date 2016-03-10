@@ -17,26 +17,25 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Picture-in-Picture menu -->
+    <!-- Picture-in-Picture (PIP) menu -->
     <eat-comment />
-    <!-- Button to close PIP on PIP UI -->
-    <string name="pip_close" translatable="false">Close PIP</string>
-    <!-- Button to move PIP screen to the fullscreen on PIP UI -->
-    <string name="pip_fullscreen" translatable="false">Full screen</string>
-    <!-- Button to play the current media on PIP UI -->
-    <string name="pip_play" translatable="false">Play</string>
-    <!-- Button to pause the current media on PIP UI -->
-    <string name="pip_pause" translatable="false">Pause</string>
-    <!-- Button to close PIP overlay menu on PIP UI -->
-    <string name="pip_cancel" translatable="false">Cancel</string>
-    <!-- Overlay text on PIP -->
-    <string name="pip_hold_home" translatable="false">Hold <b>HOME</b> to control PIP</string>
-    <!-- Picture-in-Picture onboarding screen -->
+    <!-- Button to close picture-in-picture (PIP) in PIP menu [CHAR LIMIT=16] -->
+    <string name="pip_close">Close PIP</string>
+    <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=16] -->
+    <string name="pip_fullscreen">Full screen</string>
+    <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=16] -->
+    <string name="pip_play">Play</string>
+    <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=16] -->
+    <string name="pip_pause">Pause</string>
+    <!-- Overlay text on picture-in-picture (PIP) to indicate that longpress HOME key to control PIP [CHAR LIMIT=25] -->
+    <string name="pip_hold_home">Hold <b>HOME</b> to control PIP</string>
+    <!-- Picture-in-Picture (PIP) onboarding screen -->
     <eat-comment />
-    <!-- Description for onboarding screen. -->
-    <string name="pip_onboarding_description" translatable="false">Press and hold the HOME\nbutton to close or control it</string>
-    <!-- Button to close onboarding screen. -->
-    <string name="pip_onboarding_button" translatable="false">Got it</string>
+    <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP.
+         Line break is needed as if we have CHAR LIMIT=25. [CHAR LIMIT=NONE] -->
+    <string name="pip_onboarding_description">Press and hold the HOME\nbutton to control PIP</string>
+    <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
+    <string name="pip_onboarding_button">Got it</string>
     <!-- Font for Recents -->
     <!-- DO NOT TRANSLATE -->
     <string name="font_roboto_regular" translatable="false">sans-serif</string>
