@@ -46,7 +46,8 @@ public class TextViewTransformState extends TransformState {
             if(TextUtils.equals(otherTvs.mText.getText(), mText.getText())) {
                 int ownEllipsized = getEllipsisCount();
                 int otherEllipsized = otherTvs.getEllipsisCount();
-                return ownEllipsized == otherEllipsized;
+                return ownEllipsized == otherEllipsized
+                        && mText.getHeight() == otherTvs.mText.getHeight();
             }
         }
         return super.sameAs(otherState);
