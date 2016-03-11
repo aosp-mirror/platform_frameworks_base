@@ -9331,6 +9331,7 @@ package android.content.pm {
     field public int flags;
     field public int largestWidthLimitDp;
     field public java.lang.String manageSpaceActivityName;
+    field public java.lang.String minSdkVersion;
     field public java.lang.String nativeLibraryDir;
     field public java.lang.String permission;
     field public java.lang.String processName;
