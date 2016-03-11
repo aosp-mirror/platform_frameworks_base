@@ -46,6 +46,9 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     private static final boolean WAKE_ON_HOTPLUG =
             SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, true);
 
+    private static final boolean SET_MENU_LANGUAGE =
+            SystemProperties.getBoolean(Constants.PROPERTY_SET_MENU_LANGUAGE, false);
+
     private boolean mIsActiveSource = false;
 
     // Used to keep the device awake while it is the active source. For devices that
@@ -316,6 +319,9 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleSetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (!SET_MENU_LANGUAGE) {
+            return false;
+        }
 
         try {
             String iso3Language = new String(message.getParams(), 0, 3, "US-ASCII");
@@ -345,6 +351,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
             Slog.w(TAG, "Can't handle <Set Menu Language> of " + iso3Language);
             return false;
         } catch (UnsupportedEncodingException e) {
+            Slog.w(TAG, "Can't handle <Set Menu Language>", e);
             return false;
         }
     }
