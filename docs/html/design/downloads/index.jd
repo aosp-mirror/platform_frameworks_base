@@ -31,10 +31,10 @@ forcelocalnav=true
   </div>
   <div class="col-4">
   <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Toolkit AI');"
-    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_371.ai">Adobe&reg; Illustrator&reg; Toolkit</a>
 
   <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Toolkit PDF');"
-    href="{@docRoot}downloads/design/Android_Wear_Toolkit_20140722.pdf">PDF Toolkit</a>
+    href="{@docRoot}downloads/design/Android_Wear_Toolkit_371.pdf">PDF Toolkit</a>
   </div>
 </div>
 
