@@ -24,6 +24,7 @@
         android:duration="@android:integer/config_mediumAnimTime"
         android:interpolator="@android:interpolator/decelerate_quad" />
 
+    <!-- position property maps to AnimationView.setPosition -->
     <objectAnimator
         android:propertyName="position"
         android:valueFrom="1"

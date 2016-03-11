@@ -18,7 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_UNKNOWN;
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -39,6 +38,7 @@ import android.view.MenuItem;
 
 import com.android.documentsui.OperationDialogFragment.DialogType;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
@@ -97,7 +97,7 @@ public class FilesActivity extends BaseActivity {
             if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
             assert(uri == null || uri.getAuthority() == null ||
                     LauncherActivity.isLaunchUri(uri));
-            refreshCurrentRootAndDirectory(ANIM_NONE);
+            refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
         } else if (intent.getAction() == Intent.ACTION_VIEW) {
             assert(uri != null);
             new OpenUriForViewTask(this).executeOnExecutor(
@@ -470,7 +470,7 @@ public class FilesActivity extends BaseActivity {
 
         @Override
         protected void finish(Void result) {
-            mOwner.refreshCurrentRootAndDirectory(ANIM_NONE);
+            mOwner.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
         }
     }
 }

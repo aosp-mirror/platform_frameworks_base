@@ -84,7 +84,6 @@ import com.android.documentsui.Events;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
-import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentsLoader;
 import com.android.documentsui.RootsCache;
@@ -123,19 +122,6 @@ public class DirectoryFragment extends Fragment
     public @interface ResultType {}
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_RECENT_OPEN = 2;
-
-    @IntDef(flag = true, value = {
-            ANIM_NONE,
-            ANIM_SIDE,
-            ANIM_LEAVE,
-            ANIM_ENTER
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AnimationType {}
-    public static final int ANIM_NONE = 1;
-    public static final int ANIM_SIDE = 2;
-    public static final int ANIM_LEAVE = 3;
-    public static final int ANIM_ENTER = 4;
 
     @IntDef(flag = true, value = {
             REQUEST_COPY_DESTINATION
@@ -1485,18 +1471,7 @@ public class DirectoryFragment extends Fragment
         args.putParcelable(Shared.EXTRA_SELECTION, new Selection());
 
         final FragmentTransaction ft = fm.beginTransaction();
-        switch (anim) {
-            case ANIM_SIDE:
-                args.putBoolean(Shared.EXTRA_IGNORE_STATE, true);
-                break;
-            case ANIM_ENTER:
-                args.putBoolean(Shared.EXTRA_IGNORE_STATE, true);
-                ft.setCustomAnimations(R.animator.dir_enter, R.animator.fade_out);
-                break;
-            case ANIM_LEAVE:
-                ft.setCustomAnimations(R.animator.fade_in, R.animator.dir_leave);
-                break;
-        }
+        AnimationView.setupAnimations(ft, anim, args);
 
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
