@@ -103,8 +103,7 @@ public final class WebViewFactory {
     public static final int LIBLOAD_FAILED_JNI_CALL = 7;
 
     // more error codes for waiting for WebView preparation
-    public static final int LIBLOAD_WEBVIEW_BEING_REPLACED = 8;
-    public static final int LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN = 9;
+    public static final int LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN = 8;
 
     // error for namespace lookup
     public static final int LIBLOAD_FAILED_TO_FIND_NAMESPACE = 10;
@@ -115,8 +114,6 @@ public final class WebViewFactory {
                 return "Time out waiting for Relro files being created";
             case LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES:
                 return "No WebView installed";
-            case LIBLOAD_WEBVIEW_BEING_REPLACED:
-                return "Time out waiting for WebView to be replaced";
             case LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN:
                 return "Crashed for unknown reason";
         }
