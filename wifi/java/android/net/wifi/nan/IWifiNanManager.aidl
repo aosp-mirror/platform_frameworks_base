@@ -37,7 +37,7 @@ interface IWifiNanManager
     void requestConfig(int clientId, in ConfigRequest configRequest);
 
     // session API
-    int createSession(int clientId, in IWifiNanSessionCallback callback, int events);
+    int createSession(int clientId, in IWifiNanSessionCallback callback);
     void publish(int clientId, int sessionId, in PublishConfig publishConfig);
     void subscribe(int clientId, int sessionId, in SubscribeConfig subscribeConfig);
     void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageLength,
