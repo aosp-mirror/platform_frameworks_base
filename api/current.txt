@@ -21034,6 +21034,7 @@ package android.media {
     field public static final java.lang.String KEY_DURATION = "durationUs";
     field public static final java.lang.String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
     field public static final java.lang.String KEY_FRAME_RATE = "frame-rate";
+    field public static final java.lang.String KEY_HDR_STATIC_INFO = "hdr-static-info";
     field public static final java.lang.String KEY_HEIGHT = "height";
     field public static final java.lang.String KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period";
     field public static final java.lang.String KEY_IS_ADTS = "is-adts";
