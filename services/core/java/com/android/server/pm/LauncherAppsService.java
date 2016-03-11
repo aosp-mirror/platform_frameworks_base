@@ -51,6 +51,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -76,6 +77,7 @@ public class LauncherAppsService extends SystemService {
         publishBinderService(Context.LAUNCHER_APPS_SERVICE, mLauncherAppsImpl);
     }
 
+    @VisibleForTesting
     static class LauncherAppsImpl extends ILauncherApps.Stub {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
@@ -167,7 +169,8 @@ public class LauncherAppsService extends SystemService {
         /**
          * Checks if the caller is in the same group as the userToCheck.
          */
-        private void ensureInUserProfiles(UserHandle userToCheck, String message) {
+        @VisibleForTesting // We override it in unit tests
+        void ensureInUserProfiles(UserHandle userToCheck, String message) {
             final int callingUserId = UserHandle.getCallingUserId();
             final int targetUserId = userToCheck.getIdentifier();
 
@@ -187,7 +190,8 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
-        private void verifyCallingPackage(String callingPackage) {
+        @VisibleForTesting // We override it in unit tests
+        void verifyCallingPackage(String callingPackage) {
             int packageUid = -1;
             try {
                 packageUid = mPm.getPackageUid(callingPackage,
