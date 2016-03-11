@@ -24,8 +24,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback, int)}
- * or {@link WifiNanSubscribeSession#subscribe(SubscribeConfig)}.
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} or
+ * {@link WifiNanSubscribeSession#subscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -113,9 +113,15 @@ public class SubscribeConfig implements Parcelable {
      */
     public final int mMatchStyle;
 
+    /**
+     * @hide
+     */
+    public final boolean mEnableTerminateNotification;
+
     private SubscribeConfig(String serviceName, byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, byte[] txFilter, int txFilterLength, byte[] rxFilter,
-            int rxFilterLength, int subscribeType, int publichCount, int ttlSec, int matchStyle) {
+            int rxFilterLength, int subscribeType, int publichCount, int ttlSec, int matchStyle,
+            boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfoLength = serviceSpecificInfoLength;
         mServiceSpecificInfo = serviceSpecificInfo;
@@ -127,6 +133,7 @@ public class SubscribeConfig implements Parcelable {
         mSubscribeCount = publichCount;
         mTtlSec = ttlSec;
         mMatchStyle = matchStyle;
+        mEnableTerminateNotification = enableTerminateNotification;
     }
 
     @Override
@@ -138,7 +145,8 @@ public class SubscribeConfig implements Parcelable {
                 + ", mRxFilter="
                 + (new TlvBufferUtils.TlvIterable(0, 1, mRxFilter, mRxFilterLength)).toString()
                 + ", mSubscribeType=" + mSubscribeType + ", mSubscribeCount=" + mSubscribeCount
-                + ", mTtlSec=" + mTtlSec + ", mMatchType=" + mMatchStyle + "']";
+                + ", mTtlSec=" + mTtlSec + ", mMatchType=" + mMatchStyle
+                + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
     }
 
     @Override
@@ -165,6 +173,7 @@ public class SubscribeConfig implements Parcelable {
         dest.writeInt(mSubscribeCount);
         dest.writeInt(mTtlSec);
         dest.writeInt(mMatchStyle);
+        dest.writeInt(mEnableTerminateNotification ? 1 : 0);
     }
 
     public static final Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
@@ -195,8 +204,11 @@ public class SubscribeConfig implements Parcelable {
             int subscribeCount = in.readInt();
             int ttlSec = in.readInt();
             int matchStyle = in.readInt();
+            boolean enableTerminateNotification = in.readInt() != 0;
+
             return new SubscribeConfig(serviceName, ssi, ssiLength, txFilter, txFilterLength,
-                    rxFilter, rxFilterLength, subscribeType, subscribeCount, ttlSec, matchStyle);
+                    rxFilter, rxFilterLength, subscribeType, subscribeCount, ttlSec, matchStyle,
+                    enableTerminateNotification);
         }
     };
 
@@ -250,7 +262,8 @@ public class SubscribeConfig implements Parcelable {
         }
 
         return mSubscribeType == lhs.mSubscribeType && mSubscribeCount == lhs.mSubscribeCount
-                && mTtlSec == lhs.mTtlSec && mMatchStyle == lhs.mMatchStyle;
+                && mTtlSec == lhs.mTtlSec && mMatchStyle == lhs.mMatchStyle
+                && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
 
     @Override
@@ -268,6 +281,7 @@ public class SubscribeConfig implements Parcelable {
         result = 31 * result + mSubscribeCount;
         result = 31 * result + mTtlSec;
         result = 31 * result + mMatchStyle;
+        result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
 
         return result;
     }
@@ -287,6 +301,7 @@ public class SubscribeConfig implements Parcelable {
         private int mSubscribeCount = 0;
         private int mTtlSec = 0;
         private int mMatchStyle = MATCH_STYLE_ALL;
+        private boolean mEnableTerminateNotification = true;
 
         /**
          * Specify the service name of the subscribe session. The actual on-air
@@ -470,13 +485,29 @@ public class SubscribeConfig implements Parcelable {
         }
 
         /**
+         * Configure whether a subscribe terminate notification
+         * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} is reported
+         * back to the callback.
+         *
+         * @param enable If true the terminate callback will be called when the
+         *            subscribe is terminated. Otherwise it will not be called.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setEnableTerminateNotification(boolean enable) {
+            mEnableTerminateNotification = enable;
+            return this;
+        }
+
+        /**
          * Build {@link SubscribeConfig} given the current requests made on the
          * builder.
          */
         public SubscribeConfig build() {
             return new SubscribeConfig(mServiceName, mServiceSpecificInfo,
                     mServiceSpecificInfoLength, mTxFilter, mTxFilterLength, mRxFilter,
-                    mRxFilterLength, mSubscribeType, mSubscribeCount, mTtlSec, mMatchStyle);
+                    mRxFilterLength, mSubscribeType, mSubscribeCount, mTtlSec, mMatchStyle,
+                    mEnableTerminateNotification);
         }
     }
 }

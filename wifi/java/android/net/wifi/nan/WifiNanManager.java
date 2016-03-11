@@ -134,25 +134,11 @@ public class WifiNanManager {
      *            configuration of the publish session.
      * @param callback The {@link WifiNanSessionCallback} derived objects to be
      *            used for the event callbacks specified by {@code events}.
-     * @param events The list of events to be delivered to the {@code callback}
-     *            object. An OR'd value of {@link WifiNanSessionCallback
-     *            WifiNanSessionCallback.LISTEN_*}.
      * @return The {@link WifiNanPublishSession} which can be used to further
      *         control the publish session.
      */
     public WifiNanPublishSession publish(PublishConfig publishConfig,
-            WifiNanSessionCallback callback, int events) {
-        return publishRaw(publishConfig, callback,
-                events | WifiNanSessionCallback.LISTEN_HIDDEN_FLAGS);
-    }
-
-    /**
-     * Same as publish(*) but does not modify the event flag
-     *
-     * @hide
-     */
-    public WifiNanPublishSession publishRaw(PublishConfig publishConfig,
-            WifiNanSessionCallback callback, int events) {
+            WifiNanSessionCallback callback) {
         if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
 
         if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED
@@ -172,7 +158,7 @@ public class WifiNanManager {
         int sessionId;
 
         try {
-            sessionId = mService.createSession(mClientId, callback.callback, events);
+            sessionId = mService.createSession(mClientId, callback.callback);
             if (DBG) Log.d(TAG, "publish: session created - sessionId=" + sessionId);
             mService.publish(mClientId, sessionId, publishConfig);
         } catch (RemoteException e) {
@@ -215,25 +201,11 @@ public class WifiNanManager {
      *            configuration of the subscribe session.
      * @param callback The {@link WifiNanSessionCallback} derived objects to be
      *            used for the event callbacks specified by {@code events}.
-     * @param events The list of events to be delivered to the {@code callback}
-     *            object. An OR'd value of {@link WifiNanSessionCallback
-     *            WifiNanSessionCallback.LISTEN_*}.
      * @return The {@link WifiNanSubscribeSession} which can be used to further
      *         control the subscribe session.
      */
     public WifiNanSubscribeSession subscribe(SubscribeConfig subscribeConfig,
-            WifiNanSessionCallback callback, int events) {
-        return subscribeRaw(subscribeConfig, callback,
-                events | WifiNanSessionCallback.LISTEN_HIDDEN_FLAGS);
-    }
-
-    /**
-     * Same as subscribe(*) but does not modify the event flag
-     *
-     * @hide
-     */
-    public WifiNanSubscribeSession subscribeRaw(SubscribeConfig subscribeConfig,
-            WifiNanSessionCallback callback, int events) {
+            WifiNanSessionCallback callback) {
         if (VDBG) {
             Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
@@ -252,7 +224,7 @@ public class WifiNanManager {
         int sessionId;
 
         try {
-            sessionId = mService.createSession(mClientId, callback.callback, events);
+            sessionId = mService.createSession(mClientId, callback.callback);
             if (DBG) Log.d(TAG, "subscribe: session created - sessionId=" + sessionId);
             mService.subscribe(mClientId, sessionId, subscribeConfig);
         } catch (RemoteException e) {

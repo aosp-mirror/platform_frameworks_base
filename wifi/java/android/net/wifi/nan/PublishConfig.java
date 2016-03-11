@@ -95,9 +95,15 @@ public class PublishConfig implements Parcelable {
      */
     public final int mTtlSec;
 
+    /**
+     * @hide
+     */
+    public final boolean mEnableTerminateNotification;
+
     private PublishConfig(String serviceName, byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, byte[] txFilter, int txFilterLength, byte[] rxFilter,
-            int rxFilterLength, int publishType, int publichCount, int ttlSec) {
+            int rxFilterLength, int publishType, int publichCount, int ttlSec,
+            boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfoLength = serviceSpecificInfoLength;
         mServiceSpecificInfo = serviceSpecificInfo;
@@ -108,6 +114,7 @@ public class PublishConfig implements Parcelable {
         mPublishType = publishType;
         mPublishCount = publichCount;
         mTtlSec = ttlSec;
+        mEnableTerminateNotification = enableTerminateNotification;
     }
 
     @Override
@@ -119,7 +126,8 @@ public class PublishConfig implements Parcelable {
                 + ", mRxFilter="
                 + (new TlvBufferUtils.TlvIterable(0, 1, mRxFilter, mRxFilterLength)).toString()
                 + ", mPublishType=" + mPublishType + ", mPublishCount=" + mPublishCount
-                + ", mTtlSec=" + mTtlSec + "']";
+                + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
+                + mEnableTerminateNotification + "]";
     }
 
     @Override
@@ -145,6 +153,7 @@ public class PublishConfig implements Parcelable {
         dest.writeInt(mPublishType);
         dest.writeInt(mPublishCount);
         dest.writeInt(mTtlSec);
+        dest.writeInt(mEnableTerminateNotification ? 1 : 0);
     }
 
     public static final Creator<PublishConfig> CREATOR = new Creator<PublishConfig>() {
@@ -174,8 +183,11 @@ public class PublishConfig implements Parcelable {
             int publishType = in.readInt();
             int publishCount = in.readInt();
             int ttlSec = in.readInt();
+            boolean enableTerminateNotification = in.readInt() != 0;
+
             return new PublishConfig(serviceName, ssi, ssiLength, txFilter, txFilterLength,
-                    rxFilter, rxFilterLength, publishType, publishCount, ttlSec);
+                    rxFilter, rxFilterLength, publishType, publishCount, ttlSec,
+                    enableTerminateNotification);
         }
     };
 
@@ -229,7 +241,8 @@ public class PublishConfig implements Parcelable {
         }
 
         return mPublishType == lhs.mPublishType && mPublishCount == lhs.mPublishCount
-                && mTtlSec == lhs.mTtlSec;
+                && mTtlSec == lhs.mTtlSec
+                && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
 
     @Override
@@ -246,6 +259,7 @@ public class PublishConfig implements Parcelable {
         result = 31 * result + mPublishType;
         result = 31 * result + mPublishCount;
         result = 31 * result + mTtlSec;
+        result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
 
         return result;
     }
@@ -261,9 +275,10 @@ public class PublishConfig implements Parcelable {
         private byte[] mTxFilter = new byte[0];
         private int mRxFilterLength;
         private byte[] mRxFilter = new byte[0];
-        private int mPublishType;
-        private int mPublishCount;
-        private int mTtlSec;
+        private int mPublishType = PUBLISH_TYPE_UNSOLICITED;
+        private int mPublishCount = 0;
+        private int mTtlSec = 0;
+        private boolean mEnableTerminateNotification = true;
 
         /**
          * Specify the service name of the publish session. The actual on-air
@@ -438,13 +453,28 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
+         * Configure whether a publish terminate notification
+         * {@link WifiNanSessionCallback#onPublishTerminated(int)} is reported
+         * back to the callback.
+         *
+         * @param enable If true the terminate callback will be called when the
+         *            publish is terminated. Otherwise it will not be called.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setEnableTerminateNotification(boolean enable) {
+            mEnableTerminateNotification = enable;
+            return this;
+        }
+
+        /**
          * Build {@link PublishConfig} given the current requests made on the
          * builder.
          */
         public PublishConfig build() {
             return new PublishConfig(mServiceName, mServiceSpecificInfo, mServiceSpecificInfoLength,
                     mTxFilter, mTxFilterLength, mRxFilter, mRxFilterLength, mPublishType,
-                    mPublishCount, mTtlSec);
+                    mPublishCount, mTtlSec, mEnableTerminateNotification);
         }
     }
 }
