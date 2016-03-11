@@ -114,7 +114,7 @@ use. Some of the changes include:</p>
     together, for example by message topic, and display the group. A user can
     take actions, such as Dismiss or Archive, on them in place. If you’ve
     implemented notifications for Android Wear, you’ll already be familiar with
-    this model. with this model.
+    this model.
   </li>
 
   <li>
@@ -201,7 +201,7 @@ pockets.</p>
 <img src="/preview/images/doze-diagram-1.png"
   alt="" id="figure1" />
 <p class="img-caption">
-  <strong>Figure 3.</strong> Doze now applies 
+  <strong>Figure 3.</strong> Doze now applies
   restrictions to improve battery life even when the device is not stationary.
 </p>
 
