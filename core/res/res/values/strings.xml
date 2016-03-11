@@ -4188,10 +4188,6 @@
     <string name="work_mode_off_message">Allow work profile to function, including apps, background sync, and related features.</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
-    <!-- Title for dialog displayed when a packge is suspended by device admin. [CHAR LIMIT=30] -->
-    <string name="suspended_package_title">%1$s disabled</string>
-    <!-- Message for dialog displayed when a packge is suspended by device admin. [CHAR LIMIT=NONE] -->
-    <string name="suspended_package_message">Disabled by %1$s administrator. Contact them to learn more.</string>
 
     <!-- Notification title shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
     <string name="new_sms_notification_title">You have new messages</string>

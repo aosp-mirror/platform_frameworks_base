@@ -7893,6 +7893,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return false;
         }
+
+        @Override
+        public Intent createPackageSuspendedDialogIntent(String packageName, int userId) {
+            Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
+            intent.putExtra(Intent.EXTRA_USER_ID, userId);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            synchronized (DevicePolicyManagerService.this) {
+                ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
+                if (profileOwner != null) {
+                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, profileOwner);
+                    return intent;
+                }
+
+                if (mOwners.getDeviceOwnerUserId() == userId) {
+                    ComponentName deviceOwner = mOwners.getDeviceOwnerComponent();
+                    if (deviceOwner != null) {
+                        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceOwner);
+                        return intent;
+                    }
+                }
+            }
+            return null;
+        }
     }
 
     /**

@@ -210,6 +210,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private final UserManager mUserManager;
     private final AppOpsManager mAppOpsManager;
     private final KeyguardManager mKeyguardManager;
+    private final DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
     private final SecurityPolicy mSecurityPolicy;
 
@@ -232,6 +233,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
+        mDevicePolicyManagerInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mSaveStateHandler = BackgroundThread.getHandler();
         mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
         mBackupRestoreController = new BackupRestoreController();
@@ -298,11 +300,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void registerOnCrossProfileProvidersChangedListener() {
-        DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
         // The device policy is an optional component.
-        if (devicePolicyManager != null) {
-            devicePolicyManager.addOnCrossProfileWidgetProvidersChangeListener(this);
+        if (mDevicePolicyManagerInternal != null) {
+            mDevicePolicyManagerInternal.addOnCrossProfileWidgetProvidersChangeListener(this);
         }
     }
 
@@ -588,7 +588,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             try {
                 UserInfo userInfo = mUserManager.getUserInfo(providerUserId);
                 showBadge = userInfo.isManagedProfile();
-                onClickIntent = UnlaunchableAppActivity.createPackageSuspendedDialogIntent(
+                onClickIntent = mDevicePolicyManagerInternal.createPackageSuspendedDialogIntent(
                         providerPackage, providerUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -3574,15 +3574,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         public boolean isProviderWhiteListed(String packageName, int profileId) {
-            DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
-                    DevicePolicyManagerInternal.class);
-
             // If the policy manager is not available on the device we deny it all.
-            if (devicePolicyManager == null) {
+            if (mDevicePolicyManagerInternal == null) {
                 return false;
             }
 
-            List<String> crossProfilePackages = devicePolicyManager
+            List<String> crossProfilePackages = mDevicePolicyManagerInternal
                     .getCrossProfileWidgetProviders(profileId);
 
             return crossProfilePackages.contains(packageName);
