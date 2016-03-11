@@ -13,10 +13,23 @@
      limitations under the License.
 -->
 
-<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:valueFrom="0"
-    android:valueTo="1"
-    android:propertyName="position"
-    android:valueType="floatType"
-    android:duration="@android:integer/config_mediumAnimTime"
-    android:interpolator="@android:interpolator/accelerate_quad" />
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:ordering="together">
+
+    <objectAnimator
+        android:valueFrom="1f"
+        android:valueTo="0f"
+        android:propertyName="alpha"
+        android:valueType="floatType"
+        android:duration="@android:integer/config_mediumAnimTime"
+        android:interpolator="@android:interpolator/decelerate_quad" />
+
+    <objectAnimator
+        android:valueFrom="0"
+        android:valueTo="1"
+        android:propertyName="position"
+        android:valueType="floatType"
+        android:duration="@android:integer/config_mediumAnimTime"
+        android:interpolator="@android:interpolator/accelerate_quad" />
+
+</set>

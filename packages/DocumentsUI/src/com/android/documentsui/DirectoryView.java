@@ -46,7 +46,7 @@ public class DirectoryView extends LinearLayout {
 
     public void setPosition(float position) {
         mPosition = position;
-        setX((mWidth > 0) ? (mPosition * mWidth) : 0);
+        setY((mWidth > 0) ? (mPosition * mWidth) : 0);
 
         if (mPosition != 0) {
             setTranslationZ(getResources().getDimensionPixelSize(R.dimen.dir_elevation));
