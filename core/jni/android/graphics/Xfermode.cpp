@@ -15,33 +15,19 @@
  */
 
 #include "jni.h"
-#include "GraphicsJNI.h"
+//#include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
-#include "AvoidXfermode.h"
-#include "SkPixelXorXfermode.h"
+#include <SkXfermode.h>
 
 namespace android {
 
 class SkXfermodeGlue {
 public:
-
     static void finalizer(JNIEnv* env, jobject, jlong objHandle)
     {
         SkXfermode* obj = reinterpret_cast<SkXfermode *>(objHandle);
         SkSafeUnref(obj);
-    }
-    
-    static jlong avoid_create(JNIEnv* env, jobject, jint opColor,
-                                jint tolerance, jint modeHandle)
-    {
-        AvoidXfermode::Mode mode = static_cast<AvoidXfermode::Mode>(modeHandle);
-        return reinterpret_cast<jlong>(AvoidXfermode::Create(opColor, tolerance, mode));
-    }
-
-    static jlong pixelxor_create(JNIEnv* env, jobject, jint opColor)
-    {
-        return reinterpret_cast<jlong>(SkPixelXorXfermode::Create(opColor));
     }
 };
 
@@ -51,24 +37,9 @@ static const JNINativeMethod gXfermodeMethods[] = {
     {"finalizer", "(J)V", (void*) SkXfermodeGlue::finalizer}
 };
 
-static const JNINativeMethod gAvoidMethods[] = {
-    {"nativeCreate", "(III)J", (void*) SkXfermodeGlue::avoid_create}
-};
-
-static const JNINativeMethod gPixelXorMethods[] = {
-    {"nativeCreate", "(I)J", (void*) SkXfermodeGlue::pixelxor_create}
-};
-
 int register_android_graphics_Xfermode(JNIEnv* env) {
     android::RegisterMethodsOrDie(env, "android/graphics/Xfermode", gXfermodeMethods,
                                   NELEM(gXfermodeMethods));
-    android::RegisterMethodsOrDie(env, "android/graphics/Xfermode", gXfermodeMethods,
-                                  NELEM(gXfermodeMethods));
-    android::RegisterMethodsOrDie(env, "android/graphics/AvoidXfermode", gAvoidMethods,
-                                  NELEM(gAvoidMethods));
-    android::RegisterMethodsOrDie(env, "android/graphics/PixelXorXfermode", gPixelXorMethods,
-                                  NELEM(gPixelXorMethods));
-
     return 0;
 }
 

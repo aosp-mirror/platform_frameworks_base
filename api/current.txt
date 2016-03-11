@@ -11472,17 +11472,6 @@ package android.gesture {
 
 package android.graphics {
 
-  public deprecated class AvoidXfermode extends android.graphics.Xfermode {
-    ctor public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
-  }
-
-  public static final class AvoidXfermode.Mode extends java.lang.Enum {
-    method public static android.graphics.AvoidXfermode.Mode valueOf(java.lang.String);
-    method public static final android.graphics.AvoidXfermode.Mode[] values();
-    enum_constant public static final android.graphics.AvoidXfermode.Mode AVOID;
-    enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
-  }
-
   public final class Bitmap implements android.os.Parcelable {
     method public boolean compress(android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream);
     method public android.graphics.Bitmap copy(android.graphics.Bitmap.Config, boolean);
@@ -12347,10 +12336,6 @@ package android.graphics {
     field public static final deprecated int YCbCr_422_SP = 16; // 0x10
     field public int bitsPerPixel;
     field public int bytesPerPixel;
-  }
-
-  public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
-    ctor public PixelXorXfermode(int);
   }
 
   public class Point implements android.os.Parcelable {

@@ -19,6 +19,8 @@ package android.graphics;
 /**
  * AvoidXfermode xfermode will draw the src everywhere except on top of the
  * opColor or, depending on the Mode, draw only on top of the opColor.
+ *
+ * @removed
  */
 @Deprecated
 public class AvoidXfermode extends Xfermode {
@@ -53,9 +55,5 @@ public class AvoidXfermode extends Xfermode {
         if (tolerance < 0 || tolerance > 255) {
             throw new IllegalArgumentException("tolerance must be 0..255");
         }
-        native_instance = nativeCreate(opColor, tolerance, mode.nativeInt);
     }
-
-    private static native long nativeCreate(int opColor, int tolerance,
-                                            int nativeMode);
 }

@@ -35,6 +35,25 @@ package android.database {
 
 }
 
+package android.graphics {
+
+  public deprecated class AvoidXfermode extends android.graphics.Xfermode {
+    ctor public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
+  }
+
+  public static final class AvoidXfermode.Mode extends java.lang.Enum {
+    method public static android.graphics.AvoidXfermode.Mode valueOf(java.lang.String);
+    method public static final android.graphics.AvoidXfermode.Mode[] values();
+    enum_constant public static final android.graphics.AvoidXfermode.Mode AVOID;
+    enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
+  }
+
+  public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
+    ctor public PixelXorXfermode(int);
+  }
+
+}
+
 package android.media {
 
   public final class AudioFormat implements android.os.Parcelable {
