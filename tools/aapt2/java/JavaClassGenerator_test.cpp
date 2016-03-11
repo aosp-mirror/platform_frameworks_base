@@ -15,11 +15,9 @@
  */
 
 #include "java/JavaClassGenerator.h"
+#include "test/Test.h"
 #include "util/Util.h"
 
-#include "test/Builders.h"
-
-#include <gtest/gtest.h>
 #include <sstream>
 #include <string>
 
@@ -31,7 +29,11 @@ TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
             .addSimple(u"@android:id/class", ResourceId(0x01020000))
             .build();
 
-    JavaClassGenerator generator(table.get(), {});
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGenerator generator(context.get(), table.get(), {});
 
     std::stringstream out;
     EXPECT_FALSE(generator.generate(u"android", &out));
@@ -48,7 +50,11 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
                               .build())
             .build();
 
-    JavaClassGenerator generator(table.get(), {});
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGenerator generator(context.get(), table.get(), {});
 
     std::stringstream out;
     EXPECT_TRUE(generator.generate(u"android", &out));
@@ -72,7 +78,11 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
             .addSimple(u"@android:id/com.foo$two", ResourceId(0x01020001))
             .build();
 
-    JavaClassGenerator generator(table.get(), {});
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGenerator generator(context.get(), table.get(), {});
     std::stringstream out;
     ASSERT_TRUE(generator.generate(u"android", u"com.android.internal", &out));
 
@@ -90,7 +100,11 @@ TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
             .addSimple(u"@android:^attr-private/one", ResourceId(0x01010000))
             .build();
 
-    JavaClassGenerator generator(table.get(), {});
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGenerator generator(context.get(), table.get(), {});
     std::stringstream out;
     ASSERT_TRUE(generator.generate(u"android", &out));
 
@@ -110,10 +124,15 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
             .setSymbolState(u"@android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
             .build();
 
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+
     JavaClassGeneratorOptions options;
     options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
     {
-        JavaClassGenerator generator(table.get(), options);
+        JavaClassGenerator generator(context.get(), table.get(), options);
         std::stringstream out;
         ASSERT_TRUE(generator.generate(u"android", &out));
         std::string output = out.str();
@@ -124,7 +143,7 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
 
     options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
     {
-        JavaClassGenerator generator(table.get(), options);
+        JavaClassGenerator generator(context.get(), table.get(), options);
         std::stringstream out;
         ASSERT_TRUE(generator.generate(u"android", &out));
         std::string output = out.str();
@@ -135,7 +154,7 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
 
     options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
     {
-        JavaClassGenerator generator(table.get(), options);
+        JavaClassGenerator generator(context.get(), table.get(), options);
         std::stringstream out;
         ASSERT_TRUE(generator.generate(u"android", &out));
         std::string output = out.str();
@@ -189,7 +208,11 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
                                   .build())
                 .build();
 
-    JavaClassGenerator generator(table.get(), {});
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGenerator generator(context.get(), table.get(), {});
 
     std::stringstream out;
     EXPECT_TRUE(generator.generate(u"android", &out));
@@ -207,8 +230,11 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
     test::getValue<Id>(table.get(), u"@android:id/foo")
             ->setComment(std::u16string(u"This is a comment\n@deprecated"));
 
-    JavaClassGenerator generator(table.get(), {});
-
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGenerator generator(context.get(), table.get(), {});
     std::stringstream out;
     ASSERT_TRUE(generator.generate(u"android", &out));
     std::string actual = out.str();
@@ -241,10 +267,13 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
                       std::unique_ptr<Styleable>(styleable.clone(nullptr)))
             .build();
 
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
     JavaClassGeneratorOptions options;
     options.useFinal = false;
-    JavaClassGenerator generator(table.get(), options);
-
+    JavaClassGenerator generator(context.get(), table.get(), options);
     std::stringstream out;
     ASSERT_TRUE(generator.generate(u"android", &out));
     std::string actual = out.str();

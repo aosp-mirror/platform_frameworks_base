@@ -52,7 +52,7 @@ class SymbolTable {
 public:
     struct Symbol {
         Maybe<ResourceId> id;
-        std::unique_ptr<Attribute> attribute;
+        std::shared_ptr<Attribute> attribute;
         bool isPublic;
     };
 
@@ -68,6 +68,12 @@ public:
      */
     const Symbol* findByName(const ResourceName& name);
     const Symbol* findById(ResourceId id);
+
+    /**
+     * Let's the ISymbolSource decide whether looking up by name or ID is faster, if both
+     * are available.
+     */
+    const Symbol* findByReference(const Reference& ref);
 
 private:
     std::vector<std::unique_ptr<ISymbolSource>> mSources;
@@ -90,6 +96,18 @@ public:
 
     virtual std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) = 0;
     virtual std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) = 0;
+
+    /**
+     * Default implementation tries the name if it exists, else the ID.
+     */
+    virtual std::unique_ptr<SymbolTable::Symbol> findByReference(const Reference& ref) {
+        if (ref.name) {
+            return findByName(ref.name.value());
+        } else if (ref.id) {
+            return findById(ref.id.value());
+        }
+        return {};
+    }
 };
 
 /**
@@ -122,6 +140,7 @@ public:
 
     std::unique_ptr<SymbolTable::Symbol> findByName(const ResourceName& name) override;
     std::unique_ptr<SymbolTable::Symbol> findById(ResourceId id) override;
+    std::unique_ptr<SymbolTable::Symbol> findByReference(const Reference& ref) override;
 
 private:
     android::AssetManager mAssets;

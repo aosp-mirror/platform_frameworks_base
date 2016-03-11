@@ -51,6 +51,11 @@ const SymbolTable::Symbol* SymbolTable::findByName(const ResourceName& name) {
             // doesn't support unique_ptr.
             std::shared_ptr<Symbol> sharedSymbol = std::shared_ptr<Symbol>(symbol.release());
             mCache.put(name, sharedSymbol);
+
+            if (sharedSymbol->id) {
+                // The symbol has an ID, so we can also cache this!
+                mIdCache.put(sharedSymbol->id.value(), sharedSymbol);
+            }
             return sharedSymbol.get();
         }
     }
@@ -74,6 +79,25 @@ const SymbolTable::Symbol* SymbolTable::findById(ResourceId id) {
         }
     }
     return nullptr;
+}
+
+const SymbolTable::Symbol* SymbolTable::findByReference(const Reference& ref) {
+    // First try the ID. This is because when we lookup by ID, we only fill in the ID cache.
+    // Looking up by name fills in the name and ID cache. So a cache miss will cause a failed
+    // ID lookup, then a successfull name lookup. Subsequent look ups will hit immediately
+    // because the ID is cached too.
+    //
+    // If we looked up by name first, a cache miss would mean we failed to lookup by name, then
+    // succeeded to lookup by ID. Subsequent lookups will miss then hit.
+    const SymbolTable::Symbol* symbol = nullptr;
+    if (ref.id) {
+        symbol = findById(ref.id.value());
+    }
+
+    if (ref.name && !symbol) {
+        symbol = findByName(ref.name.value());
+    }
+    return symbol;
 }
 
 std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::findByName(
@@ -102,7 +126,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::findByName(
         if (configValue) {
             // This resource has an Attribute.
             if (Attribute* attr = valueCast<Attribute>(configValue->value.get())) {
-                symbol->attribute = util::make_unique<Attribute>(*attr);
+                symbol->attribute = std::make_shared<Attribute>(*attr);
             } else {
                 return {};
             }
@@ -133,7 +157,7 @@ static std::unique_ptr<SymbolTable::Symbol> lookupAttributeInTable(const android
     // Check to see if it is an attribute.
     for (size_t i = 0; i < (size_t) count; i++) {
         if (entry[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
-            s->attribute = util::make_unique<Attribute>(false);
+            s->attribute = std::make_shared<Attribute>(false);
             s->attribute->typeMask = entry[i].map.value.data;
             break;
         }
@@ -268,6 +292,17 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findById(Resource
     if (s) {
         s->isPublic = (typeSpecFlags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
         return s;
+    }
+    return {};
+}
+
+std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findByReference(
+        const Reference& ref) {
+    // AssetManager always prefers IDs.
+    if (ref.id) {
+        return findById(ref.id.value());
+    } else if (ref.name) {
+        return findByName(ref.name.value());
     }
     return {};
 }

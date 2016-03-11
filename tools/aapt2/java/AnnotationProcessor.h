@@ -61,6 +61,8 @@ public:
     void appendComment(const StringPiece16& comment);
     void appendComment(const StringPiece& comment);
 
+    void appendNewLine();
+
     /**
      * Writes the comments and annotations to the stream, with the given prefix before each line.
      */
