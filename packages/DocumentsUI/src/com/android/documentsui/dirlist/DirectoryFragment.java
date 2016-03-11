@@ -1501,10 +1501,10 @@ public class DirectoryFragment extends Fragment
                 break;
             case ANIM_ENTER:
                 args.putBoolean(Shared.EXTRA_IGNORE_STATE, true);
-                ft.setCustomAnimations(R.animator.dir_enter, R.animator.dir_frozen);
+                ft.setCustomAnimations(R.animator.dir_enter, R.animator.fade_out);
                 break;
             case ANIM_LEAVE:
-                ft.setCustomAnimations(R.animator.dir_frozen, R.animator.dir_leave);
+                ft.setCustomAnimations(R.animator.fade_in, R.animator.dir_leave);
                 break;
         }
 
