@@ -926,7 +926,8 @@ public class Editor {
     }
 
     void onLocaleChanged() {
-        // Will be re-created on demand in getWordIterator with the proper new locale
+        // Will be re-created on demand in getWordIterator and getWordIteratorWithText with the
+        // proper new locale
         mWordIterator = null;
         mWordIteratorWithText = null;
     }
