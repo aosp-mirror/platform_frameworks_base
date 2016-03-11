@@ -32,13 +32,15 @@ import android.graphics.drawable.Drawable;
  * @see Drawable#getOutline(Outline)
  */
 public final class Outline {
+    private static final float RADIUS_UNDEFINED = -1.0f;
+
     /** @hide */
     public Path mPath;
 
     /** @hide */
     public Rect mRect;
     /** @hide */
-    public float mRadius;
+    public float mRadius = RADIUS_UNDEFINED;
     /** @hide */
     public float mAlpha;
 
@@ -63,7 +65,7 @@ public final class Outline {
     public void setEmpty() {
         mPath = null;
         mRect = null;
-        mRadius = 0;
+        mRadius = RADIUS_UNDEFINED;
     }
 
     /**
@@ -223,6 +225,7 @@ public final class Outline {
         mPath.reset();
         mPath.addOval(left, top, right, bottom, Path.Direction.CW);
         mRect = null;
+        mRadius = RADIUS_UNDEFINED;
     }
 
     /**
@@ -249,7 +252,7 @@ public final class Outline {
 
         mPath.set(convexPath);
         mRect = null;
-        mRadius = -1.0f;
+        mRadius = RADIUS_UNDEFINED;
     }
 
     /**
