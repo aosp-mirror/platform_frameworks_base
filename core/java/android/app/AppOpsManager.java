@@ -1267,8 +1267,15 @@ public class AppOpsManager {
 
     /** @hide */
     public void setUserRestriction(int code, boolean restricted, IBinder token) {
+        setUserRestriction(code, restricted, token, /*exceptionPackages*/null);
+    }
+
+    /** @hide */
+    public void setUserRestriction(int code, boolean restricted, IBinder token,
+            String[] exceptionPackages) {
         try {
-            mService.setUserRestriction(code, restricted, token, mContext.getUserId());
+            mService.setUserRestriction(code, restricted, token, mContext.getUserId(),
+                  exceptionPackages);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
