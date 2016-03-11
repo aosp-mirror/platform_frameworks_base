@@ -3071,7 +3071,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_elegantTextHeight
      */
     public void setElegantTextHeight(boolean elegant) {
-        mTextPaint.setElegantTextHeight(elegant);
+        if (elegant != mTextPaint.isElegantTextHeight()) {
+            mTextPaint.setElegantTextHeight(elegant);
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
     }
 
     /**
