@@ -29,6 +29,7 @@ import com.android.systemui.R;
 
 public class ViewFocusAnimator implements View.OnFocusChangeListener {
     private final float mUnselectedScale;
+    private final float mSelectedScale;
     private final float mSelectedScaleDelta;
     private final float mUnselectedZ;
     private final float mSelectedZDelta;
@@ -49,8 +50,9 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         TypedValue out = new TypedValue();
         res.getValue(R.integer.unselected_scale, out, true);
         mUnselectedScale = out.getFloat();
-        mSelectedScaleDelta = res.getFraction(R.fraction.lb_focus_zoom_factor_medium, 1, 1) -
-                mUnselectedScale;
+        res.getValue(R.integer.selected_scale, out, true);
+        mSelectedScale = out.getFloat();
+        mSelectedScaleDelta = mSelectedScale - mUnselectedScale;
 
         mUnselectedZ = res.getDimensionPixelOffset(R.dimen.recents_tv_unselected_item_z);
         mSelectedZDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_selected_item_z_delta);

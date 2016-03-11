@@ -16,8 +16,13 @@
 package com.android.systemui.recents.tv.views;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Display;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -71,15 +76,46 @@ public class TaskCardView extends LinearLayout {
         mThumbnailView.getFocusedRect(r);
     }
 
-    public Rect getFocusedRect() {
+    public Rect getFocusedThumbnailRect() {
         Rect r = new Rect();
-        getFocusedRect(r);
+        mThumbnailView.getGlobalVisibleRect(r);
+        TypedValue out = new TypedValue();
+        getContext().getResources().getValue(R.integer.selected_scale, out, true);
+        float deltaScale = (out.getFloat() - 1.0f) / 2;
+        r.set((int) (r.left - r.left * deltaScale),
+                (int) (r.top - r.top * deltaScale),
+                (int) (r.right + r.right * deltaScale),
+                (int) (r.bottom + r.bottom * deltaScale));
         return r;
     }
 
-    public Rect getGlobalRect() {
-        Rect r = new Rect();
-        getGlobalVisibleRect(r);
-        return r;
+    public static Rect getStartingCardThumbnailRect(Context context) {
+        Resources res = context.getResources();
+
+        TypedValue out = new TypedValue();
+        res.getValue(R.integer.selected_scale, out, true);
+        float scale = out.getFloat();
+
+        int width = res.getDimensionPixelOffset(R.dimen.recents_tv_card_width);
+        int widthDelta = (int) (width * scale - width);
+        int height = (int) (res.getDimensionPixelOffset(
+                R.dimen.recents_tv_screenshot_height) * scale);
+        int padding = res.getDimensionPixelOffset(R.dimen.recents_tv_grid_row_padding);
+
+        int headerHeight = (int) ((res.getDimensionPixelOffset(
+                R.dimen.recents_tv_card_extra_badge_size) +
+                res.getDimensionPixelOffset(R.dimen.recents_tv_icon_padding_bottom)) * scale);
+
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int screenWidth = size.x;
+        int screenHeight = size.y;
+
+        return new Rect(screenWidth - width - padding - widthDelta / 2,
+                screenHeight / 2 - height / 2 + headerHeight / 2,
+                screenWidth - padding + widthDelta / 2,
+                screenHeight / 2 + height / 2 + headerHeight / 2);
     }
 }
