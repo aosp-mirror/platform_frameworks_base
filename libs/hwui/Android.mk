@@ -240,6 +240,7 @@ LOCAL_SRC_FILES += \
     tests/unit/DamageAccumulatorTests.cpp \
     tests/unit/DeviceInfoTests.cpp \
     tests/unit/FatVectorTests.cpp \
+    tests/unit/GlopBuilderTests.cpp \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
