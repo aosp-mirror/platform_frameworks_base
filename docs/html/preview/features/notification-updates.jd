@@ -183,7 +183,7 @@ When the user responds via {@link android.support.v4.app.RemoteInput},
 
 <p>Android N provides developers with a new way to represent
  a queue of notifications: <i>bundled notifications</i>. This is similar to the
-  <a href="{@docRoot}/training/wearables/notifications/stacks.html">Notification
+  <a href="{@docRoot}training/wearables/notifications/stacks.html">Notification
   Stacks</a> feature in Android Wear. For example, if your app creates notifications
   for received messages, when more than one message is received, bundle the
  notifications together as a single group. You can
