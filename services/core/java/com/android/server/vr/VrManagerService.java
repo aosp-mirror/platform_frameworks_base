@@ -201,13 +201,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    private void updateOverlayStateLocked() {
+    private void updateOverlayStateLocked(ComponentName exemptedComponent) {
         final long identity = Binder.clearCallingIdentity();
         try {
             AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
             if (appOpsManager != null) {
+                String[] exemptions = (exemptedComponent == null) ? new String[0] :
+                        new String[] { exemptedComponent.getPackageName() };
+
                 appOpsManager.setUserRestriction(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                        mVrModeEnabled, mOverlayToken);
+                        mVrModeEnabled, mOverlayToken, exemptions);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -230,11 +233,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean updateCurrentVrServiceLocked(boolean enabled,
             @NonNull ComponentName component, int userId) {
 
-        // Always send mode change events.
-        changeVrModeLocked(enabled);
-
         boolean validUserComponent = (mComponentObserver.isValid(component, userId) ==
                 EnabledComponentsObserver.NO_ERROR);
+
+        // Always send mode change events.
+        changeVrModeLocked(enabled, (enabled && validUserComponent) ? component : null);
 
         if (!enabled || !validUserComponent) {
             // Unbind whatever is running
@@ -275,8 +278,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * Note: Must be called while holding {@code mLock}.
      *
      * @param enabled new state of the VR mode.
+     * @param exemptedComponent a component to exempt from AppOps restrictions for overlays.
      */
-    private void changeVrModeLocked(boolean enabled) {
+    private void changeVrModeLocked(boolean enabled, ComponentName exemptedComponent) {
         if (mVrModeEnabled != enabled) {
             mVrModeEnabled = enabled;
 
@@ -284,7 +288,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             Slog.i(TAG, "VR mode " + ((mVrModeEnabled) ? "enabled" : "disabled"));
             setVrModeNative(mVrModeEnabled);
 
-            updateOverlayStateLocked();
+            updateOverlayStateLocked(exemptedComponent);
             onVrModeChangedLocked();
         }
     }
