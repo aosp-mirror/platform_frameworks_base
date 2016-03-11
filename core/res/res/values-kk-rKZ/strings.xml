@@ -1051,10 +1051,10 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Қосымша параметрлер үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB жөндеу қосылған"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB жөндеуді өшіру үшін түртіңіз."</string>
-    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Қате туралы есеп құрылуда…"</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Қате туралы есеп алынуда…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Қате туралы есепті бөлісу керек пе?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Қате туралы есеп бөлісілуде…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар және деректер бөлісілуі мүмкін."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар мен деректерді бөлісуі мүмкін."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"БӨЛІСУ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
@@ -1137,8 +1137,7 @@
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Хабар бақылағыш"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR тыңдаушы"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Шарт провайдері"</string>
-    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
-    <skip />
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"Хабарландыруларды жіктеу қызметі"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN белсенді"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"ВЖЭ <xliff:g id="APP">%s</xliff:g> арқылы қосылған"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Желіні басқару үшін түрту."</string>
@@ -1565,8 +1564,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"Босату"</string>
     <string name="app_info" msgid="6856026610594615344">"Қолданба ақпараты"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
-    <skip />
-    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6351827251856877200">"Осы құрылғыны әдеттегідей пайдалану үшін зауыттық параметрлерді қалпына келтіріңіз"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Қосымша мәліметтер алу үшін түртіңіз."</string>
 </resources>

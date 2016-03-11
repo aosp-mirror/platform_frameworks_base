@@ -1143,8 +1143,7 @@
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"सूचना सुन्नेवाला"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR श्रोता"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"सर्त प्रदायक"</string>
-    <!-- no translation found for notification_ranker_binding_label (774540592299064747) -->
-    <skip />
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"सूचनालाई श्रेणी प्रदान गर्ने सेवा"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN सक्रिय भयो"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN <xliff:g id="APP">%s</xliff:g>द्वारा सक्रिय गरिएको हो"</string>
     <string name="vpn_text" msgid="3011306607126450322">"नेटवर्क प्रबन्ध गर्न छुनुहोस्।"</string>
@@ -1571,8 +1570,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन गर्नुहोस्"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6351827251856877200) -->
-    <skip />
-    <!-- no translation found for audit_safemode_notification_details (1860601176690176413) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6351827251856877200">"यस यन्त्रलाई सामान्य रूपमा प्रयोग गर्नका लागि फ्याक्ट्री रिसेट गर्नुहोस्"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"थप जान्नका लागि स्पर्श गर्नुहोस्।"</string>
 </resources>
