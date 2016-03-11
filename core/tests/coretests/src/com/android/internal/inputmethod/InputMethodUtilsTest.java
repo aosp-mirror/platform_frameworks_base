@@ -219,12 +219,28 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         final InputMethodSubtype nonAutoHi = createDummyInputMethodSubtype("hi",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
+        final InputMethodSubtype nonAutoSrCyrl = createDummyInputMethodSubtype("sr",
+                "sr-Cyrl", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
+                !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
+        final InputMethodSubtype nonAutoSrLatn = createDummyInputMethodSubtype("sr_ZZ",
+                "sr-Latn", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
+                !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
+                !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoHandwritingEn = createDummyInputMethodSubtype("en",
                 SUBTYPE_MODE_HANDWRITING, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoHandwritingFr = createDummyInputMethodSubtype("fr",
                 SUBTYPE_MODE_HANDWRITING, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 !IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
+        final InputMethodSubtype nonAutoHandwritingSrCyrl = createDummyInputMethodSubtype("sr",
+                "sr-Cyrl", SUBTYPE_MODE_HANDWRITING, !IS_AUX,
+                !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
+                !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
+        final InputMethodSubtype nonAutoHandwritingSrLatn = createDummyInputMethodSubtype("sr_ZZ",
+                "sr-Latn", SUBTYPE_MODE_HANDWRITING, !IS_AUX,
+                !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
+                !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype =
                 createDummyInputMethodSubtype("zz", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                         !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
@@ -428,6 +444,85 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                             getResourcesForLocales(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
+        }
+
+        // Make sure that both language and script are taken into account to find the best matching
+        // subtype.
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+            subtypes.add(nonAutoEnUS);
+            subtypes.add(nonAutoSrCyrl);
+            subtypes.add(nonAutoSrLatn);
+            subtypes.add(nonAutoHandwritingEn);
+            subtypes.add(nonAutoHandwritingFr);
+            subtypes.add(nonAutoHandwritingSrCyrl);
+            subtypes.add(nonAutoHandwritingSrLatn);
+            final InputMethodInfo imi = createDummyInputMethodInfo(
+                    "com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes);
+            final ArrayList<InputMethodSubtype> result =
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            getResourcesForLocales(Locale.forLanguageTag("sr-Latn-RS")), imi);
+            assertEquals(2, result.size());
+            assertThat(nonAutoSrLatn, isIn(result));
+            assertThat(nonAutoHandwritingSrLatn, isIn(result));
+        }
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+            subtypes.add(nonAutoEnUS);
+            subtypes.add(nonAutoSrCyrl);
+            subtypes.add(nonAutoSrLatn);
+            subtypes.add(nonAutoHandwritingEn);
+            subtypes.add(nonAutoHandwritingFr);
+            subtypes.add(nonAutoHandwritingSrCyrl);
+            subtypes.add(nonAutoHandwritingSrLatn);
+            final InputMethodInfo imi = createDummyInputMethodInfo(
+                    "com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes);
+            final ArrayList<InputMethodSubtype> result =
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            getResourcesForLocales(Locale.forLanguageTag("sr-Cyrl-RS")), imi);
+            assertEquals(2, result.size());
+            assertThat(nonAutoSrCyrl, isIn(result));
+            assertThat(nonAutoHandwritingSrCyrl, isIn(result));
+        }
+
+        // Make sure that secondary locales are taken into account to find the best matching
+        // subtype.
+        {
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+            subtypes.add(nonAutoEnUS);
+            subtypes.add(nonAutoEnGB);
+            subtypes.add(nonAutoSrCyrl);
+            subtypes.add(nonAutoSrLatn);
+            subtypes.add(nonAutoFr);
+            subtypes.add(nonAutoFrCA);
+            subtypes.add(nonAutoHandwritingEn);
+            subtypes.add(nonAutoHandwritingFr);
+            subtypes.add(nonAutoHandwritingSrCyrl);
+            subtypes.add(nonAutoHandwritingSrLatn);
+            final InputMethodInfo imi = createDummyInputMethodInfo(
+                    "com.android.apps.inputmethod.latin",
+                    "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
+                    subtypes);
+            final ArrayList<InputMethodSubtype> result =
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            getResourcesForLocales(
+                                    Locale.forLanguageTag("sr-Latn-RS-x-android"),
+                                    Locale.forLanguageTag("ja-JP"),
+                                    Locale.forLanguageTag("fr-FR"),
+                                    Locale.forLanguageTag("en-GB"),
+                                    Locale.forLanguageTag("en-US")),
+                            imi);
+            assertEquals(6, result.size());
+            assertThat(nonAutoEnGB, isIn(result));
+            assertThat(nonAutoFr, isIn(result));
+            assertThat(nonAutoSrLatn, isIn(result));
+            assertThat(nonAutoHandwritingEn, isIn(result));
+            assertThat(nonAutoHandwritingFr, isIn(result));
+            assertThat(nonAutoHandwritingSrLatn, isIn(result));
         }
 
         // Make sure that 3-letter language code can be handled.
@@ -778,7 +873,15 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
     private static InputMethodSubtype createDummyInputMethodSubtype(String locale, String mode,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype,
             boolean isAsciiCapable, boolean isEnabledWhenDefaultIsNotAsciiCapable) {
+        return createDummyInputMethodSubtype(locale, null /* languageTag */, mode, isAuxiliary,
+                overridesImplicitlyEnabledSubtype, isAsciiCapable,
+                isEnabledWhenDefaultIsNotAsciiCapable);
+    }
 
+    private static InputMethodSubtype createDummyInputMethodSubtype(String locale,
+            String languageTag, String mode, boolean isAuxiliary,
+            boolean overridesImplicitlyEnabledSubtype, boolean isAsciiCapable,
+            boolean isEnabledWhenDefaultIsNotAsciiCapable) {
         final StringBuilder subtypeExtraValue = new StringBuilder();
         if (isEnabledWhenDefaultIsNotAsciiCapable) {
             subtypeExtraValue.append(EXTRA_VALUE_PAIR_SEPARATOR);
@@ -796,6 +899,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                 .setSubtypeNameResId(0)
                 .setSubtypeIconResId(0)
                 .setSubtypeLocale(locale)
+                .setLanguageTag(languageTag)
                 .setSubtypeMode(mode)
                 .setSubtypeExtraValue(subtypeExtraValue.toString())
                 .setIsAuxiliary(isAuxiliary)
