@@ -529,8 +529,8 @@ public class InputMethodUtils {
             } else {
                 final Locale locale = subtype.getLocaleObject();
                 final String mode = subtype.getMode();
-                // TODO: Take secondary system locales into consideration.
-                if (locale != null && locale.equals(systemLanguage)) {
+                // TODO: Use LocaleUtils#filterByLanguage() instead.
+                if (locale != null && TextUtils.equals(locale.getLanguage(), systemLanguage)) {
                     final InputMethodSubtype applicableSubtype =
                             applicableModeAndSubtypesMap.get(mode);
                     // If more applicable subtypes are contained, skip.
