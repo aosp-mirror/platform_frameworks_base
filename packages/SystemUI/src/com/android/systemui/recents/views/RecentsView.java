@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -51,7 +52,10 @@ import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.EventBus.Event;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -491,6 +495,14 @@ public class RecentsView extends FrameLayout {
             tmpTransform.alpha = 0;
             tmpTransform.scale = 1f;
             tmpTransform.rect.set(taskViewRect);
+            final OnAnimationStartedListener startedListener = new OnAnimationStartedListener() {
+                @Override
+                public void onAnimationStarted() {
+                    EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
+                    mTaskStackView.getStack().removeTask(event.task, AnimationProps.IMMEDIATE,
+                            true /* fromDockGesture */);
+                }
+            };
             mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
                     new AnimationProps(125, Interpolators.ALPHA_OUT,
                             new AnimatorListenerAdapter() {
@@ -499,14 +511,8 @@ public class RecentsView extends FrameLayout {
                                     // Dock the task and launch it
                                     SystemServicesProxy ssp = Recents.getSystemServices();
                                     ssp.startTaskInDockedMode(getContext(), event.taskView,
-                                            event.task.key.id, dockState.createMode);
-
-                                    // Animate the stack accordingly
-                                    AnimationProps stackAnim = new AnimationProps(
-                                            TaskStackView.DEFAULT_SYNC_STACK_DURATION,
-                                            Interpolators.FAST_OUT_SLOW_IN);
-                                    mTaskStackView.getStack().removeTask(event.task, stackAnim,
-                                            true /* fromDockGesture */);
+                                            event.task.key.id, dockState.createMode,
+                                            mHandler, startedListener);
                                 }
                             }));
 

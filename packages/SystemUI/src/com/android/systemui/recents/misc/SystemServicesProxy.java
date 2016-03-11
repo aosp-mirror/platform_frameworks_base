@@ -25,6 +25,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
@@ -401,13 +402,14 @@ public class SystemServicesProxy {
     }
 
     /** Docks a task to the side of the screen and starts it. */
-    public void startTaskInDockedMode(Context context, View view, int taskId, int createMode) {
+    public void startTaskInDockedMode(Context context, View view, int taskId, int createMode,
+            Handler handler, OnAnimationStartedListener startedListener) {
         if (mIam == null) return;
 
         try {
             // TODO: Determine what animation we want for the incoming task
             final ActivityOptions options = ActivityOptions.makeThumbnailAspectScaleUpAnimation(
-                    view, null, 0, 0, view.getWidth(), view.getHeight(), null, null);
+                    view, null, 0, 0, view.getWidth(), view.getHeight(), handler, startedListener);
             options.setDockCreateMode(createMode);
             options.setLaunchStackId(DOCKED_STACK_ID);
             mIam.startActivityFromRecents(taskId, options.toBundle());

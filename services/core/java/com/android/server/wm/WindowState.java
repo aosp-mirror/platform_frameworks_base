@@ -756,20 +756,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleFrame.set(mContentFrame);
             mStableFrame.set(mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            if (isVisibleLw() || mWinAnimator.isAnimating()) {
-                // We don't adjust the dock divider frame for reasons other than performance. The
-                // real reason is that if it gets adjusted before it is shown for the first time,
-                // it would get size (0, 0). This causes a problem when we finally show the dock
-                // divider and try to draw to it. We do set the surface size at that moment to
-                // the correct size, but it's too late for the Surface Flinger to make it
-                // available for view rendering and as a result the renderer receives size 1, 1.
-                // This way we just keep the divider at the original size and Surface Flinger
-                // will return the correct value to the renderer.
-                mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
-                mContentFrame.set(mFrame);
-                if (!mFrame.equals(mLastFrame)) {
-                    mMovedByResize = true;
-                }
+            mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
+            mContentFrame.set(mFrame);
+            if (!mFrame.equals(mLastFrame)) {
+                mMovedByResize = true;
             }
         } else {
             mContentFrame.set(Math.max(mContentFrame.left, frame.left),
@@ -1309,7 +1299,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
-                && !mAnimatingExit && !mWinAnimator.mLastHidden && mService.okToDisplay()
+                && !mAnimatingExit && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
@@ -2258,7 +2248,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mResizeMode;
     }
 
-    private boolean computeDragResizing() {
+    boolean computeDragResizing() {
         final Task task = getTask();
         if (task == null) {
             return false;

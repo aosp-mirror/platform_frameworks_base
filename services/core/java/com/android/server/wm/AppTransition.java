@@ -130,6 +130,8 @@ public class AppTransition implements Dump {
     public static final int TRANSIT_TASK_IN_PLACE = 17;
     /** An activity is being relaunched (e.g. due to configuration change). */
     public static final int TRANSIT_ACTIVITY_RELAUNCH = 18;
+    /** A task is being docked from recents. */
+    public static final int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
 
     /** Fraction of animation at which the recents thumbnail stays completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.5f;
@@ -1446,6 +1448,7 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
                     break;
+                case TRANSIT_DOCK_TASK_FROM_RECENTS:
                 case TRANSIT_TASK_OPEN:
                     animAttr = enter
                             ? WindowAnimation_taskOpenEnterAnimation
@@ -1726,6 +1729,9 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_ACTIVITY_RELAUNCH: {
                 return "TRANSIT_ACTIVITY_RELAUNCH";
+            }
+            case TRANSIT_DOCK_TASK_FROM_RECENTS: {
+                return "TRANSIT_DOCK_TASK_FROM_RECENTS";
             }
             default: {
                 return "<UNKNOWN>";

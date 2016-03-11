@@ -122,7 +122,6 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -1942,9 +1941,27 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    private void resizeStackUncheckedLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
+    void deferUpdateBounds(int stackId) {
+        final ActivityStack stack = getStack(stackId);
+        if (stack != null) {
+            stack.deferUpdateBounds();
+        }
+    }
+
+    void continueUpdateBounds(int stackId) {
+        final ActivityStack stack = getStack(stackId);
+        if (stack != null) {
+            stack.continueUpdateBounds();
+        }
+    }
+
+    void resizeStackUncheckedLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
             Rect tempTaskInsetBounds) {
         bounds = TaskRecord.validateBounds(bounds);
+
+        if (!stack.updateBoundsAllowed(bounds, tempTaskBounds, tempTaskInsetBounds)) {
+            return;
+        }
 
         mTmpBounds.clear();
         mTmpConfigs.clear();

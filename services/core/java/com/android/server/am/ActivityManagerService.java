@@ -55,7 +55,6 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
-import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -103,7 +102,6 @@ import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.app.admin.IDevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
@@ -355,6 +353,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
+import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
@@ -4527,6 +4526,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (launchStackId == DOCKED_STACK_ID && activityOptions != null) {
                     mWindowManager.setDockedStackCreateState(
                             activityOptions.getDockCreateMode(), null /* initialBounds */);
+                    mStackSupervisor.deferUpdateBounds(HOME_STACK_ID);
+                    mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
                 }
                 if (task.stack.mStackId != launchStackId) {
                     mStackSupervisor.moveTaskToStackLocked(
@@ -21048,6 +21049,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reason);
             }
+        }
+
+        @Override
+        public void notifyAppTransitionFinished() {
+            mStackSupervisor.continueUpdateBounds(HOME_STACK_ID);
+        }
+
+        @Override
+        public void notifyAppTransitionCancelled() {
+            mStackSupervisor.continueUpdateBounds(HOME_STACK_ID);
         }
     }
 

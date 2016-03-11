@@ -799,7 +799,13 @@ public class WindowManagerService extends IWindowManager.Stub
             = new WindowManagerInternal.AppTransitionListener() {
 
         @Override
+        public void onAppTransitionCancelledLocked() {
+            mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_CANCELLED);
+        }
+
+        @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
+            mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_FINISHED);
             AppWindowToken atoken = findAppWindowToken(token);
             if (atoken == null) {
                 return;
@@ -7695,7 +7701,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
         public static final int NOTIFY_APP_TRANSITION_STARTING = 47;
-        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 48;
+        public static final int NOTIFY_APP_TRANSITION_CANCELLED = 48;
+        public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
+        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -8274,6 +8282,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case NOTIFY_APP_TRANSITION_STARTING: {
                     mAmInternal.notifyAppTransitionStarting(msg.arg1);
+                }
+                break;
+                case NOTIFY_APP_TRANSITION_CANCELLED: {
+                    mAmInternal.notifyAppTransitionCancelled();
+                }
+                break;
+                case NOTIFY_APP_TRANSITION_FINISHED: {
+                    mAmInternal.notifyAppTransitionFinished();
                 }
                 break;
                 case NOTIFY_STARTING_WINDOW_DRAWN: {
