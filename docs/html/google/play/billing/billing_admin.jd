@@ -155,8 +155,8 @@ number of in-app items.</p>
     application.</p>
   </li>
   <li><strong>Title</strong>
-    <p>The title is a short descriptor for the item. For example, "Sleeping potion." Titles must be
-    unique across an application's namespace. Every item must have a title. The title is visible to
+    <p>The title is a short descriptor for the item. For example, "Sleeping potion."
+    Every item must have a title. The title is visible to
     users during checkout. For optimum appearance, titles should be no longer than 25 characters;
     however, titles can be up to 55 characters in length.</p>
   </li>
@@ -201,7 +201,7 @@ or modify product IDs after you save them.</p>
 <p>To add a batch of items to a product list using a CSV file, you first need to create your CSV
 file. The data values that you specify in the CSV file represent the same data values you specify
 manually through the In-app Products UI (see <a href="#billing-form-add">Adding items one at a time
-to a product list</a>). 
+to a product list</a>).
 
 <p>If you are importing and exporting CSV files with in-app products, please
 keep tax-inclusive pricing in mind. If you use auto-fill, you can provide a
