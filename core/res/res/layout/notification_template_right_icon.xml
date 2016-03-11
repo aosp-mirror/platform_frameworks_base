@@ -19,7 +19,7 @@
     android:layout_width="40dp"
     android:layout_height="40dp"
     android:layout_marginEnd="16dp"
-    android:layout_marginTop="32dp"
+    android:layout_marginTop="36dp"
     android:layout_gravity="top|end"
     android:scaleType="centerCrop"
     />
