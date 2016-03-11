@@ -43,13 +43,15 @@ public class State implements android.os.Parcelable {
 
     private static final String TAG = "State";
 
-    public static final int ACTION_OPEN = 1;
-    public static final int ACTION_CREATE = 2;
-    public static final int ACTION_GET_CONTENT = 3;
-    public static final int ACTION_OPEN_TREE = 4;
-    public static final int ACTION_MANAGE = 5;
-    public static final int ACTION_BROWSE = 6;
-    public static final int ACTION_PICK_COPY_DESTINATION = 8;
+    // File manager and related private picking activity.
+    public static final int ACTION_BROWSE = 1;
+    public static final int ACTION_PICK_COPY_DESTINATION = 2;
+
+    // All public picking activities
+    public static final int ACTION_OPEN = 3;
+    public static final int ACTION_CREATE = 4;
+    public static final int ACTION_GET_CONTENT = 5;
+    public static final int ACTION_OPEN_TREE = 6;
 
     @IntDef(flag = true, value = {
             MODE_UNKNOWN,
