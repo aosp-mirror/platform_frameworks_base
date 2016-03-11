@@ -124,5 +124,9 @@
       <item quantity="other">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere?</item>
       <item quantity="one">Ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> fișier?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selectat</item>
+    </plurals>
 </resources>

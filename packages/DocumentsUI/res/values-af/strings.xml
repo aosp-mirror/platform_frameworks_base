@@ -116,5 +116,8 @@
       <item quantity="other">Vee <xliff:g id="COUNT_1">%1$d</xliff:g> lêers uit?</item>
       <item quantity="one">Vee <xliff:g id="COUNT_0">%1$d</xliff:g> lêer uit?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> gekies</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> gekies</item>
+    </plurals>
 </resources>

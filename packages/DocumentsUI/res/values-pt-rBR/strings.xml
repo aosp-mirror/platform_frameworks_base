@@ -116,5 +116,8 @@
       <item quantity="one">Excluir <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos?</item>
       <item quantity="other">Excluir <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+    </plurals>
 </resources>
