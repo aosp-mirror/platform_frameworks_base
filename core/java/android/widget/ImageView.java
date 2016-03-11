@@ -212,7 +212,7 @@ public class ImageView extends View {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable dr) {
+    protected boolean verifyDrawable(@NonNull Drawable dr) {
         return mDrawable == dr || super.verifyDrawable(dr);
     }
 
@@ -223,7 +223,7 @@ public class ImageView extends View {
     }
 
     @Override
-    public void invalidateDrawable(Drawable dr) {
+    public void invalidateDrawable(@NonNull Drawable dr) {
         if (dr == mDrawable) {
             if (dr != null) {
                 // update cached drawable dimensions if they've changed

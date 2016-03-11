@@ -18,6 +18,7 @@ package android.widget;
 
 import android.animation.ObjectAnimator;
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.content.Context;
@@ -1371,7 +1372,7 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return super.verifyDrawable(who) || who == mThumbDrawable || who == mTrackDrawable;
     }
 

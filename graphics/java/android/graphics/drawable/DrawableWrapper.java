@@ -198,7 +198,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public void invalidateDrawable(Drawable who) {
+    public void invalidateDrawable(@NonNull Drawable who) {
         final Callback callback = getCallback();
         if (callback != null) {
             callback.invalidateDrawable(this);
@@ -206,7 +206,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+    public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
         final Callback callback = getCallback();
         if (callback != null) {
             callback.scheduleDrawable(this, what, when);
@@ -214,7 +214,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public void unscheduleDrawable(Drawable who, Runnable what) {
+    public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         final Callback callback = getCallback();
         if (callback != null) {
             callback.unscheduleDrawable(this, what);

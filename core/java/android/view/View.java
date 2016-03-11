@@ -17505,7 +17505,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        {@link SystemClock#uptimeMillis} timebase.
      */
     @Override
-    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+    public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
         if (verifyDrawable(who) && what != null) {
             final long delay = when - SystemClock.uptimeMillis();
             if (mAttachInfo != null) {
@@ -17527,7 +17527,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param what the action to cancel
      */
     @Override
-    public void unscheduleDrawable(Drawable who, Runnable what) {
+    public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         if (verifyDrawable(who) && what != null) {
             if (mAttachInfo != null) {
                 mAttachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
@@ -17637,7 +17637,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #drawableStateChanged()
      */
     @CallSuper
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         // Avoid verifying the scroll bar drawable so that we don't end up in
         // an invalidation loop. This effectively prevents the scroll bar
         // drawable from triggering invalidations and scheduling runnables.

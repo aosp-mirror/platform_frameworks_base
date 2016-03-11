@@ -147,7 +147,7 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return (who == mBackground && !mIsSplit) || (who == mStackedBackground && mIsStacked) ||
                 (who == mSplitBackground && mIsSplit) || super.verifyDrawable(who);
     }

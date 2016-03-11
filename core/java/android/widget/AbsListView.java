@@ -2864,7 +2864,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
-    public boolean verifyDrawable(Drawable dr) {
+    public boolean verifyDrawable(@NonNull Drawable dr) {
         return mSelector == dr || super.verifyDrawable(dr);
     }
 

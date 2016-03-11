@@ -1229,7 +1229,7 @@ public class ProgressBar extends View {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return who == mProgressDrawable || who == mIndeterminateDrawable
                 || super.verifyDrawable(who);
     }
@@ -1692,7 +1692,7 @@ public class ProgressBar extends View {
     }
 
     @Override
-    public void invalidateDrawable(Drawable dr) {
+    public void invalidateDrawable(@NonNull Drawable dr) {
         if (!mInDrawing) {
             if (verifyDrawable(dr)) {
                 final Rect dirty = dr.getBounds();
