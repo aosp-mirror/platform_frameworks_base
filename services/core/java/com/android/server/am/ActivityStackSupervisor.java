@@ -2389,6 +2389,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (task.mActivities.size() == 1) {
                 // There is only one activity in the task. So, we can just move the task over to
                 // the stack without re-parenting the activity in a different task.
+                if (task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE) {
+                    // Move the home stack forward if the task we just moved to the pinned stack
+                    // was launched from home so home should be visible behind it.
+                    moveHomeStackToFront(reason);
+                }
                 moveTaskToStackLocked(
                         task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS, reason, !ANIMATE);
             } else {
