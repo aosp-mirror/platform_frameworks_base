@@ -143,6 +143,8 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
         onView(withId(R.id.textview)).check(hasSelection(""));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("i")));
+
+        // TODO: Add tests for suggestions
     }
 
     @SmallTest
