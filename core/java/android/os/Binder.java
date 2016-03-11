@@ -70,6 +70,9 @@ public class Binder implements IBinder {
     private static final boolean CHECK_PARCEL_SIZE = false;
     static final String TAG = "Binder";
 
+    /** @hide */
+    public static boolean LOG_RUNTIME_EXCEPTION = false; // DO NOT SUBMIT WITH TRUE
+
     /**
      * Control whether dump() calls are allowed.
      */
@@ -560,17 +563,16 @@ public class Binder implements IBinder {
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         try {
             res = onTransact(code, data, reply, flags);
-        } catch (RemoteException e) {
-            if ((flags & FLAG_ONEWAY) != 0) {
-                Log.w(TAG, "Binder call failed.", e);
-            } else {
-                reply.setDataPosition(0);
-                reply.writeException(e);
-            }
-            res = true;
-        } catch (RuntimeException e) {
-            if ((flags & FLAG_ONEWAY) != 0) {
+        } catch (RemoteException|RuntimeException e) {
+            if (LOG_RUNTIME_EXCEPTION) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+            }
+            if ((flags & FLAG_ONEWAY) != 0) {
+                if (e instanceof RemoteException) {
+                    Log.w(TAG, "Binder call failed.", e);
+                } else {
+                    Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+                }
             } else {
                 reply.setDataPosition(0);
                 reply.writeException(e);
