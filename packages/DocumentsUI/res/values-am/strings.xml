@@ -116,5 +116,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ፋይሎች ይሰረዙ?</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ፋይሎች ይሰረዙ?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ተመርጠዋል</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ተመርጠዋል</item>
+    </plurals>
 </resources>

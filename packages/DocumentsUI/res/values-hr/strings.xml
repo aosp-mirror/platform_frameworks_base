@@ -124,5 +124,9 @@
       <item quantity="few">Želite li izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke?</item>
       <item quantity="other">Želite li izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one">Odabrano: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="few">Odabrano: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Odabrano: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
 </resources>

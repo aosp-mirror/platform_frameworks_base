@@ -116,5 +116,8 @@
       <item quantity="one">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
       <item quantity="other">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
 </resources>
