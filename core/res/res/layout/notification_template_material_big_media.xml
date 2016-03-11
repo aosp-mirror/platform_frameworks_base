@@ -25,7 +25,7 @@
     >
     <include layout="@layout/notification_template_header"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="53dp"
         android:layout_gravity="start"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,9 +50,10 @@
             android:id="@+id/media_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-15dp"
+            android:layout_marginTop="-21dp"
             android:paddingStart="8dp"
-            android:paddingBottom="8dp"
+            android:paddingBottom="12dp"
+            android:gravity="top"
             android:orientation="horizontal"
             android:layoutDirection="ltr"
             >
@@ -65,7 +66,7 @@
         android:layout_height="@dimen/media_notification_expanded_image_max_size"
         android:minWidth="40dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:layout_gravity="bottom|end"
         android:scaleType="centerCrop"
         />
