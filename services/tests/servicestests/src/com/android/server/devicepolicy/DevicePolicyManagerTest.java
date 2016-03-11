@@ -33,6 +33,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
@@ -1491,7 +1492,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress(admin1));
     }
 
-    public void testRebootCanOnlyBeCalledByDeviceOwner() throws Exception {
+    public void testReboot() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
@@ -1524,6 +1525,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.clearProfileOwner(admin1);
         assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
 
+        // admin1 is DO.
+        // Set current call state of device to ringing.
+        when(mContext.telephonyManager.getCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_RINGING);
+        try {
+            dpm.reboot(admin1);
+            fail("DPM.reboot() called when receiveing a call, should thrown IllegalStateException");
+        } catch (IllegalStateException expected) {
+            MoreAsserts.assertContainsRegex("ongoing call on the device", expected.getMessage());
+        }
+
+        // Set current call state of device to dialing/active.
+        when(mContext.telephonyManager.getCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+        try {
+            dpm.reboot(admin1);
+            fail("DPM.reboot() called when dialing, should thrown IllegalStateException");
+        } catch (IllegalStateException expected) {
+            MoreAsserts.assertContainsRegex("ongoing call on the device", expected.getMessage());
+        }
+
+        // Set current call state of device to idle.
+        when(mContext.telephonyManager.getCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
         dpm.reboot(admin1);
     }
 

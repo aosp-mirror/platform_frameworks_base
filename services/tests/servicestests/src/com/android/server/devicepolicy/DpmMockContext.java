@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
+import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.view.IWindowManager;
@@ -262,6 +263,7 @@ public class DpmMockContext extends MockContext {
     public final WifiManager wifiManager;
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
+    public final TelephonyManager telephonyManager;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -295,6 +297,7 @@ public class DpmMockContext extends MockContext {
         storageManager = mock(StorageManagerForMock.class);
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
+        telephonyManager = mock(TelephonyManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(context.getPackageManager());

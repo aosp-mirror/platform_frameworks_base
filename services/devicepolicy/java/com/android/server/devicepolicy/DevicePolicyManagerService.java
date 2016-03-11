@@ -115,6 +115,7 @@ import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -306,6 +307,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final IPackageManager mIPackageManager;
     final UserManager mUserManager;
     final UserManagerInternal mUserManagerInternal;
+    final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
 
     /**
@@ -1354,6 +1356,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return LocalServices.getService(PowerManagerInternal.class);
         }
 
+        TelephonyManager getTelephonyManager() {
+            return TelephonyManager.from(mContext);
+        }
+
         IWindowManager getIWindowManager() {
             return IWindowManager.Stub
                     .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
@@ -1542,6 +1548,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserManager = Preconditions.checkNotNull(injector.getUserManager());
         mUserManagerInternal = Preconditions.checkNotNull(injector.getUserManagerInternal());
         mIPackageManager = Preconditions.checkNotNull(injector.getIPackageManager());
+        mTelephonyManager = Preconditions.checkNotNull(injector.getTelephonyManager());
 
         mLocalService = new LocalService();
         mLockPatternUtils = injector.newLockPatternUtils();
@@ -8309,6 +8316,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         long ident = mInjector.binderClearCallingIdentity();
         try {
+            // Make sure there are no ongoing calls on the device.
+            if (mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+                throw new IllegalStateException("Cannot be called with ongoing call on the device");
+            }
             mInjector.powerManagerReboot(PowerManager.REBOOT_REQUESTED_BY_DEVICE_OWNER);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
