@@ -308,7 +308,7 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return who == mCheckMarkDrawable || super.verifyDrawable(who);
     }
 

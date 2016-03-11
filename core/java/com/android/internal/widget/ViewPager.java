@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -746,7 +747,7 @@ public class ViewPager extends ViewGroup {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return super.verifyDrawable(who) || who == mMarginDrawable;
     }
 

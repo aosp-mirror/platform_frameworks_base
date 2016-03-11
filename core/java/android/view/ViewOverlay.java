@@ -170,7 +170,7 @@ public class ViewOverlay {
         }
 
         @Override
-        protected boolean verifyDrawable(Drawable who) {
+        protected boolean verifyDrawable(@NonNull Drawable who) {
             return super.verifyDrawable(who) || (mDrawables != null && mDrawables.contains(who));
         }
 
@@ -229,7 +229,7 @@ public class ViewOverlay {
         }
 
         @Override
-        public void invalidateDrawable(Drawable drawable) {
+        public void invalidateDrawable(@NonNull Drawable drawable) {
             invalidate(drawable.getBounds());
         }
 

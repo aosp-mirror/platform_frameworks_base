@@ -5470,7 +5470,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         final boolean verified = super.verifyDrawable(who);
         if (!verified && mDrawables != null) {
             for (Drawable dr : mDrawables.mShowing) {
@@ -5495,7 +5495,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void invalidateDrawable(Drawable drawable) {
+    public void invalidateDrawable(@NonNull Drawable drawable) {
         boolean handled = false;
 
         if (verifyDrawable(drawable)) {
