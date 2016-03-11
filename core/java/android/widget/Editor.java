@@ -290,7 +290,6 @@ public class Editor {
     boolean mIsInsertionActionModeStartPending = false;
 
     private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
-    private SuggestionInfo[] mSuggestionInfosInContextMenu;
 
     Editor(TextView textView) {
         mTextView = textView;
@@ -2454,21 +2453,24 @@ public class Editor {
         }
 
         if (shouldOfferToShowSuggestions()) {
-            if (mSuggestionInfosInContextMenu == null) {
-                mSuggestionInfosInContextMenu =
-                        new SuggestionInfo[SuggestionSpan.SUGGESTIONS_MAX_SIZE];
-                for (int i = 0; i < mSuggestionInfosInContextMenu.length; i++) {
-                    mSuggestionInfosInContextMenu[i] = new SuggestionInfo();
-                }
+            final SuggestionInfo[] suggestionInfoArray =
+                    new SuggestionInfo[SuggestionSpan.SUGGESTIONS_MAX_SIZE];
+            for (int i = 0; i < suggestionInfoArray.length; i++) {
+                suggestionInfoArray[i] = new SuggestionInfo();
             }
             final SubMenu subMenu = menu.addSubMenu(Menu.NONE, Menu.NONE, MENU_ITEM_ORDER_REPLACE,
                     com.android.internal.R.string.replace);
-            mSuggestionHelper.getSuggestionInfo(mSuggestionInfosInContextMenu);
-            int i = 0;
-            for (final SuggestionInfo info : mSuggestionInfosInContextMenu) {
-                info.mSuggestionEnd = info.mText.length();
-                subMenu.add(Menu.NONE, Menu.NONE, i++, info.mText)
-                        .setOnMenuItemClickListener(mOnContextMenuReplaceItemClickListener);
+            final int numItems = mSuggestionHelper.getSuggestionInfo(suggestionInfoArray);
+            for (int i = 0; i < numItems; i++) {
+                final SuggestionInfo info = suggestionInfoArray[i];
+                subMenu.add(Menu.NONE, Menu.NONE, i, info.mText)
+                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                replaceWithSuggestion(info);
+                                return true;
+                            }
+                        });
             }
         }
 
@@ -2606,27 +2608,6 @@ public class Editor {
                 return true;
             }
             return mTextView.onTextContextMenuItem(item.getItemId());
-        }
-    };
-
-    private final MenuItem.OnMenuItemClickListener mOnContextMenuReplaceItemClickListener =
-            new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            int index = item.getOrder();
-            if (index < 0 || index >= mSuggestionInfosInContextMenu.length) {
-                clear();
-                return false;
-            }
-            replaceWithSuggestion(mSuggestionInfosInContextMenu[index]);
-            clear();
-            return true;
-        }
-
-        private void clear() {
-            for (final SuggestionInfo info : mSuggestionInfosInContextMenu) {
-                info.clear();
-            }
         }
     };
 
