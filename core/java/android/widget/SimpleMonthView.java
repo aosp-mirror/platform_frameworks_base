@@ -33,6 +33,7 @@ import android.text.TextPaint;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.StateSet;
 import android.view.KeyEvent;
@@ -68,6 +69,9 @@ class SimpleMonthView extends View {
     private static final String DAY_OF_WEEK_FORMAT = "EEEEE";
 
     private static final int SELECTED_HIGHLIGHT_ALPHA = 0xB0;
+
+    /** Temporary until we figure out why the date gets messed up. */
+    private static final boolean DEBUG_WRONG_DATE = true;
 
     private final TextPaint mMonthPaint = new TextPaint();
     private final TextPaint mDayOfWeekPaint = new TextPaint();
@@ -189,6 +193,12 @@ class SimpleMonthView extends View {
     }
 
     private void updateDayOfWeekLabels() {
+        if (DEBUG_WRONG_DATE) {
+            Log.d(LOG_TAG, "enter updateDayOfWeekLabels()", new Exception());
+            Log.d(LOG_TAG, "mLocale => " + mLocale);
+            Log.d(LOG_TAG, "mWeekStart => " + mWeekStart);
+        }
+
         final Calendar calendar = Calendar.getInstance(mLocale);
         calendar.setFirstDayOfWeek(mWeekStart);
 
@@ -196,6 +206,10 @@ class SimpleMonthView extends View {
         for (int i = 0; i < 7; i++) {
             calendar.set(Calendar.DAY_OF_WEEK, i);
             mDayOfWeekLabels[i] = formatter.format(calendar.getTime());
+        }
+
+        if (DEBUG_WRONG_DATE) {
+            Log.d(LOG_TAG, "mDayOfWeekLabels <= " + Arrays.toString(mDayOfWeekLabels));
         }
     }
 
@@ -760,10 +774,18 @@ class SimpleMonthView extends View {
      *                  {@link Calendar#SUNDAY} through {@link Calendar#SATURDAY}
      */
     public void setFirstDayOfWeek(int weekStart) {
+        if (DEBUG_WRONG_DATE) {
+            Log.d(LOG_TAG, "enter setFirstDayOfWeek(" + weekStart + ")", new Exception());
+        }
+
         if (isValidDayOfWeek(weekStart)) {
             mWeekStart = weekStart;
         } else {
             mWeekStart = mCalendar.getFirstDayOfWeek();
+        }
+
+        if (DEBUG_WRONG_DATE) {
+            Log.d(LOG_TAG, "mWeekStart <=" + mWeekStart);
         }
 
         updateDayOfWeekLabels();
