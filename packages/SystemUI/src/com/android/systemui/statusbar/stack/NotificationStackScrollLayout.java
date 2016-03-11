@@ -372,11 +372,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    public void onSettingsIconRowReset(NotificationSettingsIconRow row) {
-        mSwipeHelper.setSnappedToGear(false);
-    }
-
-    @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom, mBackgroundPaint);
         if (DEBUG) {
@@ -722,15 +717,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDragAnimPendingChildren.remove(animView);
         }
 
-        if (mCurrIconRow != null) {
-            if (targetLeft == 0) {
-                mCurrIconRow.resetState();
-                mCurrIconRow = null;
-                if (mGearExposedView != null && mGearExposedView == mTranslatingParentView) {
-                    mGearExposedView = null;
-                }
-            } else {
-                mSwipeHelper.setSnappedToGear(true);
+        if (targetLeft == 0 && mCurrIconRow != null) {
+            mCurrIconRow.resetState();
+            mCurrIconRow = null;
+            if (mGearExposedView != null && mGearExposedView == mTranslatingParentView) {
+                mGearExposedView = null;
             }
         }
     }
@@ -3388,11 +3379,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private class NotificationSwipeHelper extends SwipeHelper {
+        private static final int MOVE_STATE_LEFT = -1;
+        private static final int MOVE_STATE_UNDEFINED = 0;
+        private static final int MOVE_STATE_RIGHT = 1;
+
         private static final long GEAR_SHOW_DELAY = 60;
+
         private CheckForDrag mCheckForDrag;
         private Handler mHandler;
-        private boolean mGearSnappedTo;
-        private boolean mGearSnappedOnLeft;
+        private int mMoveState = MOVE_STATE_UNDEFINED;
 
         public NotificationSwipeHelper(int swipeDirection, Callback callback, Context context) {
             super(swipeDirection, callback, context);
@@ -3405,10 +3400,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mTranslatingParentView = currView;
 
             // Reset check for drag gesture
-            cancelCheckForDrag();
-            if (mCurrIconRow != null) {
-                mCurrIconRow.setSnapping(false);
-            }
             mCheckForDrag = null;
             mCurrIconRow = null;
 
@@ -3420,32 +3411,17 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mCurrIconRow = ((ExpandableNotificationRow) currView).getSettingsRow();
                 mCurrIconRow.setGearListener(NotificationStackScrollLayout.this);
             }
+            mMoveState = MOVE_STATE_UNDEFINED;
         }
 
         @Override
         public void onMoveUpdate(View view, float translation, float delta) {
-            if (mCurrIconRow != null) {
-                mCurrIconRow.setSnapping(false); // If we're moving, we're not snapping.
-
-                // If the gear is visible and the movement is towards it it's not a location change.
-                boolean onLeft = mGearSnappedTo ? mGearSnappedOnLeft : mCurrIconRow.isIconOnLeft();
-                boolean locationChange = isTowardsGear(translation, onLeft)
-                        ? false : mCurrIconRow.isIconLocationChange(translation);
-                if (locationChange) {
-                    // Don't consider it "snapped" if location has changed.
-                    setSnappedToGear(false);
-
-                    // Changed directions, make sure we check to fade in icon again.
-                    if (!mHandler.hasCallbacks(mCheckForDrag)) {
-                        // No check scheduled, set null to schedule a new one.
-                        mCheckForDrag = null;
-                    } else {
-                        // Check scheduled, reset alpha and update location; check will fade it in
-                        mCurrIconRow.setGearAlpha(0f);
-                        mCurrIconRow.setIconLocation(translation > 0 /* onLeft */);
-                    }
-                }
+            final int newMoveState = (delta < 0) ? MOVE_STATE_RIGHT : MOVE_STATE_LEFT;
+            if (mMoveState != MOVE_STATE_UNDEFINED && mMoveState != newMoveState) {
+                // Changed directions, make sure we check for drag again.
+                mCheckForDrag = null;
             }
+            mMoveState = newMoveState;
 
             final boolean gutsExposed = (view instanceof ExpandableNotificationRow)
                     && ((ExpandableNotificationRow) view).areGutsExposed();
@@ -3458,99 +3434,35 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         @Override
         public void dismissChild(final View view, float velocity) {
-            super.dismissChild(view, velocity);
             cancelCheckForDrag();
-            setSnappedToGear(false);
+            super.dismissChild(view, velocity);
         }
 
         @Override
         public void snapChild(final View animView, final float targetLeft, float velocity) {
-            super.snapChild(animView, targetLeft, velocity);
-            if (targetLeft == 0) {
-                cancelCheckForDrag();
-                setSnappedToGear(false);
-            }
-        }
-
-
-        @Override
-        public boolean handleUpEvent(MotionEvent ev, View animView, float velocity,
-                float translation) {
-            if (mCurrIconRow == null) {
-                cancelCheckForDrag();
-                return false; // Let SwipeHelper handle it.
-            }
-
-            boolean gestureTowardsGear = isTowardsGear(velocity, mCurrIconRow.isIconOnLeft());
-            boolean gestureFastEnough = Math.abs(velocity) > getEscapeVelocity();
-
-            if (mGearSnappedTo && mCurrIconRow.isVisible()) {
-                if (mGearSnappedOnLeft == mCurrIconRow.isIconOnLeft()) {
-                    boolean coveringGear =
-                            Math.abs(getTranslation(animView)) <= getSpaceForGear(animView) * 0.6f;
-                    if (gestureTowardsGear || coveringGear) {
-                        // Gesture is towards or covering the gear
-                        snapChild(animView, 0 /* leftTarget */, velocity);
-                    } else if (isDismissGesture(ev)) {
-                        // Gesture is a dismiss that's not towards the gear
-                        dismissChild(animView, swipedFastEnough() ? velocity : 0f);
-                    } else {
-                        // Didn't move enough to dismiss or cover, snap to the gear
-                        snapToGear(animView, velocity);
-                    }
-                } else if ((!gestureFastEnough && swipedEnoughToShowGear(animView))
-                        || (gestureTowardsGear && !swipedFarEnough())) {
-                    // The gear has been snapped to previously, however, the gear is now on the
-                    // other side. If gesture is towards gear and not too far snap to the gear.
-                    snapToGear(animView, velocity);
-                } else {
-                    dismissOrSnapBack(animView, velocity, ev);
-                }
-            } else if ((!gestureFastEnough && swipedEnoughToShowGear(animView))
-                    || gestureTowardsGear) {
-                // Gear has not been snapped to previously and this is gear revealing gesture
-                snapToGear(animView, velocity);
-            } else {
-                dismissOrSnapBack(animView, velocity, ev);
-            }
-            return true;
-        }
-
-        private void dismissOrSnapBack(View animView, float velocity, MotionEvent ev) {
-            if (isDismissGesture(ev)) {
-                dismissChild(animView, swipedFastEnough() ? velocity : 0f);
-            } else {
-                snapChild(animView, 0 /* leftTarget */, velocity);
-            }
-        }
-
-        private void snapToGear(View animView, float velocity) {
-            final float snapBackThreshold = getSpaceForGear(animView);
-            final float target = mCurrIconRow.isIconOnLeft() ? snapBackThreshold
-                    : -snapBackThreshold;
-            mGearExposedView = mTranslatingParentView;
-            if (mGearDisplayedListener != null
-                    && (animView instanceof ExpandableNotificationRow)) {
-                mGearDisplayedListener.onGearDisplayed((ExpandableNotificationRow) animView);
-            }
-            if (mCurrIconRow != null) {
-                mCurrIconRow.setSnapping(true);
-                setSnappedToGear(true);
-            }
-            super.snapChild(animView, target, velocity);
-        }
-
-        private boolean swipedEnoughToShowGear(View animView) {
             final float snapBackThreshold = getSpaceForGear(animView);
             final float translation = getTranslation(animView);
             final boolean fromLeft = translation > 0;
             final float absTrans = Math.abs(translation);
             final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
 
-            // If the notification can't be dismissed then how far it can move is
-            // restricted -- reduce the distance it needs to move in this case.
-            final float multiplier = canChildBeDismissed(animView) ? 0.4f : 0.2f;
-            return absTrans >= snapBackThreshold * 0.4f && absTrans <= notiThreshold;
+            boolean pastGear = (fromLeft && translation >= snapBackThreshold * 0.4f
+                    && translation <= notiThreshold) ||
+                    (!fromLeft && absTrans >= snapBackThreshold * 0.4f
+                            && absTrans <= notiThreshold);
+
+            if (pastGear && !isPinnedHeadsUp(animView)
+                    && (animView instanceof ExpandableNotificationRow)) {
+                // bouncity
+                final float target = fromLeft ? snapBackThreshold : -snapBackThreshold;
+                mGearExposedView = mTranslatingParentView;
+                if (mGearDisplayedListener != null) {
+                    mGearDisplayedListener.onGearDisplayed((ExpandableNotificationRow) animView);
+                }
+                super.snapChild(animView, target, velocity);
+            } else {
+                super.snapChild(animView, 0, velocity);
+            }
         }
 
         @Override
@@ -3587,25 +3499,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         /**
-         * Returns whether the gesture is towards the gear location or not.
-         */
-        private boolean isTowardsGear(float velocity, boolean onLeft) {
-            if (mCurrIconRow == null) {
-                return false;
-            }
-            return mCurrIconRow.isVisible()
-                    && ((onLeft && velocity <= 0) || (!onLeft && velocity >= 0));
-        }
-
-        /**
-         * Indicates the the gear has been snapped to.
-         */
-        private void setSnappedToGear(boolean snapped) {
-            mGearSnappedOnLeft = (mCurrIconRow != null) ? mCurrIconRow.isIconOnLeft() : false;
-            mGearSnappedTo = snapped && mCurrIconRow != null;
-        }
-
-        /**
          * Returns the horizontal space in pixels required to display the gear behind a
          * notification.
          */
@@ -3617,7 +3510,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         private void checkForDrag() {
-            if (mCheckForDrag == null || !mHandler.hasCallbacks(mCheckForDrag)) {
+            if (mCheckForDrag == null) {
                 mCheckForDrag = new CheckForDrag();
                 mHandler.postDelayed(mCheckForDrag, GEAR_SHOW_DELAY);
             }
@@ -3628,6 +3521,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mCurrIconRow.cancelFadeAnimator();
             }
             mHandler.removeCallbacks(mCheckForDrag);
+            mCheckForDrag = null;
         }
 
         private final class CheckForDrag implements Runnable {
@@ -3637,13 +3531,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                 final float absTransX = Math.abs(translation);
                 final float bounceBackToGearWidth = getSpaceForGear(mTranslatingParentView);
                 final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
-                if ((mCurrIconRow != null && (!mCurrIconRow.isVisible()
-                        || mCurrIconRow.isIconLocationChange(translation)))
-                        && absTransX >= bounceBackToGearWidth * 0.4
+                if (mCurrIconRow != null && absTransX >= bounceBackToGearWidth * 0.4
                         && absTransX < notiThreshold) {
-                    // Fade in the gear
+                    // Show icon
                     mCurrIconRow.fadeInSettings(translation > 0 /* fromLeft */, translation,
                             notiThreshold);
+                } else {
+                    // Allow more to be posted if this wasn't a drag.
+                    mCheckForDrag = null;
                 }
             }
         }
@@ -3656,7 +3551,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             final View prevGearExposedView = mGearExposedView;
             mGearExposedView = null;
-            mGearSnappedTo = false;
+
             Animator anim = getViewTranslationAnimator(prevGearExposedView,
                     0 /* leftTarget */, null /* updateListener */);
             if (anim != null) {
