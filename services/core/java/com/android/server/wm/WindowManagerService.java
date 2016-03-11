@@ -2621,7 +2621,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 // Odd choice but less odd than embedding in copyFrom()
-                if ((attrs.flags & WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY) != 0) {
+                if ((attrs.privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY)
+                        != 0) {
                     attrs.x = win.mAttrs.x;
                     attrs.y = win.mAttrs.y;
                     attrs.width = win.mAttrs.width;
