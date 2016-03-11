@@ -116,5 +116,8 @@
       <item quantity="other">ลบ <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์ใช่ไหม</item>
       <item quantity="one">ลบ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์ใช่ไหม</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other">เลือกไว้ <xliff:g id="COUNT_1">%1$d</xliff:g> รายการ</item>
+      <item quantity="one">เลือกไว้ <xliff:g id="COUNT_0">%1$d</xliff:g> รายการ</item>
+    </plurals>
 </resources>

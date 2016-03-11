@@ -116,5 +116,8 @@
       <item quantity="other">ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
       <item quantity="one">ဖိုင် <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ခုရွေးချယ်ထားသည်</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ခုရွေးချယ်ထားသည်</item>
+    </plurals>
 </resources>

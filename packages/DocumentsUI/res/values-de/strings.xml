@@ -116,5 +116,8 @@
       <item quantity="other">Möchtest du <xliff:g id="COUNT_1">%1$d</xliff:g> Dateien löschen?</item>
       <item quantity="one">Möchtest du <xliff:g id="COUNT_0">%1$d</xliff:g> Datei löschen?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ausgewählt</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ausgewählt</item>
+    </plurals>
 </resources>

@@ -116,5 +116,8 @@
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මකන්නද?</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මකන්නද?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>ක් තෝරන ලදී</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>ක් තෝරන ලදී</item>
+    </plurals>
 </resources>

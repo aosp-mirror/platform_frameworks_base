@@ -148,5 +148,12 @@
       <item quantity="other">هل تريد حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملف؟</item>
       <item quantity="one">هل تريد حذف <xliff:g id="COUNT_0">%1$d</xliff:g> ملف؟</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="zero">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="two">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="few">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="many">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one">تم تحديد <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    </plurals>
 </resources>

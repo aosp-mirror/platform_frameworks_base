@@ -132,5 +132,10 @@
       <item quantity="many">Удалить <xliff:g id="COUNT_1">%1$d</xliff:g> файлов?</item>
       <item quantity="other">Удалить <xliff:g id="COUNT_1">%1$d</xliff:g> файла?</item>
     </plurals>
-    <!-- no translation found for elements_selected (1376955402452875047) -->
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="few">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="many">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
 </resources>
