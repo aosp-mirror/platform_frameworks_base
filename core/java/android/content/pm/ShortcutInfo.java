@@ -160,10 +160,12 @@ public class ShortcutInfo implements Parcelable {
         mIcon = b.mIcon;
         mTitle = b.mTitle;
         mIntent = b.mIntent;
-        final Bundle intentExtras = mIntent.getExtras();
-        if (intentExtras != null) {
-            mIntent.replaceExtras((Bundle) null);
-            mIntentPersistableExtras = new PersistableBundle(intentExtras);
+        if (mIntent != null) {
+            final Bundle intentExtras = mIntent.getExtras();
+            if (intentExtras != null) {
+                mIntent.replaceExtras((Bundle) null);
+                mIntentPersistableExtras = new PersistableBundle(intentExtras);
+            }
         }
         mWeight = b.mWeight;
         mExtras = b.mExtras;
@@ -194,6 +196,7 @@ public class ShortcutInfo implements Parcelable {
 
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
+                mBitmapPath = source.mBitmapPath;
             }
 
             mTitle = source.mTitle;
@@ -204,8 +207,6 @@ public class ShortcutInfo implements Parcelable {
             mWeight = source.mWeight;
             mExtras = source.mExtras;
             mIconResourceId = source.mIconResourceId;
-            mBitmapPath = source.mBitmapPath;
-
         } else {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
@@ -231,9 +232,9 @@ public class ShortcutInfo implements Parcelable {
      * @hide
      */
     public void copyNonNullFieldsFrom(ShortcutInfo source) {
-        Preconditions.checkState(mId == source.mId, "ID must match");
+        Preconditions.checkState(mId.equals(source.mId), "ID must match");
         Preconditions.checkState(mPackageName.equals(source.mPackageName),
-                "Package namae must match");
+                "Package name must match");
 
         if (source.mActivityComponent != null) {
             mActivityComponent = source.mActivityComponent;
