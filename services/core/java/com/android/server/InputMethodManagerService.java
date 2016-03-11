@@ -3588,6 +3588,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static final String ATTR_IME_SUBTYPE_MODE = "imeSubtypeMode";
         private static final String ATTR_IME_SUBTYPE_EXTRA_VALUE = "imeSubtypeExtraValue";
         private static final String ATTR_IS_AUXILIARY = "isAuxiliary";
+        private static final String ATTR_IS_ASCII_CAPABLE = "isAsciiCapable";
         private final AtomicFile mAdditionalInputMethodSubtypeFile;
         private final HashMap<String, InputMethodInfo> mMethodMap;
         private final HashMap<String, List<InputMethodSubtype>> mAdditionalSubtypesMap =
@@ -3684,6 +3685,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         out.attribute(null, ATTR_IME_SUBTYPE_EXTRA_VALUE, subtype.getExtraValue());
                         out.attribute(null, ATTR_IS_AUXILIARY,
                                 String.valueOf(subtype.isAuxiliary() ? 1 : 0));
+                        out.attribute(null, ATTR_IS_ASCII_CAPABLE,
+                                String.valueOf(subtype.isAsciiCapable() ? 1 : 0));
                         out.endTag(null, NODE_SUBTYPE);
                     }
                     out.endTag(null, NODE_IMI);
@@ -3749,6 +3752,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_EXTRA_VALUE);
                         final boolean isAuxiliary = "1".equals(String.valueOf(
                                 parser.getAttributeValue(null, ATTR_IS_AUXILIARY)));
+                        final boolean isAsciiCapable = "1".equals(String.valueOf(
+                                parser.getAttributeValue(null, ATTR_IS_ASCII_CAPABLE)));
                         final InputMethodSubtype subtype = new InputMethodSubtypeBuilder()
                                 .setSubtypeNameResId(label)
                                 .setSubtypeIconResId(icon)
@@ -3757,6 +3762,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 .setSubtypeMode(imeSubtypeMode)
                                 .setSubtypeExtraValue(imeSubtypeExtraValue)
                                 .setIsAuxiliary(isAuxiliary)
+                                .setIsAsciiCapable(isAsciiCapable)
                                 .build();
                         tempSubtypesArray.add(subtype);
                     }
