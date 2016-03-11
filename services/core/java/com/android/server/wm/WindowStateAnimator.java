@@ -75,6 +75,25 @@ class WindowStateAnimator {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowStateAnimator" : TAG_WM;
     static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
 
+    /**
+     * Mode how the window gets clipped by the stack bounds during an animation: The clipping should
+     * be applied after applying the animation transformation, i.e. the stack bounds don't move
+     * during the animation.
+     */
+    static final int STACK_CLIP_AFTER_ANIM = 0;
+
+    /**
+     * Mode how the window gets clipped by the stack bounds: The clipping should be applied before
+     * applying the animation transformation, i.e. the stack bounds move with the window.
+     */
+    static final int STACK_CLIP_BEFORE_ANIM = 1;
+
+    /**
+     * Mode how window gets clipped by the stack bounds during an animation: Don't clip the window
+     * by the stack bounds.
+     */
+    static final int STACK_CLIP_NONE = 2;
+
     // Unchanging local convenience fields.
     final WindowManagerService mService;
     final WindowState mWin;
@@ -100,6 +119,7 @@ class WindowStateAnimator {
     int mLastLayer;
     long mAnimationStartTime;
     long mLastAnimationTime;
+    int mStackClip = STACK_CLIP_BEFORE_ANIM;
 
     /**
      * Set when we have changed the size of the surface, to know that
@@ -128,7 +148,9 @@ class WindowStateAnimator {
     boolean mHasClipRect;
     Rect mClipRect = new Rect();
     Rect mTmpClipRect = new Rect();
+    Rect mTmpFinalClipRect = new Rect();
     Rect mLastClipRect = new Rect();
+    Rect mLastFinalClipRect = new Rect();
     Rect mTmpStackBounds = new Rect();
 
     /**
@@ -226,7 +248,7 @@ class WindowStateAnimator {
         mWallpaperControllerLocked = mService.mWallpaperControllerLocked;
     }
 
-    public void setAnimation(Animation anim, long startTime) {
+    public void setAnimation(Animation anim, long startTime, int stackClip) {
         if (localLOGV) Slog.v(TAG, "Setting animation in " + this + ": " + anim);
         mAnimating = false;
         mLocalAnimating = false;
@@ -238,10 +260,15 @@ class WindowStateAnimator {
         mTransformation.setAlpha(mLastHidden ? 0 : 1);
         mHasLocalTransformation = true;
         mAnimationStartTime = startTime;
+        mStackClip = stackClip;
+    }
+
+    public void setAnimation(Animation anim, int stackClip) {
+        setAnimation(anim, -1, stackClip);
     }
 
     public void setAnimation(Animation anim) {
-        setAnimation(anim, -1);
+        setAnimation(anim, -1, STACK_CLIP_AFTER_ANIM);
     }
 
     public void clearAnimation() {
@@ -252,6 +279,7 @@ class WindowStateAnimator {
             mAnimation = null;
             mKeyguardGoingAwayAnimation = false;
             mKeyguardGoingAwayWithWallpaper = false;
+            mStackClip = STACK_CLIP_BEFORE_ANIM;
         }
     }
 
@@ -397,6 +425,7 @@ class WindowStateAnimator {
         if (DEBUG_LAYERS) Slog.v(TAG, "Stepping win " + this + " anim layer: " + mAnimLayer);
         mHasTransformation = false;
         mHasLocalTransformation = false;
+        mStackClip = STACK_CLIP_BEFORE_ANIM;
         mWin.checkPolicyVisibilityChange();
         mTransformation.clear();
         if (mDrawState == HAS_DRAWN
@@ -1130,11 +1159,13 @@ class WindowStateAnimator {
         }
     }
 
-    Rect calculateSurfaceWindowCrop() {
+    void calculateSurfaceWindowCrop(Rect clipRect, Rect finalClipRect) {
         final WindowState w = mWin;
         final DisplayContent displayContent = w.getDisplayContent();
         if (displayContent == null) {
-            return null;
+            clipRect.setEmpty();
+            finalClipRect.setEmpty();
+            return;
         }
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Updating crop for window: " + w + ", " + "mLastCrop=" +
@@ -1170,7 +1201,6 @@ class WindowStateAnimator {
         final boolean fullscreen = w.isFrameFullscreen(displayInfo);
         final boolean isFreeformResizing =
                 w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
-        final Rect clipRect = mTmpClipRect;
 
         // We use the clip rect as provided by the tranformation for non-fullscreen windows to
         // avoid premature clipping with the system decor rect.
@@ -1201,7 +1231,8 @@ class WindowStateAnimator {
         // so we need to translate to match the actual surface coordinates.
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
-        adjustCropToStackBounds(w, clipRect, isFreeformResizing);
+        finalClipRect.setEmpty();
+        adjustCropToStackBounds(w, clipRect, finalClipRect, isFreeformResizing);
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Clip rect after stack adjustment=" + clipRect);
 
         w.transformFromScreenToSurfaceSpace(clipRect);
@@ -1210,35 +1241,39 @@ class WindowStateAnimator {
         if (w.hasJustMovedInStack() && mLastClipRect.isEmpty() && !clipRect.isEmpty()) {
             clipRect.setEmpty();
         }
-
-        return clipRect;
     }
 
-    void updateSurfaceWindowCrop(Rect clipRect, boolean recoveringMemory) {
+    void updateSurfaceWindowCrop(Rect clipRect, Rect finalClipRect, boolean recoveringMemory) {
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
             mSurfaceController.setCropInTransaction(clipRect, recoveringMemory);
         }
+        if (!finalClipRect.equals(mLastFinalClipRect)) {
+            mLastFinalClipRect.set(finalClipRect);
+            mSurfaceController.setFinalCropInTransaction(finalClipRect);
+        }
     }
 
-    private void adjustCropToStackBounds(WindowState w, Rect clipRect, boolean isFreeformResizing) {
+    private int resolveStackClip() {
+
+        // App animation overrides window animation stack clip mode.
+        if (mAppAnimator != null && mAppAnimator.animation != null) {
+            return mAppAnimator.getStackClip();
+        } else {
+            return mStackClip;
+        }
+    }
+    private void adjustCropToStackBounds(WindowState w, Rect clipRect, Rect finalClipRect,
+            boolean isFreeformResizing) {
         final Task task = w.getTask();
         if (task == null || !task.cropWindowsToStackBounds()) {
             return;
         }
 
-        // We don't apply the stack bounds crop if:
-        // 1. The window is currently animating in freeform mode, otherwise the animating window
-        // will be suddenly (docked) or for whole animation (freeform) cut off.
-        // 2. The window that is being replaced during animation, because it was living in a
-        // different stack. If we suddenly crop it to the new stack bounds, it might get cut off.
-        // We don't want it to happen, so we let it ignore the stack bounds until it gets removed.
-        // The window that will replace it will abide them.
-        // TODO: identify animations where we don't want to apply docked stack crop to the docked
-        //       task. For example, if the app is going from freeform to docked mode, we may not
-        //       want to apply the crop during the animation, since it will make the app appear
-        //       cropped prematurely.
-        if (isAnimating() && (w.mWillReplaceWindow || w.inFreeformWorkspace())) {
+        final int stackClip = resolveStackClip();
+
+        // It's animating and we don't want to clip it to stack bounds during animation - abort.
+        if (isAnimating() && stackClip == STACK_CLIP_NONE) {
             return;
         }
 
@@ -1257,16 +1292,24 @@ class WindowStateAnimator {
         final int frameY = isFreeformResizing ? (int) mSurfaceController.getY() :
                 w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
 
+        // If we are animating, we either apply the clip before applying all the animation
+        // transformation or after all the transformation.
+        final boolean useFinalClipRect = isAnimating() && stackClip == STACK_CLIP_AFTER_ANIM;
+
         // We need to do some acrobatics with surface position, because their clip region is
         // relative to the inside of the surface, but the stack bounds aren't.
-        clipRect.left = Math.max(0,
-                Math.max(mTmpStackBounds.left, frameX + clipRect.left) - frameX);
-        clipRect.top = Math.max(0,
-                Math.max(mTmpStackBounds.top, frameY + clipRect.top) - frameY);
-        clipRect.right = Math.max(0,
-                Math.min(mTmpStackBounds.right, frameX + clipRect.right) - frameX);
-        clipRect.bottom = Math.max(0,
-                Math.min(mTmpStackBounds.bottom, frameY + clipRect.bottom) - frameY);
+        if (useFinalClipRect) {
+            finalClipRect.set(mTmpStackBounds);
+        } else {
+            clipRect.left = Math.max(0,
+                    Math.max(mTmpStackBounds.left, frameX + clipRect.left) - frameX);
+            clipRect.top = Math.max(0,
+                    Math.max(mTmpStackBounds.top, frameY + clipRect.top) - frameY);
+            clipRect.right = Math.max(0,
+                    Math.min(mTmpStackBounds.right, frameX + clipRect.right) - frameX);
+            clipRect.bottom = Math.max(0,
+                    Math.min(mTmpStackBounds.bottom, frameY + clipRect.bottom) - frameY);
+        }
     }
 
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
@@ -1279,10 +1322,10 @@ class WindowStateAnimator {
         float extraHScale = (float) 1.0;
         float extraVScale = (float) 1.0;
 
-        final Rect crop = calculateSurfaceWindowCrop();
+        calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
         if (task != null && task.mStack.getForceScaleToCrop()) {
-            extraHScale = crop.width() / (float)mTmpSize.width();
-            extraVScale = crop.height() / (float)mTmpSize.height();
+            extraHScale = mTmpClipRect.width() / (float)mTmpSize.width();
+            extraVScale = mTmpClipRect.height() / (float)mTmpSize.height();
 
             // In the case of ForceScaleToCrop we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
@@ -1296,12 +1339,13 @@ class WindowStateAnimator {
             // Since we are scaled to fit in our previously desired crop, we can now
             // expose the whole window in buffer space, and not risk extending
             // past where the system would have cropped us
-            crop.set(0, 0, mTmpSize.width(), mTmpSize.height());
-            updateSurfaceWindowCrop(crop, recoveringMemory);
+            mTmpClipRect.set(0, 0, mTmpSize.width(), mTmpSize.height());
+            mTmpFinalClipRect.setEmpty();
+            updateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect, recoveringMemory);
         } else {
             mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
                     recoveringMemory);
-            updateSurfaceWindowCrop(crop, recoveringMemory);
+            updateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect, recoveringMemory);
         }
 
 
@@ -1458,7 +1502,8 @@ class WindowStateAnimator {
             SurfaceControl.openTransaction();
             mSurfaceController.setPositionInTransaction(mWin.mFrame.left + left,
                     mWin.mFrame.top + top, false);
-            updateSurfaceWindowCrop(calculateSurfaceWindowCrop(), false);
+            calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
+            updateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect, false);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
@@ -1721,6 +1766,7 @@ class WindowStateAnimator {
                     pw.print(" mLocalAnimating="); pw.print(mLocalAnimating);
                     pw.print(" mAnimationIsEntrance="); pw.print(mAnimationIsEntrance);
                     pw.print(" mAnimation="); pw.println(mAnimation);
+                    pw.print(" mStackClip="); pw.println(mStackClip);
         }
         if (mHasTransformation || mHasLocalTransformation) {
             pw.print(prefix); pw.print("XForm: has=");
@@ -1739,6 +1785,9 @@ class WindowStateAnimator {
             pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
             if (mHasClipRect) {
                 pw.print(" mLastClipRect="); mLastClipRect.printShortString(pw);
+            }
+            if (!mLastFinalClipRect.isEmpty()) {
+                pw.print(" mLastFinalClipRect="); mLastFinalClipRect.printShortString(pw);
             }
             pw.println();
         }

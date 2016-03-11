@@ -43,6 +43,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -1465,6 +1467,12 @@ public class AppTransition implements Dump {
                     + " Callers=" + Debug.getCallers(3));
         }
         return a;
+    }
+
+    int getAppStackClipMode() {
+        return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
+                ? STACK_CLIP_NONE
+                : STACK_CLIP_AFTER_ANIM;
     }
 
     void postAnimationCallback() {
