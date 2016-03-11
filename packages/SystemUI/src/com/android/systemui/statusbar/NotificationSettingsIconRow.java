@@ -29,18 +29,11 @@ import com.android.systemui.R;
 
 public class NotificationSettingsIconRow extends FrameLayout implements View.OnClickListener {
 
-    private static final int GEAR_ALPHA_ANIM_DURATION = 200;
-
     public interface SettingsIconRowListener {
         /**
          * Called when the gear behind a notification is touched.
          */
         public void onGearTouched(ExpandableNotificationRow row, int x, int y);
-
-        /**
-         * Called when a notification is slid back over the gear.
-         */
-        public void onSettingsIconRowReset(NotificationSettingsIconRow row);
     }
 
     private ExpandableNotificationRow mParent;
@@ -52,8 +45,6 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     private boolean mSettingsFadedIn = false;
     private boolean mAnimating = false;
     private boolean mOnLeft = true;
-    private boolean mDismissing = false;
-    private boolean mSnapping = false;
     private int[] mGearLocation = new int[2];
     private int[] mParentLocation = new int[2];
 
@@ -87,14 +78,8 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     public void resetState() {
         setGearAlpha(0f);
-        mSettingsFadedIn = false;
         mAnimating = false;
-        mSnapping = false;
-        mDismissing = false;
         setIconLocation(true /* on left */);
-        if (mListener != null) {
-            mListener.onSettingsIconRowReset(this);
-        }
     }
 
     public void setGearListener(SettingsIconRowListener listener) {
@@ -109,21 +94,17 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         return mParent;
     }
 
-    public void setGearAlpha(float alpha) {
+    private void setGearAlpha(float alpha) {
         if (alpha == 0) {
             mSettingsFadedIn = false; // Can fade in again once it's gone.
             setVisibility(View.INVISIBLE);
         } else {
+            if (alpha == 1) {
+                mSettingsFadedIn = true;
+            }
             setVisibility(View.VISIBLE);
         }
         mGearIcon.setAlpha(alpha);
-    }
-
-    /**
-     * Returns whether the icon is on the left side of the view or not.
-     */
-    public boolean isIconOnLeft() {
-        return mOnLeft;
     }
 
     /**
@@ -138,7 +119,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
      * if entire view is visible.
      */
     public boolean isVisible() {
-        return mGearIcon.getAlpha() > 0;
+        return mSettingsFadedIn;
     }
 
     public void cancelFadeAnimator() {
@@ -148,18 +129,16 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     }
 
     public void updateSettingsIcons(final float transX, final float size) {
-        if (mAnimating || !mSettingsFadedIn) {
-            // Don't adjust when animating, or if the gear hasn't been shown yet.
+        if (mAnimating || (mGearIcon.getAlpha() == 0)) {
+            // Don't adjust when animating or settings aren't visible
             return;
         }
-
+        setIconLocation(transX > 0 /* fromLeft */);
         final float fadeThreshold = size * 0.3f;
         final float absTrans = Math.abs(transX);
         float desiredAlpha = 0;
 
-        if (absTrans == 0) {
-            desiredAlpha = 0;
-        } else if (absTrans <= fadeThreshold) {
+        if (absTrans <= fadeThreshold) {
             desiredAlpha = 1;
         } else {
             desiredAlpha = 1 - ((absTrans - fadeThreshold) / (size - fadeThreshold));
@@ -169,12 +148,6 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     public void fadeInSettings(final boolean fromLeft, final float transX,
             final float notiThreshold) {
-        if (mDismissing || mAnimating) {
-            return;
-        }
-        if (isIconLocationChange(transX)) {
-            setGearAlpha(0f);
-        }
         setIconLocation(transX > 0 /* fromLeft */);
         mFadeAnimator = ValueAnimator.ofFloat(mGearIcon.getAlpha(), 1);
         mFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -191,51 +164,38 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         });
         mFadeAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
+                mAnimating = false;
+                mSettingsFadedIn = false;
+            }
+
+            @Override
             public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
                 mAnimating = true;
             }
 
             @Override
-            public void onAnimationCancel(Animator animation) {
-                // TODO should animate back to 0f from current alpha
-                mGearIcon.setAlpha(0f);
-            }
-
-            @Override
             public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
                 mAnimating = false;
-                mSettingsFadedIn = mGearIcon.getAlpha() == 1;
+                mSettingsFadedIn = true;
             }
         });
         mFadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
-        mFadeAnimator.setDuration(GEAR_ALPHA_ANIM_DURATION);
+        mFadeAnimator.setDuration(200);
         mFadeAnimator.start();
     }
 
-    public void setIconLocation(boolean onLeft) {
-        if (onLeft == mOnLeft || mSnapping) {
+    private void setIconLocation(boolean onLeft) {
+        if (onLeft == mOnLeft) {
             // Same side? Do nothing.
             return;
         }
+
         setTranslationX(onLeft ? 0 : (mParent.getWidth() - mHorizSpaceForGear));
         mOnLeft = onLeft;
-    }
-
-    public boolean isIconLocationChange(float translation) {
-        boolean onLeft = translation > mGearIcon.getPaddingStart();
-        boolean onRight = translation < -mGearIcon.getPaddingStart();
-        if ((mOnLeft && onRight) || (!mOnLeft && onLeft)) {
-            return true;
-        }
-        return false;
-    }
-
-    public void setDismissing() {
-        mDismissing = true;
-    }
-
-    public void setSnapping(boolean snapping) {
-        mSnapping = snapping;
     }
 
     @Override
