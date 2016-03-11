@@ -315,8 +315,8 @@ public class UserSwitcherController {
     public void logoutCurrentUser() {
         int currentUser = ActivityManager.getCurrentUser();
         if (currentUser != UserHandle.USER_SYSTEM) {
-            switchToUserId(UserHandle.USER_SYSTEM);
-            stopUserId(currentUser);
+            pauseRefreshUsers();
+            ActivityManager.logoutCurrentUser();
         }
     }
 
@@ -381,14 +381,6 @@ public class UserSwitcherController {
             ActivityManagerNative.getDefault().switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
-        }
-    }
-
-    private void stopUserId(int id) {
-        try {
-            ActivityManagerNative.getDefault().stopUser(id, /* force= */ false, null);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't stop user.", e);
         }
     }
 

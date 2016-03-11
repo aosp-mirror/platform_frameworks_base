@@ -3329,6 +3329,23 @@ public class ActivityManager {
         }
     }
 
+    /**
+     * Logs out current current foreground user by switching to the system user and stopping the
+     * user being switched from.
+     * @hide
+     */
+    public static void logoutCurrentUser() {
+        int currentUser = ActivityManager.getCurrentUser();
+        if (currentUser != UserHandle.USER_SYSTEM) {
+            try {
+                ActivityManagerNative.getDefault().switchUser(UserHandle.USER_SYSTEM);
+                ActivityManagerNative.getDefault().stopUser(currentUser, /* force= */ false, null);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
     /** {@hide} */
     public static final int FLAG_OR_STOPPED = 1 << 0;
     /** {@hide} */
