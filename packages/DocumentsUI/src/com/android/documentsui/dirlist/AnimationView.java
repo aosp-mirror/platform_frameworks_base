@@ -77,6 +77,8 @@ public class AnimationView extends LinearLayout {
 
     public void setPosition(float position) {
         mPosition = position;
+        // Warning! If we ever decide to switch this to setX (slide left/right)
+        // please remember to add RLT variations of the animations under res/animator-ldrtl.
         setY((mSpan > 0) ? (mPosition * mSpan) : 0);
 
         if (mPosition != 0) {
