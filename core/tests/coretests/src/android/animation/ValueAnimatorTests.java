@@ -905,6 +905,10 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
                 a1.start();
                 a2.reverse();
                 a3.start();
+                // Check that the animators' values are immediately set to end value in the case of
+                // 0-duration.
+                assertEquals(A1_END_VALUE, a1.getAnimatedValue());
+                assertEquals(A2_START_VALUE, a2.getAnimatedValue());
             }
         });
         Thread.sleep(POLL_INTERVAL);
@@ -951,6 +955,10 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
 
                 a1.start();
                 a2.start();
+
+                // In the case of 0 duration scale applied to a non-0 duration, check that the
+                // value is immediately set to the start value.
+                assertEquals(A2_START_VALUE, a2.getAnimatedValue());
             }
         });
         Thread.sleep(POLL_INTERVAL);
@@ -962,6 +970,8 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
                 assertTrue(l2.startCalled);
                 assertTrue(l1.endCalled);
                 assertTrue(l2.endCalled);
+                assertEquals(A1_END_VALUE, a1.getAnimatedValue());
+                assertEquals(A2_END_VALUE, a2.getAnimatedValue());
             }
         });
 
