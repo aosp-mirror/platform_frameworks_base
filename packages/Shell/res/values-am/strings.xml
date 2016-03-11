@@ -19,10 +19,16 @@
     <string name="app_label" msgid="3701846017049540910">"ቀፎ"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> እየተመነጨ ነው"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> ተወስዷል"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_title (5460883450679439591) -->
+    <skip />
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ዝርዝሮችን ወደ የሳንካ ሪፖርቱ በማከል ላይ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"እባክዎ ይጠብቁ…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"የሳንካ ሪፖርትዎን ለማጋራት ወደ ግራ ያንሸራትቱ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"የሳንካ ሪፖርትዎን ለማጋራት መታ ያድርጉ"</string>
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
+    <skip />
     <string name="bugreport_confirm" msgid="5130698467795669780">"የሳንካ ሪፖርቶች የግል መረጃን ጨምሮ ከበርካታ የስርዓቱ ምዝግብ ማስታወሻዎች የመጣ ውሂብን ይዟል። የሳንካ ሪፖርቶች ለሚያምኗቸው መተግበሪያዎችን እና ሰዎችን ብቻ ያጋሩ።"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ይህን መልዕክት በሚቀጥለው ጊዜ አሳይ"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"የሳንካ ሪፖርቶች"</string>
