@@ -154,11 +154,11 @@ public class DisplayMetrics {
     public static final int DENSITY_DEVICE_STABLE = getDeviceDensity();
 
     /**
-     * The absolute width of the display in pixels.
+     * The absolute width of the available display size in pixels.
      */
     public int widthPixels;
     /**
-     * The absolute height of the display in pixels.
+     * The absolute height of the available display size in pixels.
      */
     public int heightPixels;
     /**
