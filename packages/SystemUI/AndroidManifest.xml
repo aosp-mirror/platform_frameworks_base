@@ -187,6 +187,15 @@
             android:process=":screenshot"
             android:exported="false" />
 
+        <!-- Called from PhoneWindowManager -->
+        <receiver android:name=".screenshot.ScreenshotServiceErrorReceiver"
+            android:process=":screenshot"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.screenshot.SHOW_ERROR" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".LoadAverageService"
                 android:exported="true" />
 
