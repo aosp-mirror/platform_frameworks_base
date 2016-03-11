@@ -93,13 +93,13 @@ class SaveImageInBackgroundData {
 /**
  * An AsyncTask that saves an image to the media store in the background.
  */
-class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Void,
-        SaveImageInBackgroundData> {
+class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
+    private final SaveImageInBackgroundData mParams;
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder, mPublicNotificationBuilder;
     private final File mScreenshotDir;
@@ -122,6 +122,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         Resources r = context.getResources();
 
         // Prepare all the output metadata
+        mParams = data;
         mImageTime = System.currentTimeMillis();
         String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
         mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
@@ -210,17 +211,17 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     }
 
     @Override
-    protected SaveImageInBackgroundData doInBackground(SaveImageInBackgroundData... params) {
+    protected Void doInBackground(Void... params) {
         if (isCancelled()) {
-            return params[0];
+            return null;
         }
 
         // By default, AsyncTask sets the worker thread to have background thread priority, so bump
         // it back up so that we save a little quicker.
         Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
-        Context context = params[0].context;
-        Bitmap image = params[0].image;
+        Context context = mParams.context;
+        Bitmap image = mParams.image;
         Resources r = context.getResources();
 
         try {
@@ -284,14 +285,14 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                     r.getString(com.android.internal.R.string.delete), deleteAction);
             mNotificationBuilder.addAction(deleteActionBuilder.build());
 
-            params[0].imageUri = uri;
-            params[0].image = null;
-            params[0].errorMsgResId = 0;
+            mParams.imageUri = uri;
+            mParams.image = null;
+            mParams.errorMsgResId = 0;
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is not
             // mounted
-            params[0].clearImage();
-            params[0].errorMsgResId = R.string.screenshot_failed_to_save_text;
+            mParams.clearImage();
+            mParams.errorMsgResId = R.string.screenshot_failed_to_save_text;
         }
 
         // Recycle the bitmap data
@@ -299,23 +300,23 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             image.recycle();
         }
 
-        return params[0];
+        return null;
     }
 
     @Override
-    protected void onPostExecute(SaveImageInBackgroundData params) {
-        if (params.errorMsgResId != 0) {
+    protected void onPostExecute(Void params) {
+        if (mParams.errorMsgResId != 0) {
             // Show a message that we've failed to save the image to disk
-            GlobalScreenshot.notifyScreenshotError(params.context, mNotificationManager,
-                    params.errorMsgResId);
+            GlobalScreenshot.notifyScreenshotError(mParams.context, mNotificationManager,
+                    mParams.errorMsgResId);
         } else {
             // Show the final notification to indicate screenshot saved
-            Context context = params.context;
+            Context context = mParams.context;
             Resources r = context.getResources();
 
             // Create the intent to show the screenshot in gallery
             Intent launchIntent = new Intent(Intent.ACTION_VIEW);
-            launchIntent.setDataAndType(params.imageUri, "image/png");
+            launchIntent.setDataAndType(mParams.imageUri, "image/png");
             launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             final long now = System.currentTimeMillis();
@@ -324,7 +325,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             mPublicNotificationBuilder
                     .setContentTitle(r.getString(R.string.screenshot_saved_title))
                     .setContentText(r.getString(R.string.screenshot_saved_text))
-                    .setContentIntent(PendingIntent.getActivity(params.context, 0, launchIntent, 0))
+                    .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
                     .setWhen(now)
                     .setAutoCancel(true)
                     .setColor(context.getColor(
@@ -332,7 +333,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             mNotificationBuilder
                 .setContentTitle(r.getString(R.string.screenshot_saved_title))
                 .setContentText(r.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(params.context, 0, launchIntent, 0))
+                .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
                 .setWhen(now)
                 .setAutoCancel(true)
                 .setColor(context.getColor(
@@ -342,15 +343,18 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
             mNotificationManager.notify(R.id.notification_screenshot, mNotificationBuilder.build());
         }
-        params.finisher.run();
-        params.clearContext();
+        mParams.finisher.run();
+        mParams.clearContext();
     }
 
     @Override
-    protected void onCancelled(SaveImageInBackgroundData params) {
-        params.finisher.run();
-        params.clearImage();
-        params.clearContext();
+    protected void onCancelled(Void params) {
+        // If we are cancelled while the task is running in the background, we may get null params.
+        // The finisher is expected to always be called back, so just use the baked-in params from
+        // the ctor in any case.
+        mParams.finisher.run();
+        mParams.clearImage();
+        mParams.clearContext();
 
         // Cancel the posted notification
         mNotificationManager.cancel(R.id.notification_screenshot);
@@ -419,7 +423,7 @@ class GlobalScreenshot {
     private float mBgPadding;
     private float mBgPaddingScale;
 
-    private AsyncTask<SaveImageInBackgroundData, Void, SaveImageInBackgroundData> mSaveInBgTask;
+    private AsyncTask<Void, Void, Void> mSaveInBgTask;
 
     private MediaActionSound mCameraSound;
 
@@ -510,7 +514,7 @@ class GlobalScreenshot {
             mSaveInBgTask.cancel(false);
         }
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager)
-                .execute(data);
+                .execute();
     }
 
     /**
