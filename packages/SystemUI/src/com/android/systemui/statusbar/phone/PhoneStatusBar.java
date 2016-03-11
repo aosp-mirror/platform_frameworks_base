@@ -1149,9 +1149,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         @Override
         public boolean onLongClick(View v) {
-            if (mRecents == null) {
+            if (mRecents == null || !ActivityManager.supportsMultiWindow()) {
                 return false;
             }
+
             boolean initiallyDocked = WindowManagerProxy.getInstance().getDockSide()
                     == WindowManager.DOCKED_INVALID;
             boolean dockedAtEnd = toggleSplitScreenMode();

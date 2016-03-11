@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.view.MotionEvent;
@@ -149,7 +150,8 @@ public class RecentsViewTouchHandler {
         mTaskView.setTranslationY(y);
 
         mVisibleDockStates.clear();
-        if (!ssp.hasDockedTask() && mRv.getTaskStack().getTaskCount() > 1) {
+        if (ActivityManager.supportsMultiWindow() &&
+                !ssp.hasDockedTask() && mRv.getTaskStack().getTaskCount() > 1) {
             if (!event.task.isDockable) {
                 Toast.makeText(mRv.getContext(), R.string.recents_drag_non_dockable_task_message,
                         Toast.LENGTH_SHORT).show();
