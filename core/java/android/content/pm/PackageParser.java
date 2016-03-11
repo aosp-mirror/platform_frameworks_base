@@ -1524,6 +1524,7 @@ public class PackageParser {
         childPkg.baseRevisionCode = parentPkg.baseRevisionCode;
         childPkg.mVersionName = parentPkg.mVersionName;
         childPkg.applicationInfo.targetSdkVersion = parentPkg.applicationInfo.targetSdkVersion;
+        childPkg.applicationInfo.minSdkVersion = parentPkg.applicationInfo.minSdkVersion;
 
         childPkg = parseBaseApkCommon(childPkg, CHILD_PACKAGE_TAGS, res, parser, flags, outError);
         if (childPkg == null) {
@@ -1854,10 +1855,16 @@ public class PackageParser {
                             com.android.internal.R.styleable.AndroidManifestUsesSdk_targetSdkVersion);
                     if (val != null) {
                         if (val.type == TypedValue.TYPE_STRING && val.string != null) {
-                            targetCode = minCode = val.string.toString();
+                            targetCode = val.string.toString();
+                            if (minCode == null) {
+                                minCode = targetCode;
+                            }
                         } else {
                             // If it's not a string, it's an integer.
                             targetVers = val.data;
+                            if (minVers == 0) {
+                                minVers = targetVers;
+                            }
                         }
                     }
 
@@ -1883,11 +1890,14 @@ public class PackageParser {
                             mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                             return null;
                         }
+                        pkg.applicationInfo.minSdkVersion = minCode;
                     } else if (minVers > SDK_VERSION) {
                         outError[0] = "Requires newer sdk version #" + minVers
                                 + " (current version is #" + SDK_VERSION + ")";
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
+                    } else {
+                        pkg.applicationInfo.minSdkVersion = Integer.toString(minVers);
                     }
 
                     if (targetCode != null) {
