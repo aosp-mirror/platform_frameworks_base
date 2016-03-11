@@ -879,6 +879,7 @@ package android {
     field public static final int nextFocusLeft = 16842977; // 0x10100e1
     field public static final int nextFocusRight = 16842978; // 0x10100e2
     field public static final int nextFocusUp = 16842979; // 0x10100e3
+    field public static final int nfcAntennaPositionDrawable = 16844063; // 0x101051f
     field public static final int noHistory = 16843309; // 0x101022d
     field public static final int normalScreens = 16843397; // 0x1010285
     field public static final int notificationTimeout = 16843651; // 0x1010383

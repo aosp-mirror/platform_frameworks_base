@@ -593,6 +593,9 @@ i
              the appearance matches the branding of the app requesting the fingerprint scan.-->
         <attr name="fingerprintAuthDrawable" format="reference" />
 
+	<!-- Asset that should be used to show users the position of the NFC antenna on the device. -->
+	<attr name="nfcAntennaPositionDrawable" format="reference" />
+
         <!-- ============ -->
         <!-- Panel styles -->
         <!-- ============ -->

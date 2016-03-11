@@ -2705,6 +2705,7 @@
     <public type="attr" name="countDown" />
     <public type="attr" name="canRecord" />
     <public type="attr" name="tunerCount" />
+    <public type="attr" name="nfcAntennaPositionDrawable" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
