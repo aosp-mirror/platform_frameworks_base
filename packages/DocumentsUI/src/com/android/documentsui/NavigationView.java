@@ -19,7 +19,6 @@ package com.android.documentsui;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_LEAVE;
 
 import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
@@ -30,10 +29,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 
@@ -105,7 +104,7 @@ class NavigationView {
         while (mState.stack.size() > position + 1) {
             mState.popDocument();
         }
-        mEnv.refreshCurrentRootAndDirectory(ANIM_LEAVE);
+        mEnv.refreshCurrentRootAndDirectory(AnimationView.ANIM_LEAVE);
     }
 
     void update() {
