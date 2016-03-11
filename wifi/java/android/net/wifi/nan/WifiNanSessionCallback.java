@@ -26,18 +26,12 @@ import android.util.Log;
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are registered when a
  * publish or subscribe session is created using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback, int)} or
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback, int)}
- * . These are callbacks applying to a specific NAN session. Events
- * corresponding to the NAN link are delivered using
- * {@link WifiNanEventCallback}.
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} or
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} .
+ * These are callbacks applying to a specific NAN session. Events corresponding
+ * to the NAN link are delivered using {@link WifiNanEventCallback}.
  * <p>
  * A single callback is registered at session creation - it cannot be replaced.
- * <p>
- * During registration specify which specific events are desired using a set of
- * {@code WifiNanSessionCallback.LISTEN_*} flags OR'd together. Only those
- * events will be delivered to the registered callback. Override those callbacks
- * {@code WifiNanSessionCallback.on*} for the registered events.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -46,76 +40,22 @@ public class WifiNanSessionCallback {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
-    /**
-     * Publish fail callback event registration flag. Corresponding callback is
-     * {@link WifiNanSessionCallback#onPublishFail(int)}.
-     *
-     * @hide
-     */
-    public static final int FLAG_LISTEN_PUBLISH_FAIL = 0x1 << 0;
-
-    /**
-     * Publish terminated callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionCallback#onPublishTerminated(int)}.
-     */
-    public static final int FLAG_LISTEN_PUBLISH_TERMINATED = 0x1 << 1;
-
-    /**
-     * Subscribe fail callback event registration flag. Corresponding callback
-     * is {@link WifiNanSessionCallback#onSubscribeFail(int)}.
-     *
-     * @hide
-     */
-    public static final int FLAG_LISTEN_SUBSCRIBE_FAIL = 0x1 << 2;
-
-    /**
-     * Subscribe terminated callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionCallback#onSubscribeTerminated(int)}.
-     */
-    public static final int FLAG_LISTEN_SUBSCRIBE_TERMINATED = 0x1 << 3;
-
-    /**
-     * Match (discovery: publish or subscribe) callback event registration flag.
-     * Corresponding callback is
-     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}.
-     *
-     * @hide
-     */
-    public static final int FLAG_LISTEN_MATCH = 0x1 << 4;
-
-    /**
-     * Message sent successfully callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionCallback#onMessageSendSuccess()}.
-     *
-     * @hide
-     */
-    public static final int FLAG_LISTEN_MESSAGE_SEND_SUCCESS = 0x1 << 5;
-
-    /**
-     * Message sending failure callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionCallback#onMessageSendFail(int)}.
-     *
-     * @hide
-     */
-    public static final int FLAG_LISTEN_MESSAGE_SEND_FAIL = 0x1 << 6;
-
-    /**
-     * Message received callback event registration flag. Corresponding callback
-     * is {@link WifiNanSessionCallback#onMessageReceived(int, byte[], int)}.
-     *
-     * @hide
-     */
-    public static final int FLAG_LISTEN_MESSAGE_RECEIVED = 0x1 << 7;
-
-    /**
-     * List of hidden events: which are mandatory - i.e. they will be added to
-     * every request.
-     *
-     * @hide
-     */
-    public static final int LISTEN_HIDDEN_FLAGS = FLAG_LISTEN_PUBLISH_FAIL
-            | FLAG_LISTEN_SUBSCRIBE_FAIL | FLAG_LISTEN_MATCH | FLAG_LISTEN_MESSAGE_SEND_SUCCESS
-            | FLAG_LISTEN_MESSAGE_SEND_FAIL | FLAG_LISTEN_MESSAGE_RECEIVED;
+    /** @hide */
+    public static final int CALLBACK_PUBLISH_FAIL = 0;
+    /** @hide */
+    public static final int CALLBACK_PUBLISH_TERMINATED = 1;
+    /** @hide */
+    public static final int CALLBACK_SUBSCRIBE_FAIL = 2;
+    /** @hide */
+    public static final int CALLBACK_SUBSCRIBE_TERMINATED = 3;
+    /** @hide */
+    public static final int CALLBACK_MATCH = 4;
+    /** @hide */
+    public static final int CALLBACK_MESSAGE_SEND_SUCCESS = 5;
+    /** @hide */
+    public static final int CALLBACK_MESSAGE_SEND_FAIL = 6;
+    /** @hide */
+    public static final int CALLBACK_MESSAGE_RECEIVED = 7;
 
     /**
      * Failure reason flag for {@link WifiNanEventCallback} and
@@ -192,31 +132,31 @@ public class WifiNanSessionCallback {
             public void handleMessage(Message msg) {
                 if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
                 switch (msg.what) {
-                    case FLAG_LISTEN_PUBLISH_FAIL:
+                    case CALLBACK_PUBLISH_FAIL:
                         WifiNanSessionCallback.this.onPublishFail(msg.arg1);
                         break;
-                    case FLAG_LISTEN_PUBLISH_TERMINATED:
+                    case CALLBACK_PUBLISH_TERMINATED:
                         WifiNanSessionCallback.this.onPublishTerminated(msg.arg1);
                         break;
-                    case FLAG_LISTEN_SUBSCRIBE_FAIL:
+                    case CALLBACK_SUBSCRIBE_FAIL:
                         WifiNanSessionCallback.this.onSubscribeFail(msg.arg1);
                         break;
-                    case FLAG_LISTEN_SUBSCRIBE_TERMINATED:
+                    case CALLBACK_SUBSCRIBE_TERMINATED:
                         WifiNanSessionCallback.this.onSubscribeTerminated(msg.arg1);
                         break;
-                    case FLAG_LISTEN_MATCH:
+                    case CALLBACK_MATCH:
                         WifiNanSessionCallback.this.onMatch(
                                 msg.getData().getInt(MESSAGE_BUNDLE_KEY_PEER_ID),
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE), msg.arg1,
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2), msg.arg2);
                         break;
-                    case FLAG_LISTEN_MESSAGE_SEND_SUCCESS:
+                    case CALLBACK_MESSAGE_SEND_SUCCESS:
                         WifiNanSessionCallback.this.onMessageSendSuccess(msg.arg1);
                         break;
-                    case FLAG_LISTEN_MESSAGE_SEND_FAIL:
+                    case CALLBACK_MESSAGE_SEND_FAIL:
                         WifiNanSessionCallback.this.onMessageSendFail(msg.arg1, msg.arg2);
                         break;
-                    case FLAG_LISTEN_MESSAGE_RECEIVED:
+                    case CALLBACK_MESSAGE_RECEIVED:
                         WifiNanSessionCallback.this.onMessageReceived(msg.arg2,
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE), msg.arg1);
                         break;
@@ -240,7 +180,7 @@ public class WifiNanSessionCallback {
     /**
      * Called when a publish operation terminates. Event will only be delivered
      * if registered using
-     * {@link WifiNanSessionCallback#FLAG_LISTEN_PUBLISH_TERMINATED}. A dummy (empty
+     * {@link WifiNanSessionCallback#CALLBACK_PUBLISH_TERMINATED}. A dummy (empty
      * implementation printing out a warning). Make sure to override if
      * registered.
      *
@@ -266,7 +206,7 @@ public class WifiNanSessionCallback {
     /**
      * Called when a subscribe operation terminates. Event will only be
      * delivered if registered using
-     * {@link WifiNanSessionCallback#FLAG_LISTEN_SUBSCRIBE_TERMINATED}. A dummy
+     * {@link WifiNanSessionCallback#CALLBACK_SUBSCRIBE_TERMINATED}. A dummy
      * (empty implementation printing out a warning). Make sure to override if
      * registered.
      *
@@ -353,7 +293,7 @@ public class WifiNanSessionCallback {
         public void onPublishFail(int reason) {
             if (VDBG) Log.v(TAG, "onPublishFail: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_PUBLISH_FAIL);
+            Message msg = mHandler.obtainMessage(CALLBACK_PUBLISH_FAIL);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
@@ -362,7 +302,7 @@ public class WifiNanSessionCallback {
         public void onPublishTerminated(int reason) {
             if (VDBG) Log.v(TAG, "onPublishResponse: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_PUBLISH_TERMINATED);
+            Message msg = mHandler.obtainMessage(CALLBACK_PUBLISH_TERMINATED);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
@@ -371,7 +311,7 @@ public class WifiNanSessionCallback {
         public void onSubscribeFail(int reason) {
             if (VDBG) Log.v(TAG, "onSubscribeFail: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_SUBSCRIBE_FAIL);
+            Message msg = mHandler.obtainMessage(CALLBACK_SUBSCRIBE_FAIL);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
@@ -380,7 +320,7 @@ public class WifiNanSessionCallback {
         public void onSubscribeTerminated(int reason) {
             if (VDBG) Log.v(TAG, "onSubscribeTerminated: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_SUBSCRIBE_TERMINATED);
+            Message msg = mHandler.obtainMessage(CALLBACK_SUBSCRIBE_TERMINATED);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
@@ -395,7 +335,7 @@ public class WifiNanSessionCallback {
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, serviceSpecificInfo);
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2, matchFilter);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_MATCH);
+            Message msg = mHandler.obtainMessage(CALLBACK_MATCH);
             msg.arg1 = serviceSpecificInfoLength;
             msg.arg2 = matchFilterLength;
             msg.setData(data);
@@ -406,7 +346,7 @@ public class WifiNanSessionCallback {
         public void onMessageSendSuccess(int messageId) {
             if (VDBG) Log.v(TAG, "onMessageSendSuccess");
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_MESSAGE_SEND_SUCCESS);
+            Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_SEND_SUCCESS);
             msg.arg1 = messageId;
             mHandler.sendMessage(msg);
         }
@@ -415,7 +355,7 @@ public class WifiNanSessionCallback {
         public void onMessageSendFail(int messageId, int reason) {
             if (VDBG) Log.v(TAG, "onMessageSendFail: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_MESSAGE_SEND_FAIL);
+            Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_SEND_FAIL);
             msg.arg1 = messageId;
             msg.arg2 = reason;
             mHandler.sendMessage(msg);
@@ -431,7 +371,7 @@ public class WifiNanSessionCallback {
             Bundle data = new Bundle();
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, message);
 
-            Message msg = mHandler.obtainMessage(FLAG_LISTEN_MESSAGE_RECEIVED);
+            Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_RECEIVED);
             msg.arg1 = messageLength;
             msg.arg2 = peerId;
             msg.setData(data);
