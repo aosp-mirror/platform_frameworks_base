@@ -18,10 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.MODE_GRID;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_ENTER;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_LEAVE;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -48,6 +44,7 @@ import android.widget.Spinner;
 
 import com.android.documentsui.SearchViewManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
+import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
@@ -225,7 +222,7 @@ public abstract class BaseActivity extends Activity
         // Otherwise we delegate loading data from disk to a task
         // to ensure a responsive ui.
         if (mRoots.isRecentsRoot(root)) {
-            refreshCurrentRootAndDirectory(ANIM_NONE);
+            refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
         } else {
             new PickRootTask(this, root).executeOnExecutor(getExecutorForCurrentDirectory());
         }
@@ -327,7 +324,7 @@ public abstract class BaseActivity extends Activity
         // previous directory. Especially after opening a root document, pressing
         // back, wouldn't go to the previous root, but close the activity.
         final int anim = (mState.hasLocationChanged() && mState.stack.size() > 1)
-                ? ANIM_ENTER : ANIM_NONE;
+                ? AnimationView.ANIM_ENTER : AnimationView.ANIM_NONE;
         refreshCurrentRootAndDirectory(anim);
     }
 
@@ -543,7 +540,7 @@ public abstract class BaseActivity extends Activity
             // Update the restored stack to ensure we have freshest data
             stack.updateDocuments(getContentResolver());
             mState.setStack(stack);
-            refreshCurrentRootAndDirectory(ANIM_SIDE);
+            refreshCurrentRootAndDirectory(AnimationView.ANIM_SIDE);
 
         } catch (FileNotFoundException e) {
             Log.w(mTag, "Failed to restore stack: " + e);
@@ -644,7 +641,7 @@ public abstract class BaseActivity extends Activity
     private boolean popDir() {
         if (mState.stack.size() > 1) {
             mState.stack.pop();
-            refreshCurrentRootAndDirectory(ANIM_LEAVE);
+            refreshCurrentRootAndDirectory(AnimationView.ANIM_LEAVE);
             return true;
         }
         return false;

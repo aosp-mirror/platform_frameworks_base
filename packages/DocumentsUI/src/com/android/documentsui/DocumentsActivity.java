@@ -22,7 +22,6 @@ import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -46,6 +45,7 @@ import android.view.MenuItem;
 
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
@@ -492,7 +492,7 @@ public class DocumentsActivity extends BaseActivity {
         protected void finish(Void result) {
             mState.restored = true;
             mState.external = mExternal;
-            mOwner.refreshCurrentRootAndDirectory(ANIM_NONE);
+            mOwner.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
         }
     }
 
