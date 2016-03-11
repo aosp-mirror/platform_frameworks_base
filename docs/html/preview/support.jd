@@ -370,3 +370,13 @@ page.image=images/cards/card-n-support_2x.png
 <ul>
 <li>Multi-window resizing may cause crashing.</li>
 </ul>
+
+<h4 id="n9">Nexus 9</h4>
+<ul>
+<li>Nexus 9 devices may not start after receiving an over-the-air (OTA) update
+  via the Android Beta Program. To recover from this issue, you can try
+  to manually install the OTA image. For more information, see
+  <a href="{@docRoot}preview/download-ota.html">Applying a Device OTA Image</a>.
+</li>
+</ul>
+
