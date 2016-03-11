@@ -813,7 +813,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @see #updateLayoutAlgorithm(boolean, ArraySet<Task.TaskKey>)
      */
-    void updateLayoutAlgorithm(boolean boundScrollToNewMinMax) {
+   public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax) {
         updateLayoutAlgorithm(boundScrollToNewMinMax, mIgnoreTasks);
     }
 
@@ -822,7 +822,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @param ignoreTasksSet the set of tasks to ignore in the relayout
      */
-    void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
+    public void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
             ArraySet<Task.TaskKey> ignoreTasksSet) {
         // Compute the min and max scroll values
         mLayoutAlgorithm.update(mStack, ignoreTasksSet);

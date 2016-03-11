@@ -45,6 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
@@ -617,6 +618,12 @@ public class Recents extends SystemUI
                 }
             });
         }
+    }
+
+    public final void onBusEvent(ConfigurationChangedEvent event) {
+        // Update the configuration for the Recents component when the activity configuration
+        // changes as well
+        mImpl.onConfigurationChanged();
     }
 
     /**
