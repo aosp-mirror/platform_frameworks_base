@@ -32,7 +32,7 @@ import android.net.wifi.nan.SubscribeConfig;
 interface IWifiNanManager
 {
     // client API
-    int connect(in IBinder binder, in IWifiNanEventCallback callback, int events);
+    int connect(in IBinder binder, in IWifiNanEventCallback callback);
     void disconnect(int clientId, in IBinder binder);
     void requestConfig(int clientId, in ConfigRequest configRequest);
 
