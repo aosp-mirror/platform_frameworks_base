@@ -4291,6 +4291,7 @@ final class Settings {
         }
         pw.print(prefix); pw.print("  versionCode="); pw.print(ps.versionCode);
         if (ps.pkg != null) {
+            pw.print(" minSdk="); pw.print(ps.pkg.applicationInfo.minSdkVersion);
             pw.print(" targetSdk="); pw.print(ps.pkg.applicationInfo.targetSdkVersion);
         }
         pw.println();

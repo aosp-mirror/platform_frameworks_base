@@ -707,6 +707,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int uid;
     
     /**
+     * The minimum SDK version this application can run on. It will not run
+     * on earlier versions.
+     */
+    public String minSdkVersion;
+
+    /**
      * The minimum SDK version this application targets.  It may run on earlier
      * versions, but it knows how to work with any new behavior added at this
      * version.  Will be {@link android.os.Build.VERSION_CODES#CUR_DEVELOPMENT}
@@ -790,7 +796,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
             }
         }
-        pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion
+        pw.println(prefix + "enabled=" + enabled
+                + " minSdkVersion=" + minSdkVersion
+                + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode);
         if ((flags&DUMP_FLAG_DETAILS) != 0) {
             if (manageSpaceActivityName != null) {
@@ -884,6 +892,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         deviceEncryptedDataDir = orig.deviceEncryptedDataDir;
         credentialEncryptedDataDir = orig.credentialEncryptedDataDir;
         uid = orig.uid;
+        minSdkVersion = orig.minSdkVersion;
         targetSdkVersion = orig.targetSdkVersion;
         versionCode = orig.versionCode;
         enabled = orig.enabled;
@@ -938,6 +947,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(deviceEncryptedDataDir);
         dest.writeString(credentialEncryptedDataDir);
         dest.writeInt(uid);
+        dest.writeString(minSdkVersion);
         dest.writeInt(targetSdkVersion);
         dest.writeInt(versionCode);
         dest.writeInt(enabled ? 1 : 0);
@@ -992,6 +1002,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         deviceEncryptedDataDir = source.readString();
         credentialEncryptedDataDir = source.readString();
         uid = source.readInt();
+        minSdkVersion = source.readString();
         targetSdkVersion = source.readInt();
         versionCode = source.readInt();
         enabled = source.readInt() != 0;
