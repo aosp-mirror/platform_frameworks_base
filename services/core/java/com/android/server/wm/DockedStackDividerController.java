@@ -95,6 +95,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private long mAnimationDuration;
     private final Interpolator mMinimizedDockInterpolator;
     private float mMaximizeMeetFraction;
+    private final Rect mTouchRegion = new Rect();
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -127,6 +128,15 @@ public class DockedStackDividerController implements DimLayerUser {
             mResizing = resizing;
             resetDragResizingChangeReported();
         }
+    }
+
+    void setTouchRegion(Rect touchRegion) {
+        mTouchRegion.set(touchRegion);
+    }
+
+    void getTouchRegion(Rect outRegion) {
+        outRegion.set(mTouchRegion);
+        outRegion.offset(mWindow.getFrameLw().left, mWindow.getFrameLw().top);
     }
 
     private void resetDragResizingChangeReported() {
