@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -485,7 +486,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return who == mThumb || who == mTickMark || super.verifyDrawable(who);
     }
 

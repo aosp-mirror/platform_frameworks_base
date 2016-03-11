@@ -308,7 +308,7 @@ public abstract class Drawable {
      * to supply your implementation of the interface to the drawable; it uses
      * this interface to schedule and execute animation changes.
      */
-    public static interface Callback {
+    public interface Callback {
         /**
          * Called when the drawable needs to be redrawn.  A view at this point
          * should invalidate itself (or at least the part of itself where the
@@ -316,7 +316,7 @@ public abstract class Drawable {
          *
          * @param who The drawable that is requesting the update.
          */
-        public void invalidateDrawable(Drawable who);
+        void invalidateDrawable(@NonNull Drawable who);
 
         /**
          * A Drawable can call this to schedule the next frame of its
@@ -330,7 +330,7 @@ public abstract class Drawable {
          * @param when The time (in milliseconds) to run.  The timebase is
          *             {@link android.os.SystemClock#uptimeMillis}
          */
-        public void scheduleDrawable(Drawable who, Runnable what, long when);
+        void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when);
 
         /**
          * A Drawable can call this to unschedule an action previously
@@ -342,7 +342,7 @@ public abstract class Drawable {
          * @param who The drawable being unscheduled.
          * @param what The action being unscheduled.
          */
-        public void unscheduleDrawable(Drawable who, Runnable what);
+        void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what);
     }
 
     /**

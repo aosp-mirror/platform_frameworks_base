@@ -373,21 +373,21 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void invalidateDrawable(Drawable who) {
+    public void invalidateDrawable(@NonNull Drawable who) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().invalidateDrawable(this);
         }
     }
 
     @Override
-    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+    public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().scheduleDrawable(this, what, when);
         }
     }
 
     @Override
-    public void unscheduleDrawable(Drawable who, Runnable what) {
+    public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         if (who == mCurrDrawable && getCallback() != null) {
             getCallback().unscheduleDrawable(this, what);
         }

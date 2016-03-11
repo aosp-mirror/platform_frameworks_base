@@ -19,6 +19,7 @@ package android.app;
 import com.android.internal.R;
 import com.android.internal.app.MediaRouteDialogPresenter;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.TypedArray;
@@ -279,7 +280,7 @@ public class MediaRouteButton extends View {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return super.verifyDrawable(who) || who == mRemoteIndicator;
     }
 
