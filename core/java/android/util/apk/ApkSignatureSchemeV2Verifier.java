@@ -84,8 +84,19 @@ public class ApkSignatureSchemeV2Verifier {
             if (fileSize > Integer.MAX_VALUE) {
                 return false;
             }
-            MappedByteBuffer apkContents =
-                    apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
+            MappedByteBuffer apkContents;
+            try {
+                apkContents = apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
+            } catch (IOException e) {
+                if (e.getCause() instanceof OutOfMemoryError) {
+                    // TODO: Remove this temporary workaround once verifying large APKs is
+                    // supported. Very large APKs cannot be memory-mapped. This verification code
+                    // needs to change to use a different approach for verifying such APKs.
+                    return false; // Pretend that this APK does not have a v2 signature.
+                } else {
+                    throw new IOException("Failed to memory-map APK", e);
+                }
+            }
             // ZipUtils and APK Signature Scheme v2 verifier expect little-endian byte order.
             apkContents.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -134,11 +145,26 @@ public class ApkSignatureSchemeV2Verifier {
         if (fileSize > Integer.MAX_VALUE) {
             throw new IOException("File too large: " + apk.length() + " bytes");
         }
-        MappedByteBuffer apkContents =
-                apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
-        // Attempt to preload the contents into memory for faster overall verification (v2 and
-        // older) at the expense of somewhat increased latency for rejecting malformed APKs.
-        apkContents.load();
+        MappedByteBuffer apkContents;
+        try {
+            apkContents = apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
+            // Attempt to preload the contents into memory for faster overall verification (v2 and
+            // older) at the expense of somewhat increased latency for rejecting malformed APKs.
+            apkContents.load();
+        } catch (IOException e) {
+            if (e.getCause() instanceof OutOfMemoryError) {
+                // TODO: Remove this temporary workaround once verifying large APKs is supported.
+                // Very large APKs cannot be memory-mapped. This verification code needs to change
+                // to use a different approach for verifying such APKs.
+                // This workaround pretends that this APK does not have a v2 signature. This works
+                // fine provided the APK is not actually v2-signed. If the APK is v2 signed, v2
+                // signature stripping protection inside v1 signature verification code will reject
+                // this APK.
+                throw new SignatureNotFoundException("Failed to memory-map APK", e);
+            } else {
+                throw new IOException("Failed to memory-map APK", e);
+            }
+        }
         return verify(apkContents);
     }
 
