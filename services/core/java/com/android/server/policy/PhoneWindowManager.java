@@ -251,6 +251,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // app shows again. If that doesn't happen for 30s we drop the gesture.
     private static final long PANIC_GESTURE_EXPIRATION = 30000;
 
+    private static final String SYSUI_PACKAGE = "com.android.systemui";
+    private static final String SYSUI_SCREENSHOT_SERVICE =
+            "com.android.systemui.screenshot.TakeScreenshotService";
+    private static final String SYSUI_SCREENSHOT_ERROR_RECEIVER =
+            "com.android.systemui.screenshot.ScreenshotServiceErrorReceiver";
+
     /**
      * Keyguard stuff
      */
@@ -5186,6 +5192,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mScreenshotConnection != null) {
                     mContext.unbindService(mScreenshotConnection);
                     mScreenshotConnection = null;
+                    notifyScreenshotError();
                 }
             }
         }
@@ -5197,10 +5204,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mScreenshotConnection != null) {
                 return;
             }
-            ComponentName cn = new ComponentName("com.android.systemui",
-                    "com.android.systemui.screenshot.TakeScreenshotService");
-            Intent intent = new Intent();
-            intent.setComponent(cn);
+            final ComponentName serviceComponent = new ComponentName(SYSUI_PACKAGE,
+                    SYSUI_SCREENSHOT_SERVICE);
+            final Intent serviceIntent = new Intent();
+            serviceIntent.setComponent(serviceComponent);
             ServiceConnection conn = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
@@ -5235,15 +5242,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 }
+
                 @Override
-                public void onServiceDisconnected(ComponentName name) {}
+                public void onServiceDisconnected(ComponentName name) {
+                    notifyScreenshotError();
+                }
             };
-            if (mContext.bindServiceAsUser(
-                    intent, conn, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
+            if (mContext.bindServiceAsUser(serviceIntent, conn,
+                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                    UserHandle.CURRENT)) {
                 mScreenshotConnection = conn;
                 mHandler.postDelayed(mScreenshotTimeout, 10000);
             }
         }
+    }
+
+    /**
+     * Notifies the screenshot service to show an error.
+     */
+    private void notifyScreenshotError() {
+        // If the service process is killed, then ask it to clean up after itself
+        final ComponentName errorComponent = new ComponentName(SYSUI_PACKAGE,
+                SYSUI_SCREENSHOT_ERROR_RECEIVER);
+        Intent errorIntent = new Intent();
+        errorIntent.setComponent(errorComponent);
+        errorIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+                Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(errorIntent, UserHandle.ALL);
     }
 
     /** {@inheritDoc} */
