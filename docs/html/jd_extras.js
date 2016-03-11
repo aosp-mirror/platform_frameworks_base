@@ -3281,6 +3281,18 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"distribute"
   },
   {
+    "title":"What’s New in Android N Developer Preview",
+    "titleFriendly":"",
+    "summary":"Learn all about the new features in the Android N Preview.",
+    "url":"https://www.youtube.com/watch?v=CsulIu3UaUM",
+    "group":"",
+    "keywords": ["n preview"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/CsulIu3UaUM/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
     "title":"Developing for Android 6.0 (Marshmallow)",
     "titleFriendly":"",
     "summary":"This video covers how to get started with the preview, important APIs to test and how to provide feedback on the preview.",

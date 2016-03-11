@@ -149,6 +149,7 @@ var RESOURCE_COLLECTIONS = {
   "preview/landing/more": {
     "title": "",
     "resources": [
+      "https://www.youtube.com/watch?v=CsulIu3UaUM",
       "preview/features/multi-window.html",
       "preview/features/notification-updates.html",
       "preview/features/background-optimization.html",
