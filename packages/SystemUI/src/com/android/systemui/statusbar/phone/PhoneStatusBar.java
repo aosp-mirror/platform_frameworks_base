@@ -3138,7 +3138,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private void resetUserExpandedStates() {
+    public void resetUserExpandedStates() {
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         final int notificationCount = activeNotifications.size();
         for (int i = 0; i < notificationCount; i++) {

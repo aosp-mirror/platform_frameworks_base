@@ -151,16 +151,13 @@
     <dimen name="notification_content_picture_margin">56dp</dimen>
 
     <!-- height of the content margin to accomodate for the header -->
-    <dimen name="notification_content_margin_top">30dp</dimen>
+    <dimen name="notification_content_margin_top">37.5dp</dimen>
 
     <!-- height of the content margin on the bottom -->
-    <dimen name="notification_content_margin_bottom">13dp</dimen>
-
-    <!-- height of notification header view if present -->
-    <dimen name="notification_header_height">32dp</dimen>
+    <dimen name="notification_content_margin_bottom">16dp</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">84dp</dimen>
+    <dimen name="notification_min_height">92dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
@@ -177,7 +174,7 @@
     <dimen name="media_notification_expanded_image_max_size">94dp</dimen>
 
     <!-- The maximum size of the image in the expanded media notification -->
-    <dimen name="media_notification_expanded_image_margin_bottom">16dp</dimen>
+    <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>

@@ -2656,6 +2656,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mIsExpansionChanging = false;
         if (!mIsExpanded) {
             mOwnScrollY = 0;
+            mPhoneStatusBar.resetUserExpandedStates();
 
             // lets make sure nothing is in the overlay anymore
             getOverlay().clear();
