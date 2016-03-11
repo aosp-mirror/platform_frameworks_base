@@ -146,7 +146,7 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     jobject fontRef = MakeGlobalRefOrDie(env, font);
     SkAutoTUnref<SkData> data(SkData::NewWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data));
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data.get()));
 
     SkFontMgr::FontParameters params;
     params.setCollectionIndex(ttcIndex);
@@ -192,7 +192,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     }
 
     SkAutoTUnref<SkData> data(SkData::NewWithProc(buf, asset->getLength(), releaseAsset, asset));
-    SkMemoryStream* stream = new SkMemoryStream(data);
+    SkMemoryStream* stream = new SkMemoryStream(data.get());
     // CreateFromStream takes ownership of stream.
     SkTypeface* face = SkTypeface::CreateFromStream(stream);
     if (face == NULL) {
