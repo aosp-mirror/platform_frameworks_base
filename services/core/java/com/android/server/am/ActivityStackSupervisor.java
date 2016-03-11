@@ -2062,7 +2062,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    boolean resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
+    boolean resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow,
+            boolean deferResume) {
         if (!task.isResizeable()) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
             return true;
@@ -2105,10 +2106,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (r != null) {
                 final ActivityStack stack = task.stack;
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
-                // All other activities must be made visible with their correct configuration.
-                ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
-                if (!kept) {
-                    resumeFocusedStackTopActivityLocked();
+
+                if (!deferResume) {
+
+                    // All other activities must be made visible with their correct configuration.
+                    ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
+                    if (!kept) {
+                        resumeFocusedStackTopActivityLocked();
+                    }
                 }
             }
         }
@@ -2247,6 +2252,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
             String reason, boolean animate) {
+        return moveTaskToStackLocked(taskId, stackId, toTop, forceFocus, reason, animate,
+                false /* deferResume */);
+    }
+
+    boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
+            String reason, boolean animate, boolean deferResume) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
@@ -2297,16 +2308,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             // Make sure the task has the appropriate bounds/size for the stack it is in.
             if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-                kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+                kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM,
+                        !mightReplaceWindow, deferResume);
             } else if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
                 Rect bounds = task.getLaunchBounds();
                 if (bounds == null) {
                     stack.layoutTaskInStack(task, null);
                     bounds = task.mBounds;
                 }
-                kept = resizeTaskLocked(task, bounds, RESIZE_MODE_FORCED, !mightReplaceWindow);
+                kept = resizeTaskLocked(task, bounds, RESIZE_MODE_FORCED, !mightReplaceWindow,
+                        deferResume);
             } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-                kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+                kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM,
+                        !mightReplaceWindow, deferResume);
             }
         } finally {
             mWindowManager.continueSurfaceLayout();
@@ -2319,10 +2333,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken, !kept);
         }
 
-        // The task might have already been running and its visibility needs to be synchronized with
-        // the visibility of the stack / windows.
-        ensureActivitiesVisibleLocked(null, 0, !mightReplaceWindow);
-        resumeFocusedStackTopActivityLocked();
+        if (!deferResume) {
+
+            // The task might have already been running and its visibility needs to be synchronized with
+            // the visibility of the stack / windows.
+            ensureActivitiesVisibleLocked(null, 0, !mightReplaceWindow);
+            resumeFocusedStackTopActivityLocked();
+        }
 
         showNonResizeableDockToastIfNeeded(task, preferredLaunchStackId, stackId);
 

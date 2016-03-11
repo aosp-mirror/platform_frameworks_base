@@ -363,6 +363,12 @@ interface IWindowManager
     void setDockedStackResizing(boolean resizing);
 
     /**
+     * Sets the region the user can touch the divider. This region will be excluded from the region
+     * which is used to cause a focus switch when dispatching touch.
+     */
+    void setDockedStackDividerTouchRegion(in Rect touchableRegion);
+
+    /**
      * Registers a listener that will be called when the dock divider changes its visibility or when
      * the docked stack gets added/removed.
      */

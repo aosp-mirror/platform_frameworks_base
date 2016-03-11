@@ -352,6 +352,11 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
+import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
+import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
+import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -3262,9 +3267,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     boolean isNextTransitionForward() {
         int transit = mWindowManager.getPendingAppTransition();
-        return transit == AppTransition.TRANSIT_ACTIVITY_OPEN
-                || transit == AppTransition.TRANSIT_TASK_OPEN
-                || transit == AppTransition.TRANSIT_TASK_TO_FRONT;
+        return transit == TRANSIT_ACTIVITY_OPEN
+                || transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_TO_FRONT;
     }
 
     int startIsolatedProcess(String entryPoint, String[] entryPointArgs,
@@ -9102,7 +9107,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     preserveWindow = false;
                 }
 
-                mStackSupervisor.resizeTaskLocked(task, bounds, resizeMode, preserveWindow);
+                mStackSupervisor.resizeTaskLocked(task, bounds, resizeMode, preserveWindow,
+                        false /* deferResume */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -9167,7 +9173,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("Expected in-place ActivityOption " +
                     "with valid animation");
         }
-        mWindowManager.prepareAppTransition(AppTransition.TRANSIT_TASK_IN_PLACE, false);
+        mWindowManager.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
         mWindowManager.overridePendingAppTransitionInPlace(opts.getPackageName(),
                 opts.getCustomInPlaceResId());
         mWindowManager.executeAppTransition();
@@ -9540,6 +9546,55 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS,
                         "moveTaskToStack", ANIMATE);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public void swapDockedAndFullscreenStack() throws RemoteException {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "swapDockedAndFullscreenStack()");
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                final ActivityStack fullscreenStack = mStackSupervisor.getStack(
+                        FULLSCREEN_WORKSPACE_STACK_ID);
+                final TaskRecord topTask = fullscreenStack != null ? fullscreenStack.topTask()
+                        : null;
+                final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
+                final ArrayList<TaskRecord> tasks = dockedStack != null ? dockedStack.getAllTasks()
+                        : null;
+                if (topTask == null || tasks == null || tasks.size() == 0) {
+                    Slog.w(TAG,
+                            "Unable to swap tasks, either docked or fullscreen stack is empty.");
+                    return;
+                }
+
+                // TODO: App transition
+                mWindowManager.prepareAppTransition(TRANSIT_ACTIVITY_RELAUNCH, false);
+
+                // Defer the resume so resume/pausing while moving stacks is dangerous.
+                mStackSupervisor.moveTaskToStackLocked(topTask.taskId, DOCKED_STACK_ID,
+                        false /* toTop */, !FORCE_FOCUS, "swapDockedAndFullscreenStack",
+                        ANIMATE, true /* deferResume */);
+                final int size = tasks.size();
+                for (int i = 0; i < size; i++) {
+                    final int id = tasks.get(i).taskId;
+                    if (id == topTask.taskId) {
+                        continue;
+                    }
+                    mStackSupervisor.moveTaskToStackLocked(id,
+                            FULLSCREEN_WORKSPACE_STACK_ID, true /* toTop */, !FORCE_FOCUS,
+                            "swapDockedAndFullscreenStack", ANIMATE, true /* deferResume */);
+                }
+
+                // Because we deferred the resume, to avoid conflicts with stack switches while
+                // resuming, we need to do it after all the tasks are moved.
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
+
+                mWindowManager.executeAppTransition();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

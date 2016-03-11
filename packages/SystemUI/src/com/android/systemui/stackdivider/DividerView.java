@@ -16,6 +16,9 @@
 
 package com.android.systemui.stackdivider;
 
+import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -31,6 +34,9 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VelocityTracker;
@@ -39,6 +45,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -52,16 +59,15 @@ import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
-
-import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
 
 /**
  * Docked stack divider.
@@ -136,6 +142,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mGrowRecents;
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
+    private GestureDetector mGestureDetector;
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -213,12 +220,35 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
         mHandle.setAccessibilityDelegate(mHandleDelegate);
+        mGestureDetector = new GestureDetector(mContext, new SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                updateDockSide();
+                SystemServicesProxy ssp = Recents.getSystemServices();
+                if (mDockSide != WindowManager.DOCKED_INVALID
+                        && !ssp.isRecentsTopMost(ssp.getTopMostTask(), null /* isTopHome */)) {
+                    mWindowManagerProxy.swapTasks();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         EventBus.getDefault().register(this);
+        getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                mWindowManagerProxy.setTouchRegion(new Rect(mHandle.getLeft(), mHandle.getTop(),
+                        mHandle.getLeft() + mHandle.getWidth(),
+                        mHandle.getTop() + mHandle.getHeight()));
+            }
+        });
     }
 
     @Override
@@ -320,6 +350,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         convertToScreenCoordinates(event);
+        mGestureDetector.onTouchEvent(event);
         final int action = event.getAction() & MotionEvent.ACTION_MASK;
         switch (action) {
             case MotionEvent.ACTION_DOWN:

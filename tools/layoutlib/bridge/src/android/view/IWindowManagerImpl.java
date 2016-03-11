@@ -561,6 +561,10 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void setDockedStackDividerTouchRegion(Rect touchableRegion) throws RemoteException {
+    }
+
+    @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver) throws RemoteException {
     }
 
