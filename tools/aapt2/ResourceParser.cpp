@@ -81,6 +81,12 @@ struct ParsedResource {
 
 // Recursively adds resources to the ResourceTable.
 static bool addResourcesToTable(ResourceTable* table, IDiagnostics* diag, ParsedResource* res) {
+    StringPiece16 trimmedComment = util::trimWhitespace(res->comment);
+    if (trimmedComment.size() != res->comment.size()) {
+        // Only if there was a change do we re-assign.
+        res->comment = trimmedComment.toString();
+    }
+
     if (res->symbolState) {
         Symbol symbol;
         symbol.state = res->symbolState.value();

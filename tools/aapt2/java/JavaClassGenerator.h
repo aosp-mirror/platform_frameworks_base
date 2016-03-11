@@ -19,7 +19,7 @@
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
-
+#include "process/IResourceTableConsumer.h"
 #include "util/StringPiece.h"
 
 #include <ostream>
@@ -51,7 +51,8 @@ struct JavaClassGeneratorOptions {
  */
 class JavaClassGenerator {
 public:
-    JavaClassGenerator(ResourceTable* table, JavaClassGeneratorOptions options);
+    JavaClassGenerator(IAaptContext* context, ResourceTable* table,
+                       const JavaClassGeneratorOptions& options);
 
     /*
      * Writes the R.java file to `out`. Only symbols belonging to `package` are written.
@@ -82,6 +83,7 @@ private:
 
     bool skipSymbol(SymbolState state);
 
+    IAaptContext* mContext;
     ResourceTable* mTable;
     JavaClassGeneratorOptions mOptions;
     std::string mError;
