@@ -260,6 +260,13 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         return mAnimatedVectorState.mVectorDrawable.setLayoutDirection(layoutDirection);
     }
 
+    /**
+     * AnimatedVectorDrawable is running on render thread now. Therefore, if the root alpha is being
+     * animated, then the root alpha value we get from this call could be out of sync with alpha
+     * value used in the render thread. Otherwise, the root alpha should be always the same value.
+     *
+     * @return the containing vector drawable's root alpha value.
+     */
     @Override
     public int getAlpha() {
         return mAnimatedVectorState.mVectorDrawable.getAlpha();
@@ -273,6 +280,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     @Override
     public void setColorFilter(ColorFilter colorFilter) {
         mAnimatedVectorState.mVectorDrawable.setColorFilter(colorFilter);
+    }
+
+    @Override
+    public ColorFilter getColorFilter() {
+        return mAnimatedVectorState.mVectorDrawable.getColorFilter();
     }
 
     @Override
