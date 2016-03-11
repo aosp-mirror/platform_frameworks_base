@@ -88,6 +88,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -149,6 +150,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final String DIRECTORY_BITMAPS = "bitmaps";
 
     static final String TAG_ROOT = "root";
+    static final String TAG_USER = "user";
     static final String TAG_PACKAGE = "package";
     static final String TAG_LAST_RESET_TIME = "last_reset_time";
     static final String TAG_INTENT_EXTRAS = "intent-extras";
@@ -221,11 +223,10 @@ public class ShortcutService extends IShortcutService.Stub {
     private long mRawLastResetTime;
 
     /**
-     * User ID -> package name -> list of ShortcutInfos.
+     * User ID -> UserShortcuts
      */
     @GuardedBy("mLock")
-    private final SparseArray<ArrayMap<String, PackageShortcuts>> mShortcuts =
-            new SparseArray<>();
+    private final SparseArray<UserShortcuts> mUsers = new SparseArray<>();
 
     /**
      * Max number of dynamic shortcuts that each application can have at a time.
@@ -313,7 +314,7 @@ public class ShortcutService extends IShortcutService.Stub {
     /** lifecycle event */
     void onCleanupUserInner(int userId) {
         // Unload
-        mShortcuts.delete(userId);
+        mUsers.delete(userId);
     }
 
     /** Return the base state file name */
@@ -583,20 +584,9 @@ public class ShortcutService extends IShortcutService.Stub {
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(outs, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
-            out.startTag(null, TAG_ROOT);
 
-            final ArrayMap<String, PackageShortcuts> packages = getUserShortcutsLocked(userId);
+            getUserShortcutsLocked(userId).saveToXml(out);
 
-            // Body.
-            for (int i = 0; i < packages.size(); i++) {
-                final String packageName = packages.keyAt(i);
-                final PackageShortcuts packageShortcuts = packages.valueAt(i);
-
-                packageShortcuts.saveToXml(out);
-            }
-
-            // Epilogue.
-            out.endTag(null, TAG_ROOT);
             out.endDocument();
 
             // Close.
@@ -612,7 +602,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Nullable
-    private ArrayMap<String, PackageShortcuts> loadUserLocked(@UserIdInt int userId) {
+    private UserShortcuts loadUserLocked(@UserIdInt int userId) {
         final File path = new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
         if (DEBUG) {
             Slog.i(TAG, "Loading from " + path);
@@ -628,12 +618,10 @@ public class ShortcutService extends IShortcutService.Stub {
             }
             return null;
         }
-        final ArrayMap<String, PackageShortcuts> ret = new ArrayMap<>();
+        UserShortcuts ret = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(in, StandardCharsets.UTF_8.name());
-
-            PackageShortcuts shortcuts = null;
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -647,22 +635,9 @@ public class ShortcutService extends IShortcutService.Stub {
                     Slog.d(TAG, String.format("depth=%d type=%d name=%s",
                             depth, type, tag));
                 }
-                switch (depth) {
-                    case 1: {
-                        if (TAG_ROOT.equals(tag)) {
-                            continue;
-                        }
-                        break;
-                    }
-                    case 2: {
-                        switch (tag) {
-                            case TAG_PACKAGE:
-                                shortcuts = PackageShortcuts.loadFromXml(parser, userId);
-                                ret.put(shortcuts.mPackageName, shortcuts);
-                                continue;
-                        }
-                        break;
-                    }
+                if ((depth == 1) && TAG_USER.equals(tag)) {
+                    ret = UserShortcuts.loadFromXml(parser, userId);
+                    continue;
                 }
                 throwForInvalidTag(depth, tag);
             }
@@ -731,14 +706,14 @@ public class ShortcutService extends IShortcutService.Stub {
     /** Return the per-user state. */
     @GuardedBy("mLock")
     @NonNull
-    private ArrayMap<String, PackageShortcuts> getUserShortcutsLocked(@UserIdInt int userId) {
-        ArrayMap<String, PackageShortcuts> userPackages = mShortcuts.get(userId);
+    private UserShortcuts getUserShortcutsLocked(@UserIdInt int userId) {
+        UserShortcuts userPackages = mUsers.get(userId);
         if (userPackages == null) {
             userPackages = loadUserLocked(userId);
             if (userPackages == null) {
-                userPackages = new ArrayMap<>();
+                userPackages = new UserShortcuts(userId);
             }
-            mShortcuts.put(userId, userPackages);
+            mUsers.put(userId, userPackages);
         }
         return userPackages;
     }
@@ -748,11 +723,11 @@ public class ShortcutService extends IShortcutService.Stub {
     @NonNull
     private PackageShortcuts getPackageShortcutsLocked(
             @NonNull String packageName, @UserIdInt int userId) {
-        final ArrayMap<String, PackageShortcuts> userPackages = getUserShortcutsLocked(userId);
-        PackageShortcuts shortcuts = userPackages.get(packageName);
+        final UserShortcuts userPackages = getUserShortcutsLocked(userId);
+        PackageShortcuts shortcuts = userPackages.getPackages().get(packageName);
         if (shortcuts == null) {
             shortcuts = new PackageShortcuts(userId, packageName);
-            userPackages.put(packageName, shortcuts);
+            userPackages.getPackages().put(packageName, shortcuts);
         }
         return shortcuts;
     }
@@ -1335,7 +1310,7 @@ public class ShortcutService extends IShortcutService.Stub {
                             userId, ret, cloneFlag);
                 } else {
                     final ArrayMap<String, PackageShortcuts> packages =
-                            getUserShortcutsLocked(userId);
+                            getUserShortcutsLocked(userId).getPackages();
                     for (int i = packages.size() - 1; i >= 0; i--) {
                         getShortcutsInnerLocked(
                                 packages.keyAt(i),
@@ -1512,36 +1487,12 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.print(mIconPersistQuality);
             pw.println();
 
-            pw.println();
 
-            for (int i = 0; i < mShortcuts.size(); i++) {
-                dumpUserLocked(pw, mShortcuts.keyAt(i));
+            for (int i = 0; i < mUsers.size(); i++) {
+                pw.println();
+                mUsers.valueAt(i).dump(this, pw, "  ");
             }
         }
-    }
-
-    private void dumpUserLocked(PrintWriter pw, int userId) {
-        pw.print("  User: ");
-        pw.print(userId);
-        pw.println();
-
-        final ArrayMap<String, PackageShortcuts> packages = mShortcuts.get(userId);
-        if (packages == null) {
-            return;
-        }
-        for (int j = 0; j < packages.size(); j++) {
-            dumpPackageLocked(pw, userId, packages.keyAt(j));
-        }
-        pw.println();
-    }
-
-    private void dumpPackageLocked(PrintWriter pw, int userId, String packageName) {
-        final PackageShortcuts packageShortcuts = mShortcuts.get(userId).get(packageName);
-        if (packageShortcuts == null) {
-            return;
-        }
-
-        packageShortcuts.dump(this, pw, "    ");
     }
 
     static String formatTime(long time) {
@@ -1694,8 +1645,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @VisibleForTesting
-    SparseArray<ArrayMap<String, PackageShortcuts>> getShortcutsForTest() {
-        return mShortcuts;
+    SparseArray<UserShortcuts> getShortcutsForTest() {
+        return mUsers;
     }
 
     @VisibleForTesting
@@ -1732,6 +1683,73 @@ public class ShortcutService extends IShortcutService.Stub {
     ShortcutInfo getPackageShortcutForTest(String packageName, String shortcutId, int userId) {
         synchronized (mLock) {
             return getPackageShortcutsLocked(packageName, userId).findShortcutById(shortcutId);
+        }
+    }
+}
+
+class UserShortcuts {
+    private static final String TAG = ShortcutService.TAG;
+
+    @UserIdInt
+    final int mUserId;
+
+    private final ArrayMap<String, PackageShortcuts> mPackages = new ArrayMap<>();
+
+    public UserShortcuts(int userId) {
+        mUserId = userId;
+    }
+
+    public ArrayMap<String, PackageShortcuts> getPackages() {
+        return mPackages;
+    }
+
+    public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+        out.startTag(null, ShortcutService.TAG_USER);
+
+        for (int i = 0; i < mPackages.size(); i++) {
+            final String packageName = mPackages.keyAt(i);
+            final PackageShortcuts packageShortcuts = mPackages.valueAt(i);
+
+            packageShortcuts.saveToXml(out);
+        }
+
+        out.endTag(null, ShortcutService.TAG_USER);
+    }
+
+    public static UserShortcuts loadFromXml(XmlPullParser parser, int userId)
+            throws IOException, XmlPullParserException {
+        final UserShortcuts ret = new UserShortcuts(userId);
+
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            final int depth = parser.getDepth();
+            final String tag = parser.getName();
+            switch (tag) {
+                case ShortcutService.TAG_PACKAGE:
+                    final PackageShortcuts shortcuts = PackageShortcuts.loadFromXml(parser, userId);
+
+                    // Don't use addShortcut(), we don't need to save the icon.
+                    ret.getPackages().put(shortcuts.mPackageName, shortcuts);
+                    continue;
+            }
+            throw ShortcutService.throwForInvalidTag(depth, tag);
+        }
+        return ret;
+    }
+
+    public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.print("  ");
+        pw.print("User: ");
+        pw.print(mUserId);
+        pw.println();
+
+        for (int i = 0; i < mPackages.size(); i++) {
+            mPackages.valueAt(i).dump(s, pw, prefix + "  ");
         }
     }
 }
