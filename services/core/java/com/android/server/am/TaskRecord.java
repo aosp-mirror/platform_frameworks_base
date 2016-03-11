@@ -759,6 +759,14 @@ final class TaskRecord {
         if (r.isPersistable()) {
             mService.notifyTaskPersisterLocked(this, false);
         }
+
+        if (stack != null && stack.mStackId == PINNED_STACK_ID) {
+            // We normally notify listeners of task stack changes on pause, however pinned stack
+            // activities are normally in the paused state so no notification will be sent there
+            // before the activity is removed. We send it here so instead.
+            mService.notifyTaskStackChangedLocked();
+        }
+
         if (mActivities.isEmpty()) {
             return !mReuseTask;
         }
