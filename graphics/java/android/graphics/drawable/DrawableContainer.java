@@ -804,6 +804,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mConstantPadding = null;
             mCheckedPadding = false;
             mCheckedConstantSize = false;
+            mCheckedConstantState = false;
 
             return pos;
         }
