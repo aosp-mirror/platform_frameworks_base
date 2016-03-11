@@ -25,6 +25,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -66,26 +67,11 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private QSContainer mQsContainer;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
-        super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
+        super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
         mClipper = new QSDetailClipper(this);
-    }
 
-    public void setHost(QSTileHost host) {
-        mHost = host;
-        mPhoneStatusBar = host.getPhoneStatusBar();
-    }
+        LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
 
-    public void setContainer(NotificationsQuickSettingsContainer notificationsQsContainer) {
-        mNotifQsContainer = notificationsQsContainer;
-    }
-
-    public void setQsContainer(QSContainer qsContainer) {
-        mQsContainer = qsContainer;
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
         mToolbar = (Toolbar) findViewById(com.android.internal.R.id.action_bar);
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
@@ -113,6 +99,19 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
+    }
+
+    public void setHost(QSTileHost host) {
+        mHost = host;
+        mPhoneStatusBar = host.getPhoneStatusBar();
+    }
+
+    public void setContainer(NotificationsQuickSettingsContainer notificationsQsContainer) {
+        mNotifQsContainer = notificationsQsContainer;
+    }
+
+    public void setQsContainer(QSContainer qsContainer) {
+        mQsContainer = qsContainer;
     }
 
     public void show(int x, int y) {
