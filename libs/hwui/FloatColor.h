@@ -17,6 +17,7 @@
 #define FLOATCOLOR_H
 
 #include "utils/Macros.h"
+#include "utils/MathUtils.h"
 
 #include <stdint.h>
 
@@ -36,6 +37,17 @@ struct FloatColor {
                 || r > 0.0f
                 || g > 0.0f
                 || b > 0.0f;
+    }
+
+    bool operator==(const FloatColor& other) const {
+        return MathUtils::areEqual(r, other.r)
+                && MathUtils::areEqual(g, other.g)
+                && MathUtils::areEqual(b, other.b)
+                && MathUtils::areEqual(a, other.a);
+    }
+
+    bool operator!=(const FloatColor& other) const {
+        return !(*this == other);
     }
 
     float r;
