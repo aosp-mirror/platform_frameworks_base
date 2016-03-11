@@ -40,17 +40,17 @@ set:sdk.win_installer_checksum='f9b59d72413649d31e633207e31f456443e7ea0b' ?><?cs
 
 
 set:ndk.mac64_download='android-ndk-r11-darwin-x86_64.zip' ?><?cs
-set:ndk.mac64_bytes='774830876' ?><?cs
-set:ndk.mac64_checksum='7a6fdc0931ea9fe2713064f04474333369a34d53' ?><?cs
+set:ndk.mac64_bytes='772314112' ?><?cs
+set:ndk.mac64_checksum='a3764714eff7d187c80d989a9bf1ff8ebf5a0dfa' ?><?cs
 
 set:ndk.linux64_download='android-ndk-r11-linux-x86_64.zip' ?><?cs
-set:ndk.linux64_bytes='796414803' ?><?cs
-set:ndk.linux64_checksum='8583ff5c22af1603129a6ec35afd3d51163e3fc1' ?><?cs
+set:ndk.linux64_bytes='794012672' ?><?cs
+set:ndk.linux64_checksum='7b4e0d13f6bbf48dd87475be9d052273dc766fb6' ?><?cs
 
 set:ndk.win64_download='android-ndk-r11-windows-x86_64.zip' ?><?cs
-set:ndk.win64_bytes='771291233' ?><?cs
+set:ndk.win64_bytes='771291648' ?><?cs
 set:ndk.win64_checksum='49fcdae88724c74bb52b332b648edba9700b9529' ?><?cs
 set:ndk.win32_download='android-ndk-r11-windows-x86.zip' ?><?cs
-set:ndk.win32_bytes='728773247' ?><?cs
+set:ndk.win32_bytes='728773632' ?><?cs
 set:ndk.win32_checksum='0c9e895e400ab539c2005759410ef3e33d048291'
 ?>
