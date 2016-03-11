@@ -86,8 +86,6 @@ to get started by following these steps:</p>
 <li>
   <h2 id="GetTools" class="norule">Get the latest SDK tools</h2>
 
-<img src="/images/sdk_manager_packages.png" alt="" width="350" style="float:right;margin-left:20px" />
-
   <p>As a minimum when setting up the Android SDK,
   you should download the latest tools and Android platform:</p>
   <ol>
