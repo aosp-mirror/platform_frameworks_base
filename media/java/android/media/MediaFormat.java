@@ -16,6 +16,10 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -606,6 +610,16 @@ public final class MediaFormat {
     /** BT.2020 color chromacity coordinates with KR = 0.2627, KB = 0.0593. */
     public static final int COLOR_STANDARD_BT2020 = 6;
 
+    /** @hide */
+    @IntDef({
+        COLOR_STANDARD_BT709,
+        COLOR_STANDARD_BT601_PAL,
+        COLOR_STANDARD_BT601_NTSC,
+        COLOR_STANDARD_BT2020,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorStandard {}
+
     /**
      * An optional key describing the opto-electronic transfer function used
      * for the video content.
@@ -628,6 +642,16 @@ public final class MediaFormat {
     /** ARIB STD-B67 hybrid-log-gamma transfer function. This is used by some HDR video content. */
     public static final int COLOR_TRANSFER_HLG = 7;
 
+    /** @hide */
+    @IntDef({
+        COLOR_TRANSFER_LINEAR,
+        COLOR_TRANSFER_SDR_VIDEO,
+        COLOR_TRANSFER_ST2084,
+        COLOR_TRANSFER_HLG,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorTransfer {}
+
     /**
      * An optional key describing the range of the component values of the video content.
      *
@@ -643,6 +667,14 @@ public final class MediaFormat {
 
     /** Full range. Y, Cr and Cb component values range from 0 to 255 for 8-bit content. */
     public static final int COLOR_RANGE_FULL = 1;
+
+    /** @hide */
+    @IntDef({
+        COLOR_RANGE_LIMITED,
+        COLOR_RANGE_FULL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorRange {}
 
     /**
      * An optional key describing the static metadata of HDR (high-dynamic-range) video content.
