@@ -1052,6 +1052,12 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        @SystemApi
+        public void setInstallFlagsDowngrade() {
+            installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+        }
+
+        /** {@hide} */
         public void setInstallFlagsExternal() {
             installFlags |= PackageManager.INSTALL_EXTERNAL;
             installFlags &= ~PackageManager.INSTALL_INTERNAL;
