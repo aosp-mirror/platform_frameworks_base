@@ -150,12 +150,4 @@ final class GridDocumentHolder extends DocumentHolder {
             mSize.setText(Formatter.formatFileSize(mContext, docSize));
         }
     }
-
-    /**
-     * Sets whether to hide titles on subsequently created GridDocumentHolder items.
-     * @param hideTitles
-     */
-    public static void setHideTitles(boolean hideTitles) {
-        mHideTitles = hideTitles;
-    }
 }

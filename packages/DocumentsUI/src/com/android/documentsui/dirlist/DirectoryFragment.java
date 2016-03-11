@@ -281,16 +281,6 @@ public class DirectoryFragment extends Fragment
         mTuner = FragmentTuner.pick(getContext(), state);
         mClipper = new DocumentClipper(context);
 
-        boolean hideGridTitles;
-        if (mType == TYPE_RECENT_OPEN) {
-            // Hide titles when showing recents for picking images/videos
-            hideGridTitles = MimePredicate.mimeMatches(
-                    MimePredicate.VISUAL_MIMES, state.acceptMimes);
-        } else {
-            hideGridTitles = (mDocument != null) && mDocument.isGridTitlesHidden();
-        }
-        GridDocumentHolder.setHideTitles(hideGridTitles);
-
         final ActivityManager am = (ActivityManager) context.getSystemService(
                 Context.ACTIVITY_SERVICE);
         boolean svelte = am.isLowRamDevice() && (mType == TYPE_RECENT_OPEN);
