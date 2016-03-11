@@ -19,7 +19,6 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.State.ACTION_BROWSE;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
 
@@ -53,8 +52,6 @@ public abstract class FragmentTuner {
         switch (state.action) {
             case ACTION_BROWSE:
                 return new FilesTuner(context, state);
-            case ACTION_MANAGE:
-                return new DownloadsTuner(context, state);
             default:
                 return new DocumentsTuner(context, state);
         }
@@ -167,47 +164,6 @@ public abstract class FragmentTuner {
         @Override
         public boolean enableManagedMode() {
             return false;
-        }
-    }
-
-    /**
-     * Provides support for Platform specific specializations of DirectoryFragment.
-     */
-    private static final class DownloadsTuner extends FragmentTuner {
-
-        public DownloadsTuner(Context context, State state) {
-            super(context, state);
-            assert(state.action == ACTION_MANAGE);
-        }
-
-        @Override
-        public void updateActionMenu(
-                Menu menu, @ResultType int resultType, boolean canDelete, boolean canRename) {
-            assert(resultType != DirectoryFragment.TYPE_RECENT_OPEN);
-
-            MenuItem open = menu.findItem(R.id.menu_open);
-            MenuItem delete = menu.findItem(R.id.menu_delete);
-            MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
-            MenuItem moveTo = menu.findItem(R.id.menu_move_to);
-            MenuItem rename = menu.findItem(R.id.menu_rename);
-            MenuItem copy = menu.findItem(R.id.menu_copy_to_clipboard);
-
-            open.setVisible(false);
-            delete.setVisible(canDelete);
-            copy.setEnabled(true);  // to clipboard
-            copyTo.setVisible(true);
-            copyTo.setEnabled(true);
-            moveTo.setVisible(true);
-            moveTo.setEnabled(true);
-            rename.setVisible(false);
-        }
-
-        @Override
-        void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {}
-
-        @Override
-        public boolean enableManagedMode() {
-            return mState.stack.root != null && mState.stack.root.isDownloads();
         }
     }
 

@@ -18,6 +18,7 @@ package com.android.documentsui;
 
 import static android.os.Environment.STANDARD_DIRECTORIES;
 import static com.android.documentsui.Shared.DEBUG;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
@@ -58,7 +59,7 @@ public final class Metrics {
     private static final String COUNT_CREATE_MIME = "docsui_create_mime";
     private static final String COUNT_GET_CONTENT_MIME = "docsui_get_content_mime";
     private static final String COUNT_BROWSE_ROOT = "docsui_browse_root";
-    private static final String COUNT_MANAGE_ROOT = "docsui_manage_root";
+    @Deprecated private static final String COUNT_MANAGE_ROOT = "docsui_manage_root";
     private static final String COUNT_MULTI_WINDOW = "docsui_multi_window";
     private static final String COUNT_FILEOP_SYSTEM = "docsui_fileop_system";
     private static final String COUNT_FILEOP_EXTERNAL = "docsui_fileop_external";
@@ -194,7 +195,7 @@ public final class Metrics {
     private static final int ACTION_CREATE = 3;
     private static final int ACTION_GET_CONTENT = 4;
     private static final int ACTION_OPEN_TREE = 5;
-    private static final int ACTION_MANAGE = 6;
+    @Deprecated private static final int ACTION_MANAGE = 6;
     private static final int ACTION_BROWSE = 7;
     private static final int ACTION_PICK_COPY_DESTINATION = 8;
 
@@ -245,9 +246,6 @@ public final class Metrics {
                 break;
             case State.ACTION_GET_CONTENT:
                 logHistogram(context, COUNT_GET_CONTENT_MIME, sanitizeMime(intent.getType()));
-                break;
-            case State.ACTION_MANAGE:
-                logHistogram(context, COUNT_MANAGE_ROOT, sanitizeRoot(uri));
                 break;
             case State.ACTION_BROWSE:
                 logHistogram(context, COUNT_BROWSE_ROOT, sanitizeRoot(uri));
@@ -641,8 +639,6 @@ public final class Metrics {
                 return ACTION_GET_CONTENT;
             case State.ACTION_OPEN_TREE:
                 return ACTION_OPEN_TREE;
-            case State.ACTION_MANAGE:
-                return ACTION_MANAGE;
             case State.ACTION_BROWSE:
                 return ACTION_BROWSE;
             case State.ACTION_PICK_COPY_DESTINATION:

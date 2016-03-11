@@ -119,8 +119,6 @@ public final class DocumentsContract {
     public static final String EXTRA_PROMPT = "android.provider.extra.PROMPT";
 
     /** {@hide} */
-    public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
-    /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
     /** {@hide} */
