@@ -81,8 +81,10 @@ namespace TransformFlags {
  * vertex/index/Texture/RoundRectClipState pointers prevent this from
  * being safe.
  */
-// TODO: PREVENT_COPY_AND_ASSIGN(...) or similar
 struct Glop {
+    PREVENT_COPY_AND_ASSIGN(Glop);
+public:
+    Glop() { }
     struct Mesh {
         GLuint primitiveMode; // GL_TRIANGLES and GL_TRIANGLE_STRIP supported
 
@@ -149,7 +151,7 @@ struct Glop {
        }
     } transform;
 
-    const RoundRectClipState* roundRectClipState;
+    const RoundRectClipState* roundRectClipState = nullptr;
 
     /**
      * Blending to be used by this draw - both GL_NONE if blending is disabled.
@@ -165,7 +167,7 @@ struct Glop {
      * Bounds of the drawing command in layer space. Only mapped into layer
      * space once GlopBuilder::build() is called.
      */
-    Rect bounds;
+    Rect bounds; // TODO: remove for HWUI_NEW_OPS
 
     /**
      * Additional render state to enumerate:
