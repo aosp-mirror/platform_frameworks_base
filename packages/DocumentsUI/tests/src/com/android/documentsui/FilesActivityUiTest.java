@@ -72,11 +72,11 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.directory.assertDocumentsPresent("file0.log", "file1.png", "file2.csv");
     }
 
-    public void testLoadsHomeDirectoryByDefault() throws Exception {
+    public void testLoadsDownloadsDirectoryByDefault() throws Exception {
         initTestFiles();
 
         device.waitForIdle();
-        bots.main.assertWindowTitle("Documents");
+        bots.main.assertWindowTitle("Downloads");
     }
 
     public void testRootClickSetsWindowTitle() throws Exception {

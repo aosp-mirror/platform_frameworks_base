@@ -40,18 +40,6 @@
         </activity>
 
         <activity
-            android:name=".DownloadsActivity"
-            android:theme="@style/DocumentsTheme"
-            android:label="@string/downloads_label"
-            android:icon="@drawable/ic_doc_text">
-            <intent-filter>
-                <action android:name="android.provider.action.MANAGE_ROOT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.document/root" />
-            </intent-filter>
-        </activity>
-
-        <activity
             android:name=".LauncherActivity"
             android:theme="@android:style/Theme.NoDisplay"
             android:icon="@drawable/ic_files_app"
@@ -70,6 +58,10 @@
             android:documentLaunchMode="intoExisting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_DOWNLOADS" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.provider.action.BROWSE" />

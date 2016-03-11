@@ -108,10 +108,10 @@ public class FilesActivity extends BaseActivity {
             // authority. That way a misbehaving provider won't result in an ANR.
             loadRoot(uri);
         } else {
-            if (DEBUG) Log.d(TAG, "Launching into Home directory.");
-            // If all else fails, try to load "Home" directory.
-            final Uri homeUri = DocumentsContract.buildHomeUri();
-            loadRoot(homeUri);
+            if (DEBUG) Log.d(TAG, "All other means skipped. Launching into default directory.");
+            Uri defaultUri = DocumentsContract.buildRootUri(
+                    "com.android.providers.downloads.documents", "downloads");
+            loadRoot(defaultUri);
         }
 
         final @DialogType int dialogType = intent.getIntExtra(
