@@ -62,7 +62,7 @@ footer.hide=1
     </a>
     <ul class="dac-actions">
       <li class="dac-action">
-        <a class="dac-action-link" href="{@docRoot}preview/bug">
+        <a class="dac-action-link" href="https://developer.android.com/preview/bug">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
           Report an issue
         </a>
@@ -87,7 +87,7 @@ footer.hide=1
   <div class="wrap dac-offset-parent">
 
     <div class="actions">
-      <div><a href="{@docRoot}preview/bug">
+      <div><a href="https://developer.android.com/preview/bug">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Report an issue
       </a></div>

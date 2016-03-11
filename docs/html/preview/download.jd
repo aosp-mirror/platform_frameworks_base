@@ -220,14 +220,13 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 
 <ul>
   <li><strong>Enroll the device in automatic OTA system updates</strong> through the
-  Android Beta program. Once enrolled, your device will receive regular
+  <a href="https://g.co/androidbeta">Android Beta Program</a>. Once enrolled, your device will receive regular
   over-the-air (OTA) updates of all milestone builds in the N Developer Preview. This
   approach is recommended because it lets you seamlessly transition from your current
   environment through the various releases of the N Developer Preview.</li>
   <li><strong>Download a Developer Preview system image and flash the device</strong>.
-  OTA updates are not provided automatically for devices that you flash manually. This
-  approach is recommended if you need precise control over the test environment or need
-  to reinstall frequently, such as for automated testing.  </li>
+  OTA updates are not provided automatically for devices that you flash manually, but
+  you can enroll those devices in Android Beta Program to get OTA updates. </li>
 </ul>
 
 <h3 id="ota">Enroll the device in automatic OTA updates</h3>
@@ -235,7 +234,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <p>
   If you have access to a supported device (see the list in the Downloads
   table), you can receive over-the-air updates to preview versions of Android
-  by enrolling that device in the Android Beta Program. These updates are
+  by enrolling that device in the <a href="https://g.co/androidbeta">Android Beta Program</a>. These updates are
   automatically downloaded and will update your device just like official
   system updates.
 </p>
@@ -263,10 +262,12 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <p>
   At any time you can download the latest Developer Preview system image and
   manually flash it to your device. See the table below to download the system
-  image for your test device.
+  image for your test device. Manually flashing a device is useful if you need
+  precise control over the test environment or need to reinstall frequently,
+  such as for automated testing. 
 </p>
 
-<p>
+<!-- You can flash by ota or system image --><p>
   Installing a system image on a device <strong>removes all data from the
   device</strong>, so you should back up your data first.
 </p>
@@ -278,11 +279,18 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   to flash the image onto your device.
 </p>
 
-<p class="note"><strong>Note:</strong>
-  Manually flashed system images <em>will not</em>
-  automatically receive subsequent OTA updates to later Developer Preview
+<p>
+  Manually flashed system images <strong>do not
+  automatically receive OTA updates</strong> to later Developer Preview
   milestone builds. Make sure to keep your environment up-to-date and flash a
   new system image at each Developer Preview milestone.
+</p>
+
+<p>
+  If you decide you want to get OTA updates after manually flashing a device, 
+  all you need to do is enroll the device in the <a href="https://g.co/androidbeta">Android
+  Beta Program</a>. You can enroll the device at any time to receive the next Preview
+  update over the air. 
 </p>
 
 <table>

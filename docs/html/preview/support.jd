@@ -8,7 +8,7 @@ page.image=images/cards/card-n-support_2x.png
 <p>
   Two primary support channels are available to you when developing and testing
   with the Android N Developer Preview: Please file bugs at <a href=
-  "{@docRoot}preview/bug">https://developer.android.com/preview/bug</a> for
+  "https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a> for
   device-specific, system, and Google App bugs. For issues in other apps,
   please contact the developer directly.
 </p>
@@ -91,6 +91,12 @@ page.image=images/cards/card-n-support_2x.png
 
   <li>Voicemail playback does not work.
   </li>
+</ul>
+
+<h4 id="microphone">Microphone</h4>
+
+<ul>
+   <li>The system may incorrect persists the microphone mute state across apps and reboots. If you mute the microphone in an app and the state is persisted, open any app that has microphone mute controls and unmute the microphone.</li>
 </ul>
 
 <h4 id="ui">System UI</h4>
@@ -227,6 +233,7 @@ page.image=images/cards/card-n-support_2x.png
     </ul>
   </li>
 </ul>
+
 <h4 id="keyboard">Keyboard</h4>
 
 <ul>
@@ -345,29 +352,21 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
+
 <h4 id="accessibility">Accessibility</h4>
 
 <ul>
-  <li>TalkBack exhibits issues with features including Notifications, Quick
-  Settings Tiles and Multi-window display that may cause system crashing or
-  lack of spoken feedback from TalkBack. Future releases of the preview will
-  address these issues.
-  </li>
+   <li>TalkBack exhibits issues with features including Notifications, Quick Settings Tiles and Multi-window display that may cause system crashing or lack of spoken feedback from TalkBack. Future releases of the preview will address these issues.</li>
 </ul>
 
 <h3 id="device-sp">Device-Specific Notes and Issues</h3>
 
 <h4 id="player">Nexus Player</h4>
-
 <ul>
-  <li>Video playback, app compatibility and stability issues are expected on
-  Nexus Player in this release of the Preview.
-  </li>
+<li>Video playback, app compatibility and stability issues are expected on Nexus Player in this release of the Preview.</li>
 </ul>
 
 <h4 id="pixelc">Pixel C</h4>
-
 <ul>
-  <li>Multi-window resizing may cause crashing.
-  </li>
+<li>Multi-window resizing may cause crashing.</li>
 </ul>
