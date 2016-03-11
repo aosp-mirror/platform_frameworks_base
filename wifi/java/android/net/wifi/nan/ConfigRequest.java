@@ -73,19 +73,28 @@ public class ConfigRequest implements Parcelable {
      */
     public final int mClusterHigh;
 
+    /**
+     * Indicates whether we want to get callbacks when our identity is changed.
+     *
+     * @hide
+     */
+    public final boolean mEnableIdentityChangeCallback;
+
     private ConfigRequest(boolean support5gBand, int masterPreference, int clusterLow,
-            int clusterHigh) {
+            int clusterHigh, boolean enableIdentityChangeCallback) {
         mSupport5gBand = support5gBand;
         mMasterPreference = masterPreference;
         mClusterLow = clusterLow;
         mClusterHigh = clusterHigh;
+        mEnableIdentityChangeCallback = enableIdentityChangeCallback;
     }
 
     @Override
     public String toString() {
         return "ConfigRequest [mSupport5gBand=" + mSupport5gBand + ", mMasterPreference="
                 + mMasterPreference + ", mClusterLow=" + mClusterLow + ", mClusterHigh="
-                + mClusterHigh + "]";
+                + mClusterHigh + ", mEnableIdentityChangeCallback=" + mEnableIdentityChangeCallback
+                + "]";
     }
 
     @Override
@@ -99,6 +108,7 @@ public class ConfigRequest implements Parcelable {
         dest.writeInt(mMasterPreference);
         dest.writeInt(mClusterLow);
         dest.writeInt(mClusterHigh);
+        dest.writeInt(mEnableIdentityChangeCallback ? 1 : 0);
     }
 
     public static final Creator<ConfigRequest> CREATOR = new Creator<ConfigRequest>() {
@@ -113,7 +123,9 @@ public class ConfigRequest implements Parcelable {
             int masterPreference = in.readInt();
             int clusterLow = in.readInt();
             int clusterHigh = in.readInt();
-            return new ConfigRequest(support5gBand, masterPreference, clusterLow, clusterHigh);
+            boolean enableIdentityChangeCallback = in.readInt() != 0;
+            return new ConfigRequest(support5gBand, masterPreference, clusterLow, clusterHigh,
+                    enableIdentityChangeCallback);
         }
     };
 
@@ -130,7 +142,8 @@ public class ConfigRequest implements Parcelable {
         ConfigRequest lhs = (ConfigRequest) o;
 
         return mSupport5gBand == lhs.mSupport5gBand && mMasterPreference == lhs.mMasterPreference
-                && mClusterLow == lhs.mClusterLow && mClusterHigh == lhs.mClusterHigh;
+                && mClusterLow == lhs.mClusterLow && mClusterHigh == lhs.mClusterHigh
+                && mEnableIdentityChangeCallback == lhs.mEnableIdentityChangeCallback;
     }
 
     @Override
@@ -141,6 +154,7 @@ public class ConfigRequest implements Parcelable {
         result = 31 * result + mMasterPreference;
         result = 31 * result + mClusterLow;
         result = 31 * result + mClusterHigh;
+        result = 31 * result + (mEnableIdentityChangeCallback ? 1 : 0);
 
         return result;
     }
@@ -149,20 +163,11 @@ public class ConfigRequest implements Parcelable {
      * Builder used to build {@link ConfigRequest} objects.
      */
     public static final class Builder {
-        private boolean mSupport5gBand;
-        private int mMasterPreference;
-        private int mClusterLow;
-        private int mClusterHigh;
-
-        /**
-         * Default constructor for the Builder.
-         */
-        public Builder() {
-            mSupport5gBand = false;
-            mMasterPreference = 0;
-            mClusterLow = 0;
-            mClusterHigh = CLUSTER_ID_MAX;
-        }
+        private boolean mSupport5gBand = false;
+        private int mMasterPreference = 0;
+        private int mClusterLow = CLUSTER_ID_MIN;
+        private int mClusterHigh = CLUSTER_ID_MAX;
+        private boolean mEnableIdentityChangeCallback = false;
 
         /**
          * Specify whether 5G band support is required in this request.
@@ -247,6 +252,25 @@ public class ConfigRequest implements Parcelable {
         }
 
         /**
+         * Indicate whether or not we want to enable the callback to the
+         * listener on the event when the NAN device identity is changed. A
+         * device identity is it's Discovery MAC address. Depending on use-case
+         * we may want to perform some activity (e.g. re-publish). In other
+         * use-cases (typically where we're silent) there's no reason to be
+         * woken up repeatedly. Note that the MAC address is randomized at
+         * regular intervals - so do not enable unless specifically required.
+         *
+         * @param enableIdentityChangeCallback Enable the callback informing
+         *            listener when identity is changed.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setEnableIdentityChangeCallback(boolean enableIdentityChangeCallback) {
+            mEnableIdentityChangeCallback = enableIdentityChangeCallback;
+            return this;
+        }
+
+        /**
          * Build {@link ConfigRequest} given the current requests made on the
          * builder.
          */
@@ -256,7 +280,8 @@ public class ConfigRequest implements Parcelable {
                         "Invalid argument combination - must have Cluster Low <= Cluster High");
             }
 
-            return new ConfigRequest(mSupport5gBand, mMasterPreference, mClusterLow, mClusterHigh);
+            return new ConfigRequest(mSupport5gBand, mMasterPreference, mClusterLow, mClusterHigh,
+                    mEnableIdentityChangeCallback);
         }
     }
 }
