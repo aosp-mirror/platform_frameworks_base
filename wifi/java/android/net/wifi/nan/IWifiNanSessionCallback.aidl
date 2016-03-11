@@ -23,11 +23,8 @@ package android.net.wifi.nan;
  */
 oneway interface IWifiNanSessionCallback
 {
-    void onPublishFail(int reason);
-    void onPublishTerminated(int reason);
-
-    void onSubscribeFail(int reason);
-    void onSubscribeTerminated(int reason);
+    void onSessionConfigFail(int reason);
+    void onSessionTerminated(int reason);
 
     void onMatch(int peerId, in byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, in byte[] matchFilter, int matchFilterLength);

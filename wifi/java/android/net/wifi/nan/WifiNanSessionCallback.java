@@ -41,21 +41,17 @@ public class WifiNanSessionCallback {
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /** @hide */
-    public static final int CALLBACK_PUBLISH_FAIL = 0;
+    public static final int CALLBACK_SESSION_CONFIG_FAIL = 0;
     /** @hide */
-    public static final int CALLBACK_PUBLISH_TERMINATED = 1;
+    public static final int CALLBACK_SESSION_TERMINATED = 1;
     /** @hide */
-    public static final int CALLBACK_SUBSCRIBE_FAIL = 2;
+    public static final int CALLBACK_MATCH = 2;
     /** @hide */
-    public static final int CALLBACK_SUBSCRIBE_TERMINATED = 3;
+    public static final int CALLBACK_MESSAGE_SEND_SUCCESS = 3;
     /** @hide */
-    public static final int CALLBACK_MATCH = 4;
+    public static final int CALLBACK_MESSAGE_SEND_FAIL = 4;
     /** @hide */
-    public static final int CALLBACK_MESSAGE_SEND_SUCCESS = 5;
-    /** @hide */
-    public static final int CALLBACK_MESSAGE_SEND_FAIL = 6;
-    /** @hide */
-    public static final int CALLBACK_MESSAGE_RECEIVED = 7;
+    public static final int CALLBACK_MESSAGE_RECEIVED = 5;
 
     /**
      * Failure reason flag for {@link WifiNanEventCallback} and
@@ -87,8 +83,7 @@ public class WifiNanSessionCallback {
 
     /**
      * Failure reason flag for
-     * {@link WifiNanSessionCallback#onPublishTerminated(int)} and
-     * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} callbacks.
+     * {@link WifiNanSessionCallback#onSessionTerminated(int)} callback.
      * Indicates that publish or subscribe session is done - i.e. all the
      * requested operations (per {@link PublishConfig} or
      * {@link SubscribeConfig}) have been executed.
@@ -97,8 +92,7 @@ public class WifiNanSessionCallback {
 
     /**
      * Failure reason flag for
-     * {@link WifiNanSessionCallback#onPublishTerminated(int)} and
-     * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} callbacks.
+     * {@link WifiNanSessionCallback#onSessionTerminated(int)} callback.
      * Indicates that publish or subscribe session is terminated due to a
      * failure.
      */
@@ -132,17 +126,11 @@ public class WifiNanSessionCallback {
             public void handleMessage(Message msg) {
                 if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
                 switch (msg.what) {
-                    case CALLBACK_PUBLISH_FAIL:
-                        WifiNanSessionCallback.this.onPublishFail(msg.arg1);
+                    case CALLBACK_SESSION_CONFIG_FAIL:
+                        WifiNanSessionCallback.this.onSessionConfigFail(msg.arg1);
                         break;
-                    case CALLBACK_PUBLISH_TERMINATED:
-                        WifiNanSessionCallback.this.onPublishTerminated(msg.arg1);
-                        break;
-                    case CALLBACK_SUBSCRIBE_FAIL:
-                        WifiNanSessionCallback.this.onSubscribeFail(msg.arg1);
-                        break;
-                    case CALLBACK_SUBSCRIBE_TERMINATED:
-                        WifiNanSessionCallback.this.onSubscribeTerminated(msg.arg1);
+                    case CALLBACK_SESSION_TERMINATED:
+                        WifiNanSessionCallback.this.onSessionTerminated(msg.arg1);
                         break;
                     case CALLBACK_MATCH:
                         WifiNanSessionCallback.this.onMatch(
@@ -166,55 +154,27 @@ public class WifiNanSessionCallback {
     }
 
     /**
-     * Called when a publish operation fails. It is dummy method (empty
-     * implementation printing out a log message). Override to implement your
-     * custom response.
+     * Called when a session configuration (publish or subscribe setup) fails.
+     * It is dummy method (empty implementation printing out a log message).
+     * Override to implement your custom response.
      *
      * @param reason The failure reason using
      *            {@code WifiNanSessionCallback.FAIL_*} codes.
      */
-    public void onPublishFail(int reason) {
-        if (VDBG) Log.v(TAG, "onPublishFail: called in stub - override if interested");
+    public void onSessionConfigFail(int reason) {
+        if (VDBG) Log.v(TAG, "onSessionConfigFail: called in stub - override if interested");
     }
 
     /**
-     * Called when a publish operation terminates. Event will only be delivered
-     * if registered using
-     * {@link WifiNanSessionCallback#CALLBACK_PUBLISH_TERMINATED}. A dummy (empty
+     * Called when a session (publish or subscribe) terminates. A dummy (empty
      * implementation printing out a warning). Make sure to override if
      * registered.
      *
      * @param reason The termination reason using
      *            {@code WifiNanSessionCallback.TERMINATE_*} codes.
      */
-    public void onPublishTerminated(int reason) {
-        Log.w(TAG, "onPublishTerminated: called in stub - override if interested or disable");
-    }
-
-    /**
-     * Called when a subscribe operation fails. It is dummy method (empty
-     * implementation printing out a log message). Override to implement your
-     * custom response.
-     *
-     * @param reason The failure reason using
-     *            {@code WifiNanSessionCallback.FAIL_*} codes.
-     */
-    public void onSubscribeFail(int reason) {
-        if (VDBG) Log.v(TAG, "onSubscribeFail: called in stub - override if interested");
-    }
-
-    /**
-     * Called when a subscribe operation terminates. Event will only be
-     * delivered if registered using
-     * {@link WifiNanSessionCallback#CALLBACK_SUBSCRIBE_TERMINATED}. A dummy
-     * (empty implementation printing out a warning). Make sure to override if
-     * registered.
-     *
-     * @param reason The termination reason using
-     *            {@code WifiNanSessionCallback.TERMINATE_*} codes.
-     */
-    public void onSubscribeTerminated(int reason) {
-        Log.w(TAG, "onSubscribeTerminated: called in stub - override if interested or disable");
+    public void onSessionTerminated(int reason) {
+        Log.w(TAG, "onSessionTerminated: called in stub - override if interested or disable");
     }
 
     /**
@@ -290,37 +250,19 @@ public class WifiNanSessionCallback {
      */
     public IWifiNanSessionCallback callback = new IWifiNanSessionCallback.Stub() {
         @Override
-        public void onPublishFail(int reason) {
-            if (VDBG) Log.v(TAG, "onPublishFail: reason=" + reason);
+        public void onSessionConfigFail(int reason) {
+            if (VDBG) Log.v(TAG, "onSessionConfigFail: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(CALLBACK_PUBLISH_FAIL);
+            Message msg = mHandler.obtainMessage(CALLBACK_SESSION_CONFIG_FAIL);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
 
         @Override
-        public void onPublishTerminated(int reason) {
-            if (VDBG) Log.v(TAG, "onPublishResponse: reason=" + reason);
+        public void onSessionTerminated(int reason) {
+            if (VDBG) Log.v(TAG, "onSessionTerminated: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(CALLBACK_PUBLISH_TERMINATED);
-            msg.arg1 = reason;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onSubscribeFail(int reason) {
-            if (VDBG) Log.v(TAG, "onSubscribeFail: reason=" + reason);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_SUBSCRIBE_FAIL);
-            msg.arg1 = reason;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onSubscribeTerminated(int reason) {
-            if (VDBG) Log.v(TAG, "onSubscribeTerminated: reason=" + reason);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_SUBSCRIBE_TERMINATED);
+            Message msg = mHandler.obtainMessage(CALLBACK_SESSION_TERMINATED);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
