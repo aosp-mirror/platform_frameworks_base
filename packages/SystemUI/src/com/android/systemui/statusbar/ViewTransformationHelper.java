@@ -188,6 +188,9 @@ public class ViewTransformationHelper implements TransformableView {
 
     @Override
     public void setVisible(boolean visible) {
+        if (mViewTransformationAnimation != null) {
+            mViewTransformationAnimation.cancel();
+        }
         for (Integer viewType : mTransformedViews.keySet()) {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
