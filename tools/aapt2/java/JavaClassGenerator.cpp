@@ -23,6 +23,7 @@
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinitionWriter.h"
 #include "java/JavaClassGenerator.h"
+#include "process/SymbolTable.h"
 #include "util/StringPiece.h"
 
 #include <algorithm>
@@ -33,8 +34,9 @@
 
 namespace aapt {
 
-JavaClassGenerator::JavaClassGenerator(ResourceTable* table, JavaClassGeneratorOptions options) :
-        mTable(table), mOptions(options) {
+JavaClassGenerator::JavaClassGenerator(IAaptContext* context, ResourceTable* table,
+                                       const JavaClassGeneratorOptions& options) :
+        mContext(context), mTable(table), mOptions(options) {
 }
 
 static void generateHeader(const StringPiece16& packageNameToGenerate, std::ostream* out) {
@@ -103,6 +105,85 @@ static std::string transformNestedAttr(const ResourceNameRef& attrName,
     return output;
 }
 
+static void addAttributeFormatDoc(AnnotationProcessor* processor, Attribute* attr) {
+    const uint32_t typeMask = attr->typeMask;
+    if (typeMask & android::ResTable_map::TYPE_REFERENCE) {
+        processor->appendComment(
+                "<p>May be a reference to another resource, in the form\n"
+                        "\"<code>@[+][<i>package</i>:]<i>type</i>/<i>name</i></code>\" or a theme\n"
+                        "attribute in the form\n"
+                        "\"<code>?[<i>package</i>:]<i>type</i>/<i>name</i></code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_STRING) {
+        processor->appendComment(
+                "<p>May be a string value, using '\\\\;' to escape characters such as\n"
+                        "'\\\\n' or '\\\\uxxxx' for a unicode character;");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_INTEGER) {
+        processor->appendComment("<p>May be an integer value, such as \"<code>100</code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_BOOLEAN) {
+        processor->appendComment(
+                "<p>May be a boolean value, such as \"<code>true</code>\" or\n"
+                        "\"<code>false</code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_COLOR) {
+        processor->appendComment(
+                "<p>May be a color value, in the form of \"<code>#<i>rgb</i></code>\",\n"
+                        "\"<code>#<i>argb</i></code>\", \"<code>#<i>rrggbb</i></code\", or \n"
+                        "\"<code>#<i>aarrggbb</i></code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_FLOAT) {
+        processor->appendComment(
+                "<p>May be a floating point value, such as \"<code>1.2</code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_DIMENSION) {
+        processor->appendComment(
+                "<p>May be a dimension value, which is a floating point number appended with a\n"
+                        "unit such as \"<code>14.5sp</code>\".\n"
+                        "Available units are: px (pixels), dp (density-independent pixels),\n"
+                        "sp (scaled pixels based on preferred font size), in (inches), and\n"
+                        "mm (millimeters).");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_FRACTION) {
+        processor->appendComment(
+                "<p>May be a fractional value, which is a floating point number appended with\n"
+                        "either % or %p, such as \"<code>14.5%</code>\".\n"
+                        "The % suffix always means a percentage of the base size;\n"
+                        "the optional %p suffix provides a size relative to some parent container.");
+    }
+
+    if (typeMask & (android::ResTable_map::TYPE_FLAGS | android::ResTable_map::TYPE_ENUM)) {
+        if (typeMask & android::ResTable_map::TYPE_FLAGS) {
+            processor->appendComment(
+                    "<p>Must be one or more (separated by '|') of the following "
+                            "constant values.</p>");
+        } else {
+            processor->appendComment("<p>Must be one of the following constant values.</p>");
+        }
+
+        processor->appendComment("<table>\n<colgroup align=\"left\" />\n"
+                                         "<colgroup align=\"left\" />\n"
+                                         "<colgroup align=\"left\" />\n"
+                                         "<tr><th>Constant</th><th>Value</th><th>Description</th></tr>\n");
+        for (const Attribute::Symbol& symbol : attr->symbols) {
+            std::stringstream line;
+            line << "<tr><td>" << symbol.symbol.name.value().entry << "</td>"
+            << "<td>" << std::hex << symbol.value << std::dec << "</td>"
+            << "<td>" << util::trimWhitespace(symbol.symbol.getComment()) << "</td></tr>";
+            processor->appendComment(line.str());
+        }
+        processor->appendComment("</table>");
+    }
+}
+
 bool JavaClassGenerator::skipSymbol(SymbolState state) {
     switch (mOptions.types) {
     case JavaClassGeneratorOptions::SymbolTypes::kAll:
@@ -117,6 +198,7 @@ bool JavaClassGenerator::skipSymbol(SymbolState state) {
 
 struct StyleableAttr {
     const Reference* attrRef;
+    std::shared_ptr<Attribute> attribute;
     std::string fieldName;
 };
 
@@ -148,8 +230,29 @@ void JavaClassGenerator::writeStyleableEntryForClass(ClassDefinitionWriter* outC
         assert((!mOptions.useFinal || attr.id) && "no ID set for Styleable entry");
         assert(attr.name && "no name set for Styleable entry");
 
-        sortedAttributes.emplace_back(StyleableAttr{
-                &attr, transformNestedAttr(attr.name.value(), className, packageNameToGenerate) });
+        StyleableAttr styleableAttr = {};
+        styleableAttr.attrRef = &attr;
+        styleableAttr.fieldName = transformNestedAttr(attr.name.value(), className,
+                                                      packageNameToGenerate);
+
+        Reference mangledReference;
+        mangledReference.id = attr.id;
+        mangledReference.name = attr.name;
+        if (mangledReference.name.value().package.empty()) {
+            mangledReference.name.value().package = mContext->getCompilationPackage();
+        }
+
+        if (Maybe<ResourceName> mangledName =
+                mContext->getNameMangler()->mangleName(mangledReference.name.value())) {
+            mangledReference.name = mangledName;
+        }
+
+        const SymbolTable::Symbol* symbol = mContext->getExternalSymbols()->findByReference(
+                mangledReference);
+        if (symbol) {
+            styleableAttr.attribute = symbol->attribute;
+        }
+        sortedAttributes.push_back(std::move(styleableAttr));
     }
     std::sort(sortedAttributes.begin(), sortedAttributes.end(), lessStyleableAttr);
 
@@ -159,16 +262,34 @@ void JavaClassGenerator::writeStyleableEntryForClass(ClassDefinitionWriter* outC
         // Build the comment string for the Styleable. It includes details about the
         // child attributes.
         std::stringstream styleableComment;
-        styleableComment << "Attributes that can be used with a " << className << ".\n";
-        styleableComment << "<table>\n"
+        if (!styleable->getComment().empty()) {
+            styleableComment << styleable->getComment() << "\n";
+        } else {
+            styleableComment << "Attributes that can be used with a " << className << ".\n";
+        }
+        styleableComment <<
+                "<p>Includes the following attributes:</p>\n"
+                "<table>\n"
                 "<colgroup align=\"left\" />\n"
-                "<colgroup align=\"left\">\n"
+                "<colgroup align=\"left\" />\n"
                 "<tr><th>Attribute</th><th>Description</th></tr>\n";
+
         for (const auto& entry : sortedAttributes) {
             const ResourceName& attrName = entry.attrRef->name.value();
-            styleableComment << "<tr><td><code>{@link #" << entry.fieldName << " "
-                    << attrName.package << ":" << attrName.entry
-                    << "}</code></td><td></td></tr>\n";
+            styleableComment << "<tr><td>";
+            styleableComment << "<code>{@link #"
+                             << entry.fieldName << " "
+                             << (!attrName.package.empty()
+                                    ? attrName.package : mContext->getCompilationPackage())
+                             << ":" << attrName.entry
+                             << "}</code>";
+            styleableComment << "</td>";
+
+            styleableComment << "<td>";
+            if (entry.attribute) {
+                styleableComment << entry.attribute->getComment();
+            }
+            styleableComment << "</td></tr>\n";
         }
         styleableComment << "</table>\n";
         for (const auto& entry : sortedAttributes) {
@@ -189,96 +310,45 @@ void JavaClassGenerator::writeStyleableEntryForClass(ClassDefinitionWriter* outC
 
     // Now we emit the indices into the array.
     for (size_t i = 0; i < attrCount; i++) {
-        const ResourceName& attrName = sortedAttributes[i].attrRef->name.value();
+        const StyleableAttr& styleableAttr = sortedAttributes[i];
+        const ResourceName& attrName = styleableAttr.attrRef->name.value();
+
+        StringPiece16 packageName = attrName.package;
+        if (packageName.empty()) {
+            packageName = mContext->getCompilationPackage();
+        }
 
         AnnotationProcessor attrProcessor;
-        std::stringstream doclavaComments;
-        doclavaComments << "@attr name ";
-        if (!attrName.package.empty()) {
-            doclavaComments << attrName.package << ":";
+
+        StringPiece16 comment = styleableAttr.attrRef->getComment();
+        if (styleableAttr.attribute && comment.empty()) {
+            comment = styleableAttr.attribute->getComment();
         }
-        doclavaComments << attrName.entry;
-        attrProcessor.appendComment(doclavaComments.str());
-        outClassDef->addIntMember(sortedAttributes[i].fieldName, &attrProcessor, i);
-    }
-}
 
-static void addAttributeFormatDoc(AnnotationProcessor* processor, Attribute* attr) {
-    const uint32_t typeMask = attr->typeMask;
-    if (typeMask & android::ResTable_map::TYPE_REFERENCE) {
-        processor->appendComment(
-                "<p>May be a reference to another resource, in the form\n"
-                "\"<code>@[+][<i>package</i>:]<i>type</i>/<i>name</i></code>\" or a theme\n"
-                "attribute in the form\n"
-                "\"<code>?[<i>package</i>:]<i>type</i>/<i>name</i></code>\".");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_STRING) {
-        processor->appendComment(
-                "<p>May be a string value, using '\\\\;' to escape characters such as\n"
-                "'\\\\n' or '\\\\uxxxx' for a unicode character;");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_INTEGER) {
-        processor->appendComment("<p>May be an integer value, such as \"<code>100</code>\".");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_BOOLEAN) {
-        processor->appendComment(
-                "<p>May be a boolean value, such as \"<code>true</code>\" or\n"
-                "\"<code>false</code>\".");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_COLOR) {
-        processor->appendComment(
-                "<p>May be a color value, in the form of \"<code>#<i>rgb</i></code>\",\n"
-                "\"<code>#<i>argb</i></code>\", \"<code>#<i>rrggbb</i></code\", or \n"
-                "\"<code>#<i>aarrggbb</i></code>\".");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_FLOAT) {
-        processor->appendComment(
-                "<p>May be a floating point value, such as \"<code>1.2</code>\".");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_DIMENSION) {
-        processor->appendComment(
-                "<p>May be a dimension value, which is a floating point number appended with a\n"
-                "unit such as \"<code>14.5sp</code>\".\n"
-                "Available units are: px (pixels), dp (density-independent pixels),\n"
-                "sp (scaled pixels based on preferred font size), in (inches), and\n"
-                "mm (millimeters).");
-    }
-
-    if (typeMask & android::ResTable_map::TYPE_FRACTION) {
-        processor->appendComment(
-                "<p>May be a fractional value, which is a floating point number appended with\n"
-                "either % or %p, such as \"<code>14.5%</code>\".\n"
-                "The % suffix always means a percentage of the base size;\n"
-                "the optional %p suffix provides a size relative to some parent container.");
-    }
-
-    if (typeMask & (android::ResTable_map::TYPE_FLAGS | android::ResTable_map::TYPE_ENUM)) {
-        if (typeMask & android::ResTable_map::TYPE_FLAGS) {
-            processor->appendComment(
-                    "<p>Must be one or more (separated by '|') of the following "
-                    "constant values.</p>");
+        if (!comment.empty()) {
+            attrProcessor.appendComment("<p>\n@attr description");
+            attrProcessor.appendComment(comment);
         } else {
-            processor->appendComment("<p>Must be one of the following constant values.</p>");
+            std::stringstream defaultComment;
+            defaultComment
+                    << "<p>This symbol is the offset where the "
+                    << "{@link " << packageName << ".R.attr#" << transform(attrName.entry) << "}\n"
+                    << "attribute's value can be found in the "
+                    << "{@link #" << className << "} array.";
+            attrProcessor.appendComment(defaultComment.str());
         }
 
-        processor->appendComment("<table>\n<colgroup align=\"left\" />\n"
-                                 "<colgroup align=\"left\" />\n"
-                                 "<colgroup align=\"left\" />\n"
-                                 "<tr><th>Constant</th><th>Value</th><th>Description</th></tr>\n");
-        for (const Attribute::Symbol& symbol : attr->symbols) {
-            std::stringstream line;
-            line << "<tr><td>" << symbol.symbol.name.value().entry << "</td>"
-                 << "<td>" << std::hex << symbol.value << std::dec << "</td>"
-                 << "<td>" << util::trimWhitespace(symbol.symbol.getComment()) << "</td></tr>";
-            processor->appendComment(line.str());
+        attrProcessor.appendNewLine();
+
+        if (styleableAttr.attribute) {
+            addAttributeFormatDoc(&attrProcessor, styleableAttr.attribute.get());
+            attrProcessor.appendNewLine();
         }
-        processor->appendComment("</table>");
+
+        std::stringstream doclavaName;
+        doclavaName << "@attr name " << packageName << ":" << attrName.entry;;
+        attrProcessor.appendComment(doclavaName.str());
+        outClassDef->addIntMember(sortedAttributes[i].fieldName, &attrProcessor, i);
     }
 }
 

@@ -744,7 +744,7 @@ public:
             return false;
         }
 
-        JavaClassGenerator generator(table, javaOptions);
+        JavaClassGenerator generator(mContext, table, javaOptions);
         if (!generator.generate(packageNameToGenerate, outPackage, &fout)) {
             mContext->getDiagnostics()->error(DiagMessage(outPath) << generator.getError());
             return false;

@@ -38,7 +38,7 @@ void AnnotationProcessor::appendCommentLine(const std::string& comment) {
         mComment << "/**";
     }
 
-    mComment << "\n" << " * " << std::move(comment);
+    mComment << "\n * " << std::move(comment);
 }
 
 void AnnotationProcessor::appendComment(const StringPiece16& comment) {
@@ -58,6 +58,10 @@ void AnnotationProcessor::appendComment(const StringPiece& comment) {
             appendCommentLine(line.toString());
         }
     }
+}
+
+void AnnotationProcessor::appendNewLine() {
+    mComment << "\n *";
 }
 
 void AnnotationProcessor::writeToStream(std::ostream* out, const StringPiece& prefix) {

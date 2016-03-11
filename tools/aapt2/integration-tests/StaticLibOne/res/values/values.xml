@@ -15,8 +15,13 @@
 -->
 
 <resources>
+    <!-- An attribute from StaticLibOne -->
     <attr name="StaticLibOne_attr" format="string" />
 
     <string name="Foo">Foo</string>
     <string name="Foo" product="tablet">Bar</string>
+
+    <declare-styleable name="Widget">
+        <attr name="StaticLibOne_attr" />
+    </declare-styleable>
 </resources>
