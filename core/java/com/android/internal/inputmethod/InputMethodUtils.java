@@ -505,7 +505,6 @@ public class InputMethodUtils {
         final int numSubtypes = subtypes.size();
 
         // Handle overridesImplicitlyEnabledSubtype mechanism.
-        final String systemLanguage = systemLocales.get(0).getLanguage();
         final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap = new HashMap<>();
         for (int i = 0; i < numSubtypes; ++i) {
             // scan overriding implicitly enabled subtypes.
@@ -521,25 +520,20 @@ public class InputMethodUtils {
             return new ArrayList<>(applicableModeAndSubtypesMap.values());
         }
 
+        final HashMap<String, ArrayList<InputMethodSubtype>> nonKeyboardSubtypesMap =
+                new HashMap<>();
         final ArrayList<InputMethodSubtype> keyboardSubtypes = new ArrayList<>();
+
         for (int i = 0; i < numSubtypes; ++i) {
             final InputMethodSubtype subtype = subtypes.get(i);
-            if (TextUtils.equals(SUBTYPE_MODE_KEYBOARD, subtype.getMode())) {
+            final String mode = subtype.getMode();
+            if (SUBTYPE_MODE_KEYBOARD.equals(mode)) {
                 keyboardSubtypes.add(subtype);
             } else {
-                final Locale locale = subtype.getLocaleObject();
-                final String mode = subtype.getMode();
-                // TODO: Use LocaleUtils#filterByLanguage() instead.
-                if (locale != null && TextUtils.equals(locale.getLanguage(), systemLanguage)) {
-                    final InputMethodSubtype applicableSubtype =
-                            applicableModeAndSubtypesMap.get(mode);
-                    // If more applicable subtypes are contained, skip.
-                    if (applicableSubtype != null) {
-                        if (systemLocale.equals(applicableSubtype.getLocaleObject())) continue;
-                        if (!systemLocale.equals(locale)) continue;
-                    }
-                    applicableModeAndSubtypesMap.put(mode, subtype);
+                if (!nonKeyboardSubtypesMap.containsKey(mode)) {
+                    nonKeyboardSubtypesMap.put(mode, new ArrayList<>());
                 }
+                nonKeyboardSubtypesMap.get(mode).add(subtype);
             }
         }
 
@@ -578,7 +572,12 @@ public class InputMethodUtils {
             }
         }
 
-        applicableSubtypes.addAll(applicableModeAndSubtypesMap.values());
+        // For each non-keyboard mode, extract subtypes with system locales.
+        for (final ArrayList<InputMethodSubtype> subtypeList : nonKeyboardSubtypesMap.values()) {
+            LocaleUtils.filterByLanguage(subtypeList, sSubtypeToLocale, systemLocales,
+                    applicableSubtypes);
+        }
+
         return applicableSubtypes;
     }
 
