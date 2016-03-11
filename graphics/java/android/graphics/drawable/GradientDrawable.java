@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -958,7 +959,7 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mGradientState.getChangingConfigurations();
     }
 
@@ -1734,7 +1735,7 @@ public class GradientDrawable extends Drawable {
     }
 
     final static class GradientState extends ConstantState {
-        public int mChangingConfigurations;
+        public @Config int mChangingConfigurations;
         public @Shape int mShape = RECTANGLE;
         public @GradientType int mGradient = LINEAR_GRADIENT;
         public int mAngle = 0;
@@ -1962,7 +1963,7 @@ public class GradientDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mStrokeColors != null ? mStrokeColors.getChangingConfigurations() : 0)
                     | (mSolidColors != null ? mSolidColors.getChangingConfigurations() : 0)

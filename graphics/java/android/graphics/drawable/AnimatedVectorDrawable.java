@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -230,7 +231,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mAnimatedVectorState.getChangingConfigurations();
     }
 
@@ -437,7 +438,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     private static class AnimatedVectorDrawableState extends ConstantState {
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         VectorDrawable mVectorDrawable;
 
         /** Animators that require a theme before inflation. */
@@ -501,7 +502,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations;
         }
 

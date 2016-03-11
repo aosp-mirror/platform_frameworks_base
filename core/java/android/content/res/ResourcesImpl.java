@@ -15,6 +15,9 @@
  */
 package android.content.res;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.animation.Animator;
 import android.animation.StateListAnimator;
 import android.annotation.AnyRes;
@@ -26,6 +29,7 @@ import android.annotation.RawRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -40,8 +44,6 @@ import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -65,7 +67,7 @@ public class ResourcesImpl {
     private static final boolean TRACE_FOR_PRELOAD = false;
     private static final boolean TRACE_FOR_MISS_PRELOAD = false;
 
-    private static final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
+    private static final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigJavaToNative(
             ActivityInfo.CONFIG_LAYOUT_DIRECTION);
 
     private static final int ID_OTHER = 0x01000004;
@@ -331,7 +333,7 @@ public class ResourcesImpl {
             // the framework.
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
-            final int configChanges = calcConfigChanges(config);
+            final @Config int configChanges = calcConfigChanges(config);
 
             LocaleList locales = mConfiguration.getLocales();
             if (locales.isEmpty()) {
@@ -395,26 +397,30 @@ public class ResourcesImpl {
     }
 
     /**
-     * Called by ConfigurationBoundResourceCacheTest.
+     * Applies the new configuration, returning a bitmask of the changes
+     * between the old and new configurations.
+     *
+     * @param config the new configuration
+     * @return bitmask of config changes
      */
-    public int calcConfigChanges(Configuration config) {
-        int configChanges = 0xfffffff;
-        if (config != null) {
-            mTmpConfig.setTo(config);
-            int density = config.densityDpi;
-            if (density == Configuration.DENSITY_DPI_UNDEFINED) {
-                density = mMetrics.noncompatDensityDpi;
-            }
-
-            mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
-
-            if (mTmpConfig.getLocales().isEmpty()) {
-                mTmpConfig.setLocales(LocaleList.getDefault());
-            }
-            configChanges = mConfiguration.updateFrom(mTmpConfig);
-            configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+    public @Config int calcConfigChanges(@Nullable Configuration config) {
+        if (config == null) {
+            // If there is no configuration, assume all flags have changed.
+            return 0xFFFFFFFF;
         }
-        return configChanges;
+
+        mTmpConfig.setTo(config);
+        int density = config.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = mMetrics.noncompatDensityDpi;
+        }
+
+        mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
+
+        if (mTmpConfig.getLocales().isEmpty()) {
+            mTmpConfig.setLocales(LocaleList.getDefault());
+        }
+        return mConfiguration.updateFrom(mTmpConfig);
     }
 
     /**
@@ -593,8 +599,8 @@ public class ResourcesImpl {
         }
     }
 
-    private boolean verifyPreloadConfig(int changingConfigurations, int allowVarying,
-            int resourceId, String name) {
+    private boolean verifyPreloadConfig(@Config int changingConfigurations,
+            @Config int allowVarying, @AnyRes int resourceId, @Nullable String name) {
         // We allow preloading of resources even if they vary by font scale (which
         // doesn't impact resource selection) or density (which we handle specially by
         // simply turning off all preloading), as well as any other configs specified
@@ -1104,7 +1110,7 @@ public class ResourcesImpl {
             return mAssets.getStyleAttributes(getAppliedStyleResId());
         }
 
-        int getChangingConfigurations() {
+        @Config int getChangingConfigurations() {
             synchronized (mKey) {
                 final int nativeChangingConfig =
                         AssetManager.getThemeChangingConfigurations(mTheme);

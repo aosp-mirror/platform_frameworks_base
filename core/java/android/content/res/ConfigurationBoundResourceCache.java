@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import android.content.pm.ActivityInfo.Config;
+
 /**
  * A Cache class which can be used to cache resource objects that are easy to clone but more
  * expensive to inflate.
@@ -42,7 +44,7 @@ public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<Cons
     }
 
     @Override
-    public boolean shouldInvalidateEntry(ConstantState<T> entry, int configChanges) {
+    public boolean shouldInvalidateEntry(ConstantState<T> entry, @Config int configChanges) {
         return Configuration.needNewResources(configChanges, entry.getChangingConfigurations());
     }
 }

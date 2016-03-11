@@ -16,6 +16,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.ComplexColor;
 import android.content.res.GradientColor;
@@ -686,7 +687,7 @@ public class VectorDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mVectorState.getChangingConfigurations();
     }
 
@@ -714,7 +715,7 @@ public class VectorDrawable extends Drawable {
     static class VectorDrawableState extends ConstantState {
         // Variables below need to be copied (deep copy if applicable) for mutation.
         int[] mThemeAttrs;
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         ColorStateList mTint = null;
         Mode mTintMode = DEFAULT_TINT_MODE;
         boolean mAutoMirrored;
@@ -823,7 +824,7 @@ public class VectorDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
@@ -923,7 +924,7 @@ public class VectorDrawable extends Drawable {
 
         // mLocalMatrix is updated based on the update of transformation information,
         // either parsed from the XML or by animation.
-        private int mChangingConfigurations;
+        private @Config int mChangingConfigurations;
         private int[] mThemeAttrs;
         private String mGroupName = null;
 
@@ -1169,7 +1170,7 @@ public class VectorDrawable extends Drawable {
         protected PathParser.PathData mPathData = null;
 
         String mPathName;
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
 
         public VPath() {
             // Empty constructor.

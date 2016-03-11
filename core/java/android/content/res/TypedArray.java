@@ -20,6 +20,8 @@ import android.annotation.AnyRes;
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.annotation.StyleableRes;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.Config;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
@@ -252,7 +254,8 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      * @hide
      */
-    public String getNonConfigurationString(@StyleableRes int index, int allowedChangingConfigs) {
+    public String getNonConfigurationString(@StyleableRes int index,
+            @Config int allowedChangingConfigs) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -260,7 +263,9 @@ public class TypedArray {
         index *= AssetManager.STYLE_NUM_ENTRIES;
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
-        if ((data[index+AssetManager.STYLE_CHANGING_CONFIGURATIONS]&~allowedChangingConfigs) != 0) {
+        final @Config int changingConfigs = ActivityInfo.activityInfoConfigNativeToJava(
+                data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS]);
+        if ((changingConfigs & ~allowedChangingConfigs) != 0) {
             return null;
         }
         if (type == TypedValue.TYPE_NULL) {
@@ -1155,12 +1160,12 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      * @see android.content.pm.ActivityInfo
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
-        int changingConfig = 0;
+        @Config int changingConfig = 0;
 
         final int[] data = mData;
         final int N = length();
@@ -1170,7 +1175,8 @@ public class TypedArray {
             if (type == TypedValue.TYPE_NULL) {
                 continue;
             }
-            changingConfig |= data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS];
+            changingConfig |= ActivityInfo.activityInfoConfigNativeToJava(
+                    data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS]);
         }
         return changingConfig;
     }
@@ -1185,7 +1191,8 @@ public class TypedArray {
         outValue.data = data[index+AssetManager.STYLE_DATA];
         outValue.assetCookie = data[index+AssetManager.STYLE_ASSET_COOKIE];
         outValue.resourceId = data[index+AssetManager.STYLE_RESOURCE_ID];
-        outValue.changingConfigurations = data[index+AssetManager.STYLE_CHANGING_CONFIGURATIONS];
+        outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS]);
         outValue.density = data[index+AssetManager.STYLE_DENSITY];
         outValue.string = (type == TypedValue.TYPE_STRING) ? loadStringValueAt(index) : null;
         return true;

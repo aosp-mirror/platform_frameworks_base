@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -454,7 +455,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mBitmapState.getChangingConfigurations();
     }
 
@@ -910,7 +911,7 @@ public class BitmapDrawable extends Drawable {
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
         boolean mAutoMirrored = false;
 
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         boolean mRebuildShader;
 
         BitmapState(Bitmap bitmap) {
@@ -958,7 +959,7 @@ public class BitmapDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }

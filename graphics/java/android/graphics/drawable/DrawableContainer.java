@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -87,7 +88,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations()
                 | mDrawableContainerState.getChangingConfigurations();
     }
@@ -649,8 +650,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
         Resources mSourceRes;
         int mDensity = DisplayMetrics.DENSITY_DEFAULT;
-        int mChangingConfigurations;
-        int mChildrenChangingConfigurations;
+        @Config int mChangingConfigurations;
+        @Config int mChildrenChangingConfigurations;
 
         SparseArray<ConstantState> mDrawableFutures;
         Drawable[] mDrawables;
@@ -781,7 +782,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations | mChildrenChangingConfigurations;
         }
 
