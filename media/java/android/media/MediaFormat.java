@@ -645,6 +645,18 @@ public final class MediaFormat {
     public static final int COLOR_RANGE_FULL = 1;
 
     /**
+     * An optional key describing the static metadata of HDR (high-dynamic-range) video content.
+     *
+     * The associated value is a ByteBuffer. This buffer contains the raw contents of the
+     * Static Metadata Descriptor (including the descriptor ID) of an HDMI Dynamic Range and
+     * Mastering InfoFrame as defined by CTA-861.3. This key must be provided to video decoders
+     * for HDR video content unless this information is contained in the bitstream and the video
+     * decoder supports an HDR-capable profile. This key must be provided to video encoders for
+     * HDR video content.
+     */
+    public static final String KEY_HDR_STATIC_INFO = "hdr-static-info";
+
+    /**
      * A key describing a unique ID for the content of a media track.
      *
      * <p>This key is used by {@link MediaExtractor}. Some extractors provide multiple encodings
