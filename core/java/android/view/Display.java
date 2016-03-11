@@ -762,14 +762,23 @@ public final class Display {
 
     /**
      * Gets display metrics that describe the size and density of this display.
-     * <p>
-     * The size is adjusted based on the current rotation of the display.
-     * </p><p>
      * The size returned by this method does not necessarily represent the
-     * actual raw size (native resolution) of the display.  The returned size may
-     * be adjusted to exclude certain system decor elements that are always visible.
-     * It may also be scaled to provide compatibility with older applications that
+     * actual raw size (native resolution) of the display.
+     * <p>
+     * 1. The returned size may be adjusted to exclude certain system decor elements
+     * that are always visible.
+     * </p><p>
+     * 2. It may be scaled to provide compatibility with older applications that
      * were originally designed for smaller displays.
+     * </p><p>
+     * 3. It can be different depending on the WindowManager to which the display belongs.
+     * <pre>
+     * - If requested from non-Activity context (e.g. Application context via
+     * {@code (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE)})
+     * metrics will report real size of the display based on current rotation.
+     * - If requested from activity resulting metrics will correspond to current window metrics.
+     * In this case the size can be smaller than physical size in multi-window mode.
+     * </pre>
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
@@ -807,7 +816,7 @@ public final class Display {
      * The size is adjusted based on the current rotation of the display.
      * </p><p>
      * The real size may be smaller than the physical size of the screen when the
-     * window manager is emulating a smaller display (using adb shell am display-size).
+     * window manager is emulating a smaller display (using adb shell wm size).
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
@@ -816,8 +825,7 @@ public final class Display {
         synchronized (this) {
             updateDisplayInfoLocked();
             mDisplayInfo.getLogicalMetrics(outMetrics,
-                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
-                    mDisplayAdjustments.getConfiguration());
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         }
     }
 
