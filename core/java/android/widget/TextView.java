@@ -8923,8 +8923,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     void onLocaleChanged() {
-        // Will be re-created on demand in getWordIterator with the proper new locale
-        mEditor.mWordIterator = null;
+        mEditor.onLocaleChanged();
     }
 
     /**
