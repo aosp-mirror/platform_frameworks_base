@@ -95,8 +95,8 @@ public interface RILConstants {
     int SIM_BUSY = 51;                        /* SIM is busy */
     int SIM_FULL = 52;                        /* The target EF is full */
     int NETWORK_REJECT = 53;                  /* Request is rejected by network */
-    int OPERATION_NOT_ALLOWED = 54,           /* Not allowed the request now */
-    int EMPTY_RECORD = 55,                    /* The request record is empty */
+    int OPERATION_NOT_ALLOWED = 54;           /* Not allowed the request now */
+    int EMPTY_RECORD = 55;                    /* The request record is empty */
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
     int OEM_ERROR_1 = 501;
