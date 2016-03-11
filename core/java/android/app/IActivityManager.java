@@ -151,6 +151,12 @@ public interface IActivityManager extends IInterface {
             boolean preserveWindows, boolean animate) throws RemoteException;
 
     /**
+     * Moves all tasks from the docked stack in the fullscreen stack and puts the top task of the
+     * fullscreen stack into the docked stack.
+     */
+    public void swapDockedAndFullscreenStack() throws RemoteException;
+
+    /**
      * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.
      *
      * @param dockedBounds The bounds for the docked stack.
@@ -998,4 +1004,5 @@ public interface IActivityManager extends IInterface {
     int GET_MEMORY_TRIM_LEVEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+369;
     int RESIZE_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 370;
     int IS_VR_PACKAGE_ENABLED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 371;
+    int SWAP_DOCKED_AND_FULLSCREEN_STACK = IBinder.FIRST_CALL_TRANSACTION + 372;
 }

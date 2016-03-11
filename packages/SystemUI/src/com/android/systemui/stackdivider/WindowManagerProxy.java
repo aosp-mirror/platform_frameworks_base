@@ -16,6 +16,9 @@
 
 package com.android.systemui.stackdivider;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.view.WindowManager.DOCKED_INVALID;
+
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -27,9 +30,6 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.view.WindowManager.DOCKED_INVALID;
-
 /**
  * Proxy to simplify calls into window manager/activity manager
  */
@@ -39,7 +39,7 @@ public class WindowManagerProxy {
 
     private static final WindowManagerProxy sInstance = new WindowManagerProxy();
 
-    @GuardedBy("mResizeRect")
+    @GuardedBy("mDockedRect")
     private final Rect mDockedRect = new Rect();
     private final Rect mTempDockedTaskRect = new Rect();
     private final Rect mTempDockedInsetRect = new Rect();
@@ -51,6 +51,9 @@ public class WindowManagerProxy {
     private final Rect mTmpRect3 = new Rect();
     private final Rect mTmpRect4 = new Rect();
     private final Rect mTmpRect5 = new Rect();
+
+    @GuardedBy("mDockedRect")
+    private final Rect mTouchableRegion = new Rect();
 
     private boolean mDimLayerVisible;
     private int mDimLayerTargetStack;
@@ -113,6 +116,32 @@ public class WindowManagerProxy {
                         mDimLayerTargetStack, mDimLayerAlpha);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
+            }
+        }
+    };
+
+    private final Runnable mSwapRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                ActivityManagerNative.getDefault().swapDockedAndFullscreenStack();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to resize stack: " + e);
+            }
+        }
+    };
+
+    private final Runnable mSetTouchableRegionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                synchronized (mDockedRect) {
+                    mTmpRect1.set(mTouchableRegion);
+                }
+                WindowManagerGlobal.getWindowManagerService().setDockedStackDividerTouchRegion(
+                        mTmpRect1);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to set touchable region: " + e);
             }
         }
     };
@@ -187,5 +216,16 @@ public class WindowManagerProxy {
         mDimLayerTargetStack = targetStackId;
         mDimLayerAlpha = alpha;
         mExecutor.execute(mDimLayerRunnable);
+    }
+
+    public void swapTasks() {
+        mExecutor.execute(mSwapRunnable);
+    }
+
+    public void setTouchRegion(Rect region) {
+        synchronized (mDockedRect) {
+            mTouchableRegion.set(region);
+        }
+        mExecutor.execute(mSetTouchableRegionRunnable);
     }
 }

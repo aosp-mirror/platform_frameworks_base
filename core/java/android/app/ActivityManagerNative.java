@@ -838,6 +838,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             resizePinnedStack(bounds, tempPinnedTaskBounds);
             return true;
         }
+        case SWAP_DOCKED_AND_FULLSCREEN_STACK: {
+            data.enforceInterface(IActivityManager.descriptor);
+            swapDockedAndFullscreenStack();
+            reply.writeNoException();
+            return true;
+        }
         case RESIZE_DOCKED_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final boolean hasBounds = data.readInt() != 0;
@@ -3890,6 +3896,17 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(preserveWindows ? 1 : 0);
         data.writeInt(animate ? 1 : 0);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public void swapDockedAndFullscreenStack() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(SWAP_DOCKED_AND_FULLSCREEN_STACK, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
