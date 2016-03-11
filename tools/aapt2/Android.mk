@@ -125,10 +125,12 @@ hostStaticLibs := \
 	libexpat \
 	libziparchive-host \
 	libpng \
-	libbase
+	libbase \
+	libprotobuf-cpp-lite_static
 
-hostSharedLibs := \
-	libprotobuf-cpp-lite
+# Do not add any shared libraries. AAPT2 is built to run on many
+# environments that may not have the required dependencies.
+hostSharedLibs :=
 
 ifneq ($(strip $(USE_MINGW)),)
 	hostStaticLibs += libz
