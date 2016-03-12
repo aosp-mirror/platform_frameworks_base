@@ -2728,13 +2728,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (row.isUserLocked() && row != getFirstChildNotGone()) {
+                if (row.isSummaryWithChildren()) {
+                    return;
+                }
                 // We are actually expanding this view
-                float endPosition;
+                float endPosition = row.getTranslationY() + row.getActualHeight();
                 if (row.isChildInGroup()) {
-                    ExpandableNotificationRow parent = row.getNotificationParent();
-                    endPosition = parent.getTranslationY() + parent.getActualHeight();
-                } else {
-                    endPosition = row.getTranslationY() + row.getActualHeight();
+                    endPosition += row.getNotificationParent().getTranslationY();
                 }
                 int stackEnd = mMaxLayoutHeight - mBottomStackPeekSize -
                         mBottomStackSlowDownHeight + (int) mStackTranslation;
