@@ -2440,6 +2440,28 @@ public abstract class ContentResolver {
         }
     }
 
+    /** {@hide} */
+    public void putCache(Uri key, Bundle value) {
+        try {
+            getContentService().putCache(mContext.getPackageName(), key, value,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public Bundle getCache(Uri key) {
+        try {
+            final Bundle bundle = getContentService().getCache(mContext.getPackageName(), key,
+                    mContext.getUserId());
+            if (bundle != null) bundle.setClassLoader(mContext.getClassLoader());
+            return bundle;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Returns sampling percentage for a given duration.
      *
