@@ -1382,6 +1382,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (mIsInterestedInDrag) {
                 retval = true;
             }
+
+            if (!retval) {
+                // Neither us nor any of our children are interested in this drag, so stop tracking
+                // the current drag event.
+                mCurrentDragStartEvent.recycle();
+                mCurrentDragStartEvent = null;
+            }
         } break;
 
         case DragEvent.ACTION_DRAG_ENDED: {
