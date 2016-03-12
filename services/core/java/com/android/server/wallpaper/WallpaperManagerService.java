@@ -441,12 +441,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         // Called during initialization of a given user's wallpaper bookkeeping
-        boolean ensureCropExists() {
-            // if the crop file is not present, copy over the source image to use verbatim
-            if (!cropFile.exists()) {
-                return FileUtils.copyFile(wallpaperFile, cropFile);
-            }
-            return true;
+        boolean cropExists() {
+            return cropFile.exists();
         }
     }
 
@@ -734,7 +730,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public void systemRunning() {
         if (DEBUG) Slog.v(TAG, "systemReady");
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
-        if (!wallpaper.ensureCropExists()) {
+        // No crop file? Make sure we've finished the processing sequence if necessary
+        if (!wallpaper.cropExists()) {
+            generateCrop(wallpaper);
+        }
+        // Still nothing?  Fall back to default.
+        if (!wallpaper.cropExists()) {
             clearWallpaperLocked(false, FLAG_SET_SYSTEM, UserHandle.USER_SYSTEM, null);
         }
         switchWallpaper(wallpaper, null);
@@ -1645,7 +1646,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         if (wallpaper == null) {
             wallpaper = new WallpaperData(userId, WALLPAPER, WALLPAPER_CROP);
             mWallpaperMap.put(userId, wallpaper);
-            wallpaper.ensureCropExists();
+            if (!wallpaper.cropExists()) {
+                generateCrop(wallpaper);
+            }
         }
         boolean success = false;
         try {
@@ -1809,7 +1812,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 if (DEBUG) Slog.v(TAG, "settingsRestored: success=" + success
                         + " id=" + wallpaper.wallpaperId);
                 if (success) {
-                    bindWallpaperComponentLocked(wallpaper.nextWallpaperComponent, false, false,
+                    generateCrop(wallpaper);    // based on the new image + metadata
+                    bindWallpaperComponentLocked(wallpaper.nextWallpaperComponent, true, false,
                             wallpaper, null);
                 }
             }

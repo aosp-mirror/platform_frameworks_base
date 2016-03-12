@@ -70,6 +70,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String WALLPAPER_IMAGE_KEY = WallpaperBackupHelper.WALLPAPER_IMAGE_KEY;
     private static final String WALLPAPER_INFO_KEY = WallpaperBackupHelper.WALLPAPER_INFO_KEY;
 
+    private WallpaperBackupHelper mWallpaperHelper = null;
+
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
@@ -121,13 +123,16 @@ public class SystemBackupAgent extends BackupAgentHelper {
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
-        // On restore, we also support a previous data schema "system_files"
-        addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this,
+        mWallpaperHelper = new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO },
-                new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} ));
+                new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} );
+        addHelper(WALLPAPER_HELPER, mWallpaperHelper);
+
+        // On restore, we also support a previous data schema "system_files"
         addHelper("system_files", new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
+
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
@@ -201,5 +206,10 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 (new File(WALLPAPER_INFO)).delete();
             }
         }
+    }
+
+    @Override
+    public void onRestoreFinished() {
+        mWallpaperHelper.onRestoreFinished();
     }
 }
