@@ -536,6 +536,9 @@ public class JobInfo implements Parcelable {
          * {@link #setPeriodic(long)} or {@link #setPersisted(boolean)}.  To continually monitor
          * for content changes, you need to schedule a new JobInfo observing the same URIs
          * before you finish execution of the JobService handling the most recent changes.</p>
+         * <p>Because because setting this property is not compatible with periodic or
+         * persisted jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
+         * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
          * @param uri The content: URI to monitor.
          */
         public Builder addTriggerContentUri(@NonNull TriggerContentUri uri) {
