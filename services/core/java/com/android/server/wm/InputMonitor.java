@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -36,6 +37,7 @@ import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputWindowHandle;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
@@ -46,6 +48,9 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     // When true, prevents input dispatch from proceeding until set to false again.
     private boolean mInputDispatchFrozen;
+
+    // The reason the input is currently frozen or null if the input isn't frozen.
+    private String mInputFreezeReason = null;
 
     // When true, input dispatch proceeds normally.  Otherwise all events are dropped.
     // Initially false, so that input does not get dispatched until boot is finished at
@@ -474,12 +479,16 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     public void freezeInputDispatchingLw() {
-        if (! mInputDispatchFrozen) {
+        if (!mInputDispatchFrozen) {
             if (DEBUG_INPUT) {
                 Slog.v(TAG_WM, "Freezing input dispatching");
             }
 
             mInputDispatchFrozen = true;
+
+            if (DEBUG_INPUT || true) {
+                mInputFreezeReason = Debug.getCallers(6);
+            }
             updateInputDispatchModeLw();
         }
     }
@@ -491,6 +500,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
 
             mInputDispatchFrozen = false;
+            mInputFreezeReason = null;
             updateInputDispatchModeLw();
         }
     }
@@ -508,5 +518,11 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     private void updateInputDispatchModeLw() {
         mService.mInputManager.setInputDispatchMode(mInputDispatchEnabled, mInputDispatchFrozen);
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        if (mInputFreezeReason != null) {
+            pw.println(prefix + "mInputFreezeReason=" + mInputFreezeReason);
+        }
     }
 }
