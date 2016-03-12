@@ -120,6 +120,7 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
      * need to be backed up, write them to the data stream, and fill in newState with the
      * state as it exists now.
      */
+    @Override
     public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) {
         performBackup_checked(oldState, data, newState, mFiles, mKeys);
@@ -130,6 +131,7 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
      * magic wallpaper file, take specific action to determine whether it is suitable for
      * the current device.
      */
+    @Override
     public void restoreEntity(BackupDataInputStream data) {
         final String key = data.getKey();
         if (isKeyInList(key, mKeys)) {
@@ -174,18 +176,30 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                     }
 
                     // We passed the acceptable-dimensions test (if any), so we're going to
-                    // use the restored image.
-                    // TODO: spin a service to copy the restored image to sd/usb storage,
-                    // since it does not exist anywhere other than the private wallpaper
-                    // file.
-                    Slog.d(TAG, "Applying restored wallpaper image.");
-                    f.renameTo(new File(WALLPAPER_IMAGE));
+                    // use the restored image.  That comes last, when we are done restoring
+                    // both the pixels and the metadata.
                 }
             } else if (key.equals(WALLPAPER_INFO_KEY)) {
                 // XML file containing wallpaper info
                 File f = new File(WALLPAPER_INFO);
                 writeFile(f, data);
             }
+        }
+    }
+
+    /**
+     * Hook for the agent to call this helper upon completion of the restore.  We do this
+     * upon completion so that we know both the imagery and the wallpaper info have
+     * been emplaced without requiring either or relying on ordering.
+     */
+    public void onRestoreFinished() {
+        final File f = new File(STAGE_FILE);
+        if (f.exists()) {
+            // TODO: spin a service to copy the restored image to sd/usb storage,
+            // since it does not exist anywhere other than the private wallpaper
+            // file.
+            Slog.d(TAG, "Applying restored wallpaper image.");
+            f.renameTo(new File(WALLPAPER_IMAGE));
         }
     }
 }
