@@ -14,10 +14,14 @@ void countInterestingRegions(const int32_t *v_in, int32_t *v_out) {
 
     for (int x = 0; x < HEIGHT; x += REGION_SIZE) {
         bool interestingRegion = false;
-        int regionColor = (int) rsGetElementAt_uchar4(ideal, x, y);
+        uchar4 regionColor = rsGetElementAt_uchar4(ideal, x, y);
         for (int i = 0; i < REGION_SIZE && !interestingRegion; i++) {
             for (int j = 0; j < REGION_SIZE && !interestingRegion; j++) {
-                interestingRegion |= ((int) rsGetElementAt_uchar4(ideal, x + j, y + i)) != regionColor;
+                uchar4 testVal = rsGetElementAt_uchar4(ideal, x + j, y + i);
+                interestingRegion |= (testVal.r != regionColor.r);
+                interestingRegion |= (testVal.g != regionColor.g);
+                interestingRegion |= (testVal.b != regionColor.b);
+                interestingRegion |= (testVal.a != regionColor.a);
             }
         }
         if (interestingRegion) {
