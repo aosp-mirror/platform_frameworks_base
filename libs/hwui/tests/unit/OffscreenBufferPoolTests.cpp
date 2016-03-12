@@ -103,9 +103,11 @@ TEST(OffscreenBufferPool, resize) {
         OffscreenBufferPool pool;
 
         auto layer = pool.get(thread.renderState(), 64u, 64u);
+        layer->dirty(Rect(64, 64));
 
         // resize in place
         ASSERT_EQ(layer, pool.resize(layer, 60u, 55u));
+        EXPECT_TRUE(layer->region.isEmpty()) << "In place resize should clear usage region";
         EXPECT_EQ(60u, layer->viewportWidth);
         EXPECT_EQ(55u, layer->viewportHeight);
         EXPECT_EQ(64u, layer->texture.width());
@@ -113,9 +115,13 @@ TEST(OffscreenBufferPool, resize) {
 
         // resized to use different object in pool
         auto layer2 = pool.get(thread.renderState(), 128u, 128u);
+        layer2->dirty(Rect(128, 128));
+        EXPECT_FALSE(layer2->region.isEmpty());
         pool.putOrDelete(layer2);
         ASSERT_EQ(1u, pool.getCount());
+
         ASSERT_EQ(layer2, pool.resize(layer, 120u, 125u));
+        EXPECT_TRUE(layer2->region.isEmpty()) << "Swap resize should clear usage region";
         EXPECT_EQ(120u, layer2->viewportWidth);
         EXPECT_EQ(125u, layer2->viewportHeight);
         EXPECT_EQ(128u, layer2->texture.width());

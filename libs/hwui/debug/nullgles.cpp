@@ -133,6 +133,15 @@ void glGetIntegerv(GLenum pname, GLint *data) {
     }
 }
 
+GLenum glCheckFramebufferStatus(GLenum target) {
+    switch (target) {
+    case GL_FRAMEBUFFER:
+        return GL_FRAMEBUFFER_COMPLETE;
+    default:
+        return 0; // error case
+    }
+}
+
 const char* getString(GLenum name) {
     switch (name) {
     case GL_VENDOR:
