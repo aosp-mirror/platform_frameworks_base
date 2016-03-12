@@ -625,7 +625,7 @@
     <!-- UI debug setting: force allow apps on external storage [CHAR LIMIT=50] -->
     <string name="force_allow_on_external">Force allow apps on external</string>
     <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
-    <string name="force_allow_on_external_summary">Makes any app elligible to be written to external storage, regardless of manifest values</string>
+    <string name="force_allow_on_external_summary">Makes any app eligible to be written to external storage, regardless of manifest values</string>
 
     <!-- UI debug setting: force all activites to be resizable for multiwindow [CHAR LIMIT=50] -->
     <string name="force_resizable_activities">Force activities to be resizable</string>
