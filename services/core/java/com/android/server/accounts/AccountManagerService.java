@@ -47,6 +47,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -2460,31 +2461,12 @@ public class AccountManagerService
         public void onResult(Bundle result) {
             mNumResults++;
             Intent intent = null;
-
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
-                /*
-                 * The Authenticator API allows third party authenticators to
-                 * supply arbitrary intents to other apps that they can run,
-                 * this can be very bad when those apps are in the system like
-                 * the System Settings.
-                 */
-                int authenticatorUid = Binder.getCallingUid();
-                long bid = Binder.clearCallingIdentity();
-                try {
-                    PackageManager pm = mContext.getPackageManager();
-                    ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
-                    int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
-                    if (PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authenticatorUid,
-                            targetUid)) {
-                        throw new SecurityException("Activity to be started with KEY_INTENT must "
-                                + "share Authenticator's signatures");
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(bid);
-                }
+                checkKeyIntent(
+                        Binder.getCallingUid(),
+                        intent);
             }
-
             IAccountManagerResponse response;
             if (mExpectActivityLaunch && result != null
                     && result.containsKey(AccountManager.KEY_INTENT)) {
@@ -3569,6 +3551,36 @@ public class AccountManagerService
             return response;
         }
 
+        /**
+         * Checks Intents, supplied via KEY_INTENT, to make sure that they don't violate our
+         * security policy.
+         *
+         * In particular we want to make sure that the Authenticator doesn't try to trick users
+         * into launching aribtrary intents on the device via by tricking to click authenticator
+         * supplied entries in the system Settings app.
+         */
+        protected void checkKeyIntent(
+                int authUid,
+                Intent intent) throws SecurityException {
+            long bid = Binder.clearCallingIdentity();
+            try {
+                PackageManager pm = mContext.getPackageManager();
+                ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
+                ActivityInfo targetActivityInfo = resolveInfo.activityInfo;
+                int targetUid = targetActivityInfo.applicationInfo.uid;
+                if (PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authUid, targetUid)) {
+                    String pkgName = targetActivityInfo.packageName;
+                    String activityName = targetActivityInfo.name;
+                    String tmpl = "KEY_INTENT resolved to an Activity (%s) in a package (%s) that "
+                            + "does not share a signature with the supplying authenticator (%s).";
+                    throw new SecurityException(
+                            String.format(tmpl, activityName, pkgName, mAccountType));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(bid);
+            }
+        }
+
         private void close() {
             synchronized (mSessions) {
                 if (mSessions.remove(toString()) == null) {
@@ -3711,27 +3723,9 @@ public class AccountManagerService
             }
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
-                /*
-                 * The Authenticator API allows third party authenticators to
-                 * supply arbitrary intents to other apps that they can run,
-                 * this can be very bad when those apps are in the system like
-                 * the System Settings.
-                 */
-                int authenticatorUid = Binder.getCallingUid();
-                long bid = Binder.clearCallingIdentity();
-                try {
-                    PackageManager pm = mContext.getPackageManager();
-                    ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
-                    int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
-                    if (PackageManager.SIGNATURE_MATCH !=
-                            pm.checkSignatures(authenticatorUid, targetUid)) {
-                        throw new SecurityException(
-                                "Activity to be started with KEY_INTENT must " +
-                               "share Authenticator's signatures");
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(bid);
-                }
+                checkKeyIntent(
+                        Binder.getCallingUid(),
+                        intent);
             }
             if (result != null
                     && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
