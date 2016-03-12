@@ -17,7 +17,9 @@
 package android.media.audiopolicy;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
 
@@ -36,19 +38,28 @@ public class AudioMix {
     private int mRouteFlags;
     private String mRegistrationId;
     private int mMixType = MIX_TYPE_INVALID;
+
+    // written by AudioPolicy
     int mMixState = MIX_STATE_DISABLED;
     int mCallbackFlags;
+
+    // initialized in constructor, read by AudioPolicyConfig
+    final int mDeviceId;
+    final String mDeviceAddress;
 
     /**
      * All parameters are guaranteed valid through the Builder.
      */
-    private AudioMix(AudioMixingRule rule, AudioFormat format, int routeFlags, int callbackFlags) {
+    private AudioMix(AudioMixingRule rule, AudioFormat format, int routeFlags, int callbackFlags,
+            int deviceId, String deviceAddress) {
         mRule = rule;
         mFormat = format;
         mRouteFlags = routeFlags;
         mRegistrationId = null;
         mMixType = rule.getTargetMixType();
         mCallbackFlags = callbackFlags;
+        mDeviceId = deviceId;
+        mDeviceAddress = deviceAddress;
     }
 
     // CALLBACK_FLAG_* values: keep in sync with AudioMix::kCbFlag* values defined
@@ -73,6 +84,8 @@ public class AudioMix {
      */
     @SystemApi
     public static final int ROUTE_FLAG_LOOP_BACK = 0x1 << 1;
+
+    private static final int ROUTE_FLAG_SUPPORTED = ROUTE_FLAG_RENDER | ROUTE_FLAG_LOOP_BACK;
 
     // MIX_TYPE_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
     /**
@@ -172,6 +185,8 @@ public class AudioMix {
         private AudioFormat mFormat = null;
         private int mRouteFlags = 0;
         private int mCallbackFlags = 0;
+        private int mDeviceId = -1;
+        private String mDeviceAddress = null;
 
         /**
          * @hide
@@ -200,7 +215,7 @@ public class AudioMix {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public Builder setMixingRule(AudioMixingRule rule)
+        Builder setMixingRule(AudioMixingRule rule)
                 throws IllegalArgumentException {
             if (rule == null) {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule argument");
@@ -216,12 +231,25 @@ public class AudioMix {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public Builder setCallbackFlags(int flags) throws IllegalArgumentException {
+        Builder setCallbackFlags(int flags) throws IllegalArgumentException {
             if ((flags != 0) && ((flags & CALLBACK_FLAGS_ALL) == 0)) {
                 throw new IllegalArgumentException("Illegal callback flags 0x"
                         + Integer.toHexString(flags).toUpperCase());
             }
             mCallbackFlags = flags;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Only used by AudioPolicyConfig, not a public API.
+         * @param deviceId
+         * @param address
+         * @return the same Builder instance.
+         */
+        Builder setDevice(int deviceId, String address) {
+            mDeviceId = deviceId;
+            mDeviceAddress = address;
             return this;
         }
 
@@ -242,7 +270,8 @@ public class AudioMix {
         }
 
         /**
-         * Sets the routing behavior for the mix.
+         * Sets the routing behavior for the mix. If not set, routing behavior will default to
+         * {@link AudioMix#ROUTE_FLAG_LOOP_BACK}.
          * @param routeFlags one of {@link AudioMix#ROUTE_FLAG_LOOP_BACK},
          *     {@link AudioMix#ROUTE_FLAG_RENDER}
          * @return the same Builder instance.
@@ -254,11 +283,37 @@ public class AudioMix {
             if (routeFlags == 0) {
                 throw new IllegalArgumentException("Illegal empty route flags");
             }
-            if ((routeFlags & (ROUTE_FLAG_LOOP_BACK | ROUTE_FLAG_RENDER)) == 0) {
+            if ((routeFlags & ROUTE_FLAG_SUPPORTED) == 0) {
                 throw new IllegalArgumentException("Invalid route flags 0x"
-                        + Integer.toHexString(routeFlags) + "when creating an AudioMix");
+                        + Integer.toHexString(routeFlags) + "when configuring an AudioMix");
+            }
+            if ((routeFlags & ~ROUTE_FLAG_SUPPORTED) != 0) {
+                throw new IllegalArgumentException("Unknown route flags 0x"
+                        + Integer.toHexString(routeFlags) + "when configuring an AudioMix");
             }
             mRouteFlags = routeFlags;
+            return this;
+        }
+
+        /**
+         * Sets the audio device used for playback. Cannot be used in the context of an audio
+         * policy used to inject audio to be recorded, or in a mix whose route flags doesn't
+         * specify {@link AudioMix#ROUTE_FLAG_RENDER}.
+         * @param device a non-null AudioDeviceInfo describing the audio device to play the output
+         *     of this mix.
+         * @return the same Builder instance
+         * @throws IllegalArgumentException
+         */
+        @SystemApi
+        public Builder setDevice(@NonNull AudioDeviceInfo device) throws IllegalArgumentException {
+            if (device == null) {
+                throw new IllegalArgumentException("Illegal null AudioDeviceInfo argument");
+            }
+            if (!device.isSink()) {
+                throw new IllegalArgumentException("Unsupported device type on mix, not a sink");
+            }
+            mDeviceId = device.getId();
+            mDeviceAddress = device.getAddress();
             return this;
         }
 
@@ -273,8 +328,13 @@ public class AudioMix {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule");
             }
             if (mRouteFlags == 0) {
-                // no route flags set, use default
-                mRouteFlags = ROUTE_FLAG_RENDER;
+                // no route flags set, use default as described in Builder.setRouteFlags(int)
+                mRouteFlags = ROUTE_FLAG_LOOP_BACK;
+            }
+            // can't do loop back AND render at same time in this implementation
+            if (mRouteFlags == (ROUTE_FLAG_RENDER | ROUTE_FLAG_LOOP_BACK)) {
+                throw new IllegalArgumentException("Unsupported route behavior combination 0x" +
+                        Integer.toHexString(mRouteFlags));
             }
             if (mFormat == null) {
                 // FIXME Can we eliminate this?  Will AudioMix work with an unspecified sample rate?
@@ -284,7 +344,22 @@ public class AudioMix {
                 }
                 mFormat = new AudioFormat.Builder().setSampleRate(rate).build();
             }
-            return new AudioMix(mRule, mFormat, mRouteFlags, mCallbackFlags);
+            if (mDeviceId != -1) {
+                if ((mRouteFlags & ROUTE_FLAG_RENDER) == 0) {
+                    throw new IllegalArgumentException(
+                            "Can't have audio device without flag ROUTE_FLAG_RENDER");
+                }
+                if (mRule.getTargetMixType() != AudioMix.MIX_TYPE_PLAYERS) {
+                    throw new IllegalArgumentException("Unsupported device on non-playback mix");
+                }
+            } else {
+                if ((mRouteFlags & ROUTE_FLAG_RENDER) == ROUTE_FLAG_RENDER) {
+                    throw new IllegalArgumentException(
+                            "Can't have flag ROUTE_FLAG_RENDER without an audio device");
+                }
+            }
+            return new AudioMix(mRule, mFormat, mRouteFlags, mCallbackFlags, mDeviceId,
+                    mDeviceAddress);
         }
     }
 }

@@ -17,6 +17,8 @@
 package android.media.audiopolicy;
 
 import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioPatch;
 import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -81,6 +83,9 @@ public class AudioPolicyConfig implements Parcelable {
             dest.writeInt(mix.getRouteFlags());
             // write callback flags
             dest.writeInt(mix.mCallbackFlags);
+            // write device information
+            dest.writeInt(mix.mDeviceId);
+            dest.writeString(mix.mDeviceAddress);
             // write mix format
             dest.writeInt(mix.getFormat().getSampleRate());
             dest.writeInt(mix.getFormat().getEncoding());
@@ -104,6 +109,8 @@ public class AudioPolicyConfig implements Parcelable {
             mixBuilder.setRouteFlags(routeFlags);
             // read callback flags
             mixBuilder.setCallbackFlags(in.readInt());
+            // read device information
+            mixBuilder.setDevice(in.readInt(), in.readString());
             // read mix format
             int sampleRate = in.readInt();
             int encoding = in.readInt();
@@ -197,8 +204,14 @@ public class AudioPolicyConfig implements Parcelable {
         int mixIndex = 0;
         for (AudioMix mix : mMixes) {
             if (!mRegistrationId.isEmpty()) {
-                mix.setRegistration(mRegistrationId + "mix" + mixTypeId(mix.getMixType()) + ":"
-                        + mixIndex++);
+                if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_LOOP_BACK) ==
+                        AudioMix.ROUTE_FLAG_LOOP_BACK) {
+                    mix.setRegistration(mRegistrationId + "mix" + mixTypeId(mix.getMixType()) + ":"
+                            + mixIndex++);
+                } else if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_RENDER) ==
+                        AudioMix.ROUTE_FLAG_RENDER) {
+                    mix.setRegistration(mix.mDeviceAddress);
+                }
             } else {
                 mix.setRegistration("");
             }
