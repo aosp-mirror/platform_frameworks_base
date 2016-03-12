@@ -63,4 +63,6 @@ public abstract class ShortcutServiceInternal {
 
     public abstract ParcelFileDescriptor getShortcutIconFd(@NonNull String callingPackage,
             @NonNull ShortcutInfo shortcut, int userId);
+
+    public abstract boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId);
 }

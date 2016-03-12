@@ -58,4 +58,6 @@ interface ILauncherApps {
     int getShortcutIconResId(String callingPackage, in ShortcutInfo shortcut, in UserHandle user);
     ParcelFileDescriptor getShortcutIconFd(String callingPackage, in ShortcutInfo shortcut,
             in UserHandle user);
+
+    boolean hasShortcutHostPermission(String callingPackage);
 }

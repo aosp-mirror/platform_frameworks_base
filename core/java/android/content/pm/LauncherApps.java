@@ -16,11 +16,9 @@
 
 package android.content.pm;
 
-import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +28,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -158,6 +155,9 @@ public class LauncherApps {
         /**
          * Indicates that one or more shortcuts (which may be dynamic and/or pinned)
          * have been added, updated or removed.
+         *
+         * <p>Only the applications that are allowed to access the shortcut information,
+         * as defined in {@link #hasShortcutHostPermission()}, will receive it.
          *
          * @param packageName The name of the package that has the shortcuts.
          * @param shortcuts all shortcuts from the package (dynamic and/or pinned).
@@ -395,16 +395,34 @@ public class LauncherApps {
     }
 
     /**
+     * Returns whether the caller can access the shortcut information.
+     *
+     * <p>Only the default launcher can access the shortcut information.
+     *
+     * <p>Note when this method returns {@code false}, that may be a temporary situation because
+     * the user is trying a new launcher application.  The user may decide to change the default
+     * launcher to the calling application again, so even if a launcher application loses
+     * this permission, it does <b>not</b> have to purge pinned shortcut information.
+     */
+    public boolean hasShortcutHostPermission() {
+        try {
+            return mService.hasShortcutHostPermission(mContext.getPackageName());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the IDs of {@link ShortcutInfo}s that match {@code query}.
      *
-     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
      *
      * @param query result includes shortcuts matching this query.
      * @param user The UserHandle of the profile.
      *
      * @return the IDs of {@link ShortcutInfo}s that match the query.
      */
-    @RequiresPermission(permission.BIND_APPWIDGET)
     @Nullable
     public List<ShortcutInfo> getShortcuts(@NonNull ShortcutQuery query,
             @NonNull UserHandle user) {
@@ -420,7 +438,8 @@ public class LauncherApps {
     /**
      * Returns {@link ShortcutInfo}s with the given IDs from a package.
      *
-     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
      *
      * @param packageName The target package.
      * @param ids IDs of the shortcuts to retrieve.
@@ -428,7 +447,6 @@ public class LauncherApps {
      *
      * @return list of {@link ShortcutInfo} associated with the package.
      */
-    @RequiresPermission(permission.BIND_APPWIDGET)
     @Nullable
     public List<ShortcutInfo> getShortcutInfo(@NonNull String packageName,
             @NonNull List<String> ids, @NonNull UserHandle user) {
@@ -447,13 +465,13 @@ public class LauncherApps {
      * <p>This API is <b>NOT</b> cumulative; this will replace all pinned shortcuts for the package.
      * However, different launchers may have different set of pinned shortcuts.
      *
-     * <p>Callers must have the {@link permission#BIND_APPWIDGET} permission.
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
      *
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
      * @param user The UserHandle of the profile.
      */
-    @RequiresPermission(permission.BIND_APPWIDGET)
     public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
             @NonNull UserHandle user) {
         try {
@@ -467,12 +485,12 @@ public class LauncherApps {
      * Return the icon resource ID, if {@code shortcut} has one
      * (i.e. when {@link ShortcutInfo#hasIconResource()} returns {@code true}).
      *
-     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
      * @param user The UserHandle of the profile.
      */
-    @RequiresPermission(permission.BIND_APPWIDGET)
     public int getShortcutIconResId(@NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
         try {
             return mService.getShortcutIconResId(mContext.getPackageName(), shortcut, user);
@@ -485,12 +503,12 @@ public class LauncherApps {
      * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
      * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
      *
-     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
      * @param user The UserHandle of the profile.
      */
-    @RequiresPermission(permission.BIND_APPWIDGET)
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull ShortcutInfo shortcut, @NonNull UserHandle user) {
         try {
@@ -503,7 +521,8 @@ public class LauncherApps {
     /**
      * Launches a shortcut.
      *
-     * <p>Callers mut have the {@link permission#BIND_APPWIDGET} permission.
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
      *
      * @param packageName The target shortcut package name.
      * @param shortcutId The target shortcut ID.
@@ -513,7 +532,6 @@ public class LauncherApps {
      * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
      *   has been uninstalled). {@code true} when the shortcut is still valid.
      */
-    @RequiresPermission(permission.BIND_APPWIDGET)
     public boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             @NonNull UserHandle user) {

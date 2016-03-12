@@ -28,7 +28,9 @@ import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
@@ -71,6 +73,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import libcore.io.IoUtils;
+import libcore.util.Objects;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -88,7 +91,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -112,7 +114,7 @@ import java.util.function.Predicate;
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
 
-    static final boolean DEBUG = false; // STOPSHIP if true
+    static final boolean DEBUG = true; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
 
     @VisibleForTesting
@@ -156,6 +158,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final String TAG_INTENT_EXTRAS = "intent-extras";
     static final String TAG_EXTRAS = "extras";
     static final String TAG_SHORTCUT = "shortcut";
+    static final String TAG_LAUNCHER = "launcher";
 
     static final String ATTR_VALUE = "value";
     static final String ATTR_NAME = "name";
@@ -251,10 +254,13 @@ public class ShortcutService extends IShortcutService.Stub {
     private CompressFormat mIconPersistFormat;
     private int mIconPersistQuality;
 
+    private final PackageManagerInternal mPackageManagerInternal;
+
     public ShortcutService(Context context) {
         mContext = Preconditions.checkNotNull(context);
         LocalServices.addService(ShortcutServiceInternal.class, new LocalService());
         mHandler = new Handler(BackgroundThread.get().getLooper());
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     /**
@@ -460,6 +466,11 @@ public class ShortcutService extends IShortcutService.Stub {
         writeTagValue(out, tag, Long.toString(value));
     }
 
+    static void writeTagValue(XmlSerializer out, String tag, ComponentName name) throws IOException {
+        if (name == null) return;
+        writeTagValue(out, tag, name.flattenToString());
+    }
+
     static void writeTagExtra(XmlSerializer out, String tag, PersistableBundle bundle)
             throws IOException, XmlPullParserException {
         if (bundle == null) return;
@@ -658,7 +669,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     // TODO Actually make it async.
-    private void scheduleSaveUser(@UserIdInt int userId) {
+    void scheduleSaveUser(@UserIdInt int userId) {
         synchronized (mLock) {
             saveUserLocked(userId);
         }
@@ -1289,6 +1300,87 @@ public class ShortcutService extends IShortcutService.Stub {
         Slog.i(TAG, "ShortcutManager: throttling counter reset");
     }
 
+    // We override this method in unit tests to do a simpler check.
+    boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
+        return hasShortcutHostPermissionInner(callingPackage, userId);
+    }
+
+    // This method is extracted so we can directly call this method from unit tests,
+    // even when hasShortcutPermission() is overridden.
+    @VisibleForTesting
+    boolean hasShortcutHostPermissionInner(@NonNull String callingPackage, int userId) {
+        synchronized (mLock) {
+            long start = 0;
+            if (DEBUG) {
+                start = System.currentTimeMillis();
+            }
+
+            final UserShortcuts user = getUserShortcutsLocked(userId);
+
+            final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
+
+            // Default launcher from package manager.
+            final ComponentName defaultLauncher = injectPackageManagerInternal()
+                    .getHomeActivitiesAsUser(allHomeCandidates, userId);
+
+            ComponentName detected;
+            if (defaultLauncher != null) {
+                detected = defaultLauncher;
+                if (DEBUG) {
+                    Slog.v(TAG, "Default launcher from PM: " + detected);
+                }
+            } else {
+                detected = user.getLauncherComponent();
+
+                // TODO: Make sure it's still enabled.
+                if (DEBUG) {
+                    Slog.v(TAG, "Cached launcher: " + detected);
+                }
+            }
+
+            if (detected == null) {
+                // If we reach here, that means it's the first check since the user was created,
+                // and there's already multiple launchers and there's no default set.
+                // Find the system one with the highest priority.
+                // (We need to check the priority too because of FallbackHome in Settings.)
+                // If there's no system launcher yet, then no one can access shortcuts, until
+                // the user explicitly
+                final int size = allHomeCandidates.size();
+
+                int lastPriority = Integer.MIN_VALUE;
+                for (int i = 0; i < size; i++) {
+                    final ResolveInfo ri = allHomeCandidates.get(i);
+                    if (!ri.activityInfo.applicationInfo.isSystemApp()) {
+                        continue;
+                    }
+                    if (DEBUG) {
+                        Slog.d(TAG, String.format("hasShortcutPermissionInner: pkg=%s prio=%d",
+                                ri.activityInfo.getComponentName(), ri.priority));
+                    }
+                    if (ri.priority < lastPriority) {
+                        continue;
+                    }
+                    detected = ri.activityInfo.getComponentName();
+                    lastPriority = ri.priority;
+                }
+            }
+            if (DEBUG) {
+                long end = System.currentTimeMillis();
+                Slog.v(TAG, String.format("hasShortcutPermission took %d ms", end - start));
+            }
+            if (detected != null) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Detected launcher: " + detected);
+                }
+                user.setLauncherComponent(this, detected);
+                return detected.getPackageName().equals(callingPackage);
+            } else {
+                // Default launcher not found.
+                return false;
+            }
+        }
+    }
+
     /**
      * Entry point from {@link LauncherApps}.
      */
@@ -1434,6 +1526,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
             }
         }
+
+        @Override
+        public boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
+            return ShortcutService.this.hasShortcutHostPermission(callingPackage, userId);
+        }
     }
 
     // === Dump ===
@@ -1512,37 +1609,74 @@ public class ShortcutService extends IShortcutService.Stub {
         (new MyShellCommand()).exec(this, in, out, err, args, resultReceiver);
     }
 
+    static class CommandException extends Exception {
+        public CommandException(String message) {
+            super(message);
+        }
+    }
+
     /**
      * Handle "adb shell cmd".
      */
     private class MyShellCommand extends ShellCommand {
+
+        private int mUserId = UserHandle.USER_SYSTEM;
+
+        private void parseOptions(boolean takeUser)
+                throws CommandException {
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                switch (opt) {
+                    case "--user":
+                        if (takeUser) {
+                            mUserId = UserHandle.parseUserArg(getNextArgRequired());
+                            break;
+                        }
+                        // fallthrough
+                    default:
+                        throw new CommandException("Unknown option: " + opt);
+                }
+            }
+        }
+
         @Override
         public int onCommand(String cmd) {
             if (cmd == null) {
                 return handleDefaultCommands(cmd);
             }
             final PrintWriter pw = getOutPrintWriter();
-            int ret = 1;
-            switch (cmd) {
-                case "reset-package-throttling":
-                    ret = handleResetPackageThrottling();
-                    break;
-                case "reset-throttling":
-                    ret = handleResetThrottling();
-                    break;
-                case "override-config":
-                    ret = handleOverrideConfig();
-                    break;
-                case "reset-config":
-                    ret = handleResetConfig();
-                    break;
-                default:
-                    return handleDefaultCommands(cmd);
+            try {
+                switch (cmd) {
+                    case "reset-package-throttling":
+                        handleResetPackageThrottling();
+                        break;
+                    case "reset-throttling":
+                        handleResetThrottling();
+                        break;
+                    case "override-config":
+                        handleOverrideConfig();
+                        break;
+                    case "reset-config":
+                        handleResetConfig();
+                        break;
+                    case "clear-default-launcher":
+                        handleClearDefaultLauncher();
+                        break;
+                    case "get-default-launcher":
+                        handleGetDefaultLauncher();
+                        break;
+                    case "refresh-default-launcher":
+                        handleRefreshDefaultLauncher();
+                        break;
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+            } catch (CommandException e) {
+                pw.println("Error: " + e.getMessage());
+                return 1;
             }
-            if (ret == 0) {
-                pw.println("Success");
-            }
-            return ret;
+            pw.println("Success");
+            return 0;
         }
 
         @Override
@@ -1562,6 +1696,15 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println("cmd shortcut reset-config");
             pw.println("    Reset the configuration set with \"update-config\"");
             pw.println();
+            pw.println("cmd shortcut clear-default-launcher [--user USER_ID]");
+            pw.println("    Clear the cached default launcher");
+            pw.println();
+            pw.println("cmd shortcut get-default-launcher [--user USER_ID]");
+            pw.println("    Show the cached default launcher");
+            pw.println();
+            pw.println("cmd shortcut refresh-default-launcher [--user USER_ID]");
+            pw.println("    Refresh the cached default launcher");
+            pw.println();
         }
 
         private int handleResetThrottling() {
@@ -1569,49 +1712,67 @@ public class ShortcutService extends IShortcutService.Stub {
             return 0;
         }
 
-        private int handleResetPackageThrottling() {
-            final PrintWriter pw = getOutPrintWriter();
+        private void handleResetPackageThrottling() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
 
-            int userId = UserHandle.USER_SYSTEM;
-            String opt;
-            while ((opt = getNextOption()) != null) {
-                switch (opt) {
-                    case "--user":
-                        userId = UserHandle.parseUserArg(getNextArgRequired());
-                        break;
-                    default:
-                        pw.println("Error: Unknown option: " + opt);
-                        return 1;
-                }
-            }
             final String packageName = getNextArgRequired();
 
             synchronized (mLock) {
-                getPackageShortcutsLocked(packageName, userId).resetRateLimitingForCommandLine();
-                saveUserLocked(userId);
+                getPackageShortcutsLocked(packageName, mUserId).resetRateLimitingForCommandLine();
+                saveUserLocked(mUserId);
             }
-
-            return 0;
         }
 
-        private int handleOverrideConfig() {
-            final PrintWriter pw = getOutPrintWriter();
+        private void handleOverrideConfig() throws CommandException {
             final String config = getNextArgRequired();
 
             synchronized (mLock) {
                 if (!updateConfigurationLocked(config)) {
-                    pw.println("override-config failed.  See logcat for details.");
-                    return 1;
+                    throw new CommandException("override-config failed.  See logcat for details.");
                 }
             }
-            return 0;
         }
 
-        private int handleResetConfig() {
+        private void handleResetConfig() {
             synchronized (mLock) {
                 loadConfigurationLocked();
             }
-            return 0;
+        }
+
+        private void clearLauncher() {
+            synchronized (mLock) {
+                getUserShortcutsLocked(mUserId).setLauncherComponent(
+                        ShortcutService.this, null);
+            }
+        }
+
+        private void showLauncher() {
+            synchronized (mLock) {
+                // This ensures to set the cached launcher.  Package name doesn't matter.
+                hasShortcutHostPermissionInner("-", mUserId);
+
+                getOutPrintWriter().println("Launcher: "
+                        + getUserShortcutsLocked(mUserId).getLauncherComponent());
+            }
+        }
+
+        private void handleClearDefaultLauncher() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
+
+            clearLauncher();
+        }
+
+        private void handleGetDefaultLauncher() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
+
+            showLauncher();
+        }
+
+        private void handleRefreshDefaultLauncher() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
+
+            clearLauncher();
+            showLauncher();
         }
     }
 
@@ -1638,6 +1799,10 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean injectIsLowRamDevice() {
         return ActivityManager.isLowRamDeviceStatic();
+    }
+
+    PackageManagerInternal injectPackageManagerInternal() {
+        return mPackageManagerInternal;
     }
 
     File getUserBitmapFilePath(@UserIdInt int userId) {
@@ -1687,6 +1852,9 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 }
 
+/**
+ * Per-user information.
+ */
 class UserShortcuts {
     private static final String TAG = ShortcutService.TAG;
 
@@ -1694,6 +1862,8 @@ class UserShortcuts {
     final int mUserId;
 
     private final ArrayMap<String, PackageShortcuts> mPackages = new ArrayMap<>();
+
+    private ComponentName mLauncherComponent;
 
     public UserShortcuts(int userId) {
         mUserId = userId;
@@ -1706,11 +1876,11 @@ class UserShortcuts {
     public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         out.startTag(null, ShortcutService.TAG_USER);
 
-        for (int i = 0; i < mPackages.size(); i++) {
-            final String packageName = mPackages.keyAt(i);
-            final PackageShortcuts packageShortcuts = mPackages.valueAt(i);
+        ShortcutService.writeTagValue(out, ShortcutService.TAG_LAUNCHER,
+                mLauncherComponent);
 
-            packageShortcuts.saveToXml(out);
+        for (int i = 0; i < mPackages.size(); i++) {
+            mPackages.valueAt(i).saveToXml(out);
         }
 
         out.endTag(null, ShortcutService.TAG_USER);
@@ -1730,6 +1900,10 @@ class UserShortcuts {
             final int depth = parser.getDepth();
             final String tag = parser.getName();
             switch (tag) {
+                case ShortcutService.TAG_LAUNCHER:
+                    ret.mLauncherComponent = ShortcutService.parseComponentNameAttribute(
+                            parser, ShortcutService.ATTR_VALUE);
+                    continue;
                 case ShortcutService.TAG_PACKAGE:
                     final PackageShortcuts shortcuts = PackageShortcuts.loadFromXml(parser, userId);
 
@@ -1742,10 +1916,28 @@ class UserShortcuts {
         return ret;
     }
 
+    public ComponentName getLauncherComponent() {
+        return mLauncherComponent;
+    }
+
+    public void setLauncherComponent(ShortcutService s, ComponentName launcherComponent) {
+        if (Objects.equal(mLauncherComponent, launcherComponent)) {
+            return;
+        }
+        mLauncherComponent = launcherComponent;
+        s.scheduleSaveUser(mUserId);
+    }
+
     public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
-        pw.print("  ");
+        pw.print(prefix);
         pw.print("User: ");
         pw.print(mUserId);
+        pw.println();
+
+        pw.print(prefix);
+        pw.print("  ");
+        pw.print("Default launcher: ");
+        pw.print(mLauncherComponent);
         pw.println();
 
         for (int i = 0; i < mPackages.size(); i++) {
