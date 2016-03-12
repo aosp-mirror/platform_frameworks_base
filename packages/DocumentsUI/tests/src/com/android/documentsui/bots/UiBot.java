@@ -173,6 +173,13 @@ public class UiBot extends BaseBot {
         return findObject("android:id/content", "android:id/text1");
     }
 
+    public UiObject findDownloadRetryDialog() {
+        UiSelector selector = new UiSelector().text("Couldn't download");
+        UiObject title = mDevice.findObject(selector);
+        title.waitForExists(mTimeout);
+        return title;
+    }
+
     public UiObject findDialogOkButton() {
         UiObject object = findObject("android:id/content", "android:id/button1");
         object.waitForExists(mTimeout);

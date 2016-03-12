@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.documentsui.tests">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application>
         <uses-library android:name="android.test.runner" />
         <provider
