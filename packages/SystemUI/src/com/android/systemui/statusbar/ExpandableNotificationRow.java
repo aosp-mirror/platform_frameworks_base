@@ -241,18 +241,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void updateLimits() {
-        boolean customView = getPrivateLayout().getContractedChild().getId()
+        updateLimitsForView(mPrivateLayout);
+        updateLimitsForView(mPublicLayout);
+    }
+
+    private void updateLimitsForView(NotificationContentView layout) {
+        boolean customView = layout.getContractedChild().getId()
                 != com.android.internal.R.id.status_bar_latest_event_content;
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
         int minHeight = customView && beforeN && !mIsSummaryWithChildren ?
                 mNotificationMinHeightLegacy : mNotificationMinHeight;
-        boolean headsUpCustom = getPrivateLayout().getHeadsUpChild() != null &&
-                getPrivateLayout().getHeadsUpChild().getId()
-                != com.android.internal.R.id.status_bar_latest_event_content;
+        boolean headsUpCustom = layout.getHeadsUpChild() != null &&
+                layout.getHeadsUpChild().getId()
+                        != com.android.internal.R.id.status_bar_latest_event_content;
         int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
                 : mMaxHeadsUpHeight;
-        mPrivateLayout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
-        mPublicLayout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
+        layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
     }
 
     public StatusBarNotification getStatusBarNotification() {
