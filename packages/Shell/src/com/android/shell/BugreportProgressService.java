@@ -620,7 +620,11 @@ public class BugreportProgressService extends Service {
      * upon receiving a {@link #INTENT_BUGREPORT_STARTED}.
      */
     private void takeScreenshot(int id, boolean delayed) {
-        MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT);
+        if (delayed) {
+            // Only logs screenshots requested from the notification action.
+            MetricsLogger.action(this,
+                    MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT);
+        }
         if (getInfo(id) == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
