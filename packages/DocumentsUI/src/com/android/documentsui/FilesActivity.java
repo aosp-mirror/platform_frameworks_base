@@ -283,10 +283,16 @@ public class FilesActivity extends BaseActivity {
      */
     private void openDocument(DocumentInfo doc, Model model) {
 
-        // Provide specialized handling of downloaded APKs This sends the APK
-        // details off to get extra security information added, and finally
-        // to be handled by the package manager.
-        if (MimePredicate.isApkType(doc.mimeType)) {
+        // Anything on downloads goes through the back through downloads manager
+        // (that's the MANAGE_DOCUMENT bit).
+        // This is done for two reasons:
+        // 1) The file in question might be a failed/queued or otherwise have some
+        //    specialized download handling.
+        // 2) For APKs, the download manager will add on some important security stuff
+        //    like origin URL.
+        // All other files not on downloads, event APKs, would get no benefit from this
+        // treatment, thusly the "isDownloads" check.
+        if (getCurrentRoot().isDownloads()) {
             // First try managing the document; we expect manager to filter
             // based on authority, so we don't grant.
             final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
