@@ -78,6 +78,7 @@ public class ExpandHelper implements Gefingerpoken {
     private float mOldHeight;
     private float mNaturalHeight;
     private float mInitialTouchFocusY;
+    private float mInitialTouchX;
     private float mInitialTouchY;
     private float mInitialTouchSpan;
     private float mLastFocusY;
@@ -291,7 +292,8 @@ public class ExpandHelper implements Gefingerpoken {
                 }
                 if (mWatchingForPull) {
                     final float yDiff = ev.getRawY() - mInitialTouchY;
-                    if (yDiff > mTouchSlop) {
+                    final float xDiff = ev.getRawX() - mInitialTouchX;
+                    if (yDiff > mTouchSlop && yDiff > Math.abs(xDiff)) {
                         if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
                         mWatchingForPull = false;
                         if (mResizedView != null && !isFullyExpanded(mResizedView)) {
@@ -316,6 +318,7 @@ public class ExpandHelper implements Gefingerpoken {
                     mWatchingForPull = false;
                 }
                 mInitialTouchY = ev.getY();
+                mInitialTouchX = ev.getX();
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -409,12 +412,14 @@ public class ExpandHelper implements Gefingerpoken {
                 mWatchingForPull = mScrollAdapter != null &&
                         isInside(mScrollAdapter.getHostView(), x, y);
                 mResizedView = findView(x, y);
+                mInitialTouchX = ev.getX();
                 mInitialTouchY = ev.getY();
                 break;
             case MotionEvent.ACTION_MOVE: {
                 if (mWatchingForPull) {
                     final float yDiff = ev.getRawY() - mInitialTouchY;
-                    if (yDiff > mTouchSlop) {
+                    final float xDiff = ev.getRawX() - mInitialTouchX;
+                    if (yDiff > mTouchSlop && yDiff > Math.abs(xDiff)) {
                         if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
                         mWatchingForPull = false;
                         if (mResizedView != null && !isFullyExpanded(mResizedView)) {
