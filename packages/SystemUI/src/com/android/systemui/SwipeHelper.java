@@ -517,35 +517,16 @@ public class SwipeHelper implements Gefingerpoken {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (mCurrView != null) {
-                    float maxVelocity = MAX_DISMISS_VELOCITY * mDensityScale;
-                    mVelocityTracker.computeCurrentVelocity(1000 /* px/sec */, maxVelocity);
-                    float escapeVelocity = SWIPE_ESCAPE_VELOCITY * mDensityScale;
-                    float velocity = getVelocity(mVelocityTracker);
-                    float perpendicularVelocity = getPerpendicularVelocity(mVelocityTracker);
+                if (mCurrView == null) {
+                    break;
+                }
+                mVelocityTracker.computeCurrentVelocity(1000 /* px/sec */, getMaxVelocity());
+                float velocity = getVelocity(mVelocityTracker);
 
-                    float translation = getTranslation(mCurrView);
-                    // Decide whether to dismiss the current view
-                    boolean childSwipedFarEnough = DISMISS_IF_SWIPED_FAR_ENOUGH &&
-                            Math.abs(translation) > 0.4 * getSize(mCurrView);
-                    boolean childSwipedFastEnough = (Math.abs(velocity) > escapeVelocity) &&
-                            (Math.abs(velocity) > Math.abs(perpendicularVelocity)) &&
-                            (velocity > 0) == (translation > 0);
-                    boolean falsingDetected = mCallback.isAntiFalsingNeeded();
-
-                    if (mFalsingManager.isClassiferEnabled()) {
-                        falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
-                    } else {
-                        falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;
-                    }
-
-                    boolean dismissChild = mCallback.canChildBeDismissed(mCurrView)
-                            && !falsingDetected && (childSwipedFastEnough || childSwipedFarEnough)
-                            && ev.getActionMasked() == MotionEvent.ACTION_UP;
-
-                    if (dismissChild) {
+                if (!handleUpEvent(ev, mCurrView, velocity, getTranslation(mCurrView))) {
+                    if (isDismissGesture(ev)) {
                         // flingadingy
-                        dismissChild(mCurrView, childSwipedFastEnough ? velocity : 0f);
+                        dismissChild(mCurrView, swipedFastEnough() ? velocity : 0f);
                     } else {
                         // snappity
                         mCallback.onDragCancelled(mCurrView);
@@ -560,6 +541,46 @@ public class SwipeHelper implements Gefingerpoken {
     private int getFalsingThreshold() {
         float factor = mCallback.getFalsingThresholdFactor();
         return (int) (mFalsingThreshold * factor);
+    }
+
+    private float getMaxVelocity() {
+        return MAX_DISMISS_VELOCITY * mDensityScale;
+    }
+
+    protected float getEscapeVelocity() {
+        return SWIPE_ESCAPE_VELOCITY * mDensityScale;
+    }
+
+    protected boolean swipedFarEnough() {
+        float translation = getTranslation(mCurrView);
+        return DISMISS_IF_SWIPED_FAR_ENOUGH && Math.abs(translation) > 0.4 * getSize(mCurrView);
+    }
+
+    protected boolean isDismissGesture(MotionEvent ev) {
+        boolean falsingDetected = mCallback.isAntiFalsingNeeded();
+        if (mFalsingManager.isClassiferEnabled()) {
+            falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();
+        } else {
+            falsingDetected = falsingDetected && !mTouchAboveFalsingThreshold;
+        }
+        return !falsingDetected && (swipedFastEnough() || swipedFarEnough())
+                && ev.getActionMasked() == MotionEvent.ACTION_UP
+                && mCallback.canChildBeDismissed(mCurrView);
+    }
+
+    protected boolean swipedFastEnough() {
+        float velocity = getVelocity(mVelocityTracker);
+        float perpendicularVelocity = getPerpendicularVelocity(mVelocityTracker);
+        float translation = getTranslation(mCurrView);
+        boolean ret = (Math.abs(velocity) > getEscapeVelocity()) &&
+                (Math.abs(velocity) > Math.abs(perpendicularVelocity)) &&
+                (velocity > 0) == (translation > 0);
+        return ret;
+    }
+
+    protected boolean handleUpEvent(MotionEvent ev, View animView, float velocity,
+            float translation) {
+        return false;
     }
 
     public interface Callback {
