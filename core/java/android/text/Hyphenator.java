@@ -185,7 +185,6 @@ public class Hyphenator {
             "de-1901", "de-1996", "de-CH-1901",
             "en-US",
             "es",
-            "eu",
             "hu",
             "hy",
             "nb",
