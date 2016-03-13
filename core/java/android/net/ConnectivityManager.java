@@ -2093,6 +2093,8 @@ public class ConnectivityManager {
     @SystemApi
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback, Handler handler) {
+        checkNotNull(callback, "OnStartTetheringCallback cannot be null.");
+
         ResultReceiver wrappedCallback = new ResultReceiver(handler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -2103,6 +2105,7 @@ public class ConnectivityManager {
                 }
             }
         };
+
         try {
             mService.startTethering(type, wrappedCallback, showProvisioningUi);
         } catch (RemoteException e) {
