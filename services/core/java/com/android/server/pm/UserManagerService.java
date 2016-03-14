@@ -262,6 +262,17 @@ public class UserManagerService extends IUserManager.Stub {
                 Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
             }
         }
+        UserInfo currentGuestUser = null;
+        synchronized (mPackagesLock) {
+            currentGuestUser = findCurrentGuestUserLocked();
+        }
+        if (currentGuestUser != null && !hasUserRestriction(
+                UserManager.DISALLOW_CONFIG_WIFI, currentGuestUser.id)) {
+            // If a guest user currently exists, apply the DISALLOW_CONFIG_WIFI option
+            // to it, in case this guest was created in a previous version where this
+            // user restriction was not a default guest restriction.
+            setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
+        }
     }
 
     @Override
@@ -509,6 +520,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (mGuestRestrictions.isEmpty()) {
             mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
             mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+            mGuestRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
         }
     }
 
