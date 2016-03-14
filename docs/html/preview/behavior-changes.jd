@@ -164,10 +164,8 @@ page.image=images/cards/card-n-changes_2x.png
 </ul>
 
 <p>
-  Future releases of Android may deprecate additional implicit broadcasts, as
-  well as unbound background services. For this reason, you should avoid or
-  remove dependencies on manifest-declared receivers for implicit broadcasts,
-  as well as on background services.
+  In general, apps should remove dependence on manifest-declared receivers
+  for implicit broadcasts as well as on background services.
 </p>
 
 <p>
