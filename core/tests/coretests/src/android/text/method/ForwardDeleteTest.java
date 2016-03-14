@@ -29,7 +29,8 @@ import android.widget.TextView.BufferType;
 /**
  * Test forward delete key handling of  {@link android.text.method.BaseKeyListener}.
  *
- * TODO: Move some of test cases to the CTS.
+ * Only contains edge cases. For normal cases, see {@see android.text.method.cts.ForwardDeleteTest}.
+ * TODO: introduce test cases for surrogate pairs and replacement span.
  */
 public class ForwardDeleteTest extends KeyListenerTestCase {
     private static final BaseKeyListener mKeyListener = new BaseKeyListener() {
@@ -65,73 +66,9 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
     }
 
     @SmallTest
-    public void testSurrogatePairs() {
-        EditorState state = new EditorState();
-
-        // U+1F441 is EYE
-        state.setByString("| U+1F441");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // U+1F5E8 is LEFT SPEECH BUBBLE
-        state.setByString("| U+1F441 U+1F5E8");
-        forwardDelete(state, 0);
-        state.assertEquals("| U+1F5E8");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // TODO: introduce edge cases.
-    }
-
-    @SmallTest
-    public void testReplacementSpan() {
-        EditorState state = new EditorState();
-
-        state.setByString("| 'abc' ( 'de' ) 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("| 'bc' ( 'de' ) 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("| 'c' ( 'de' ) 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("| ( 'de' ) 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("| 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("| 'g'");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("'abc' [ ( 'de' ) ] 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("'abc' | 'fg'");
-        forwardDelete(state, 0);
-        state.assertEquals("'abc' | 'g'");
-        forwardDelete(state, 0);
-        state.assertEquals("'abc' |");
-        forwardDelete(state, 0);
-        state.assertEquals("'abc' |");
-
-        state.setByString("'ab' [ 'c' ( 'de' ) 'f' ] 'g'");
-        forwardDelete(state, 0);
-        state.assertEquals("'ab' | 'g'");
-        forwardDelete(state, 0);
-        state.assertEquals("'ab' |");
-        forwardDelete(state, 0);
-        state.assertEquals("'ab' |");
-
-        // TODO: introduce edge cases.
-    }
-
-    @SmallTest
     public void testCombiningEnclosingKeycaps() {
         EditorState state = new EditorState();
 
-        // U+20E3 is COMBINING ENCLOSING KEYCAP.
-        state.setByString("| '1' U+20E3");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // multiple COMBINING ENCLOSING KEYCAP
         state.setByString("| '1' U+20E3 U+20E3");
         forwardDelete(state, 0);
@@ -152,17 +89,6 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
     public void testVariationSelector() {
         EditorState state = new EditorState();
 
-        // U+FE0F is VARIATION SELECTOR-16.
-        state.setByString("| '#' U+FE0F");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // U+E0100 is VARIATION SELECTOR-17.
-        state.setByString("| U+845B U+E0100");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // Isolated variation selectors
         state.setByString("| U+FE0F");
         forwardDelete(state, 0);
@@ -211,16 +137,6 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
     public void testEmojiZeroWidthJoinerSequence() {
         EditorState state = new EditorState();
 
-        // U+200D is ZERO WIDTH JOINER.
-        state.setByString("| U+1F441 U+200D U+1F5E8");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("| U+1F468 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // End with ZERO WIDTH JOINER
         state.setByString("| U+1F441 U+200D");
         forwardDelete(state, 0);
@@ -255,19 +171,6 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
     public void testFlags() {
         EditorState state = new EditorState();
 
-        // U+1F1FA is REGIONAL INDICATOR SYMBOL LETTER U.
-        // U+1F1F8 is REGIONAL INDICATOR SYMBOL LETTER S.
-        state.setByString("| U+1F1FA U+1F1F8");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("| U+1F1FA U+1F1F8 U+1F1FA U+1F1F8");
-        forwardDelete(state, 0);
-        state.assertEquals("| U+1F1FA U+1F1F8");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // Isolated regional indicator symbol
         state.setByString("| U+1F1FA");
         forwardDelete(state, 0);
@@ -285,12 +188,6 @@ public class ForwardDeleteTest extends KeyListenerTestCase {
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
-        // U+1F3FB is EMOJI MODIFIER FITZPATRICK TYPE-1-2.
-        state.setByString("| U+1F466 U+1F3FB");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // Isolated emoji modifier
         state.setByString("| U+1F3FB");
         forwardDelete(state, 0);
