@@ -9467,6 +9467,7 @@ package android.content.pm {
     method public int getShortcutIconResId(android.content.pm.ShortcutInfo, android.os.UserHandle);
     method public java.util.List<android.content.pm.ShortcutInfo> getShortcutInfo(java.lang.String, java.util.List<java.lang.String>, android.os.UserHandle);
     method public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(android.content.pm.LauncherApps.ShortcutQuery, android.os.UserHandle);
+    method public boolean hasShortcutHostPermission();
     method public boolean isActivityEnabled(android.content.ComponentName, android.os.UserHandle);
     method public boolean isPackageEnabled(java.lang.String, android.os.UserHandle);
     method public void pinShortcuts(java.lang.String, java.util.List<java.lang.String>, android.os.UserHandle);
