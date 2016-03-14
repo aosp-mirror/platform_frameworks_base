@@ -97,6 +97,12 @@ public interface RILConstants {
     int NETWORK_REJECT = 53;                  /* Request is rejected by network */
     int OPERATION_NOT_ALLOWED = 54;           /* Not allowed the request now */
     int EMPTY_RECORD = 55;                    /* The request record is empty */
+    int INVALID_SMS_FORMAT = 56;              /* Invalid sms format */
+    int ENCODING_ERR = 57;                    /* Message not encoded properly */
+    int INVALID_SMSC_ADDRESS = 58;            /* SMSC address specified is invalid */
+    int NO_SUCH_ENTRY = 59;                   /* No such entry present to perform the request */
+    int NETWORK_NOT_READY = 60;               /* Network is not ready to perform the request */
+    int NOT_PROVISIONED = 61;                 /* Device doesnot have this value provisioned */
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
     int OEM_ERROR_1 = 501;
