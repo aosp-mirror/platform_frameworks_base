@@ -1158,7 +1158,7 @@ class WindowSurfacePlacer {
 
             if (!appAnimator.usingTransferredAnimation) {
                 appAnimator.clearThumbnail();
-                appAnimator.animation = null;
+                appAnimator.setNullAnimation();
             }
             wtoken.inPendingTransaction = false;
 
@@ -1231,7 +1231,7 @@ class WindowSurfacePlacer {
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             appAnimator.clearThumbnail();
-            appAnimator.animation = null;
+            appAnimator.setNullAnimation();
             wtoken.inPendingTransaction = false;
             mService.setTokenVisibilityLocked(wtoken, animLp, false, transit, false,
                     voiceInteraction);
@@ -1494,7 +1494,7 @@ class WindowSurfacePlacer {
                 if (DEBUG_APP_TRANSITIONS)
                     Slog.v(TAG, "Now animating app in place " + wtoken);
                 appAnimator.clearThumbnail();
-                appAnimator.animation = null;
+                appAnimator.setNullAnimation();
                 mService.updateTokenInPlaceLocked(wtoken, transit);
                 wtoken.updateReportedVisibilityLocked();
 

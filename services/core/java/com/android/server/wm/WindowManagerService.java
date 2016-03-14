@@ -2826,10 +2826,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
+            win.mWinAnimator.mAnimating = true;
         } else if (win.mWinAnimator.isAnimating()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
+            win.mWinAnimator.mAnimating = true;
         } else if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
@@ -4086,7 +4088,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (transit != AppTransition.TRANSIT_UNSET) {
                 if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
-                    wtoken.mAppAnimator.animation = null;
+                    wtoken.mAppAnimator.setNullAnimation();
                 }
                 if (applyAnimationLocked(wtoken, lp, transit, visible, isVoiceInteraction)) {
                     delayed = runningAppAnimation = true;
@@ -4196,7 +4198,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void updateTokenInPlaceLocked(AppWindowToken wtoken, int transit) {
         if (transit != AppTransition.TRANSIT_UNSET) {
             if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
-                wtoken.mAppAnimator.animation = null;
+                wtoken.mAppAnimator.setNullAnimation();
             }
             applyAnimationLocked(wtoken, null, transit, false, false);
         }
@@ -4256,7 +4258,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ADD_REMOVE) Slog.v(
                         TAG_WM, "No longer Stopped: " + wtoken);
                 wtoken.mAppStopped = false;
-                wtoken.setWindowsExiting(false);
                 mOpeningApps.add(wtoken);
                 wtoken.startingMoved = false;
 
@@ -4288,6 +4289,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // animation is going on (in this case an application transition). If the animation
                 // was transferred from another application/animator, no dummy animator should be
                 // created since an animation is already in progress.
+                if (wtoken.mAppAnimator.usingTransferredAnimation
+                        && wtoken.mAppAnimator.animation == null) {
+                    Slog.wtf(TAG_WM, "Will NOT set dummy animation on: " + wtoken
+                            + ", using null transfered animation!");
+                }
                 if (!wtoken.mAppAnimator.usingTransferredAnimation &&
                         (!wtoken.startingDisplayed || mSkipAppTransitionAnimation)) {
                     if (DEBUG_APP_TRANSITIONS) Slog.v(
@@ -4298,7 +4304,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (visible) {
                     wtoken.mEnteringAnimation = true;
                 } else {
-                    wtoken.setWindowsExiting(true);
                     mClosingApps.add(wtoken);
                     wtoken.mEnteringAnimation = false;
                 }
