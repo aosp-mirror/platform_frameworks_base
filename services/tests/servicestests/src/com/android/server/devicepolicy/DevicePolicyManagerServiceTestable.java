@@ -28,6 +28,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.storage.StorageManager;
 import android.view.IWindowManager;
 
 import java.io.File;
@@ -160,6 +161,26 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         LockPatternUtils newLockPatternUtils() {
             return context.lockPatternUtils;
+        }
+
+        @Override
+        boolean storageManagerIsFileBasedEncryptionEnabled() {
+            return context.storageManager.isFileBasedEncryptionEnabled();
+        }
+
+        @Override
+        boolean storageManagerIsNonDefaultBlockEncrypted() {
+            return context.storageManager.isNonDefaultBlockEncrypted();
+        }
+
+        @Override
+        boolean storageManagerIsEncrypted() {
+            return context.storageManager.isEncrypted();
+        }
+
+        @Override
+        boolean storageManagerIsEncryptable() {
+            return context.storageManager.isEncryptable();
         }
 
         @Override
