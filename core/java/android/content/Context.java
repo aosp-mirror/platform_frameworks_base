@@ -2742,7 +2742,7 @@ public abstract class Context {
      * <dt> {@link #NETWORK_STATS_SERVICE} ("netstats")
      * <dd> A {@link android.app.usage.NetworkStatsManager NetworkStatsManager} for querying network
      * usage statistics.
-     * <dt> {@link #HARDWARE_PROPERTIES_SERVICE} ("hardwareproperties")
+     * <dt> {@link #HARDWARE_PROPERTIES_SERVICE} ("hardware_properties")
      * <dd> A {@link android.os.HardwarePropertiesManager} for accessing hardware properties.
      * </dl>
      *
@@ -3574,7 +3574,7 @@ public abstract class Context {
      *
      * @see #getSystemService
      */
-    public static final String HARDWARE_PROPERTIES_SERVICE = "hardwareproperties";
+    public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
 
     /**
      * TODO Javadoc
