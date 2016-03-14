@@ -6897,7 +6897,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Extract pacakges only if profile-guided compilation is enabled because
         // otherwise BackgroundDexOptService will not dexopt them later.
-        if (!isUpgrade()) {
+        boolean prunedCache = VMRuntime.didPruneDalvikCache();
+        if (!isUpgrade() && !prunedCache) {
             return;
         }
 
@@ -6925,8 +6926,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (PackageDexOptimizer.canOptimizePackage(pkg)) {
+                // If the cache was pruned, any compiled odex files will likely be out of date
+                // and would have to be patched (would be SELF_PATCHOAT, which is deprecated).
+                // Instead, force the extraction in this case.
                 performDexOpt(pkg.packageName, null /* instructionSet */,
-                         false /* useProfiles */, true /* extractOnly */, false /* force */);
+                         false /* useProfiles */, true /* extractOnly */, prunedCache);
             }
         }
     }
