@@ -4635,7 +4635,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
-        if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && attrs.type != TYPE_SYSTEM_ERROR) {
+        // Also, we don't allow windows in multi-window mode to extend out of the screen.
+        if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && attrs.type != TYPE_SYSTEM_ERROR
+                && !win.inMultiWindowMode()) {
             df.left = df.top = -10000;
             df.right = df.bottom = 10000;
             if (attrs.type != TYPE_WALLPAPER) {

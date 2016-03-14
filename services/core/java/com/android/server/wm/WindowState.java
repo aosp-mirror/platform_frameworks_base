@@ -642,7 +642,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean fullscreenTask = task == null || task.isFullscreen();
+        final boolean fullscreenTask = !inMultiWindowMode();
         final boolean windowsAreFloating = task != null && task.isFloating();
 
         if (fullscreenTask || (isChildWindow()
@@ -2215,6 +2215,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return task != null && task.inFreeformWorkspace();
     }
 
+    @Override
+    public boolean inMultiWindowMode() {
+        final Task task = getTask();
+        return task != null && !task.isFullscreen();
+    }
+
     boolean isDragResizeChanged() {
         return mDragResizing != computeDragResizing();
     }
@@ -2506,9 +2512,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int pw = mContainingFrame.width();
         final int ph = mContainingFrame.height();
         final Task task = getTask();
-        final boolean nonFullscreenTask = task != null && !task.isFullscreen();
-        final boolean fitToDisplay = task != null &&
-            !task.isFloating();
+        final boolean nonFullscreenTask = inMultiWindowMode();
+        final boolean fitToDisplay = task != null && !task.isFloating();
         float x, y;
         int w,h;
 
