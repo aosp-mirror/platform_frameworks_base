@@ -10828,25 +10828,41 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    // TODO: investigate and add more restrictions for suspending crucial packages.
+    /**
+     * TODO: cache and disallow blocking the active dialer.
+     *
+     * @see also DefaultPermissionGrantPolicy#grantDefaultSystemHandlerPermissions
+     */
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
-            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
-                    + "\": has active device admin");
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": has an active device admin");
             return false;
         }
 
         String activeLauncherPackageName = getActiveLauncherPackageName(userId);
         if (packageName.equals(activeLauncherPackageName)) {
-            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
-                    + "\" because it is set as the active launcher");
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": contains the active launcher");
+            return false;
+        }
+
+        if (packageName.equals(mRequiredInstallerPackage)) {
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": required for package installation");
+            return false;
+        }
+
+        if (packageName.equals(mRequiredVerifierPackage)) {
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": required for package verification");
             return false;
         }
 
         final PackageParser.Package pkg = mPackages.get(packageName);
         if (pkg != null && isPrivilegedApp(pkg)) {
-            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
-                    + "\" because it is a privileged app");
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": is a privileged app");
             return false;
         }
 
