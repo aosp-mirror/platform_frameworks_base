@@ -164,6 +164,9 @@ OffscreenBuffer* OffscreenBufferPool::resize(OffscreenBuffer* layer,
         // resize in place
         layer->viewportWidth = width;
         layer->viewportHeight = height;
+
+        // entire area will be repainted (and may be smaller) so clear usage region
+        layer->region.clear();
         return layer;
     }
     putOrDelete(layer);

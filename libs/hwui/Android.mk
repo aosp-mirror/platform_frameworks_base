@@ -254,6 +254,7 @@ LOCAL_SRC_FILES += \
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
         tests/unit/BakedOpDispatcherTests.cpp \
+        tests/unit/BakedOpRendererTests.cpp \
         tests/unit/BakedOpStateTests.cpp \
         tests/unit/FrameBuilderTests.cpp \
         tests/unit/LeakCheckTests.cpp \

@@ -40,6 +40,16 @@ OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t h
 void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
+    // subtract repaintRect from region, since it will be regenerated
+    if (repaintRect.contains(0, 0,
+                offscreenBuffer->viewportWidth, offscreenBuffer->viewportHeight)) {
+        // repaint full layer, so throw away entire region
+        offscreenBuffer->region.clear();
+    } else {
+        offscreenBuffer->region.subtractSelf(android::Rect(repaintRect.left, repaintRect.top,
+                repaintRect.right, repaintRect.bottom));
+    }
+
     mRenderTarget.offscreenBuffer = offscreenBuffer;
 
     // create and bind framebuffer
