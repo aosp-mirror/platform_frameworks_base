@@ -210,6 +210,10 @@ public class JobStore {
         mJobSet.forEachJob(functor);
     }
 
+    public void forEachJob(int uid, JobStatusFunctor functor) {
+        mJobSet.forEachJob(uid, functor);
+    }
+
     public interface JobStatusFunctor {
         public void process(JobStatus jobStatus);
     }
@@ -865,6 +869,15 @@ public class JobStore {
         public void forEachJob(JobStatusFunctor functor) {
             for (int uidIndex = mJobs.size() - 1; uidIndex >= 0; uidIndex--) {
                 ArraySet<JobStatus> jobs = mJobs.valueAt(uidIndex);
+                for (int i = jobs.size() - 1; i >= 0; i--) {
+                    functor.process(jobs.valueAt(i));
+                }
+            }
+        }
+
+        public void forEachJob(int uid, JobStatusFunctor functor) {
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            if (jobs != null) {
                 for (int i = jobs.size() - 1; i >= 0; i--) {
                     functor.process(jobs.valueAt(i));
                 }
