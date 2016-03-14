@@ -1597,8 +1597,6 @@ class WindowSurfacePlacer {
             openingAppAnimator.thumbnailLayer = openingLayer;
             openingAppAnimator.thumbnailAnimation = anim;
             mService.mAppTransition.getNextAppTransitionStartRect(taskId, mTmpStartRect);
-            openingAppAnimator.thumbnailX = mTmpStartRect.left;
-            openingAppAnimator.thumbnailY = mTmpStartRect.top;
         } catch (Surface.OutOfResourcesException e) {
             Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w="
                     + dirty.width() + " h=" + dirty.height(), e);

@@ -4033,8 +4033,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 wAppAnimator.thumbnail.destroy();
             }
             wAppAnimator.thumbnail = tAppAnimator.thumbnail;
-            wAppAnimator.thumbnailX = tAppAnimator.thumbnailX;
-            wAppAnimator.thumbnailY = tAppAnimator.thumbnailY;
             wAppAnimator.thumbnailLayer = tAppAnimator.thumbnailLayer;
             wAppAnimator.thumbnailAnimation = tAppAnimator.thumbnailAnimation;
             tAppAnimator.thumbnail = null;
