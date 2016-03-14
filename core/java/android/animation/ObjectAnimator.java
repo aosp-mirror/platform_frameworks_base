@@ -373,6 +373,7 @@ public final class ObjectAnimator extends ValueAnimator {
      * @param values A set of values that the animation will animate between over time.
      * @return An ObjectAnimator object that is set up to animate between the given values.
      */
+    @SafeVarargs
     public static <T> ObjectAnimator ofMultiInt(Object target, String propertyName,
             TypeConverter<T, int[]> converter, TypeEvaluator<T> evaluator, T... values) {
         PropertyValuesHolder pvh = PropertyValuesHolder.ofMultiInt(propertyName, converter,
@@ -569,6 +570,7 @@ public final class ObjectAnimator extends ValueAnimator {
      * @param values A set of values that the animation will animate between over time.
      * @return An ObjectAnimator object that is set up to animate between the given values.
      */
+    @SafeVarargs
     public static <T> ObjectAnimator ofMultiFloat(Object target, String propertyName,
             TypeConverter<T, float[]> converter, TypeEvaluator<T> evaluator, T... values) {
         PropertyValuesHolder pvh = PropertyValuesHolder.ofMultiFloat(propertyName, converter,
@@ -642,6 +644,7 @@ public final class ObjectAnimator extends ValueAnimator {
      * @return An ObjectAnimator object that is set up to animate between the given values.
      */
     @NonNull
+    @SafeVarargs
     public static <T, V> ObjectAnimator ofObject(T target, Property<T, V> property,
             TypeEvaluator<V> evaluator, V... values) {
         ObjectAnimator anim = new ObjectAnimator(target, property);
@@ -670,6 +673,7 @@ public final class ObjectAnimator extends ValueAnimator {
      * @return An ObjectAnimator object that is set up to animate between the given values.
      */
     @NonNull
+    @SafeVarargs
     public static <T, V, P> ObjectAnimator ofObject(T target, Property<T, P> property,
             TypeConverter<V, P> converter, TypeEvaluator<V> evaluator, V... values) {
         PropertyValuesHolder pvh = PropertyValuesHolder.ofObject(property, converter, evaluator,

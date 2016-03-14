@@ -621,6 +621,7 @@ public class ActivityOptions {
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
+    @SafeVarargs
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();

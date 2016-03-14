@@ -236,6 +236,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @see ObjectAnimator#ofMultiInt(Object, String, TypeConverter, TypeEvaluator, Object[])
      * @see ObjectAnimator#ofPropertyValuesHolder(Object, PropertyValuesHolder...)
      */
+    @SafeVarargs
     public static <V> PropertyValuesHolder ofMultiInt(String propertyName,
             TypeConverter<V, int[]> converter, TypeEvaluator<V> evaluator, V... values) {
         return new MultiIntValuesHolder(propertyName, converter, evaluator, values);
@@ -353,6 +354,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
      * @see ObjectAnimator#ofMultiFloat(Object, String, TypeConverter, TypeEvaluator, Object[])
      */
+    @SafeVarargs
     public static <V> PropertyValuesHolder ofMultiFloat(String propertyName,
             TypeConverter<V, float[]> converter, TypeEvaluator<V> evaluator, V... values) {
         return new MultiFloatValuesHolder(propertyName, converter, evaluator, values);
@@ -438,6 +440,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @param values The values that the property will animate between.
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
      */
+    @SafeVarargs
     public static <V> PropertyValuesHolder ofObject(Property property,
             TypeEvaluator<V> evaluator, V... values) {
         PropertyValuesHolder pvh = new PropertyValuesHolder(property);
@@ -465,6 +468,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @see #setConverter(TypeConverter)
      * @see TypeConverter
      */
+    @SafeVarargs
     public static <T, V> PropertyValuesHolder ofObject(Property<?, V> property,
             TypeConverter<T, V> converter, TypeEvaluator<T> evaluator, T... values) {
         PropertyValuesHolder pvh = new PropertyValuesHolder(property);
