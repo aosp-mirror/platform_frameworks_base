@@ -688,12 +688,11 @@ public class NetworkMonitor extends StateMachine {
             // Time how long it takes to get a response to our request
             long requestTimestamp = SystemClock.elapsedRealtime();
 
-            urlConnection.getInputStream();
+            httpResponseCode = urlConnection.getResponseCode();
 
             // Time how long it takes to get a response to our request
             long responseTimestamp = SystemClock.elapsedRealtime();
 
-            httpResponseCode = urlConnection.getResponseCode();
             validationLog("isCaptivePortal: ret=" + httpResponseCode +
                     " headers=" + urlConnection.getHeaderFields());
             // NOTE: We may want to consider an "HTTP/1.0 204" response to be a captive
