@@ -824,7 +824,13 @@ public class ExifInterface {
         }
 
         // Process JPEG input stream
-        getJpegAttributes(in);
+        try {
+            getJpegAttributes(in);
+        } catch (IOException e) {
+            // Ignore exceptions in order to keep the compatibility with the old versions of
+            // ExifInterface.
+            Log.w(TAG, "Invalid JPEG", e);
+        }
 
         if (DEBUG) {
             printAttributes();
