@@ -17,6 +17,8 @@
 package com.android.mtp;
 
 import android.database.Cursor;
+import android.media.MediaFile;
+import android.media.MediaFile.MediaFileType;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
@@ -1078,6 +1080,43 @@ public class MtpDatabaseTest extends AndroidTestCase {
             cursor.moveToNext();
             assertEquals("5", cursor.getString(0));
             assertEquals("orange.txt", cursor.getString(1));
+        }
+    }
+
+    public void testFormatCodeForMpeg() throws FileNotFoundException {
+        addTestDevice();
+        addTestStorage("1");
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
+            createDocument(100, "audio.m4a", MtpConstants.FORMAT_MPEG, 1000),
+            createDocument(101, "video.m4v", MtpConstants.FORMAT_MPEG, 1000),
+            createDocument(102, "unknown.mp4", MtpConstants.FORMAT_MPEG, 1000),
+            createDocument(103, "inconsistent.txt", MtpConstants.FORMAT_MPEG, 1000),
+            createDocument(104, "noext", MtpConstants.FORMAT_UNDEFINED, 1000),
+        });
+        mDatabase.getMapper().stopAddingDocuments("2");
+        try (final Cursor cursor = mDatabase.queryChildDocuments(
+                strings(COLUMN_DISPLAY_NAME,  COLUMN_MIME_TYPE),
+                "2")) {
+            assertEquals(5, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals("audio.m4a", cursor.getString(0));
+            assertEquals("audio/mp4", cursor.getString(1));
+            cursor.moveToNext();
+            assertEquals("video.m4v", cursor.getString(0));
+            assertEquals("video/mp4", cursor.getString(1));
+            cursor.moveToNext();
+            // Assume that the file is video as we don't have any hints to find out if the file is
+            // video or audio.
+            assertEquals("unknown.mp4", cursor.getString(0));
+            assertEquals("video/mp4", cursor.getString(1));
+            // Don't return mime type that is inconsistent with format code.
+            cursor.moveToNext();
+            assertEquals("inconsistent.txt", cursor.getString(0));
+            assertEquals("video/mp4", cursor.getString(1));
+            cursor.moveToNext();
+            assertEquals("noext", cursor.getString(0));
+            assertEquals("application/octet-stream", cursor.getString(1));
         }
     }
 
