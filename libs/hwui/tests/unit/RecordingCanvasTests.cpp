@@ -114,6 +114,23 @@ TEST(RecordingCanvas, drawRect) {
     EXPECT_EQ(Rect(10, 20, 90, 180), op.unmappedBounds);
 }
 
+TEST(RecordingCanvas, drawRoundRect) {
+    // Round case - stays rounded
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+        canvas.drawRoundRect(0, 0, 100, 100, 10, 10, SkPaint());
+    });
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
+    ASSERT_EQ(RecordedOpId::RoundRectOp, dl->getOps()[0]->opId);
+
+    // Non-rounded case - turned into drawRect
+    dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+        canvas.drawRoundRect(0, 0, 100, 100, 0, -1, SkPaint());
+    });
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
+    ASSERT_EQ(RecordedOpId::RectOp, dl->getOps()[0]->opId)
+        << "Non-rounded rects should be converted";
+}
+
 TEST(RecordingCanvas, drawText) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
