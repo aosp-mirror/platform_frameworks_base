@@ -17,8 +17,8 @@
 package android.net;
 
 import static android.net.NetworkStats.ROAMING_ALL;
-import static android.net.NetworkStats.ROAMING_DEFAULT;
-import static android.net.NetworkStats.ROAMING_ROAMING;
+import static android.net.NetworkStats.ROAMING_NO;
+import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.SET_DBG_VPN_IN;
@@ -46,57 +46,57 @@ public class NetworkStatsTest extends TestCase {
 
     public void testFindIndex() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 4)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L, 0L,
                         0L, 10)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 0L, 0L, 1024L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 0L, 0L, 1024L,
                         8L, 11)
-                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L,
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L,
                         1024L, 8L, 12)
-                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 1024L, 8L,
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_YES, 1024L, 8L,
                         1024L, 8L, 12);
 
-        assertEquals(3, stats.findIndex(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING));
-        assertEquals(2, stats.findIndex(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT));
-        assertEquals(1, stats.findIndex(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT));
-        assertEquals(0, stats.findIndex(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT));
-        assertEquals(-1, stats.findIndex(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT));
+        assertEquals(3, stats.findIndex(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_YES));
+        assertEquals(2, stats.findIndex(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_NO));
+        assertEquals(1, stats.findIndex(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO));
+        assertEquals(0, stats.findIndex(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO));
+        assertEquals(-1, stats.findIndex(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE, ROAMING_NO));
     }
 
     public void testFindIndexHinted() {
         final NetworkStats stats = new NetworkStats(TEST_START, 3)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L, 0L,
                         0L, 10)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 0L, 0L, 1024L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 0L, 0L, 1024L,
                         8L, 11)
-                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L,
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L,
                         1024L, 8L, 12)
-                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L,
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 1024L, 8L,
                         0L, 0L, 10)
-                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 0L, 0L, 1024L,
+                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, ROAMING_NO, 0L, 0L, 1024L,
                         8L, 11)
-                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L,
+                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L,
                         1024L, 8L, 12)
-                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 1024L, 8L,
+                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, ROAMING_YES, 1024L, 8L,
                         1024L, 8L, 12);
 
         // verify that we correctly find across regardless of hinting
         for (int hint = 0; hint < stats.size(); hint++) {
             assertEquals(0, stats.findIndexHinted(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
             assertEquals(1, stats.findIndexHinted(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
             assertEquals(2, stats.findIndexHinted(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
             assertEquals(3, stats.findIndexHinted(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
             assertEquals(4, stats.findIndexHinted(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
             assertEquals(5, stats.findIndexHinted(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
             assertEquals(6, stats.findIndexHinted(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE,
-                    ROAMING_ROAMING, hint));
+                    ROAMING_YES, hint));
             assertEquals(-1, stats.findIndexHinted(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE,
-                    ROAMING_DEFAULT, hint));
+                    ROAMING_NO, hint));
         }
     }
 
@@ -106,41 +106,41 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(0, stats.size());
         assertEquals(3, stats.internalSize());
 
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1L, 1L, 2L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1L, 1L, 2L,
                 2L, 3);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 2L, 2L, 2L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 2L, 2L, 2L,
                 2L, 4);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 3L, 3L, 2L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_YES, 3L, 3L, 2L,
                 2L, 5);
 
         assertEquals(3, stats.size());
         assertEquals(3, stats.internalSize());
 
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 4L, 40L, 4L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 4L, 40L, 4L,
                 40L, 7);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 5L, 50L, 4L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 5L, 50L, 4L,
                 40L, 8);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 6L, 60L, 5L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 6L, 60L, 5L,
                 50L, 10);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 7L, 70L, 5L,
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_YES, 7L, 70L, 5L,
                 50L, 11);
 
         assertEquals(7, stats.size());
         assertTrue(stats.internalSize() >= 7);
 
-        assertValues(stats, 0, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1L, 1L,
+        assertValues(stats, 0, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1L, 1L,
                 2L, 2L, 3);
-        assertValues(stats, 1, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 2L, 2L,
+        assertValues(stats, 1, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 2L, 2L,
                 2L, 2L, 4);
-        assertValues(stats, 2, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 3L, 3L,
+        assertValues(stats, 2, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_YES, 3L, 3L,
                 2L, 2L, 5);
-        assertValues(stats, 3, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 4L,
+        assertValues(stats, 3, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 4L,
                 40L, 4L, 40L, 7);
-        assertValues(stats, 4, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 5L,
+        assertValues(stats, 4, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 5L,
                 50L, 4L, 40L, 8);
-        assertValues(stats, 5, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 6L,
+        assertValues(stats, 5, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_NO, 6L,
                 60L, 5L, 50L, 10);
-        assertValues(stats, 6, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 7L,
+        assertValues(stats, 6, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, ROAMING_YES, 7L,
                 70L, 5L, 50L, 11);
     }
 
@@ -152,19 +152,19 @@ public class NetworkStatsTest extends TestCase {
         stats.combineValues(TEST_IFACE, 1001, SET_DEFAULT, TAG_NONE, -128L, -1L,
                 -128L, -1L, -1);
 
-        assertValues(stats, 0, TEST_IFACE, 1001, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 384L, 3L,
+        assertValues(stats, 0, TEST_IFACE, 1001, SET_DEFAULT, TAG_NONE, ROAMING_NO, 384L, 3L,
                 128L, 1L, 9);
-        assertValues(stats, 1, TEST_IFACE, 1001, SET_DEFAULT, 0xff, ROAMING_DEFAULT, 128L, 1L, 128L,
+        assertValues(stats, 1, TEST_IFACE, 1001, SET_DEFAULT, 0xff, ROAMING_NO, 128L, 1L, 128L,
                 1L, 2);
 
         // now try combining that should create row
         stats.combineValues(TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, 128L, 1L,
                 128L, 1L, 3);
-        assertValues(stats, 2, TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 1L,
+        assertValues(stats, 2, TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 1L,
                 128L, 1L, 3);
         stats.combineValues(TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, 128L, 1L,
                 128L, 1L, 3);
-        assertValues(stats, 2, TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 256L, 2L,
+        assertValues(stats, 2, TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, ROAMING_NO, 256L, 2L,
                 256L, 2L, 6);
     }
 
@@ -180,9 +180,9 @@ public class NetworkStatsTest extends TestCase {
         final NetworkStats result = after.subtract(before);
 
         // identical data should result in zero delta
-        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 0L, 0L, 0L,
+        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 0L, 0L, 0L,
                 0L, 0);
-        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 0L, 0L, 0L,
+        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 0L, 0L, 0L,
                 0L, 0);
     }
 
@@ -198,9 +198,9 @@ public class NetworkStatsTest extends TestCase {
         final NetworkStats result = after.subtract(before);
 
         // expect delta between measurements
-        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1L, 1L, 2L,
+        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1L, 1L, 2L,
                 1L, 4);
-        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 3L, 1L, 4L,
+        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 3L, 1L, 4L,
                 1L, 8);
     }
 
@@ -217,11 +217,11 @@ public class NetworkStatsTest extends TestCase {
         final NetworkStats result = after.subtract(before);
 
         // its okay to have new rows
-        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 0L, 0L, 0L,
+        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 0L, 0L, 0L,
                 0L, 0);
-        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 0L, 0L, 0L,
+        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 0L, 0L, 0L,
                 0L, 0);
-        assertValues(result, 2, TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L,
+        assertValues(result, 2, TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L,
                 1024L, 8L, 20);
     }
 
@@ -237,7 +237,7 @@ public class NetworkStatsTest extends TestCase {
 
         // should silently drop omitted rows
         assertEquals(1, result.size());
-        assertValues(result, 0, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1L,
+        assertValues(result, 0, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1L,
                 2L, 3L, 4L, 0);
         assertEquals(4L, result.getTotalBytes());
     }
@@ -264,11 +264,11 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(64L, uidTag.getTotalBytes());
 
         final NetworkStats uidRoaming = new NetworkStats(TEST_START, 3)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 32L, 0L, 0L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 32L, 0L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 32L, 0L, 0L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 32L, 0L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 32L, 0L, 0L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_YES, 32L, 0L, 0L, 0L,
                         0L);
         assertEquals(96L, uidRoaming.getTotalBytes());
     }
@@ -283,11 +283,11 @@ public class NetworkStatsTest extends TestCase {
 
     public void testGroupedByIfaceAll() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 3)
-                .addValues(IFACE_ALL, 100, SET_ALL, TAG_NONE, ROAMING_DEFAULT, 128L, 8L, 0L, 2L,
+                .addValues(IFACE_ALL, 100, SET_ALL, TAG_NONE, ROAMING_NO, 128L, 8L, 0L, 2L,
                         20L)
-                .addValues(IFACE_ALL, 101, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 128L, 8L, 0L,
+                .addValues(IFACE_ALL, 101, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 128L, 8L, 0L,
                         2L, 20L)
-                .addValues(IFACE_ALL, 101, SET_ALL, TAG_NONE, ROAMING_ROAMING, 128L, 8L, 0L, 2L,
+                .addValues(IFACE_ALL, 101, SET_ALL, TAG_NONE, ROAMING_YES, 128L, 8L, 0L, 2L,
                         20L);
         final NetworkStats grouped = uidStats.groupedByIface();
 
@@ -300,19 +300,19 @@ public class NetworkStatsTest extends TestCase {
 
     public void testGroupedByIface() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 7)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 8L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 8L, 0L,
                         2L, 20L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 512L, 32L, 0L,
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 512L, 32L, 0L,
                         0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 64L, 4L, 0L, 0L,
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, ROAMING_NO, 64L, 4L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 512L, 32L,
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 512L, 32L,
                         0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 8L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 8L, 0L,
                         0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 128L, 8L, 0L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, ROAMING_NO, 128L, 8L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 128L, 8L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_YES, 128L, 8L, 0L,
                         0L, 0L);
 
         final NetworkStats grouped = uidStats.groupedByIface();
@@ -328,49 +328,49 @@ public class NetworkStatsTest extends TestCase {
 
     public void testAddAllValues() {
         final NetworkStats first = new NetworkStats(TEST_START, 5)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 32L, 0L, 0L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 32L, 0L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 32L, 0L, 0L,
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 32L, 0L, 0L,
                         0L, 0L)
-                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_ROAMING, 32L, 0L, 0L,
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_YES, 32L, 0L, 0L,
                         0L, 0L);
 
         final NetworkStats second = new NetworkStats(TEST_START, 2)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 32L, 0L, 0L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 32L, 0L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 32L, 0L,
+                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_NO, 32L, 0L,
                         0L, 0L, 0L)
-                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_ROAMING, 32L, 0L, 0L,
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_YES, 32L, 0L, 0L,
                         0L, 0L);
 
         first.combineAllValues(second);
 
         assertEquals(4, first.size());
-        assertValues(first, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 64L, 0L, 0L,
+        assertValues(first, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 64L, 0L, 0L,
                 0L, 0L);
-        assertValues(first, 1, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 32L, 0L,
+        assertValues(first, 1, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 32L, 0L,
                 0L, 0L, 0L);
-        assertValues(first, 2, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_ROAMING, 64L, 0L,
+        assertValues(first, 2, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, ROAMING_YES, 64L, 0L,
                 0L, 0L, 0L);
-        assertValues(first, 3, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 32L,
+        assertValues(first, 3, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_NO, 32L,
                 0L, 0L, 0L, 0L);
     }
 
     public void testGetTotal() {
         final NetworkStats stats = new NetworkStats(TEST_START, 7)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 8L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 8L, 0L,
                         2L, 20L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 512L, 32L, 0L,
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 512L, 32L, 0L,
                         0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 64L, 4L, 0L, 0L,
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, ROAMING_NO, 64L, 4L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 512L, 32L,
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 512L, 32L,
                         0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 8L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 8L, 0L,
                         0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 128L, 8L, 0L, 0L,
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, ROAMING_NO, 128L, 8L, 0L, 0L,
                         0L)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 128L, 8L, 0L,
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, ROAMING_YES, 128L, 8L, 0L,
                         0L, 0L);
 
         assertValues(stats.getTotal(null), 1408L, 88L, 0L, 2L, 20L);
@@ -396,9 +396,9 @@ public class NetworkStatsTest extends TestCase {
         final NetworkStats after = before.withoutUids(new int[] { 100 });
         assertEquals(6, before.size());
         assertEquals(2, after.size());
-        assertValues(after, 0, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 8L,
+        assertValues(after, 0, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 8L,
                 0L, 0L, 0L);
-        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 128L, 8L, 0L,
+        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, ROAMING_NO, 128L, 8L, 0L,
                 0L, 0L);
     }
 
@@ -457,53 +457,53 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(21, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
-        assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                 39605L, 46L, 12259L, 55L, 0L);
-        assertValues(delta, 1, tunIface, 10100, SET_FOREGROUND, TAG_NONE,  ROAMING_DEFAULT, 0L, 0L,
+        assertValues(delta, 1, tunIface, 10100, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 0L, 0L,
                 0L, 0L, 0L);
-        assertValues(delta, 2, tunIface, 10120, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 2, tunIface, 10120, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                 72667L, 197L, 43909L, 241L, 0L);
-        assertValues(delta, 3, tunIface, 10120, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 3, tunIface, 10120, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
                 9297L, 17L, 4128L, 21L, 0L);
-        assertValues(delta, 4, tunIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 4, tunIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                 4983L, 10L, 1801L, 12L, 0L);
-        assertValues(delta, 5, tunIface, tunUid, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 0L, 0L,
+        assertValues(delta, 5, tunIface, tunUid, SET_FOREGROUND, TAG_NONE, ROAMING_NO, 0L, 0L,
                 0L, 0L, 0L);
-        assertValues(delta, 6, tunIface, 10120, SET_DEFAULT, testTag1, ROAMING_DEFAULT,
+        assertValues(delta, 6, tunIface, 10120, SET_DEFAULT, testTag1, ROAMING_NO,
                 21691L, 41L, 13820L, 51L, 0L);
-        assertValues(delta, 7, tunIface, 10120, SET_FOREGROUND, testTag1, ROAMING_DEFAULT, 1281L,
+        assertValues(delta, 7, tunIface, 10120, SET_FOREGROUND, testTag1, ROAMING_NO, 1281L,
                 2L, 665L, 2L, 0L);
-        assertValues(delta, 8, TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1685L, 5L,
+        assertValues(delta, 8, TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1685L, 5L,
                 2070L, 6L, 0L);
 
         // Existing underlying Iface entries are updated
-        assertValues(delta, 9, underlyingIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 9, underlyingIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                 44783L, 54L, 13829L, 60L, 0L);
-        assertValues(delta, 10, underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 10, underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
                 0L, 0L, 0L, 0L, 0L);
 
         // VPN underlying Iface entries are updated
-        assertValues(delta, 11, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 11, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                 28304L, 27L, 1719L, 12L, 0L);
-        assertValues(delta, 12, underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT,
+        assertValues(delta, 12, underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
                 0L, 0L, 0L, 0L, 0L);
 
         // New entries are added for new application's underlying Iface traffic
-        assertContains(delta, underlyingIface, 10120, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, 10120, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                 72667L, 197L, 41872L, 219L, 0L);
-        assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
                 9297L, 17L, 3936, 19L, 0L);
-        assertContains(delta, underlyingIface, 10120, SET_DEFAULT, testTag1, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, 10120, SET_DEFAULT, testTag1, ROAMING_NO,
                 21691L, 41L, 13179L, 46L, 0L);
-        assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, testTag1, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, testTag1, ROAMING_NO,
                 1281L, 2L, 634L, 1L, 0L);
 
         // New entries are added for debug purpose
-        assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
                 39605L, 46L, 11690, 49, 0);
-        assertContains(delta, underlyingIface, 10120, SET_DBG_VPN_IN, TAG_NONE, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, 10120, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
                 81964, 214, 45808, 238, 0);
-        assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_IN, TAG_NONE, ROAMING_DEFAULT,
+        assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
                 4983, 10, 1717, 10, 0);
         assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_OUT, TAG_NONE, ROAMING_ALL,
                 126552, 270, 59215, 297, 0);

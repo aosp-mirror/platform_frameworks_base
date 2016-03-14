@@ -71,9 +71,9 @@ public class NetworkStats implements Parcelable {
     /** {@link #set} value for all roaming values. */
     public static final int ROAMING_ALL = -1;
     /** {@link #set} value where native, non-roaming data is accounted. */
-    public static final int ROAMING_DEFAULT = 0;
+    public static final int ROAMING_NO = 0;
     /** {@link #set} value where roaming data is accounted. */
-    public static final int ROAMING_ROAMING = 1;
+    public static final int ROAMING_YES = 1;
 
     // TODO: move fields to "mVariable" notation
 
@@ -123,7 +123,7 @@ public class NetworkStats implements Parcelable {
 
         public Entry(String iface, int uid, int set, int tag, long rxBytes, long rxPackets,
                 long txBytes, long txPackets, long operations) {
-            this(iface, uid, set, tag, ROAMING_DEFAULT, rxBytes, rxPackets, txBytes, txPackets,
+            this(iface, uid, set, tag, ROAMING_NO, rxBytes, rxPackets, txBytes, txPackets,
                     operations);
         }
 
@@ -836,10 +836,10 @@ public class NetworkStats implements Parcelable {
         switch (roaming) {
             case ROAMING_ALL:
                 return "ALL";
-            case ROAMING_DEFAULT:
-                return "DEFAULT";
-            case ROAMING_ROAMING:
-                return "ROAMING";
+            case ROAMING_NO:
+                return "NO";
+            case ROAMING_YES:
+                return "YES";
             default:
                 return "UNKNOWN";
         }
@@ -1019,18 +1019,18 @@ public class NetworkStats implements Parcelable {
         // Caveat: if the vpn software uses tag, the total tagged traffic may be greater than
         // the TAG_NONE traffic.
         //
-        // Relies on the fact that the underlying traffic only has state ROAMING_DEFAULT, which
+        // Relies on the fact that the underlying traffic only has state ROAMING_NO, which
         // should be the case as it comes directly from the /proc file. We only blend in the
         // roaming data after applying these adjustments, by checking the NetworkIdentity of the
         // underlying iface.
         int idxVpnBackground = findIndex(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE,
-                ROAMING_DEFAULT);
+                ROAMING_NO);
         if (idxVpnBackground != -1) {
             tunSubtract(idxVpnBackground, this, moved);
         }
 
         int idxVpnForeground = findIndex(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE,
-                ROAMING_DEFAULT);
+                ROAMING_NO);
         if (idxVpnForeground != -1) {
             tunSubtract(idxVpnForeground, this, moved);
         }

@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -28,6 +29,9 @@ import android.util.IntArray;
 import android.util.Log;
 
 import dalvik.system.CloseGuard;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class providing enumeration over buckets of network usage statistics. {@link NetworkStats} objects
@@ -119,6 +123,11 @@ public final class NetworkStats implements AutoCloseable {
      * aggregated (e.g. time or state) some values may be equal across all buckets.
      */
     public static class Bucket {
+        /** @hide */
+        @IntDef({STATE_ALL, STATE_DEFAULT, STATE_FOREGROUND})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface State {}
+
         /**
          * Combined usage across all states.
          */
@@ -149,20 +158,34 @@ public final class NetworkStats implements AutoCloseable {
          */
         public static final int UID_TETHERING = TrafficStats.UID_TETHERING;
 
+        /** @hide */
+        @IntDef({ROAMING_ALL, ROAMING_NO, ROAMING_YES})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Roaming {}
+
         /**
-         * Combined usage across all roaming states.
+         * Combined usage across all roaming states. Covers both roaming and non-roaming usage.
          */
         public static final int ROAMING_ALL = -1;
 
         /**
-         * Usage not accounted for in any other roaming state.
+         * Usage that occurs on a home, non-roaming network.
+         *
+         * <p>Any cellular usage in this bucket was incurred while the device was connected to a
+         * tower owned or operated by the user's wireless carrier, or a tower that the user's
+         * wireless carrier has indicated should be treated as a home network regardless.
+         *
+         * <p>This is also the default value for network types that do not support roaming.
          */
-        public static final int ROAMING_DEFAULT = 0x1;
+        public static final int ROAMING_NO = 0x1;
 
         /**
-         * Roaming usage.
+         * Usage that occurs on a roaming network.
+         *
+         * <p>Any cellular usage in this bucket as incurred while the device was roaming on another
+         * carrier's network, for which additional charges may apply.
          */
-        public static final int ROAMING_ROAMING = 0x2;
+        public static final int ROAMING_YES = 0x2;
 
         /**
          * Special TAG value matching any tag.
@@ -185,7 +208,7 @@ public final class NetworkStats implements AutoCloseable {
         private long mTxBytes;
         private long mTxPackets;
 
-        private static int convertState(int networkStatsSet) {
+        private static @State int convertState(int networkStatsSet) {
             switch (networkStatsSet) {
                 case android.net.NetworkStats.SET_ALL : return STATE_ALL;
                 case android.net.NetworkStats.SET_DEFAULT : return STATE_DEFAULT;
@@ -210,11 +233,11 @@ public final class NetworkStats implements AutoCloseable {
             return tag;
         }
 
-        private static int convertRoaming(int roaming) {
+        private static @Roaming int convertRoaming(int roaming) {
             switch (roaming) {
                 case android.net.NetworkStats.ROAMING_ALL : return ROAMING_ALL;
-                case android.net.NetworkStats.ROAMING_DEFAULT : return ROAMING_DEFAULT;
-                case android.net.NetworkStats.ROAMING_ROAMING : return ROAMING_ROAMING;
+                case android.net.NetworkStats.ROAMING_NO: return ROAMING_NO;
+                case android.net.NetworkStats.ROAMING_YES: return ROAMING_YES;
             }
             return 0;
         }
@@ -252,7 +275,7 @@ public final class NetworkStats implements AutoCloseable {
          * </ul>
          * @return Usage state.
          */
-        public int getState() {
+        public @State int getState() {
             return mState;
         }
 
@@ -260,11 +283,11 @@ public final class NetworkStats implements AutoCloseable {
          * Roaming state. One of the following values:<p/>
          * <ul>
          * <li>{@link #ROAMING_ALL}</li>
-         * <li>{@link #ROAMING_DEFAULT}</li>
-         * <li>{@link #ROAMING_ROAMING}</li>
+         * <li>{@link #ROAMING_NO}</li>
+         * <li>{@link #ROAMING_YES}</li>
          * </ul>
          */
-        public int getRoaming() {
+        public @Roaming int getRoaming() {
             return mRoaming;
         }
 
