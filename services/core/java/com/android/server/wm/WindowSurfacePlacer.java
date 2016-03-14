@@ -1576,12 +1576,13 @@ class WindowSurfacePlacer {
                 WindowState win = appToken.findMainWindow();
                 Rect appRect = win != null ? win.getContentFrameLw() :
                         new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
+                Rect insets = win != null ? win.mContentInsets : null;
                 // For the new aspect-scaled transition, we want it to always show
                 // above the animating opening/closing window, and we want to
                 // synchronize its thumbnail surface with the surface for the
                 // open/close animation (only on the way down)
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
-                        thumbnailHeader, taskId);
+                        insets, thumbnailHeader, taskId);
                 openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();

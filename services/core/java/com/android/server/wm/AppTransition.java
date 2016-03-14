@@ -871,8 +871,8 @@ public class AppTransition implements Dump {
      * This animation runs for the thumbnail that gets cross faded with the enter/exit activity
      * when a thumbnail is specified with the pending animation override.
      */
-    Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, Bitmap thumbnailHeader,
-            final int taskId) {
+    Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
+            Bitmap thumbnailHeader, final int taskId) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -900,11 +900,35 @@ public class AppTransition implements Dump {
             translate.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
+            float thumbScale = thumbWidth / (appWidth - (contentInsets != null
+                    ? contentInsets.left - contentInsets.right : 0));
+
+            mTmpFromClipRect.set(0, 0, thumbWidthI, thumbHeightI);
+            mTmpToClipRect.set(appRect);
+
+            // Containing frame is in screen space, but we need the clip rect in the
+            // app space.
+            mTmpToClipRect.offsetTo(0, 0);
+            mTmpToClipRect.right = (int) (mTmpToClipRect.right * thumbScale);
+            mTmpToClipRect.bottom = (int) (mTmpToClipRect.bottom * thumbScale);
+
+            if (contentInsets != null) {
+                mTmpToClipRect.inset((int) (-contentInsets.left * thumbScale),
+                        (int) (-contentInsets.top * thumbScale),
+                        (int) (-contentInsets.right * thumbScale),
+                        (int) (-contentInsets.bottom * thumbScale));
+            }
+
+            Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+            clipAnim.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
+            clipAnim.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
+
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
             set.addAnimation(alpha);
             set.addAnimation(translate);
+            set.addAnimation(clipAnim);
             a = set;
         } else {
             // Animation down from the full screen to the thumbnail

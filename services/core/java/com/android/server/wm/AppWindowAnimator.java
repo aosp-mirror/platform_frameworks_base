@@ -288,6 +288,7 @@ public class AppWindowAnimator {
         }
         thumbnail.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
                 tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
+        thumbnail.setWindowCrop(thumbnailTransformation.getClipRect());
     }
 
     /**
