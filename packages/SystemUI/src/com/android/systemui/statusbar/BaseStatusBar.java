@@ -1079,6 +1079,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         });
                         a.start();
                         guts.setExposed(true);
+                        row.closeRemoteInput();
                         mStackScroller.onHeightChanged(null, true /* needsAnimation */);
                         mNotificationGutsExposed = guts;
                     }

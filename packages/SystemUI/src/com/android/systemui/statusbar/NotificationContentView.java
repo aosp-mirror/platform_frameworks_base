@@ -69,6 +69,9 @@ public class NotificationContentView extends FrameLayout {
     private View mHeadsUpChild;
     private HybridNotificationView mSingleLineView;
 
+    private RemoteInputView mExpandedRemoteInput;
+    private RemoteInputView mHeadsUpRemoteInput;
+
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
     private NotificationViewWrapper mHeadsUpWrapper;
@@ -743,15 +746,19 @@ public class NotificationContentView extends FrameLayout {
 
         View bigContentView = mExpandedChild;
         if (bigContentView != null) {
-            applyRemoteInput(bigContentView, entry, hasRemoteInput);
+            mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasRemoteInput);
+        } else {
+            mExpandedRemoteInput = null;
         }
         View headsUpContentView = mHeadsUpChild;
         if (headsUpContentView != null) {
-            applyRemoteInput(headsUpContentView, entry, hasRemoteInput);
+            mHeadsUpRemoteInput = applyRemoteInput(headsUpContentView, entry, hasRemoteInput);
+        } else {
+            mHeadsUpRemoteInput = null;
         }
     }
 
-    private void applyRemoteInput(View view, NotificationData.Entry entry, boolean hasRemoteInput) {
+    private RemoteInputView applyRemoteInput(View view, NotificationData.Entry entry, boolean hasRemoteInput) {
         View actionContainerCandidate = view.findViewById(
                 com.android.internal.R.id.actions_container);
         if (actionContainerCandidate instanceof FrameLayout) {
@@ -777,7 +784,20 @@ public class NotificationContentView extends FrameLayout {
                     color = mContext.getColor(R.color.default_remote_input_background);
                 }
                 riv.setBackgroundColor(color);
+
+                return riv;
             }
+            return existing;
+        }
+        return null;
+    }
+
+    public void closeRemoteInput() {
+        if (mHeadsUpRemoteInput != null) {
+            mHeadsUpRemoteInput.close();
+        }
+        if (mExpandedRemoteInput != null) {
+            mExpandedRemoteInput.close();
         }
     }
 
