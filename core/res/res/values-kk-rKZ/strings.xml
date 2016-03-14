@@ -1135,7 +1135,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Артқы фоны"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Артқы фонын өзгерту"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Хабар бақылағыш"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR тыңдаушы"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Виртуалды шынайылық тыңдаушысы"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Шарт провайдері"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Хабарландыруларды жіктеу қызметі"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN белсенді"</string>
