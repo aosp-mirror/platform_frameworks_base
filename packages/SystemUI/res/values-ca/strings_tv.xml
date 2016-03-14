@@ -19,15 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for pip_close (3480680679023423574) -->
-    <skip />
+    <string name="pip_close" msgid="3480680679023423574">"Tanca PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Pantalla completa"</string>
     <string name="pip_play" msgid="674145557658227044">"Reprodueix"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Posa en pausa"</string>
-    <!-- no translation found for pip_hold_home (340086535668778109) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (2627737116380318292) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_button (3957426748484904611) -->
-    <skip />
+    <string name="pip_hold_home" msgid="340086535668778109">"Prem "<b>"INICI"</b>" per contr. PIP"</string>
+    <string name="pip_onboarding_description" msgid="2627737116380318292">"Mantén premut botó INICI\n per controlar PIP"</string>
+    <string name="pip_onboarding_button" msgid="3957426748484904611">"D\'acord"</string>
 </resources>

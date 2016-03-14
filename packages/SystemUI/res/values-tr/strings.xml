@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekran görüntüsü alındı."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Ekran görüntünüzü izlemek için dokunun."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Ekran görüntüsü alınamadı."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Depolama alanı sınırlı olduğundan ekran görüntüsü kaydedilemiyor."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Uygulama veya kuruluşunuz, ekran görüntüsü alınmasına izin vermiyor."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB dosya aktarım seçenekleri"</string>

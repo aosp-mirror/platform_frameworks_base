@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"スクリーンショットを取得しました。"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"タップしてスクリーンショットを表示します。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"スクリーンショットをキャプチャできませんでした。"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"スクリーンショットの保存中に問題が発生しました。"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"空き容量が足りないため、スクリーンショットを保存できません。"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"アプリまたは組織によって許可されていないため、スクリーンショットは撮れません。"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USBファイル転送オプション"</string>

@@ -75,6 +75,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Wykonano zrzut ekranu."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dotknij, aby wyświetlić zrzut ekranu."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nie udało się wykonać zrzutu ekranu."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Nie można zapisać zrzutu ekranu, bo brakuje miejsca w pamięci."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB – opcje przesyłania plików"</string>

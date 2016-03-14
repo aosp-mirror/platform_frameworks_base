@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"સ્ક્રીનશોટ કેપ્ચર કર્યો."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"તમારો સ્ક્રીનશોટ જોવા માટે ટચ કરો."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"સ્ક્રીનશોટ કેપ્ચર કરી શકાયો નથી."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"સ્ક્રીનશૉટ સાચવવામાં સમયા આવી."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"મર્યાદિત સંગ્રહ સ્થાનને કારણે સ્ક્રીનશોટ સાચવી શકાતો નથી."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશોટ્સ લેવાની મંજૂરી નથી."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>

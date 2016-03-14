@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот тартылды."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Тийип, скриншотту көрүңүз."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот кылынбай жатат."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Сактагычта бош орун аз болгондуктан скриншот сакталбай жатат."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Скриншот тартууга колдонмо же ишканаңыз уруксат бербейт."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB менен файл өткөрүү мүмкүнчүлүктөрү"</string>

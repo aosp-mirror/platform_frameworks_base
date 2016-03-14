@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de ecrã efetuada"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toque para ver a captura de ecrã"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Não foi possível obter captura de ecrã."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Problema encontrado ao guardar a captura de ecrã."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Não é possível guardar a captura de ecrã devido a espaço de armazenamento limitado."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"A aplicação ou a sua entidade não tem autorização para tirar capturas de ecrã."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções de transm. de fich. USB"</string>

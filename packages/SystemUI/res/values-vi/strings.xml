@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Đã chụp ảnh màn hình."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Chạm để xem ảnh chụp màn hình của bạn."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Không thể chụp ảnh màn hình."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Đã gặp phải sự cố khi đang lưu ảnh chụp màn hình."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Không thể lưu ảnh chụp màn hình do giới hạn dung lượng bộ nhớ."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Ứng dụng hoặc tổ chức của bạn không cho phép chụp ảnh màn hình."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Tùy chọn truyền tệp USB"</string>
