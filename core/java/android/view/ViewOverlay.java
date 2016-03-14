@@ -216,6 +216,9 @@ public class ViewOverlay {
         public void clear() {
             removeAllViews();
             if (mDrawables != null) {
+                for (Drawable drawable : mDrawables) {
+                    drawable.setCallback(null);
+                }
                 mDrawables.clear();
             }
         }
