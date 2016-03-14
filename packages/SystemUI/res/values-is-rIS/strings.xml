@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skjámynd var tekin."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Snertu til að skoða skjámyndina."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Ekki tókst að taka skjámynd."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Ekki tókst að vista skjámynd vegna takmarkaðs geymslupláss."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Forritið eða fyrirtækið þitt leyfir ekki að teknar séu skjámyndir."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Valkostir USB-skráaflutnings"</string>
@@ -220,6 +222,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Kveikt á vinnustillingu."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Slökkt á vinnustillingu."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Kveikt á vinnustillingu."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"Birtustig skjás"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Slökkt er á 2G- og 3G-gögnum"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Slökkt er á 4G-gögnum"</string>

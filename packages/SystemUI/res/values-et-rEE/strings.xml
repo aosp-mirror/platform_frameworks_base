@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekraanipilt on jäädvustatud."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Puudutage kuvatõmmise vaatamiseks."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Kuvatõmmist ei saanud jäädvustada."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Piiratud salvestusruumi tõttu ei saa ekraanipilti salvestada."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-failiedastuse valikud"</string>
@@ -220,6 +222,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Töörežiim on sees."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Töörežiim on välja lülitatud."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Töörežiim on sisse lülitatud."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekraani heledus"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G andmekasutus on peatatud"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G andmekasutus on peatatud"</string>

@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት ይንኩ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ቅጽበታዊ ገጽ ዕይታን በማስቀመጥ ጊዜ ችግር አጋጥሟል።"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ባለው የተገደበ የማከማቻ ቦታ ምክንያት ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አይችልም።"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ቅጽበታዊ ገጽ እይታዎችን ማንሳት በመተግበሪያው ወይም በእርስዎ ድርጅት አይፈቀድም።"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
@@ -220,6 +221,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"የሥራ ሁነታ በርቷል።"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"የሥራ ሁነታ ጠፍቷል።"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"የሥራ ሁነታ በርቷል።"</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"ብሩህነት ያሳዩ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2ጂ-3ጂ ውሂብ ላፍታ ቆሟል"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4ጂ ውሂብ ላፍታ ቆሟል"</string>

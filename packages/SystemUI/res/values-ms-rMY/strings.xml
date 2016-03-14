@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Tangkapan skrin ditangkap."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Sentuh untuk melihat tangkapan skrin anda."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Tidak dapat menangkap tangkapan skrin."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Tidak dapat menyimpan tangkapan skrin kerana ruang storan terhad."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Apl atau organisasi anda tidak membenarkan pengambilan tangkapan skrin."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Pilihan pemindahan fail USB"</string>
@@ -220,6 +222,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Mod kerja hidup."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Mod kerja dimatikan."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Mod kerja dihidupkan."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"Kecerahan paparan"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data 2G-3G dijeda"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>

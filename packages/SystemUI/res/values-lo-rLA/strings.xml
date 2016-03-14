@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ຖ່າຍຮູບໜ້າຈໍແລ້ວ"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ແຕະເພື່ອເບິ່ງພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ເກີດບັນຫາໃນການບັນທຶກພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້ເນື່ອງຈາກພື້ນທີ່ຈັດເກັບຂໍ້ມູນມີຈຳກັດ."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ມີການຖ່າຍຮູບໜ້າຈໍ."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ໂຕເລືອກການຍ້າຍໄຟລ໌"</string>
@@ -220,6 +221,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"ໂໝດການເຮັດວຽກເປີດຢູ່."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"ໂໝດການເຮັດວຽກປິດຢູ່."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"ໂໝດການເຮັດວຽກເປີດຢູ່."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"​ຄວາມ​ແຈ້ງ​​ຂອງ​ຈໍ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"ຂໍ້​ມູນ 2G​-3G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ຂໍ້​ມູນ 4G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
