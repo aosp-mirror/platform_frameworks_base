@@ -19,6 +19,7 @@ package android.content.res;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.graphics.Color;
 
@@ -82,7 +83,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     private ColorStateListFactory mFactory;
 
     private int[][] mThemeAttrs;
-    private int mChangingConfigurations;
+    private @Config int mChangingConfigurations;
 
     private int[][] mStateSpecs;
     private int[] mColors;
@@ -251,7 +252,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
         int depth;
         int type;
 
-        int changingConfigurations = 0;
+        @Config int changingConfigurations = 0;
         int defaultColor = DEFAULT_COLOR;
 
         boolean hasUnresolvedAttrs = false;
@@ -440,7 +441,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      *
      * @see android.content.pm.ActivityInfo
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return mChangingConfigurations;
     }
 
@@ -620,7 +621,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mSrc.mChangingConfigurations;
         }
 

@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -229,7 +230,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations()
                 | (mState != null ? mState.getChangingConfigurations() : 0)
                 | mDrawable.getChangingConfigurations();
@@ -444,7 +445,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     abstract static class DrawableWrapperState extends Drawable.ConstantState {
         private int[] mThemeAttrs;
 
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         int mDensity = DisplayMetrics.DENSITY_DEFAULT;
 
         Drawable.ConstantState mDrawableState;
@@ -524,7 +525,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
         public abstract Drawable newDrawable(@Nullable Resources res);
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mDrawableState != null ? mDrawableState.getChangingConfigurations() : 0);
         }

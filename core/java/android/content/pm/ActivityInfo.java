@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.content.res.Configuration;
+import android.content.res.Configuration.NativeConfig;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -495,6 +496,28 @@ public class ActivityInfo extends ComponentInfo
     @ScreenOrientation
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                    CONFIG_MCC,
+                    CONFIG_MNC,
+                    CONFIG_LOCALE,
+                    CONFIG_TOUCHSCREEN,
+                    CONFIG_KEYBOARD,
+                    CONFIG_KEYBOARD_HIDDEN,
+                    CONFIG_NAVIGATION,
+                    CONFIG_ORIENTATION,
+                    CONFIG_SCREEN_LAYOUT,
+                    CONFIG_UI_MODE,
+                    CONFIG_SCREEN_SIZE,
+                    CONFIG_SMALLEST_SCREEN_SIZE,
+                    CONFIG_DENSITY,
+                    CONFIG_LAYOUT_DIRECTION,
+                    CONFIG_FONT_SCALE,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Config {}
+
     /**
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the IMSI MCC.  Set from the
@@ -629,7 +652,7 @@ public class ActivityInfo extends ComponentInfo
      *
      * @hide
      */
-    public static int activityInfoConfigToNative(int input) {
+    public static @NativeConfig int activityInfoConfigJavaToNative(@Config int input) {
         int output = 0;
         for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
             if ((input & (1 << i)) != 0) {
@@ -644,7 +667,7 @@ public class ActivityInfo extends ComponentInfo
      *
      * @hide
      */
-    public static int activityInfoConfigNativeToJava(int input) {
+    public static @Config int activityInfoConfigNativeToJava(@NativeConfig int input) {
         int output = 0;
         for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
             if ((input & CONFIG_NATIVE_BITS[i]) != 0) {

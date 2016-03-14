@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -134,7 +135,7 @@ public abstract class Drawable {
 
     private int[] mStateSet = StateSet.WILD_CARD;
     private int mLevel = 0;
-    private int mChangingConfigurations = 0;
+    private @Config int mChangingConfigurations = 0;
     private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
     private WeakReference<Callback> mCallback = null;
     private boolean mVisible = true;
@@ -249,7 +250,7 @@ public abstract class Drawable {
      *
      * @see android.content.pm.ActivityInfo
      */
-    public void setChangingConfigurations(int configs) {
+    public void setChangingConfigurations(@Config int configs) {
         mChangingConfigurations = configs;
     }
 
@@ -266,7 +267,7 @@ public abstract class Drawable {
      *
      * @see android.content.pm.ActivityInfo
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return mChangingConfigurations;
     }
 
@@ -1294,7 +1295,7 @@ public abstract class Drawable {
          * Return a bit mask of configuration changes that will impact
          * this drawable (and thus require completely reloading it).
          */
-        public abstract int getChangingConfigurations();
+        public abstract @Config int getChangingConfigurations();
 
         /**
          * @return Total pixel count

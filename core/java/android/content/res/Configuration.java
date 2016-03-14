@@ -22,8 +22,11 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.Config;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +35,8 @@ import android.util.LocaleList;
 import android.view.View;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -663,6 +668,28 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int seq;
 
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                    NATIVE_CONFIG_MCC,
+                    NATIVE_CONFIG_MNC,
+                    NATIVE_CONFIG_LOCALE,
+                    NATIVE_CONFIG_TOUCHSCREEN,
+                    NATIVE_CONFIG_KEYBOARD,
+                    NATIVE_CONFIG_KEYBOARD_HIDDEN,
+                    NATIVE_CONFIG_NAVIGATION,
+                    NATIVE_CONFIG_ORIENTATION,
+                    NATIVE_CONFIG_DENSITY,
+                    NATIVE_CONFIG_SCREEN_SIZE,
+                    NATIVE_CONFIG_VERSION,
+                    NATIVE_CONFIG_SCREEN_LAYOUT,
+                    NATIVE_CONFIG_UI_MODE,
+                    NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
+                    NATIVE_CONFIG_LAYOUTDIR,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NativeConfig {}
+
     /** @hide Native-specific bit mask for MCC config; DO NOT USE UNLESS YOU ARE SURE. */
     public static final int NATIVE_CONFIG_MCC = 0x0001;
     /** @hide Native-specific bit mask for MNC config; DO NOT USE UNLESS YOU ARE SURE. */
@@ -917,14 +944,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
-     * Copy the fields from delta into this Configuration object, keeping
-     * track of which ones have changed.  Any undefined fields in
-     * <var>delta</var> are ignored and not copied in to the current
-     * Configuration.
-     * @return Returns a bit mask of the changed fields, as per
-     * {@link #diff}.
+     * Copies the fields from delta into this Configuration object, keeping
+     * track of which ones have changed. Any undefined fields in {@code delta}
+     * are ignored and not copied in to the current Configuration.
+     *
+     * @return a bit mask of the changed fields, as per {@link #diff}
      */
-    public int updateFrom(Configuration delta) {
+    public @Config int updateFrom(@NonNull Configuration delta) {
         int changed = 0;
         if (delta.fontScale > 0 && fontScale != delta.fontScale) {
             changed |= ActivityInfo.CONFIG_FONT_SCALE;
@@ -1171,17 +1197,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
-     * Determine if a new resource needs to be loaded from the bit set of
+     * Determines if a new resource needs to be loaded from the bit set of
      * configuration changes returned by {@link #updateFrom(Configuration)}.
      *
-     * @param configChanges The mask of changes configurations as returned by
-     * {@link #updateFrom(Configuration)}.
-     * @param interestingChanges The configuration changes that the resource
-     * can handled, as given in {@link android.util.TypedValue#changingConfigurations}.
-     *
-     * @return Return true if the resource needs to be loaded, else false.
+     * @param configChanges the mask of changes configurations as returned by
+     *                      {@link #updateFrom(Configuration)}
+     * @param interestingChanges the configuration changes that the resource
+     *                           can handle as given in
+     *                           {@link android.util.TypedValue#changingConfigurations}
+     * @return {@code true} if the resource needs to be loaded, {@code false}
+     *         otherwise
      */
-    public static boolean needNewResources(int configChanges, int interestingChanges) {
+    public static boolean needNewResources(@Config int configChanges,
+            @Config int interestingChanges) {
         return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
     }
 

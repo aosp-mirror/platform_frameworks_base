@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public abstract class Animator implements Cloneable {
      * A set of flags which identify the type of configuration changes that can affect this
      * Animator. Used by the Animator cache.
      */
-    int mChangingConfigurations = 0;
+    @Config int mChangingConfigurations = 0;
 
     /**
      * If this animator is inflated from a constant state, keep a reference to it so that
@@ -344,7 +345,7 @@ public abstract class Animator implements Cloneable {
      * @see android.content.pm.ActivityInfo
      * @hide
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return mChangingConfigurations;
     }
 
@@ -358,7 +359,7 @@ public abstract class Animator implements Cloneable {
      * @see android.content.pm.ActivityInfo
      * @hide
      */
-    public void setChangingConfigurations(int configs) {
+    public void setChangingConfigurations(@Config int configs) {
         mChangingConfigurations = configs;
     }
 
@@ -368,7 +369,7 @@ public abstract class Animator implements Cloneable {
      * This method is called while loading the animator.
      * @hide
      */
-    public void appendChangingConfigurations(int configs) {
+    public void appendChangingConfigurations(@Config int configs) {
         mChangingConfigurations |= configs;
     }
 
@@ -564,7 +565,7 @@ public abstract class Animator implements Cloneable {
     private static class AnimatorConstantState extends ConstantState<Animator> {
 
         final Animator mAnimator;
-        int mChangingConf;
+        @Config int mChangingConf;
 
         public AnimatorConstantState(Animator animator) {
             mAnimator = animator;
@@ -574,7 +575,7 @@ public abstract class Animator implements Cloneable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConf;
         }
 

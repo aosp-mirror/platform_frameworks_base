@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -260,7 +261,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mNinePatchState.getChangingConfigurations();
     }
 
@@ -575,7 +576,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     final static class NinePatchState extends ConstantState {
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
 
         // Values loaded during inflation.
         NinePatch mNinePatch = null;
@@ -651,7 +652,7 @@ public class NinePatchDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
