@@ -1054,8 +1054,12 @@ public class PackageInstaller {
 
         /** {@hide} */
         @SystemApi
-        public void setInstallFlagsDowngrade() {
-            installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+        public void setAllowDowngrade(boolean allowDowngrade) {
+            if (allowDowngrade) {
+                installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            }
         }
 
         /** {@hide} */
