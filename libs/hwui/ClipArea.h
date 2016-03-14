@@ -106,6 +106,8 @@ struct ClipBase {
     // Bounds of the clipping area, used to define the scissor, and define which
     // portion of the stencil is updated/used
     Rect rect;
+
+    void dump() const;
 };
 
 struct ClipRect : ClipBase {

@@ -41,6 +41,10 @@ Rect transformAndCalculateBounds(const Rect& r, const Matrix4& transform) {
     return transformedBounds;
 }
 
+void ClipBase::dump() const {
+    ALOGD("mode %d" RECT_STRING, mode, RECT_ARGS(rect));
+}
+
 /*
  * TransformedRectangle
  */

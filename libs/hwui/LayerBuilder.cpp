@@ -349,8 +349,9 @@ void LayerBuilder::replayBakedOpsImpl(void* arg,
 }
 
 void LayerBuilder::dump() const {
-    ALOGD("LayerBuilder %p, %ux%u buffer %p, blo %p, rn %p",
-            this, width, height, offscreenBuffer, beginLayerOp, renderNode);
+    ALOGD("LayerBuilder %p, %ux%u buffer %p, blo %p, rn %p (%s)",
+            this, width, height, offscreenBuffer, beginLayerOp,
+            renderNode, renderNode ? renderNode->getName() : "-");
     for (const BatchBase* batch : mBatches) {
         batch->dump();
     }
