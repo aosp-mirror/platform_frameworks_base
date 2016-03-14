@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.ComponentName;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 import java.util.List;
@@ -140,4 +141,10 @@ public abstract class PackageManagerInternal {
      *             found on the system.
      */
     public abstract ApplicationInfo getApplicationInfo(String packageName, int userId);
+
+    /**
+     * Interface to {@link com.android.server.pm.PackageManagerService#getHomeActivitiesAsUser}.
+     */
+    public abstract ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
+            int userId);
 }

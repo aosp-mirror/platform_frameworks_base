@@ -16456,14 +16456,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
     @Override
     public ComponentName getHomeActivities(List<ResolveInfo> allHomeCandidates) {
+        return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
+    }
+
+    ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
+            int userId) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
-
-        final int callingUserId = UserHandle.getCallingUserId();
         List<ResolveInfo> list = queryIntentActivitiesInternal(intent, null,
-                PackageManager.GET_META_DATA, callingUserId);
+                PackageManager.GET_META_DATA, userId);
         ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
-                true, false, false, callingUserId);
+                true, false, false, userId);
 
         allHomeCandidates.clear();
         if (list != null) {
@@ -19251,6 +19254,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public ApplicationInfo getApplicationInfo(String packageName, int userId) {
             return PackageManagerService.this.getApplicationInfo(packageName, 0 /*flags*/, userId);
+        }
+
+        @Override
+        public ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
+                int userId) {
+            return PackageManagerService.this.getHomeActivitiesAsUser(allHomeCandidates, userId);
         }
     }
 

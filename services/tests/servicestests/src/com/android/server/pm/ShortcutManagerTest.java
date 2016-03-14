@@ -16,6 +16,7 @@
 package com.android.server.pm;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -27,6 +28,7 @@ import android.content.pm.ILauncherApps;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
@@ -191,6 +193,17 @@ public class ShortcutManagerTest extends AndroidTestCase {
         boolean injectIsLowRamDevice() {
             return mInjectdIsLowRamDevice;
         }
+
+        @Override
+        PackageManagerInternal injectPackageManagerInternal() {
+            return mMockPackageManagerInternal;
+        }
+
+        @Override
+        boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
+            // Sort of hack; do a simpler check.
+            return LAUNCHER_1.equals(callingPackage) || LAUNCHER_2.equals(callingPackage);
+        }
     }
 
     /** ShortcutManager with injection override methods. */
@@ -258,6 +271,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
     private Map<String, Integer> mInjectedPackageUidMap;
 
     private PackageManager mMockPackageManager;
+    private PackageManagerInternal mMockPackageManagerInternal;
     private UserManager mMockUserManager;
 
     private static final String CALLING_PACKAGE_1 = "com.android.test.1";
@@ -298,6 +312,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
         mClientContext = new ClientContext();
 
         mMockPackageManager = mock(PackageManager.class);
+        mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
 
         // Prepare injection values.
@@ -1889,6 +1904,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
             assertEquals(2, mManager.getRemainingCallCount());
         });
 
+        mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setLauncherComponent(
+                mService, new ComponentName("pkg1", "class"));
+
         // Restore.
         initService();
 
@@ -1918,6 +1936,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
             assertEquals("title2-2", getCallerShortcut("s2").getTitle());
         });
 
+        assertEquals("pkg1", mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM)
+                .getLauncherComponent().getPackageName());
+
         // Start another user
         mService.onStartUserLocked(USER_10);
 
@@ -1932,6 +1953,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
             assertEquals("title10-1-1", getCallerShortcut("s1").getTitle());
             assertEquals("title10-1-2", getCallerShortcut("s2").getTitle());
         });
+        assertNull(mService.getShortcutsForTest().get(USER_10).getLauncherComponent());
 
         // Try stopping the user
         mService.onCleanupUserInner(USER_10);
@@ -1941,4 +1963,8 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         // TODO Check all other fields
     }
+
+    // TODO Detailed test for hasShortcutPermissionInner().
+
+    // TODO Add tests for the command line functions too.
 }
