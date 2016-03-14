@@ -405,6 +405,12 @@ public interface WindowManagerPolicy {
          *         not attached to any stack.
          */
         int getStackId();
+
+        /**
+         * Returns true if the window is current in multi-windowing mode. i.e. it shares the
+         * screen with other application windows.
+         */
+        public boolean inMultiWindowMode();
     }
 
     /**
