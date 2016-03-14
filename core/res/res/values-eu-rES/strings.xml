@@ -1565,5 +1565,5 @@
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6351827251856877200">"Berrezarri jatorrizko egoerara gailua ohi bezala erabiltzen jarraitu ahal izateko"</string>
-    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ukitu informazio gehiago lortzeko."</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Sakatu informazio gehiago lortzeko."</string>
 </resources>

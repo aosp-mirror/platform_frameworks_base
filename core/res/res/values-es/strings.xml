@@ -909,8 +909,8 @@
     <string name="noApplications" msgid="2991814273936504689">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_application" msgid="250320989337856518">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> ha dejado de funcionar"</string>
     <string name="aerr_process" msgid="6201597323218674729">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha dejado de funcionar"</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sigue dejando de funcionar"</string>
-    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sigue dejando de funcionar"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sigue sin funcionar"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Reiniciar aplicación"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Restablecer y reiniciar aplicación"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar sugerencias"</string>
@@ -1135,7 +1135,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fondo de pantalla"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambiar fondo de pantalla"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Detector de notificaciones"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Procesador de Realidad Virtual"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Procesador de RV"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Proveedor de condiciones"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servicio de clasificación de notificaciones"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activada"</string>
