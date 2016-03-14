@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -971,7 +972,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mLayerState.getChangingConfigurations();
     }
 
@@ -1864,8 +1865,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         int mPaddingEnd = -1;
         int mOpacityOverride = PixelFormat.UNKNOWN;
 
-        int mChangingConfigurations;
-        int mChildrenChangingConfigurations;
+        @Config int mChangingConfigurations;
+        @Config int mChildrenChangingConfigurations;
 
         private boolean mHaveOpacity;
         private int mOpacity;
@@ -1989,7 +1990,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | mChildrenChangingConfigurations;
         }

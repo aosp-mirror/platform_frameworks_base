@@ -21,6 +21,7 @@ import android.annotation.ArrayRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.content.res.Configuration.NativeConfig;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.SparseArray;
@@ -796,7 +797,10 @@ public final class AssetManager implements AutoCloseable {
     /*package*/ static final int STYLE_DATA = 1;
     /*package*/ static final int STYLE_ASSET_COOKIE = 2;
     /*package*/ static final int STYLE_RESOURCE_ID = 3;
-    /*package*/ static final int STYLE_CHANGING_CONFIGURATIONS = 4;
+
+    /* Offset within typed data array for native changingConfigurations. */
+    static final int STYLE_CHANGING_CONFIGURATIONS = 4;
+
     /*package*/ static final int STYLE_DENSITY = 5;
     /*package*/ native static final boolean applyStyle(long theme,
             int defStyleAttr, int defStyleRes, long xmlParser,
@@ -845,7 +849,7 @@ public final class AssetManager implements AutoCloseable {
                                                                 TypedValue outValue,
                                                                 boolean resolve);
     /*package*/ native static final void dumpTheme(long theme, int priority, String tag, String prefix);
-    /*package*/ native static final int getThemeChangingConfigurations(long theme);
+    /*package*/ native static final @NativeConfig int getThemeChangingConfigurations(long theme);
 
     private native final long openXmlAssetNative(int cookie, String fileName);
 

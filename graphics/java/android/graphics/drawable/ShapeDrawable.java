@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -260,7 +261,7 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mShapeState.getChangingConfigurations();
     }
 
@@ -526,7 +527,7 @@ public class ShapeDrawable extends Drawable {
      */
     final static class ShapeState extends ConstantState {
         int[] mThemeAttrs;
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         Paint mPaint;
         Shape mShape;
         ColorStateList mTint = null;
@@ -571,7 +572,7 @@ public class ShapeDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
