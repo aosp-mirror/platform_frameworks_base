@@ -670,8 +670,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
 
             if (windowsAreFloating) {
-                // In floating modes (e.g. freeform, pinned) we have only to set the rectangle 
-                // if it wasn't set already. No need to intersect it with the (visible) 
+                // In floating modes (e.g. freeform, pinned) we have only to set the rectangle
+                // if it wasn't set already. No need to intersect it with the (visible)
                 // "content frame" since it is allowed to be outside the visible desktop.
                 if (mContainingFrame.isEmpty()) {
                     mContainingFrame.set(cf);
