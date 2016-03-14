@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"عکس صفحه‌نمایش گرفته شد."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده عکس صفحه‌نمایشتان، لمس کنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"عکس صفحه‌نمایش گرفته نشد."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توانید عکس صفحه‌نمایش را ذخیره کنید."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"این برنامه یا سازمان شما اجازه نمی‌دهند عکس صفحه‌نمایش بگیرید."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>
@@ -220,6 +222,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"حالت کار روشن."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"حالت کار خاموش شد."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"حالت کار روشن شد."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"روشنایی نمایشگر"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"‏داده 2G-3G موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏داده 4G موقتاً متوقف شده است"</string>
@@ -506,9 +512,9 @@
     <string name="headset" msgid="4534219457597457353">"هدست"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"هدفون وصل شد"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"هدست وصل شد"</string>
-    <string name="data_saver" msgid="5037565123367048522">"صرفه‌جویی در مصرف داده"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"صرفه‌جویی در مصرف داده روشن است"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"صرفه‌جویی در مصرف داده خاموش است"</string>
+    <string name="data_saver" msgid="5037565123367048522">"صرفه‌جویی داده"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"صرفه‌جویی داده روشن است"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"صرفه‌جویی داده خاموش است"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"روشن"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"خاموش"</string>
     <string name="nav_bar" msgid="1993221402773877607">"نوار پیمایش"</string>

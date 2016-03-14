@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रिनसट क्याप्चर गरियो।"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"तपाईँको स्क्रिनसट हेर्न छुनुहोस्।"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रिनसट क्याप्चर गर्न सकिएन।"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रिनसटलाई सुरक्षित गर्दा समस्या भयो।"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"सीमित भण्डारण स्थान उपलब्ध रहेको हुनाले स्क्रिनसटलाई सुरक्षित गर्न सकिँदैन।"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"अनुप्रयोग वा तपाईँको संगठनले स्क्रिनसट लिन अनुमति दॅिंदैन।"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाइल सार्ने विकल्पहरू"</string>
@@ -220,6 +221,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"कार्य मोड अन।"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"कार्य मोड बन्द भयो।"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"कार्य मोड सक्रिय भयो।"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"डेटा सेभरलाई निष्क्रिय पारियो।"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"डेटा सेभरलाई सक्रिय गरियो।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"प्रदर्शन चमक"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटा रोकिएको छ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटा रोकिएको छ"</string>

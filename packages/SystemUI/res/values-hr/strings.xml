@@ -74,6 +74,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Zaslon je snimljen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dodirnite za prikaz snimke zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nije bilo moguće snimiti zaslon."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Prilikom spremanja snimke zaslona pojavio se problem."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Zaslon nije snimljen zbog ograničenog prostora za pohranu."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Snimanje zaslona ne dopušta aplikacija ili vaša organizacija."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcije USB prijenosa datoteka"</string>
@@ -221,6 +222,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Način rada uključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Način rada isključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Način rada uključen."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"Svjetlina zaslona"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G – 3G podaci pauzirani"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G podaci pauzirani"</string>

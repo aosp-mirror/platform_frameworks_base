@@ -77,6 +77,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"المس لعرض لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"حدثت مشكلة أثناء حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"يتعذر حفظ لقطة الشاشة نظرًا لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"غير مسموح بالتقاط لقطات شاشة نظرًا لإذن يتعلق بالتطبيق أو بالمؤسسة."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
@@ -224,6 +225,10 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"وضع العمل قيد التشغيل."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"تم تعطيل وضع العمل."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"تم تشغيل وضع العمل."</string>
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"سطوع الشاشة"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"بيانات شبكات الجيل الثاني والثالث متوقفة مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"تم إيقاف بيانات شبكة الجيل الرابع مؤقتًا"</string>

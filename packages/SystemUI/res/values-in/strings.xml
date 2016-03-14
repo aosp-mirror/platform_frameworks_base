@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Tangkapan layar diambil."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Sentuh untuk melihat tangkapan layar Anda."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Tidak dapat mengambil tangkapan layar."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Terjadi masalah saat menyimpan tangkapan layar."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Tidak dapat menyimpan tangkapan layar karena ruang penyimpanan terbatas."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Mengambil tangkapan layar tidak diizinkan oleh aplikasi atau organisasi."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsi transfer file USB"</string>
@@ -220,6 +221,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Mode kerja aktif."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Mode kerja dinonaktifkan."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Mode kerja diaktifkan."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Penghemat Data nonaktif."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Penghemat Data diaktifkan."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Kecerahan tampilan"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data 2G-3G dijeda"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>
