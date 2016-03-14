@@ -9642,7 +9642,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean canShare() {
-        return canCopy() && isDeviceProvisioned();
+        if (!getContext().canStartActivityForResult() || !isDeviceProvisioned()) {
+            return false;
+        }
+        return canCopy();
     }
 
     boolean isDeviceProvisioned() {
@@ -9665,16 +9668,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean canProcessText() {
-        if (!getContext().canStartActivityForResult() || getId() == View.NO_ID
-                || hasPasswordTransformationMethod()) {
+        if (getId() == View.NO_ID) {
             return false;
         }
-
-        if (mText.length() > 0 && hasSelection() && mEditor != null) {
-            return true;
-        }
-
-        return false;
+        return canShare();
     }
 
     boolean canSelectAllText() {

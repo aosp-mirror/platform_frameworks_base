@@ -16,24 +16,42 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
+import android.annotation.LayoutRes;
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.session.MediaSessionLegacyHelper;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.AttributeSet;
+import android.view.ActionMode;
+import android.view.InputQueue;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 
+import com.android.internal.view.FloatingActionMode;
+import com.android.internal.widget.FloatingToolbar;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -56,6 +74,13 @@ public class StatusBarWindowView extends FrameLayout {
     private PhoneStatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
     private FalsingManager mFalsingManager;
+
+    // Implements the floating action mode for TextView's Cut/Copy/Past menu. Normally provided by
+    // DecorView, but since this is a special window we have to roll our own.
+    private View mFloatingActionModeOriginatingView;
+    private ActionMode mFloatingActionMode;
+    private FloatingToolbar mFloatingToolbar;
+    private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -301,5 +326,341 @@ public class StatusBarWindowView extends FrameLayout {
             a.recycle();
         }
     }
+
+    @Override
+    public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback,
+            int type) {
+        if (type == ActionMode.TYPE_FLOATING) {
+            return startActionMode(originalView, callback, type);
+        }
+        return super.startActionModeForChild(originalView, callback, type);
+    }
+
+    private ActionMode createFloatingActionMode(
+            View originatingView, ActionMode.Callback2 callback) {
+        if (mFloatingActionMode != null) {
+            mFloatingActionMode.finish();
+        }
+        cleanupFloatingActionModeViews();
+        final FloatingActionMode mode =
+                new FloatingActionMode(mContext, callback, originatingView);
+        mFloatingActionModeOriginatingView = originatingView;
+        mFloatingToolbarPreDrawListener =
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mode.updateViewLocationInWindow();
+                        return true;
+                    }
+                };
+        return mode;
+    }
+
+    private void setHandledFloatingActionMode(ActionMode mode) {
+        mFloatingActionMode = mode;
+        mFloatingToolbar = new FloatingToolbar(mContext, mFakeWindow);
+        ((FloatingActionMode) mFloatingActionMode).setFloatingToolbar(mFloatingToolbar);
+        mFloatingActionMode.invalidate();  // Will show the floating toolbar if necessary.
+        mFloatingActionModeOriginatingView.getViewTreeObserver()
+                .addOnPreDrawListener(mFloatingToolbarPreDrawListener);
+    }
+
+    private void cleanupFloatingActionModeViews() {
+        if (mFloatingToolbar != null) {
+            mFloatingToolbar.dismiss();
+            mFloatingToolbar = null;
+        }
+        if (mFloatingActionModeOriginatingView != null) {
+            if (mFloatingToolbarPreDrawListener != null) {
+                mFloatingActionModeOriginatingView.getViewTreeObserver()
+                        .removeOnPreDrawListener(mFloatingToolbarPreDrawListener);
+                mFloatingToolbarPreDrawListener = null;
+            }
+            mFloatingActionModeOriginatingView = null;
+        }
+    }
+
+    private ActionMode startActionMode(
+            View originatingView, ActionMode.Callback callback, int type) {
+        ActionMode.Callback2 wrappedCallback = new ActionModeCallback2Wrapper(callback);
+        ActionMode mode = createFloatingActionMode(originatingView, wrappedCallback);
+        if (mode != null && wrappedCallback.onCreateActionMode(mode, mode.getMenu())) {
+            setHandledFloatingActionMode(mode);
+        } else {
+            mode = null;
+        }
+        return mode;
+    }
+
+    private class ActionModeCallback2Wrapper extends ActionMode.Callback2 {
+        private final ActionMode.Callback mWrapped;
+
+        public ActionModeCallback2Wrapper(ActionMode.Callback wrapped) {
+            mWrapped = wrapped;
+        }
+
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            return mWrapped.onCreateActionMode(mode, menu);
+        }
+
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            requestFitSystemWindows();
+            return mWrapped.onPrepareActionMode(mode, menu);
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            return mWrapped.onActionItemClicked(mode, item);
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+            mWrapped.onDestroyActionMode(mode);
+            if (mode == mFloatingActionMode) {
+                cleanupFloatingActionModeViews();
+                mFloatingActionMode = null;
+            }
+            requestFitSystemWindows();
+        }
+
+        @Override
+        public void onGetContentRect(ActionMode mode, View view, Rect outRect) {
+            if (mWrapped instanceof ActionMode.Callback2) {
+                ((ActionMode.Callback2) mWrapped).onGetContentRect(mode, view, outRect);
+            } else {
+                super.onGetContentRect(mode, view, outRect);
+            }
+        }
+    }
+
+    /**
+     * Minimal window to satisfy FloatingToolbar.
+     */
+    private Window mFakeWindow = new Window(mContext) {
+        @Override
+        public void takeSurface(SurfaceHolder.Callback2 callback) {
+        }
+
+        @Override
+        public void takeInputQueue(InputQueue.Callback callback) {
+        }
+
+        @Override
+        public boolean isFloating() {
+            return false;
+        }
+
+        @Override
+        public void alwaysReadCloseOnTouchAttr() {
+        }
+
+        @Override
+        public void setContentView(@LayoutRes int layoutResID) {
+        }
+
+        @Override
+        public void setContentView(View view) {
+        }
+
+        @Override
+        public void setContentView(View view, ViewGroup.LayoutParams params) {
+        }
+
+        @Override
+        public void addContentView(View view, ViewGroup.LayoutParams params) {
+        }
+
+        @Override
+        public void clearContentView() {
+        }
+
+        @Override
+        public View getCurrentFocus() {
+            return null;
+        }
+
+        @Override
+        public LayoutInflater getLayoutInflater() {
+            return null;
+        }
+
+        @Override
+        public void setTitle(CharSequence title) {
+        }
+
+        @Override
+        public void setTitleColor(@ColorInt int textColor) {
+        }
+
+        @Override
+        public void openPanel(int featureId, KeyEvent event) {
+        }
+
+        @Override
+        public void closePanel(int featureId) {
+        }
+
+        @Override
+        public void togglePanel(int featureId, KeyEvent event) {
+        }
+
+        @Override
+        public void invalidatePanelMenu(int featureId) {
+        }
+
+        @Override
+        public boolean performPanelShortcut(int featureId, int keyCode, KeyEvent event, int flags) {
+            return false;
+        }
+
+        @Override
+        public boolean performPanelIdentifierAction(int featureId, int id, int flags) {
+            return false;
+        }
+
+        @Override
+        public void closeAllPanels() {
+        }
+
+        @Override
+        public boolean performContextMenuIdentifierAction(int id, int flags) {
+            return false;
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+        }
+
+        @Override
+        public void setBackgroundDrawable(Drawable drawable) {
+        }
+
+        @Override
+        public void setFeatureDrawableResource(int featureId, @DrawableRes int resId) {
+        }
+
+        @Override
+        public void setFeatureDrawableUri(int featureId, Uri uri) {
+        }
+
+        @Override
+        public void setFeatureDrawable(int featureId, Drawable drawable) {
+        }
+
+        @Override
+        public void setFeatureDrawableAlpha(int featureId, int alpha) {
+        }
+
+        @Override
+        public void setFeatureInt(int featureId, int value) {
+        }
+
+        @Override
+        public void takeKeyEvents(boolean get) {
+        }
+
+        @Override
+        public boolean superDispatchKeyEvent(KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean superDispatchKeyShortcutEvent(KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean superDispatchTouchEvent(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean superDispatchTrackballEvent(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean superDispatchGenericMotionEvent(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public View getDecorView() {
+            return StatusBarWindowView.this;
+        }
+
+        @Override
+        public View peekDecorView() {
+            return null;
+        }
+
+        @Override
+        public Bundle saveHierarchyState() {
+            return null;
+        }
+
+        @Override
+        public void restoreHierarchyState(Bundle savedInstanceState) {
+        }
+
+        @Override
+        protected void onActive() {
+        }
+
+        @Override
+        public void setChildDrawable(int featureId, Drawable drawable) {
+        }
+
+        @Override
+        public void setChildInt(int featureId, int value) {
+        }
+
+        @Override
+        public boolean isShortcutKey(int keyCode, KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public void setVolumeControlStream(int streamType) {
+        }
+
+        @Override
+        public int getVolumeControlStream() {
+            return 0;
+        }
+
+        @Override
+        public int getStatusBarColor() {
+            return 0;
+        }
+
+        @Override
+        public void setStatusBarColor(@ColorInt int color) {
+        }
+
+        @Override
+        public int getNavigationBarColor() {
+            return 0;
+        }
+
+        @Override
+        public void setNavigationBarColor(@ColorInt int color) {
+        }
+
+        @Override
+        public void setDecorCaptionShade(int decorCaptionShade) {
+        }
+
+        @Override
+        public void setResizingCaptionDrawable(Drawable drawable) {
+        }
+
+        @Override
+        public void onMultiWindowChanged() {
+        }
+
+        @Override
+        public void reportActivityRelaunched() {
+        }
+    };
+
 }
 

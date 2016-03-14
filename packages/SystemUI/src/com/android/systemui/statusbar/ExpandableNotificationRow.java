@@ -579,6 +579,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    public void closeRemoteInput() {
+        mPrivateLayout.closeRemoteInput();
+        mPublicLayout.closeRemoteInput();
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }

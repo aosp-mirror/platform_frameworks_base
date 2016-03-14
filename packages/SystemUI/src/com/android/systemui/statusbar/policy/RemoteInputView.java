@@ -29,8 +29,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -44,6 +46,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.stack.LongPressCancelable;
 
 /**
  * Host for the remote input.
@@ -64,6 +67,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private RemoteInputController mController;
 
     private NotificationData.Entry mEntry;
+    private LongPressCancelable mLongPressCancelable;
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -224,6 +228,30 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     public void afterTextChanged(Editable s) {
         updateSendButton();
+    }
+
+    public void close() {
+        mEditText.defocusIfNeeded();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mLongPressCancelable == null) {
+                ViewParent p = getParent();
+                while (p != null) {
+                    if (p instanceof LongPressCancelable) {
+                        mLongPressCancelable = (LongPressCancelable) p;
+                        break;
+                    }
+                    p = p.getParent();
+                }
+            }
+            if (mLongPressCancelable != null) {
+                mLongPressCancelable.requestDisallowLongPress();
+            }
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     /**
