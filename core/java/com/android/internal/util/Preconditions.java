@@ -56,7 +56,7 @@ public class Preconditions {
      * @return the string reference that was validated
      * @throws IllegalArgumentException if {@code string} is empty
      */
-    public static @NonNull String checkStringNotEmpty(final String string) {
+    public static @NonNull <T extends CharSequence> T checkStringNotEmpty(final T string) {
         if (TextUtils.isEmpty(string)) {
             throw new IllegalArgumentException();
         }
@@ -73,7 +73,7 @@ public class Preconditions {
      * @return the string reference that was validated
      * @throws IllegalArgumentException if {@code string} is empty
      */
-    public static @NonNull String checkStringNotEmpty(final String string,
+    public static @NonNull <T extends CharSequence> T checkStringNotEmpty(final T string,
             final Object errorMessage) {
         if (TextUtils.isEmpty(string)) {
             throw new IllegalArgumentException(String.valueOf(errorMessage));
@@ -141,13 +141,17 @@ public class Preconditions {
     /**
      * Check the requested flags, throwing if any requested flags are outside
      * the allowed set.
+     *
+     * @return the validated requested flags.
      */
-    public static void checkFlagsArgument(final int requestedFlags, final int allowedFlags) {
+    public static int checkFlagsArgument(final int requestedFlags, final int allowedFlags) {
         if ((requestedFlags & allowedFlags) != requestedFlags) {
             throw new IllegalArgumentException("Requested flags 0x"
                     + Integer.toHexString(requestedFlags) + ", but only 0x"
                     + Integer.toHexString(allowedFlags) + " are allowed");
         }
+
+        return requestedFlags;
     }
 
     /**
@@ -162,6 +166,22 @@ public class Preconditions {
             final String errorMessage) {
         if (value < 0) {
             throw new IllegalArgumentException(errorMessage);
+        }
+
+        return value;
+    }
+
+    /**
+     * Ensures that that the argument numeric value is non-negative.
+     *
+     * @param value a numeric int value
+     *
+     * @return the validated numeric value
+     * @throws IllegalArgumentException if {@code value} was negative
+     */
+    public static @IntRange(from = 0) int checkArgumentNonnegative(final int value) {
+        if (value < 0) {
+            throw new IllegalArgumentException();
         }
 
         return value;

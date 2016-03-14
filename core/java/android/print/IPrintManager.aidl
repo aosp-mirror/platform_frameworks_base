@@ -24,9 +24,11 @@ import android.print.IPrintDocumentAdapter;
 import android.print.PrintJobId;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintServicesChangeListener;
+import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
+import android.printservice.recommendation.RecommendationInfo;
 import android.printservice.PrintServiceInfo;
 
 /**
@@ -73,7 +75,6 @@ interface IPrintManager {
      * Get the print services.
      *
      * @param selectionFlags flags selecting which services to get
-     * @param selectedService if not null, the id of the print service to get
      * @param userId the id of the user requesting the services
      *
      * @return the list of selected print services.
@@ -88,6 +89,37 @@ interface IPrintManager {
      * @param userId the id of the user requesting the services
      */
     void setPrintServiceEnabled(in ComponentName service, boolean isEnabled, int userId);
+
+    /**
+     * Listen for changes to the print service recommendations.
+     *
+     * @param listener the listener to add
+     * @param userId the id of the user listening
+     *
+     * @see android.print.PrintManager#getPrintServiceRecommendations
+     */
+    void addPrintServiceRecommendationsChangeListener(in IRecommendationsChangeListener listener,
+            int userId);
+
+    /**
+     * Stop listening for changes to the print service recommendations.
+     *
+     * @param listener the listener to remove
+     * @param userId the id of the user requesting the removal
+     *
+     * @see android.print.PrintManager#getPrintServiceRecommendations
+     */
+    void removePrintServiceRecommendationsChangeListener(in IRecommendationsChangeListener listener,
+            int userId);
+
+    /**
+     * Get the print service recommendations.
+     *
+     * @param userId the id of the user requesting the recommendations
+     *
+     * @return the list of selected print services.
+     */
+    List<RecommendationInfo> getPrintServiceRecommendations(int userId);
 
     void createPrinterDiscoverySession(in IPrinterDiscoveryObserver observer, int userId);
     void startPrinterDiscovery(in IPrinterDiscoveryObserver observer,

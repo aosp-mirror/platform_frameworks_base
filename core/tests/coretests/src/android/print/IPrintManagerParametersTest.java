@@ -31,6 +31,7 @@ import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.printservice.PrintServiceInfo;
+import android.printservice.recommendation.IRecommendationsChangeListener;
 
 import android.print.mockservice.MockPrintService;
 import android.print.mockservice.PrintServiceCallbacks;
@@ -181,6 +182,17 @@ public class IPrintManagerParametersTest extends BasePrintTest {
                 new Handler(Looper.getMainLooper()));
     }
 
+    /**
+     * Create a IPrintServiceRecommendationsChangeListener object.
+     *
+     * @return the object
+     * @throws Exception if the object could not be created.
+     */
+    private IRecommendationsChangeListener
+    createMockIPrintServiceRecommendationsChangeListener() throws Exception {
+        return new PrintManager.PrintServiceRecommendationsChangeListenerWrapper(null,
+                new Handler(Looper.getMainLooper()));
+    }
 
     /**
      * Create a IPrinterDiscoveryObserver object.
@@ -554,6 +566,61 @@ public class IPrintManagerParametersTest extends BasePrintTest {
                 mIPrintManager.setPrintServiceEnabled(null, true, mUserId);
             }
         }, SecurityException.class);
+
+        // Cannot test bad user Id as these tests are allowed to call across users
+    }
+
+    /**
+     * test IPrintManager.addPrintServiceRecommendationsChangeListener
+     */
+    @MediumTest
+    public void testAddPrintServiceRecommendationsChangeListener() throws Exception {
+        final IRecommendationsChangeListener listener =
+                createMockIPrintServiceRecommendationsChangeListener();
+
+        mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
+
+        assertException(new Invokable() {
+            @Override
+            public void run() throws Exception {
+                mIPrintManager.addPrintServiceRecommendationsChangeListener(null, mUserId);
+            }
+        }, NullPointerException.class);
+
+        // Cannot test bad user Id as these tests are allowed to call across users
+    }
+
+    /**
+     * test IPrintManager.removePrintServicesChangeListener
+     */
+    @MediumTest
+    public void testRemovePrintServiceRecommendationsChangeListener() throws Exception {
+        final IRecommendationsChangeListener listener =
+                createMockIPrintServiceRecommendationsChangeListener();
+
+        mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
+        mIPrintManager.removePrintServiceRecommendationsChangeListener(listener, mUserId);
+
+        // Removing unknown listeners is a no-op
+        mIPrintManager.removePrintServiceRecommendationsChangeListener(listener, mUserId);
+
+        mIPrintManager.addPrintServiceRecommendationsChangeListener(listener, mUserId);
+        assertException(new Invokable() {
+            @Override
+            public void run() throws Exception {
+                mIPrintManager.removePrintServiceRecommendationsChangeListener(null, mUserId);
+            }
+        }, NullPointerException.class);
+
+        // Cannot test bad user Id as these tests are allowed to call across users
+    }
+
+    /**
+     * test IPrintManager.getPrintServiceRecommendations
+     */
+    @MediumTest
+    public void testGetPrintServiceRecommendations() throws Exception {
+        mIPrintManager.getPrintServiceRecommendations(mUserId);
 
         // Cannot test bad user Id as these tests are allowed to call across users
     }
