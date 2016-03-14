@@ -25,7 +25,7 @@
     <bool name="config_defaultWindowFeatureOptionsPanel">false</bool>
 
     <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
-    <string translatable="false" name="config_defaultPictureInPictureBounds">"1420 100 1820 325"</string>
+    <string translatable="false" name="config_defaultPictureInPictureBounds">"1328 54 1808 324"</string>
 
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows, when the PIP
          is located in center. -->

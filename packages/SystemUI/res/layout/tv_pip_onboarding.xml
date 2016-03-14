@@ -37,10 +37,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         android:fontFamily="sans-serif"
         android:textSize="16sp"
         android:textColor="#EEEEEE"
         android:lineSpacingMultiplier="1.28"
+        android:gravity="top|center_horizontal"
         android:text="@string/pip_onboarding_description" />
     <Button
         android:id="@+id/close"
