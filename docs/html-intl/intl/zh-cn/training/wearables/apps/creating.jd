@@ -1,0 +1,225 @@
+page.title=创建并运行可穿戴式设备应用
+page.tags=wear
+helpoutsWidget=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本课程将向您展示如何</h2>
+<ol>
+  <li><a href="#UpdateSDK">更新 SDK</a></li>
+  <li><a href="#SetupEmulator">设置 Android Wear 模拟器或设备</a></li>
+  <li><a href="#CreateProject">创建项目</a></li>
+  <li><a href="#Install">安装可穿戴式设备应用</a></li>
+  <li><a href="#Libraries">包含正确的库</a></li>
+</ol>
+</div>
+</div>
+
+<p>可穿戴式设备应用直接在可穿戴式设备上运行，让您可以直接访问可穿戴式设备上的底层硬件（如传感器）、Activity、服务等。
+
+</p>
+
+<p>如果您想要发布到 Google Play 商店，还需要提供包含可穿戴式设备应用的协同手持式设备应用。可穿戴式设备不支持 Google Play 商店，因此，用户可下载协同手持式设备应用，后者自动将可穿戴式设备应用推送到可穿戴式设备上。
+
+
+手持式设备应用还可用于执行繁重的处理、网络操作或其他工作，以及将处理结果发送到可穿戴式设备。
+
+
+</p>
+
+<p>此课程介绍如何设置设备或模拟器，并创建一个同时包含可穿戴式设备应用和手持式设备应用的项目。
+
+</p>
+
+<h2 id="UpdateSDK">更新 SDK</h2>
+
+<p>在您着手构建可穿戴式设备应用前，必须：</p>
+
+<ul>
+  <li><strong>将您的 SDK 工具更新到 23.0.0 或更高版本</strong>
+    <br>
+    利用更新后的 SDK 工具，您可以构建和测试可穿戴式设备应用。
+  </li>
+  <li><strong>将您的 SDK 平台更新为 Android 4.4W.2 (API 20) 或更高版本</strong>
+    <br>
+    更新后的平台版本提供了新的可穿戴式设备应用 API。
+  </li>
+</ul>
+
+<p>若要将 SDK 更新为上述组件，请参阅<a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">获取最新的 SDK 工具</a>
+。</p>
+
+
+<h2 id="SetupEmulator">设置 Android Wear 模拟器或设备</h2>
+<p>我们建议您在真实的硬件上进行开发，以便您可以更好地衡量用户体验。
+不过，通过模拟器，您可以测试不同类型的屏幕形状，这对于测试非常有用。
+</p>
+
+<h3>设置 Android Wear 虚拟设备</h3>
+
+<p>若要设置 Android Wear 虚拟设备，请：</p>
+<ol>
+  <li>点击 <b>Tools &gt; Android &gt; AVD Manager</b>。</li>
+  <li>点击 <b>Create Virtual Device...</b>。</li>
+  <ol>
+    <li>在“Category”列表中点击 <b>Wear</b>：</li>
+    <li>选择 Android Wear Square 或 Android Wear Round。</li>
+    <li>点击 <b>Next</b>。</li>
+    <li>选择版本名称（例如，KitKat Wear）。</li>
+    <li>点击 <b>Next</b>。</li>
+    <li>（可选）更改虚拟设备的任意首选项。</li>
+    <li>点击 <b>Finish</b>。</li>
+  </ol>
+<li>启动模拟器：
+<ol>
+  <li>选择您刚创建的虚拟设备。</li>
+  <li>点击 <b>Play</b> 按钮。</li>
+  <li>等待模拟器初始化并显示 Android Wear 主屏幕。</li>
+</ol>
+</li>
+<li>将手持式设备与模拟器配对：
+<ol>
+  <li>在手持式设备上，从 Google Play 安装 Android Wear 应用。</li>
+  <li>通过 USB 将手持式设备连接到计算机。</li>
+  <li>将 AVD 的通信端口转发到连接的手持式设备（每次连接手持式设备时必须进行此操作）：
+
+  <pre>adb -d forward tcp:5601 tcp:5601</pre>
+  </li>
+  <li>在手持式设备上启动 Android Wear 应用并连接到模拟器。</li>
+  <li>点击 Android Wear 应用右上角的菜单并选择
+<b>Demo Cards</b>。</li>
+  <li>您选择的卡片作为通知显示在模拟器主屏幕上。</li>
+</ol>
+</li>
+</ol>
+
+<h3 id="SetupDevice">设置 Android Wear 设备</h3>
+<p>若要设置 Android Wear 设备，请：</p>
+<ol>
+  <li>在手持式设备上安装 Android Wear 应用，可通过 Google Play 获取。</li>
+  <li>按照应用的说明将手持式设备与可穿戴式设备配对。
+  这样，您可以测试同步的手持式设备通知（如果您正在构建这些通知）。</li>
+  <li>在您的手机上使 Android Wear 应用保持打开状态。</li>
+  <li>在 Android Wear 设备上启用 adb 调试。</li>
+  <ol>
+    <li>请转到 <strong>Settings &gt; About</strong>。</li>
+    <li>连续点击 <strong>Build number</strong> 七次。</li>
+    <li>向右滑动返回“Settings”菜单。</li>
+    <li>转到屏幕底部的 <strong>Developer options</strong>。
+    </li>
+    <li>点击 <strong>ADB Debugging</strong> 以启用 adb。</li>
+  </ol>
+  <li>通过 USB 将可穿戴式设备连接到您的计算机，以便您可以在开发时将应用直接安装在可穿戴式设备上。
+可穿戴式设备应用和 Android Wear 应用上会显示一条消息，提示您允许调试。
+</li>
+
+  <p class="note"><strong>注</strong>：如果您无法通过 USB 将可穿戴式设备连接到计算机，您可以尝试<a href="{@docRoot}training/wearables/apps/bt-debugging.html">通过蓝牙连接</a>。
+
+
+  </p>
+
+  <li>在 Android Wear 应用上，选择 <strong>Always allow from this computer</strong> 并点击
+<strong>OK</strong>。</li>
+</ol>
+
+<p>Android Studio 上的 Android 工具窗口显示来自可穿戴式设备的系统日志。<i></i>
+运行 <code>adb devices</code> 命令也可列出可穿戴式设备。</p>
+
+<h2 id="CreateProject">创建项目</h2>
+
+<p>若要着手开发，请先创建包含可穿戴式设备和手持式设备应用模块的应用项目。
+在 Android Studio 中，点击 <b>File</b> &gt;
+ <b>New Project</b>，并按照项目向导说明操作，如<a href="{@docRoot}sdk/installing/create-project.html">创建项目</a>中所述。
+
+按照向导进行操作时，请输入以下信息：</p>
+
+<ol>
+  <li>在 <b>Configure your Project</b> 窗口中，输入应用名称和软件包名称。
+</li>
+  <li>在 <b>Form Factors</b> 窗口中：
+    <ul>
+      <li>选择 <b>Phone and Tablet</b>，然后在 <b>Minimum SDK</b> 下选择 <b>API 9: Android 2.3 (Gingerbread)</b>。
+</li>
+      <li>选择 <b>Wear</b>，然后在 <b>Minimum SDK</b> 下选择 <b>API 20: Android 4.4 (KitKat Wear)</b>。
+</li>
+    </ul>
+  </li>
+  <li>在第一个 <b>Add an Activity</b> 窗口中，针对移动设备添加空白 Activity。</li>
+  <li>在第二个 <b>Add an Activity</b> 窗口中，针对穿戴设备添加空白 Activity。</li>
+</ol>
+  <p>向导完成时，Android Studio 将创建一个包含两个模块（<b>mobile</b>
+和 <b>wear</b>）的新项目。现在，您有一个可供手持式设备应用和可穿戴式设备应用使用的项目，您可以针对该项目创建 Activity、服务和自定义布局。
+手持式设备应用处理大多数繁重事务，如网络通信、密集型处理或需要大量用户交互的任务。
+
+当应用完成这些操作时，您的应用可通过通知或同步数据并将其发送到可穿戴式设备，将处理结果通知给可穿戴式设备。
+
+</p>
+
+  <p class="note"><b>注</b>：<b>wear</b> 模块还包含一个使用
+<a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>的 "Hello World" Activity。
+
+  该类可根据设备屏幕是圆形还是方形扩充布局。
+  <a href="{@docRoot}reference/android/support/wearable/view/WatchViewStub.html"><code>WatchViewStub</code></a>
+ 类是<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">可穿戴式设备支持库</a>提供的 UI 小工具之一。
+
+
+  </p>
+</li>
+
+<h2 id="Install">安装可穿戴式设备应用</h2>
+
+<p>开发时，与手持式设备应用相似，直接将应用安装到可穿戴式设备。使用 Android Studio 上的 <code>adb install</code> 或 <b>Play</b> 按钮。
+</p>
+
+<p>准备向用户发布应用时，将可穿戴式设备应用嵌入手持式设备应用的内部。
+用户从 Google Play 安装手持式设备应用时，已连接的可穿戴式设备会自动接收可穿戴式设备应用。
+</p>
+
+<p class="note"><b>注</b>：自动安装可穿戴式设备应用的功能仅支持发布密钥，如果您使用调试密钥签署应用，将无法自动安装。
+有关如何正确打包可穿戴式设备应用的完整信息，请参阅<a href="{@docRoot}training/wearables/apps/packaging.html">打包可穿戴式设备应用</a>
+
+。</p>
+
+<li>
+要将“Hello World”应用安装到可穿戴式设备，请从 <b>Run/Debug
+configuration</b> 下拉菜单中选择 <b>wear</b>，然后点击 <b>Play</b> 按钮。此时，该 Activity 将出现在可穿戴式设备上并显示“Hello world!”
+
+</li></ol>
+<h2 id="Libraries">包含正确的库</h2>
+
+<p>项目向导将在相应模块的 <code>build.gradle</code> 文件中为您导入正确的依赖项。不过，这些依赖项并不是必需的，因此，请阅读以下说明以了解您是否需要它们：
+
+
+</p>
+
+<b>通知</b>
+<p><a href="{@docRoot}tools/support-library/features.html#v4">Android
+v4 支持库</a>（或 v13，其包含 v4）包含的 API 可扩展手持式设备上的现有通知，使之支持可穿戴式设备。
+</p>
+
+<p>对于仅显示在可穿戴式设备上的通知（意味着这些通知由可穿戴式设备上运行的应用发出），您只需在可穿戴式设备上使用标准框架 API（API 级别 20），并在项目的 <b>mobile</b> 模块中移除支持库依赖项。
+
+
+
+</p>
+
+<b>Wearable Data Layer</b>
+<p>若要通过 Wearable Data Layer API 在可穿戴式设备和手持式设备之间同步和发送数据，您需要最新版本的
+<a href="{@docRoot}google/play-services/setup.html">Google Play 服务</a>。如果您不打算使用这些 API，则从这两个模块中移除依赖项。
+
+</p>
+
+<b>Wearable UI 支持库</b>
+<p>这是非官方库，其包含<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary">专为可穿戴式设备设计的 UI 小工具</a>。
+
+我们建议您在应用中使用这些库，因为它们可作为最佳实践的范例，但仍可随时进行更改。
+不过，更新库时，您的应用不会中断，因为这些库已编译到您的应用中。
+要从更新的库中获取新功能，您只需静态链接新版本，然后相应更新您的应用。
+此库仅适用于创建可穿戴式设备应用。
+
+</p>
+
+<p>在后面的课程中，您将学习如何创建专为可穿戴式设备设计的布局，以及如何使用平台支持的各种语音操作。
+</p>
