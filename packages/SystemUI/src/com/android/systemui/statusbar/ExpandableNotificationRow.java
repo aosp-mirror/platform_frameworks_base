@@ -745,6 +745,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public Animator getTranslateViewAnimator(final float leftTarget,
             AnimatorUpdateListener listener) {
+        if (mTranslateAnim != null) {
+            mTranslateAnim.cancel();
+        }
         if (areGutsExposed()) {
             // No translation if guts are exposed.
             return null;
@@ -769,19 +772,27 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     if (listener != null) {
                         translateAnim.addUpdateListener(listener);
                     }
-                }
-                translateAnim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator anim) {
-                        if (mSettingsIconRow != null && leftTarget == 0) {
-                            mSettingsIconRow.resetState();
+                    translateAnim.addListener(new AnimatorListenerAdapter() {
+                        boolean cancelled = false;
+
+                        @Override
+                        public void onAnimationCancel(Animator anim) {
+                            cancelled = true;
                         }
-                        mTranslateAnim = null;
-                    }
-                });
+
+                        @Override
+                        public void onAnimationEnd(Animator anim) {
+                            if (!cancelled && mSettingsIconRow != null && leftTarget == 0) {
+                                mSettingsIconRow.resetState();
+                                mTranslateAnim = null;
+                            }
+                        }
+                    });
+                }
                 set.play(translateAnim);
             }
         }
+        mTranslateAnim = set;
         return set;
     }
 
