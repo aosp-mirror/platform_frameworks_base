@@ -23,7 +23,7 @@
     <string name="pip_fullscreen" msgid="8604643018538487816">"မျက်နှာပြင် အပြည့်"</string>
     <string name="pip_play" msgid="674145557658227044">"ဖွင့်ပါ"</string>
     <string name="pip_pause" msgid="8412075640017218862">"ဆိုင်းငံ့ပါ"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"PIP ကိုထိန်းချုပ်ရန် "<b>"ပင်မခလုတ်"</b>" ကိုဖိထားပါ"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"PIP ကိုထိန်းချုပ်ရန် ပင်မခလုတ်\nကိုနှိပ်ပြီးဖိထားပါ"</string>
+    <string name="pip_hold_home" msgid="340086535668778109">"PIP ကိုထိန်းချုပ်ရန် "<b>"ပင်မ"</b>" ခလုတ်ကို ဖိထားပါ"</string>
+    <string name="pip_onboarding_description" msgid="2627737116380318292">"PIP ကိုထိန်းချုပ်ရန် ပင်မ\nခလုတ်ကို နှိပ်ပြီးဖိထားပါ"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"ရပါပြီ"</string>
 </resources>

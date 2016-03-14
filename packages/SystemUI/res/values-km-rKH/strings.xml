@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"បានជួបប្រទះបញ្ហាខណៈពេលរក្សាទុកការថតអេក្រង់"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"មិនអាចរក្សាទុករូបថតអេក្រង់បានទេដោយសារទំហំផ្ទុកមានកម្រិត។"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ការថតរូបអេក្រង់មិនត្រូវបានអនុញ្ញាតដោយកម្មវិធីនេះ ឬស្ថាប័នរបស់អ្នក។"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ជម្រើស​ផ្ទេរ​ឯកសារ​តាម​យូអេសប៊ី"</string>

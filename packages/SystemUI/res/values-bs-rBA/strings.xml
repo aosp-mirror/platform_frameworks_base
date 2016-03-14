@@ -74,6 +74,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekran snimljen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dodirnite za prikaz snimka ekrana."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Došlo je do greške prilikom snimanja ekrana."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Snimak ekrana se ne može sačuvati zbog manjka prostora za pohranu."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Aplikacija ili vaša organizacija ne dopuštaju pravljenje snimaka ekrana."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcije USB prijenosa fajlova"</string>

@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Λήφθηκε το στιγμιότυπο οθόνης ."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Αγγίξτε για να δείτε το στιγμιότυπο οθόνης σας"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Παρουσιάστηκε πρόβλημα κατά την αποθήκευση του στιγμιότυπου οθόνης."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Δεν είναι δυνατή η αποθήκευση του στιγμιότυπου οθόνης λόγω περιορισμένου χώρου αποθήκευσης."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Η λήψη στιγμιοτύπων οθόνης δεν επιτρέπεται από την εφαρμογή ή από τον οργανισμό σας."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Επιλογές μεταφοράς αρχείων μέσω USB"</string>

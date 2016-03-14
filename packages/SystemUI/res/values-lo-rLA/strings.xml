@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ຖ່າຍຮູບໜ້າຈໍແລ້ວ"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ແຕະເພື່ອເບິ່ງພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ເກີດບັນຫາໃນການບັນທຶກພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້ເນື່ອງຈາກພື້ນທີ່ຈັດເກັບຂໍ້ມູນມີຈຳກັດ."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ມີການຖ່າຍຮູບໜ້າຈໍ."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ໂຕເລືອກການຍ້າຍໄຟລ໌"</string>

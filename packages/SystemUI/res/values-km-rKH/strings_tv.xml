@@ -19,15 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for pip_close (3480680679023423574) -->
-    <skip />
+    <string name="pip_close" msgid="3480680679023423574">"បិទ PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"ពេញអេក្រង់"</string>
     <string name="pip_play" msgid="674145557658227044">"ចាក់"</string>
     <string name="pip_pause" msgid="8412075640017218862">"ផ្អាក"</string>
-    <!-- no translation found for pip_hold_home (340086535668778109) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (2627737116380318292) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_button (3957426748484904611) -->
-    <skip />
+    <string name="pip_hold_home" msgid="340086535668778109">"សង្កត់ប៊ូតុង "<b>"ដើម"</b>" ដើម្បីគ្រប់គ្រង PIP"</string>
+    <string name="pip_onboarding_description" msgid="2627737116380318292">"ចុច និងសង្កត់ប៊ូតុង ដើម\nដើម្បីគ្រប់គ្រង PIP"</string>
+    <string name="pip_onboarding_button" msgid="3957426748484904611">"យល់ហើយ"</string>
 </resources>

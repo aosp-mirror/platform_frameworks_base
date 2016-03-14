@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de pantalla gardada."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca para ver a captura de pantalla."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Non se puido facer a captura de pantalla."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Non se pode gardar a captura de pantalla porque o espazo de almacenamento é limitado."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"A aplicación ou a túa organización non permite realizar capturas de pantalla."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcións de transferencia USB"</string>

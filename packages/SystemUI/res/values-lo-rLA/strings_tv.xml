@@ -19,15 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for pip_close (3480680679023423574) -->
-    <skip />
+    <string name="pip_close" msgid="3480680679023423574">"ປິດ PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"ເຕັມໜ້າຈໍ"</string>
     <string name="pip_play" msgid="674145557658227044">"ຫຼິ້ນ"</string>
     <string name="pip_pause" msgid="8412075640017218862">"ຢຸດຊົ່ວຄາວ"</string>
-    <!-- no translation found for pip_hold_home (340086535668778109) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (2627737116380318292) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_button (3957426748484904611) -->
-    <skip />
+    <string name="pip_hold_home" msgid="340086535668778109">"ກົດ "<b>"HOME"</b>" ຄ້າງໄວ້ເພື່ອຄວບຄຸມ PIP"</string>
+    <string name="pip_onboarding_description" msgid="2627737116380318292">"ກົດປຸ່ມ HOME\nຄ້າງໄວ້ເພື່ອຄວບຄຸມ PIP"</string>
+    <string name="pip_onboarding_button" msgid="3957426748484904611">"ເຂົ້າໃຈແລ້ວ"</string>
 </resources>

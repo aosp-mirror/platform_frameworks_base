@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"عکس صفحه‌نمایش گرفته شد."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده عکس صفحه‌نمایشتان، لمس کنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"عکس صفحه‌نمایش گرفته نشد."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توانید عکس صفحه‌نمایش را ذخیره کنید."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"این برنامه یا سازمان شما اجازه نمی‌دهند عکس صفحه‌نمایش بگیرید."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏گزینه‌های انتقال فایل USB"</string>
@@ -510,9 +512,9 @@
     <string name="headset" msgid="4534219457597457353">"هدست"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"هدفون وصل شد"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"هدست وصل شد"</string>
-    <string name="data_saver" msgid="5037565123367048522">"صرفه‌جویی در مصرف داده"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"صرفه‌جویی در مصرف داده روشن است"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"صرفه‌جویی در مصرف داده خاموش است"</string>
+    <string name="data_saver" msgid="5037565123367048522">"صرفه‌جویی داده"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"صرفه‌جویی داده روشن است"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"صرفه‌جویی داده خاموش است"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"روشن"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"خاموش"</string>
     <string name="nav_bar" msgid="1993221402773877607">"نوار پیمایش"</string>

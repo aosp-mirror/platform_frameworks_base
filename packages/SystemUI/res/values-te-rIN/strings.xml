@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"స్క్రీన్‌షాట్ క్యాప్చర్ చేయబడింది."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"మీ స్క్రీన్‌షాట్‌ను వీక్షించడానికి తాకండి."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"స్క్రీన్‌షాట్‌ను క్యాప్చర్ చేయడం సాధ్యపడలేదు."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"పరిమిత నిల్వ స్థలం కారణంగా స్క్రీన్‌షాట్‌ను సేవ్ చేయడం సాధ్యపడదు."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"స్క్రీన్‌షాట్‌లు తీయడానికి అనువర్తనం లేదా మీ సంస్థ అనుమతించలేదు."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ఫైల్ బదిలీ ఎంపికలు"</string>

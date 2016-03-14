@@ -73,6 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"სკრინშოტი გადაღებულია."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"შეეხეთ ეკრანის სურათის სანახავად."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ვერ მოხერხდა ეკრანის ანაბეჭდის გადაღება."</string>
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ეკრანის ანაბეჭდის შენახვა ვერ მოხერხდა შეზღუდული მეხსიერების გამო."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ეკრანის ანაბეჭდების შექმნა არ არის ნებადართული აპის ან თქვენი ორგანიზაციის მიერ."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ფაილის ტრანსფერის პარამეტრები"</string>

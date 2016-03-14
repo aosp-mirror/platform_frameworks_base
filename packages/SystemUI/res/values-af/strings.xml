@@ -73,6 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skermkiekie geneem."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak om jou skermkiekie te sien."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Kon nie skermkiekie neem nie."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Kon nie skermkiekie stoor nie."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Kan weens beperkte bergingspasie nie skermkiekie stoor nie."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Die program of jou organisasie laat nie toe dat skermkiekies geneem word nie."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-lêeroordrag-opsies"</string>

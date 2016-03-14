@@ -74,6 +74,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Zaslon je snimljen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dodirnite za prikaz snimke zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nije bilo moguće snimiti zaslon."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Prilikom spremanja snimke zaslona pojavio se problem."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Zaslon nije snimljen zbog ograničenog prostora za pohranu."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Snimanje zaslona ne dopušta aplikacija ili vaša organizacija."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcije USB prijenosa datoteka"</string>
