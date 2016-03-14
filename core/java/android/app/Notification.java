@@ -4571,13 +4571,13 @@ public class Notification implements Parcelable
 
         private void buildIntoRemoteViewContent(RemoteViews remoteViews,
                 RemoteViews customContent) {
-            remoteViews.removeAllViews(R.id.notification_main_column);
-            // Need to clone customContent before adding, because otherwise it can no longer be
-            // parceled independently of remoteViews.
             if (customContent != null) {
+                // Need to clone customContent before adding, because otherwise it can no longer be
+                // parceled independently of remoteViews.
                 customContent = customContent.clone();
+                remoteViews.removeAllViews(R.id.notification_main_column);
+                remoteViews.addView(R.id.notification_main_column, customContent);
             }
-            remoteViews.addView(R.id.notification_main_column, customContent);
             // also update the end margin if there is an image
             int endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
                     R.dimen.notification_content_margin_end);
@@ -4680,13 +4680,13 @@ public class Notification implements Parcelable
 
         private RemoteViews buildIntoRemoteView(RemoteViews remoteViews, int id,
                 RemoteViews customContent) {
-            remoteViews.removeAllViews(id);
-            // Need to clone customContent before adding, because otherwise it can no longer be
-            // parceled independently of remoteViews.
             if (customContent != null) {
+                // Need to clone customContent before adding, because otherwise it can no longer be
+                // parceled independently of remoteViews.
                 customContent = customContent.clone();
+                remoteViews.removeAllViews(id);
+                remoteViews.addView(id, customContent);
             }
-            remoteViews.addView(id, customContent);
             return remoteViews;
         }
     }
