@@ -75,7 +75,9 @@ public abstract class DevicePolicyManagerInternal {
 
     /**
      * Checks if a given package has a device or a profile owner for the given user.
-     * </br><em>Does <b>not</b> support negative userIds like {@link UserHandle#USER_ALL}</em>
+     * <p>
+     * <em>Note: does <b>not</b> support negative userIds like {@link UserHandle#USER_ALL}</em>
+     *
      * @param packageName The package to check
      * @param userId the userId to check for.
      * @return true if package has a device or profile owner, false otherwise.
