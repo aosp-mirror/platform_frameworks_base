@@ -24,13 +24,19 @@
     <TextView
         android:id="@+id/guide_overlay"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:textSize="14sp"
         android:textColor="#EEEEEE"
         android:fontFamily="sans-serif"
         android:background="@drawable/tv_pip_overlay_background"
+        android:lineSpacingMultiplier="1.465"
         android:gravity="center"
+        android:maxLines="2"
         android:text="@string/pip_hold_home" />
     <LinearLayout
         android:id="@+id/guide_buttons"

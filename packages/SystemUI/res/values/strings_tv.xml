@@ -27,13 +27,12 @@
     <string name="pip_play">Play</string>
     <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=16] -->
     <string name="pip_pause">Pause</string>
-    <!-- Overlay text on picture-in-picture (PIP) to indicate that longpress HOME key to control PIP [CHAR LIMIT=25] -->
+    <!-- Overlay text on picture-in-picture (PIP) to indicate that longpress HOME key to control PIP [CHAR LIMIT=52] -->
     <string name="pip_hold_home">Hold <b>HOME</b> to control PIP</string>
     <!-- Picture-in-Picture (PIP) onboarding screen -->
     <eat-comment />
-    <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP.
-         Line break is needed as if we have CHAR LIMIT=25. [CHAR LIMIT=NONE] -->
-    <string name="pip_onboarding_description">Press and hold the HOME\nbutton to control PIP</string>
+    <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP. [CHAR LIMIT=NONE] -->
+    <string name="pip_onboarding_description">Press and hold the HOME button to control PIP</string>
     <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
     <string name="pip_onboarding_button">Got it</string>
     <!-- Font for Recents -->
