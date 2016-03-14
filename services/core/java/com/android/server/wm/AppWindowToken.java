@@ -322,23 +322,6 @@ class AppWindowToken extends WindowToken {
         }
     }
 
-    void setWindowsExiting(boolean exiting) {
-        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
-            WindowState win = allAppWindows.get(i);
-            // If the app already requested to remove its window, we don't modify
-            // its exiting state. Otherwise the stale window won't get removed on
-            // exit and could cause focus to be given to the wrong window.
-            if (!(win.mRemoveOnExit && win.mAnimatingExit)) {
-                win.mAnimatingExit = exiting;
-            }
-            // If we're no longer exiting, remove the window from destroying list
-            if (!win.mAnimatingExit && win.mDestroying) {
-                win.mDestroying = false;
-                service.mDestroySurface.remove(win);
-            }
-        }
-    }
-
     // Here we destroy surfaces which have been marked as eligible by the animator, taking care
     // to ensure the client has finished with them. If the client could still be using them
     // we will skip destruction and try again when the client has stopped.

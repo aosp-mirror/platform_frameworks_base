@@ -171,17 +171,21 @@ public class AppWindowAnimator {
         transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
     }
 
+    void setNullAnimation() {
+        animation = null;
+        usingTransferredAnimation = false;
+    }
+
     public void clearAnimation() {
         if (animation != null) {
-            animation = null;
             animating = true;
         }
         clearThumbnail();
+        setNullAnimation();
         if (mAppToken.deferClearAllDrawn) {
             mAppToken.allDrawn = false;
             mAppToken.deferClearAllDrawn = false;
         }
-        usingTransferredAnimation = false;
     }
 
     public boolean isAnimating() {
@@ -202,9 +206,9 @@ public class AppWindowAnimator {
 
         if (animation != null) {
             toAppAnimator.animation = animation;
-            animation = null;
             toAppAnimator.animating = animating;
             toAppAnimator.animLayerAdjustment = animLayerAdjustment;
+            setNullAnimation();
             animLayerAdjustment = 0;
             toAppAnimator.updateLayers();
             updateLayers();
@@ -311,7 +315,7 @@ public class AppWindowAnimator {
                 if (mProlongAnimation == PROLONG_ANIMATION_AT_END) {
                     hasMoreFrames = true;
                 } else {
-                    animation = null;
+                    setNullAnimation();
                     clearThumbnail();
                     if (DEBUG_ANIM) Slog.v(TAG, "Finished animation in " + mAppToken + " @ "
                             + currentTime);
