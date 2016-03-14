@@ -83,7 +83,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private float mDateScaleFactor;
     private float mGearTranslation;
 
-    private TouchAnimator mAnimator;
     private TouchAnimator mSecondHalfAnimator;
     private TouchAnimator mFirstHalfAnimator;
     private TouchAnimator mDateSizeAnimator;
@@ -154,12 +153,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateScaleFactor = dateExpandedSize / dateCollapsedSize;
         updateDateTimePosition();
 
-        mAnimator = new TouchAnimator.Builder()
-                .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
-                .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
-                .build();
         mSecondHalfAnimator = new TouchAnimator.Builder()
-                .addFloat(mSettingsButton, "rotation", -180, 0)
                 .addFloat(mAlarmStatus, "alpha", 0, 1)
                 .addFloat(mEmergencyOnly, "alpha", 0, 1)
                 .setStartDelay(.5f)
@@ -174,6 +168,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 .setStartDelay(.36f)
                 .build();
         mSettingsAlpha = new TouchAnimator.Builder()
+                .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
+                .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
+                .addFloat(mSettingsButton, "rotation", -90, 0)
                 .addFloat(mSettingsContainer, "alpha", 0, 1)
                 .addFloat(mMultiUserSwitch, "alpha", 0, 1)
                 .setStartDelay(QSAnimator.EXPANDED_TILE_DELAY)
@@ -211,7 +208,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
-        mAnimator.setPosition(headerExpansionFraction);
         mSecondHalfAnimator.setPosition(headerExpansionFraction);
         mFirstHalfAnimator.setPosition(headerExpansionFraction);
         mDateSizeAnimator.setPosition(headerExpansionFraction);

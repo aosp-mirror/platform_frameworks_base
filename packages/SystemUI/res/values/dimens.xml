@@ -178,7 +178,7 @@
     <dimen name="qs_date_alarm_anim_translation">22dp</dimen>
     <dimen name="qs_date_collapsed_text_size">14sp</dimen>
     <dimen name="qs_date_text_size">16sp</dimen>
-    <dimen name="qs_header_gear_translation">150dp</dimen>
+    <dimen name="qs_header_gear_translation">16dp</dimen>
     <dimen name="qs_page_indicator_size">12dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
