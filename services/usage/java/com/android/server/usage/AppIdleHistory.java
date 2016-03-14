@@ -274,6 +274,11 @@ public class AppIdleHistory {
                 - (idle ? mScreenOnTimeThreshold : 0) - 1000 /* just a second more */;
     }
 
+    public void clearUsageLocked(String packageName, int userId) {
+        ArrayMap<String, PackageHistory> userHistory = getUserHistoryLocked(userId);
+        userHistory.remove(packageName);
+    }
+
     private boolean hasPassedThresholdsLocked(PackageHistory packageHistory, long elapsedRealtime) {
         return (packageHistory.lastUsedScreenTime
                     <= getScreenOnTimeLocked(elapsedRealtime) - mScreenOnTimeThreshold)
