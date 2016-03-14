@@ -69,6 +69,10 @@ public class BackspaceTest extends KeyListenerTestCase {
     public void testCombiningEnclosingKeycaps() {
         EditorState state = new EditorState();
 
+        state.setByString("'1' U+E0101 U+20E3 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
         // multiple COMBINING ENCLOSING KEYCAP
         state.setByString("'1' U+20E3 U+20E3 |");
         backspace(state, 0);
@@ -157,6 +161,19 @@ public class BackspaceTest extends KeyListenerTestCase {
     public void testEmojiZWJSequence() {
         EditorState state = new EditorState();
 
+        // U+200D is ZERO WIDTH JOINER.
+        state.setByString("U+1F441 U+200D U+1F5E8 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F441 U+200D U+1F5E8 U+FE0E |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F468 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
         // End with ZERO WIDTH JOINER
         state.setByString("U+1F441 U+200D |");
         backspace(state, 0);
@@ -223,6 +240,11 @@ public class BackspaceTest extends KeyListenerTestCase {
     @SmallTest
     public void testEmojiModifier() {
         EditorState state = new EditorState();
+
+        // U+1F3FB is EMOJI MODIFIER FITZPATRICK TYPE-1-2.
+        state.setByString("U+1F466 U+1F3FB |");
+        backspace(state, 0);
+        state.assertEquals("|");
 
         // Isolated emoji modifier
         state.setByString("U+1F3FB |");
