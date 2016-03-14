@@ -3253,8 +3253,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             int user = UserHandle.getUserId(Binder.getCallingUid());
             synchronized(mVpns) {
-                setLockdownTracker(new LockdownVpnTracker(mContext, mNetd, this, mVpns.get(user),
-                            profile));
+                Vpn vpn = mVpns.get(user);
+                if (vpn == null) {
+                    Slog.w(TAG, "VPN for user " + user + " not ready yet. Skipping lockdown");
+                    return false;
+                }
+                setLockdownTracker(new LockdownVpnTracker(mContext, mNetd, this, vpn, profile));
             }
         } else {
             setLockdownTracker(null);
