@@ -18,12 +18,16 @@ package com.android.server.content;
 
 import android.Manifest;
 import android.accounts.Account;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ISyncStatusObserver;
 import android.content.PeriodicSync;
 import android.content.SyncAdapterType;
@@ -32,6 +36,7 @@ import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ProviderInfo;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -44,29 +49,63 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@hide}
  */
 public final class ContentService extends IContentService.Stub {
     private static final String TAG = "ContentService";
+
     private Context mContext;
     private boolean mFactoryTest;
+
     private final ObserverNode mRootNode = new ObserverNode("");
+
     private SyncManager mSyncManager = null;
     private final Object mSyncManagerLock = new Object();
+
+    /**
+     * Map from userId to providerPackageName to [clientPackageName, uri] to
+     * value. This structure is carefully optimized to keep invalidation logic
+     * as cheap as possible.
+     */
+    @GuardedBy("mCache")
+    private final SparseArray<ArrayMap<String, ArrayMap<Pair<String, Uri>, Bundle>>>
+            mCache = new SparseArray<>();
+
+    private BroadcastReceiver mCacheReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final Uri data = intent.getData();
+            if (data != null) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                        UserHandle.USER_NULL);
+                final String packageName = data.getSchemeSpecificPart();
+                invalidateCacheLocked(userId, packageName, null);
+            }
+        }
+    };
 
     private SyncManager getSyncManager() {
         if (SystemProperties.getBoolean("config.disable_network", false)) {
@@ -85,13 +124,15 @@ public final class ContentService extends IContentService.Stub {
     }
 
     @Override
-    protected synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    protected synchronized void dump(FileDescriptor fd, PrintWriter pw_, String[] args) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.DUMP,
                 "caller doesn't have the DUMP permission");
 
+        final IndentingPrintWriter pw = new IndentingPrintWriter(pw_, "  ");
+
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
-        long identityToken = clearCallingIdentity();
+        final long identityToken = clearCallingIdentity();
         try {
             if (mSyncManager == null) {
                 pw.println("No SyncManager created!  (Disk full?)");
@@ -132,6 +173,19 @@ public final class ContentService extends IContentService.Stub {
                 pw.print(" Total number of nodes: "); pw.println(counts[0]);
                 pw.print(" Total number of observers: "); pw.println(counts[1]);
             }
+
+            synchronized (mCache) {
+                pw.println();
+                pw.println("Cached content:");
+                pw.increaseIndent();
+                for (int i = 0; i < mCache.size(); i++) {
+                    pw.println("User " + mCache.keyAt(i) + ":");
+                    pw.increaseIndent();
+                    pw.println(mCache.valueAt(i));
+                    pw.decreaseIndent();
+                }
+                pw.decreaseIndent();
+            }
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -167,6 +221,15 @@ public final class ContentService extends IContentService.Stub {
                         return getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
                     }
                 });
+
+        final IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        packageFilter.addDataScheme("package");
+        mContext.registerReceiverAsUser(mCacheReceiver, UserHandle.ALL,
+                packageFilter, null, null);
     }
 
     public void systemReady() {
@@ -311,6 +374,11 @@ public final class ContentService extends IContentService.Stub {
                     syncManager.scheduleLocalSync(null /* all accounts */, callingUserHandle, uid,
                             uri.getAuthority());
                 }
+            }
+
+            synchronized (mCache) {
+                final String providerPackageName = getProviderPackageName(uri);
+                invalidateCacheLocked(userHandle, providerPackageName, uri);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -912,6 +980,86 @@ public final class ContentService extends IContentService.Stub {
             }
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private @Nullable String getProviderPackageName(Uri uri) {
+        final ProviderInfo pi = mContext.getPackageManager()
+                .resolveContentProvider(uri.getAuthority(), 0);
+        return (pi != null) ? pi.packageName : null;
+    }
+
+    private ArrayMap<Pair<String, Uri>, Bundle> findOrCreateCacheLocked(int userId,
+            String providerPackageName) {
+        ArrayMap<String, ArrayMap<Pair<String, Uri>, Bundle>> userCache = mCache.get(userId);
+        if (userCache == null) {
+            userCache = new ArrayMap<>();
+            mCache.put(userId, userCache);
+        }
+        ArrayMap<Pair<String, Uri>, Bundle> packageCache = userCache.get(providerPackageName);
+        if (packageCache == null) {
+            packageCache = new ArrayMap<>();
+            userCache.put(providerPackageName, packageCache);
+        }
+        return packageCache;
+    }
+
+    private void invalidateCacheLocked(int userId, String providerPackageName, Uri uri) {
+        ArrayMap<String, ArrayMap<Pair<String, Uri>, Bundle>> userCache = mCache.get(userId);
+        if (userCache == null) return;
+
+        ArrayMap<Pair<String, Uri>, Bundle> packageCache = userCache.get(providerPackageName);
+        if (packageCache == null) return;
+
+        if (uri != null) {
+            for (int i = 0; i < packageCache.size();) {
+                final Uri key = packageCache.keyAt(i).second;
+                if (Objects.equals(key, uri)) {
+                    packageCache.removeAt(i);
+                } else {
+                    i++;
+                }
+            }
+        } else {
+            packageCache.clear();
+        }
+    }
+
+    @Override
+    public void putCache(String packageName, Uri key, Bundle value, int userId) {
+        enforceCrossUserPermission(userId, TAG);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CACHE_CONTENT, TAG);
+        mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
+                packageName);
+
+        final String providerPackageName = getProviderPackageName(key);
+        final Pair<String, Uri> fullKey = Pair.create(packageName, key);
+
+        synchronized (mCache) {
+            final ArrayMap<Pair<String, Uri>, Bundle> cache = findOrCreateCacheLocked(userId,
+                    providerPackageName);
+            if (value != null) {
+                cache.put(fullKey, value);
+            } else {
+                cache.remove(fullKey);
+            }
+        }
+    }
+
+    @Override
+    public Bundle getCache(String packageName, Uri key, int userId) {
+        enforceCrossUserPermission(userId, TAG);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CACHE_CONTENT, TAG);
+        mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
+                packageName);
+
+        final String providerPackageName = getProviderPackageName(key);
+        final Pair<String, Uri> fullKey = Pair.create(packageName, key);
+
+        synchronized (mCache) {
+            final ArrayMap<Pair<String, Uri>, Bundle> cache = findOrCreateCacheLocked(userId,
+                    providerPackageName);
+            return cache.get(fullKey);
         }
     }
 
