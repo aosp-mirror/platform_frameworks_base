@@ -36,7 +36,6 @@ import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -48,6 +47,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * DocumentsProvider for MTP devices.
@@ -426,7 +426,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     closeDeviceInternal(id);
                 }
                 mRootScanner.pause();
-            } catch (InterruptedException|IOException e) {
+            } catch (InterruptedException | IOException | TimeoutException e) {
                 // It should fail unit tests by throwing runtime exception.
                 throw new RuntimeException(e);
             } finally {
@@ -464,9 +464,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         getDeviceToolkit(deviceId).close();
         mDeviceToolkits.remove(deviceId);
         mMtpManager.closeDevice(deviceId);
-        if (mDeviceToolkits.size() == 0) {
-            mRootScanner.pause();
-        }
     }
 
     private DeviceToolkit getDeviceToolkit(int deviceId) throws FileNotFoundException {
