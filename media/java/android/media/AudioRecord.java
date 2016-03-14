@@ -394,30 +394,48 @@ public class AudioRecord implements AudioRouting
      * value here as no error checking is or can be done.
      */
     /*package*/ AudioRecord(long nativeRecordInJavaObj) {
-        int[] session = { 0 };
-        int[] rates = { 0 };
-        //TODO: update native initialization when information about hardware init failure
-        //      due to capture device already open is available.
-        // Note that for this native_setup, we are providing an already created/initialized
-        // *Native* AudioRecord, so the attributes parameters to native_setup() are ignored.
-        int initResult = native_setup(new WeakReference<AudioRecord>(this),
-                null /*mAudioAttributes*/,
-                rates /*mSampleRates*/,
-                0 /*mChannelMask*/,
-                0 /*mChannelIndexMask*/,
-                0 /*mAudioFormat*/,
-                0 /*mNativeBufferSizeInBytes*/,
-                session,
-                ActivityThread.currentOpPackageName(),
-                nativeRecordInJavaObj);
-        if (initResult != SUCCESS) {
-            loge("Error code "+initResult+" when initializing native AudioRecord object.");
-            return; // with mState == STATE_UNINITIALIZED
+        mNativeRecorderInJavaObj = 0;
+        mNativeCallbackCookie = 0;
+        mNativeDeviceCallback = 0;
+
+        // other initialization...
+        if (nativeRecordInJavaObj != 0) {
+            deferred_connect(nativeRecordInJavaObj);
+        } else {
+            mState = STATE_UNINITIALIZED;
         }
+    }
 
-        mSessionId = session[0];
+    /**
+     * @hide
+     */
+    /* package */ void deferred_connect(long  nativeRecordInJavaObj) {
+        if (mState != STATE_INITIALIZED) {
+            int[] session = { 0 };
+            int[] rates = { 0 };
+            //TODO: update native initialization when information about hardware init failure
+            //      due to capture device already open is available.
+            // Note that for this native_setup, we are providing an already created/initialized
+            // *Native* AudioRecord, so the attributes parameters to native_setup() are ignored.
+            int initResult = native_setup(new WeakReference<AudioRecord>(this),
+                    null /*mAudioAttributes*/,
+                    rates /*mSampleRates*/,
+                    0 /*mChannelMask*/,
+                    0 /*mChannelIndexMask*/,
+                    0 /*mAudioFormat*/,
+                    0 /*mNativeBufferSizeInBytes*/,
+                    session,
+                    ActivityThread.currentOpPackageName(),
+                    nativeRecordInJavaObj);
+            if (initResult != SUCCESS) {
+                loge("Error code "+initResult+" when initializing native AudioRecord object.");
+                return; // with mState == STATE_UNINITIALIZED
+            }
 
-        mState = STATE_INITIALIZED;
+            mSessionId = session[0];
+
+            mState = STATE_INITIALIZED;
+        }
     }
 
     /**
