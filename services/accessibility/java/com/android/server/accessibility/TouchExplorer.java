@@ -390,11 +390,6 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
     }
 
     @Override
-    public boolean onDoubleTapStarted() {
-        return true;
-    }
-
-    @Override
     public boolean onDoubleTap(MotionEvent event, int policyFlags) {
         // Ignore the event if we aren't touch exploring.
         if (mCurrentState != STATE_TOUCH_EXPLORING) {
