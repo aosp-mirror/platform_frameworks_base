@@ -22335,7 +22335,7 @@ package android.media.browse {
     method public void subscribe(java.lang.String, android.media.browse.MediaBrowser.SubscriptionCallback);
     method public void subscribe(java.lang.String, android.os.Bundle, android.media.browse.MediaBrowser.SubscriptionCallback);
     method public void unsubscribe(java.lang.String);
-    method public void unsubscribe(java.lang.String, android.os.Bundle);
+    method public void unsubscribe(java.lang.String, android.media.browse.MediaBrowser.SubscriptionCallback);
     field public static final java.lang.String EXTRA_PAGE = "android.media.browse.extra.PAGE";
     field public static final java.lang.String EXTRA_PAGE_SIZE = "android.media.browse.extra.PAGE_SIZE";
   }

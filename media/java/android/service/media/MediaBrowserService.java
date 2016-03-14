@@ -574,6 +574,9 @@ public abstract class MediaBrowserService extends Service {
      * Remove the subscription.
      */
     private boolean removeSubscription(String id, ConnectionRecord connection, Bundle options) {
+        if (options == null) {
+            return connection.subscriptions.remove(id) != null;
+        }
         boolean removed = false;
         List<Bundle> optionsList = connection.subscriptions.get(id);
         if (optionsList != null) {
