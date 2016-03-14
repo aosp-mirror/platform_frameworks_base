@@ -400,7 +400,7 @@ int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>
                 connection.mThread->shutdown();
             }
             connection.mThread = new BufferProducerThread(mDevice, deviceId, &stream);
-            connection.mThread->run();
+            connection.mThread->run("BufferProducerThread");
         }
     }
     connection.mSurface = surface;
