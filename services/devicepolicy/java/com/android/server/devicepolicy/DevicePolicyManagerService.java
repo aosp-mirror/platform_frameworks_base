@@ -33,6 +33,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -83,6 +84,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -1376,6 +1378,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         LockPatternUtils newLockPatternUtils() {
             return new LockPatternUtils(mContext);
+        }
+
+        boolean storageManagerIsFileBasedEncryptionEnabled() {
+            return StorageManager.isFileEncryptedNativeOnly();
+        }
+
+        boolean storageManagerIsNonDefaultBlockEncrypted() {
+            return StorageManager.isNonDefaultBlockEncrypted();
+        }
+
+        boolean storageManagerIsEncrypted() {
+            return StorageManager.isEncrypted();
+        }
+
+        boolean storageManagerIsEncryptable() {
+            return StorageManager.isEncryptable();
         }
 
         Looper getMyLooper() {
@@ -2866,13 +2884,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isSeparateProfileChallengeAllowed(int userHandle) {
         ComponentName profileOwner = getProfileOwner(userHandle);
-        try {
-            // Profile challenge is supported on N or newer release.
-            return profileOwner != null &&
-                    getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
-        } catch (RemoteException e) {
-            return false;
-        }
+        // Profile challenge is supported on N or newer release.
+        return profileOwner != null &&
+                getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
     }
 
     @Override
@@ -4236,15 +4250,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            try {
-                if (getTargetSdk(who.getPackageName(), userHandle) >= Build.VERSION_CODES.N) {
-                    if (installerPackage != null &&
-                            !isPackageInstalledForUser(installerPackage, userHandle)) {
-                        throw new IllegalArgumentException("Package " + installerPackage
-                                + " is not installed on the current user");
-                    }
+            if (getTargetSdk(who.getPackageName(), userHandle) >= Build.VERSION_CODES.N) {
+                if (installerPackage != null &&
+                        !isPackageInstalledForUser(installerPackage, userHandle)) {
+                    throw new IllegalArgumentException("Package " + installerPackage
+                            + " is not installed on the current user");
                 }
-            } catch (RemoteException e) {
             }
             DevicePolicyData policy = getUserData(userHandle);
             policy.mDelegatedCertInstallerPackage = installerPackage;
@@ -4835,12 +4846,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Get the current encryption status of the device.
      */
     @Override
-    public int getStorageEncryptionStatus(int userHandle) {
+    public int getStorageEncryptionStatus(@Nullable String callerPackage, int userHandle) {
         if (!mHasFeature) {
             // Ok to return current status.
         }
         enforceFullCrossUsersPermission(userHandle);
-        return getEncryptionStatus();
+
+        // It's not critical here, but let's make sure the package name is correct, in case
+        // we start using it for different purposes.
+        ensureCallerPackage(callerPackage);
+
+        final int rawStatus = getEncryptionStatus();
+        if ((rawStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER)
+                && (callerPackage != null)
+                && (getTargetSdk(callerPackage, userHandle) <= VERSION_CODES.M)) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
+        }
+        return rawStatus;
     }
 
     /**
@@ -4858,15 +4880,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Hook to low-levels:  Reporting the current status of encryption.
      * @return A value such as {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED},
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE},
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY}, or
+     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
+     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER}, or
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
     private int getEncryptionStatus() {
-        if (StorageManager.isEncrypted()) {
-            return StorageManager.isNonDefaultBlockEncrypted() ?
-                      DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
-                    : DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
-        } else if (StorageManager.isEncryptable()) {
+        if (mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
+        } else if (mInjector.storageManagerIsNonDefaultBlockEncrypted()) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
+        } else if (mInjector.storageManagerIsEncrypted()) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
+        } else if (mInjector.storageManagerIsEncryptable()) {
             return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         } else {
             return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
@@ -4878,7 +4903,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     private void setEncryptionRequested(boolean encrypt) {
     }
-
 
     /**
      * Set whether the screen capture is disabled for the user managed by the specified admin.
@@ -6037,6 +6061,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void ensureCallerPackage(@Nullable String packageName) {
+        if (packageName == null) {
+            Preconditions.checkState(isCallerWithSystemUid(),
+                    "Only caller can omit package name");
+        } else {
+            final int callingUid = mInjector.binderGetCallingUid();
+            final int userId = mInjector.userHandleGetCallingUserId();
+            try {
+                final ApplicationInfo ai = mIPackageManager.getApplicationInfo(
+                        packageName, 0, userId);
+                Preconditions.checkState(ai.uid == callingUid, "Unmatching package name");
+            } catch (RemoteException e) {
+                // Shouldn't happen
+            }
+        }
+    }
+
     private boolean isCallerWithSystemUid() {
         return UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID);
     }
@@ -6122,6 +6163,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.println(" ");
                 pw.print("    mPasswordOwner="); pw.println(policy.mPasswordOwner);
             }
+            pw.println();
+            pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
+        }
+    }
+
+    private String getEncryptionStatusName(int encryptionStatus) {
+        switch (encryptionStatus) {
+            case DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE:
+                return "inactive";
+            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY:
+                return "block default key";
+            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE:
+                return "block";
+            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER:
+                return "per-user";
+            case DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED:
+                return "unsupported";
+            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVATING:
+                return "activating";
+            default:
+                return "unknown";
         }
     }
 
@@ -8207,11 +8269,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Returns the target sdk version number that the given packageName was built for
      * in the given user.
      */
-    private int getTargetSdk(String packageName, int userId) throws RemoteException {
-        final ApplicationInfo ai = mIPackageManager
-                .getApplicationInfo(packageName, 0, userId);
-        final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
-        return targetSdkVersion;
+    private int getTargetSdk(String packageName, int userId) {
+        final ApplicationInfo ai;
+        try {
+            ai = mIPackageManager.getApplicationInfo(packageName, 0, userId);
+            final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
+            return targetSdkVersion;
+        } catch (RemoteException e) {
+            // Shouldn't happen
+            return 0;
+        }
     }
 
     @Override

@@ -2487,6 +2487,12 @@ public class DevicePolicyManager {
     public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4;
 
     /**
+     * Result code for {@link #getStorageEncryptionStatus}:
+     * indicating that encryption is active and the encryption key is tied to the user.
+     */
+    public static final int ENCRYPTION_STATUS_ACTIVE_PER_USER = 5;
+
+    /**
      * Activity action: begin the process of encrypting data on the device.  This activity should
      * be launched after using {@link #setStorageEncryption} to request encryption be activated.
      * After resuming from this activity, use {@link #getStorageEncryption}
@@ -2627,7 +2633,7 @@ public class DevicePolicyManager {
     public int getStorageEncryptionStatus(int userHandle) {
         if (mService != null) {
             try {
-                return mService.getStorageEncryptionStatus(userHandle);
+                return mService.getStorageEncryptionStatus(mContext.getPackageName(), userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
