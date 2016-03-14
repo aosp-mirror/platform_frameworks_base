@@ -16,70 +16,180 @@
 
 package android.hardware.soundtrigger;
 
-import java.util.Random;
-import java.util.UUID;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.soundtrigger.SoundTrigger.GenericRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.os.ParcelUuid;
 import android.os.ServiceManager;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.app.ISoundTriggerService;
 
-import java.util.Arrays;
+import java.io.DataOutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
+import org.mockito.MockitoAnnotations;
+
 public class GenericSoundModelTest extends AndroidTestCase {
-    private Random mRandom = new Random();
+    static final int MSG_DETECTION_ERROR = -1;
+    static final int MSG_DETECTION_RESUME = 0;
+    static final int MSG_DETECTION_PAUSE = 1;
+    static final int MSG_KEYPHRASE_TRIGGER = 2;
+    static final int MSG_GENERIC_TRIGGER = 4;
+
+    private Random random = new Random();
+    private ArrayList<UUID> loadedModelUuids;
+    private ISoundTriggerService soundTriggerService;
+    private SoundTriggerManager soundTriggerManager;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        Context context = getContext();
+        soundTriggerService = ISoundTriggerService.Stub.asInterface(
+                ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE));
+        soundTriggerManager = (SoundTriggerManager) context.getSystemService(
+                Context.SOUND_TRIGGER_SERVICE);
+
+        loadedModelUuids = new ArrayList<UUID>();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        for (UUID modelUuid : loadedModelUuids) {
+            soundTriggerService.deleteSoundModel(new ParcelUuid(modelUuid));
+        }
+        super.tearDown();
+    }
+
+    GenericSoundModel new_sound_model() {
+        // Create sound model
+        byte[] data = new byte[1024];
+        random.nextBytes(data);
+        UUID modelUuid = UUID.randomUUID();
+        UUID mVendorUuid = UUID.randomUUID();
+        return new GenericSoundModel(modelUuid, mVendorUuid, data);
+    }
 
     @SmallTest
     public void testUpdateGenericSoundModel() throws Exception {
-        Context context = getContext();
-        ISoundTriggerService mSoundTriggerService = ISoundTriggerService.Stub.asInterface(
-            ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE));
-        SoundTriggerManager mSoundTriggerManager = (SoundTriggerManager) context.getSystemService(
-            Context.SOUND_TRIGGER_SERVICE);
+        GenericSoundModel model = new_sound_model();
 
-        byte[] data = new byte[1024];
-        mRandom.nextBytes(data);
-        UUID modelUuid = UUID.randomUUID();
-        UUID mVendorUuid = UUID.randomUUID();
-        GenericSoundModel model = new GenericSoundModel(modelUuid, mVendorUuid, data);
+        // Update sound model
+        soundTriggerService.updateSoundModel(model);
+        loadedModelUuids.add(model.uuid);
 
-        mSoundTriggerService.updateSoundModel(model);
+        // Confirm it was updated
         GenericSoundModel returnedModel =
-            mSoundTriggerService.getSoundModel(new ParcelUuid(modelUuid));
-
+                soundTriggerService.getSoundModel(new ParcelUuid(model.uuid));
         assertEquals(model, returnedModel);
-
-        // Cleanup sound model
-        mSoundTriggerService.deleteSoundModel(new ParcelUuid(modelUuid));
     }
-
 
     @SmallTest
     public void testDeleteGenericSoundModel() throws Exception {
-        Context context = getContext();
-        ISoundTriggerService mSoundTriggerService = ISoundTriggerService.Stub.asInterface(
-            ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE));
-        SoundTriggerManager mSoundTriggerManager = (SoundTriggerManager) context.getSystemService(
-            Context.SOUND_TRIGGER_SERVICE);
+        GenericSoundModel model = new_sound_model();
 
-        byte[] data = new byte[1024];
-        mRandom.nextBytes(data);
-        UUID modelUuid = UUID.randomUUID();
-        UUID mVendorUuid = UUID.randomUUID();
-        GenericSoundModel model = new GenericSoundModel(modelUuid, mVendorUuid, data);
+        // Update sound model
+        soundTriggerService.updateSoundModel(model);
+        loadedModelUuids.add(model.uuid);
 
-        mSoundTriggerService.updateSoundModel(model);
-        mSoundTriggerService.deleteSoundModel(new ParcelUuid(modelUuid));
+        // Delete sound model
+        soundTriggerService.deleteSoundModel(new ParcelUuid(model.uuid));
+        loadedModelUuids.remove(model.uuid);
 
+        // Confirm it was deleted
         GenericSoundModel returnedModel =
-            mSoundTriggerService.getSoundModel(new ParcelUuid(modelUuid));
+                soundTriggerService.getSoundModel(new ParcelUuid(model.uuid));
         assertEquals(null, returnedModel);
+    }
+
+    @LargeTest
+    public void testStartStopGenericSoundModel() throws Exception {
+        GenericSoundModel model = new_sound_model();
+
+        boolean captureTriggerAudio = true;
+        boolean allowMultipleTriggers = true;
+        RecognitionConfig config = new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
+                null, null);
+        TestRecognitionStatusCallback spyCallback = spy(new TestRecognitionStatusCallback());
+
+        // Update and start sound model recognition
+        soundTriggerService.updateSoundModel(model);
+        loadedModelUuids.add(model.uuid);
+        int r = soundTriggerService.startRecognition(new ParcelUuid(model.uuid), spyCallback,
+                config);
+        assertEquals("Could Not Start Recognition with code: " + r,
+                android.hardware.soundtrigger.SoundTrigger.STATUS_OK, r);
+
+        // Stop recognition
+        r = soundTriggerService.stopRecognition(new ParcelUuid(model.uuid), spyCallback);
+        assertEquals("Could Not Stop Recognition with code: " + r,
+                android.hardware.soundtrigger.SoundTrigger.STATUS_OK, r);
+    }
+
+    @LargeTest
+    public void testTriggerGenericSoundModel() throws Exception {
+        GenericSoundModel model = new_sound_model();
+
+        boolean captureTriggerAudio = true;
+        boolean allowMultipleTriggers = true;
+        RecognitionConfig config = new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
+                null, null);
+        TestRecognitionStatusCallback spyCallback = spy(new TestRecognitionStatusCallback());
+
+        // Update and start sound model
+        soundTriggerService.updateSoundModel(model);
+        loadedModelUuids.add(model.uuid);
+        soundTriggerService.startRecognition(new ParcelUuid(model.uuid), spyCallback, config);
+
+        // Send trigger to stub HAL
+        Socket socket = new Socket(InetAddress.getLocalHost(), 14035);
+        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+        out.writeBytes("trig " + model.uuid.toString() + "\r\n");
+        out.flush();
+        socket.close();
+
+        // Verify trigger was received
+        verify(spyCallback, timeout(100)).onGenericSoundTriggerDetected(any());
+    }
+
+
+    public class TestRecognitionStatusCallback extends IRecognitionStatusCallback.Stub {
+        @Override
+        public void onGenericSoundTriggerDetected(GenericRecognitionEvent recognitionEvent) {
+        }
+
+        @Override
+        public void onKeyphraseDetected(KeyphraseRecognitionEvent recognitionEvent) {
+        }
+
+        @Override
+        public void onError(int status) {
+        }
+
+        @Override
+        public void onRecognitionPaused() {
+        }
+
+        @Override
+        public void onRecognitionResumed() {
+        }
     }
 }
