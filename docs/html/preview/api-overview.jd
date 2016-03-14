@@ -351,7 +351,7 @@ displayed &mdash; users can add or move tiles just by dragging and dropping them
 
 <p>Android N now supports number-blocking in the platform and provides a
 framework API to let service providers maintain a blocked-number list. The
-default SMS app, the default phone app, and provider apps can read from and
+default SMS app, the default phone app, and carrier apps can read from and
 write to the blocked-number list. The list is not accessible to other apps.</p>
 
 <p>By making number-blocking a standard feature of the platform, Android provides
