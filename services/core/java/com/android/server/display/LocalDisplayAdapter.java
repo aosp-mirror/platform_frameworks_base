@@ -381,8 +381,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
                 }
 
+                final Resources res = getContext().getResources();
                 if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
-                    final Resources res = getContext().getResources();
                     mInfo.name = res.getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
@@ -415,6 +415,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     // to follow the built-in display.
                     if (SystemProperties.getBoolean("persist.demo.hdmirotates", false)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                    }
+
+                    if (!res.getBoolean(
+                                com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                     }
                 }
             }
