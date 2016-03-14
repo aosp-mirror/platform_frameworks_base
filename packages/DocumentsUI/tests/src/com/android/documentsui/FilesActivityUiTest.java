@@ -183,6 +183,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
 
     // We don't really need to test the entirety of download support
     // since downloads is (almost) just another provider.
+    @Suppress
     public void testDownload_Queued() throws Exception {
         DownloadManager dm = (DownloadManager) context.getSystemService(
                 Context.DOWNLOAD_SERVICE);
@@ -194,6 +195,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.directory.assertDocumentsPresent("Queued");
     }
 
+    @Suppress
     public void testDownload_RetryUnsuccessful() throws Exception {
         DownloadManager dm = (DownloadManager) context.getSystemService(
                 Context.DOWNLOAD_SERVICE);
