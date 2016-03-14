@@ -558,6 +558,23 @@ public class CarrierConfigManager {
     public static final String BOOL_ALLOW_VIDEO_PAUSE =
             "bool_allow_video_pause";
 
+
+    /**
+     * Flag indicating whether the carrier supports RCS presence indication for video calls.  When
+     * {@code true}, the carrier supports RCS presence indication for video calls.  When presence
+     * is supported, the device should use the
+     * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE} bit mask and set the
+     * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE_VT_CAPABLE} bit to indicate
+     * whether each contact supports video calling.  The UI is made aware that presence is enabled
+     * via {@link android.telecom.PhoneAccount#CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE}
+     * and can choose to hide or show the video calling icon based on whether a contact supports
+     * video.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -672,6 +689,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_UA_PROF_URL_STRING, "");
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
+        sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
     }
 
     /**
