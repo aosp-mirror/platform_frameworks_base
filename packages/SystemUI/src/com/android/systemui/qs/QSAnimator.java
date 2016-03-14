@@ -41,6 +41,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private static final String MOVE_FULL_ROWS = "sysui_qs_move_whole_rows";
 
     public static final float EXPANDED_TILE_DELAY = .7f;
+    private static final float LAST_ROW_EXPANDED_DELAY = .84f;
 
     private final ArrayList<View> mAllViews = new ArrayList<>();
     private final ArrayList<View> mTopFiveQs = new ArrayList<>();
@@ -56,6 +57,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private TouchAnimator mTranslationXAnimator;
     private TouchAnimator mTranslationYAnimator;
     private TouchAnimator mNonfirstPageAnimator;
+    private TouchAnimator mLastRowAnimator;
 
     private boolean mOnKeyguard;
 
@@ -129,20 +131,20 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder firstPageBuilder = new Builder();
         TouchAnimator.Builder translationXBuilder = new Builder();
         TouchAnimator.Builder translationYBuilder = new Builder();
-        TouchAnimator.Builder firstPageDelayedBuilder = new Builder();
+        TouchAnimator.Builder lastRowBuilder = new Builder();
+
         Collection<QSTile<?>> tiles = mQsPanel.getHost().getTiles();
         int count = 0;
         int[] loc1 = new int[2];
         int[] loc2 = new int[2];
         int lastYDiff = 0;
-        firstPageDelayedBuilder.setStartDelay(EXPANDED_TILE_DELAY);
-        firstPageBuilder.setListener(this);
-        // Fade in the tiles/labels as we reach the final position.
-        firstPageDelayedBuilder.addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1);
+
         clearAnimationState();
         mAllViews.clear();
         mTopFiveQs.clear();
+
         mAllViews.add((View) mQsPanel.getTileLayout());
+
         for (QSTile<?> tile : tiles) {
             QSTileBaseView tileView = mQsPanel.getTileView(tile);
             final TextView label = ((QSTileView) tileView).getLabel();
@@ -171,22 +173,30 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                 mTopFiveQs.add(tileIcon);
                 mAllViews.add(tileIcon);
-                mAllViews.add(label);
                 mAllViews.add(quickTileView);
             } else if (mFullRows && isIconInAnimatedRow(count)) {
                 firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
                 translationYBuilder.addFloat(label, "translationY", -lastYDiff, 0);
                 translationYBuilder.addFloat(tileIcon, "translationY", -lastYDiff, 0);
                 mAllViews.add(tileIcon);
-                mAllViews.add(label);
+            } else {
+                lastRowBuilder.addFloat(tileView, "alpha", 0, 1);
             }
             mAllViews.add(tileView);
             mAllViews.add(label);
             count++;
         }
         if (mAllowFancy) {
-            mFirstPageAnimator = firstPageBuilder.build();
-            mFirstPageDelayedAnimator = firstPageDelayedBuilder.build();
+            mFirstPageAnimator = firstPageBuilder
+                    .setListener(this)
+                    .build();
+            // Fade in the tiles/labels as we reach the final position.
+            mFirstPageDelayedAnimator = new TouchAnimator.Builder()
+                    .setStartDelay(EXPANDED_TILE_DELAY)
+                    .addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1).build();
+            mLastRowAnimator = lastRowBuilder
+                    .setStartDelay(LAST_ROW_EXPANDED_DELAY)
+                    .build();
             Path path = new Path();
             path.moveTo(0, 0);
             path.cubicTo(0, 0, 0, 1, 1, 1);
@@ -235,6 +245,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mFirstPageDelayedAnimator.setPosition(position);
             mTranslationXAnimator.setPosition(position);
             mTranslationYAnimator.setPosition(position);
+            mLastRowAnimator.setPosition(position);
         } else {
             mNonfirstPageAnimator.setPosition(position);
         }
