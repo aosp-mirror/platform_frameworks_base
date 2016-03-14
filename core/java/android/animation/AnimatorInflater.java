@@ -16,7 +16,10 @@
 package android.animation;
 
 import android.annotation.AnimatorRes;
+import android.annotation.AnyRes;
+import android.annotation.NonNull;
 import android.content.Context;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConfigurationBoundResourceCache;
 import android.content.res.ConstantState;
 import android.content.res.Resources;
@@ -1062,7 +1065,7 @@ public class AnimatorInflater {
         return anim;
     }
 
-    private static int getChangingConfigs(Resources resources, int id) {
+    private static @Config int getChangingConfigs(@NonNull Resources resources, @AnyRes int id) {
         synchronized (sTmpTypedValue) {
             resources.getValue(id, sTmpTypedValue, true);
             return sTmpTypedValue.changingConfigurations;

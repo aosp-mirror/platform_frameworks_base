@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 
 import com.android.internal.R;
@@ -83,7 +84,7 @@ public class GradientColor extends ComplexColor {
     /** Lazily-created factory for this GradientColor. */
     private GradientColorFactory mFactory;
 
-    private int mChangingConfigurations;
+    private @Config int mChangingConfigurations;
     private int mDefaultColor;
 
     // After parsing all the attributes from XML, this shader is the ultimate result containing
@@ -506,7 +507,7 @@ public class GradientColor extends ComplexColor {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mSrc.mChangingConfigurations;
         }
 
