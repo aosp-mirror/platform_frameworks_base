@@ -761,6 +761,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
             if (DBG) Slog.d(TAG, "Auto-enabling Bluetooth.");
             sendEnableMsg(mQuietEnableExternal);
+        } else if (!isNameAndAddressSet()) {
+            if (DBG) Slog.d(TAG, "Getting adapter name and address");
+            enable();
+            waitForOnOff(true, false);
+            disable(true);
         }
     }
 
@@ -1001,6 +1006,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
             }
         }
+
         // mAddress is accessed from outside.
         // It is alright without a lock. Here, bluetooth is off, no other thread is
         // changing mAddress
@@ -1179,6 +1185,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             }
                         } catch (RemoteException e) {
                             Slog.e(TAG,"Unable to call configHciSnoopLog", e);
+                        }
+
+                        if (!isNameAndAddressSet()) {
+                            try {
+                                storeNameAndAddress(mBluetooth.getName(),
+                                                    mBluetooth.getAddress());
+                            } catch (RemoteException re) {
+                                Slog.e(TAG, "Unable to grab names", re);
+                            }
                         }
 
                         //Register callback object
