@@ -45,6 +45,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -505,6 +506,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onStart() {
+        publishLocalService(JobSchedulerInternal.class, new LocalService());
         publishBinderService(Context.JOB_SCHEDULER_SERVICE, mJobSchedulerStub);
     }
 
@@ -1176,6 +1178,28 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         }
         return -1;
+    }
+
+    final class LocalService implements JobSchedulerInternal {
+
+        /**
+         * Returns a list of all pending jobs. A running job is not considered pending. Periodic
+         * jobs are always considered pending.
+         */
+        public List<JobInfo> getSystemScheduledPendingJobs() {
+            synchronized (mLock) {
+                final List<JobInfo> pendingJobs = new ArrayList<JobInfo>();
+                mJobs.forEachJob(Process.SYSTEM_UID, new JobStatusFunctor() {
+                    @Override
+                    public void process(JobStatus job) {
+                        if (job.getJob().isPeriodic() || !isCurrentlyActiveLocked(job)) {
+                            pendingJobs.add(job.getJob());
+                        }
+                    }
+                });
+                return pendingJobs;
+            }
+        }
     }
 
     /**
