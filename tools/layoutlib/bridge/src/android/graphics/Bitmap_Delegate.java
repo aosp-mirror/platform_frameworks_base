@@ -67,7 +67,7 @@ public final class Bitmap_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Bitmap_Delegate> sManager =
-            new DelegateManager<Bitmap_Delegate>(Bitmap_Delegate.class);
+            new DelegateManager<>(Bitmap_Delegate.class);
     private static long sFinalizer = -1;
 
     // ---- delegate helper data ----
@@ -314,7 +314,7 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static boolean nativeRecycle(long nativeBitmap) {
-        sManager.removeJavaReferenceFor(nativeBitmap);
+        // In our case reycle() is a no-op. We will let the finalizer to dispose the bitmap.
         return true;
     }
 
