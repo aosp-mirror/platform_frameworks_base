@@ -34,22 +34,26 @@ the expanded number of locales to support more multilingual users.</p>
 <h2 id="preN">Challenges in Resolving Language Resources</h2>
 
 <p>Prior to Android N, Android could not always successfully
- match app and system locales. For example, suppose that your app's default language
-  is US English, but that it also has Spanish strings localized in {@code es_ES}
-  resource files.</p>
-<p>When your Java code referred to strings, it would resolve string languages as
-follows:</p>
-<ul>
-<li>If a device were set to {@code es_MX} (Spanish-Mexico), Android would load
-strings from {@code es_ES} resource files.</li>
-<li>If the device were set to {@code en_AU}, Android would fall back on {@code
-en_US}. The system would also default to {@code en_US} if the user chose a
-language that the app didn't support at all, like French.</li>
-</ul>
+ match app and system locales.</p>
+
+ <p>For example, assume that you have the following situation:</p>
+ <ul>
+ <li>Your app's default language is {@code en_US} (US English), and it also has
+  Spanish strings localized in {@code es_ES}
+  resource files.</li>
+ <li> A device is set to {@code es_MX} </li>
+
+<p>When your Java code refers to strings, the system would load
+strings from the default ({@code en_US}) resource file, even if the app has
+Spanish resources localized under {@code es_ES}. This is because when the system
+ cannot find an exact match, it continues to look for resources by stripping the
+ country code off the locale. Finally, if no match is found, the system falls
+ back to the default, which is {@code en_US}. </p>
 
 
-<p>These resolution problems arose because the system stripped the country code
- off of the locale if it could not find an exact match.  For example:</p>
+<p>The system would also default to {@code en_US} if the user chose a language that
+the app didn't support at all, like French. For example:</p>
+
 <p class="table-caption" id="t-resource-res">
 <strong>Table 1.</strong> Resource resolution without an exact locale match.
 </p>
