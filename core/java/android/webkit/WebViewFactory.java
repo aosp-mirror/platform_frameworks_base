@@ -131,98 +131,9 @@ public final class WebViewFactory {
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
 
-    private static String TAG_START = "webviewproviders";
-    private static String TAG_WEBVIEW_PROVIDER = "webviewprovider";
-    private static String TAG_PACKAGE_NAME = "packageName";
-    private static String TAG_DESCRIPTION = "description";
-    // Whether or not the provider must be explicitly chosen by the user to be used.
-    private static String TAG_AVAILABILITY = "availableByDefault";
-    private static String TAG_SIGNATURE = "signature";
-    private static String TAG_FALLBACK = "isFallback";
-
-    /**
-     * Reads all signatures at the current depth (within the current provider) from the XML parser.
-     */
-    private static String[] readSignatures(XmlResourceParser parser) throws IOException,
-            XmlPullParserException {
-        List<String> signatures = new ArrayList<String>();
-        int outerDepth = parser.getDepth();
-        while(XmlUtils.nextElementWithin(parser, outerDepth)) {
-            if (parser.getName().equals(TAG_SIGNATURE)) {
-                // Parse the value within the signature tag
-                String signature = parser.nextText();
-                signatures.add(signature);
-            } else {
-                Log.e(LOGTAG, "Found an element in a webview provider that is not a signature");
-            }
-        }
-        return signatures.toArray(new String[signatures.size()]);
-    }
-
-    /**
-     * Returns all packages declared in the framework resources as potential WebView providers.
-     * @hide
-     * */
-    public static WebViewProviderInfo[] getWebViewPackages() {
-        int numFallbackPackages = 0;
-        XmlResourceParser parser = null;
-        List<WebViewProviderInfo> webViewProviders = new ArrayList<WebViewProviderInfo>();
-        try {
-            parser = AppGlobals.getInitialApplication().getResources().getXml(
-                    com.android.internal.R.xml.config_webview_packages);
-            XmlUtils.beginDocument(parser, TAG_START);
-            while(true) {
-                XmlUtils.nextElement(parser);
-                String element = parser.getName();
-                if (element == null) {
-                    break;
-                }
-                if (element.equals(TAG_WEBVIEW_PROVIDER)) {
-                    String packageName = parser.getAttributeValue(null, TAG_PACKAGE_NAME);
-                    if (packageName == null) {
-                        throw new MissingWebViewPackageException(
-                                "WebView provider in framework resources missing package name");
-                    }
-                    String description = parser.getAttributeValue(null, TAG_DESCRIPTION);
-                    if (description == null) {
-                        throw new MissingWebViewPackageException(
-                                "WebView provider in framework resources missing description");
-                    }
-                    boolean availableByDefault = "true".equals(
-                            parser.getAttributeValue(null, TAG_AVAILABILITY));
-                    boolean isFallback = "true".equals(
-                            parser.getAttributeValue(null, TAG_FALLBACK));
-                    WebViewProviderInfo currentProvider =
-                            new WebViewProviderInfo(packageName, description, availableByDefault,
-                                isFallback, readSignatures(parser));
-                    if (currentProvider.isFallbackPackage()) {
-                        numFallbackPackages++;
-                        if (numFallbackPackages > 1) {
-                            throw new AndroidRuntimeException(
-                                    "There can be at most one webview fallback package.");
-                        }
-                    }
-                    webViewProviders.add(currentProvider);
-                }
-                else {
-                    Log.e(LOGTAG, "Found an element that is not a webview provider");
-                }
-            }
-        } catch(XmlPullParserException e) {
-            throw new MissingWebViewPackageException("Error when parsing WebView meta data " + e);
-        } catch(IOException e) {
-            throw new MissingWebViewPackageException("Error when parsing WebView meta data " + e);
-        } finally {
-            if (parser != null) parser.close();
-        }
-        return webViewProviders.toArray(new WebViewProviderInfo[webViewProviders.size()]);
-    }
-
-
     // TODO (gsennton) remove when committing webview xts test change
     public static String getWebViewPackageName() {
-        WebViewProviderInfo[] providers = getWebViewPackages();
-        return providers[0].packageName;
+        return null;
     }
 
     /**

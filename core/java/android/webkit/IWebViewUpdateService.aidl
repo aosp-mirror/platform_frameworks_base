@@ -54,6 +54,11 @@ interface IWebViewUpdateService {
     WebViewProviderInfo[] getValidWebViewPackages();
 
     /**
+     * Fetch all packages that could potentially implement WebView.
+     */
+    WebViewProviderInfo[] getAllWebViewPackages();
+
+    /**
      * Used by DevelopmentSetting to get the name of the WebView provider currently in use.
      */
     String getCurrentWebViewPackageName();
