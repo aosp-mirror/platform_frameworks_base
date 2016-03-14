@@ -356,11 +356,15 @@ void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
 }
 void RecordingCanvas::drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) {
-    addOp(alloc().create_trivial<RoundRectOp>(
-            Rect(left, top, right, bottom),
-            *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
-            refPaint(&paint), rx, ry));
+    if (CC_LIKELY(MathUtils::isPositive(rx) || MathUtils::isPositive(ry))) {
+        addOp(alloc().create_trivial<RoundRectOp>(
+                Rect(left, top, right, bottom),
+                *(mState.currentSnapshot()->transform),
+                getRecordedClip(),
+                refPaint(&paint), rx, ry));
+    } else {
+        drawRect(left, top, right, bottom, paint);
+    }
 }
 
 void RecordingCanvas::drawRoundRect(
