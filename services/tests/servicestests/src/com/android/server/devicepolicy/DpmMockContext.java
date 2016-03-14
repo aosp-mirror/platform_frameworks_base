@@ -39,6 +39,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.storage.StorageManager;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.view.IWindowManager;
@@ -211,6 +212,24 @@ public class DpmMockContext extends MockContext {
         }
     }
 
+    public static class StorageManagerForMock {
+        public boolean isFileBasedEncryptionEnabled() {
+            return false;
+        }
+
+        public boolean isNonDefaultBlockEncrypted() {
+            return false;
+        }
+
+        public boolean isEncrypted() {
+            return false;
+        }
+
+        public boolean isEncryptable() {
+            return false;
+        }
+    }
+
     public final Context realTestContext;
 
     /**
@@ -239,6 +258,7 @@ public class DpmMockContext extends MockContext {
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
+    public final StorageManagerForMock storageManager;
     public final WifiManager wifiManager;
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
@@ -272,6 +292,7 @@ public class DpmMockContext extends MockContext {
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);
+        storageManager = mock(StorageManagerForMock.class);
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
 
