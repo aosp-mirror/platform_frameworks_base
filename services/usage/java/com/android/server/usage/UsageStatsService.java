@@ -180,6 +180,7 @@ public class UsageStatsService extends SystemService implements
         IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addDataScheme("package");
 
         getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL, packageFilter,
@@ -266,6 +267,12 @@ public class UsageStatsService extends SystemService implements
                     || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 clearCarrierPrivilegedApps();
             }
+            if ((Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
+                    Intent.ACTION_PACKAGE_ADDED.equals(action))
+                    && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                clearAppIdleForPackage(intent.getData().getSchemeSpecificPart(),
+                        getSendingUserId());
+            }
         }
     }
 
@@ -329,6 +336,12 @@ public class UsageStatsService extends SystemService implements
             if (pi.applicationInfo != null && pi.applicationInfo.isSystemApp()) {
                 mAppIdleHistory.reportUsageLocked(packageName, userId, elapsedRealtime);
             }
+        }
+    }
+
+    void clearAppIdleForPackage(String packageName, int userId) {
+        synchronized (mLock) {
+            mAppIdleHistory.clearUsageLocked(packageName, userId);
         }
     }
 
