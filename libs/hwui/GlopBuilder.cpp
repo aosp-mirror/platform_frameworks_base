@@ -676,8 +676,11 @@ void GlopBuilder::dump(const Glop& glop) {
             fill.skiaShaderData.skiaShaderType);
 
     ALOGD("Glop transform");
-    glop.transform.modelView.dump("model view");
-    glop.transform.canvas.dump("canvas");
+    glop.transform.modelView.dump("  model view");
+    glop.transform.canvas.dump("  canvas");
+    ALOGD_IF(glop.transform.transformFlags, "  transformFlags 0x%x", glop.transform.transformFlags);
+
+    ALOGD_IF(glop.roundRectClipState, "Glop RRCS %p", glop.roundRectClipState);
 
     ALOGD("Glop blend %d %d", glop.blend.src, glop.blend.dst);
     ALOGD("Glop bounds " RECT_STRING, RECT_ARGS(glop.bounds));
