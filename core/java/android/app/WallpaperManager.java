@@ -919,8 +919,8 @@ public class WallpaperManager {
      *     image for restore to a future device; {@code false} otherwise.
      * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
      *
-     * @see #FLAG_SET_LOCK_WALLPAPER
-     * @see #FLAG_SET_SYSTEM_WALLPAPER
+     * @see #FLAG_SET_LOCK
+     * @see #FLAG_SET_SYSTEM
      *
      * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
      *
@@ -1038,8 +1038,8 @@ public class WallpaperManager {
      *     image for restore to a future device; {@code false} otherwise.
      * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
      *
-     * @see #FLAG_SET_LOCK_WALLPAPER
-     * @see #FLAG_SET_SYSTEM_WALLPAPER
+     * @see #FLAG_SET_LOCK
+     * @see #FLAG_SET_SYSTEM
      *
      * @throws IOException
      */
