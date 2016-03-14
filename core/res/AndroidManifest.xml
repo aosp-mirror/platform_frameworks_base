@@ -3161,14 +3161,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.SELinuxPolicyInstallReceiver"
-                android:permission="android.permission.UPDATE_CONFIG">
-            <intent-filter>
-                <action android:name="android.intent.action.UPDATE_SEPOLICY" />
-                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
-            </intent-filter>
-        </receiver>
-
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR">
             <intent-filter
