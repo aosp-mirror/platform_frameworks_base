@@ -5347,6 +5347,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(pkgUid));
                 broadcastIntentInPackage("android", Process.SYSTEM_UID, intent,
                         null, null, 0, null, null, null, null, false, false, userId);
             } catch (RemoteException e) {

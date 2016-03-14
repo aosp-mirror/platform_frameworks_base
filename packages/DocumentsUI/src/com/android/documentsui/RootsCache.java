@@ -18,6 +18,7 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 
+import android.content.BroadcastReceiver.PendingResult;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
@@ -40,10 +42,10 @@ import android.util.Log;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
 
+import libcore.io.IoUtils;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-
-import libcore.io.IoUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,6 +65,8 @@ public class RootsCache {
 
     private static final String TAG = "RootsCache";
 
+    private static final boolean ENABLE_SYSTEM_CACHE = true;
+
     private final Context mContext;
     private final ContentObserver mObserver;
     private OnCacheUpdateListener mCacheUpdateListener;
@@ -71,6 +75,11 @@ public class RootsCache {
 
     private final Object mLock = new Object();
     private final CountDownLatch mFirstLoad = new CountDownLatch(1);
+
+    @GuardedBy("mLock")
+    private boolean mFirstLoadDone;
+    @GuardedBy("mLock")
+    private PendingResult mBootCompletedResult;
 
     @GuardedBy("mLock")
     private Multimap<String, RootInfo> mRoots = ArrayListMultimap.create();
@@ -118,7 +127,7 @@ public class RootsCache {
     public void updateAsync() {
 
         // NOTE: This method is called when the UI language changes.
-        // For that reason we upadte our RecentsRoot to reflect
+        // For that reason we update our RecentsRoot to reflect
         // the current language.
         mRecentsRoot.title = mContext.getString(R.string.root_recent);
 
@@ -152,7 +161,25 @@ public class RootsCache {
         }
     }
 
-    private void waitForFirstLoad() {
+    public void setBootCompletedResult(PendingResult result) {
+        synchronized (mLock) {
+            // Quickly check if we've already finished loading, otherwise hang
+            // out until first pass is finished.
+            if (mFirstLoadDone) {
+                result.finish();
+            } else {
+                mBootCompletedResult = result;
+            }
+        }
+    }
+
+    /**
+     * Block until the first {@link UpdateTask} pass has finished.
+     *
+     * @return {@code true} if cached roots is ready to roll, otherwise
+     *         {@code false} if we timed out while waiting.
+     */
+    private boolean waitForFirstLoad() {
         boolean success = false;
         try {
             success = mFirstLoad.await(15, TimeUnit.SECONDS);
@@ -161,6 +188,7 @@ public class RootsCache {
         if (!success) {
             Log.w(TAG, "Timeout waiting for first update");
         }
+        return success;
     }
 
     /**
@@ -222,9 +250,11 @@ public class RootsCache {
             final long start = SystemClock.elapsedRealtime();
 
             if (mFilterPackage != null) {
-                // Need at least first load, since we're going to be using
-                // previously cached values for non-matching packages.
-                waitForFirstLoad();
+                // We must have previously cached values to fill in non-matching
+                // packages, so wait around for successful first load.
+                if (!waitForFirstLoad()) {
+                    return null;
+                }
             }
 
             mTaskRoots.put(mRecentsRoot.authority, mRecentsRoot);
@@ -243,6 +273,11 @@ public class RootsCache {
             if (DEBUG)
                 Log.d(TAG, "Update found " + mTaskRoots.size() + " roots in " + delta + "ms");
             synchronized (mLock) {
+                mFirstLoadDone = true;
+                if (mBootCompletedResult != null) {
+                    mBootCompletedResult.finish();
+                    mBootCompletedResult = null;
+                }
                 mRoots = mTaskRoots;
                 mStoppedAuthorities = mTaskStoppedAuthorities;
             }
@@ -300,9 +335,18 @@ public class RootsCache {
             }
         }
 
-        final List<RootInfo> roots = new ArrayList<>();
         final Uri rootsUri = DocumentsContract.buildRootsUri(authority);
+        if (ENABLE_SYSTEM_CACHE) {
+            // Look for roots data that we might have cached for ourselves in the
+            // long-lived system process.
+            final Bundle systemCache = resolver.getCache(rootsUri);
+            if (systemCache != null) {
+                if (DEBUG) Log.d(TAG, "System cache hit for " + authority);
+                return systemCache.getParcelableArrayList(TAG);
+            }
+        }
 
+        final ArrayList<RootInfo> roots = new ArrayList<>();
         ContentProviderClient client = null;
         Cursor cursor = null;
         try {
@@ -318,6 +362,16 @@ public class RootsCache {
             IoUtils.closeQuietly(cursor);
             ContentProviderClient.releaseQuietly(client);
         }
+
+        if (ENABLE_SYSTEM_CACHE) {
+            // Cache these freshly parsed roots over in the long-lived system
+            // process, in case our process goes away. The system takes care of
+            // invalidating the cache if the package or Uri changes.
+            final Bundle systemCache = new Bundle();
+            systemCache.putParcelableArrayList(TAG, roots);
+            resolver.putCache(rootsUri, systemCache);
+        }
+
         return roots;
     }
 

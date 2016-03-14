@@ -55,7 +55,7 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
     private static final int VERSION_DROP_TYPE = 2;
 
     // The values of these constants determine the sort order of various roots in the RootsFragment.
-    @IntDef(flag = true, value = {
+    @IntDef(flag = false, value = {
             TYPE_IMAGES,
             TYPE_VIDEO,
             TYPE_AUDIO,

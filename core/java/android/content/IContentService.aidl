@@ -179,6 +179,8 @@ interface IContentService {
             int userId);
 
     void addStatusChangeListener(int mask, ISyncStatusObserver callback);
-
     void removeStatusChangeListener(ISyncStatusObserver callback);
+
+    void putCache(in String packageName, in Uri key, in Bundle value, int userId);
+    Bundle getCache(in String packageName, in Uri key, int userId);
 }
