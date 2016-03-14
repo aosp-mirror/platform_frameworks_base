@@ -63,14 +63,6 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         void onDoubleTapAndHold(MotionEvent event, int policyFlags);
 
         /**
-         * Called when the user touches the screen on the second tap of a double
-         * tap.
-         *
-         * @return true if the event is consumed, else false
-         */
-        boolean onDoubleTapStarted();
-
-        /**
          * Called when the user lifts their finger on the second tap of a double
          * tap.
          *
@@ -246,13 +238,20 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                         mBaseY = y;
                         mBaseTime = time;
 
+                        // Since the pointer has moved, this is not a double
+                        // tap.
+                        mFirstTapDetected = false;
+                        mDoubleTapDetected = false;
+
                         // If this hasn't been confirmed as a gesture yet, send
                         // the event.
                         if (!mGestureStarted) {
                             mGestureStarted = true;
                             return mListener.onGestureStarted();
                         }
-                    } else {
+                    } else if (!mFirstTapDetected) {
+                        // The finger may not move if they are double tapping.
+                        // In that case, we shouldn't cancel the gesture.
                         final long timeDelta = time - mBaseTime;
                         final long threshold = mGestureStarted ?
                             CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS :
@@ -371,7 +370,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         // The processing of the double tap is deferred until the finger is
         // lifted, so that we can detect a long press on the second tap.
         mDoubleTapDetected = true;
-        return mListener.onDoubleTapStarted();
+        return false;
     }
 
     private void maybeSendLongPress(MotionEvent event, int policyFlags) {
