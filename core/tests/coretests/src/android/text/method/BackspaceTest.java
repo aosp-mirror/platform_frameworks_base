@@ -29,7 +29,8 @@ import android.widget.TextView.BufferType;
 /**
  * Test backspace key handling of {@link android.text.method.BaseKeyListner}.
  *
- * TODO: Move some of test cases to the CTS.
+ * Only contains edge cases. For normal cases, see {@see android.text.method.cts.BackspaceTest}.
+ * TODO: introduce test cases for surrogate pairs and replacement span.
  */
 public class BackspaceTest extends KeyListenerTestCase {
     private static final BaseKeyListener mKeyListener = new BaseKeyListener() {
@@ -65,85 +66,9 @@ public class BackspaceTest extends KeyListenerTestCase {
     }
 
     @SmallTest
-    public void testSurrogatePairs() {
-        EditorState state = new EditorState();
-
-        state.setByString("U+1F441 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("U+1F441 U+1F5E8 |");
-        backspace(state, 0);
-        state.assertEquals("U+1F441 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // TODO: introduce edge cases.
-    }
-
-    @SmallTest
-    public void testReplacementSpan() {
-        EditorState state = new EditorState();
-
-        // ReplacementSpan will be set to "()" region.
-        state.setByString("'abc' ( 'de' ) 'fg' |");
-        backspace(state, 0);
-        state.assertEquals("'abc' ( 'de' ) 'f' |");
-        backspace(state, 0);
-        state.assertEquals("'abc' ( 'de' ) |");
-        backspace(state, 0);
-        state.assertEquals("'abc' |");
-        backspace(state, 0);
-        state.assertEquals("'ab' |");
-        backspace(state, 0);
-        state.assertEquals("'a' |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("'abc' [ ( 'de' ) ] 'fg'");
-        backspace(state, 0);
-        state.assertEquals("'abc' | 'fg'");
-        backspace(state, 0);
-        state.assertEquals("'ab' | 'fg'");
-        backspace(state, 0);
-        state.assertEquals("'a' | 'fg'");
-        backspace(state, 0);
-        state.assertEquals("| 'fg'");
-        backspace(state, 0);
-        state.assertEquals("| 'fg'");
-
-        state.setByString("'ab' [ 'c' ( 'de' ) 'f' ] 'g'");
-        backspace(state, 0);
-        state.assertEquals("'ab' | 'g'");
-        backspace(state, 0);
-        state.assertEquals("'a' | 'g'");
-        backspace(state, 0);
-        state.assertEquals("| 'g'");
-        backspace(state, 0);
-        state.assertEquals("| 'g'");
-
-        // TODO: introduce edge cases.
-    }
-
-    @SmallTest
     public void testCombiningEnclosingKeycaps() {
         EditorState state = new EditorState();
 
-        // U+20E3 is COMBINING ENCLOSING KEYCAP.
-        state.setByString("'1' U+20E3 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Variation selector before COMBINING ECLOSING KEYCAP
-        state.setByString("'1' U+FE0E U+20E3 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("'1' U+E0101 U+20E3 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // multiple COMBINING ENCLOSING KEYCAP
         state.setByString("'1' U+20E3 U+20E3 |");
         backspace(state, 0);
@@ -168,17 +93,6 @@ public class BackspaceTest extends KeyListenerTestCase {
     public void testVariationSelector() {
         EditorState state = new EditorState();
 
-        // U+FE0F is VARIATION SELECTOR-16.
-        state.setByString("'#' U+FE0F |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // U+E0100 is VARIATION SELECTOR-17.
-        state.setByString("U+845B U+E0100 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // Isolated variation selector
         state.setByString("U+FE0F |");
         backspace(state, 0);
@@ -243,20 +157,6 @@ public class BackspaceTest extends KeyListenerTestCase {
     public void testEmojiZWJSequence() {
         EditorState state = new EditorState();
 
-        // U+200D is ZERO WIDTH JOINER.
-        state.setByString("U+1F441 U+200D U+1F5E8 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("U+1F441 U+200D U+1F5E8 U+FE0E |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("U+1F468 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // End with ZERO WIDTH JOINER
         state.setByString("U+1F441 U+200D |");
         backspace(state, 0);
@@ -307,35 +207,6 @@ public class BackspaceTest extends KeyListenerTestCase {
     public void testFlags() {
         EditorState state = new EditorState();
 
-        // U+1F1FA is REGIONAL INDICATOR SYMBOL LETTER U.
-        // U+1F1F8 is REGIONAL INDICATOR SYMBOL LETTER S.
-        state.setByString("U+1F1FA U+1F1F8 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("'a' U+1F1FA U+1F1F8 |");
-        backspace(state, 0);
-        state.assertEquals("'a' |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("U+1F1FA U+1F1F8 U+1F1FA U+1F1F8 |");
-        backspace(state, 0);
-        state.assertEquals("U+1F1FA U+1F1F8 |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        state.setByString("'a' U+1F1FA U+1F1F8 'b' U+1F1FA U+1F1F8 |");
-        backspace(state, 0);
-        state.assertEquals("'a' U+1F1FA U+1F1F8 'b' |");
-        backspace(state, 0);
-        state.assertEquals("'a' U+1F1FA U+1F1F8 |");
-        backspace(state, 0);
-        state.assertEquals("'a' |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Edcae cases
         // Isolated regional indicator symbol
         state.setByString("U+1F1FA |");
         backspace(state, 0);
@@ -353,12 +224,6 @@ public class BackspaceTest extends KeyListenerTestCase {
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
-        // U+1F3FB is EMOJI MODIFIER FITZPATRICK TYPE-1-2.
-        state.setByString("U+1F466 U+1F3FB |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Edge cases
         // Isolated emoji modifier
         state.setByString("U+1F3FB |");
         backspace(state, 0);
