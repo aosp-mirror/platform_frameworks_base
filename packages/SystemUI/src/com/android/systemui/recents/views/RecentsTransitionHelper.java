@@ -319,6 +319,43 @@ public class RecentsTransitionHelper {
         return new AppTransitionAnimationSpec(task.key.id, null, taskRect);
     }
 
+    public static Bitmap composeTaskBitmap(TaskView taskView, TaskViewTransform transform) {
+        float scale = transform.scale;
+        int fromWidth = (int) (transform.rect.width() * scale);
+        int fromHeight = (int) (transform.rect.height() * scale);
+        Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight,
+                Bitmap.Config.ARGB_8888);
+
+        if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
+            b.eraseColor(0xFFff0000);
+        } else {
+            Canvas c = new Canvas(b);
+            c.scale(scale, scale);
+            taskView.draw(c);
+            c.setBitmap(null);
+        }
+        return b.createAshmemBitmap();
+    }
+
+    private static Bitmap composeHeaderBitmap(TaskView taskView,
+            TaskViewTransform transform) {
+        float scale = transform.scale;
+        int fromHeaderWidth = (int) (transform.rect.width());
+        int fromHeaderHeight = (int) (taskView.mHeaderView.getMeasuredHeight() * scale);
+        Bitmap b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
+                Bitmap.Config.ARGB_8888);
+
+        if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
+            b.eraseColor(0xFFff0000);
+        } else {
+            Canvas c = new Canvas(b);
+            c.scale(scale, scale);
+            taskView.mHeaderView.draw(c);
+            c.setBitmap(null);
+        }
+        return b.createAshmemBitmap();
+    }
+
     /**
      * Composes a single animation spec for the given {@link TaskView}
      */
@@ -326,21 +363,7 @@ public class RecentsTransitionHelper {
             TaskView taskView, TaskViewTransform transform, boolean addHeaderBitmap) {
         Bitmap b = null;
         if (addHeaderBitmap) {
-            float scale = transform.scale;
-            int fromHeaderWidth = (int) (transform.rect.width());
-            int fromHeaderHeight = (int) (taskView.mHeaderView.getMeasuredHeight() * scale);
-            b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
-                    Bitmap.Config.ARGB_8888);
-
-            if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-                b.eraseColor(0xFFff0000);
-            } else {
-                Canvas c = new Canvas(b);
-                c.scale(scale, scale);
-                taskView.mHeaderView.draw(c);
-                c.setBitmap(null);
-            }
-            b = b.createAshmemBitmap();
+            b = composeHeaderBitmap(taskView, transform);
         }
 
         Rect taskRect = new Rect();

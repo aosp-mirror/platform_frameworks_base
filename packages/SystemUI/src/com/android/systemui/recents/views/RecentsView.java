@@ -52,10 +52,8 @@ import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.EventBus.Event;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
-import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -493,7 +491,7 @@ public class RecentsView extends FrameLayout {
             stackLayout.getStackTransform(event.task, stackScroller.getStackScroll(), tmpTransform,
                     null);
             tmpTransform.alpha = 0;
-            tmpTransform.scale = 1f;
+            tmpTransform.scale = TaskStackView.DRAG_SCALE_FACTOR;
             tmpTransform.rect.set(taskViewRect);
             final OnAnimationStartedListener startedListener = new OnAnimationStartedListener() {
                 @Override
@@ -510,8 +508,12 @@ public class RecentsView extends FrameLayout {
                                 public void onAnimationEnd(Animator animation) {
                                     // Dock the task and launch it
                                     SystemServicesProxy ssp = Recents.getSystemServices();
+                                    TaskViewTransform transform = new TaskViewTransform();
+                                    transform.fillIn(event.taskView);
                                     ssp.startTaskInDockedMode(getContext(), event.taskView,
                                             event.task.key.id, dockState.createMode,
+                                            RecentsTransitionHelper.composeTaskBitmap(
+                                                    event.taskView, transform),
                                             mHandler, startedListener);
                                 }
                             }));

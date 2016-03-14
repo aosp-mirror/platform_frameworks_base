@@ -202,6 +202,8 @@ import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
 import static android.view.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
@@ -2927,9 +2929,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         final boolean freeformResizing = win.isDragResizing()
-                && win.getResizeMode() == WindowState.DRAG_RESIZE_MODE_FREEFORM;
+                && win.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
         final boolean dockedResizing = win.isDragResizing()
-                && win.getResizeMode() == WindowState.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+                && win.getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
         result |= freeformResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
         result |= dockedResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
         if (win.isAnimatingWithSavedSurface()) {
@@ -4993,6 +4995,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 task.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }
+        }
+    }
+
+    /**
+     * Puts a specific task into docked drag resizing mode. See {@link DragResizeMode}.
+     *
+     * @param taskId The id of the task to put into drag resize mode.
+     * @param resizing Whether to put the task into drag resize mode.
+     */
+    public void setTaskDockedResizing(int taskId, boolean resizing) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                throw new IllegalArgumentException("setTaskDockedResizing: taskId " + taskId
+                        + " not found.");
+            }
+            task.setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
         }
     }
 

@@ -403,13 +403,14 @@ public class SystemServicesProxy {
 
     /** Docks a task to the side of the screen and starts it. */
     public void startTaskInDockedMode(Context context, View view, int taskId, int createMode,
-            Handler handler, OnAnimationStartedListener startedListener) {
+            Bitmap headerBitmap, Handler handler, OnAnimationStartedListener startedListener) {
         if (mIam == null) return;
 
         try {
             // TODO: Determine what animation we want for the incoming task
             final ActivityOptions options = ActivityOptions.makeThumbnailAspectScaleUpAnimation(
-                    view, null, 0, 0, view.getWidth(), view.getHeight(), handler, startedListener);
+                    view, headerBitmap, 0, 0, (int) (view.getWidth() * view.getScaleX()),
+                    (int) (view.getHeight() * view.getScaleY()), handler, startedListener);
             options.setDockCreateMode(createMode);
             options.setLaunchStackId(DOCKED_STACK_ID);
             mIam.startActivityFromRecents(taskId, options.toBundle());

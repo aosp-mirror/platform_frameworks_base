@@ -4494,63 +4494,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            return startActivityFromRecentsInner(taskId, bOptions);
+            synchronized (this) {
+                return mStackSupervisor.startActivityFromRecentsInner(taskId, bOptions);
+            }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
-    }
-
-    final int startActivityFromRecentsInner(int taskId, Bundle bOptions) {
-        final TaskRecord task;
-        final int callingUid;
-        final String callingPackage;
-        final Intent intent;
-        final int userId;
-        synchronized (this) {
-            final ActivityOptions activityOptions = (bOptions != null)
-                    ? new ActivityOptions(bOptions) : null;
-            final int launchStackId = (activityOptions != null)
-                    ? activityOptions.getLaunchStackId() : INVALID_STACK_ID;
-
-            if (launchStackId == HOME_STACK_ID) {
-                throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
-                        + taskId + " can't be launch in the home stack.");
-            }
-            task = mStackSupervisor.anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
-            if (task == null) {
-                throw new IllegalArgumentException(
-                        "startActivityFromRecentsInner: Task " + taskId + " not found.");
-            }
-
-            if (launchStackId != INVALID_STACK_ID) {
-                if (launchStackId == DOCKED_STACK_ID && activityOptions != null) {
-                    mWindowManager.setDockedStackCreateState(
-                            activityOptions.getDockCreateMode(), null /* initialBounds */);
-                    mStackSupervisor.deferUpdateBounds(HOME_STACK_ID);
-                    mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
-                }
-                if (task.stack.mStackId != launchStackId) {
-                    mStackSupervisor.moveTaskToStackLocked(
-                            taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
-                            ANIMATE);
-                }
-            }
-
-            // If the user must confirm credentials (e.g. when first launching a work app and the
-            // Work Challenge is present) let startActivityInPackage handle the intercepting.
-            if (!mUserController.shouldConfirmCredentials(task.userId)
-                    && task.getRootActivity() != null) {
-                moveTaskToFrontLocked(task.taskId, 0, bOptions);
-                return ActivityManager.START_TASK_TO_FRONT;
-            }
-            callingUid = task.mCallingUid;
-            callingPackage = task.mCallingPackage;
-            intent = task.intent;
-            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            userId = task.userId;
-        }
-        return startActivityInPackage(callingUid, callingPackage, intent, null, null, null, 0, 0,
-                bOptions, userId, null, task);
     }
 
     final int startActivityInPackage(int uid, String callingPackage,
@@ -21053,12 +21002,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public void notifyAppTransitionFinished() {
-            mStackSupervisor.continueUpdateBounds(HOME_STACK_ID);
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.notifyAppTransitionDone();
+            }
         }
 
         @Override
         public void notifyAppTransitionCancelled() {
-            mStackSupervisor.continueUpdateBounds(HOME_STACK_ID);
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.notifyAppTransitionDone();
+            }
         }
     }
 
@@ -21148,7 +21101,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Will bring task to front if it already has a root activity.
             final long origId = Binder.clearCallingIdentity();
             try {
-                startActivityFromRecentsInner(mTaskId, null);
+                synchronized (this) {
+                    mStackSupervisor.startActivityFromRecentsInner(mTaskId, null);
+                }
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

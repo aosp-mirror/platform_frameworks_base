@@ -101,6 +101,7 @@ class Task implements DimLayer.DimLayerUser {
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
+    private int mDragResizeMode;
 
     private boolean mHomeTask;
 
@@ -507,9 +508,14 @@ class Task implements DimLayer.DimLayerUser {
         mStack.getDisplayContent().getLogicalDisplayRect(out);
     }
 
-    void setDragResizing(boolean dragResizing) {
+    void setDragResizing(boolean dragResizing, int dragResizeMode) {
         if (mDragResizing != dragResizing) {
+            if (!DragResizeMode.isModeAllowedForStack(mStack.mStackId, dragResizeMode)) {
+                throw new IllegalArgumentException("Drag resize mode not allow for stack stackId="
+                        + mStack.mStackId + " dragResizeMode=" + dragResizeMode);
+            }
             mDragResizing = dragResizing;
+            mDragResizeMode = dragResizeMode;
             resetDragResizingChangeReported();
         }
     }
@@ -526,6 +532,10 @@ class Task implements DimLayer.DimLayerUser {
 
     boolean isDragResizing() {
         return mDragResizing || (mStack != null && mStack.isDragResizing());
+    }
+
+    int getDragResizeMode() {
+        return mDragResizeMode;
     }
 
     void updateDisplayInfo(final DisplayContent displayContent) {

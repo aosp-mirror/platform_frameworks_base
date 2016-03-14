@@ -88,6 +88,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -123,9 +125,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
-
-    static final int DRAG_RESIZE_MODE_FREEFORM = 0;
-    static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
 
     static final boolean DEBUG_DISABLE_SAVING_SURFACES = false;
 
@@ -2278,9 +2277,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return;
         }
         mDragResizing = resizing;
-        mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
-                ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
-                : DRAG_RESIZE_MODE_FREEFORM;
+        final Task task = getTask();
+        if (task != null && task.isDragResizing()) {
+            mResizeMode = task.getDragResizeMode();
+        } else {
+            mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
+                    ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
+                    : DRAG_RESIZE_MODE_FREEFORM;
+        }
     }
 
     boolean isDragResizing() {

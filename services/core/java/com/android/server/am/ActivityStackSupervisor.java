@@ -52,6 +52,7 @@ import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -169,6 +170,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
+import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 public final class ActivityStackSupervisor implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
@@ -423,6 +425,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * determine whether to invoke the task stack change listener after pausing.
      */
     boolean mAppVisibilitiesChangedSinceLastPause;
+
+    /**
+     * Set of tasks that are in resizing mode during an app transition to fill the "void".
+     */
+    private final ArraySet<Integer> mResizingTasksDuringAnimation = new ArraySet<>();
 
     /**
      * Description of a request to start a new activity, which has been held
@@ -1953,6 +1960,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (stack != null) {
             stack.continueUpdateBounds();
         }
+    }
+
+    void notifyAppTransitionDone() {
+        continueUpdateBounds(HOME_STACK_ID);
+        for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
+            final int taskId = mResizingTasksDuringAnimation.valueAt(i);
+            if (anyTaskForIdLocked(taskId) != null) {
+                mWindowManager.setTaskDockedResizing(taskId, false);
+            }
+        }
+        mResizingTasksDuringAnimation.clear();
     }
 
     void resizeStackUncheckedLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
@@ -4167,5 +4185,68 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         throw new IllegalStateException("Failed to find a stack behind stack=" + stack
                 + " in=" + stacks);
+    }
+
+    final int startActivityFromRecentsInner(int taskId, Bundle bOptions) {
+        final TaskRecord task;
+        final int callingUid;
+        final String callingPackage;
+        final Intent intent;
+        final int userId;
+        final ActivityOptions activityOptions = (bOptions != null)
+                ? new ActivityOptions(bOptions) : null;
+        final int launchStackId = (activityOptions != null)
+                ? activityOptions.getLaunchStackId() : INVALID_STACK_ID;
+
+        if (launchStackId == HOME_STACK_ID) {
+            throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
+                    + taskId + " can't be launch in the home stack.");
+        }
+        task = anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
+        if (task == null) {
+            throw new IllegalArgumentException(
+                    "startActivityFromRecentsInner: Task " + taskId + " not found.");
+        }
+
+        if (launchStackId != INVALID_STACK_ID) {
+            if (launchStackId == DOCKED_STACK_ID) {
+                mWindowManager.setDockedStackCreateState(
+                        activityOptions.getDockCreateMode(), null /* initialBounds */);
+
+                // Defer updating the stack in which recents is until the app transition is done, to
+                // not run into issues where we still need to draw the task in recents but the
+                // docked stack is already created.
+                deferUpdateBounds(HOME_STACK_ID);
+                mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
+            }
+            if (task.stack.mStackId != launchStackId) {
+                moveTaskToStackLocked(
+                        taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
+                        ANIMATE);
+            }
+        }
+
+        // If the user must confirm credentials (e.g. when first launching a work app and the
+        // Work Challenge is present) let startActivityInPackage handle the intercepting.
+        if (!mService.mUserController.shouldConfirmCredentials(task.userId)
+                && task.getRootActivity() != null) {
+            mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
+
+            // If we are launching the task in the docked stack, put it into resizing mode so
+            // the window renders full-screen with the background filling the void. Also only
+            // call this at the end to make sure that tasks exists on the window manager side.
+            if (launchStackId == DOCKED_STACK_ID) {
+                mResizingTasksDuringAnimation.add(task.taskId);
+                mWindowManager.setTaskDockedResizing(task.taskId, true);
+            }
+            return ActivityManager.START_TASK_TO_FRONT;
+        }
+        callingUid = task.mCallingUid;
+        callingPackage = task.mCallingPackage;
+        intent = task.intent;
+        intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+        userId = task.userId;
+        return mService.startActivityInPackage(callingUid, callingPackage, intent, null, null, null,
+                0, 0, bOptions, userId, null, task);
     }
 }
