@@ -17,6 +17,7 @@
 package com.android.internal.telecom;
 
 import android.app.PendingIntent;
+import android.os.Bundle;
 import android.telecom.CallAudioState;
 import android.telecom.ParcelableCall;
 
@@ -47,4 +48,6 @@ oneway interface IInCallService {
     void onCanAddCallChanged(boolean canAddCall);
 
     void silenceRinger();
+
+    void onConnectionEvent(String callId, String event, in Bundle extras);
 }

@@ -317,6 +317,18 @@ public class TelecomManager {
             "android.telecom.IN_CALL_SERVICE_RINGING";
 
     /**
+     * A boolean meta-data value indicating whether an {@link InCallService} wants to be informed of
+     * calls which have the {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} property.  An external
+     * call is one which a {@link ConnectionService} knows about, but is not connected to directly.
+     * Dialer implementations (see {@link #getDefaultDialerPackage()}) which would like to be
+     * informed of external calls should set this meta-data to {@code true} in the manifest
+     * registration of their {@link InCallService}.  By default, the {@link InCallService} will NOT
+     * be informed of external calls.
+     */
+    public static final String METADATA_INCLUDE_EXTERNAL_CALLS =
+            "android.telecom.INCLUDE_EXTERNAL_CALLS";
+
+    /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
      * pause for a predefined period.
      */

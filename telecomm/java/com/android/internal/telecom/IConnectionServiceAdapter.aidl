@@ -87,5 +87,5 @@ oneway interface IConnectionServiceAdapter {
 
     void setExtras(String callId, in Bundle extras);
 
-    void onConnectionEvent(String callId, String event);
+    void onConnectionEvent(String callId, String event, in Bundle extras);
 }

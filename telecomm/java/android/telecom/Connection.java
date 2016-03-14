@@ -93,6 +93,15 @@ public abstract class Connection extends Conferenceable {
     public static final int STATE_DISCONNECTED = 6;
 
     /**
+     * The state of an external connection which is in the process of being pulled from a remote
+     * device to the local device.
+     * <p>
+     * A connection can only be in this state if the {@link #CAPABILITY_IS_EXTERNAL_CALL} and
+     * {@link #CAPABILITY_CAN_PULL_CALL} capability bits are set on the connection.
+     */
+    public static final int STATE_PULLING_CALL = 7;
+
+    /**
      * Connection can currently be put on hold or unheld. This is distinct from
      * {@link #CAPABILITY_SUPPORT_HOLD} in that although a connection may support 'hold' most times,
      * it does not at the moment support the function. This can be true while the call is in the
@@ -270,8 +279,33 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 0x00800000;
 
+    /**
+     * When set, indicates that the {@code Connection} does not actually exist locally for the
+     * {@link ConnectionService}.
+     * <p>
+     * Consider, for example, a scenario where a user has two devices with the same phone number.
+     * When a user places a call on one devices, the telephony stack can represent that call on the
+     * other device by adding is to the {@link ConnectionService} with the
+     * {@code CAPABILITY_IS_EXTERNAL_CALL} capability set.
+     * <p>
+     * An {@link ConnectionService} should not assume that all {@link InCallService}s will handle
+     * external connections.  Only those {@link InCallService}s which have the
+     * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
+     * manifest will see external connections.
+     */
+    public static final int CAPABILITY_IS_EXTERNAL_CALL = 0x01000000;
+
+    /**
+     * When set for an external connection, indicates that this {@code Connection} can be pulled
+     * from a remote device to the current device.
+     * <p>
+     * Should only be set on a {@code Connection} where {@link #CAPABILITY_IS_EXTERNAL_CALL}
+     * is set.
+     */
+    public static final int CAPABILITY_CAN_PULL_CALL = 0x02000000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x01000000
+    // Next CAPABILITY value: 0x04000000
     //**********************************************************************************************
 
     /**
@@ -314,6 +348,18 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EVENT_ON_HOLD_TONE_END =
             "android.telecom.event.ON_HOLD_TONE_END";
+
+    /**
+     * Connection event used to inform {@link InCallService}s when pulling of an external call has
+     * failed.  The user interface should inform the user of the error.
+     * <p>
+     * Expected to be used by the {@link ConnectionService} when the {@link Call#pullExternalCall()}
+     * API is called on a {@link Call} with the properties
+     * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} and
+     * {@link Call.Details#CAPABILITY_CAN_PULL_CALL}, but the {@link ConnectionService} could not
+     * pull the external call due to an error condition.
+     */
+    public static final String EVENT_CALL_PULL_FAILED = "android.telecom.event.CALL_PULL_FAILED";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -434,6 +480,12 @@ public abstract class Connection extends Conferenceable {
         if (can(capabilities, CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)) {
             builder.append(" CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION");
         }
+        if (can(capabilities, CAPABILITY_IS_EXTERNAL_CALL)) {
+            builder.append(" CAPABILITY_IS_EXTERNAL_CALL");
+        }
+        if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
+            builder.append(" CAPABILITY_CAN_PULL_CALL");
+        }
 
         builder.append("]");
         return builder.toString();
@@ -465,8 +517,7 @@ public abstract class Connection extends Conferenceable {
         public void onConferenceStarted() {}
         public void onConferenceMergeFailed(Connection c) {}
         public void onExtrasChanged(Connection c, Bundle extras) {}
-        /** @hide */
-        public void onConnectionEvent(Connection c, String event) {}
+        public void onConnectionEvent(Connection c, String event, Bundle extras) {}
     }
 
     /**
@@ -1854,6 +1905,31 @@ public abstract class Connection extends Conferenceable {
      */
     public void onPostDialContinue(boolean proceed) {}
 
+    /**
+     * Notifies this Connection of a request to pull an external call to the local device.
+     * <p>
+     * The {@link InCallService} issues a request to pull an external call to the local device via
+     * {@link Call#pullExternalCall()}.
+     * <p>
+     * For a Connection to be pulled, both the {@link Connection#CAPABILITY_CAN_PULL_CALL} and
+     * {@link Connection#CAPABILITY_IS_EXTERNAL_CALL} capability bits must be set.
+     * <p>
+     * For more information on external calls, see {@link Connection#CAPABILITY_IS_EXTERNAL_CALL}.
+     */
+    public void onPullExternalCall() {}
+
+    /**
+     * Notifies this Connection of a {@link Call} event initiated from an {@link InCallService}.
+     * <p>
+     * The {@link InCallService} issues a Call event via {@link Call#sendCallEvent(String, Bundle)}.
+     * <p>
+     * See also {@link Call#sendCallEvent(String, Bundle)}.
+     *
+     * @param event The call event.
+     * @param extras Extras associated with the call event.
+     */
+    public void onCallEvent(String event, Bundle extras) {}
+
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
         if (number == null) {
@@ -2008,14 +2084,20 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Sends a connection event to Telecom.
+     * Sends an event associated with this {@code Connection}, with associated event extras.
+     *
+     * Events are exposed to {@link InCallService} implementations via the
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)} API.
+     *
+     * No assumptions should be made as to how an In-Call UI or service will handle these events.
+     * Events should be fully qualified (e.g., com.example.event.MY_EVENT) to avoid conflicts.
      *
      * @param event The connection event.
-     * @hide
+     * @param extras Bundle containing extra information associated with the event.
      */
-    protected void sendConnectionEvent(String event) {
+    public void sendConnectionEvent(String event, Bundle extras) {
         for (Listener l : mListeners) {
-            l.onConnectionEvent(this, event);
+            l.onConnectionEvent(this, event, null);
         }
     }
 }

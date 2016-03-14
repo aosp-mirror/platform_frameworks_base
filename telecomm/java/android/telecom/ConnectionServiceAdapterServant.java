@@ -245,7 +245,8 @@ final class ConnectionServiceAdapterServant {
                 case MSG_ON_CONNECTION_EVENT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        mDelegate.onConnectionEvent((String) args.arg1, (String) args.arg2);
+                        mDelegate.onConnectionEvent((String) args.arg1, (String) args.arg2,
+                                (Bundle) args.arg3);
                     } finally {
                         args.recycle();
                     }
@@ -432,10 +433,11 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public final void onConnectionEvent(String connectionId, String event) {
+        public final void onConnectionEvent(String connectionId, String event, Bundle extras) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = connectionId;
             args.arg2 = event;
+            args.arg3 = extras;
             mHandler.obtainMessage(MSG_ON_CONNECTION_EVENT, args).sendToTarget();
         }
     };
