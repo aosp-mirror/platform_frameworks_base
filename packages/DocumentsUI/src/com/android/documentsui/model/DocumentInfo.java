@@ -74,7 +74,6 @@ public class DocumentInfo implements Durable, Parcelable {
         summary = null;
         size = -1;
         icon = 0;
-
         derivedUri = null;
     }
 
@@ -210,6 +209,7 @@ public class DocumentInfo implements Durable, Parcelable {
                 + ", isContainer=" + isContainer()
                 + ", isDirectory=" + isDirectory()
                 + ", isArchive=" + isArchive()
+                + ", isPartial=" + isPartial()
                 + ", isVirtualDocument=" + isVirtualDocument()
                 + ", isDeleteSupported=" + isDeleteSupported()
                 + ", isCreateSupported=" + isCreateSupported()
@@ -247,6 +247,10 @@ public class DocumentInfo implements Durable, Parcelable {
 
     public boolean isArchive() {
         return (flags & Document.FLAG_ARCHIVE) != 0;
+    }
+
+    public boolean isPartial() {
+        return (flags & Document.FLAG_PARTIAL) != 0;
     }
 
     public boolean isContainer() {
