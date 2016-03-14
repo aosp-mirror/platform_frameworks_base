@@ -830,11 +830,21 @@ class MtpDatabase {
         if (info.getFormat() == MtpConstants.FORMAT_ASSOCIATION) {
             return DocumentsContract.Document.MIME_TYPE_DIR;
         }
+
         final String formatCodeMimeType = MediaFile.getMimeTypeForFormatCode(info.getFormat());
+        final String mediaFileMimeType = MediaFile.getMimeTypeForFile(info.getName());
+
+        // Format code can be mapped with multiple mime types, e.g. FORMAT_MPEG is mapped with
+        // audio/mp4 and video/mp4.
+        // As file extension contains more information than format code, returns mime type obtained
+        // from file extension if it is consistent with format code.
+        if (mediaFileMimeType != null &&
+                MediaFile.getFormatCode("", mediaFileMimeType) == info.getFormat()) {
+            return mediaFileMimeType;
+        }
         if (formatCodeMimeType != null) {
             return formatCodeMimeType;
         }
-        final String mediaFileMimeType = MediaFile.getMimeTypeForFile(info.getName());
         if (mediaFileMimeType != null) {
             return mediaFileMimeType;
         }
