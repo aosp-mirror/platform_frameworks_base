@@ -1953,7 +1953,7 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         @Override
         public LongSamplingCounter getIdleTimeCounter() {
-            return mRxTimeMillis;
+            return mIdleTimeMillis;
         }
 
         /**
