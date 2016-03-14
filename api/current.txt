@@ -19280,7 +19280,6 @@ package android.location {
     method public boolean hasCarrierPhase();
     method public boolean hasCarrierPhaseUncertainty();
     method public boolean hasSnrInDb();
-    method public boolean isPseudorangeRateCorrected();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ADR_STATE_CYCLE_SLIP = 4; // 0x4
     field public static final int ADR_STATE_RESET = 2; // 0x2

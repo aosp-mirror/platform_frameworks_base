@@ -47,7 +47,6 @@ public final class GnssMeasurement implements Parcelable {
     private double mCarrierPhaseUncertainty;
     private int mMultipathIndicator;
     private double mSnrInDb;
-    private boolean mPseudorangeRateCorrected;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -440,25 +439,6 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * See {@link #getPseudorangeRateMetersPerSecond()} for more details.
-     *
-     * @return {@code true} if {@link #getPseudorangeRateMetersPerSecond()} contains a corrected
-     *         value, {@code false} if it contains an uncorrected value.
-     */
-    public boolean isPseudorangeRateCorrected() {
-        return mPseudorangeRateCorrected;
-    }
-
-    /**
-     * Sets whether the pseudorange corrected.
-     * @hide
-     */
-    @TestApi
-    public void setPseudorangeRateCorrected(boolean value) {
-        mPseudorangeRateCorrected = value;
-    }
-
-    /**
      * Gets the pseudorange's rate uncertainty (1-Sigma) in m/s.
      * The uncertainty is represented as an absolute (single sided) value.
      */
@@ -813,7 +793,6 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mCarrierPhaseUncertainty = parcel.readDouble();
             gnssMeasurement.mMultipathIndicator = parcel.readInt();
             gnssMeasurement.mSnrInDb = parcel.readDouble();
-            gnssMeasurement.mPseudorangeRateCorrected = (parcel.readByte() != 0);
 
             return gnssMeasurement;
         }
@@ -845,7 +824,6 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mCarrierPhaseUncertainty);
         parcel.writeInt(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
-        parcel.writeByte((byte) (mPseudorangeRateCorrected ? 1 : 0));
     }
 
     @Override
@@ -880,10 +858,6 @@ public final class GnssMeasurement implements Parcelable {
                 mPseudorangeRateMetersPerSecond,
                 "PseudorangeRateUncertaintyMetersPerSecond",
                 mPseudorangeRateUncertaintyMetersPerSecond));
-        builder.append(String.format(
-                format,
-                "PseudorangeRateIsCorrected",
-                isPseudorangeRateCorrected()));
 
         builder.append(String.format(
                 format,
@@ -943,7 +917,6 @@ public final class GnssMeasurement implements Parcelable {
         resetCarrierPhaseUncertainty();
         setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
         resetSnrInDb();
-        setPseudorangeRateCorrected(false);
     }
 
     private void setFlag(int flag) {

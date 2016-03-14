@@ -19310,7 +19310,6 @@ package android.location {
     method public boolean hasCarrierPhase();
     method public boolean hasCarrierPhaseUncertainty();
     method public boolean hasSnrInDb();
-    method public boolean isPseudorangeRateCorrected();
     method public void reset();
     method public void resetCarrierCycles();
     method public void resetCarrierFrequencyHz();
@@ -19328,7 +19327,6 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
-    method public void setPseudorangeRateCorrected(boolean);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
