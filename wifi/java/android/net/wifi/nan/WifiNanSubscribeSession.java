@@ -18,8 +18,8 @@ package android.net.wifi.nan;
 
 /**
  * A representation of a NAN subscribe session. Created when
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback, int)}
- * is executed. The object can be used to stop and re-start (re-configure) the
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} is
+ * executed. The object can be used to stop and re-start (re-configure) the
  * subscribe session.
  *
  * @hide PROPOSED_NAN_API
@@ -28,19 +28,25 @@ public class WifiNanSubscribeSession extends WifiNanSession {
     /**
      * {@hide}
      */
-    public WifiNanSubscribeSession(WifiNanManager manager, int sessionId) {
-        super(manager, sessionId);
+    public WifiNanSubscribeSession(WifiNanManager manager, int sessionId,
+            WifiNanSessionCallback callback) {
+        super(manager, sessionId, callback);
     }
 
     /**
-     * Restart/re-configure the subscribe session. Note that the
+     * Re-configure the subscribe session. Note that the
      * {@link WifiNanSessionCallback} is not replaced - the same listener used
      * at creation is still used.
      *
      * @param subscribeConfig The configuration ({@link SubscribeConfig}) of the
      *            subscribe session.
      */
-    public void subscribe(SubscribeConfig subscribeConfig) {
-        mManager.subscribe(mSessionId, subscribeConfig);
+    public void updateSubscribe(SubscribeConfig subscribeConfig) {
+        if (mTerminated) {
+            mCallback.onSessionConfigFail(WifiNanSessionCallback.FAIL_REASON_SESSION_TERMINATED);
+            return;
+        } else {
+            mManager.updateSubscribe(mSessionId, subscribeConfig);
+        }
     }
 }

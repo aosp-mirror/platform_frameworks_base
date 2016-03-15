@@ -30,64 +30,44 @@ public class WifiNanSession {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
-    /**
-     * {@hide}
-     */
     protected WifiNanManager mManager;
+    protected final int mSessionId;
+    protected final WifiNanSessionCallback mCallback;
+
+    protected boolean mTerminated = false;
 
     /**
      * {@hide}
      */
-    protected int mSessionId;
-
-    /**
-     * {@hide}
-     */
-    private boolean mDestroyed;
-
-    /**
-     * {@hide}
-     */
-    public WifiNanSession(WifiNanManager manager, int sessionId) {
+    public WifiNanSession(WifiNanManager manager, int sessionId,
+            WifiNanSessionCallback callback) {
         if (VDBG) Log.v(TAG, "New client created: manager=" + manager + ", sessionId=" + sessionId);
 
         mManager = manager;
         mSessionId = sessionId;
-        mDestroyed = false;
+        mCallback = callback;
     }
 
     /**
      * Terminate the current publish or subscribe session - i.e. stop
      * transmitting packet on-air (for an active session) or listening for
-     * matches (for a passive session). Note that the session may still receive
-     * incoming messages and may be re-configured/re-started at a later time.
+     * matches (for a passive session). The session may not be used for any
+     * additional operations are termination.
      */
-    public void stop() {
-        mManager.stopSession(mSessionId);
+    public void terminate() {
+        mManager.terminateSession(mSessionId);
+        mTerminated = true;
+        mManager = null;
     }
 
-    /**
-     * Destroy the current publish or subscribe session. Performs a
-     * {@link WifiNanSession#stop()} function but in addition destroys the session -
-     * it will not be able to receive any messages or to be restarted at a later
-     * time.
-     */
-    public void destroy() {
-        mManager.destroySession(mSessionId);
-        mDestroyed = true;
-    }
-
-    /**
-     * {@hide}
-     */
     @Override
     protected void finalize() throws Throwable {
-        if (!mDestroyed) {
+        if (!mTerminated) {
             Log.w(TAG, "WifiNanSession mSessionId=" + mSessionId
-                            + " was not explicitly destroyed. The session may use resources until "
-                            + "destroyed so step should be done explicitly");
+                    + " was not explicitly terminated. The session may use resources until "
+                    + "terminated so step should be done explicitly");
         }
-        destroy();
+        terminate();
     }
 
     /**
@@ -108,6 +88,12 @@ public class WifiNanSession {
      *            indicated message send success or failure.
      */
     public void sendMessage(int peerId, byte[] message, int messageLength, int messageId) {
+        if (mTerminated) {
+            mCallback.onMessageSendFail(messageId,
+                    WifiNanSessionCallback.FAIL_REASON_SESSION_TERMINATED);
+            return;
+        }
+
         mManager.sendMessage(mSessionId, peerId, message, messageLength, messageId);
     }
 }
