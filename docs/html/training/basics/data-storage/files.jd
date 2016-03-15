@@ -59,7 +59,7 @@ The following lists summarize the facts about each storage space.</p>
 <p><b>Internal storage:</b></p>
 <ul>
 <li>It's always available.</li>
-<li>Files saved here are accessible by only your app by default.</li>
+<li>Files saved here are accessible by only your app.</li>
 <li>When the user uninstalls your app, the system removes all your app's files from
 internal storage.</li>
 </ul>
@@ -83,6 +83,12 @@ place for files that don't require access restrictions and for files that you wa
 with other apps or allow the user to access with a computer.</p>
 </div>
 
+<p class="note">
+<strong>Note:</strong> Before API level 24, internal files could be made accessible to other
+apps by means of relaxing file system permissions. This is no longer the case. If you wish
+to make the content of a private file accessible to other apps, your app may use the
+{@link android.support.v4.content.FileProvider}. See <a
+href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>.</p>
 
 <p class="note" style="clear:both">
 <strong>Tip:</strong> Although apps are installed onto the internal storage by
