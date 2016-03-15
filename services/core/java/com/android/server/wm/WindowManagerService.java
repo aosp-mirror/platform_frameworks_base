@@ -4255,16 +4255,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.appDied = false;
                 wtoken.removeAllWindows();
             } else if (visible) {
-                if (DEBUG_ADD_REMOVE) Slog.v(
-                        TAG_WM, "No longer Stopped: " + wtoken);
-                wtoken.mAppStopped = false;
                 mOpeningApps.add(wtoken);
                 wtoken.startingMoved = false;
 
-                // If the token is currently hidden (should be the
-                // common case), then we need to set up to wait for
-                // its windows to be ready.
-                if (wtoken.hidden) {
+                // If the token is currently hidden (should be the common case), or has been
+                // stopped, then we need to set up to wait for its windows to be ready.
+                if (wtoken.hidden || wtoken.mAppStopped) {
                     wtoken.allDrawn = false;
                     wtoken.deferClearAllDrawn = false;
                     wtoken.waitingToShow = true;
@@ -4280,6 +4276,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         wtoken.sendAppVisibilityToClients();
                     }
                 }
+                if (DEBUG_ADD_REMOVE) Slog.v(
+                        TAG_WM, "No longer Stopped: " + wtoken);
+                wtoken.mAppStopped = false;
             }
 
             // If we are preparing an app transition, then delay changing

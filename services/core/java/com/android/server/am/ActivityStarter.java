@@ -1327,19 +1327,31 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.task);
                 }
                 mMovedHome = true;
-                final ActivityStack launchStack =
-                        getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.task,
-                                mOptions, true);
-                if (launchStack == null || launchStack == mTargetStack) {
-                    // We only want to move to the front, if we aren't going to launch on a
-                    // different stack. If we launch on a different stack, we will put the
-                    // task on top there.
-                    mTargetStack.moveTaskToFrontLocked(intentActivity.task, mNoAnimation,
-                            mOptions, mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
-                    mMovedToFront = true;
+
+                // If the launch flags carry both NEW_TASK and CLEAR_TASK, the task's activities
+                // will be cleared soon by ActivityStarter in setTaskFromIntentActivity().
+                // So no point resuming any of the activities here, it just wastes one extra
+                // resuming, plus enter AND exit transitions.
+                // Here we only want to bring the target stack forward. Transition will be applied
+                // to the new activity that's started after the old ones are gone.
+                final boolean willClearTask =
+                        (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
+                            == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
+                if (!willClearTask) {
+                    final ActivityStack launchStack = getLaunchStack(
+                            mStartActivity, mLaunchFlags, mStartActivity.task, mOptions, true);
+                    if (launchStack == null || launchStack == mTargetStack) {
+                        // We only want to move to the front, if we aren't going to launch on a
+                        // different stack. If we launch on a different stack, we will put the
+                        // task on top there.
+                        mTargetStack.moveTaskToFrontLocked(
+                                intentActivity.task, mNoAnimation, mOptions,
+                                mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
+                        mMovedToFront = true;
+                    }
+                    mOptions = null;
                 }
                 updateTaskReturnToType(intentActivity.task, mLaunchFlags, focusStack);
-                mOptions = null;
             }
         }
         if (!mMovedToFront && mDoResume) {
