@@ -160,6 +160,7 @@ class WindowStateAnimator {
     boolean mEnteringAnimation;
 
     boolean mKeyguardGoingAwayAnimation;
+    boolean mKeyguardGoingAwayWithWallpaper;
 
     /** The pixel format of the underlying SurfaceControl */
     int mSurfaceFormat;
@@ -250,6 +251,7 @@ class WindowStateAnimator {
             mAnimation.cancel();
             mAnimation = null;
             mKeyguardGoingAwayAnimation = false;
+            mKeyguardGoingAwayWithWallpaper = false;
         }
     }
 
@@ -381,6 +383,7 @@ class WindowStateAnimator {
 
         mAnimating = false;
         mKeyguardGoingAwayAnimation = false;
+        mKeyguardGoingAwayWithWallpaper = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();

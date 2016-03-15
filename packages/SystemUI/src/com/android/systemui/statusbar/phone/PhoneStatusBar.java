@@ -1887,10 +1887,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (mBackdrop.getVisibility() != View.VISIBLE) {
                 mBackdrop.setVisibility(View.VISIBLE);
                 if (allowEnterAnimation) {
-                    mBackdrop.animate().alpha(1f);
+                    mBackdrop.animate().alpha(1f).withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mStatusBarWindowManager.setBackdropShowing(true);
+                        }
+                    });
                 } else {
                     mBackdrop.animate().cancel();
                     mBackdrop.setAlpha(1f);
+                    mStatusBarWindowManager.setBackdropShowing(true);
                 }
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
@@ -1948,7 +1954,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
                     mBackdropBack.setImageDrawable(null);
+                    mStatusBarWindowManager.setBackdropShowing(false);
                 } else {
+                    mStatusBarWindowManager.setBackdropShowing(false);
                     mBackdrop.animate()
                             // Never let the alpha become zero - otherwise the RenderNode
                             // won't draw anything and uninitialized memory will show through
