@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -431,6 +432,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         mIgnoreAltTabRelease = false;
         mIterateTrigger.stopDozing();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        EventBus.getDefault().send(new ConfigurationChangedEvent());
     }
 
     @Override
