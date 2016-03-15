@@ -411,11 +411,15 @@ public final class Metrics {
     public static final int SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED = 0;
     public static final int SCOPED_DIRECTORY_ACCESS_GRANTED = 1;
     public static final int SCOPED_DIRECTORY_ACCESS_DENIED = 2;
+    public static final int SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST = 3;
+    public static final int SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED = 4;
 
     @IntDef(flag = true, value = {
             SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED,
             SCOPED_DIRECTORY_ACCESS_GRANTED,
-            SCOPED_DIRECTORY_ACCESS_DENIED
+            SCOPED_DIRECTORY_ACCESS_DENIED,
+            SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST,
+            SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScopedAccessGrant {}
@@ -432,23 +436,34 @@ public final class Metrics {
         final String packageName = activity.getCallingPackage();
         switch (type) {
             case SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED:
-                MetricsLogger.action(activity,
-                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE,
-                        packageName);
-                MetricsLogger.action(activity,
-                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_FOLDER, index);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_FOLDER, index);
                 break;
             case SCOPED_DIRECTORY_ACCESS_GRANTED:
-                MetricsLogger.action(activity,
-                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_PACKAGE, packageName);
-                MetricsLogger.action(activity,
-                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_FOLDER, index);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_FOLDER, index);
                 break;
             case SCOPED_DIRECTORY_ACCESS_DENIED:
-                MetricsLogger.action(activity,
-                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_PACKAGE, packageName);
-                MetricsLogger.action(activity,
-                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_FOLDER, index);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_FOLDER, index);
+                break;
+            case SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST:
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_FOLDER, index);
+                break;
+            case SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED:
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity, MetricsEvent
+                        .ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED_BY_FOLDER, index);
                 break;
             default:
                 Log.wtf(TAG, "invalid ScopedAccessGrant: " + type);
