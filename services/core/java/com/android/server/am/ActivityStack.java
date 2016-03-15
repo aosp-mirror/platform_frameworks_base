@@ -2182,10 +2182,11 @@ final class ActivityStack {
 
         ActivityStack lastStack = mStackSupervisor.getLastStack();
         if (next.app != null && next.app.thread != null) {
-            if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next);
+            if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
+                    + " stopped=" + next.stopped + " visible=" + next.visible);
 
             // This activity is now becoming visible.
-            if (!next.visible) {
+            if (!next.visible || next.stopped) {
                 mWindowManager.setAppVisibility(next.appToken, true);
             }
 
