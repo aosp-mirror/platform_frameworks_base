@@ -48,6 +48,7 @@ public class PipeManagerTest extends AndroidTestCase {
     @Override
     protected void tearDown() throws Exception {
         assertTrue(mPipeManager.close());
+        mDatabase.close();
     }
 
     public void testReadDocument_basic() throws Exception {

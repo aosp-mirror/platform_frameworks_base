@@ -262,11 +262,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 null));
         {
             mProvider.openDevice(0);
-            mProvider.resumeRootScanner();
             mResolver.waitForNotification(ROOTS_URI, 1);
 
             mProvider.openDevice(1);
-            mProvider.resumeRootScanner();
             mResolver.waitForNotification(ROOTS_URI, 2);
 
             final Cursor cursor = mProvider.queryRoots(null);
