@@ -138,11 +138,6 @@
         android:title="@string/other" >
 
         <com.android.systemui.tuner.TunerSwitch
-            android:key="overview_disable_fast_toggle_via_button"
-            android:title="@string/overview_disable_fast_toggle_via_button"
-            android:summary="@string/overview_disable_fast_toggle_via_button_desc" />
-
-        <com.android.systemui.tuner.TunerSwitch
             android:key="overview_nav_bar_gesture"
             android:title="@string/overview_nav_bar_gesture"
             android:summary="@string/overview_nav_bar_gesture_desc" />

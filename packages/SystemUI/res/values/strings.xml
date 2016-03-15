@@ -1186,11 +1186,6 @@
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
-    <!-- Disables fast-toggling recents via the recents button. DO NOT TRANSLATE -->
-    <string name="overview_disable_fast_toggle_via_button">Disable fast toggle</string>
-    <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
-    <string name="overview_disable_fast_toggle_via_button_desc">Disable launch timeout while paging</string>
-
     <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=60]-->
     <string name="overview_nav_bar_gesture">Enable split-screen swipe-up gesture</string>
     <!-- Description for the toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=NONE]-->

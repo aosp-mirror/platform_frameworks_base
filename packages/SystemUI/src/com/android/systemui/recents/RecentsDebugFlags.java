@@ -41,6 +41,8 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean EnableHistory = false;
         // Overrides the Tuner flags and enables the timeout
         private static final boolean EnableFastToggleTimeout = false;
+        // Overrides the Tuner flags and enables the paging via the Recents button
+        private static final boolean EnablePaging = false;
 
         // Enables us to create mock recents tasks
         public static final boolean EnableMockTasks = false;
@@ -54,10 +56,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final int MockTaskGroupsTaskCount = 12;
     }
 
-    private static final String KEY_ENABLE_PAGING = "overview_enable_paging";
-
-    private boolean mEnablePaging;
-
     /**
      * We read the prefs once when we start the activity, then update them as the tuner changes
      * the flags.
@@ -65,7 +63,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public RecentsDebugFlags(Context context) {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
-        TunerService.get(context).addTunable(this, KEY_ENABLE_PAGING);
     }
 
     /**
@@ -83,16 +80,11 @@ public class RecentsDebugFlags implements TunerService.Tunable {
      * @return whether we are enabling paging.
      */
     public boolean isPagingEnabled() {
-        return mEnablePaging;
+        return Static.EnablePaging;
     }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        switch (key) {
-            case KEY_ENABLE_PAGING:
-                mEnablePaging = (newValue != null) && (Integer.parseInt(newValue) != 0);
-                break;
-        }
         EventBus.getDefault().send(new DebugFlagsChangedEvent());
     }
 }
