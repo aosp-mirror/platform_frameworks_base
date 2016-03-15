@@ -670,7 +670,7 @@ public abstract class BaseActivity extends Activity
 
     private static final class HandleRootsChangedTask
             extends PairedTask<BaseActivity, RootInfo, RootInfo> {
-        DocumentInfo mHome;
+        DocumentInfo mDownloadsDocument;
 
         public HandleRootsChangedTask(BaseActivity activity) {
             super(activity);
@@ -682,28 +682,28 @@ public abstract class BaseActivity extends Activity
 
             final RootInfo currentRoot = roots[0];
             final Collection<RootInfo> cachedRoots = mOwner.mRoots.getRootsBlocking();
-            RootInfo homeRoot = null;
+            RootInfo downloadsRoot = null;
             for (final RootInfo root : cachedRoots) {
-                if (root.isHome()) {
-                    homeRoot = root;
+                if (root.isDownloads()) {
+                    downloadsRoot = root;
                 }
                 if (root.getUri().equals(currentRoot.getUri())) {
                     // We don't need to change the current root as the current root was not removed.
                     return null;
                 }
             }
-            assert(homeRoot != null);
-            mHome = mOwner.getRootDocumentBlocking(homeRoot);
-            return homeRoot;
+            assert(downloadsRoot != null);
+            mDownloadsDocument = mOwner.getRootDocumentBlocking(downloadsRoot);
+            return downloadsRoot;
         }
 
         @Override
-        protected void finish(RootInfo homeRoot) {
-            if (homeRoot != null && mHome != null) {
+        protected void finish(RootInfo downloadsRoot) {
+            if (downloadsRoot != null && mDownloadsDocument != null) {
                 // Clear entire backstack and start in new root
-                mOwner.mState.onRootChanged(homeRoot);
-                mOwner.mSearchManager.update(homeRoot);
-                mOwner.openContainerDocument(mHome);
+                mOwner.mState.onRootChanged(downloadsRoot);
+                mOwner.mSearchManager.update(downloadsRoot);
+                mOwner.openContainerDocument(mDownloadsDocument);
             }
         }
     }
