@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.util.ArrayMap;
 
 import java.util.Collections;
@@ -188,6 +189,13 @@ public final class Phone {
 
     final void internalSilenceRinger() {
         fireSilenceRinger();
+    }
+
+    final void internalOnConnectionEvent(String telecomId, String event, Bundle extras) {
+        Call call = mCallByTelecomCallId.get(telecomId);
+        if (call != null) {
+            call.internalOnConnectionEvent(event, extras);
+        }
     }
 
     /**

@@ -418,12 +418,13 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the call.
      * @param event The event.
+     * @param extras Extras associated with the event.
      */
-    void onConnectionEvent(String callId, String event) {
+    void onConnectionEvent(String callId, String event, Bundle extras) {
         Log.v(this, "onConnectionEvent: %s", event);
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.onConnectionEvent(callId, event);
+                adapter.onConnectionEvent(callId, event, extras);
             } catch (RemoteException ignored) {
             }
         }

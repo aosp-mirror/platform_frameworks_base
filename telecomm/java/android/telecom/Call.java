@@ -95,6 +95,19 @@ public final class Call {
     public static final int STATE_DISCONNECTING = 10;
 
     /**
+     * The state of an external call which is in the process of being pulled from a remote device to
+     * the local device.
+     * <p>
+     * A call can only be in this state if the {@link Details#PROPERTY_IS_EXTERNAL_CALL} property
+     * and {@link Details#CAPABILITY_CAN_PULL_CALL} capability are set on the call.
+     * <p>
+     * An {@link InCallService} will only see this state if it has the
+     * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
+     * manifest.
+     */
+    public static final int STATE_PULLING_CALL = 11;
+
+    /**
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
      * extras. Used to pass the phone accounts to display on the front end to the user in order to
      * select phone accounts to (for example) place a call.
@@ -226,8 +239,23 @@ public final class Call {
          */
         public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 0x00400000;
 
+        /**
+         * When set for an external call, indicates that this {@code Call} can be pulled from a
+         * remote device to the current device.
+         * <p>
+         * Should only be set on a {@code Call} where {@link #PROPERTY_IS_EXTERNAL_CALL} is set.
+         * <p>
+         * An {@link InCallService} will only see calls with this capability if it has the
+         * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
+         * in its manifest.
+         * <p>
+         * See {@link Connection#CAPABILITY_CAN_PULL_CALL} and
+         * {@link Connection#CAPABILITY_IS_EXTERNAL_CALL}.
+         */
+        public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x00800000
+        // Next CAPABILITY value: 0x01000000
         //******************************************************************************************
 
         /**
@@ -261,8 +289,25 @@ public final class Call {
          */
         public static final int PROPERTY_WORK_CALL = 0x00000020;
 
+        /**
+         * When set, indicates that this {@code Call} does not actually exist locally for the
+         * {@link ConnectionService}.
+         * <p>
+         * Consider, for example, a scenario where a user has two phones with the same phone number.
+         * When a user places a call on one device, the telephony stack can represent that call on
+         * the other device by adding it to the {@link ConnectionService} with the
+         * {@link Connection#CAPABILITY_IS_EXTERNAL_CALL} capability set.
+         * <p>
+         * An {@link InCallService} will only see calls with this property if it has the
+         * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
+         * in its manifest.
+         * <p>
+         * See {@link Connection#CAPABILITY_IS_EXTERNAL_CALL}.
+         */
+        public static final int PROPERTY_IS_EXTERNAL_CALL = 0x00000040;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000040
+        // Next PROPERTY value: 0x00000100
         //******************************************************************************************
 
         private final String mTelecomCallId;
@@ -362,6 +407,9 @@ public final class Call {
             if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
                 builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
             }
+            if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
+                builder.append(" CAPABILITY_CAN_PULL_CALL");
+            }
             builder.append("]");
             return builder.toString();
         }
@@ -410,6 +458,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
                 builder.append(" PROPERTY_EMERGENCY_CALLBACK_MODE");
+            }
+            if (hasProperty(properties, PROPERTY_IS_EXTERNAL_CALL)) {
+                builder.append(" PROPERTY_IS_EXTERNAL_CALL");
             }
             builder.append("]");
             return builder.toString();
@@ -723,6 +774,17 @@ public final class Call {
          *          conferenced.
          */
         public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
+
+        /**
+         * Invoked when a call receives an event from its associated {@link Connection}.
+         * <p>
+         * See {@link Connection#sendConnectionEvent(String, Bundle)}.
+         *
+         * @param call The {@code Call} receiving the event.
+         * @param event The event.
+         * @param extras Extras associated with the connection event.
+         */
+        public void onConnectionEvent(Call call, String event, Bundle extras) {}
     }
 
     /**
@@ -886,6 +948,43 @@ public final class Call {
      */
     public void swapConference() {
         mInCallAdapter.swapConference(mTelecomCallId);
+    }
+
+    /**
+     * Initiates a request to the {@link ConnectionService} to pull an external call to the local
+     * device.
+     * <p>
+     * Calls to this method are ignored if the call does not have the
+     * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} property set.
+     * <p>
+     * An {@link InCallService} will only see calls which support this method if it has the
+     * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
+     * in its manifest.
+     */
+    public void pullExternalCall() {
+        // If this isn't an external call, ignore the request.
+        if (!mDetails.hasProperty(Details.PROPERTY_IS_EXTERNAL_CALL)) {
+            return;
+        }
+
+        mInCallAdapter.pullExternalCall(mTelecomCallId);
+    }
+
+    /**
+     * Sends a {@code Call} event from this {@code Call} to the associated {@link Connection} in
+     * the {@link ConnectionService}.
+     * <p>
+     * Events are exposed to {@link ConnectionService} implementations via
+     * {@link android.telecom.Connection#onCallEvent(String, Bundle)}.
+     * <p>
+     * No assumptions should be made as to how a {@link ConnectionService} will handle these events.
+     * Events should be fully qualified (e.g., com.example.event.MY_EVENT) to avoid conflicts.
+     *
+     * @param event The connection event.
+     * @param extras Bundle containing extra information associated with the event.
+     */
+    public void sendCallEvent(String event, Bundle extras) {
+        mInCallAdapter.sendCallEvent(mTelecomCallId, event, extras);
     }
 
     /**
@@ -1211,6 +1310,11 @@ public final class Call {
         }
     }
 
+    /** {@hide} */
+    final void internalOnConnectionEvent(String event, Bundle extras) {
+        fireOnConnectionEvent(event, extras);
+    }
+
     private void fireStateChanged(final int newState) {
         for (CallbackRecord<Callback> record : mCallbackRecords) {
             final Call call = this;
@@ -1352,6 +1456,27 @@ public final class Call {
                 @Override
                 public void run() {
                     callback.onConferenceableCallsChanged(call, mUnmodifiableConferenceableCalls);
+                }
+            });
+        }
+    }
+
+    /**
+     * Notifies listeners of an incoming connection event.
+     * <p>
+     * Connection events are issued via {@link Connection#sendConnectionEvent(String, Bundle)}.
+     *
+     * @param event
+     * @param extras
+     */
+    private void fireOnConnectionEvent(final String event, final Bundle extras) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionEvent(call, event, extras);
                 }
             });
         }
