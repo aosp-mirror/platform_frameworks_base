@@ -442,7 +442,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
      * @see android.content.pm.ActivityInfo
      */
     public @Config int getChangingConfigurations() {
-        return mChangingConfigurations;
+        return super.getChangingConfigurations() | mChangingConfigurations;
     }
 
     private int modulateColorAlpha(int baseColor, float alphaMod) {
