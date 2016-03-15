@@ -22,6 +22,9 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
@@ -98,8 +101,7 @@ public class WindowAnimator {
     boolean mInitialized = false;
 
     boolean mKeyguardGoingAway;
-    boolean mKeyguardGoingAwayToNotificationShade;
-    boolean mKeyguardGoingAwayDisableWindowAnimations;
+    int mKeyguardGoingAwayFlags;
 
     /** Use one animation for all entering activities after keyguard is dismissed. */
     Animation mPostKeyguardExitAnimation;
@@ -243,6 +245,13 @@ public class WindowAnimator {
 
         final WindowList windows = mService.getWindowListLocked(displayId);
 
+        final boolean keyguardGoingAwayToShade =
+                (mKeyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_TO_SHADE) != 0;
+        final boolean keyguardGoingAwayNoAnimation =
+                (mKeyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS) != 0;
+        final boolean keyguardGoingAwayWithWallpaper =
+                (mKeyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER) != 0;
+
         if (mKeyguardGoingAway) {
             for (int i = windows.size() - 1; i >= 0; i--) {
                 WindowState win = windows.get(i);
@@ -261,6 +270,8 @@ public class WindowAnimator {
                         winAnimator.mAnimationIsEntrance = false;
                         winAnimator.mAnimationStartTime = -1;
                         winAnimator.mKeyguardGoingAwayAnimation = true;
+                        winAnimator.mKeyguardGoingAwayWithWallpaper
+                                = keyguardGoingAwayWithWallpaper;
                     }
                 } else {
                     if (DEBUG_KEYGUARD) Slog.d(TAG,
@@ -392,10 +403,13 @@ public class WindowAnimator {
                             if (DEBUG_KEYGUARD) Slog.v(TAG,
                                     "Applying existing Keyguard exit animation to new window: win="
                                             + win);
-                            Animation a = mPolicy.createForceHideEnterAnimation(
-                                    false, mKeyguardGoingAwayToNotificationShade);
+
+                            Animation a = mPolicy.createForceHideEnterAnimation(false,
+                                    keyguardGoingAwayToShade);
                             winAnimator.setAnimation(a, mPostKeyguardExitAnimation.getStartTime());
                             winAnimator.mKeyguardGoingAwayAnimation = true;
+                            winAnimator.mKeyguardGoingAwayWithWallpaper
+                                    = keyguardGoingAwayWithWallpaper;
                         }
                         final WindowState currentFocus = mService.mCurrentFocus;
                         if (currentFocus == null || currentFocus.mLayer < win.mLayer) {
@@ -463,18 +477,20 @@ public class WindowAnimator {
         // being force-hidden, apply the appropriate animation to them if animations are not
         // disabled.
         if (unForceHiding != null) {
-            if (!mKeyguardGoingAwayDisableWindowAnimations) {
+            if (!keyguardGoingAwayNoAnimation) {
                 boolean first = true;
                 for (int i=unForceHiding.size()-1; i>=0; i--) {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     Animation a = mPolicy.createForceHideEnterAnimation(
                             wallpaperInUnForceHiding && !startingInUnForceHiding,
-                            mKeyguardGoingAwayToNotificationShade);
+                            keyguardGoingAwayToShade);
                     if (a != null) {
                         if (DEBUG_KEYGUARD) Slog.v(TAG,
                                 "Starting keyguard exit animation on window " + winAnimator.mWin);
                         winAnimator.setAnimation(a);
                         winAnimator.mKeyguardGoingAwayAnimation = true;
+                        winAnimator.mKeyguardGoingAwayWithWallpaper
+                                = keyguardGoingAwayWithWallpaper;
                         if (first) {
                             mPostKeyguardExitAnimation = a;
                             mPostKeyguardExitAnimation.setStartTime(mCurrentTime);
@@ -489,11 +505,10 @@ public class WindowAnimator {
 
 
             // Wallpaper is going away in un-force-hide motion, animate it as well.
-            if (!wallpaperInUnForceHiding && wallpaper != null
-                    && !mKeyguardGoingAwayDisableWindowAnimations) {
+            if (!wallpaperInUnForceHiding && wallpaper != null && !keyguardGoingAwayNoAnimation) {
                 if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: wallpaper animating away");
                 Animation a = mPolicy.createForceHideWallpaperExitAnimation(
-                        mKeyguardGoingAwayToNotificationShade);
+                        keyguardGoingAwayToShade);
                 if (a != null) {
                     wallpaper.mWinAnimator.setAnimation(a);
                 }

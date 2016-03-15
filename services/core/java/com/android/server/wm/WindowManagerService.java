@@ -5179,18 +5179,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void keyguardGoingAway(boolean disableWindowAnimations,
-            boolean keyguardGoingToNotificationShade) {
+    public void keyguardGoingAway(int flags) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        if (DEBUG_KEYGUARD) Slog.d(TAG_WM, "keyguardGoingAway: disableWinAnim="
-                + disableWindowAnimations + " kgToNotifShade=" + keyguardGoingToNotificationShade);
+        if (DEBUG_KEYGUARD) Slog.d(TAG_WM,
+                "keyguardGoingAway: flags=0x" + Integer.toHexString(flags));
         synchronized (mWindowMap) {
             mAnimator.mKeyguardGoingAway = true;
-            mAnimator.mKeyguardGoingAwayToNotificationShade = keyguardGoingToNotificationShade;
-            mAnimator.mKeyguardGoingAwayDisableWindowAnimations = disableWindowAnimations;
+            mAnimator.mKeyguardGoingAwayFlags = flags;
             mWindowPlacerLocked.requestTraversal();
         }
     }

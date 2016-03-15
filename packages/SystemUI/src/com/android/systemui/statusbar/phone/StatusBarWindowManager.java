@@ -100,11 +100,15 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
 
     private void applyKeyguardFlags(State state) {
         if (state.keyguardShowing) {
-            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
             mLpChanged.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         } else {
-            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
             mLpChanged.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+        }
+
+        if (state.keyguardShowing && !state.backdropShowing) {
+            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+        } else {
+            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         }
     }
 
@@ -255,6 +259,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         apply(mCurrentState);
     }
 
+    public void setBackdropShowing(boolean showing) {
+        mCurrentState.backdropShowing = showing;
+        apply(mCurrentState);
+    }
+
     public void setKeyguardFadingAway(boolean keyguardFadingAway) {
         mCurrentState.keyguardFadingAway = keyguardFadingAway;
         apply(mCurrentState);
@@ -323,6 +332,10 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         pw.println(mCurrentState);
     }
 
+    public boolean isShowingWallpaper() {
+        return !mCurrentState.backdropShowing;
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -338,6 +351,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         boolean forceCollapsed;
         boolean forceDozeBrightness;
         boolean forceUserActivity;
+        boolean backdropShowing;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.
