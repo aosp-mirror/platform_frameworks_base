@@ -5495,9 +5495,6 @@ public class DevicePolicyManager {
      * Returns if provisioning a managed profile or device is possible or not.
      * @param action One of {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE}.
-     * Note that even if this method returns true, there is a slight possibility that the
-     * provisioning will not be allowed when it is actually initiated because some event has
-     * happened in between.
      * @return if provisioning a managed profile or device is possible or not.
      * @throws IllegalArgumentException if the supplied action is not valid.
      */
