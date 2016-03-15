@@ -11198,7 +11198,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void finishRunningVoiceLocked() {
-        Slog.d(TAG, "finishRunningVoiceLocked()  >>>>");
         if (mRunningVoice != null) {
             mRunningVoice = null;
             mVoiceWakeLock.release();
