@@ -362,7 +362,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!loadPlan.hasTasks()) {
-            loader.preloadTasks(loadPlan, -1, launchState.launchedFromHome);
+            loader.preloadTasks(loadPlan, launchState.launchedToTaskId,
+                    launchState.launchedFromHome);
         }
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
