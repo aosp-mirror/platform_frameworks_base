@@ -1976,15 +1976,13 @@ public class Activity extends ContextThemeWrapper
      * normal {@link #onSaveInstanceState(Bundle)} mechanism) even if this
      * function returns null.
      *
-     * @return Returns the object previously returned by
-     * {@link #onRetainNonConfigurationInstance()}.
-     *
-     * @deprecated Use the new {@link Fragment} API
+     * <p><strong>Note:</strong> For most cases you should use the {@link Fragment} API
      * {@link Fragment#setRetainInstance(boolean)} instead; this is also
-     * available on older platforms through the Android compatibility package.
+     * available on older platforms through the Android support libraries.
+     *
+     * @return the object previously returned by {@link #onRetainNonConfigurationInstance()}
      */
     @Nullable
-    @Deprecated
     public Object getLastNonConfigurationInstance() {
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.activity : null;
@@ -2035,12 +2033,12 @@ public class Activity extends ContextThemeWrapper
      * guarantee for {@link android.os.AsyncTask#doInBackground} since that is
      * running in a separate thread.)
      *
-     * @return Return any Object holding the desired state to propagate to the
-     * next activity instance.
-     *
-     * @deprecated Use the new {@link Fragment} API
+     * <p><strong>Note:</strong> For most cases you should use the {@link Fragment} API
      * {@link Fragment#setRetainInstance(boolean)} instead; this is also
-     * available on older platforms through the Android compatibility package.
+     * available on older platforms through the Android support libraries.
+     *
+     * @return any Object holding the desired state to propagate to the
+     *         next activity instance
      */
     public Object onRetainNonConfigurationInstance() {
         return null;
