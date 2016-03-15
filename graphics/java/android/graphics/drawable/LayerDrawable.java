@@ -89,7 +89,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @see #getLayerInsetStart(int)
      * @see #getLayerInsetEnd(int)
      */
-    public static final int UNDEFINED_INSET = Integer.MIN_VALUE;
+    public static final int INSET_UNDEFINED = Integer.MIN_VALUE;
 
     LayerState mLayerState;
 
@@ -759,7 +759,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @attr ref android.R.styleable#LayerDrawableItem_bottom
      */
     public void setLayerInset(int index, int l, int t, int r, int b) {
-        setLayerInsetInternal(index, l, t, r, b, UNDEFINED_INSET, UNDEFINED_INSET);
+        setLayerInsetInternal(index, l, t, r, b, INSET_UNDEFINED, INSET_UNDEFINED);
     }
 
     /**
@@ -874,7 +874,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * @param index the index of the layer
      * @return the number of pixels to inset from the start bound, or
-     *         {@link #UNDEFINED_INSET} if not specified
+     *         {@link #INSET_UNDEFINED} if not specified
      * @attr ref android.R.styleable#LayerDrawableItem_start
      */
     public int getLayerInsetStart(int index) {
@@ -885,7 +885,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * @param index the index of the layer to adjust
      * @param e number of pixels to inset from the end bound, or
-     *         {@link #UNDEFINED_INSET} if not specified
+     *         {@link #INSET_UNDEFINED} if not specified
      * @attr ref android.R.styleable#LayerDrawableItem_end
      */
     public void setLayerInsetEnd(int index, int e) {
@@ -1503,8 +1503,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             // insets.
             final int insetRtlL = isLayoutRtl ? r.mInsetE : r.mInsetS;
             final int insetRtlR = isLayoutRtl ? r.mInsetS : r.mInsetE;
-            final int insetL = insetRtlL == UNDEFINED_INSET ? r.mInsetL : insetRtlL;
-            final int insetR = insetRtlR == UNDEFINED_INSET ? r.mInsetR : insetRtlR;
+            final int insetL = insetRtlL == INSET_UNDEFINED ? r.mInsetL : insetRtlL;
+            final int insetR = insetRtlR == INSET_UNDEFINED ? r.mInsetR : insetRtlR;
 
             // Establish containing region based on aggregate padding and
             // requested insets for the current layer.
@@ -1602,8 +1602,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             // left / right ones.
             final int insetRtlL = isLayoutRtl ? r.mInsetE : r.mInsetS;
             final int insetRtlR = isLayoutRtl ? r.mInsetS : r.mInsetE;
-            final int insetL = insetRtlL == UNDEFINED_INSET ? r.mInsetL : insetRtlL;
-            final int insetR = insetRtlR == UNDEFINED_INSET ? r.mInsetR : insetRtlR;
+            final int insetL = insetRtlL == INSET_UNDEFINED ? r.mInsetL : insetRtlL;
+            final int insetR = insetRtlR == INSET_UNDEFINED ? r.mInsetR : insetRtlR;
 
             // Don't apply padding and insets for children that don't have
             // an intrinsic dimension.
@@ -1763,8 +1763,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         public int[] mThemeAttrs;
         public int mDensity = DisplayMetrics.DENSITY_DEFAULT;
         public int mInsetL, mInsetT, mInsetR, mInsetB;
-        public int mInsetS = UNDEFINED_INSET;
-        public int mInsetE = UNDEFINED_INSET;
+        public int mInsetS = INSET_UNDEFINED;
+        public int mInsetE = INSET_UNDEFINED;
         public int mWidth = -1;
         public int mHeight = -1;
         public int mGravity = Gravity.NO_GRAVITY;
@@ -1833,10 +1833,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             mInsetT = Drawable.scaleFromDensity(mInsetT, sourceDensity, targetDensity, false);
             mInsetR = Drawable.scaleFromDensity(mInsetR, sourceDensity, targetDensity, false);
             mInsetB = Drawable.scaleFromDensity(mInsetB, sourceDensity, targetDensity, false);
-            if (mInsetS != UNDEFINED_INSET) {
+            if (mInsetS != INSET_UNDEFINED) {
                 mInsetS = Drawable.scaleFromDensity(mInsetS, sourceDensity, targetDensity, false);
             }
-            if (mInsetE != UNDEFINED_INSET) {
+            if (mInsetE != INSET_UNDEFINED) {
                 mInsetE = Drawable.scaleFromDensity(mInsetE, sourceDensity, targetDensity, false);
             }
             if (mWidth > 0) {
