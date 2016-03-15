@@ -34,7 +34,7 @@ import java.util.List;
  * {@hide}
  */
 interface ILauncherApps {
-    void addOnAppsChangedListener(in IOnAppsChangedListener listener);
+    void addOnAppsChangedListener(String callingPackage, in IOnAppsChangedListener listener);
     void removeOnAppsChangedListener(in IOnAppsChangedListener listener);
     ParceledListSlice getLauncherActivities(String packageName, in UserHandle user);
     ResolveInfo resolveActivity(in Intent intent, in UserHandle user);

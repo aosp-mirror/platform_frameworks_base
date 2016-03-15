@@ -15,15 +15,22 @@
  */
 package com.android.server.pm;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ILauncherApps;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
@@ -40,10 +47,13 @@ import android.graphics.drawable.Icon;
 import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.test.AndroidTestCase;
+import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -59,6 +69,7 @@ import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import libcore.io.IoUtils;
 
 import org.junit.Assert;
+import org.mockito.ArgumentCaptor;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -92,7 +103,7 @@ import java.util.Set;
  *
  */
 @SmallTest
-public class ShortcutManagerTest extends AndroidTestCase {
+public class ShortcutManagerTest extends InstrumentationTestCase {
     private static final String TAG = "ShortcutManagerTest";
 
     /**
@@ -118,7 +129,14 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         @Override
         public Resources getResources() {
-            return ShortcutManagerTest.this.getContext().getResources();
+            return getTestContext().getResources();
+        }
+
+        @Override
+        public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+                IntentFilter filter, String broadcastPermission, Handler scheduler) {
+            // ignore.
+            return null;
         }
     }
 
@@ -132,13 +150,24 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
     /** Context used in the service side */
     private final class ServiceContext extends BaseContext {
+        long injectClearCallingIdentity() {
+            final int prevCallingUid = mInjectedCallingUid;
+            mInjectedCallingUid = Process.SYSTEM_UID;
+            return prevCallingUid;
+        }
+
+        void injectRestoreCallingIdentity(long token) {
+            mInjectedCallingUid = (int) token;
+        }
     }
 
     /** ShortcutService with injection override methods. */
     private final class ShortcutServiceTestable extends ShortcutService {
-        public ShortcutServiceTestable(Context context) {
-            super(context);
+        final ServiceContext mContext;
 
+        public ShortcutServiceTestable(ServiceContext context) {
+            super(context);
+            mContext = context;
         }
 
         @Override
@@ -151,6 +180,16 @@ public class ShortcutManagerTest extends AndroidTestCase {
                     + MAX_ICON_DIMENSION_LOWRAM + ","
                     + ConfigConstants.KEY_ICON_FORMAT + "=PNG,"
                     + ConfigConstants.KEY_ICON_QUALITY + "=100";
+        }
+
+        @Override
+        long injectClearCallingIdentity() {
+            return mContext.injectClearCallingIdentity();
+        }
+
+        @Override
+        void injectRestoreCallingIdentity(long token) {
+            mContext.injectRestoreCallingIdentity(token);
         }
 
         @Override
@@ -204,6 +243,13 @@ public class ShortcutManagerTest extends AndroidTestCase {
             // Sort of hack; do a simpler check.
             return LAUNCHER_1.equals(callingPackage) || LAUNCHER_2.equals(callingPackage);
         }
+
+        @Override
+        void postToHandler(Runnable r) {
+            final long token = mContext.injectClearCallingIdentity();
+            r.run();
+            mContext.injectRestoreCallingIdentity(token);
+        }
     }
 
     /** ShortcutManager with injection override methods. */
@@ -219,18 +265,40 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     private class LauncherAppImplTestable extends LauncherAppsImpl {
-        public LauncherAppImplTestable(Context context) {
+        final ServiceContext mContext;
+
+        public LauncherAppImplTestable(ServiceContext context) {
             super(context);
+            mContext = context;
         }
 
         @Override
         public void ensureInUserProfiles(UserHandle userToCheck, String message) {
+            if (getCallingUserId() == userToCheck.getIdentifier()) {
+                return; // okay
+            }
+
+            assertEquals(Process.SYSTEM_UID, mInjectedCallingUid);
             // SKIP
         }
 
         @Override
         public void verifyCallingPackage(String callingPackage) {
             // SKIP
+        }
+
+        @Override
+        boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser, String debugMsg) {
+            // This requires CROSS_USER
+            assertEquals(Process.SYSTEM_UID, mInjectedCallingUid);
+            return user.getIdentifier() == listeningUser.getIdentifier();
+        }
+
+        @Override
+        void postToPackageMonitor(Runnable r) {
+            final long token = mContext.injectClearCallingIdentity();
+            r.run();
+            mContext.injectRestoreCallingIdentity(token);
         }
     }
 
@@ -289,6 +357,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
     private static final String LAUNCHER_2 = "com.android.launcher.2";
     private static final int LAUNCHER_UID_2 = 10012;
 
+    private static final int USER_0 = UserHandle.USER_SYSTEM;
     private static final int USER_10 = 10;
     private static final int USER_11 = 11;
 
@@ -326,7 +395,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
         mInjectedPackageUidMap.put(LAUNCHER_1, LAUNCHER_UID_1);
         mInjectedPackageUidMap.put(LAUNCHER_2, LAUNCHER_UID_2);
 
-        mInjectedFilePathRoot = new File(getContext().getCacheDir(), "test-files");
+        mInjectedFilePathRoot = new File(getTestContext().getCacheDir(), "test-files");
 
         // Empty the data directory.
         if (mInjectedFilePathRoot.exists()) {
@@ -337,6 +406,10 @@ public class ShortcutManagerTest extends AndroidTestCase {
 
         initService();
         setCaller(CALLING_PACKAGE_1);
+    }
+
+    private Context getTestContext() {
+        return getInstrumentation().getContext();
     }
 
     /** (Re-) init the manager and the service. */
@@ -440,6 +513,10 @@ public class ShortcutManagerTest extends AndroidTestCase {
         dumpFileOnLogcat(mInjectedFilePathRoot.getAbsolutePath()
                 + "/user-" + userId
                 + "/" + ShortcutService.FILENAME_USER_PACKAGES);
+    }
+
+    private void waitOnMainThread() throws Throwable {
+        runTestOnUiThread(() -> {});
     }
 
     private static Bundle makeBundle(Object... keysAndValues) {
@@ -879,9 +956,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     public void testSetDynamicShortcuts() {
-        final Icon icon1 = Icon.createWithResource(mContext, R.drawable.icon1);
+        final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.icon1);
         final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                mContext.getResources(), R.drawable.icon2));
+                getTestContext().getResources(), R.drawable.icon2));
 
         final ShortcutInfo si1 = makeShortcut(
                 "shortcut1",
@@ -1163,16 +1240,16 @@ public class ShortcutManagerTest extends AndroidTestCase {
     }
 
     public void testIcons() {
-        final Icon res32x32 = Icon.createWithResource(mContext, R.drawable.black_32x32);
-        final Icon res64x64 = Icon.createWithResource(mContext, R.drawable.black_64x64);
-        final Icon res512x512 = Icon.createWithResource(mContext, R.drawable.black_512x512);
+        final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
+        final Icon res64x64 = Icon.createWithResource(getTestContext(), R.drawable.black_64x64);
+        final Icon res512x512 = Icon.createWithResource(getTestContext(), R.drawable.black_512x512);
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                mContext.getResources(), R.drawable.black_32x32));
+                getTestContext().getResources(), R.drawable.black_32x32));
         final Icon bmp64x64 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                mContext.getResources(), R.drawable.black_64x64));
+                getTestContext().getResources(), R.drawable.black_64x64));
         final Icon bmp512x512 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                mContext.getResources(), R.drawable.black_512x512));
+                getTestContext().getResources(), R.drawable.black_512x512));
 
         // Set from package 1
         setCaller(CALLING_PACKAGE_1);
@@ -1278,7 +1355,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
     private void checkShrinkBitmap(int expectedWidth, int expectedHeight, int resId, int maxSize) {
         assertBitmapSize(expectedWidth, expectedHeight,
                 ShortcutService.shrinkBitmap(BitmapFactory.decodeResource(
-                        mContext.getResources(), resId),
+                        getTestContext().getResources(), resId),
                         maxSize));
     }
 
@@ -1433,7 +1510,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
             ShortcutInfo s2 = makeShortcutBuilder()
                     .setId("s2")
-                    .setIcon(Icon.createWithResource(mContext, R.drawable.black_32x32))
+                    .setIcon(Icon.createWithResource(getTestContext(), R.drawable.black_32x32))
                     .build();
 
             ShortcutInfo s4 = makeShortcutBuilder()
@@ -1802,6 +1879,125 @@ public class ShortcutManagerTest extends AndroidTestCase {
         // TODO Check extra, etc
     }
 
+    public void testLauncherCallback() throws Throwable {
+        LauncherApps.Callback c0 = mock(LauncherApps.Callback.class);
+
+
+        // Set listeners
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.registerCallback(c0, new Handler(Looper.getMainLooper()));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
+        waitOnMainThread();
+        ArgumentCaptor<List> shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertShortcutIds(assertAllDynamic(shortcuts.getValue()),
+                "s1", "s2", "s3");
+
+        // From different package.
+        reset(c0);
+        runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+        waitOnMainThread();
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_2),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertShortcutIds(assertAllDynamic(shortcuts.getValue()),
+                "s1", "s2", "s3");
+
+        // Different user, callback shouldn't be called.
+        reset(c0);
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+        waitOnMainThread();
+        verify(c0, times(0)).onShortcutsChanged(
+                anyString(),
+                any(List.class),
+                any(UserHandle.class)
+        );
+
+        // Test for addDynamicShortcut.
+        reset(c0);
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            assertTrue(mManager.addDynamicShortcut(makeShortcut("s4")));
+        });
+
+        waitOnMainThread();
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertShortcutIds(assertAllDynamic(shortcuts.getValue()),
+                "s1", "s2", "s3", "s4");
+
+        // Test for remove
+        reset(c0);
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            mManager.deleteDynamicShortcut("s1");
+        });
+
+        waitOnMainThread();
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertShortcutIds(assertAllDynamic(shortcuts.getValue()),
+                "s2", "s3", "s4");
+
+        // Test for update
+        reset(c0);
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            assertTrue(mManager.updateShortcuts(Arrays.asList(
+                    makeShortcut("s1"), makeShortcut("s2"))));
+        });
+
+        waitOnMainThread();
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertShortcutIds(assertAllDynamic(shortcuts.getValue()),
+                "s2", "s3", "s4");
+
+        // Test for deleteAll
+        reset(c0);
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            mManager.deleteAllDynamicShortcuts();
+        });
+
+        waitOnMainThread();
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertEquals(0, shortcuts.getValue().size());
+    }
+
     // === Test for persisting ===
 
     public void testSaveAndLoadUser_empty() {
@@ -1823,9 +2019,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
     public void testSaveAndLoadUser() {
         // First, create some shortcuts and save.
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
-            final Icon icon1 = Icon.createWithResource(mContext, R.drawable.black_64x16);
+            final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_64x16);
             final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                    mContext.getResources(), R.drawable.icon2));
+                    getTestContext().getResources(), R.drawable.icon2));
 
             final ShortcutInfo si1 = makeShortcut(
                     "s1",
@@ -1850,9 +2046,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
             assertEquals(2, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
-            final Icon icon1 = Icon.createWithResource(mContext, R.drawable.black_16x64);
+            final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_16x64);
             final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                    mContext.getResources(), R.drawable.icon2));
+                    getTestContext().getResources(), R.drawable.icon2));
 
             final ShortcutInfo si1 = makeShortcut(
                     "s1",
@@ -1877,9 +2073,9 @@ public class ShortcutManagerTest extends AndroidTestCase {
             assertEquals(2, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
-            final Icon icon1 = Icon.createWithResource(mContext, R.drawable.black_64x64);
+            final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_64x64);
             final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                    mContext.getResources(), R.drawable.icon2));
+                    getTestContext().getResources(), R.drawable.icon2));
 
             final ShortcutInfo si1 = makeShortcut(
                     "s1",
