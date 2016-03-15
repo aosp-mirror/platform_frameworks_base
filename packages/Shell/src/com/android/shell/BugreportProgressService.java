@@ -1102,7 +1102,14 @@ public class BugreportProgressService extends Service {
             preferredDomain = "@" + preferredDomain;
         }
 
-        final Account[] accounts = am.getAccounts();
+        final Account[] accounts;
+        try {
+            accounts = am.getAccounts();
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Could not get accounts for preferred domain " + preferredDomain, e);
+            return null;
+        }
+        if (DEBUG) Log.d(TAG, "Number of accounts: " + accounts.length);
         Account foundAccount = null;
         for (Account account : accounts) {
             if (Patterns.EMAIL_ADDRESS.matcher(account.name).matches()) {
