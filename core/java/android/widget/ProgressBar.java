@@ -246,6 +246,8 @@ public class ProgressBar extends View {
 
     boolean mMirrorForRtl = false;
 
+    private boolean mAggregatedIsVisible;
+
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
 
     private AccessibilityEventSender mAccessibilityEventSender;
@@ -620,9 +622,7 @@ public class ProgressBar extends View {
                 oldDrawable.setVisible(false, false);
             }
             if (mCurrentDrawable != null) {
-                mCurrentDrawable.setVisible(
-                        getVisibility() == VISIBLE && getWindowVisibility() == VISIBLE,
-                        false);
+                mCurrentDrawable.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             }
         }
     }
@@ -1645,49 +1645,25 @@ public class ProgressBar extends View {
     }
 
     @Override
-    @RemotableViewMethod
-    public void setVisibility(int v) {
-        if (getVisibility() != v) {
-            super.setVisibility(v);
+    public void onVisibilityAggregated(View changedView, @Visibility int visibility) {
+        super.onVisibilityAggregated(changedView, visibility);
+
+        final boolean isVisible = visibility == VISIBLE;
+        if (isVisible != mAggregatedIsVisible) {
+            mAggregatedIsVisible = isVisible;
 
             if (mIndeterminate) {
                 // let's be nice with the UI thread
-                if (v == GONE || v == INVISIBLE) {
-                    stopAnimation();
-                } else {
+                if (isVisible) {
                     startAnimation();
+                } else {
+                    stopAnimation();
                 }
             }
-        }
-    }
 
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-
-        updateVisibility();
-    }
-
-    @Override
-    protected void onWindowVisibilityChanged(@Visibility int visibility) {
-        super.onWindowVisibilityChanged(visibility);
-
-        updateVisibility();
-    }
-
-    private void updateVisibility() {
-        final boolean isVisible = getVisibility() == VISIBLE && getWindowVisibility() == VISIBLE;
-        if (mIndeterminate) {
-            // let's be nice with the UI thread
-            if (isVisible) {
-                startAnimation();
-            } else {
-                stopAnimation();
+            if (mCurrentDrawable != null) {
+                mCurrentDrawable.setVisible(isVisible, false);
             }
-        }
-
-        if (mCurrentDrawable != null) {
-            mCurrentDrawable.setVisible(isVisible, false);
         }
     }
 
