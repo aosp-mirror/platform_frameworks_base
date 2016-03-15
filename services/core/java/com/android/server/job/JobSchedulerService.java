@@ -67,6 +67,7 @@ import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.ContentObserverController;
+import com.android.server.job.controllers.DeviceIdleJobsController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
@@ -164,11 +165,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
     boolean mReadyToRock;
 
     /**
-     * True when in device idle mode, so we don't want to schedule any jobs.
-     */
-    boolean mDeviceIdleMode;
-
-    /**
      * What we last reported to DeviceIdleController about whether we are active.
      */
     boolean mReportedActive;
@@ -228,12 +224,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 cancelJobsForUser(userId);
-            } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())
-                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())) {
-                updateIdleMode(mPowerManager != null
-                        ? (mPowerManager.isDeviceIdleMode()
-                        || mPowerManager.isLightDeviceIdleMode())
-                        : false);
             }
         }
     };
@@ -418,44 +408,29 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    void updateIdleMode(boolean enabled) {
-        boolean changed = false;
-        boolean rocking;
+    @Override
+    public void onDeviceIdleStateChanged(boolean deviceIdle) {
         synchronized (mLock) {
-            if (mDeviceIdleMode != enabled) {
-                changed = true;
-            }
-            rocking = mReadyToRock;
-        }
-        if (changed) {
-            if (rocking) {
-                for (int i=0; i<mControllers.size(); i++) {
-                    mControllers.get(i).deviceIdleModeChanged(enabled);
+            if (deviceIdle) {
+                // When becoming idle, make sure no jobs are actively running.
+                for (int i=0; i<mActiveServices.size(); i++) {
+                    JobServiceContext jsc = mActiveServices.get(i);
+                    final JobStatus executing = jsc.getRunningJob();
+                    if (executing != null) {
+                        jsc.cancelExecutingJob(JobParameters.REASON_DEVICE_IDLE);
+                    }
                 }
-            }
-            synchronized (mLock) {
-                mDeviceIdleMode = enabled;
-                if (enabled) {
-                    // When becoming idle, make sure no jobs are actively running.
-                    for (int i=0; i<mActiveServices.size(); i++) {
-                        JobServiceContext jsc = mActiveServices.get(i);
-                        final JobStatus executing = jsc.getRunningJob();
-                        if (executing != null) {
-                            jsc.cancelExecutingJob(JobParameters.REASON_DEVICE_IDLE);
+            } else {
+                // When coming out of idle, allow thing to start back up.
+                if (mReadyToRock) {
+                    if (mLocalDeviceIdleController != null) {
+                        if (!mReportedActive) {
+                            mReportedActive = true;
+                            mLocalDeviceIdleController.setJobsActive(true);
                         }
                     }
-                } else {
-                    // When coming out of idle, allow thing to start back up.
-                    if (rocking) {
-                        if (mLocalDeviceIdleController != null) {
-                            if (!mReportedActive) {
-                                mReportedActive = true;
-                                mLocalDeviceIdleController.setJobsActive(true);
-                            }
-                        }
-                    }
-                    mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
                 }
+                mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
             }
         }
     }
@@ -500,6 +475,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(BatteryController.get(this));
         mControllers.add(AppIdleController.get(this));
         mControllers.add(ContentObserverController.get(this));
+        mControllers.add(DeviceIdleJobsController.get(this));
 
         mHandler = new JobHandler(context.getMainLooper());
         mJobSchedulerStub = new JobSchedulerStub();
@@ -521,8 +497,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
             final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
-            userFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
-            userFilter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
             mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
@@ -553,7 +527,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     public void process(JobStatus job) {
                         for (int controller = 0; controller < mControllers.size(); controller++) {
                             final StateController sc = mControllers.get(controller);
-                            sc.deviceIdleModeChanged(mDeviceIdleMode);
                             sc.maybeStartTrackingJobLocked(job, null);
                         }
                     }
@@ -1015,10 +988,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
          */
         private void maybeRunPendingJobsH() {
             synchronized (mLock) {
-                if (mDeviceIdleMode) {
-                    // If device is idle, we will not schedule jobs to run.
-                    return;
-                }
                 if (DEBUG) {
                     Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
                 }
@@ -1188,6 +1157,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * Returns a list of all pending jobs. A running job is not considered pending. Periodic
          * jobs are always considered pending.
          */
+        @Override
         public List<JobInfo> getSystemScheduledPendingJobs() {
             synchronized (mLock) {
                 final List<JobInfo> pendingJobs = new ArrayList<JobInfo>();
@@ -1509,7 +1479,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
             pw.println();
             pw.print("mReadyToRock="); pw.println(mReadyToRock);
-            pw.print("mDeviceIdleMode="); pw.println(mDeviceIdleMode);
             pw.print("mReportedActive="); pw.println(mReportedActive);
             pw.print("mMaxActiveJobs="); pw.println(mMaxActiveJobs);
         }

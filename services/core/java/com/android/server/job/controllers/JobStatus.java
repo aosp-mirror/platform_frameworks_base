@@ -54,6 +54,7 @@ public final class JobStatus {
     static final int CONSTRAINT_CONNECTIVITY = 1<<5;
     static final int CONSTRAINT_APP_NOT_IDLE = 1<<6;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<7;
+    static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<8;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -363,6 +364,10 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, state);
     }
 
+    boolean setDeviceNotDozingConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state);
+    }
+
     boolean setConstraintSatisfied(int constraint, boolean state) {
         boolean old = (satisfiedConstraints&constraint) != 0;
         if (old == state) {
@@ -380,11 +385,14 @@ public final class JobStatus {
         // Deadline constraint trumps other constraints (except for periodic jobs where deadline
         // is an implementation detail. A periodic job should only run if its constraints are
         // satisfied).
-        // AppNotIdle implicit constraint trumps all!
+        // AppNotIdle implicit constraint must be satisfied
+        // DeviceNotDozing implicit constraint must be satisfied
         return (isConstraintsSatisfied()
                 || (!job.isPeriodic()
-                && hasDeadlineConstraint() && (satisfiedConstraints&CONSTRAINT_DEADLINE) != 0))
-                && (satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) != 0;
+                && hasDeadlineConstraint() && (satisfiedConstraints&CONSTRAINT_DEADLINE) != 0)
+                )
+                && (satisfiedConstraints & CONSTRAINT_APP_NOT_IDLE) != 0
+                && (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0;
     }
 
     static final int CONSTRAINTS_OF_INTEREST =
@@ -433,6 +441,7 @@ public final class JobStatus {
                 + ",U=" + (job.getTriggerContentUris() != null)
                 + ",F=" + numFailures + ",P=" + job.isPersisted()
                 + ",ANI=" + ((satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) != 0)
+                + ",DND=" + ((satisfiedConstraints&CONSTRAINT_DEVICE_NOT_DOZING) != 0)
                 + (isReady() ? "(READY)" : "")
                 + "]";
     }
@@ -491,6 +500,9 @@ public final class JobStatus {
         }
         if ((constraints&CONSTRAINT_CONTENT_TRIGGER) != 0) {
             pw.print(" CONTENT_TRIGGER");
+        }
+        if ((constraints&CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
+            pw.print(" DEVICE_NOT_DOZING");
         }
     }
 

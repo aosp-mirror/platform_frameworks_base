@@ -33,17 +33,12 @@ public abstract class StateController {
     protected final Context mContext;
     protected final Object mLock;
     protected final StateChangedListener mStateChangedListener;
-    protected boolean mDeviceIdleMode;
 
     public StateController(StateChangedListener stateChangedListener, Context context,
             Object lock) {
         mStateChangedListener = stateChangedListener;
         mContext = context;
         mLock = lock;
-    }
-
-    public void deviceIdleModeChanged(boolean enabled) {
-        mDeviceIdleMode = enabled;
     }
 
     /**

@@ -198,7 +198,6 @@ public class DeviceIdleController extends SystemService
 
     private int mActiveIdleOpCount;
     private IBinder mDownloadServiceActive;
-    private boolean mSyncActive;
     private boolean mJobsActive;
     private boolean mAlarmsActive;
     private boolean mReportedMaintenanceActivity;
@@ -944,7 +943,7 @@ public class DeviceIdleController extends SystemService
                                 null, mIdleStartedDoneReceiver, null, 0, null, null);
                     }
                     // Always start with one active op for the message being sent here.
-                    // Now we we done!
+                    // Now we are done!
                     decActiveIdleOps();
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
@@ -1145,10 +1144,6 @@ public class DeviceIdleController extends SystemService
             setNetworkPolicyTempWhitelistCallbackInternal(callback);
         }
 
-        public void setSyncActive(boolean active) {
-            DeviceIdleController.this.setSyncActive(active);
-        }
-
         public void setJobsActive(boolean active) {
             DeviceIdleController.this.setJobsActive(active);
         }
@@ -1157,12 +1152,28 @@ public class DeviceIdleController extends SystemService
         public void setAlarmsActive(boolean active) {
             DeviceIdleController.this.setAlarmsActive(active);
         }
+
+        /**
+         * Returns the array of app ids whitelisted by user. Take care not to
+         * modify this, as it is a reference to the original copy. But the reference
+         * can change when the list changes, so it needs to be re-acquired when
+         * {@link PowerManager#ACTION_POWER_SAVE_WHITELIST_CHANGED} is sent.
+         */
+        public int[] getPowerSaveWhitelistUserAppIds() {
+            return DeviceIdleController.this.getPowerSaveWhitelistUserAppIds();
+        }
     }
 
     public DeviceIdleController(Context context) {
         super(context);
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
         mHandler = new MyHandler(BackgroundThread.getHandler().getLooper());
+    }
+
+    int[] getPowerSaveWhitelistUserAppIds() {
+        synchronized (this) {
+            return mPowerSaveWhitelistUserAppIdArray;
+        }
     }
 
     private static File getSystemDir() {
@@ -1288,7 +1299,6 @@ public class DeviceIdleController extends SystemService
 
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
-
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
                 updateDisplayLocked();
             }
@@ -1877,16 +1887,6 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void setSyncActive(boolean active) {
-        synchronized (this) {
-            mSyncActive = active;
-            reportMaintenanceActivityIfNeededLocked();
-            if (!active) {
-                exitMaintenanceEarlyIfNeededLocked();
-            }
-        }
-    }
-
     void setJobsActive(boolean active) {
         synchronized (this) {
             mJobsActive = active;
@@ -1920,7 +1920,7 @@ public class DeviceIdleController extends SystemService
     }
 
     void reportMaintenanceActivityIfNeededLocked() {
-        boolean active = mJobsActive | mSyncActive | (mDownloadServiceActive != null);
+        boolean active = mJobsActive | (mDownloadServiceActive != null);
         if (active == mReportedMaintenanceActivity) {
             return;
         }
@@ -1933,7 +1933,7 @@ public class DeviceIdleController extends SystemService
     void exitMaintenanceEarlyIfNeededLocked() {
         if (mState == STATE_IDLE_MAINTENANCE || mLightState == LIGHT_STATE_IDLE_MAINTENANCE) {
             if (mActiveIdleOpCount <= 0 && mDownloadServiceActive == null
-                    && !mSyncActive && !mJobsActive && !mAlarmsActive) {
+                    && !mJobsActive && !mAlarmsActive) {
                 final long now = SystemClock.elapsedRealtime();
                 if (DEBUG) {
                     StringBuilder sb = new StringBuilder();
@@ -2740,9 +2740,6 @@ public class DeviceIdleController extends SystemService
                 pw.print("  mMaintenanceStartTime=");
                 TimeUtils.formatDuration(mMaintenanceStartTime, SystemClock.elapsedRealtime(), pw);
                 pw.println();
-            }
-            if (mSyncActive) {
-                pw.print("  mSyncActive="); pw.println(mSyncActive);
             }
             if (mJobsActive) {
                 pw.print("  mJobsActive="); pw.println(mJobsActive);

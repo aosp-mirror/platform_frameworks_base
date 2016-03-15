@@ -87,7 +87,7 @@ public class AppIdleController extends StateController {
         pw.println("Parole On: " + mAppIdleParoleOn);
         for (JobStatus task : mTrackedTasks) {
             pw.print(task.getSourcePackageName());
-            pw.print(":idle="
+            pw.print(":runnable="
                     + ((task.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0));
             pw.print(", ");
         }
