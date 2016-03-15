@@ -336,6 +336,13 @@ public class NotificationUsageStats {
             finalImportance = new ImportanceHistogram(context, "note_importance_");
         }
 
+        public AggregatedStats getPrevious() {
+            if (mPrevious == null) {
+                mPrevious = new AggregatedStats(mContext, key);
+            }
+            return mPrevious;
+        }
+
         public void countApiUse(NotificationRecord record) {
             final Notification n = record.getNotification();
             if (n.actions != null) {
@@ -411,67 +418,64 @@ public class NotificationUsageStats {
         }
 
         public void emit() {
-            if (mPrevious == null) {
-                mPrevious = new AggregatedStats(null, key);
-            }
+            AggregatedStats previous = getPrevious();
+            maybeCount("note_post", (numPostedByApp - previous.numPostedByApp));
+            maybeCount("note_update", (numUpdatedByApp - previous.numUpdatedByApp));
+            maybeCount("note_remove", (numRemovedByApp - previous.numRemovedByApp));
+            maybeCount("note_with_people", (numWithValidPeople - previous.numWithValidPeople));
+            maybeCount("note_with_stars", (numWithStaredPeople - previous.numWithStaredPeople));
+            maybeCount("people_cache_hit", (numPeopleCacheHit - previous.numPeopleCacheHit));
+            maybeCount("people_cache_miss", (numPeopleCacheMiss - previous.numPeopleCacheMiss));
+            maybeCount("note_blocked", (numBlocked - previous.numBlocked));
+            maybeCount("note_suspended", (numSuspendedByAdmin - previous.numSuspendedByAdmin));
+            maybeCount("note_with_actions", (numWithActions - previous.numWithActions));
+            maybeCount("note_private", (numPrivate - previous.numPrivate));
+            maybeCount("note_secret", (numSecret - previous.numSecret));
+            maybeCount("note_interupt", (numInterrupt - previous.numInterrupt));
+            maybeCount("note_big_text", (numWithBigText - previous.numWithBigText));
+            maybeCount("note_big_pic", (numWithBigPicture - previous.numWithBigPicture));
+            maybeCount("note_fg", (numForegroundService - previous.numForegroundService));
+            maybeCount("note_ongoing", (numOngoing - previous.numOngoing));
+            maybeCount("note_auto", (numAutoCancel - previous.numAutoCancel));
+            maybeCount("note_large_icon", (numWithLargeIcon - previous.numWithLargeIcon));
+            maybeCount("note_inbox", (numWithInbox - previous.numWithInbox));
+            maybeCount("note_media", (numWithMediaSession - previous.numWithMediaSession));
+            maybeCount("note_title", (numWithTitle - previous.numWithTitle));
+            maybeCount("note_text", (numWithText - previous.numWithText));
+            maybeCount("note_sub_text", (numWithSubText - previous.numWithSubText));
+            maybeCount("note_info_text", (numWithInfoText - previous.numWithInfoText));
+            noisyImportance.maybeCount(previous.noisyImportance);
+            quietImportance.maybeCount(previous.quietImportance);
+            finalImportance.maybeCount(previous.finalImportance);
 
-            maybeCount("note_post", (numPostedByApp - mPrevious.numPostedByApp));
-            maybeCount("note_update", (numUpdatedByApp - mPrevious.numUpdatedByApp));
-            maybeCount("note_remove", (numRemovedByApp - mPrevious.numRemovedByApp));
-            maybeCount("note_with_people", (numWithValidPeople - mPrevious.numWithValidPeople));
-            maybeCount("note_with_stars", (numWithStaredPeople - mPrevious.numWithStaredPeople));
-            maybeCount("people_cache_hit", (numPeopleCacheHit - mPrevious.numPeopleCacheHit));
-            maybeCount("people_cache_miss", (numPeopleCacheMiss - mPrevious.numPeopleCacheMiss));
-            maybeCount("note_blocked", (numBlocked - mPrevious.numBlocked));
-            maybeCount("note_suspended", (numSuspendedByAdmin - mPrevious.numSuspendedByAdmin));
-            maybeCount("note_with_actions", (numWithActions - mPrevious.numWithActions));
-            maybeCount("note_private", (numPrivate - mPrevious.numPrivate));
-            maybeCount("note_secret", (numSecret - mPrevious.numSecret));
-            maybeCount("note_interupt", (numInterrupt - mPrevious.numInterrupt));
-            maybeCount("note_big_text", (numWithBigText - mPrevious.numWithBigText));
-            maybeCount("note_big_pic", (numWithBigPicture - mPrevious.numWithBigPicture));
-            maybeCount("note_fg", (numForegroundService - mPrevious.numForegroundService));
-            maybeCount("note_ongoing", (numOngoing - mPrevious.numOngoing));
-            maybeCount("note_auto", (numAutoCancel - mPrevious.numAutoCancel));
-            maybeCount("note_large_icon", (numWithLargeIcon - mPrevious.numWithLargeIcon));
-            maybeCount("note_inbox", (numWithInbox - mPrevious.numWithInbox));
-            maybeCount("note_media", (numWithMediaSession - mPrevious.numWithMediaSession));
-            maybeCount("note_title", (numWithTitle - mPrevious.numWithTitle));
-            maybeCount("note_text", (numWithText - mPrevious.numWithText));
-            maybeCount("note_sub_text", (numWithSubText - mPrevious.numWithSubText));
-            maybeCount("note_info_text", (numWithInfoText - mPrevious.numWithInfoText));
-            noisyImportance.maybeCount(mPrevious.noisyImportance);
-            quietImportance.maybeCount(mPrevious.quietImportance);
-            finalImportance.maybeCount(mPrevious.finalImportance);
-
-            mPrevious.numPostedByApp = numPostedByApp;
-            mPrevious.numUpdatedByApp = numUpdatedByApp;
-            mPrevious.numRemovedByApp = numRemovedByApp;
-            mPrevious.numPeopleCacheHit = numPeopleCacheHit;
-            mPrevious.numPeopleCacheMiss = numPeopleCacheMiss;
-            mPrevious.numWithStaredPeople = numWithStaredPeople;
-            mPrevious.numWithValidPeople = numWithValidPeople;
-            mPrevious.numBlocked = numBlocked;
-            mPrevious.numSuspendedByAdmin = numSuspendedByAdmin;
-            mPrevious.numWithActions = numWithActions;
-            mPrevious.numPrivate = numPrivate;
-            mPrevious.numSecret = numSecret;
-            mPrevious.numInterrupt = numInterrupt;
-            mPrevious.numWithBigText = numWithBigText;
-            mPrevious.numWithBigPicture = numWithBigPicture;
-            mPrevious.numForegroundService = numForegroundService;
-            mPrevious.numOngoing = numOngoing;
-            mPrevious.numAutoCancel = numAutoCancel;
-            mPrevious.numWithLargeIcon = numWithLargeIcon;
-            mPrevious.numWithInbox = numWithInbox;
-            mPrevious.numWithMediaSession = numWithMediaSession;
-            mPrevious.numWithTitle = numWithTitle;
-            mPrevious.numWithText = numWithText;
-            mPrevious.numWithSubText = numWithSubText;
-            mPrevious.numWithInfoText = numWithInfoText;
-            noisyImportance.update(mPrevious.noisyImportance);
-            quietImportance.update(mPrevious.quietImportance);
-            finalImportance.update(mPrevious.finalImportance);
+            previous.numPostedByApp = numPostedByApp;
+            previous.numUpdatedByApp = numUpdatedByApp;
+            previous.numRemovedByApp = numRemovedByApp;
+            previous.numPeopleCacheHit = numPeopleCacheHit;
+            previous.numPeopleCacheMiss = numPeopleCacheMiss;
+            previous.numWithStaredPeople = numWithStaredPeople;
+            previous.numWithValidPeople = numWithValidPeople;
+            previous.numBlocked = numBlocked;
+            previous.numSuspendedByAdmin = numSuspendedByAdmin;
+            previous.numWithActions = numWithActions;
+            previous.numPrivate = numPrivate;
+            previous.numSecret = numSecret;
+            previous.numInterrupt = numInterrupt;
+            previous.numWithBigText = numWithBigText;
+            previous.numWithBigPicture = numWithBigPicture;
+            previous.numForegroundService = numForegroundService;
+            previous.numOngoing = numOngoing;
+            previous.numAutoCancel = numAutoCancel;
+            previous.numWithLargeIcon = numWithLargeIcon;
+            previous.numWithInbox = numWithInbox;
+            previous.numWithMediaSession = numWithMediaSession;
+            previous.numWithTitle = numWithTitle;
+            previous.numWithText = numWithText;
+            previous.numWithSubText = numWithSubText;
+            previous.numWithInfoText = numWithInfoText;
+            noisyImportance.update(previous.noisyImportance);
+            quietImportance.update(previous.quietImportance);
+            finalImportance.update(previous.finalImportance);
         }
 
         void maybeCount(String name, int value) {
@@ -553,6 +557,7 @@ public class NotificationUsageStats {
         }
 
         public JSONObject dumpJson() throws JSONException {
+            AggregatedStats previous = getPrevious();
             JSONObject dump = new JSONObject();
             dump.put("key", key);
             dump.put("duration", SystemClock.elapsedRealtime() - mCreated);
@@ -581,9 +586,9 @@ public class NotificationUsageStats {
             maybePut(dump, "numWithText", numWithText);
             maybePut(dump, "numWithSubText", numWithSubText);
             maybePut(dump, "numWithInfoText", numWithInfoText);
-            noisyImportance.maybePut(dump, mPrevious.noisyImportance);
-            quietImportance.maybePut(dump, mPrevious.quietImportance);
-            finalImportance.maybePut(dump, mPrevious.finalImportance);
+            noisyImportance.maybePut(dump, previous.noisyImportance);
+            quietImportance.maybePut(dump, previous.quietImportance);
+            finalImportance.maybePut(dump, previous.finalImportance);
 
             return dump;
         }
