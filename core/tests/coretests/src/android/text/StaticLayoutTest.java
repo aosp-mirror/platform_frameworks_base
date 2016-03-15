@@ -20,6 +20,8 @@ import android.graphics.Paint.FontMetricsInt;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.Layout.Alignment;
 import static android.text.Layout.Alignment.*;
+import android.text.TextPaint;
+import android.text.method.EditorState;
 import android.util.Log;
 
 import junit.framework.TestCase;
@@ -33,6 +35,10 @@ import junit.framework.TestCase;
  * @Suppress
  */
 public class StaticLayoutTest extends TestCase {
+    private static final int DEFAULT_OUTER_WIDTH = 150;
+    private static final Alignment DEFAULT_ALIGN = Alignment.ALIGN_CENTER;
+    private static final float SPACE_MULTI = 1.0f;
+    private static final float SPACE_ADD = 0.0f;
 
     /**
      * Basic test showing expected behavior and relationship between font
@@ -320,5 +326,92 @@ public class StaticLayoutTest extends TestCase {
     private void assertTopBotPadding(Layout l, int topPad, int botPad) {
         assertEquals(topPad, l.getTopPadding());
         assertEquals(botPad, l.getBottomPadding());
+    }
+
+    private void moveCursorToRightCursorableOffset(EditorState state, TextPaint paint) {
+        assertEquals("The editor has selection", state.mSelectionStart, state.mSelectionEnd);
+        final Layout layout = builder().setText(state.mText.toString()).setPaint(paint).build();
+        final int newOffset = layout.getOffsetToRightOf(state.mSelectionStart);
+        state.mSelectionStart = state.mSelectionEnd = newOffset;
+    }
+
+    private void moveCursorToLeftCursorableOffset(EditorState state, TextPaint paint) {
+        assertEquals("The editor has selection", state.mSelectionStart, state.mSelectionEnd);
+        final Layout layout = builder().setText(state.mText.toString()).setPaint(paint).build();
+        final int newOffset = layout.getOffsetToLeftOf(state.mSelectionStart);
+        state.mSelectionStart = state.mSelectionEnd = newOffset;
+    }
+
+    /**
+     * Tests for keycap, variation selectors, flags are in CTS.
+     * See {@link android.text.cts.StaticLayoutTest}.
+     */
+    public void testEmojiOffset() {
+        EditorState state = new EditorState();
+        TextPaint paint = new TextPaint();
+
+        // Odd numbered regional indicator symbols.
+        // U+1F1E6 is REGIONAL INDICATOR SYMBOL LETTER A, U+1F1E8 is REGIONAL INDICATOR SYMBOL
+        // LETTER C.
+        state.setByString("| U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 U+1F1E6");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+1F1E6 U+1F1E8 | U+1F1E6 U+1F1E8 U+1F1E6");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 | U+1F1E6");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 U+1F1E6 |");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 U+1F1E6 |");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 | U+1F1E6");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("U+1F1E6 U+1F1E8 | U+1F1E6 U+1F1E8 U+1F1E6");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("| U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 U+1F1E6");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("| U+1F1E6 U+1F1E8 U+1F1E6 U+1F1E8 U+1F1E6");
+        moveCursorToLeftCursorableOffset(state, paint);
+
+        // Zero width sequence
+        final String zwjSequence = "U+1F468 U+200D U+2764 U+FE0F U+200D U+1F468";
+        state.setByString("| " + zwjSequence + " " + zwjSequence + " " + zwjSequence);
+        moveCursorToRightCursorableOffset(state, paint);
+        state.assertEquals(zwjSequence + " | " + zwjSequence + " " + zwjSequence);
+        moveCursorToRightCursorableOffset(state, paint);
+        state.assertEquals(zwjSequence + " " + zwjSequence + " | " + zwjSequence);
+        moveCursorToRightCursorableOffset(state, paint);
+        state.assertEquals(zwjSequence + " " + zwjSequence + " " + zwjSequence + " |");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.assertEquals(zwjSequence + " " + zwjSequence + " " + zwjSequence + " |");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.assertEquals(zwjSequence + " " + zwjSequence + " | " + zwjSequence);
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.assertEquals(zwjSequence + " | " + zwjSequence + " " + zwjSequence);
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.assertEquals("| " + zwjSequence + " " + zwjSequence + " " + zwjSequence);
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.assertEquals("| " + zwjSequence + " " + zwjSequence + " " + zwjSequence);
+        moveCursorToLeftCursorableOffset(state, paint);
+
+        // Emoji modifiers
+        // U+261D is WHITE UP POINTING INDEX, U+1F3FB is EMOJI MODIFIER FITZPATRICK TYPE-1-2.
+        state.setByString("| U+261D U+1F3FB U+261D U+1F3FB U+261D U+1F3FB");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+261D U+1F3FB | U+261D U+1F3FB U+261D U+1F3FB");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+261D U+1F3FB U+261D U+1F3FB | U+261D U+1F3FB");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+261D U+1F3FB U+261D U+1F3FB U+261D U+1F3FB |");
+        moveCursorToRightCursorableOffset(state, paint);
+        state.setByString("U+261D U+1F3FB U+261D U+1F3FB U+261D U+1F3FB |");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("U+261D U+1F3FB U+261D U+1F3FB | U+261D U+1F3FB");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("U+261D U+1F3FB | U+261D U+1F3FB U+261D U+1F3FB");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("| U+261D U+1F3FB U+261D U+1F3FB U+261D U+1F3FB");
+        moveCursorToLeftCursorableOffset(state, paint);
+        state.setByString("| U+261D U+1F3FB U+261D U+1F3FB U+261D U+1F3FB");
+        moveCursorToLeftCursorableOffset(state, paint);
     }
 }
