@@ -67,7 +67,8 @@ public class Watchdog extends Thread {
         "/system/bin/audioserver",
         "/system/bin/mediaserver",
         "/system/bin/sdcard",
-        "/system/bin/surfaceflinger"
+        "/system/bin/surfaceflinger",
+        "media.log"
     };
 
     static Watchdog sWatchdog;
