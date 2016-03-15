@@ -1995,6 +1995,12 @@ public class ExifInterface {
         int bytesWritten = 0;
         int dataFormat = getDataFormatOfExifEntryValue(entryValue);
 
+        if (dataFormat == IFD_FORMAT_STRING) {
+            byte[] asciiArray = (entryValue + '\0').getBytes(Charset.forName("US-ASCII"));
+            dataOutputStream.write(asciiArray);
+            return asciiArray.length;
+        }
+
         // Values can be composed of several components. Each component is separated by char ','.
         String[] components = entryValue.split(",");
         for (String component : components) {
@@ -2006,11 +2012,6 @@ public class ExifInterface {
                 case IFD_FORMAT_DOUBLE:
                     dataOutputStream.writeDouble(Double.parseDouble(component));
                     bytesWritten += 8;
-                    break;
-                case IFD_FORMAT_STRING:
-                    byte[] asciiArray = (component + '\0').getBytes(Charset.forName("US-ASCII"));
-                    dataOutputStream.write(asciiArray);
-                    bytesWritten += asciiArray.length;
                     break;
                 case IFD_FORMAT_SRATIONAL:
                     String[] rationalNumber = component.split("/");
@@ -2030,11 +2031,31 @@ public class ExifInterface {
         // See TIFF 6.0 spec Types. page 15.
         // Take the first component if there are more than one component.
         if (entryValue.contains(",")) {
-            entryValue = entryValue.split(",")[0];
+            String[] entryValues = entryValue.split(",");
+            int dataFormat = getDataFormatOfExifEntryValue(entryValues[0]);
+            if (dataFormat == IFD_FORMAT_STRING) {
+                return IFD_FORMAT_STRING;
+            }
+            for (int i = 1; i < entryValues.length; ++i) {
+                if (getDataFormatOfExifEntryValue(entryValues[i]) != dataFormat) {
+                    return IFD_FORMAT_STRING;
+                }
+            }
+            return dataFormat;
         }
 
         if (entryValue.contains("/")) {
-            return IFD_FORMAT_SRATIONAL;
+            String[] rationalNumber = entryValue.split("/");
+            if (rationalNumber.length == 2) {
+                try {
+                    Integer.parseInt(rationalNumber[0]);
+                    Integer.parseInt(rationalNumber[1]);
+                    return IFD_FORMAT_SRATIONAL;
+                } catch (NumberFormatException e)  {
+                    // Ignored
+                }
+            }
+            return IFD_FORMAT_STRING;
         }
         try {
             Integer.parseInt(entryValue);
@@ -2054,6 +2075,9 @@ public class ExifInterface {
     // Determines the size of EXIF entry value.
     private static int getSizeOfExifEntryValue(int dataFormat, String entryValue) {
         // See TIFF 6.0 spec Types page 15.
+        if (dataFormat == IFD_FORMAT_STRING) {
+            return (entryValue + '\0').getBytes(Charset.forName("US-ASCII")).length;
+        }
         int bytesEstimated = 0;
         String[] components = entryValue.split(",");
         for (String component : components) {
@@ -2063,10 +2087,6 @@ public class ExifInterface {
                     break;
                 case IFD_FORMAT_DOUBLE:
                     bytesEstimated += 8;
-                    break;
-                case IFD_FORMAT_STRING:
-                    bytesEstimated
-                            += (component + '\0').getBytes(Charset.forName("US-ASCII")).length;
                     break;
                 case IFD_FORMAT_SRATIONAL:
                     bytesEstimated += 8;
