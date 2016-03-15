@@ -65,28 +65,6 @@ counterparts.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="cols">
-  <div class="col-5">
-
-<h4>Don't use bottom tab bars</h4>
-<p>Other platforms use the bottom tab bar to switch between the app's views. Per platform convention,
-Android's tabs for view control are shown in action bars at the top of the screen instead. In
-addition, Android apps may use a bottom bar to display actions on a split action bar.</p>
-<p>You should follow this guideline to create a consistent experience with other apps on the Android
-platform and to avoid confusion between actions and view switching on Android.</p>
-<p>For more information on how to properly use action bars for view control, see
-<a href="{@docRoot}design/patterns/actionbar.html">Action Bars</a>.</p>
-
-  </div>
-  <div class="col-8">
-
-    <img src="{@docRoot}design/media/migrating_ios_dialers.png">
-    <div class="figure-caption">
-      Android dialer with tabs in an action bar vs. bottom tabs in iOS.
-    </div>
-
-  </div>
-</div>
 
 <div class="cols">
   <div class="col-5">
