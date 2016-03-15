@@ -15,8 +15,7 @@ next.link=authenticate.html
 <ol>
   <li><a href="#ForYou">Determine if AccountManager is for You</a></li>
   <li><a href="#TaskTwo">Decide What Type of Account to Use</a></li>
-  <li><a href="#GetPermission">Request GET_ACCOUNT permission</a></li>
-  <li><a href="#TaskFive">Query AccountManager for a List of Accounts</a></li>
+  <li><a href="#QueryAccounts">Query the user for an Account</a></li>
   <li><a href="#IdentifyUser">Use the Account Object to Personalize Your App</a></li>
   <li><a href="#IdIsEnough">Decide Whether an Account Name is Enough</a></li>
 </ol>
@@ -71,47 +70,45 @@ UI.</p>
 <h2 id="TaskTwo">Decide What Type of Account to Use</h2>
 
 <p>Android devices can store multiple accounts from many different providers.
-When you query {@link android.accounts.AccountManager} for account names, you can choose to filter
-by
-account type. The account type is a string that uniquely identifies the entity
-that issued the account. For instance, Google accounts have type "com.google,"
-while Twitter uses "com.twitter.android.auth.login."</p>
+When you query {@link android.accounts.AccountManager} for account names, you
+can choose to filter by account type. The account type is a string that
+uniquely identifies the entity that issued the account. For instance, Google
+accounts have type "com.google," while Twitter uses
+"com.twitter.android.auth.login."</p>
 
+<h2 id="QueryAccounts">Query the user for an Account</h2>
 
-<h2 id="GetPermission">Request GET_ACCOUNT permission</h2>
-
-<p>In order to get a list of accounts on the device, your app needs the {@link
-android.Manifest.permission#GET_ACCOUNTS}
-permission. Add a <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code
-<uses-permission>}</a> tag in your manifest file to request
-this permission:</p>
+<p>Once an account type has been determined, you can prompt the user with an
+account chooser as follows:
 
 <pre>
-&lt;manifest ... >
-    &lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;
-    ...
-&lt;/manifest>
+AccountManager am = AccountManager.get(this);  // "this" reference the current Context
+Intent chooserIntent = am.newChooseAccountIntent(
+        null, // currently select account
+        null, // list of accounts that are allowed to be shown
+        new String[] { "com.google" }, // Only allow the user to select Google accounts
+        false,
+        null,  // description text
+        null, // add account auth token type
+        null, // required features for added accounts
+        null);  // options for adding an account
+this.startActivityForResult(chooserIntent, MY_REQUEST_CODE);
 </pre>
 
-
-<h2 id="TaskFive">Query AccountManager for a List of Accounts</h2>
-
-<p>Once you decide what account type you're interested in, you need to query for accounts of that
-type. Get an instance of {@link android.accounts.AccountManager} by calling {@link
-android.accounts.AccountManager#get(android.content.Context) AccountManager.get()}. Then use that
-instance to call {@link android.accounts.AccountManager#getAccountsByType(java.lang.String)
-getAccountsByType()}.</p>
+<p>Once the chooser intent is started, the user will be presented with a list of
+appropriately typed accounts. From this list they will select one which will be
+returned to your app upon onActivityResult as follows:
 
 <pre>
-AccountManager am = AccountManager.get(this); // "this" references the current Context
-
-Account[] accounts = am.getAccountsByType("com.google");
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == MY_REQUEST_CODE && resultCode == RESULT_OK) {
+        String name = data.getStringExtra(AccountManage.KEY_ACCOUNT_NAME);
+        String type = data.getStringExtra(AccountManage.KEY_ACCOUNT_TYPE);
+        Account selectedAccount = new Account(name, type);
+        doSomethingWithSelectedAccount(selectedAccount);
+    }
+}
 </pre>
-
-<p>This returns an array of {@link android.accounts.Account} objects. If there's more than one
-{@link android.accounts.Account} in
-the array, you should present a dialog asking the user to select one.</p>
-
 
 <h2 id="IdentifyUser">Use the Account Object to Personalize Your App</h2>
 
