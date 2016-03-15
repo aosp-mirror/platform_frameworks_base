@@ -12,8 +12,6 @@ trainingnavtop=true
 <ol>
   <li><a href="#40">Hide the Status Bar on Android 4.0 and Lower</a></li>
   <li><a href="#41">Hide the Status Bar on Android 4.1 and Higher</a></li>
-  <li><a href="#44">Hide the Status Bar on Android 4.4 and Higher</a></li>
-
   <li><a href="#behind">Make Content Appear Behind the Status Bar</a></li>
   <li><a href="#action-bar">Synchronize the Status Bar with Action Bar Transition</a></li>
 </ol>

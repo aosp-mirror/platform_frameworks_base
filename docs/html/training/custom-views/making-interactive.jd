@@ -229,8 +229,8 @@ if (!mScroller.isFinished()) {
     is not available prior to API level 11, so this technique cannot be used
 on devices running Android versions lower than 3.0.</p>
 
-<p class="note"><strong>Note:</strong> {@link android.animation.ValueAnimator} isn't available
-        prior to API level 11, but you can still use it in applications that
+<p class="note"><strong>Note:</strong> You can use {@link android.animation.ValueAnimator} in
+applications that
 target lower API levels. You just need to make sure to check the current API level
 at runtime, and omit the calls to the view animation system if the current level is less than 11.</p>
 
