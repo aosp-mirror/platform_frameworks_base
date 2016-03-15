@@ -55904,18 +55904,28 @@ package java.util {
 
   public abstract interface Map {
     method public abstract void clear();
+    method public default V compute(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
+    method public default V computeIfAbsent(K, java.util.function.Function<? super K, ? extends V>);
+    method public default V computeIfPresent(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public abstract boolean containsKey(java.lang.Object);
     method public abstract boolean containsValue(java.lang.Object);
     method public abstract java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public abstract boolean equals(java.lang.Object);
     method public default void forEach(java.util.function.BiConsumer<? super K, ? super V>);
     method public abstract V get(java.lang.Object);
+    method public default V getOrDefault(java.lang.Object, V);
     method public abstract int hashCode();
     method public abstract boolean isEmpty();
     method public abstract java.util.Set<K> keySet();
+    method public default V merge(K, V, java.util.function.BiFunction<? super V, ? super V, ? extends V>);
     method public abstract V put(K, V);
     method public abstract void putAll(java.util.Map<? extends K, ? extends V>);
+    method public default V putIfAbsent(K, V);
     method public abstract V remove(java.lang.Object);
+    method public default boolean remove(java.lang.Object, java.lang.Object);
+    method public default boolean replace(K, V, V);
+    method public default V replace(K, V);
+    method public default void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public abstract int size();
     method public abstract java.util.Collection<V> values();
   }
@@ -55923,6 +55933,8 @@ package java.util {
   public static abstract interface Map.Entry {
     method public static java.util.Comparator<java.util.Map.Entry<K, V>> comparingByKey();
     method public static java.util.Comparator<java.util.Map.Entry<K, V>> comparingByKey(java.util.Comparator<? super K>);
+    method public static java.util.Comparator<java.util.Map.Entry<K, V>> comparingByValue();
+    method public static java.util.Comparator<java.util.Map.Entry<K, V>> comparingByValue(java.util.Comparator<? super V>);
     method public abstract boolean equals(java.lang.Object);
     method public abstract K getKey();
     method public abstract V getValue();
@@ -56704,6 +56716,7 @@ package java.util.concurrent {
     method public void put(E) throws java.lang.InterruptedException;
     method public int remainingCapacity();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public E take() throws java.lang.InterruptedException;
   }
 
@@ -56767,6 +56780,78 @@ package java.util.concurrent {
     ctor public CancellationException(java.lang.String);
   }
 
+  public class CompletableFuture implements java.util.concurrent.CompletionStage java.util.concurrent.Future {
+    ctor public CompletableFuture();
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> acceptEither(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Consumer<? super T>);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> acceptEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Consumer<? super T>);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> acceptEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Consumer<? super T>, java.util.concurrent.Executor);
+    method public static java.util.concurrent.CompletableFuture<java.lang.Void> allOf(java.util.concurrent.CompletableFuture<?>...);
+    method public static java.util.concurrent.CompletableFuture<java.lang.Object> anyOf(java.util.concurrent.CompletableFuture<?>...);
+    method public java.util.concurrent.CompletableFuture<U> applyToEither(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Function<? super T, U>);
+    method public java.util.concurrent.CompletableFuture<U> applyToEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Function<? super T, U>);
+    method public java.util.concurrent.CompletableFuture<U> applyToEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Function<? super T, U>, java.util.concurrent.Executor);
+    method public boolean cancel(boolean);
+    method public boolean complete(T);
+    method public boolean completeExceptionally(java.lang.Throwable);
+    method public static java.util.concurrent.CompletableFuture<U> completedFuture(U);
+    method public java.util.concurrent.CompletableFuture<T> exceptionally(java.util.function.Function<java.lang.Throwable, ? extends T>);
+    method public T get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException;
+    method public T get(long, java.util.concurrent.TimeUnit) throws java.util.concurrent.ExecutionException, java.lang.InterruptedException, java.util.concurrent.TimeoutException;
+    method public T getNow(T);
+    method public int getNumberOfDependents();
+    method public java.util.concurrent.CompletableFuture<U> handle(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends U>);
+    method public java.util.concurrent.CompletableFuture<U> handleAsync(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends U>);
+    method public java.util.concurrent.CompletableFuture<U> handleAsync(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends U>, java.util.concurrent.Executor);
+    method public boolean isCancelled();
+    method public boolean isCompletedExceptionally();
+    method public boolean isDone();
+    method public T join();
+    method public void obtrudeException(java.lang.Throwable);
+    method public void obtrudeValue(T);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> runAfterBoth(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> runAfterBothAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> runAfterBothAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> runAfterEither(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> runAfterEitherAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> runAfterEitherAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable, java.util.concurrent.Executor);
+    method public static java.util.concurrent.CompletableFuture<java.lang.Void> runAsync(java.lang.Runnable);
+    method public static java.util.concurrent.CompletableFuture<java.lang.Void> runAsync(java.lang.Runnable, java.util.concurrent.Executor);
+    method public static java.util.concurrent.CompletableFuture<U> supplyAsync(java.util.function.Supplier<U>);
+    method public static java.util.concurrent.CompletableFuture<U> supplyAsync(java.util.function.Supplier<U>, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenAccept(java.util.function.Consumer<? super T>);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenAcceptAsync(java.util.function.Consumer<? super T>);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenAcceptAsync(java.util.function.Consumer<? super T>, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenAcceptBoth(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiConsumer<? super T, ? super U>);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenAcceptBothAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiConsumer<? super T, ? super U>);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenAcceptBothAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiConsumer<? super T, ? super U>, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<U> thenApply(java.util.function.Function<? super T, ? extends U>);
+    method public java.util.concurrent.CompletableFuture<U> thenApplyAsync(java.util.function.Function<? super T, ? extends U>);
+    method public java.util.concurrent.CompletableFuture<U> thenApplyAsync(java.util.function.Function<? super T, ? extends U>, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<V> thenCombine(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiFunction<? super T, ? super U, ? extends V>);
+    method public java.util.concurrent.CompletableFuture<V> thenCombineAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiFunction<? super T, ? super U, ? extends V>);
+    method public java.util.concurrent.CompletableFuture<V> thenCombineAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiFunction<? super T, ? super U, ? extends V>, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<U> thenCompose(java.util.function.Function<? super T, ? extends java.util.concurrent.CompletionStage<U>>);
+    method public java.util.concurrent.CompletableFuture<U> thenComposeAsync(java.util.function.Function<? super T, ? extends java.util.concurrent.CompletionStage<U>>);
+    method public java.util.concurrent.CompletableFuture<U> thenComposeAsync(java.util.function.Function<? super T, ? extends java.util.concurrent.CompletionStage<U>>, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenRun(java.lang.Runnable);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenRunAsync(java.lang.Runnable);
+    method public java.util.concurrent.CompletableFuture<java.lang.Void> thenRunAsync(java.lang.Runnable, java.util.concurrent.Executor);
+    method public java.util.concurrent.CompletableFuture<T> toCompletableFuture();
+    method public java.util.concurrent.CompletableFuture<T> whenComplete(java.util.function.BiConsumer<? super T, ? super java.lang.Throwable>);
+    method public java.util.concurrent.CompletableFuture<T> whenCompleteAsync(java.util.function.BiConsumer<? super T, ? super java.lang.Throwable>);
+    method public java.util.concurrent.CompletableFuture<T> whenCompleteAsync(java.util.function.BiConsumer<? super T, ? super java.lang.Throwable>, java.util.concurrent.Executor);
+  }
+
+  public static abstract interface CompletableFuture.AsynchronousCompletionTask {
+  }
+
+  public class CompletionException extends java.lang.RuntimeException {
+    ctor protected CompletionException();
+    ctor protected CompletionException(java.lang.String);
+    ctor public CompletionException(java.lang.String, java.lang.Throwable);
+    ctor public CompletionException(java.lang.Throwable);
+  }
+
   public abstract interface CompletionService {
     method public abstract java.util.concurrent.Future<V> poll();
     method public abstract java.util.concurrent.Future<V> poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
@@ -56775,20 +56860,130 @@ package java.util.concurrent {
     method public abstract java.util.concurrent.Future<V> take() throws java.lang.InterruptedException;
   }
 
+  public abstract interface CompletionStage {
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> acceptEither(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Consumer<? super T>);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> acceptEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Consumer<? super T>);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> acceptEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Consumer<? super T>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<U> applyToEither(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Function<? super T, U>);
+    method public abstract java.util.concurrent.CompletionStage<U> applyToEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Function<? super T, U>);
+    method public abstract java.util.concurrent.CompletionStage<U> applyToEitherAsync(java.util.concurrent.CompletionStage<? extends T>, java.util.function.Function<? super T, U>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<T> exceptionally(java.util.function.Function<java.lang.Throwable, ? extends T>);
+    method public abstract java.util.concurrent.CompletionStage<U> handle(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends U>);
+    method public abstract java.util.concurrent.CompletionStage<U> handleAsync(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends U>);
+    method public abstract java.util.concurrent.CompletionStage<U> handleAsync(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends U>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> runAfterBoth(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> runAfterBothAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> runAfterBothAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> runAfterEither(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> runAfterEitherAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> runAfterEitherAsync(java.util.concurrent.CompletionStage<?>, java.lang.Runnable, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenAccept(java.util.function.Consumer<? super T>);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenAcceptAsync(java.util.function.Consumer<? super T>);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenAcceptAsync(java.util.function.Consumer<? super T>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenAcceptBoth(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiConsumer<? super T, ? super U>);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenAcceptBothAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiConsumer<? super T, ? super U>);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenAcceptBothAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiConsumer<? super T, ? super U>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<U> thenApply(java.util.function.Function<? super T, ? extends U>);
+    method public abstract java.util.concurrent.CompletionStage<U> thenApplyAsync(java.util.function.Function<? super T, ? extends U>);
+    method public abstract java.util.concurrent.CompletionStage<U> thenApplyAsync(java.util.function.Function<? super T, ? extends U>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<V> thenCombine(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiFunction<? super T, ? super U, ? extends V>);
+    method public abstract java.util.concurrent.CompletionStage<V> thenCombineAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiFunction<? super T, ? super U, ? extends V>);
+    method public abstract java.util.concurrent.CompletionStage<V> thenCombineAsync(java.util.concurrent.CompletionStage<? extends U>, java.util.function.BiFunction<? super T, ? super U, ? extends V>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<U> thenCompose(java.util.function.Function<? super T, ? extends java.util.concurrent.CompletionStage<U>>);
+    method public abstract java.util.concurrent.CompletionStage<U> thenComposeAsync(java.util.function.Function<? super T, ? extends java.util.concurrent.CompletionStage<U>>);
+    method public abstract java.util.concurrent.CompletionStage<U> thenComposeAsync(java.util.function.Function<? super T, ? extends java.util.concurrent.CompletionStage<U>>, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenRun(java.lang.Runnable);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenRunAsync(java.lang.Runnable);
+    method public abstract java.util.concurrent.CompletionStage<java.lang.Void> thenRunAsync(java.lang.Runnable, java.util.concurrent.Executor);
+    method public abstract java.util.concurrent.CompletableFuture<T> toCompletableFuture();
+    method public abstract java.util.concurrent.CompletionStage<T> whenComplete(java.util.function.BiConsumer<? super T, ? super java.lang.Throwable>);
+    method public abstract java.util.concurrent.CompletionStage<T> whenCompleteAsync(java.util.function.BiConsumer<? super T, ? super java.lang.Throwable>);
+    method public abstract java.util.concurrent.CompletionStage<T> whenCompleteAsync(java.util.function.BiConsumer<? super T, ? super java.lang.Throwable>, java.util.concurrent.Executor);
+  }
+
   public class ConcurrentHashMap extends java.util.AbstractMap implements java.util.concurrent.ConcurrentMap java.io.Serializable {
     ctor public ConcurrentHashMap();
     ctor public ConcurrentHashMap(int);
     ctor public ConcurrentHashMap(java.util.Map<? extends K, ? extends V>);
     ctor public ConcurrentHashMap(int, float);
     ctor public ConcurrentHashMap(int, float, int);
+    method public V compute(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
+    method public V computeIfAbsent(K, java.util.function.Function<? super K, ? extends V>);
+    method public V computeIfPresent(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public boolean contains(java.lang.Object);
     method public java.util.Enumeration<V> elements();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
+    method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
+    method public void forEach(long, java.util.function.BiConsumer<? super K, ? super V>);
+    method public void forEach(long, java.util.function.BiFunction<? super K, ? super V, ? extends U>, java.util.function.Consumer<? super U>);
+    method public void forEachEntry(long, java.util.function.Consumer<? super java.util.Map.Entry<K, V>>);
+    method public void forEachEntry(long, java.util.function.Function<java.util.Map.Entry<K, V>, ? extends U>, java.util.function.Consumer<? super U>);
+    method public void forEachKey(long, java.util.function.Consumer<? super K>);
+    method public void forEachKey(long, java.util.function.Function<? super K, ? extends U>, java.util.function.Consumer<? super U>);
+    method public void forEachValue(long, java.util.function.Consumer<? super V>);
+    method public void forEachValue(long, java.util.function.Function<? super V, ? extends U>, java.util.function.Consumer<? super U>);
+    method public V getOrDefault(java.lang.Object, V);
+    method public java.util.concurrent.ConcurrentHashMap.KeySetView<K, V> keySet(V);
     method public java.util.Enumeration<K> keys();
+    method public long mappingCount();
+    method public V merge(K, V, java.util.function.BiFunction<? super V, ? super V, ? extends V>);
+    method public static java.util.concurrent.ConcurrentHashMap.KeySetView<K, java.lang.Boolean> newKeySet();
+    method public static java.util.concurrent.ConcurrentHashMap.KeySetView<K, java.lang.Boolean> newKeySet(int);
     method public V putIfAbsent(K, V);
+    method public U reduce(long, java.util.function.BiFunction<? super K, ? super V, ? extends U>, java.util.function.BiFunction<? super U, ? super U, ? extends U>);
+    method public java.util.Map.Entry<K, V> reduceEntries(long, java.util.function.BiFunction<java.util.Map.Entry<K, V>, java.util.Map.Entry<K, V>, ? extends java.util.Map.Entry<K, V>>);
+    method public U reduceEntries(long, java.util.function.Function<java.util.Map.Entry<K, V>, ? extends U>, java.util.function.BiFunction<? super U, ? super U, ? extends U>);
+    method public double reduceEntriesToDouble(long, java.util.function.ToDoubleFunction<java.util.Map.Entry<K, V>>, double, java.util.function.DoubleBinaryOperator);
+    method public int reduceEntriesToInt(long, java.util.function.ToIntFunction<java.util.Map.Entry<K, V>>, int, java.util.function.IntBinaryOperator);
+    method public long reduceEntriesToLong(long, java.util.function.ToLongFunction<java.util.Map.Entry<K, V>>, long, java.util.function.LongBinaryOperator);
+    method public K reduceKeys(long, java.util.function.BiFunction<? super K, ? super K, ? extends K>);
+    method public U reduceKeys(long, java.util.function.Function<? super K, ? extends U>, java.util.function.BiFunction<? super U, ? super U, ? extends U>);
+    method public double reduceKeysToDouble(long, java.util.function.ToDoubleFunction<? super K>, double, java.util.function.DoubleBinaryOperator);
+    method public int reduceKeysToInt(long, java.util.function.ToIntFunction<? super K>, int, java.util.function.IntBinaryOperator);
+    method public long reduceKeysToLong(long, java.util.function.ToLongFunction<? super K>, long, java.util.function.LongBinaryOperator);
+    method public double reduceToDouble(long, java.util.function.ToDoubleBiFunction<? super K, ? super V>, double, java.util.function.DoubleBinaryOperator);
+    method public int reduceToInt(long, java.util.function.ToIntBiFunction<? super K, ? super V>, int, java.util.function.IntBinaryOperator);
+    method public long reduceToLong(long, java.util.function.ToLongBiFunction<? super K, ? super V>, long, java.util.function.LongBinaryOperator);
+    method public V reduceValues(long, java.util.function.BiFunction<? super V, ? super V, ? extends V>);
+    method public U reduceValues(long, java.util.function.Function<? super V, ? extends U>, java.util.function.BiFunction<? super U, ? super U, ? extends U>);
+    method public double reduceValuesToDouble(long, java.util.function.ToDoubleFunction<? super V>, double, java.util.function.DoubleBinaryOperator);
+    method public int reduceValuesToInt(long, java.util.function.ToIntFunction<? super V>, int, java.util.function.IntBinaryOperator);
+    method public long reduceValuesToLong(long, java.util.function.ToLongFunction<? super V>, long, java.util.function.LongBinaryOperator);
     method public boolean remove(java.lang.Object, java.lang.Object);
     method public boolean replace(K, V, V);
     method public V replace(K, V);
+    method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
+    method public U search(long, java.util.function.BiFunction<? super K, ? super V, ? extends U>);
+    method public U searchEntries(long, java.util.function.Function<java.util.Map.Entry<K, V>, ? extends U>);
+    method public U searchKeys(long, java.util.function.Function<? super K, ? extends U>);
+    method public U searchValues(long, java.util.function.Function<? super V, ? extends U>);
+  }
+
+   static abstract class ConcurrentHashMap.CollectionView implements java.util.Collection java.io.Serializable {
+    method public final void clear();
+    method public abstract boolean contains(java.lang.Object);
+    method public final boolean containsAll(java.util.Collection<?>);
+    method public java.util.concurrent.ConcurrentHashMap<K, V> getMap();
+    method public final boolean isEmpty();
+    method public abstract java.util.Iterator<E> iterator();
+    method public abstract boolean remove(java.lang.Object);
+    method public final boolean removeAll(java.util.Collection<?>);
+    method public final boolean retainAll(java.util.Collection<?>);
+    method public final int size();
+    method public final java.lang.Object[] toArray();
+    method public final T[] toArray(T[]);
+    method public final java.lang.String toString();
+  }
+
+  public static class ConcurrentHashMap.KeySetView extends java.util.concurrent.ConcurrentHashMap.CollectionView implements java.io.Serializable java.util.Set {
+    method public boolean add(K);
+    method public boolean addAll(java.util.Collection<? extends K>);
+    method public boolean contains(java.lang.Object);
+    method public void forEach(java.util.function.Consumer<? super K>);
+    method public V getMappedValue();
+    method public java.util.Iterator<K> iterator();
+    method public boolean remove(java.lang.Object);
+    method public java.util.Spliterator<K> spliterator();
   }
 
   public class ConcurrentLinkedDeque extends java.util.AbstractCollection implements java.util.Deque java.io.Serializable {
@@ -56818,6 +57013,7 @@ package java.util.concurrent {
     method public E removeLast();
     method public boolean removeLastOccurrence(java.lang.Object);
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
   }
 
   public class ConcurrentLinkedQueue extends java.util.AbstractQueue implements java.util.Queue java.io.Serializable {
@@ -56828,6 +57024,7 @@ package java.util.concurrent {
     method public E peek();
     method public E poll();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
   }
 
   public abstract interface ConcurrentMap implements java.util.Map {
@@ -56859,6 +57056,9 @@ package java.util.concurrent {
     method public K ceilingKey(K);
     method public java.util.concurrent.ConcurrentSkipListMap<K, V> clone();
     method public java.util.Comparator<? super K> comparator();
+    method public V compute(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
+    method public V computeIfAbsent(K, java.util.function.Function<? super K, ? extends V>);
+    method public V computeIfPresent(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public java.util.NavigableSet<K> descendingKeySet();
     method public java.util.concurrent.ConcurrentNavigableMap<K, V> descendingMap();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
@@ -56866,6 +57066,8 @@ package java.util.concurrent {
     method public K firstKey();
     method public java.util.Map.Entry<K, V> floorEntry(K);
     method public K floorKey(K);
+    method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
+    method public V getOrDefault(java.lang.Object, V);
     method public java.util.concurrent.ConcurrentNavigableMap<K, V> headMap(K, boolean);
     method public java.util.concurrent.ConcurrentNavigableMap<K, V> headMap(K);
     method public java.util.Map.Entry<K, V> higherEntry(K);
@@ -56874,6 +57076,7 @@ package java.util.concurrent {
     method public K lastKey();
     method public java.util.Map.Entry<K, V> lowerEntry(K);
     method public K lowerKey(K);
+    method public V merge(K, V, java.util.function.BiFunction<? super V, ? super V, ? extends V>);
     method public java.util.NavigableSet<K> navigableKeySet();
     method public java.util.Map.Entry<K, V> pollFirstEntry();
     method public java.util.Map.Entry<K, V> pollLastEntry();
@@ -56881,6 +57084,7 @@ package java.util.concurrent {
     method public boolean remove(java.lang.Object, java.lang.Object);
     method public boolean replace(K, V, V);
     method public V replace(K, V);
+    method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public java.util.concurrent.ConcurrentNavigableMap<K, V> subMap(K, boolean, K, boolean);
     method public java.util.concurrent.ConcurrentNavigableMap<K, V> subMap(K, K);
     method public java.util.concurrent.ConcurrentNavigableMap<K, V> tailMap(K, boolean);
@@ -56908,6 +57112,7 @@ package java.util.concurrent {
     method public E pollFirst();
     method public E pollLast();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public java.util.NavigableSet<E> subSet(E, boolean, E, boolean);
     method public java.util.NavigableSet<E> subSet(E, E);
     method public java.util.NavigableSet<E> tailSet(E, boolean);
@@ -56918,31 +57123,35 @@ package java.util.concurrent {
     ctor public CopyOnWriteArrayList();
     ctor public CopyOnWriteArrayList(java.util.Collection<? extends E>);
     ctor public CopyOnWriteArrayList(E[]);
-    method public synchronized boolean add(E);
-    method public synchronized void add(int, E);
-    method public synchronized boolean addAll(java.util.Collection<? extends E>);
-    method public synchronized boolean addAll(int, java.util.Collection<? extends E>);
-    method public synchronized int addAllAbsent(java.util.Collection<? extends E>);
-    method public synchronized boolean addIfAbsent(E);
-    method public synchronized void clear();
+    method public boolean add(E);
+    method public void add(int, E);
+    method public boolean addAll(java.util.Collection<? extends E>);
+    method public boolean addAll(int, java.util.Collection<? extends E>);
+    method public int addAllAbsent(java.util.Collection<? extends E>);
+    method public boolean addIfAbsent(E);
+    method public void clear();
     method public java.lang.Object clone();
     method public boolean contains(java.lang.Object);
     method public boolean containsAll(java.util.Collection<?>);
+    method public void forEach(java.util.function.Consumer<? super E>);
     method public E get(int);
-    method public int indexOf(E, int);
     method public int indexOf(java.lang.Object);
+    method public int indexOf(E, int);
     method public boolean isEmpty();
     method public java.util.Iterator<E> iterator();
-    method public int lastIndexOf(E, int);
     method public int lastIndexOf(java.lang.Object);
-    method public java.util.ListIterator<E> listIterator(int);
+    method public int lastIndexOf(E, int);
     method public java.util.ListIterator<E> listIterator();
-    method public synchronized E remove(int);
-    method public synchronized boolean remove(java.lang.Object);
-    method public synchronized boolean removeAll(java.util.Collection<?>);
-    method public synchronized boolean retainAll(java.util.Collection<?>);
-    method public synchronized E set(int, E);
+    method public java.util.ListIterator<E> listIterator(int);
+    method public E remove(int);
+    method public boolean remove(java.lang.Object);
+    method public boolean removeAll(java.util.Collection<?>);
+    method public boolean removeIf(java.util.function.Predicate<? super E>);
+    method public void replaceAll(java.util.function.UnaryOperator<E>);
+    method public boolean retainAll(java.util.Collection<?>);
+    method public E set(int, E);
     method public int size();
+    method public void sort(java.util.Comparator<? super E>);
     method public java.util.List<E> subList(int, int);
     method public java.lang.Object[] toArray();
     method public T[] toArray(T[]);
@@ -56951,8 +57160,11 @@ package java.util.concurrent {
   public class CopyOnWriteArraySet extends java.util.AbstractSet implements java.io.Serializable {
     ctor public CopyOnWriteArraySet();
     ctor public CopyOnWriteArraySet(java.util.Collection<? extends E>);
+    method public void forEach(java.util.function.Consumer<? super E>);
     method public java.util.Iterator<E> iterator();
+    method public boolean removeIf(java.util.function.Predicate<? super E>);
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
   }
 
   public class CountDownLatch {
@@ -56961,6 +57173,32 @@ package java.util.concurrent {
     method public boolean await(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
     method public void countDown();
     method public long getCount();
+  }
+
+  public abstract class CountedCompleter extends java.util.concurrent.ForkJoinTask {
+    ctor protected CountedCompleter(java.util.concurrent.CountedCompleter<?>, int);
+    ctor protected CountedCompleter(java.util.concurrent.CountedCompleter<?>);
+    ctor protected CountedCompleter();
+    method public final void addToPendingCount(int);
+    method public final boolean compareAndSetPendingCount(int, int);
+    method public void complete(T);
+    method public abstract void compute();
+    method public final int decrementPendingCountUnlessZero();
+    method protected final boolean exec();
+    method public final java.util.concurrent.CountedCompleter<?> firstComplete();
+    method public final java.util.concurrent.CountedCompleter<?> getCompleter();
+    method public final int getPendingCount();
+    method public T getRawResult();
+    method public final java.util.concurrent.CountedCompleter<?> getRoot();
+    method public final void helpComplete(int);
+    method public final java.util.concurrent.CountedCompleter<?> nextComplete();
+    method public void onCompletion(java.util.concurrent.CountedCompleter<?>);
+    method public boolean onExceptionalCompletion(java.lang.Throwable, java.util.concurrent.CountedCompleter<?>);
+    method public final void propagateCompletion();
+    method public final void quietlyCompleteRoot();
+    method public final void setPendingCount(int);
+    method protected void setRawResult(T);
+    method public final void tryComplete();
   }
 
   public class CyclicBarrier {
@@ -57053,6 +57291,8 @@ package java.util.concurrent {
     method public static java.util.concurrent.ExecutorService newSingleThreadExecutor(java.util.concurrent.ThreadFactory);
     method public static java.util.concurrent.ScheduledExecutorService newSingleThreadScheduledExecutor();
     method public static java.util.concurrent.ScheduledExecutorService newSingleThreadScheduledExecutor(java.util.concurrent.ThreadFactory);
+    method public static java.util.concurrent.ExecutorService newWorkStealingPool(int);
+    method public static java.util.concurrent.ExecutorService newWorkStealingPool();
     method public static java.util.concurrent.Callable<T> privilegedCallable(java.util.concurrent.Callable<T>);
     method public static java.util.concurrent.Callable<T> privilegedCallableUsingCurrentClassLoader(java.util.concurrent.Callable<T>);
     method public static java.util.concurrent.ThreadFactory privilegedThreadFactory();
@@ -57066,11 +57306,13 @@ package java.util.concurrent {
     ctor public ForkJoinPool(int, java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory, java.lang.Thread.UncaughtExceptionHandler, boolean);
     method public boolean awaitQuiescence(long, java.util.concurrent.TimeUnit);
     method public boolean awaitTermination(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method public static java.util.concurrent.ForkJoinPool commonPool();
     method protected int drainTasksTo(java.util.Collection<? super java.util.concurrent.ForkJoinTask<?>>);
     method public void execute(java.util.concurrent.ForkJoinTask<?>);
     method public void execute(java.lang.Runnable);
     method public int getActiveThreadCount();
     method public boolean getAsyncMode();
+    method public static int getCommonPoolParallelism();
     method public java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory getFactory();
     method public int getParallelism();
     method public int getPoolSize();
@@ -57108,6 +57350,7 @@ package java.util.concurrent {
     method public static java.util.concurrent.ForkJoinTask<T> adapt(java.lang.Runnable, T);
     method public static java.util.concurrent.ForkJoinTask<T> adapt(java.util.concurrent.Callable<? extends T>);
     method public boolean cancel(boolean);
+    method public final boolean compareAndSetForkJoinTaskTag(short, short);
     method public void complete(V);
     method public void completeExceptionally(java.lang.Throwable);
     method protected abstract boolean exec();
@@ -57115,6 +57358,7 @@ package java.util.concurrent {
     method public final V get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException;
     method public final V get(long, java.util.concurrent.TimeUnit) throws java.util.concurrent.ExecutionException, java.lang.InterruptedException, java.util.concurrent.TimeoutException;
     method public final java.lang.Throwable getException();
+    method public final short getForkJoinTaskTag();
     method public static java.util.concurrent.ForkJoinPool getPool();
     method public static int getQueuedTaskCount();
     method public abstract V getRawResult();
@@ -57133,9 +57377,11 @@ package java.util.concurrent {
     method protected static java.util.concurrent.ForkJoinTask<?> peekNextLocalTask();
     method protected static java.util.concurrent.ForkJoinTask<?> pollNextLocalTask();
     method protected static java.util.concurrent.ForkJoinTask<?> pollTask();
+    method public final void quietlyComplete();
     method public final void quietlyInvoke();
     method public final void quietlyJoin();
     method public void reinitialize();
+    method public final short setForkJoinTaskTag(short);
     method protected abstract void setRawResult(V);
     method public boolean tryUnfork();
   }
@@ -57209,6 +57455,7 @@ package java.util.concurrent {
     method public E removeLast();
     method public boolean removeLastOccurrence(java.lang.Object);
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public E take() throws java.lang.InterruptedException;
     method public E takeFirst() throws java.lang.InterruptedException;
     method public E takeLast() throws java.lang.InterruptedException;
@@ -57229,6 +57476,7 @@ package java.util.concurrent {
     method public void put(E) throws java.lang.InterruptedException;
     method public int remainingCapacity();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public E take() throws java.lang.InterruptedException;
   }
 
@@ -57248,6 +57496,7 @@ package java.util.concurrent {
     method public void put(E);
     method public int remainingCapacity();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public E take() throws java.lang.InterruptedException;
     method public void transfer(E) throws java.lang.InterruptedException;
     method public boolean tryTransfer(E);
@@ -57295,6 +57544,7 @@ package java.util.concurrent {
     method public void put(E);
     method public int remainingCapacity();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public E take() throws java.lang.InterruptedException;
   }
 
@@ -57398,6 +57648,7 @@ package java.util.concurrent {
     method public void put(E) throws java.lang.InterruptedException;
     method public int remainingCapacity();
     method public int size();
+    method public java.util.Spliterator<E> spliterator();
     method public E take() throws java.lang.InterruptedException;
   }
 
@@ -57527,112 +57778,136 @@ package java.util.concurrent.atomic {
   public class AtomicInteger extends java.lang.Number implements java.io.Serializable {
     ctor public AtomicInteger(int);
     ctor public AtomicInteger();
+    method public final int accumulateAndGet(int, java.util.function.IntBinaryOperator);
     method public final int addAndGet(int);
     method public final boolean compareAndSet(int, int);
     method public final int decrementAndGet();
     method public double doubleValue();
     method public float floatValue();
     method public final int get();
+    method public final int getAndAccumulate(int, java.util.function.IntBinaryOperator);
     method public final int getAndAdd(int);
     method public final int getAndDecrement();
     method public final int getAndIncrement();
     method public final int getAndSet(int);
+    method public final int getAndUpdate(java.util.function.IntUnaryOperator);
     method public final int incrementAndGet();
     method public int intValue();
     method public final void lazySet(int);
     method public long longValue();
     method public final void set(int);
+    method public final int updateAndGet(java.util.function.IntUnaryOperator);
     method public final boolean weakCompareAndSet(int, int);
   }
 
   public class AtomicIntegerArray implements java.io.Serializable {
     ctor public AtomicIntegerArray(int);
     ctor public AtomicIntegerArray(int[]);
+    method public final int accumulateAndGet(int, int, java.util.function.IntBinaryOperator);
     method public final int addAndGet(int, int);
     method public final boolean compareAndSet(int, int, int);
     method public final int decrementAndGet(int);
     method public final int get(int);
+    method public final int getAndAccumulate(int, int, java.util.function.IntBinaryOperator);
     method public final int getAndAdd(int, int);
     method public final int getAndDecrement(int);
     method public final int getAndIncrement(int);
     method public final int getAndSet(int, int);
+    method public final int getAndUpdate(int, java.util.function.IntUnaryOperator);
     method public final int incrementAndGet(int);
     method public final void lazySet(int, int);
     method public final int length();
     method public final void set(int, int);
+    method public final int updateAndGet(int, java.util.function.IntUnaryOperator);
     method public final boolean weakCompareAndSet(int, int, int);
   }
 
   public abstract class AtomicIntegerFieldUpdater {
     ctor protected AtomicIntegerFieldUpdater();
+    method public final int accumulateAndGet(T, int, java.util.function.IntBinaryOperator);
     method public int addAndGet(T, int);
     method public abstract boolean compareAndSet(T, int, int);
     method public int decrementAndGet(T);
     method public abstract int get(T);
+    method public final int getAndAccumulate(T, int, java.util.function.IntBinaryOperator);
     method public int getAndAdd(T, int);
     method public int getAndDecrement(T);
     method public int getAndIncrement(T);
     method public int getAndSet(T, int);
+    method public final int getAndUpdate(T, java.util.function.IntUnaryOperator);
     method public int incrementAndGet(T);
     method public abstract void lazySet(T, int);
     method public static java.util.concurrent.atomic.AtomicIntegerFieldUpdater<U> newUpdater(java.lang.Class<U>, java.lang.String);
     method public abstract void set(T, int);
+    method public final int updateAndGet(T, java.util.function.IntUnaryOperator);
     method public abstract boolean weakCompareAndSet(T, int, int);
   }
 
   public class AtomicLong extends java.lang.Number implements java.io.Serializable {
     ctor public AtomicLong(long);
     ctor public AtomicLong();
+    method public final long accumulateAndGet(long, java.util.function.LongBinaryOperator);
     method public final long addAndGet(long);
     method public final boolean compareAndSet(long, long);
     method public final long decrementAndGet();
     method public double doubleValue();
     method public float floatValue();
     method public final long get();
+    method public final long getAndAccumulate(long, java.util.function.LongBinaryOperator);
     method public final long getAndAdd(long);
     method public final long getAndDecrement();
     method public final long getAndIncrement();
     method public final long getAndSet(long);
+    method public final long getAndUpdate(java.util.function.LongUnaryOperator);
     method public final long incrementAndGet();
     method public int intValue();
     method public final void lazySet(long);
     method public long longValue();
     method public final void set(long);
+    method public final long updateAndGet(java.util.function.LongUnaryOperator);
     method public final boolean weakCompareAndSet(long, long);
   }
 
   public class AtomicLongArray implements java.io.Serializable {
     ctor public AtomicLongArray(int);
     ctor public AtomicLongArray(long[]);
+    method public final long accumulateAndGet(int, long, java.util.function.LongBinaryOperator);
     method public long addAndGet(int, long);
     method public final boolean compareAndSet(int, long, long);
     method public final long decrementAndGet(int);
     method public final long get(int);
+    method public final long getAndAccumulate(int, long, java.util.function.LongBinaryOperator);
     method public final long getAndAdd(int, long);
     method public final long getAndDecrement(int);
     method public final long getAndIncrement(int);
     method public final long getAndSet(int, long);
+    method public final long getAndUpdate(int, java.util.function.LongUnaryOperator);
     method public final long incrementAndGet(int);
     method public final void lazySet(int, long);
     method public final int length();
     method public final void set(int, long);
+    method public final long updateAndGet(int, java.util.function.LongUnaryOperator);
     method public final boolean weakCompareAndSet(int, long, long);
   }
 
   public abstract class AtomicLongFieldUpdater {
     ctor protected AtomicLongFieldUpdater();
+    method public final long accumulateAndGet(T, long, java.util.function.LongBinaryOperator);
     method public long addAndGet(T, long);
     method public abstract boolean compareAndSet(T, long, long);
     method public long decrementAndGet(T);
     method public abstract long get(T);
+    method public final long getAndAccumulate(T, long, java.util.function.LongBinaryOperator);
     method public long getAndAdd(T, long);
     method public long getAndDecrement(T);
     method public long getAndIncrement(T);
     method public long getAndSet(T, long);
+    method public final long getAndUpdate(T, java.util.function.LongUnaryOperator);
     method public long incrementAndGet(T);
     method public abstract void lazySet(T, long);
     method public static java.util.concurrent.atomic.AtomicLongFieldUpdater<U> newUpdater(java.lang.Class<U>, java.lang.String);
     method public abstract void set(T, long);
+    method public final long updateAndGet(T, java.util.function.LongUnaryOperator);
     method public abstract boolean weakCompareAndSet(T, long, long);
   }
 
@@ -57650,34 +57925,46 @@ package java.util.concurrent.atomic {
   public class AtomicReference implements java.io.Serializable {
     ctor public AtomicReference(V);
     ctor public AtomicReference();
+    method public final V accumulateAndGet(V, java.util.function.BinaryOperator<V>);
     method public final boolean compareAndSet(V, V);
     method public final V get();
+    method public final V getAndAccumulate(V, java.util.function.BinaryOperator<V>);
     method public final V getAndSet(V);
+    method public final V getAndUpdate(java.util.function.UnaryOperator<V>);
     method public final void lazySet(V);
     method public final void set(V);
+    method public final V updateAndGet(java.util.function.UnaryOperator<V>);
     method public final boolean weakCompareAndSet(V, V);
   }
 
   public class AtomicReferenceArray implements java.io.Serializable {
     ctor public AtomicReferenceArray(int);
     ctor public AtomicReferenceArray(E[]);
+    method public final E accumulateAndGet(int, E, java.util.function.BinaryOperator<E>);
     method public final boolean compareAndSet(int, E, E);
     method public final E get(int);
+    method public final E getAndAccumulate(int, E, java.util.function.BinaryOperator<E>);
     method public final E getAndSet(int, E);
+    method public final E getAndUpdate(int, java.util.function.UnaryOperator<E>);
     method public final void lazySet(int, E);
     method public final int length();
     method public final void set(int, E);
+    method public final E updateAndGet(int, java.util.function.UnaryOperator<E>);
     method public final boolean weakCompareAndSet(int, E, E);
   }
 
   public abstract class AtomicReferenceFieldUpdater {
     ctor protected AtomicReferenceFieldUpdater();
+    method public final V accumulateAndGet(T, V, java.util.function.BinaryOperator<V>);
     method public abstract boolean compareAndSet(T, V, V);
     method public abstract V get(T);
+    method public final V getAndAccumulate(T, V, java.util.function.BinaryOperator<V>);
     method public V getAndSet(T, V);
+    method public final V getAndUpdate(T, java.util.function.UnaryOperator<V>);
     method public abstract void lazySet(T, V);
     method public static java.util.concurrent.atomic.AtomicReferenceFieldUpdater<U, W> newUpdater(java.lang.Class<U>, java.lang.Class<W>, java.lang.String);
     method public abstract void set(T, V);
+    method public final V updateAndGet(T, java.util.function.UnaryOperator<V>);
     method public abstract boolean weakCompareAndSet(T, V, V);
   }
 
@@ -57690,6 +57977,59 @@ package java.util.concurrent.atomic {
     method public int getStamp();
     method public void set(V, int);
     method public boolean weakCompareAndSet(V, V, int, int);
+  }
+
+  public class DoubleAccumulator extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable {
+    ctor public DoubleAccumulator(java.util.function.DoubleBinaryOperator, double);
+    method public void accumulate(double);
+    method public double doubleValue();
+    method public float floatValue();
+    method public double get();
+    method public double getThenReset();
+    method public int intValue();
+    method public long longValue();
+    method public void reset();
+  }
+
+  public class DoubleAdder extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable {
+    ctor public DoubleAdder();
+    method public void add(double);
+    method public double doubleValue();
+    method public float floatValue();
+    method public int intValue();
+    method public long longValue();
+    method public void reset();
+    method public double sum();
+    method public double sumThenReset();
+  }
+
+  public class LongAccumulator extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable {
+    ctor public LongAccumulator(java.util.function.LongBinaryOperator, long);
+    method public void accumulate(long);
+    method public double doubleValue();
+    method public float floatValue();
+    method public long get();
+    method public long getThenReset();
+    method public int intValue();
+    method public long longValue();
+    method public void reset();
+  }
+
+  public class LongAdder extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable {
+    ctor public LongAdder();
+    method public void add(long);
+    method public void decrement();
+    method public double doubleValue();
+    method public float floatValue();
+    method public void increment();
+    method public int intValue();
+    method public long longValue();
+    method public void reset();
+    method public long sum();
+    method public long sumThenReset();
+  }
+
+   abstract class Striped64 extends java.lang.Number {
   }
 
 }
@@ -57897,6 +58237,34 @@ package java.util.concurrent.locks {
     method public boolean tryLock();
     method public boolean tryLock(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
     method public void unlock();
+  }
+
+  public class StampedLock implements java.io.Serializable {
+    ctor public StampedLock();
+    method public java.util.concurrent.locks.Lock asReadLock();
+    method public java.util.concurrent.locks.ReadWriteLock asReadWriteLock();
+    method public java.util.concurrent.locks.Lock asWriteLock();
+    method public int getReadLockCount();
+    method public boolean isReadLocked();
+    method public boolean isWriteLocked();
+    method public long readLock();
+    method public long readLockInterruptibly() throws java.lang.InterruptedException;
+    method public long tryConvertToOptimisticRead(long);
+    method public long tryConvertToReadLock(long);
+    method public long tryConvertToWriteLock(long);
+    method public long tryOptimisticRead();
+    method public long tryReadLock();
+    method public long tryReadLock(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method public boolean tryUnlockRead();
+    method public boolean tryUnlockWrite();
+    method public long tryWriteLock();
+    method public long tryWriteLock(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method public void unlock(long);
+    method public void unlockRead(long);
+    method public void unlockWrite(long);
+    method public boolean validate(long);
+    method public long writeLock();
+    method public long writeLockInterruptibly() throws java.lang.InterruptedException;
   }
 
 }
