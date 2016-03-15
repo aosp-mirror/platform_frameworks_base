@@ -5801,7 +5801,7 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
                 "        (mutiple extras passed as List<String>; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
-                "    [--f <FLAG>]",
+                "    [-f <FLAG>]",
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]",
                 "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]",
                 "    [--debug-log-resolution] [--exclude-stopped-packages]",

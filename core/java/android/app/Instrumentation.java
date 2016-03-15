@@ -1016,7 +1016,7 @@ public class Instrumentation {
     /**
      * Perform instantiation of an {@link Activity} object.  This method is intended for use with
      * unit tests, such as android.test.ActivityUnitTestCase.  The activity will be useable
-     * locally but will be missing some of the linkages necessary for use within the sytem.
+     * locally but will be missing some of the linkages necessary for use within the system.
      * 
      * @param clazz The Class of the desired Activity
      * @param context The base context for the activity to use
