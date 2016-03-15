@@ -43,6 +43,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -218,7 +219,7 @@ public class NotificationManagerService extends SystemService {
     private IActivityManager mAm;
     AudioManager mAudioManager;
     AudioManagerInternal mAudioManagerInternal;
-    StatusBarManagerInternal mStatusBar;
+    @Nullable StatusBarManagerInternal mStatusBar;
     Vibrator mVibrator;
     private VrManagerInternal mVrManagerInternal;
 
@@ -795,7 +796,9 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
-                mStatusBar.notificationLightOff();
+                if (mStatusBar != null) {
+                    mStatusBar.notificationLightOff();
+                }
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 // reload per-user settings
@@ -859,7 +862,9 @@ public class NotificationManagerService extends SystemService {
     private final Runnable mBuzzBeepBlinked = new Runnable() {
         @Override
         public void run() {
-            mStatusBar.buzzBeepBlinked();
+            if (mStatusBar != null) {
+                mStatusBar.buzzBeepBlinked();
+            }
         }
     };
 
@@ -958,7 +963,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
-        mStatusBar.setNotificationDelegate(mNotificationDelegate);
+        if (mStatusBar != null) {
+            mStatusBar.setNotificationDelegate(mNotificationDelegate);
+        }
 
         final LightsManager lights = getLocalService(LightsManager.class);
         mNotificationLight = lights.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
@@ -3301,7 +3308,9 @@ public class NotificationManagerService extends SystemService {
         // Don't flash while we are in a call or screen is on
         if (ledNotification == null || mInCall || mScreenOn) {
             mNotificationLight.turnOff();
-            mStatusBar.notificationLightOff();
+            if (mStatusBar != null) {
+                mStatusBar.notificationLightOff();
+            }
         } else {
             final Notification ledno = ledNotification.sbn.getNotification();
             int ledARGB = ledno.ledARGB;
@@ -3317,8 +3326,10 @@ public class NotificationManagerService extends SystemService {
                 mNotificationLight.setFlashing(ledARGB, Light.LIGHT_FLASH_TIMED,
                         ledOnMS, ledOffMS);
             }
-            // let SystemUI make an independent decision
-            mStatusBar.notificationLightPulse(ledARGB, ledOnMS, ledOffMS);
+            if (mStatusBar != null) {
+                // let SystemUI make an independent decision
+                mStatusBar.notificationLightPulse(ledARGB, ledOnMS, ledOffMS);
+            }
         }
     }
 
