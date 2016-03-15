@@ -153,12 +153,21 @@ public class Model {
     private void updateModelData() {
         int[] positions = new int[mCursorCount];
         mIds = new String[mCursorCount];
-        String[] stringValues = new String[mCursorCount];
+        boolean[] isDirs = new boolean[mCursorCount];
+        String[] displayNames = null;
         long[] longValues = null;
 
-        if (mSortOrder == SORT_ORDER_LAST_MODIFIED || mSortOrder == SORT_ORDER_SIZE) {
-            longValues = new long[mCursorCount];
+        switch (mSortOrder) {
+            case SORT_ORDER_DISPLAY_NAME:
+                displayNames = new String[mCursorCount];
+                break;
+            case SORT_ORDER_LAST_MODIFIED:
+            case SORT_ORDER_SIZE:
+                longValues = new long[mCursorCount];
+                break;
         }
+
+        String mimeType;
 
         mCursor.moveToPosition(-1);
         for (int pos = 0; pos < mCursorCount; ++pos) {
@@ -166,35 +175,31 @@ public class Model {
             positions[pos] = pos;
             mIds[pos] = createModelId(mCursor);
 
+            mimeType = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
+            isDirs[pos] = Document.MIME_TYPE_DIR.equals(mimeType);
+
             switch(mSortOrder) {
                 case SORT_ORDER_DISPLAY_NAME:
-                    final String mimeType = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
                     final String displayName = getCursorString(
                             mCursor, Document.COLUMN_DISPLAY_NAME);
-                    if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-                        stringValues[pos] = Shared.DIR_PREFIX + displayName;
-                    } else {
-                        stringValues[pos] = displayName;
-                    }
+                    displayNames[pos] = displayName;
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
                     longValues[pos] = getLastModified(mCursor);
-                    stringValues[pos] = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
                     break;
                 case SORT_ORDER_SIZE:
                     longValues[pos] = getCursorLong(mCursor, Document.COLUMN_SIZE);
-                    stringValues[pos] = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
                     break;
             }
         }
 
         switch (mSortOrder) {
             case SORT_ORDER_DISPLAY_NAME:
-                binarySort(stringValues, positions, mIds);
+                binarySort(displayNames, isDirs, positions, mIds);
                 break;
             case SORT_ORDER_LAST_MODIFIED:
             case SORT_ORDER_SIZE:
-                binarySort(longValues, stringValues, positions, mIds);
+                binarySort(longValues, isDirs, positions, mIds);
                 break;
         }
 
@@ -207,18 +212,20 @@ public class Model {
 
     /**
      * Sorts model data. Takes three columns of index-corresponded data. The first column is the
-     * sort key. Rows are sorted in ascending alphabetical order on the sort key. This code is based
-     * on TimSort.binarySort().
+     * sort key. Rows are sorted in ascending alphabetical order on the sort key.
+     * Directories are always shown first. This code is based on TimSort.binarySort().
      *
      * @param sortKey Data is sorted in ascending alphabetical order.
+     * @param isDirs Array saying whether an item is a directory or not.
      * @param positions Cursor positions to be sorted.
      * @param ids Model IDs to be sorted.
      */
-    private static void binarySort(String[] sortKey, int[] positions, String[] ids) {
+    private static void binarySort(String[] sortKey, boolean[] isDirs, int[] positions, String[] ids) {
         final int count = positions.length;
         for (int start = 1; start < count; start++) {
             final int pivotPosition = positions[start];
             final String pivotValue = sortKey[start];
+            final boolean pivotIsDir = isDirs[start];
             final String pivotId = ids[start];
 
             int left = 0;
@@ -227,9 +234,18 @@ public class Model {
             while (left < right) {
                 int mid = (left + right) >>> 1;
 
-                final String lhs = pivotValue;
-                final String rhs = sortKey[mid];
-                final int compare = Shared.compareToIgnoreCaseNullable(lhs, rhs);
+                // Directories always go in front.
+                int compare = 0;
+                final boolean rhsIsDir = isDirs[mid];
+                if (pivotIsDir && !rhsIsDir) {
+                    compare = -1;
+                } else if (!pivotIsDir && rhsIsDir) {
+                    compare = 1;
+                } else {
+                    final String lhs = pivotValue;
+                    final String rhs = sortKey[mid];
+                    compare = Shared.compareToIgnoreCaseNullable(lhs, rhs);
+                }
 
                 if (compare < 0) {
                     right = mid;
@@ -243,20 +259,24 @@ public class Model {
                 case 2:
                     positions[left + 2] = positions[left + 1];
                     sortKey[left + 2] = sortKey[left + 1];
+                    isDirs[left + 2] = isDirs[left + 1];
                     ids[left + 2] = ids[left + 1];
                 case 1:
                     positions[left + 1] = positions[left];
                     sortKey[left + 1] = sortKey[left];
+                    isDirs[left + 1] = isDirs[left];
                     ids[left + 1] = ids[left];
                     break;
                 default:
                     System.arraycopy(positions, left, positions, left + 1, n);
                     System.arraycopy(sortKey, left, sortKey, left + 1, n);
+                    System.arraycopy(isDirs, left, isDirs, left + 1, n);
                     System.arraycopy(ids, left, ids, left + 1, n);
             }
 
             positions[left] = pivotPosition;
             sortKey[left] = pivotValue;
+            isDirs[left] = pivotIsDir;
             ids[left] = pivotId;
         }
     }
@@ -268,17 +288,17 @@ public class Model {
      * numerical order on the sort key. This code is based on TimSort.binarySort().
      *
      * @param sortKey Data is sorted in descending numerical order.
-     * @param mimeTypes Corresponding mime types. Directories will be sorted ahead of documents.
+     * @param isDirs Array saying whether an item is a directory or not.
      * @param positions Cursor positions to be sorted.
      * @param ids Model IDs to be sorted.
      */
     private static void binarySort(
-            long[] sortKey, String[] mimeTypes, int[] positions, String[] ids) {
+            long[] sortKey, boolean[] isDirs, int[] positions, String[] ids) {
         final int count = positions.length;
         for (int start = 1; start < count; start++) {
             final int pivotPosition = positions[start];
             final long pivotValue = sortKey[start];
-            final String pivotMime = mimeTypes[start];
+            final boolean pivotIsDir = isDirs[start];
             final String pivotId = ids[start];
 
             int left = 0;
@@ -287,13 +307,12 @@ public class Model {
             while (left < right) {
                 int mid = ((left + right) >>> 1);
 
-                // First bucket by mime type.  Directories always go in front.
+                // Directories always go in front.
                 int compare = 0;
-                final boolean lhsIsDir = Document.MIME_TYPE_DIR.equals(pivotMime);
-                final boolean rhsIsDir = Document.MIME_TYPE_DIR.equals(mimeTypes[mid]);
-                if (lhsIsDir && !rhsIsDir) {
+                final boolean rhsIsDir = isDirs[mid];
+                if (pivotIsDir && !rhsIsDir) {
                     compare = -1;
-                } else if (!lhsIsDir && rhsIsDir) {
+                } else if (!pivotIsDir && rhsIsDir) {
                     compare = 1;
                 } else {
                     final long lhs = pivotValue;
@@ -323,24 +342,24 @@ public class Model {
                 case 2:
                     positions[left + 2] = positions[left + 1];
                     sortKey[left + 2] = sortKey[left + 1];
-                    mimeTypes[left + 2] = mimeTypes[left + 1];
+                    isDirs[left + 2] = isDirs[left + 1];
                     ids[left + 2] = ids[left + 1];
                 case 1:
                     positions[left + 1] = positions[left];
                     sortKey[left + 1] = sortKey[left];
-                    mimeTypes[left + 1] = mimeTypes[left];
+                    isDirs[left + 1] = isDirs[left];
                     ids[left + 1] = ids[left];
                     break;
                 default:
                     System.arraycopy(positions, left, positions, left + 1, n);
                     System.arraycopy(sortKey, left, sortKey, left + 1, n);
-                    System.arraycopy(mimeTypes, left, mimeTypes, left + 1, n);
+                    System.arraycopy(isDirs, left, isDirs, left + 1, n);
                     System.arraycopy(ids, left, ids, left + 1, n);
             }
 
             positions[left] = pivotPosition;
             sortKey[left] = pivotValue;
-            mimeTypes[left] = pivotMime;
+            isDirs[left] = pivotIsDir;
             ids[left] = pivotId;
         }
     }
