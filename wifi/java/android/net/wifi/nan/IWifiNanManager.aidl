@@ -36,12 +36,14 @@ interface IWifiNanManager
     void disconnect(int clientId, in IBinder binder);
     void requestConfig(int clientId, in ConfigRequest configRequest);
 
+    void publish(int clientId, in PublishConfig publishConfig, in IWifiNanSessionCallback callback);
+    void subscribe(int clientId, in SubscribeConfig subscribeConfig,
+            in IWifiNanSessionCallback callback);
+
     // session API
-    int createSession(int clientId, in IWifiNanSessionCallback callback);
-    void publish(int clientId, int sessionId, in PublishConfig publishConfig);
-    void subscribe(int clientId, int sessionId, in SubscribeConfig subscribeConfig);
+    void updatePublish(int clientId, int sessionId, in PublishConfig publishConfig);
+    void updateSubscribe(int clientId, int sessionId, in SubscribeConfig subscribeConfig);
     void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageLength,
             int messageId);
-    void stopSession(int clientId, int sessionId);
-    void destroySession(int clientId, int sessionId);
+    void terminateSession(int clientId, int sessionId);
 }
