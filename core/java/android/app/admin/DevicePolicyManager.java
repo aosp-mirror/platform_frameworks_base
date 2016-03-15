@@ -51,6 +51,7 @@ import android.provider.ContactsContract.Directory;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -5566,7 +5567,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to reboot the device.
+     * Called by device owner to reboot the device. If there is an ongoing call on the device,
+     * throws an {@link IllegalStateException}.
+     * @throws IllegalStateException if device has an ongoing call.
+     * @see TelephonyManager#CALL_STATE_IDLE
      */
     public void reboot(@NonNull ComponentName admin) {
         try {
