@@ -17,8 +17,10 @@
 package com.android.server.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Pools;
@@ -69,6 +71,7 @@ public class KeyEventDispatcher {
     private final Handler mHandlerToSendKeyEventsToInputFilter;
     private final int mMessageTypeForSendKeyEvent;
     private final Handler mKeyEventTimeoutHandler;
+    private final PowerManager mPowerManager;
 
     /**
      * @param handlerToSendKeyEventsToInputFilter The handler to which to post {@code KeyEvent}s
@@ -77,9 +80,12 @@ public class KeyEventDispatcher {
      * message that carries a {@code KeyEvent} to be sent to the input filter
      * @param lock The lock used for all synchronization in this package. This lock must be held
      * when calling {@code notifyKeyEventLocked}
+     * @param powerManager The power manager to alert to user activity if a KeyEvent is processed
+     * by a service
      */
     public KeyEventDispatcher(Handler handlerToSendKeyEventsToInputFilter,
-                              int messageTypeForSendKeyEvent, Object lock) {
+            int messageTypeForSendKeyEvent, Object lock,
+            PowerManager powerManager) {
         if (InputEventConsistencyVerifier.isInstrumentationEnabled()) {
             mSentEventsVerifier = new InputEventConsistencyVerifier(
                     this, 0, KeyEventDispatcher.class.getSimpleName());
@@ -91,6 +97,7 @@ public class KeyEventDispatcher {
         mKeyEventTimeoutHandler =
                 new Handler(mHandlerToSendKeyEventsToInputFilter.getLooper(), new Callback());
         mLock = lock;
+        mPowerManager = powerManager;
     }
 
     /**
@@ -165,7 +172,16 @@ public class KeyEventDispatcher {
             PendingKeyEvent pendingEvent =
                     removeEventFromListLocked(mPendingEventsMap.get(service), sequence);
             if (pendingEvent != null) {
-                pendingEvent.handled |= handled;
+                if (handled && !pendingEvent.handled) {
+                    pendingEvent.handled = handled;
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        mPowerManager.userActivity(pendingEvent.event.getEventTime(),
+                                PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY, 0);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
                 removeReferenceToPendingEventLocked(pendingEvent);
             }
         }
@@ -241,7 +257,7 @@ public class KeyEventDispatcher {
             int policyFlags = pendingEvent.policyFlags | WindowManagerPolicy.FLAG_PASS_TO_USER;
             mHandlerToSendKeyEventsToInputFilter
                     .obtainMessage(mMessageTypeForSendKeyEvent, policyFlags, 0, pendingEvent.event)
-                            .sendToTarget();
+                    .sendToTarget();
         } else {
             pendingEvent.event.recycle();
         }
