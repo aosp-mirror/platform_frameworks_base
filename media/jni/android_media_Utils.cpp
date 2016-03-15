@@ -735,8 +735,15 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
         case HAL_PIXEL_FORMAT_BLOB:
             // Used for JPEG data, height must be 1, width == size, single plane.
             LOG_ALWAYS_FATAL_IF(idx != 0, "Wrong index: %d", idx);
-            LOG_ALWAYS_FATAL_IF(buffer->height != 1,
-                    "BLOB format buffer should has height value %d", buffer->height);
+            // When RGBA override is being used, buffer height will be equal to width
+            if (usingRGBAOverride) {
+                LOG_ALWAYS_FATAL_IF(buffer->height != buffer->width,
+                        "RGBA override BLOB format buffer should have height == width");
+            } else {
+                LOG_ALWAYS_FATAL_IF(buffer->height != 1,
+                        "BLOB format buffer should have height value 1");
+            }
+
 
             pData = buffer->data;
             dataSize = Image_getJpegSize(buffer, usingRGBAOverride);
