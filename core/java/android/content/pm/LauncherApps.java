@@ -565,7 +565,8 @@ public class LauncherApps {
                 addCallbackLocked(callback, handler);
                 if (addedFirstCallback) {
                     try {
-                        mService.addOnAppsChangedListener(mAppsChangedListener);
+                        mService.addOnAppsChangedListener(mContext.getPackageName(),
+                                mAppsChangedListener);
                     } catch (RemoteException re) {
                         throw re.rethrowFromSystemServer();
                     }

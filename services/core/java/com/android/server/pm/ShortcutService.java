@@ -814,7 +814,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
 
-        final long token = Binder.clearCallingIdentity();
+        final long token = injectClearCallingIdentity();
         try {
             // Clear icon info on the shortcut.
             shortcut.setIconResourceId(0);
@@ -891,7 +891,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 shortcut.clearIcon();
             }
         } finally {
-            Binder.restoreCallingIdentity(token);
+            injectRestoreCallingIdentity(token);
         }
     }
 
@@ -992,6 +992,10 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    void postToHandler(Runnable r) {
+        mHandler.post(r);
+    }
+
     /**
      * Throw if {@code numShortcuts} is bigger than {@link #mMaxDynamicShortcuts}.
      */
@@ -1011,17 +1015,16 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void notifyListeners(@NonNull String packageName, @UserIdInt int userId) {
-        final ArrayList<ShortcutChangeListener> copy;
-        final List<ShortcutInfo> shortcuts = new ArrayList<>();
-        synchronized (mLock) {
-            copy = new ArrayList<>(mListeners);
-
-            getPackageShortcutsLocked(packageName, userId)
-                    .findAll(shortcuts, /* query =*/ null, ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
-        }
-        for (int i = copy.size() - 1; i >= 0; i--) {
-            copy.get(i).onShortcutChanged(packageName, shortcuts, userId);
-        }
+        postToHandler(() -> {
+            final ArrayList<ShortcutChangeListener> copy;
+            synchronized (mLock) {
+                copy = new ArrayList<>(mListeners);
+            }
+            // Note onShortcutChanged() needs to be called with the system service permissions.
+            for (int i = copy.size() - 1; i >= 0; i--) {
+                copy.get(i).onShortcutChanged(packageName, userId);
+            }
+        });
     }
 
     /**
@@ -1797,6 +1800,16 @@ public class ShortcutService extends IShortcutService.Stub {
 
     final int getCallingUserId() {
         return UserHandle.getUserId(injectBinderCallingUid());
+    }
+
+    // Injection point.
+    long injectClearCallingIdentity() {
+        return Binder.clearCallingIdentity();
+    }
+
+    // Injection point.
+    void injectRestoreCallingIdentity(long token) {
+        Binder.restoreCallingIdentity(token);
     }
 
     File injectSystemDataPath() {
