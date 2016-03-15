@@ -777,15 +777,16 @@ public class ActivityOptions {
 
     /**
      * Sets the bounds (window size) that the activity should be launched in.
+     * Rect position should be provided in pixels and in screen coordinates.
      * Set to null explicitly for fullscreen.
      * <p>
      * <strong>NOTE:<strong/> This value is ignored on devices that don't have
      * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} or
      * {@link android.content.pm.PackageManager#FEATURE_PICTURE_IN_PICTURE} enabled.
-     * @param launchBounds Launch bounds to use for the activity or null for fullscreen.
+     * @param screenSpacePixelRect Launch bounds to use for the activity or null for fullscreen.
      */
-    public ActivityOptions setLaunchBounds(@Nullable Rect launchBounds) {
-        mLaunchBounds = launchBounds != null ? new Rect(launchBounds) : null;
+    public ActivityOptions setLaunchBounds(@Nullable Rect screenSpacePixelRect) {
+        mLaunchBounds = screenSpacePixelRect != null ? new Rect(screenSpacePixelRect) : null;
         return this;
     }
 
