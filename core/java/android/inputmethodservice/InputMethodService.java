@@ -2269,8 +2269,9 @@ public class InputMethodService extends AbstractInputMethodService {
     public void onExtractedDeleteText(int start, int end) {
         InputConnection conn = getCurrentInputConnection();
         if (conn != null) {
+            conn.finishComposingText();
             conn.setSelection(start, start);
-            conn.deleteSurroundingText(0, end-start);
+            conn.deleteSurroundingText(0, end - start);
         }
     }
 
