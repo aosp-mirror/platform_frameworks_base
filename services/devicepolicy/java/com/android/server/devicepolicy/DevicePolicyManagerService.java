@@ -26,8 +26,6 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.TEXT;
 
-import com.google.android.collect.Sets;
-
 import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
@@ -50,10 +48,10 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.SecurityLog;
+import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
-import android.auditing.SecurityLog;
-import android.auditing.SecurityLog.SecurityEvent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -142,6 +140,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 import com.android.server.pm.UserRestrictionsUtils;
+import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -484,9 +483,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 new MonitoringCertNotificationTask().execute(intent);
             }
             if (Intent.ACTION_USER_ADDED.equals(action)) {
-                disableDeviceLoggingIfNotCompliant();
+                disableSecurityLoggingIfNotCompliant();
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                disableDeviceLoggingIfNotCompliant();
+                disableSecurityLoggingIfNotCompliant();
                 removeUserData(userHandle);
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
@@ -1672,7 +1671,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mOwners.hasDeviceOwner()) {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
                 Slog.i(LOG_TAG, "Set ro.device_owner property to true");
-                disableDeviceLoggingIfNotCompliant();
+                disableSecurityLoggingIfNotCompliant();
                 if (mInjector.securityLogGetLoggingEnabledProperty()) {
                     mSecurityLogMonitor.start();
                 }
@@ -5612,7 +5611,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.clearDeviceOwner();
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
-            disableDeviceLoggingIfNotCompliant();
+            disableSecurityLoggingIfNotCompliant();
             // Reactivate backup service.
             long ident = mInjector.binderClearCallingIdentity();
             try {
@@ -8598,15 +8597,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    private synchronized void disableDeviceLoggingIfNotCompliant() {
+    private synchronized void disableSecurityLoggingIfNotCompliant() {
         if (!isDeviceOwnerManagedSingleUserDevice()) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
-            Slog.w(LOG_TAG, "Device logging turned off as it's no longer a single user device.");
+            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user device.");
         }
     }
 
     @Override
-    public void setDeviceLoggingEnabled(ComponentName admin, boolean enabled) {
+    public void setSecurityLoggingEnabled(ComponentName admin, boolean enabled) {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerManagingSingleUser(admin);
 
@@ -8624,7 +8623,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean getDeviceLoggingEnabled(ComponentName admin) {
+    public boolean isSecurityLoggingEnabled(ComponentName admin) {
         Preconditions.checkNotNull(admin);
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
@@ -8633,7 +8632,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<SecurityEvent> retrievePreviousDeviceLogs(ComponentName admin) {
+    public ParceledListSlice<SecurityEvent> retrievePreRebootSecurityLogs(ComponentName admin) {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerManagingSingleUser(admin);
 
@@ -8648,7 +8647,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<SecurityEvent> retrieveDeviceLogs(ComponentName admin) {
+    public ParceledListSlice<SecurityEvent> retrieveSecurityLogs(ComponentName admin) {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerManagingSingleUser(admin);
 
