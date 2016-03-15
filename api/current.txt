@@ -55000,6 +55000,7 @@ package java.util {
     method public void ensureCapacity(int);
     method public void forEach(java.util.function.Consumer<? super E>);
     method public E get(int);
+    method public boolean removeIf(java.util.function.Predicate<? super E>);
     method public int size();
     method public java.util.Spliterator<E> spliterator();
     method public void trimToSize();
@@ -55289,6 +55290,7 @@ package java.util {
     method public abstract java.util.Iterator<E> iterator();
     method public abstract boolean remove(java.lang.Object);
     method public abstract boolean removeAll(java.util.Collection<?>);
+    method public default boolean removeIf(java.util.function.Predicate<? super E>);
     method public abstract boolean retainAll(java.util.Collection<?>);
     method public abstract int size();
     method public abstract java.lang.Object[] toArray();
@@ -56683,6 +56685,7 @@ package java.util {
     method public synchronized void removeAllElements();
     method public synchronized boolean removeElement(java.lang.Object);
     method public synchronized void removeElementAt(int);
+    method public synchronized boolean removeIf(java.util.function.Predicate<? super E>);
     method public synchronized void setElementAt(E, int);
     method public synchronized void setSize(int);
     method public synchronized int size();
@@ -57164,7 +57167,6 @@ package java.util.concurrent {
     method public E remove(int);
     method public boolean remove(java.lang.Object);
     method public boolean removeAll(java.util.Collection<?>);
-    method public boolean removeIf(java.util.function.Predicate<? super E>);
     method public void replaceAll(java.util.function.UnaryOperator<E>);
     method public boolean retainAll(java.util.Collection<?>);
     method public E set(int, E);
