@@ -61,6 +61,7 @@ import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimati
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -1624,6 +1625,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
                     launchTask.key.getComponent().toString());
+        } else if (mStack.getTaskCount() == 0) {
+            // If there are no tasks, then just hide recents back to home.
+            EventBus.getDefault().send(new HideRecentsEvent(false, true));
         }
     }
 
