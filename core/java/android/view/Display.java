@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
@@ -31,6 +32,8 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM;
@@ -715,6 +718,14 @@ public final class Display {
     }
 
     /**
+     * Returns the display's HDR capabilities.
+     * @hide
+     */
+    public HdrCapabilities getHdrCapabilities() {
+        return new HdrCapabilities();
+    }
+
+    /**
      * Gets the supported color transforms of this device.
      * @hide
      */
@@ -1109,6 +1120,117 @@ public final class Display {
                 return new Mode[size];
             }
         };
+    }
+
+    /**
+     * Encapsulates the HDR capabilities of a given display.
+     * For example, what HDR types it supports and details about the desired luminance data.
+     * <p>You can get an instance for a given {@link Display} object with
+     * {@link Display#getHdrCapabilities getHdrCapabilities()}.
+     * @hide
+     */
+    public static final class HdrCapabilities implements Parcelable {
+        /**
+         * Invalid luminance value.
+         */
+        public static final float INVALID_LUMINANCE = -1;
+        /**
+         * Dolby Vision high dynamic range (HDR) display.
+         */
+        public static final int HDR_TYPE_DOLBY_VISION = 1;
+        /**
+         * HDR10 display.
+         */
+        public static final int HDR_TYPE_HDR10 = 2;
+        /**
+         * Hybrid Log-Gamma HDR display.
+         */
+        public static final int HDR_TYPE_HLG = 3;
+
+        @IntDef({
+            HDR_TYPE_DOLBY_VISION,
+            HDR_TYPE_HDR10,
+            HDR_TYPE_HLG,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface HdrType {}
+
+        private @HdrType int[] mSupportedHdrTypes = new int[0];
+        private float mMaxLuminance = INVALID_LUMINANCE;
+        private float mMaxAverageLuminance = INVALID_LUMINANCE;
+        private float mMinLuminance = INVALID_LUMINANCE;
+
+        public HdrCapabilities() {
+        }
+
+        /**
+         * Gets the supported HDR types of this display.
+         * Returns empty array if HDR is not supported by the display.
+         */
+        public @HdrType int[] getSupportedHdrTypes() {
+            return mSupportedHdrTypes;
+        }
+        /**
+         * Returns the desired content max luminance data in cd/m2 for this display.
+         */
+        public float getDesiredMaxLuminance() {
+            return mMaxLuminance;
+        }
+        /**
+         * Returns the desired content max frame-average luminance data in cd/m2 for this display.
+         */
+        public float getDesiredMaxAverageLuminance() {
+            return mMaxAverageLuminance;
+        }
+        /**
+         * Returns the desired content min luminance data in cd/m2 for this display.
+         */
+        public float getDesiredMinLuminance() {
+            return mMinLuminance;
+        }
+
+        public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
+            @Override
+            public HdrCapabilities createFromParcel(Parcel source) {
+                return new HdrCapabilities(source);
+            }
+
+            @Override
+            public HdrCapabilities[] newArray(int size) {
+                return new HdrCapabilities[size];
+            }
+        };
+
+        private HdrCapabilities(Parcel source) {
+            readFromParcel(source);
+        }
+
+        public void readFromParcel(Parcel source) {
+            int types = source.readInt();
+            mSupportedHdrTypes = new int[types];
+            for (int i = 0; i < types; ++i) {
+                mSupportedHdrTypes[i] = source.readInt();
+            }
+            mMaxLuminance = source.readFloat();
+            mMaxAverageLuminance = source.readFloat();
+            mMinLuminance = source.readFloat();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mSupportedHdrTypes.length);
+            for (int i = 0; i < mSupportedHdrTypes.length; ++i) {
+                dest.writeInt(mSupportedHdrTypes[i]);
+            }
+            dest.writeFloat(mMaxLuminance);
+            dest.writeFloat(mMaxAverageLuminance);
+            dest.writeFloat(mMinLuminance);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
     }
 
     /**
