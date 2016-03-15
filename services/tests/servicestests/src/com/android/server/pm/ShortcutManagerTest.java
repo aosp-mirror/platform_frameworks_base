@@ -922,7 +922,7 @@ public class ShortcutManagerTest extends AndroidTestCase {
         dumpsysOnLogcat();
 
         mInjectedCurrentTimeLillis++; // Need to advance the clock for reset to work.
-        mService.resetThrottlingInner();
+        mService.resetThrottlingInner(UserHandle.USER_SYSTEM);
 
         dumpsysOnLogcat();
 
