@@ -542,6 +542,19 @@ public class GradientColor extends ComplexColor {
         return clone;
     }
 
+    /**
+     * Returns a mask of the configuration parameters for which this gradient
+     * may change, requiring that it be re-created.
+     *
+     * @return a mask of the changing configuration parameters, as defined by
+     *         {@link android.content.pm.ActivityInfo}
+     *
+     * @see android.content.pm.ActivityInfo
+     */
+    public int getChangingConfigurations() {
+        return super.getChangingConfigurations() | mChangingConfigurations;
+    }
+
     private void applyTheme(Theme t) {
         if (mThemeAttrs != null) {
             applyRootAttrsTheme(t);
