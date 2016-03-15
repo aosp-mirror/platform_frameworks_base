@@ -82,6 +82,16 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     }
 }
 
+ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
+        const Matrix4& localTransform, const ClipBase* localClip) {
+    transform.loadMultiply(*snapshot.transform, localTransform);
+    clipState = snapshot.mutateClipArea().serializeIntersectedClip(allocator,
+            localClip, *(snapshot.transform));
+    clippedBounds = clipState->rect;
+    clipSideFlags = OpClipSideFlags::Full;
+    localProjectionPathMask = nullptr;
+}
+
 ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot)
         : transform(*snapshot.transform)
         , clipState(snapshot.mutateClipArea().serializeClip(allocator))

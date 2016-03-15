@@ -173,6 +173,10 @@ private:
     BakedOpState* tryBakeOpState(const RecordedOp& recordedOp) {
         return BakedOpState::tryConstruct(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
     }
+    BakedOpState* tryBakeUnboundedOpState(const RecordedOp& recordedOp) {
+        return BakedOpState::tryConstructUnbounded(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
+    }
+
 
     // should always be surrounded by a save/restore pair, and not called if DisplayList is null
     void deferNodePropsAndOps(RenderNode& node);
