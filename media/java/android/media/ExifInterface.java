@@ -651,6 +651,7 @@ public class ExifInterface {
     private final String mFilename;
     private final FileDescriptor mSeekableFileDescriptor;
     private final AssetManager.AssetInputStream mAssetInputStream;
+    private final boolean mIsInputStream;
     private boolean mIsRaw;
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private boolean mHasThumbnail;
@@ -669,20 +670,26 @@ public class ExifInterface {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        FileInputStream in = new FileInputStream(filename);
+        FileInputStream in = null;
         mAssetInputStream = null;
         mFilename = filename;
-        if (isSeekableFD(in.getFD())) {
-            mSeekableFileDescriptor = in.getFD();
-        } else {
-            mSeekableFileDescriptor = null;
+        mIsInputStream = false;
+        try {
+            in = new FileInputStream(filename);
+            if (isSeekableFD(in.getFD())) {
+                mSeekableFileDescriptor = in.getFD();
+            } else {
+                mSeekableFileDescriptor = null;
+            }
+            loadAttributes(in);
+        } finally {
+            IoUtils.closeQuietly(in);
         }
-        loadAttributes(in);
     }
 
     /**
      * Reads Exif tags from the specified image file descriptor. Attribute mutation is supported
-     * for seekable file descriptors only.
+     * for writable and seekable file descriptors only.
      */
     public ExifInterface(FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
@@ -692,10 +699,25 @@ public class ExifInterface {
         mFilename = null;
         if (isSeekableFD(fileDescriptor)) {
             mSeekableFileDescriptor = fileDescriptor;
+            // Keep the original file descriptor in order to save attributes when it's seekable.
+            // Otherwise, just close the given file descriptor after reading it because the save
+            // feature won't be working.
+            try {
+                fileDescriptor = Os.dup(fileDescriptor);
+            } catch (ErrnoException e) {
+                e.rethrowAsIOException();
+            }
         } else {
             mSeekableFileDescriptor = null;
         }
-        loadAttributes(new FileInputStream(fileDescriptor));
+        mIsInputStream = false;
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(fileDescriptor);
+            loadAttributes(in);
+        } finally {
+            IoUtils.closeQuietly(in);
+        }
     }
 
     /**
@@ -718,6 +740,7 @@ public class ExifInterface {
             mAssetInputStream = null;
             mSeekableFileDescriptor = null;
         }
+        mIsInputStream = true;
         loadAttributes(inputStream);
     }
 
@@ -800,32 +823,32 @@ public class ExifInterface {
      * determine whether the image data format is JPEG or not.
      */
     private void loadAttributes(@NonNull InputStream in) throws IOException {
-        // Initialize mAttributes.
-        for (int i = 0; i < EXIF_TAGS.length; ++i) {
-            mAttributes[i] = new HashMap();
-        }
-
-        // Process RAW input stream
-        if (mAssetInputStream != null) {
-            long asset = mAssetInputStream.getNativeAsset();
-            if (handleRawResult(nativeGetRawAttributesFromAsset(asset))) {
-                return;
-            }
-        } else if (mSeekableFileDescriptor != null) {
-            if (handleRawResult(nativeGetRawAttributesFromFileDescriptor(
-                    mSeekableFileDescriptor))) {
-                return;
-            }
-        } else {
-            in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
-            if (!isJpegInputStream((BufferedInputStream) in) && handleRawResult(
-                    nativeGetRawAttributesFromInputStream(in))) {
-                return;
-            }
-        }
-
-        // Process JPEG input stream
         try {
+            // Initialize mAttributes.
+            for (int i = 0; i < EXIF_TAGS.length; ++i) {
+                mAttributes[i] = new HashMap();
+            }
+
+            // Process RAW input stream
+            if (mAssetInputStream != null) {
+                long asset = mAssetInputStream.getNativeAsset();
+                if (handleRawResult(nativeGetRawAttributesFromAsset(asset))) {
+                    return;
+                }
+            } else if (mSeekableFileDescriptor != null) {
+                if (handleRawResult(nativeGetRawAttributesFromFileDescriptor(
+                        mSeekableFileDescriptor))) {
+                    return;
+                }
+            } else {
+                in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
+                if (!isJpegInputStream((BufferedInputStream) in) && handleRawResult(
+                        nativeGetRawAttributesFromInputStream(in))) {
+                    return;
+                }
+            }
+
+            // Process JPEG input stream
             getJpegAttributes(in);
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
@@ -833,10 +856,10 @@ public class ExifInterface {
             Log.w(TAG, "Invalid JPEG: ExifInterface got an unsupported image format file"
                     + "(ExifInterface supports JPEG and some RAW image formats only) "
                     + "or a corrupted JPEG file to ExifInterface.", e);
-        }
-
-        if (DEBUG) {
-            printAttributes();
+        } finally {
+            if (DEBUG) {
+                printAttributes();
+            }
         }
     }
 
@@ -880,10 +903,6 @@ public class ExifInterface {
                     break;
             }
         }
-
-        if (DEBUG) {
-            printAttributes();
-        }
         return true;
     }
 
@@ -917,7 +936,7 @@ public class ExifInterface {
             throw new UnsupportedOperationException(
                     "ExifInterface does not support saving attributes on RAW formats.");
         }
-        if (mSeekableFileDescriptor == null && mFilename == null) {
+        if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
             throw new UnsupportedOperationException(
                     "ExifInterface does not support saving attributes for the current input.");
         }
@@ -1003,8 +1022,9 @@ public class ExifInterface {
             } else if (mFilename != null) {
                 in = new FileInputStream(mFilename);
             } else if (mSeekableFileDescriptor != null) {
-                Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
-                in = new FileInputStream(mSeekableFileDescriptor);
+                FileDescriptor fileDescriptor = Os.dup(mSeekableFileDescriptor);
+                Os.lseek(fileDescriptor, 0, OsConstants.SEEK_SET);
+                in = new FileInputStream(fileDescriptor);
             }
             if (in == null) {
                 // Should not be reached this.
