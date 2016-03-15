@@ -30,6 +30,11 @@ import java.util.regex.Pattern;
  * These fields can be accessed directly. Use width() and height() to retrieve
  * the rectangle's width and height. Note: most methods do not check to see that
  * the coordinates are sorted correctly (i.e. left <= right and top <= bottom).
+ * <p>
+ * Note that the right and bottom coordinates are exclusive. This means a Rect
+ * being drawn untransformed onto a {@link android.graphics.Canvas} will draw
+ * into the column and row described by its left and top coordinates, but not
+ * those of its bottom and right.
  */
 public final class Rect implements Parcelable {
     public int left;
