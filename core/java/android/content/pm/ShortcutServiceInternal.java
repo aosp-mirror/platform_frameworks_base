@@ -36,8 +36,7 @@ import java.util.List;
  */
 public abstract class ShortcutServiceInternal {
     public interface ShortcutChangeListener {
-        void onShortcutChanged(@NonNull String packageName,
-                @NonNull List<ShortcutInfo> shortcuts, @UserIdInt int userId);
+        void onShortcutChanged(@NonNull String packageName, @UserIdInt int userId);
     }
 
     public abstract List<ShortcutInfo>

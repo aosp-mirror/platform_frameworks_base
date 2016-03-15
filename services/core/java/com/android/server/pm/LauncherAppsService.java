@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -74,7 +75,18 @@ public class LauncherAppsService extends SystemService {
 
     @Override
     public void onStart() {
+        Binder.LOG_RUNTIME_EXCEPTION = true;
         publishBinderService(Context.LAUNCHER_APPS_SERVICE, mLauncherAppsImpl);
+    }
+
+    static class BroadcastCookie {
+        public final UserHandle user;
+        public final String packageName;
+
+        BroadcastCookie(UserHandle userHandle, String packageName) {
+            this.user = userHandle;
+            this.packageName = packageName;
+        }
     }
 
     @VisibleForTesting
@@ -113,7 +125,8 @@ public class LauncherAppsService extends SystemService {
          *          android.content.pm.IOnAppsChangedListener)
          */
         @Override
-        public void addOnAppsChangedListener(IOnAppsChangedListener listener) throws RemoteException {
+        public void addOnAppsChangedListener(String callingPackage, IOnAppsChangedListener listener)
+                throws RemoteException {
             synchronized (mListeners) {
                 if (DEBUG) {
                     Log.d(TAG, "Adding listener from " + Binder.getCallingUserHandle());
@@ -125,7 +138,8 @@ public class LauncherAppsService extends SystemService {
                     startWatchingPackageBroadcasts();
                 }
                 mListeners.unregister(listener);
-                mListeners.register(listener, Binder.getCallingUserHandle());
+                mListeners.register(listener, new BroadcastCookie(UserHandle.of(getCallingUserId()),
+                        callingPackage));
             }
         }
 
@@ -490,41 +504,44 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
-
-        private class MyPackageMonitor extends PackageMonitor implements ShortcutChangeListener {
-
-            /** Checks if user is a profile of or same as listeningUser.
-              * and the user is enabled. */
-            private boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser,
-                    String debugMsg) {
-                if (user.getIdentifier() == listeningUser.getIdentifier()) {
-                    if (DEBUG) Log.d(TAG, "Delivering msg to same user " + debugMsg);
+        /** Checks if user is a profile of or same as listeningUser.
+         * and the user is enabled. */
+        boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser,
+                String debugMsg) {
+            if (user.getIdentifier() == listeningUser.getIdentifier()) {
+                if (DEBUG) Log.d(TAG, "Delivering msg to same user " + debugMsg);
+                return true;
+            }
+            long ident = Binder.clearCallingIdentity();
+            try {
+                UserInfo userInfo = mUm.getUserInfo(user.getIdentifier());
+                UserInfo listeningUserInfo = mUm.getUserInfo(listeningUser.getIdentifier());
+                if (userInfo == null || listeningUserInfo == null
+                        || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
+                        || userInfo.profileGroupId != listeningUserInfo.profileGroupId
+                        || !userInfo.isEnabled()) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Not delivering msg from " + user + " to " + listeningUser + ":"
+                                + debugMsg);
+                    }
+                    return false;
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "Delivering msg from " + user + " to " + listeningUser + ":"
+                                + debugMsg);
+                    }
                     return true;
                 }
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    UserInfo userInfo = mUm.getUserInfo(user.getIdentifier());
-                    UserInfo listeningUserInfo = mUm.getUserInfo(listeningUser.getIdentifier());
-                    if (userInfo == null || listeningUserInfo == null
-                            || userInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
-                            || userInfo.profileGroupId != listeningUserInfo.profileGroupId
-                            || !userInfo.isEnabled()) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Not delivering msg from " + user + " to " + listeningUser + ":"
-                                    + debugMsg);
-                        }
-                        return false;
-                    } else {
-                        if (DEBUG) {
-                            Log.d(TAG, "Delivering msg from " + user + " to " + listeningUser + ":"
-                                    + debugMsg);
-                        }
-                        return true;
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        void postToPackageMonitor(Runnable r) {
+            mPackageMonitor.getRegisteredHandler().post(r);
+        }
+
+        private class MyPackageMonitor extends PackageMonitor implements ShortcutChangeListener {
 
             // TODO Simplify with lambdas.
 
@@ -534,8 +551,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackageAdded")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackageAdded")) continue;
                     try {
                         listener.onPackageAdded(user, packageName);
                     } catch (RemoteException re) {
@@ -553,8 +570,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackageRemoved")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackageRemoved")) continue;
                     try {
                         listener.onPackageRemoved(user, packageName);
                     } catch (RemoteException re) {
@@ -572,8 +589,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackageModified")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackageModified")) continue;
                     try {
                         listener.onPackageChanged(user, packageName);
                     } catch (RemoteException re) {
@@ -591,8 +608,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackagesAvailable")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesAvailable")) continue;
                     try {
                         listener.onPackagesAvailable(user, packages, isReplacing());
                     } catch (RemoteException re) {
@@ -610,8 +627,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackagesUnavailable")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesUnavailable")) continue;
                     try {
                         listener.onPackagesUnavailable(user, packages, isReplacing());
                     } catch (RemoteException re) {
@@ -629,8 +646,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackagesSuspended")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesSuspended")) continue;
                     try {
                         listener.onPackagesSuspended(user, packages);
                     } catch (RemoteException re) {
@@ -648,8 +665,8 @@ public class LauncherAppsService extends SystemService {
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onPackagesUnsuspended")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesUnsuspended")) continue;
                     try {
                         listener.onPackagesUnsuspended(user, packages);
                     } catch (RemoteException re) {
@@ -663,20 +680,39 @@ public class LauncherAppsService extends SystemService {
 
             @Override
             public void onShortcutChanged(@NonNull String packageName,
-                    @NonNull List<ShortcutInfo> shortcuts, @UserIdInt int userId) {
+                    @UserIdInt int userId) {
+                postToPackageMonitor(() -> onShortcutChangedInner(packageName, userId));
+            }
+
+            private void onShortcutChangedInner(@NonNull String packageName,
+                    @UserIdInt int userId) {
                 final UserHandle user = UserHandle.of(userId);
 
                 final int n = mListeners.beginBroadcast();
                 for (int i = 0; i < n; i++) {
                     IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, listeningUser, "onShortcutChanged")) continue;
+                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, cookie.user, "onShortcutChanged")) continue;
 
-                    // STOPSHIP Skip if the receiver doesn't have the permission.
-
+                    // Make sure the caller has the permission.
+                    if (!mShortcutServiceInternal.hasShortcutHostPermission(cookie.packageName,
+                            cookie.user.getIdentifier())) {
+                        continue;
+                    }
+                    // Each launcher has a different set of pinned shortcuts, so we need to do a
+                    // query in here.
+                    // (As of now, only one launcher has the permission at a time, so it's bit
+                    // moot, but we may change the permission model eventually.)
+                    final List<ShortcutInfo> list =
+                            mShortcutServiceInternal.getShortcuts(cookie.packageName,
+                            /* changedSince= */ 0, packageName, /* component= */ null,
+                                    ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
+                                    | ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC
+                                    , userId);
                     try {
                         listener.onShortcutChanged(user, packageName,
-                                new ParceledListSlice<>(shortcuts));
+                                new ParceledListSlice<>(list));
                     } catch (RemoteException re) {
                         Slog.d(TAG, "Callback failed ", re);
                     }
