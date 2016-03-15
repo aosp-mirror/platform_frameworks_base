@@ -660,7 +660,7 @@ import java.util.List;
  * independently of the activity lifecycle itself.  An example may be a camera
  * application that allows you to upload a picture to a web site.  The upload
  * may take a long time, and the application should allow the user to leave
- * the application will it is executing.  To accomplish this, your Activity
+ * the application while it is executing.  To accomplish this, your Activity
  * should start a {@link Service} in which the upload takes place.  This allows
  * the system to properly prioritize your process (considering it to be more
  * important than other non-visible applications) for the duration of the
