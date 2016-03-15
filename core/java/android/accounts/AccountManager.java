@@ -426,46 +426,46 @@ public class AccountManager {
     }
 
     /**
-     * Lists all accounts of any type registered on the device.
-     * Equivalent to getAccountsByType(null).
+     * List every {@link Account} registered on the device that are managed by
+     * applications whose signatures match the caller.
      *
-     * <p>It is safe to call this method from the main thread.
+     * <p>This method can be called safely from the main thread. It is
+     * equivalent to calling <code>getAccountsByType(null)</code>.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p><b>NOTE:</b> Apps declaring a {@code targetSdkVersion<=23} in their
+     * manifests will continue to behave as they did on devices that support
+     * API level 23. In particular the GET_ACCOUNTS permission is required to
+     * see all the Accounts registered with the AccountManager. See docs for
+     * this function in API level 23 for more information.
      *
-     * @return An array of {@link Account}, one for each account.  Empty
-     *     (never null) if no accounts have been added.
+     * @return Array of Accounts. The array may be empty if no accounts are
+     *     available to the caller.
      */
     @NonNull
-    @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccounts() {
-        try {
-            return mService.getAccounts(null, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getAccountsByType(null);
     }
 
     /**
      * @hide
-     * Lists all accounts of any type registered on the device for a given
-     * user id. Equivalent to getAccountsByType(null).
+     * List every {@link Account} registered on the device for a specific User
+     * that are managed by applications whose signatures match the caller.
      *
-     * <p>It is safe to call this method from the main thread.
+     * <p><b>NOTE:</b> Apps declaring a {@code targetSdkVersion<=23} in their
+     * manifests will continue to behave as they did on devices that support
+     * API level 23. In particular the GET_ACCOUNTS permission is required to
+     * see all the Accounts registered with the AccountManager for the
+     * specified userId. See docs for this function in API level 23 for more
+     * information.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p>This method can be called safely from the main thread.
      *
-     * @return An array of {@link Account}, one for each account.  Empty
-     *     (never null) if no accounts have been added.
+     * @param int userId associated with the User whose accounts should be
+     *     queried.
+     * @return Array of Accounts. The array may be empty if no accounts are
+     *     available to the caller.
      */
     @NonNull
-    @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsAsUser(int userId) {
         try {
             return mService.getAccountsAsUser(null, userId, mContext.getOpPackageName());
@@ -494,10 +494,11 @@ public class AccountManager {
     /**
      * Returns the accounts visible to the specified package, in an environment where some apps
      * are not authorized to view all accounts. This method can only be called by system apps.
+     *
      * @param type The type of accounts to return, null to retrieve all accounts
      * @param packageName The package name of the app for which the accounts are to be returned
-     * @return An array of {@link Account}, one per matching account.  Empty
-     *     (never null) if no accounts of the specified type have been added.
+     * @return Array of Accounts. The array may be empty if no accounts of th
+     *     specified type are visible to the caller.
      */
     @NonNull
     public Account[] getAccountsByTypeForPackage(String type, String packageName) {
@@ -510,29 +511,22 @@ public class AccountManager {
     }
 
     /**
-     * Lists all accounts of a particular type.  The account type is a
-     * string token corresponding to the authenticator and useful domain
-     * of the account.  For example, there are types corresponding to Google
-     * and Facebook.  The exact string token to use will be published somewhere
-     * associated with the authenticator in question.
+     * List every {@link Account} of a specified type managed by applications
+     * whose signatures match the caller.
      *
-     * <p>It is safe to call this method from the main thread.
+     * <p><b>NOTE:</b> Apps declaring a {@code targetSdkVersion<=23} in their
+     * manifests will continue to behave as they did on devices that support
+     * API level 23. See docs for this function in API level 23 for more
+     * information.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p>This method can be called safely from the main thread.
      *
-     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
-     * GET_ACCOUNTS permission is needed for those platforms, irrespective of uid
-     * or signature match. See docs for this function in API level 22.
-     *
-     * @param type The type of accounts to return, null to retrieve all accounts
-     * @return An array of {@link Account}, one per matching account.  Empty
-     *     (never null) if no accounts of the specified type have been added.
+     * @param type String denoting the type of the accounts to return,
+     *        {@code null} to retrieve all accounts visible to the caller.
+     * @return An array of Accounts.  Empty (never null) if no accounts
+     *         are available to the caller.
      */
     @NonNull
-    @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsByType(String type) {
         return getAccountsByTypeAsUser(type, Process.myUserHandle());
     }
@@ -576,6 +570,7 @@ public class AccountManager {
      * @return a future containing the label string
      * @hide
      */
+    @NonNull
     public AccountManagerFuture<String> getAuthTokenLabel(
             final String accountType, final String authTokenType,
             AccountManagerCallback<String> callback, Handler handler) {
@@ -608,9 +603,13 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#GET_ACCOUNTS} or be a signature
-     * match with the AbstractAccountAuthenticator that manages the account.
+     * <p><b>Note:</b>The specified account must be managed by an application
+     * whose signature matches the caller.
+     *
+     * <p><b>Further note:</b>Apps targeting API level 23 or earlier will continue to
+     * behave as they did on devices that support API level 23. In particular
+     * they may still require the GET_ACCOUNTS permission. See docs for this
+     * function in API level 23.
      *
      * @param account The {@link Account} to test
      * @param features An array of the account features to check
@@ -619,9 +618,11 @@ public class AccountManager {
      * @param handler {@link Handler} identifying the callback thread,
      *     null for the main thread
      * @return An {@link AccountManagerFuture} which resolves to a Boolean,
-     * true if the account exists and has all of the specified features.
+     *     true if the account exists and has all of the specified features.
+     * @throws SecurityException if the specified account is managed by an
+     *     application whose signature doesn't match the caller's signature.
      */
-    @RequiresPermission(GET_ACCOUNTS)
+    @NonNull
     public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
             AccountManagerCallback<Boolean> callback, Handler handler) {
@@ -644,9 +645,10 @@ public class AccountManager {
 
     /**
      * Lists all accounts of a type which have certain features.  The account
-     * type identifies the authenticator (see {@link #getAccountsByType}).
-     * Account features are authenticator-specific string tokens identifying
-     * boolean account properties (see {@link #hasFeatures}).
+     * type identifies the authenticator (see {@link #getAccountsByType}). Said
+     * authenticator must be in a package whose signature matches the callers
+     * package signature. Account features are authenticator-specific string tokens
+     * identifying boolean account properties (see {@link #hasFeatures}).
      *
      * <p>Unlike {@link #getAccountsByType}, this method calls the authenticator,
      * which may contact the server or do other work to check account features,
@@ -655,19 +657,14 @@ public class AccountManager {
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
-     * <p>Clients of this method that have not been granted the
-     * {@link android.Manifest.permission#GET_ACCOUNTS} permission,
-     * will only see those accounts managed by AbstractAccountAuthenticators whose
-     * signature matches the client.
+     * <p><b>NOTE:</b> Apps targeting API level 23 or earlier will continue to
+     * behave as they did on devices that support API level 23. In particular
+     * they may still require the GET_ACCOUNTS permission. See docs for this
+     * function in API level 23.
      *
      * @param type The type of accounts to return, must not be null
      * @param features An array of the account features to require,
      *     may be null or empty
-     *
-     * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
-     * GET_ACCOUNTS permission is needed for those platforms, irrespective of uid
-     * or signature match. See docs for this function in API level 22.
-     *
      * @param callback Callback to invoke when the request completes,
      *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
@@ -676,7 +673,7 @@ public class AccountManager {
      *     {@link Account}, one per account of the specified type which
      *     matches the requested features.
      */
-    @RequiresPermission(GET_ACCOUNTS)
+    @NonNull
     public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
             final String type, final String[] features,
             AccountManagerCallback<Account[]> callback, Handler handler) {

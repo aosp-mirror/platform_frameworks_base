@@ -68,7 +68,7 @@ package android {
     field public static final java.lang.String DUMP = "android.permission.DUMP";
     field public static final java.lang.String EXPAND_STATUS_BAR = "android.permission.EXPAND_STATUS_BAR";
     field public static final java.lang.String FACTORY_TEST = "android.permission.FACTORY_TEST";
-    field public static final java.lang.String GET_ACCOUNTS = "android.permission.GET_ACCOUNTS";
+    field public static final deprecated java.lang.String GET_ACCOUNTS = "android.permission.GET_ACCOUNTS";
     field public static final java.lang.String GET_ACCOUNTS_PRIVILEGED = "android.permission.GET_ACCOUNTS_PRIVILEGED";
     field public static final java.lang.String GET_PACKAGE_SIZE = "android.permission.GET_PACKAGE_SIZE";
     field public static final deprecated java.lang.String GET_TASKS = "android.permission.GET_TASKS";
