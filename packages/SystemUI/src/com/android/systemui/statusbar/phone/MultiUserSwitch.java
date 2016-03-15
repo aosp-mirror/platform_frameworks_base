@@ -131,6 +131,9 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                     getContext(), v, ContactsContract.Profile.CONTENT_URI,
                     ContactsContract.QuickContact.MODE_LARGE, null);
             getContext().startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+            if (mQsPanel != null) {
+                mQsPanel.getHost().collapsePanels();
+            }
         }
     }
 
