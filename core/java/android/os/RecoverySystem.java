@@ -434,25 +434,35 @@ public class RecoverySystem {
             String filename = packageFile.getCanonicalPath();
             Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
 
-            if (!processed && filename.startsWith("/data/")) {
-                FileWriter uncryptFile = new FileWriter(UNCRYPT_PACKAGE_FILE);
-                try {
-                    uncryptFile.write(filename + "\n");
-                } finally {
-                    uncryptFile.close();
-                }
-                // UNCRYPT_PACKAGE_FILE needs to be readable and writable by system server.
-                if (!UNCRYPT_PACKAGE_FILE.setReadable(true, false)
-                        || !UNCRYPT_PACKAGE_FILE.setWritable(true, false)) {
-                    Log.e(TAG, "Error setting permission for " + UNCRYPT_PACKAGE_FILE);
-                }
-
-                BLOCK_MAP_FILE.delete();
-            }
-
-            // If the package is on the /data partition, use the block map file as
-            // the package name instead.
+            // If the package is on the /data partition, the package needs to
+            // be processed (i.e. uncrypt'd). The caller specifies if that has
+            // been done in 'processed' parameter.
             if (filename.startsWith("/data/")) {
+                if (processed) {
+                    if (!BLOCK_MAP_FILE.exists()) {
+                        Log.e(TAG, "Package claimed to have been processed but failed to find "
+                                + "the block map file.");
+                        throw new IOException("Failed to find block map file");
+                    }
+                } else {
+                    FileWriter uncryptFile = new FileWriter(UNCRYPT_PACKAGE_FILE);
+                    try {
+                        uncryptFile.write(filename + "\n");
+                    } finally {
+                        uncryptFile.close();
+                    }
+                    // UNCRYPT_PACKAGE_FILE needs to be readable and writable
+                    // by system server.
+                    if (!UNCRYPT_PACKAGE_FILE.setReadable(true, false)
+                            || !UNCRYPT_PACKAGE_FILE.setWritable(true, false)) {
+                        Log.e(TAG, "Error setting permission for " + UNCRYPT_PACKAGE_FILE);
+                    }
+
+                    BLOCK_MAP_FILE.delete();
+                }
+
+                // If the package is on the /data partition, use the block map
+                // file as the package name instead.
                 filename = "@/cache/recovery/block.map";
             }
 
