@@ -547,12 +547,18 @@ class ActivityStarter {
         }
 
         if (startedActivityStackId == DOCKED_STACK_ID && prevFocusedStackId == HOME_STACK_ID) {
-            // We launch an activity while being in home stack, which means either launcher or
-            // recents into docked stack. We don't want the launched activity to be alone in a
-            // docked stack, so we want to immediately launch recents too.
-            if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
-            mWindowManager.showRecentApps();
-            return;
+            final ActivityStack homeStack = mSupervisor.getStack(HOME_STACK_ID);
+            final ActivityRecord topActivityHomeStack = homeStack != null
+                    ? homeStack.topRunningActivityLocked() : null;
+            if (topActivityHomeStack == null
+                    || topActivityHomeStack.mActivityType != RECENTS_ACTIVITY_TYPE) {
+                // We launch an activity while being in home stack, which means either launcher or
+                // recents into docked stack. We don't want the launched activity to be alone in a
+                // docked stack, so we want to immediately launch recents too.
+                if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
+                mWindowManager.showRecentApps();
+                return;
+            }
         }
 
         if (startedActivityStackId == PINNED_STACK_ID

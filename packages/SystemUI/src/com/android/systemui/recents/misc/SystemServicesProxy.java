@@ -25,7 +25,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
-import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
@@ -53,6 +52,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -65,9 +65,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.Display;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
-import android.view.Surface;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
@@ -402,15 +401,12 @@ public class SystemServicesProxy {
     }
 
     /** Docks a task to the side of the screen and starts it. */
-    public void startTaskInDockedMode(Context context, View view, int taskId, int createMode,
-            Bitmap headerBitmap, Handler handler, OnAnimationStartedListener startedListener) {
+    public void startTaskInDockedMode(int taskId, int createMode) {
         if (mIam == null) return;
 
         try {
             // TODO: Determine what animation we want for the incoming task
-            final ActivityOptions options = ActivityOptions.makeThumbnailAspectScaleUpAnimation(
-                    view, headerBitmap, 0, 0, (int) (view.getWidth() * view.getScaleX()),
-                    (int) (view.getHeight() * view.getScaleY()), handler, startedListener);
+            final ActivityOptions options = ActivityOptions.makeBasic();
             options.setDockCreateMode(createMode);
             options.setLaunchStackId(DOCKED_STACK_ID);
             mIam.startActivityFromRecents(taskId, options.toBundle());
@@ -1053,6 +1049,18 @@ public class SystemServicesProxy {
             WindowManagerGlobal.getWindowManagerService().getStableInsets(outStableInsets);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void overridePendingAppTransitionMultiThumbFuture(
+            IAppTransitionAnimationSpecsFuture future, IRemoteCallback animStartedListener,
+            boolean scaleUp) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .overridePendingAppTransitionMultiThumbFuture(future, animStartedListener,
+                            scaleUp);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to override transition: " + e);
         }
     }
 

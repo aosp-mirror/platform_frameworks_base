@@ -24,6 +24,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
+import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -32,10 +33,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Recents;
@@ -52,6 +51,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -92,7 +92,7 @@ public class RecentsTransitionHelper {
      */
     public void launchTaskFromRecents(final TaskStack stack, @Nullable final Task task,
             final TaskStackView stackView, final TaskView taskView,
-            final boolean screenPinningRequested, final Rect bounds, int destinationStack) {
+            final boolean screenPinningRequested, final Rect bounds, final int destinationStack) {
         final ActivityOptions opts = ActivityOptions.makeBasic();
         if (bounds != null) {
             opts.setLaunchBounds(bounds.isEmpty() ? null : bounds);
@@ -101,7 +101,12 @@ public class RecentsTransitionHelper {
         final ActivityOptions.OnAnimationStartedListener animStartedListener;
         final IAppTransitionAnimationSpecsFuture transitionFuture;
         if (taskView != null) {
-            transitionFuture = getAppTransitionFuture(task, stackView, destinationStack);
+            transitionFuture = getAppTransitionFuture(new AnimationSpecComposer() {
+                @Override
+                public List<AppTransitionAnimationSpec> composeSpecs() {
+                    return composeAnimationSpecs(task, stackView, destinationStack);
+                }
+            });
             animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
                 @Override
                 public void onAnimationStarted() {
@@ -154,6 +159,23 @@ public class RecentsTransitionHelper {
         }
     }
 
+    public IRemoteCallback wrapStartedListener(final OnAnimationStartedListener listener) {
+        if (listener == null) {
+            return null;
+        }
+        return new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle data) throws RemoteException {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onAnimationStarted();
+                    }
+                });
+            }
+        };
+    }
+
     /**
      * Starts the activity for the launch task.
      *
@@ -181,40 +203,21 @@ public class RecentsTransitionHelper {
         }
 
         if (transitionFuture != null) {
-            IRemoteCallback.Stub callback = null;
-            if (animStartedListener != null) {
-                callback = new IRemoteCallback.Stub() {
-                    @Override
-                    public void sendResult(Bundle data) throws RemoteException {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (animStartedListener != null) {
-                                    animStartedListener.onAnimationStarted();
-                                }
-                            }
-                        });
-                    }
-                };
-            }
-            try {
-                synchronized (this) {
-                    mAppTransitionAnimationSpecs = SPECS_WAITING;
-                }
-                WindowManagerGlobal.getWindowManagerService()
-                        .overridePendingAppTransitionMultiThumbFuture(transitionFuture,
-                                callback, true /* scaleUp */);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to override transition: " + e);
-            }
+            ssp.overridePendingAppTransitionMultiThumbFuture(transitionFuture,
+                    wrapStartedListener(animStartedListener), true /* scaleUp */);
         }
     }
 
     /**
      * Creates a future which will later be queried for animation specs for this current transition.
+     *
+     * @param composer The implementation that composes the specs on the UI thread.
      */
-    private IAppTransitionAnimationSpecsFuture getAppTransitionFuture(final Task task,
-            final TaskStackView stackView, final int destinationStack) {
+    public IAppTransitionAnimationSpecsFuture getAppTransitionFuture(
+            final AnimationSpecComposer composer) {
+        synchronized (this) {
+            mAppTransitionAnimationSpecs = SPECS_WAITING;
+        }
         return new IAppTransitionAnimationSpecsFuture.Stub() {
             @Override
             public AppTransitionAnimationSpec[] get() throws RemoteException {
@@ -222,8 +225,7 @@ public class RecentsTransitionHelper {
                     @Override
                     public void run() {
                         synchronized (RecentsTransitionHelper.this) {
-                            mAppTransitionAnimationSpecs = composeAnimationSpecs(task, stackView,
-                                    destinationStack);
+                            mAppTransitionAnimationSpecs = composer.composeSpecs();
                             RecentsTransitionHelper.this.notifyAll();
                         }
                     }
@@ -245,6 +247,17 @@ public class RecentsTransitionHelper {
                 }
             }
         };
+    }
+
+    /**
+     * Composes the transition spec when docking a task, which includes a full task bitmap.
+     */
+    public List<AppTransitionAnimationSpec> composeDockAnimationSpec(
+            TaskView taskView, Rect transform) {
+        TaskViewTransform viewTransform = new TaskViewTransform();
+        viewTransform.fillIn(taskView);
+        return Collections.singletonList(new AppTransitionAnimationSpec(taskView.getTask().key.id,
+                RecentsTransitionHelper.composeTaskBitmap(taskView, viewTransform), transform));
     }
 
     /**
@@ -373,5 +386,9 @@ public class RecentsTransitionHelper {
             taskRect.bottom = 2 * Recents.getSystemServices().getDisplayRect().height();
         }
         return new AppTransitionAnimationSpec(taskView.getTask().key.id, b, taskRect);
+    }
+
+    public interface AnimationSpecComposer {
+        List<AppTransitionAnimationSpec> composeSpecs();
     }
 }

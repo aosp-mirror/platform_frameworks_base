@@ -11392,10 +11392,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Get the focused task before launching launcher.
 
                     if (mUserController.isLockScreenDisabled(currentUserId)) {
+
                         // If there is no device lock, we will show the profile's credential page.
                         // startActivityFromRecentsInner is intercepted and will forward user to it.
                         if (mFocusedActivity != null) {
-                            startActivityFromRecentsInner(mFocusedActivity.task.taskId, null);
+                            mStackSupervisor.startActivityFromRecentsInner(
+                                    mFocusedActivity.task.taskId, null);
                         }
                     } else {
                         // Showing launcher to avoid user entering credential twice.

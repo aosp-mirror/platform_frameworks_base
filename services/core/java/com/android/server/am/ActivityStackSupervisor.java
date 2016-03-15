@@ -4187,6 +4187,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 + " in=" + stacks);
     }
 
+    /**
+     * Puts a task into resizing mode during the next app transition.
+     *
+     * @param taskId the id of the task to put into resizing mode
+     */
+    private void setResizingDuringAnimation(int taskId) {
+        mResizingTasksDuringAnimation.add(taskId);
+        mWindowManager.setTaskDockedResizing(taskId, true);
+    }
+
     final int startActivityFromRecentsInner(int taskId, Bundle bOptions) {
         final TaskRecord task;
         final int callingUid;
@@ -4236,8 +4246,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // the window renders full-screen with the background filling the void. Also only
             // call this at the end to make sure that tasks exists on the window manager side.
             if (launchStackId == DOCKED_STACK_ID) {
-                mResizingTasksDuringAnimation.add(task.taskId);
-                mWindowManager.setTaskDockedResizing(task.taskId, true);
+                setResizingDuringAnimation(taskId);
             }
             return ActivityManager.START_TASK_TO_FRONT;
         }
@@ -4246,7 +4255,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         intent = task.intent;
         intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
         userId = task.userId;
-        return mService.startActivityInPackage(callingUid, callingPackage, intent, null, null, null,
-                0, 0, bOptions, userId, null, task);
+            int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
+                    null, null, 0, 0, bOptions, userId, null, task);
+            if (launchStackId == DOCKED_STACK_ID) {
+                setResizingDuringAnimation(task.taskId);
+            }
+            return result;
     }
 }
