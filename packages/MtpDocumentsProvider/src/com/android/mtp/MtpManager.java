@@ -33,7 +33,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.mtp.exceptions.BusyDeviceException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -190,7 +189,7 @@ class MtpManager {
         synchronized (device) {
             final MtpObjectInfo sendObjectInfoResult = device.sendObjectInfo(objectInfo);
             if (sendObjectInfoResult == null) {
-                throw new IOException("Failed to create a document");
+                throw new SendObjectInfoFailure();
             }
             if (objectInfo.getFormat() != MtpConstants.FORMAT_ASSOCIATION) {
                 if (!device.sendObject(sendObjectInfoResult.getObjectHandle(),

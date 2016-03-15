@@ -30,8 +30,6 @@ import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.mtp.exceptions.BusyDeviceException;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
