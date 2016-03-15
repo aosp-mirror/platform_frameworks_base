@@ -730,13 +730,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public void systemRunning() {
         if (DEBUG) Slog.v(TAG, "systemReady");
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
-        // No crop file? Make sure we've finished the processing sequence if necessary
-        if (!wallpaper.cropExists()) {
-            generateCrop(wallpaper);
-        }
-        // Still nothing?  Fall back to default.
-        if (!wallpaper.cropExists()) {
-            clearWallpaperLocked(false, FLAG_SET_SYSTEM, UserHandle.USER_SYSTEM, null);
+        // If we think we're going to be using the system image wallpaper imagery, make
+        // sure we have something to render
+        if (mImageWallpaper.equals(wallpaper.nextWallpaperComponent)) {
+            // No crop file? Make sure we've finished the processing sequence if necessary
+            if (!wallpaper.cropExists()) {
+                if (DEBUG) {
+                    Slog.i(TAG, "No crop; regenerating from source");
+                }
+                generateCrop(wallpaper);
+            }
+            // Still nothing?  Fall back to default.
+            if (!wallpaper.cropExists()) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Unable to regenerate crop; resetting");
+                }
+                clearWallpaperLocked(false, FLAG_SET_SYSTEM, UserHandle.USER_SYSTEM, null);
+            }
+        } else {
+            if (DEBUG) {
+                Slog.i(TAG, "Nondefault wallpaper component; gracefully ignoring");
+            }
         }
         switchWallpaper(wallpaper, null);
         wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
