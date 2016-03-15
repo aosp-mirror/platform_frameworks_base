@@ -508,10 +508,11 @@ class WallpaperController {
 
             replacing = replacing || w.mWillReplaceWindow;
 
-            // If the app is executing an animation because the keyguard is going away,
-            // keep the wallpaper during the animation so it doesn't flicker out.
+            // If the app is executing an animation because the keyguard is going away (and the
+            // keyguard was showing the wallpaper) keep the wallpaper during the animation so it
+            // doesn't flicker out.
             final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
-                    || (w.mAppToken != null && w.mWinAnimator.mKeyguardGoingAwayAnimation);
+                    || (w.mAppToken != null && w.mWinAnimator.mKeyguardGoingAwayWithWallpaper);
             if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: #" + i + "=" + w);
                 result.setWallpaperTarget(w, i);
