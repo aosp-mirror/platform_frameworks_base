@@ -1082,6 +1082,10 @@ public class Editor {
     }
 
     private void startDragAndDrop() {
+        // TODO: Fix drag and drop in full screen extracted mode.
+        if (mTextView.isInExtractedMode()) {
+            return;
+        }
         final int start = mTextView.getSelectionStart();
         final int end = mTextView.getSelectionEnd();
         CharSequence selectedText = mTextView.getTransformedText(start, end);
