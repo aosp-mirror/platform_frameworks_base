@@ -3284,10 +3284,18 @@ public class Editor {
                     com.android.internal.R.id.addToDictionaryButton);
             mAddToDictionaryButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    final SuggestionSpan misspelledSpan =
+                            findEquivalentSuggestionSpan(mMisspelledSpanInfo);
+                    if (misspelledSpan == null) {
+                        // Span has been removed.
+                        return;
+                    }
                     final Editable editable = (Editable) mTextView.getText();
-                    final int spanStart = editable.getSpanStart(
-                            mMisspelledSpanInfo.mSuggestionSpan);
-                    final int spanEnd = editable.getSpanEnd(mMisspelledSpanInfo.mSuggestionSpan);
+                    final int spanStart = editable.getSpanStart(misspelledSpan);
+                    final int spanEnd = editable.getSpanEnd(misspelledSpan);
+                    if (spanStart < 0 || spanEnd <= spanStart) {
+                        return;
+                    }
                     final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
 
                     final Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
