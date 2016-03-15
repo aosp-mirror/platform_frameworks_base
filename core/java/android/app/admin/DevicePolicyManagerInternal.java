@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.content.Intent;
 import android.os.UserHandle;
 
 import java.util.List;
@@ -80,4 +81,15 @@ public abstract class DevicePolicyManagerInternal {
      * @return true if package has a device or profile owner, false otherwise.
      */
     public abstract boolean hasDeviceOwnerOrProfileOwner(String packageName, int userId);
+
+    /**
+     * Creates an intent to show the admin support dialog to let the user know that the package is
+     * suspended by the admin. This assumes that {@param packageName} is suspended by the
+     * device/profile owner. The caller should check if the package is suspended or not.
+     *
+     * @param packageName The package that is suspended
+     * @param userId The user having the suspended package.
+     * @return The intent to trigger the admin support dialog.
+     */
+    public abstract Intent createPackageSuspendedDialogIntent(String packageName, int userId);
 }

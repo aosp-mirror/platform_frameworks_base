@@ -29,6 +29,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -40,6 +41,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.internal.app.UnlaunchableAppActivity;
+import com.android.server.LocalServices;
 
 /**
  * A class that contains activity intercepting logic for {@link ActivityStarter#startActivityLocked}
@@ -133,8 +135,10 @@ class ActivityStartInterceptor {
                 (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
             return false;
         }
-        mIntent = UnlaunchableAppActivity.createPackageSuspendedDialogIntent(mAInfo.packageName,
-                mUserId);
+        DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
+                DevicePolicyManagerInternal.class);
+        mIntent = devicePolicyManager.createPackageSuspendedDialogIntent(
+                mAInfo.packageName, mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
