@@ -97,7 +97,7 @@ public class RecentsView extends FrameLayout {
     private RecentsAppWidgetHostView mSearchBar;
     private TextView mHistoryButton;
     private TextView mHistoryClearAllButton;
-    private View mEmptyView;
+    private TextView mEmptyView;
     private RecentsHistoryView mHistoryView;
 
     private boolean mAwaitingFirstLayout = true;
@@ -159,7 +159,7 @@ public class RecentsView extends FrameLayout {
                 }
             });
         }
-        mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
+        mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
 
         setBackground(mBackgroundScrim);
@@ -206,7 +206,7 @@ public class RecentsView extends FrameLayout {
         if (stack.getTaskCount() > 0) {
             hideEmptyView();
         } else {
-            showEmptyView();
+            showEmptyView(R.string.recents_empty_message);
         }
     }
 
@@ -327,11 +327,12 @@ public class RecentsView extends FrameLayout {
     /**
      * Hides the task stack and shows the empty view.
      */
-    public void showEmptyView() {
+    public void showEmptyView(int msgResId) {
         if (RecentsDebugFlags.Static.EnableSearchBar && (mSearchBar != null)) {
             mSearchBar.setVisibility(View.INVISIBLE);
         }
         mTaskStackView.setVisibility(View.INVISIBLE);
+        mEmptyView.setText(msgResId);
         mEmptyView.setVisibility(View.VISIBLE);
         mEmptyView.bringToFront();
         if (RecentsDebugFlags.Static.EnableHistory) {
@@ -400,8 +401,8 @@ public class RecentsView extends FrameLayout {
 
         // Measure the empty view to the full size of the screen
         if (mEmptyView.getVisibility() != GONE) {
-            measureChild(mEmptyView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            measureChild(mEmptyView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
         }
 
         if (RecentsDebugFlags.Static.EnableHistory) {
@@ -449,7 +450,13 @@ public class RecentsView extends FrameLayout {
 
         // Layout the empty view
         if (mEmptyView.getVisibility() != GONE) {
-            mEmptyView.layout(left, top, right, bottom);
+            int leftRightInsets = mSystemInsets.left + mSystemInsets.right;
+            int topBottomInsets = mSystemInsets.top + mSystemInsets.bottom;
+            int childWidth = mEmptyView.getMeasuredWidth();
+            int childHeight = mEmptyView.getMeasuredHeight();
+            int childLeft = left + Math.max(0, (right - left - leftRightInsets - childWidth)) / 2;
+            int childTop = top + Math.max(0, (bottom - top - topBottomInsets - childHeight)) / 2;
+            mEmptyView.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
         }
 
         if (RecentsDebugFlags.Static.EnableHistory) {
