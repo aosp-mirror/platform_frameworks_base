@@ -49,6 +49,8 @@ import com.android.frameworks.coretests.R;
 import android.support.test.espresso.action.EspressoKey;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.text.Selection;
+import android.text.Spannable;
 import android.view.KeyEvent;
 
 import static org.hamcrest.Matchers.anyOf;
@@ -537,5 +539,69 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('i')));
         onView(withId(R.id.textview)).check(hasSelection("hijk"));
+    }
+
+    @SmallTest
+    public void testSetSelectionAndActionMode() throws Exception {
+        final String text = "abc def";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
+        assertFloatingToolbarIsNotDisplayed();
+        textView.post(() -> Selection.setSelection((Spannable) textView.getText(), 0, 3));
+        getInstrumentation().waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+        // Don't automatically start action mode.
+        assertFloatingToolbarIsNotDisplayed();
+        // Make sure that "Select All" is included in the selection action mode when the entire text
+        // is not selected.
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('e')));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        // Changing the selection range by API should not interrupt the selection action mode.
+        textView.post(() -> Selection.setSelection((Spannable) textView.getText(), 0, 3));
+        getInstrumentation().waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.selectAll));
+        // Make sure that "Select All" is no longer included when the entire text is selected by
+        // API.
+        textView.post(
+                () -> Selection.setSelection((Spannable) textView.getText(), 0, text.length()));
+        getInstrumentation().waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertFloatingToolbarDoesNotContainItem(
+                getActivity().getString(com.android.internal.R.string.selectAll));
+        // Make sure that shrinking the selection range to cursor (an empty range) by API
+        // terminates selection action mode and does not trigger the insertion action mode.
+        textView.post(() -> Selection.setSelection((Spannable) textView.getText(), 0));
+        getInstrumentation().waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsNotDisplayed();
+        // Make sure that user click can trigger the insertion action mode.
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onHandleView(com.android.internal.R.id.insertion_handle).perform(click());
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        // Make sure that an existing insertion action mode keeps alive after the insertion point is
+        // moved by API.
+        textView.post(() -> Selection.setSelection((Spannable) textView.getText(), 0));
+        getInstrumentation().waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertFloatingToolbarDoesNotContainItem(
+                getActivity().getString(com.android.internal.R.string.copy));
+        // Make sure that selection action mode is started after selection is created by API when
+        // insertion action mode is active.
+        textView.post(
+                () -> Selection.setSelection((Spannable) textView.getText(), 1, text.length()));
+        getInstrumentation().waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.copy));
     }
 }
