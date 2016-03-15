@@ -9913,6 +9913,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(mLastFinishedFreezeSource);
                 }
                 pw.println();
+
+        mInputMonitor.dump(pw, "  ");
+
         if (dumpAll) {
             pw.print("  mSystemDecorLayer="); pw.print(mSystemDecorLayer);
                     pw.print(" mScreenRect="); pw.println(mScreenRect.toShortString());
