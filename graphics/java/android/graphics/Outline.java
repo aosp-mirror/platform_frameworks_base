@@ -32,7 +32,7 @@ import android.graphics.drawable.Drawable;
  * @see Drawable#getOutline(Outline)
  */
 public final class Outline {
-    private static final float RADIUS_UNDEFINED = -1.0f;
+    private static final float RADIUS_UNDEFINED = Float.NEGATIVE_INFINITY;
 
     /** @hide */
     public Path mPath;
@@ -196,11 +196,11 @@ public final class Outline {
     }
 
     /**
-     * Returns the rounded rect radius, if set, or {@code -1} if a path has
+     * Returns the rounded rect radius, if set, or a value less than 0 if a path has
      * been set via {@link #setConvexPath(Path)}. A return value of {@code 0}
      * indicates a non-rounded rect.
      *
-     * @return the rounded rect radius or {@code -1}
+     * @return the rounded rect radius, or value < 0
      */
     public float getRadius() {
         return mRadius;
