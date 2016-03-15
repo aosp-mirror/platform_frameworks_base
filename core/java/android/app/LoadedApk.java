@@ -281,7 +281,7 @@ public final class LoadedApk {
             addedPaths.addAll(newPaths);
         }
         synchronized (this) {
-            mClassLoader = createOrUpdateClassLoaderLocked(addedPaths);
+            createOrUpdateClassLoaderLocked(addedPaths);
             if (mResources != null) {
                 mResources = mActivityThread.getTopLevelResources(mResDir, mSplitResDirs,
                         mOverlayDirs, mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
@@ -402,101 +402,99 @@ public final class LoadedApk {
                 }
             }
         }
-
-        final String zip = TextUtils.join(File.pathSeparator, outZipPaths);
     }
 
-    private ClassLoader createOrUpdateClassLoaderLocked(List<String> addedPaths) {
-        final ClassLoader classLoader;
-        if (mIncludeCode && !mPackageName.equals("android")) {
-            // Avoid the binder call when the package is the current application package.
-            // The activity manager will perform ensure that dexopt is performed before
-            // spinning up the process.
-            if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
-                VMRuntime.getRuntime().vmInstructionSet();
-                try {
-                    ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
-                } catch (RemoteException re) {
-                    throw re.rethrowFromSystemServer();
-                }
+    private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
+        if (mPackageName.equals("android")) {
+            if (mClassLoader != null) {
+                // nothing to update
+                return;
             }
 
-            final List<String> zipPaths = new ArrayList<>();
-            final List<String> libPaths = new ArrayList<>();
-
-            if (mRegisterPackage) {
-                try {
-                    ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
-
-            makePaths(mActivityThread, mApplicationInfo, zipPaths, libPaths);
-            final String zip = TextUtils.join(File.pathSeparator, zipPaths);
-            final boolean isBundledApp = mApplicationInfo.isSystemApp()
-                    && !mApplicationInfo.isUpdatedSystemApp();
-            String libraryPermittedPath = mDataDir;
-            if (isBundledApp) {
-                // This is necessary to grant bundled apps access to
-                // libraries located in subdirectories of /system/lib
-                libraryPermittedPath += File.pathSeparator +
-                                        System.getProperty("java.library.path");
-            }
-            // DO NOT SHIP: this is a workaround for apps loading native libraries
-            // provided by 3rd party apps using absolute path instead of corresponding
-            // classloader; see http://b/26954419 for example.
-            if (mApplicationInfo.targetSdkVersion <= 23) {
-                libraryPermittedPath += File.pathSeparator + "/data/app";
-            }
-            // -----------------------------------------------------------------------------
-
-            final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
-
-            /*
-             * With all the combination done (if necessary, actually
-             * create the class loader.
-             */
-
-            if (ActivityThread.localLOGV)
-                Slog.v(ActivityThread.TAG, "Class path: " + zip +
-                        ", JNI path: " + librarySearchPath);
-
-            if (mClassLoader == null) {
-                // Temporarily disable logging of disk reads on the Looper thread
-                // as this is early and necessary.
-                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-
-                classLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
-                        mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
-                        libraryPermittedPath, mBaseClassLoader);
-
-                StrictMode.setThreadPolicy(oldPolicy);
-            } else if (addedPaths != null && addedPaths.size() > 0) {
-                final String add = TextUtils.join(File.pathSeparator, addedPaths);
-                ApplicationLoaders.getDefault().addPath(mClassLoader, add);
-                classLoader = mClassLoader;
+            if (mBaseClassLoader != null) {
+                mClassLoader = mBaseClassLoader;
             } else {
-                classLoader = mClassLoader;
+                mClassLoader = ClassLoader.getSystemClassLoader();
             }
-        } else {
-            if (mClassLoader == null) {
-                if (mBaseClassLoader == null) {
-                    classLoader = ClassLoader.getSystemClassLoader();
-                } else {
-                    classLoader = mBaseClassLoader;
-                }
-            } else {
-                classLoader = mClassLoader;
+
+            return;
+        }
+
+        // Avoid the binder call when the package is the current application package.
+        // The activity manager will perform ensure that dexopt is performed before
+        // spinning up the process.
+        if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
+            VMRuntime.getRuntime().vmInstructionSet();
+            try {
+                ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
             }
         }
-        return classLoader;
+
+        final List<String> zipPaths = new ArrayList<>();
+        final List<String> libPaths = new ArrayList<>();
+
+        if (mRegisterPackage) {
+            try {
+                ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        makePaths(mActivityThread, mApplicationInfo, zipPaths, libPaths);
+        final String zip = mIncludeCode ? TextUtils.join(File.pathSeparator, zipPaths) : "";
+        final boolean isBundledApp = mApplicationInfo.isSystemApp()
+                && !mApplicationInfo.isUpdatedSystemApp();
+        String libraryPermittedPath = mDataDir;
+        if (isBundledApp) {
+            // This is necessary to grant bundled apps access to
+            // libraries located in subdirectories of /system/lib
+            libraryPermittedPath += File.pathSeparator +
+                                    System.getProperty("java.library.path");
+        }
+        // DO NOT SHIP: this is a workaround for apps loading native libraries
+        // provided by 3rd party apps using absolute path instead of corresponding
+        // classloader; see http://b/26954419 for example.
+        if (mApplicationInfo.targetSdkVersion <= 23) {
+            libraryPermittedPath += File.pathSeparator + "/data/app";
+        }
+        // -----------------------------------------------------------------------------
+
+        final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
+
+        /*
+         * With all the combination done (if necessary, actually
+         * create the class loader.
+         */
+
+        if (ActivityThread.localLOGV)
+            Slog.v(ActivityThread.TAG, "Class path: " + zip +
+                    ", JNI path: " + librarySearchPath);
+
+        if (mClassLoader == null) {
+            // Temporarily disable logging of disk reads on the Looper thread
+            // as this is early and necessary.
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+
+            mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip,
+                    mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
+                    libraryPermittedPath, mBaseClassLoader);
+
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+
+        if (addedPaths != null && addedPaths.size() > 0) {
+            final String add = TextUtils.join(File.pathSeparator, addedPaths);
+            ApplicationLoaders.getDefault().addPath(mClassLoader, add);
+        }
     }
 
     public ClassLoader getClassLoader() {
         synchronized (this) {
             if (mClassLoader == null) {
-                mClassLoader = createOrUpdateClassLoaderLocked(null /*addedPaths*/);
+                createOrUpdateClassLoaderLocked(null /*addedPaths*/);
             }
             return mClassLoader;
         }
