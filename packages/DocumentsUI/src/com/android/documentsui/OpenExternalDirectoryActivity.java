@@ -20,16 +20,24 @@ import static android.os.Environment.isStandardDirectory;
 import static android.os.Environment.STANDARD_DIRECTORIES;
 import static android.os.storage.StorageVolume.EXTRA_DIRECTORY_NAME;
 import static android.os.storage.StorageVolume.EXTRA_STORAGE_VOLUME;
-import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.Metrics.logInvalidScopedAccessRequest;
-import static com.android.documentsui.Metrics.logValidScopedAccessRequest;
+import static com.android.documentsui.LocalPreferences.getScopedAccessPermissionStatus;
+import static com.android.documentsui.LocalPreferences.PERMISSION_ASK;
+import static com.android.documentsui.LocalPreferences.PERMISSION_ASK_AGAIN;
+import static com.android.documentsui.LocalPreferences.PERMISSION_NEVER_ASK;
+import static com.android.documentsui.LocalPreferences.setScopedAccessPermissionStatus;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED;
 import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED;
 import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_DENIED;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST;
 import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_ERROR;
 import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_GRANTED;
 import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS;
 import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY;
+import static com.android.documentsui.Metrics.logInvalidScopedAccessRequest;
+import static com.android.documentsui.Metrics.logValidScopedAccessRequest;
+import static com.android.documentsui.Shared.DEBUG;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -38,7 +46,6 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -57,6 +64,11 @@ import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,12 +84,17 @@ public class OpenExternalDirectoryActivity extends Activity {
     private static final String EXTRA_FILE = "com.android.documentsui.FILE";
     private static final String EXTRA_APP_LABEL = "com.android.documentsui.APP_LABEL";
     private static final String EXTRA_VOLUME_LABEL = "com.android.documentsui.VOLUME_LABEL";
+    private static final String EXTRA_VOLUME_UUID = "com.android.documentsui.VOLUME_UUID";
 
     private ContentProviderClient mExternalStorageClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (DEBUG) Log.d(TAG, "activity.onCreateDialog(): reusing instance");
+            return;
+        }
 
         final Intent intent = getIntent();
         if (intent == null) {
@@ -105,9 +122,18 @@ public class OpenExternalDirectoryActivity extends Activity {
             finish();
             return;
         }
+        final StorageVolume volume = (StorageVolume) storageVolume;
+        if (getScopedAccessPermissionStatus(getApplicationContext(), getCallingPackage(),
+                volume.getUuid(), directoryName) == PERMISSION_NEVER_ASK) {
+            logValidScopedAccessRequest(this, directoryName,
+                    SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED);
+            setResult(RESULT_CANCELED);
+            finish();
+            return;
+        }
 
         final int userId = UserHandle.myUserId();
-        if (!showFragment(this, userId, (StorageVolume) storageVolume, directoryName)) {
+        if (!showFragment(this, userId, volume, directoryName)) {
             setResult(RESULT_CANCELED);
             finish();
             return;
@@ -157,6 +183,7 @@ public class OpenExternalDirectoryActivity extends Activity {
 
         // Gets volume label and converted path.
         String volumeLabel = null;
+        String volumeUuid = null;
         final List<VolumeInfo> volumes = sm.getVolumes();
         if (DEBUG) Log.d(TAG, "Number of volumes: " + volumes.size());
         for (VolumeInfo volume : volumes) {
@@ -166,6 +193,7 @@ public class OpenExternalDirectoryActivity extends Activity {
                 if (DEBUG) Log.d(TAG, "Converting " + root + " to " + internalRoot);
                 file = new File(internalRoot, directory);
                 volumeLabel = sm.getBestVolumeDescription(volume);
+                volumeUuid = volume.getFsUuid();
                 break;
             }
         }
@@ -197,6 +225,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         final Bundle args = new Bundle();
         args.putString(EXTRA_FILE, file.getAbsolutePath());
         args.putString(EXTRA_VOLUME_LABEL, volumeLabel);
+        args.putString(EXTRA_VOLUME_UUID, volumeUuid);
         args.putString(EXTRA_APP_LABEL, appLabel);
 
         final FragmentManager fm = activity.getFragmentManager();
@@ -303,16 +332,21 @@ public class OpenExternalDirectoryActivity extends Activity {
     public static class OpenExternalDirectoryDialogFragment extends DialogFragment {
 
         private File mFile;
+        private String mVolumeUuid;
         private String mVolumeLabel;
         private String mAppLabel;
+        private CheckBox mDontAskAgain;
         private OpenExternalDirectoryActivity mActivity;
+        private AlertDialog mDialog;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            setRetainInstance(true);
             final Bundle args = getArguments();
             if (args != null) {
                 mFile = new File(args.getString(EXTRA_FILE));
+                mVolumeUuid = args.getString(EXTRA_VOLUME_UUID);
                 mVolumeLabel = args.getString(EXTRA_VOLUME_LABEL);
                 mAppLabel = args.getString(EXTRA_APP_LABEL);
             }
@@ -320,9 +354,28 @@ public class OpenExternalDirectoryActivity extends Activity {
         }
 
         @Override
+        public void onDestroyView() {
+            // Workaround for https://code.google.com/p/android/issues/detail?id=17423
+            if (mDialog != null && getRetainInstance()) {
+                mDialog.setDismissMessage(null);
+            }
+            super.onDestroyView();
+        }
+
+        @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            if (mDialog != null) {
+                if (DEBUG) Log.d(TAG, "fragment.onCreateDialog(): reusing dialog");
+                return mDialog;
+            }
+            if (mActivity != getActivity()) {
+                // Sanity check.
+                Log.wtf(TAG, "activity references don't match on onCreateDialog(): mActivity = "
+                        + mActivity + " , getActivity() = " + getActivity());
+                mActivity = (OpenExternalDirectoryActivity) getActivity();
+            }
             final String directory = mFile.getName();
-            final Activity activity = getActivity();
+            final Context context = mActivity.getApplicationContext();
             final OnClickListener listener = new OnClickListener() {
 
                 @Override
@@ -333,15 +386,25 @@ public class OpenExternalDirectoryActivity extends Activity {
                                 mActivity.getExternalStorageClient(), mFile);
                     }
                     if (which == DialogInterface.BUTTON_NEGATIVE || intent == null) {
-                        logValidScopedAccessRequest(activity, directory,
+                        logValidScopedAccessRequest(mActivity, directory,
                                 SCOPED_DIRECTORY_ACCESS_DENIED);
-                        activity.setResult(RESULT_CANCELED);
+                        final boolean checked = mDontAskAgain.isChecked();
+                        if (checked) {
+                            logValidScopedAccessRequest(mActivity, directory,
+                                    SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST);
+                            setScopedAccessPermissionStatus(context, mActivity.getCallingPackage(),
+                                    mVolumeUuid, directory, PERMISSION_NEVER_ASK);
+                        } else {
+                            setScopedAccessPermissionStatus(context, mActivity.getCallingPackage(),
+                                    mVolumeUuid, directory, PERMISSION_ASK_AGAIN);
+                        }
+                        mActivity.setResult(RESULT_CANCELED);
                     } else {
-                        logValidScopedAccessRequest(activity, directory,
+                        logValidScopedAccessRequest(mActivity, directory,
                                 SCOPED_DIRECTORY_ACCESS_GRANTED);
-                        activity.setResult(RESULT_OK, intent);
+                        mActivity.setResult(RESULT_OK, intent);
                     }
-                    activity.finish();
+                    mActivity.finish();
                 }
             };
 
@@ -349,11 +412,31 @@ public class OpenExternalDirectoryActivity extends Activity {
                     .expandTemplate(
                             getText(R.string.open_external_dialog_request), mAppLabel, directory,
                             mVolumeLabel);
-            return new AlertDialog.Builder(activity, R.style.AlertDialogTheme)
-                    .setMessage(message)
+            @SuppressLint("InflateParams")
+            // It's ok pass null ViewRoot on AlertDialogs.
+            final View view = View.inflate(mActivity, R.layout.dialog_open_scoped_directory, null);
+            final TextView messageField = (TextView) view.findViewById(R.id.message);
+            messageField.setText(message);
+            mDialog = new AlertDialog.Builder(mActivity, R.style.AlertDialogTheme)
+                    .setView(view)
                     .setPositiveButton(R.string.allow, listener)
                     .setNegativeButton(R.string.deny, listener)
                     .create();
+
+            mDontAskAgain = (CheckBox) view.findViewById(R.id.do_not_ask_checkbox);
+            if (getScopedAccessPermissionStatus(context, mActivity.getCallingPackage(),
+                    mVolumeUuid, directory) == PERMISSION_ASK_AGAIN) {
+                mDontAskAgain.setVisibility(View.VISIBLE);
+                mDontAskAgain.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(!isChecked);
+                    }
+                });
+            }
+
+            return mDialog;
         }
 
         @Override
