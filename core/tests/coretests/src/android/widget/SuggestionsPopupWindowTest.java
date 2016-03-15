@@ -32,6 +32,8 @@ import com.android.frameworks.coretests.R;
 
 /**
  * SuggestionsPopupWindowTest tests.
+ *
+ * TODO: Add tests for when there are no suggestions
  */
 public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2<TextViewActivity> {
 
