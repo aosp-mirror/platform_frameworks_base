@@ -260,7 +260,6 @@ public abstract class Connection extends Conferenceable {
     /**
      * Indicates that the connection itself wants to handle any sort of reply response, rather than
      * relying on SMS.
-     * @hide
      */
     public static final int CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION = 0x00400000;
 
@@ -1887,9 +1886,8 @@ public abstract class Connection extends Conferenceable {
     public void onReject() {}
 
     /**
-     * Notifies ths Connection of a request reject with a message.
-     *
-     * @hide
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of
+     * a request to reject with a message.
      */
     public void onReject(String replyMessage) {}
 
