@@ -158,7 +158,8 @@ const SkPath& FullPath::getUpdatedPath() {
 
 void FullPath::updateProperties(float strokeWidth, SkColor strokeColor, float strokeAlpha,
         SkColor fillColor, float fillAlpha, float trimPathStart, float trimPathEnd,
-        float trimPathOffset, float strokeMiterLimit, int strokeLineCap, int strokeLineJoin) {
+        float trimPathOffset, float strokeMiterLimit, int strokeLineCap, int strokeLineJoin,
+        int fillType) {
     mProperties.strokeWidth = strokeWidth;
     mProperties.strokeColor = strokeColor;
     mProperties.strokeAlpha = strokeAlpha;
@@ -167,6 +168,7 @@ void FullPath::updateProperties(float strokeWidth, SkColor strokeColor, float st
     mProperties.strokeMiterLimit = strokeMiterLimit;
     mProperties.strokeLineCap = strokeLineCap;
     mProperties.strokeLineJoin = strokeLineJoin;
+    mProperties.fillType = fillType;
 
     // If any trim property changes, mark trim dirty and update the trim path
     setTrimPathStart(trimPathStart);
@@ -179,7 +181,7 @@ inline SkColor applyAlpha(SkColor color, float alpha) {
     return SkColorSetA(color, alphaBytes * alpha);
 }
 
-void FullPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath, float strokeScale,
+void FullPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath, float strokeScale,
                         const SkMatrix& matrix){
     // Draw path's fill, if fill color or gradient is valid
     bool needsFill = false;
@@ -196,6 +198,8 @@ void FullPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath, float str
     if (needsFill) {
         mPaint.setStyle(SkPaint::Style::kFill_Style);
         mPaint.setAntiAlias(true);
+        SkPath::FillType ft = static_cast<SkPath::FillType>(mProperties.fillType);
+        renderPath.setFillType(ft);
         outCanvas->drawPath(renderPath, mPaint);
     }
 
@@ -300,7 +304,7 @@ void FullPath::setPropertyValue(int propertyId, float value) {
     }
 }
 
-void ClipPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
+void ClipPath::drawPath(SkCanvas* outCanvas, SkPath& renderPath,
         float strokeScale, const SkMatrix& matrix){
     outCanvas->clipPath(renderPath, SkRegion::kIntersect_Op);
 }

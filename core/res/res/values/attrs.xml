@@ -5876,6 +5876,12 @@ i
         </attr>
         <!-- sets the Miter limit for a stroked path -->
         <attr name="strokeMiterLimit" format="float"/>
+        <!-- sets the fillType for a path. It is the same as SVG's "fill-rule" properties.
+             For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty -->
+        <attr name="fillType" format="enum">
+            <enum name="nonZero" value="0"/>
+            <enum name="evenOdd" value="1"/>
+        </attr>
     </declare-styleable>
 
     <!-- Defines the clip path used in VectorDrawables. -->
