@@ -1197,8 +1197,9 @@ public class ExifInterface {
             }
             bytesRead += 2;
             int length = dataInputStream.readUnsignedShort() - 2;
-            if (length < 0)
+            if (length < 0) {
                 throw new IOException("Invalid length");
+            }
             bytesRead += length;
             switch (marker) {
                 case MARKER_APP1: {
@@ -1220,6 +1221,9 @@ public class ExifInterface {
                     length -= 6;
                     if (length <= 0) {
                         throw new IOException("Invalid exif");
+                    }
+                    if (DEBUG) {
+                        Log.d(TAG, "readExifSegment with a byte array (length: " + length + ")");
                     }
                     byte[] bytes = new byte[length];
                     if (dataInputStream.read(bytes) != length) {
@@ -1309,8 +1313,9 @@ public class ExifInterface {
                 case MARKER_APP1: {
                     // Rewrite EXIF segment
                     int length = dataInputStream.readUnsignedShort() - 2;
-                    if (length < 0)
+                    if (length < 0) {
                         throw new IOException("Invalid length");
+                    }
                     bytesRead += 2;
                     int read;
                     while ((read = dataInputStream.read(
@@ -1331,8 +1336,9 @@ public class ExifInterface {
                     // Copy JPEG segment
                     int length = dataInputStream.readUnsignedShort();
                     dataOutputStream.writeUnsignedShort(length);
-                    if (length < 0)
+                    if (length < 0) {
                         throw new IOException("Invalid length");
+                    }
                     length -= 2;
                     bytesRead += 2;
                     int read;
@@ -1385,8 +1391,9 @@ public class ExifInterface {
         }
         firstIfdOffset -= 8;
         if (firstIfdOffset > 0) {
-            if (dataInputStream.skip(firstIfdOffset) != firstIfdOffset)
+            if (dataInputStream.skip(firstIfdOffset) != firstIfdOffset) {
                 throw new IOException("Couldn't jump to first Ifd: " + firstIfdOffset);
+            }
         }
 
         // Read primary image TIFF image file directory.
@@ -1582,8 +1589,16 @@ public class ExifInterface {
     // Reads image file directory, which is a tag group in EXIF.
     private void readImageFileDirectory(ByteOrderAwarenessDataInputStream dataInputStream, int hint)
             throws IOException {
+        if (dataInputStream.peek() + 2 > dataInputStream.mLength) {
+            // Return if there is no data from the offset.
+            return;
+        }
         // See JEITA CP-3451 Figure 5. page 9.
         short numberOfDirectoryEntry = dataInputStream.readShort();
+        if (dataInputStream.peek() + 12 * numberOfDirectoryEntry > dataInputStream.mLength) {
+            // Return if the size of entries is too big.
+            return;
+        }
 
         if (DEBUG) {
             Log.d(TAG, "numberOfDirectoryEntry: " + numberOfDirectoryEntry);
@@ -1595,10 +1610,25 @@ public class ExifInterface {
             int numberOfComponents = dataInputStream.readInt();
             long nextEntryOffset = dataInputStream.peek() + 4;  // next four bytes is for data
                                                                 // offset or value.
+            // Look up a corresponding tag from tag number
+            String tagName = (String) sExifTagMapsForReading[hint].get(tagNumber);
 
             if (DEBUG) {
-                Log.d(TAG, String.format("tagNumber: %d, dataFormat: %d, numberOfComponents: %d",
-                        tagNumber, dataFormat, numberOfComponents));
+                Log.d(TAG, String.format("hint: %d, tagNumber: %d, tagName: %s, dataFormat: %d," +
+                        "numberOfComponents: %d", hint, tagNumber, tagName, dataFormat,
+                        numberOfComponents));
+            }
+
+            if (tagName == null || dataFormat <= 0 ||
+                    dataFormat >= IFD_FORMAT_BYTES_PER_FORMAT.length) {
+                // Skip if the parsed tag number is not defined or invalid data format.
+                if (tagName == null) {
+                    Log.w(TAG, "Skip the tag entry since tag number is not defined: " + tagNumber);
+                } else {
+                    Log.w(TAG, "Skip the tag entry since data format is invalid: " + dataFormat);
+                }
+                dataInputStream.seek(nextEntryOffset);
+                continue;
             }
 
             // Read a value from data field or seek to the value offset which is stored in data
@@ -1609,19 +1639,21 @@ public class ExifInterface {
                 if (DEBUG) {
                     Log.d(TAG, "seek to data offset: " + offset);
                 }
-                dataInputStream.seek(offset);
-            }
-
-            // Look up a corresponding tag from tag number
-            String tagName = (String) sExifTagMapsForReading[hint].get(tagNumber);
-            // Skip if the parsed tag number is not defined.
-            if (tagName == null) {
-                dataInputStream.seek(nextEntryOffset);
-                continue;
+                if (offset + byteCount <= dataInputStream.mLength) {
+                    dataInputStream.seek(offset);
+                } else {
+                     // Skip if invalid data offset.
+                    Log.w(TAG, "Skip the tag entry since data offset is invalid: " + offset);
+                    dataInputStream.seek(nextEntryOffset);
+                    continue;
+                }
             }
 
             // Recursively parse IFD when a IFD pointer tag appears.
             int innerIfdHint = getIfdHintFromTagNumber(tagNumber);
+            if (DEBUG) {
+                Log.d(TAG, "innerIfdHint: " + innerIfdHint + " byteCount: " + byteCount);
+            }
             if (innerIfdHint >= 0) {
                 long offset = -1L;
                 // Get offset from data field
@@ -1650,9 +1682,11 @@ public class ExifInterface {
                 if (DEBUG) {
                     Log.d(TAG, String.format("Offset: %d, tagName: %s", offset, tagName));
                 }
-                if (offset > 0L) {
+                if (offset > 0L && offset < dataInputStream.mLength) {
                     dataInputStream.seek(offset);
                     readImageFileDirectory(dataInputStream, innerIfdHint);
+                } else {
+                    Log.w(TAG, "Skip jump into the IFD since its offset is invalid: " + offset);
                 }
 
                 dataInputStream.seek(nextEntryOffset);
@@ -1683,14 +1717,17 @@ public class ExifInterface {
             }
         }
 
-        long nextIfdOffset = dataInputStream.readUnsignedInt();
-        if (DEBUG) {
-            Log.d(TAG, String.format("nextIfdOffset: %d", nextIfdOffset));
-        }
-        // The next IFD offset needs to be bigger than 8 since the first IFD offset is at least 8.
-        if (nextIfdOffset > 8) {
-            dataInputStream.seek(nextIfdOffset);
-            readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+        if (dataInputStream.peek() + 4 <= dataInputStream.mLength) {
+            long nextIfdOffset = dataInputStream.readUnsignedInt();
+            if (DEBUG) {
+                Log.d(TAG, String.format("nextIfdOffset: %d", nextIfdOffset));
+            }
+            // The next IFD offset needs to be bigger than 8
+            // since the first IFD offset is at least 8.
+            if (nextIfdOffset > 8 && nextIfdOffset < dataInputStream.mLength) {
+                dataInputStream.seek(nextIfdOffset);
+                readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+            }
         }
     }
 
@@ -1748,17 +1785,18 @@ public class ExifInterface {
                 }
 
                 StringBuilder stringBuilder = new StringBuilder();
-                while (true) {
+                while (index < numberOfComponents) {
                     int ch = bytes[index];
-                    if (ch == 0)
+                    if (ch == 0) {
                         break;
-                    if (ch >= 32)
+                    }
+                    if (ch >= 32) {
                         stringBuilder.append((char) ch);
-                    else
+                    }
+                    else {
                         stringBuilder.append('?');
+                    }
                     ++index;
-                    if (index == numberOfComponents)
-                        break;
                 }
                 return stringBuilder.toString();
             }
@@ -1772,8 +1810,9 @@ public class ExifInterface {
     // Gets the corresponding IFD group index of the given tag number for writing Exif Tags.
     private static int getIfdHintFromTagNumber(int tagNumber) {
         for (int i = 0; i < IFD_POINTER_TAG_HINTS.length; ++i) {
-            if (IFD_POINTER_TAGS[i].number == tagNumber)
+            if (IFD_POINTER_TAGS[i].number == tagNumber) {
                 return IFD_POINTER_TAG_HINTS[i];
+            }
         }
         return -1;
     }
@@ -2076,8 +2115,9 @@ public class ExifInterface {
         public void seek(long byteCount) throws IOException {
             mPosition = 0L;
             reset();
-            if (skip(byteCount) != byteCount)
+            if (skip(byteCount) != byteCount) {
                 throw new IOException("Couldn't seek up to the byteCount");
+            }
         }
 
         public long peek() {
@@ -2086,8 +2126,9 @@ public class ExifInterface {
 
         public void readFully(byte[] buffer) throws IOException {
             mPosition += buffer.length;
-            if (mPosition > mLength)
+            if (mPosition > mLength) {
                 throw new EOFException();
+            }
             if (super.read(buffer, 0, buffer.length) != buffer.length) {
                 throw new IOException("Couldn't read up to the length of buffer");
             }
@@ -2095,22 +2136,26 @@ public class ExifInterface {
 
         public byte readByte() throws IOException {
             ++mPosition;
-            if (mPosition > mLength)
+            if (mPosition > mLength) {
                 throw new EOFException();
+            }
             int ch = super.read();
-            if (ch < 0)
+            if (ch < 0) {
                 throw new EOFException();
+            }
             return (byte) ch;
         }
 
         public short readShort() throws IOException {
             mPosition += 2;
-            if (mPosition > mLength)
+            if (mPosition > mLength) {
                 throw new EOFException();
+            }
             int ch1 = super.read();
             int ch2 = super.read();
-            if ((ch1 | ch2) < 0)
+            if ((ch1 | ch2) < 0) {
                 throw new EOFException();
+            }
             if (mByteOrder == LITTLE_ENDIAN) {
                 return (short) ((ch2 << 8) + (ch1));
             } else if (mByteOrder == BIG_ENDIAN) {
@@ -2121,14 +2166,16 @@ public class ExifInterface {
 
         public int readInt() throws IOException {
             mPosition += 4;
-            if (mPosition > mLength)
+            if (mPosition > mLength) {
                 throw new EOFException();
+            }
             int ch1 = super.read();
             int ch2 = super.read();
             int ch3 = super.read();
             int ch4 = super.read();
-            if ((ch1 | ch2 | ch3 | ch4) < 0)
+            if ((ch1 | ch2 | ch3 | ch4) < 0) {
                 throw new EOFException();
+            }
             if (mByteOrder == LITTLE_ENDIAN) {
                 return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + ch1);
             } else if (mByteOrder == BIG_ENDIAN) {
@@ -2146,12 +2193,14 @@ public class ExifInterface {
 
         public int readUnsignedShort() throws IOException {
             mPosition += 2;
-            if (mPosition > mLength)
+            if (mPosition > mLength) {
                 throw new EOFException();
+            }
             int ch1 = super.read();
             int ch2 = super.read();
-            if ((ch1 | ch2) < 0)
+            if ((ch1 | ch2) < 0) {
                 throw new EOFException();
+            }
             if (mByteOrder == LITTLE_ENDIAN) {
                 return ((ch2 << 8) + (ch1));
             } else if (mByteOrder == BIG_ENDIAN) {
@@ -2166,8 +2215,9 @@ public class ExifInterface {
 
         public long readLong() throws IOException {
             mPosition += 8;
-            if (mPosition > mLength)
+            if (mPosition > mLength) {
                 throw new EOFException();
+            }
             int ch1 = super.read();
             int ch2 = super.read();
             int ch3 = super.read();
@@ -2176,8 +2226,9 @@ public class ExifInterface {
             int ch6 = super.read();
             int ch7 = super.read();
             int ch8 = super.read();
-            if ((ch1 | ch2 | ch3 | ch4 | ch5 | ch6 | ch7 | ch8) < 0)
+            if ((ch1 | ch2 | ch3 | ch4 | ch5 | ch6 | ch7 | ch8) < 0) {
                 throw new EOFException();
+            }
             if (mByteOrder == LITTLE_ENDIAN) {
                 return (((long) ch8 << 56) + ((long) ch7 << 48) + ((long) ch6 << 40)
                         + ((long) ch5 << 32) + ((long) ch4 << 24) + ((long) ch3 << 16)
