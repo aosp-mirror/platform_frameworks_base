@@ -27,6 +27,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 final class RootScanner {
     /**
@@ -95,15 +96,19 @@ final class RootScanner {
      * Stops background thread and wait for its termination.
      * @throws InterruptedException
      */
-    synchronized void pause() throws InterruptedException {
+    synchronized void pause() throws InterruptedException, TimeoutException {
         if (mExecutor == null) {
             return;
         }
         mExecutor.shutdownNow();
-        if (!mExecutor.awaitTermination(AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS)) {
-            Log.e(MtpDocumentsProvider.TAG, "Failed to terminate RootScanner's background thread.");
+        try {
+            if (!mExecutor.awaitTermination(AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException(
+                        "Timeout for terminating RootScanner's background thread.");
+            }
+        } finally {
+            mExecutor = null;
         }
-        mExecutor = null;
     }
 
     /**
@@ -173,6 +178,9 @@ final class RootScanner {
                 }
                 mFirstScanCompleted.countDown();
                 pollingCount++;
+                if (devices.length == 0) {
+                    break;
+                }
                 try {
                     // Use SHORT_POLLING_PERIOD for the first SHORT_POLLING_TIMES because it is
                     // more likely to add new root just after the device is added.
