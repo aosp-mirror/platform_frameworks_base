@@ -9212,6 +9212,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     if (start >= 0 && start <= end && end <= text.length()) {
                         Selection.setSelection((Spannable) text, start, end);
+                        // Make sure selection mode is engaged.
+                        if (mEditor != null) {
+                            mEditor.startSelectionActionMode();
+                        }
                         return true;
                     }
                 }
