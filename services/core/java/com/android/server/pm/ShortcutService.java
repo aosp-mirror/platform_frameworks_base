@@ -114,7 +114,7 @@ import java.util.function.Predicate;
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
 
-    static final boolean DEBUG = true; // STOPSHIP if true
+    static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
 
     @VisibleForTesting
@@ -687,6 +687,10 @@ public class ShortcutService extends IShortcutService.Stub {
         return mRawLastResetTime + mResetInterval;
     }
 
+    static boolean isClockValid(long time) {
+        return time >= 1420070400; // Thu, 01 Jan 2015 00:00:00 GMT
+    }
+
     /**
      * Update the last reset time.
      */
@@ -701,8 +705,10 @@ public class ShortcutService extends IShortcutService.Stub {
             mRawLastResetTime = now;
         } else if (now < mRawLastResetTime) {
             // Clock rewound.
-            // TODO Randomize??
-            mRawLastResetTime = now;
+            if (isClockValid(now)) {
+                // TODO Randomize??
+                mRawLastResetTime = now;
+            }
         } else {
             // TODO Do it properly.
             while ((mRawLastResetTime + mResetInterval) <= now) {
@@ -1288,15 +1294,14 @@ public class ShortcutService extends IShortcutService.Stub {
     public void resetThrottling() {
         enforceSystemOrShell();
 
-        resetThrottlingInner();
+        resetThrottlingInner(getCallingUserId());
     }
 
-    @VisibleForTesting
-    void resetThrottlingInner() {
+    void resetThrottlingInner(@UserIdInt int userId) {
         synchronized (mLock) {
-            mRawLastResetTime = injectCurrentTimeMillis();
+            getUserShortcutsLocked(userId).resetThrottling();
         }
-        scheduleSaveBaseState();
+        scheduleSaveUser(userId);
         Slog.i(TAG, "ShortcutManager: throttling counter reset");
     }
 
@@ -1707,8 +1712,10 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println();
         }
 
-        private int handleResetThrottling() {
-            resetThrottling();
+        private int handleResetThrottling() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
+
+            resetThrottlingInner(mUserId);
             return 0;
         }
 
@@ -1786,6 +1793,10 @@ public class ShortcutService extends IShortcutService.Stub {
     // Injection point.
     int injectBinderCallingUid() {
         return getCallingUid();
+    }
+
+    final int getCallingUserId() {
+        return UserHandle.getUserId(injectBinderCallingUid());
     }
 
     File injectSystemDataPath() {
@@ -1928,6 +1939,12 @@ class UserShortcuts {
         s.scheduleSaveUser(mUserId);
     }
 
+    public void resetThrottling() {
+        for (int i = mPackages.size() - 1; i >= 0; i--) {
+            mPackages.valueAt(i).resetThrottling();
+        }
+    }
+
     public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
         pw.print(prefix);
         pw.print("User: ");
@@ -1983,7 +2000,6 @@ class PackageShortcuts {
         mPackageName = packageName;
     }
 
-    @GuardedBy("mLock")
     @Nullable
     public ShortcutInfo findShortcutById(String id) {
         return mShortcuts.get(id);
@@ -2010,7 +2026,6 @@ class PackageShortcuts {
      *
      * It checks the max number of dynamic shortcuts.
      */
-    @GuardedBy("mLock")
     public void updateShortcutWithCapping(@NonNull ShortcutService s,
             @NonNull ShortcutInfo newShortcut) {
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
@@ -2060,7 +2075,6 @@ class PackageShortcuts {
         }
     }
 
-    @GuardedBy("mLock")
     public void deleteAllDynamicShortcuts(@NonNull ShortcutService s) {
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_DYNAMIC);
@@ -2069,7 +2083,6 @@ class PackageShortcuts {
         mDynamicShortcutCount = 0;
     }
 
-    @GuardedBy("mLock")
     public void deleteDynamicWithId(@NonNull ShortcutService s, @NonNull String shortcutId) {
         final ShortcutInfo oldShortcut = mShortcuts.get(shortcutId);
 
@@ -2086,7 +2099,6 @@ class PackageShortcuts {
         }
     }
 
-    @GuardedBy("mLock")
     public void replacePinned(@NonNull ShortcutService s, String launcherPackage,
             List<String> shortcutIds) {
 
@@ -2111,12 +2123,11 @@ class PackageShortcuts {
     /**
      * Number of calls that the caller has made, since the last reset.
      */
-    @GuardedBy("mLock")
     public int getApiCallCount(@NonNull ShortcutService s) {
         final long last = s.getLastResetTimeLocked();
 
         final long now = s.injectCurrentTimeMillis();
-        if (mLastResetTime > now) {
+        if (ShortcutService.isClockValid(now) && mLastResetTime > now) {
             // Clock rewound. // TODO Test it
             mLastResetTime = now;
         }
@@ -2133,7 +2144,6 @@ class PackageShortcuts {
      * If the caller app hasn't been throttled yet, increment {@link #mApiCallCount}
      * and return true.  Otherwise just return false.
      */
-    @GuardedBy("mLock")
     public boolean tryApiCall(@NonNull ShortcutService s) {
         if (getApiCallCount(s) >= s.mMaxDailyUpdates) {
             return false;
@@ -2142,7 +2152,6 @@ class PackageShortcuts {
         return true;
     }
 
-    @GuardedBy("mLock")
     public void resetRateLimitingForCommandLine() {
         mApiCallCount = 0;
         mLastResetTime = 0;
@@ -2151,7 +2160,6 @@ class PackageShortcuts {
     /**
      * Find all shortcuts that match {@code query}.
      */
-    @GuardedBy("mLock")
     public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
         for (int i = 0; i < mShortcuts.size(); i++) {
@@ -2160,6 +2168,10 @@ class PackageShortcuts {
                 result.add(si.clone(cloneFlag));
             }
         }
+    }
+
+    public void resetThrottling() {
+        mApiCallCount = 0;
     }
 
     public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
