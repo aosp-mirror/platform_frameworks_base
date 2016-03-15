@@ -223,8 +223,7 @@ TEST(RecordingCanvas, drawColor) {
     auto op = *(dl->getOps()[0]);
     EXPECT_EQ(RecordedOpId::RectOp, op.opId);
     EXPECT_EQ(nullptr, op.localClip);
-    EXPECT_TRUE(op.unmappedBounds.contains(Rect(-1000, -1000, 1000, 1000)))
-            << "no clip, unmappedBounds should resolve to be much larger than DL bounds";
+    EXPECT_TRUE(op.unmappedBounds.contains(Rect(200, 200))) << "Expect recording/clip bounds";
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {

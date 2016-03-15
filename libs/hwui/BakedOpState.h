@@ -55,6 +55,10 @@ public:
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
             const RecordedOp& recordedOp, bool expandForStroke);
 
+    // Constructor for unbounded ops *with* transform/clip
+    ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
+            const Matrix4& localTransform, const ClipBase* localClip);
+
     // Constructor for unbounded ops without transform/clip (namely shadows)
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot);
 
@@ -111,8 +115,14 @@ public:
         return bakedState;
     }
 
+    static BakedOpState* tryConstructUnbounded(LinearAllocator& allocator,
+            Snapshot& snapshot, const RecordedOp& recordedOp) {
+        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
+        return allocator.create_trivial<BakedOpState>(allocator, snapshot, recordedOp);
+    }
+
     enum class StrokeBehavior {
-        // stroking is forced, regardless of style on paint
+        // stroking is forced, regardless of style on paint (such as for lines)
         Forced,
         // stroking is defined by style on paint
         StyleDefined,
@@ -163,6 +173,13 @@ private:
     BakedOpState(LinearAllocator& allocator, Snapshot& snapshot,
             const RecordedOp& recordedOp, bool expandForStroke)
             : computedState(allocator, snapshot, recordedOp, expandForStroke)
+            , alpha(snapshot.alpha)
+            , roundRectClipState(snapshot.roundRectClipState)
+            , op(&recordedOp) {}
+
+    // TODO: fix this brittleness
+    BakedOpState(LinearAllocator& allocator, Snapshot& snapshot, const RecordedOp& recordedOp)
+            : computedState(allocator, snapshot, recordedOp.localMatrix, recordedOp.localClip)
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
             , op(&recordedOp) {}
