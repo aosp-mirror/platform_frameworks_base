@@ -86,12 +86,6 @@ public final class Shared {
      */
     public static final String EXTRA_IGNORE_STATE = "ignoreState";
 
-
-    /**
-     * String prefix used to indicate the document is a directory.
-     */
-    public static final char DIR_PREFIX = '\001';
-
     private static final Collator sCollator;
 
     static {
@@ -149,12 +143,6 @@ public final class Shared {
         if (leftEmpty && rightEmpty) return 0;
         if (leftEmpty) return -1;
         if (rightEmpty) return 1;
-
-        final boolean leftDir = (lhs.charAt(0) == DIR_PREFIX);
-        final boolean rightDir = (rhs.charAt(0) == DIR_PREFIX);
-
-        if (leftDir && !rightDir) return -1;
-        if (rightDir && !leftDir) return 1;
 
         return sCollator.compare(lhs, rhs);
     }
