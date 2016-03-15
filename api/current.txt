@@ -30763,6 +30763,7 @@ package android.provider {
   public static class CallLog.Calls implements android.provider.BaseColumns {
     ctor public CallLog.Calls();
     method public static java.lang.String getLastOutgoingCall(android.content.Context);
+    field public static final int ANSWERED_EXTERNALLY_TYPE = 7; // 0x7
     field public static final int BLOCKED_TYPE = 6; // 0x6
     field public static final java.lang.String CACHED_FORMATTED_NUMBER = "formatted_number";
     field public static final java.lang.String CACHED_LOOKUP_URI = "lookup_uri";
@@ -30785,6 +30786,7 @@ package android.provider {
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String EXTRA_CALL_TYPE_FILTER = "android.provider.extra.CALL_TYPE_FILTER";
     field public static final java.lang.String FEATURES = "features";
+    field public static final int FEATURES_PULLED_EXTERNALLY = 2; // 0x2
     field public static final int FEATURES_VIDEO = 1; // 0x1
     field public static final java.lang.String GEOCODED_LOCATION = "geocoded_location";
     field public static final int INCOMING_TYPE = 1; // 0x1
@@ -36059,9 +36061,11 @@ package android.telecom {
     method public void phoneAccountSelected(android.telecom.PhoneAccountHandle, boolean);
     method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
+    method public void pullExternalCall();
     method public void registerCallback(android.telecom.Call.Callback);
     method public void registerCallback(android.telecom.Call.Callback, android.os.Handler);
     method public void reject(boolean, java.lang.String);
+    method public void sendCallEvent(java.lang.String, android.os.Bundle);
     method public void splitFromConference();
     method public void stopDtmfTone();
     method public void swapConference();
@@ -36075,6 +36079,7 @@ package android.telecom {
     field public static final int STATE_DISCONNECTING = 10; // 0xa
     field public static final int STATE_HOLDING = 3; // 0x3
     field public static final int STATE_NEW = 0; // 0x0
+    field public static final int STATE_PULLING_CALL = 11; // 0xb
     field public static final int STATE_RINGING = 2; // 0x2
     field public static final int STATE_SELECT_PHONE_ACCOUNT = 8; // 0x8
   }
@@ -36085,6 +36090,7 @@ package android.telecom {
     method public void onCannedTextResponsesLoaded(android.telecom.Call, java.util.List<java.lang.String>);
     method public void onChildrenChanged(android.telecom.Call, java.util.List<android.telecom.Call>);
     method public void onConferenceableCallsChanged(android.telecom.Call, java.util.List<android.telecom.Call>);
+    method public void onConnectionEvent(android.telecom.Call, java.lang.String, android.os.Bundle);
     method public void onDetailsChanged(android.telecom.Call, android.telecom.Call.Details);
     method public void onParentChanged(android.telecom.Call, android.telecom.Call);
     method public void onPostDialWait(android.telecom.Call, java.lang.String);
@@ -36115,6 +36121,7 @@ package android.telecom {
     method public static java.lang.String propertiesToString(int);
     field public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 4194304; // 0x400000
     field public static final int CAPABILITY_CAN_PAUSE_VIDEO = 1048576; // 0x100000
+    field public static final int CAPABILITY_CAN_PULL_CALL = 8388608; // 0x800000
     field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
     field public static final int CAPABILITY_HOLD = 1; // 0x1
     field public static final int CAPABILITY_MANAGE_CONFERENCE = 128; // 0x80
@@ -36134,6 +36141,7 @@ package android.telecom {
     field public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 4; // 0x4
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
     field public static final int PROPERTY_HIGH_DEF_AUDIO = 16; // 0x10
+    field public static final int PROPERTY_IS_EXTERNAL_CALL = 64; // 0x40
     field public static final int PROPERTY_WIFI = 8; // 0x8
     field public static final int PROPERTY_WORK_CALL = 32; // 0x20
   }
@@ -36248,15 +36256,18 @@ package android.telecom {
     method public void onAnswer(int);
     method public void onAnswer();
     method public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method public void onCallEvent(java.lang.String, android.os.Bundle);
     method public void onDisconnect();
     method public void onHold();
     method public void onPlayDtmfTone(char);
     method public void onPostDialContinue(boolean);
+    method public void onPullExternalCall();
     method public void onReject();
     method public void onSeparate();
     method public void onStateChanged(int);
     method public void onStopDtmfTone();
     method public void onUnhold();
+    method public void sendConnectionEvent(java.lang.String, android.os.Bundle);
     method public final void setActive();
     method public final void setAddress(android.net.Uri, int);
     method public final void setAudioModeIsVoip(boolean);
@@ -36280,9 +36291,11 @@ package android.telecom {
     method public static java.lang.String stateToString(int);
     field public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 8388608; // 0x800000
     field public static final int CAPABILITY_CAN_PAUSE_VIDEO = 1048576; // 0x100000
+    field public static final int CAPABILITY_CAN_PULL_CALL = 33554432; // 0x2000000
     field public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 524288; // 0x80000
     field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
     field public static final int CAPABILITY_HOLD = 1; // 0x1
+    field public static final int CAPABILITY_IS_EXTERNAL_CALL = 16777216; // 0x1000000
     field public static final int CAPABILITY_MANAGE_CONFERENCE = 128; // 0x80
     field public static final int CAPABILITY_MERGE_CONFERENCE = 4; // 0x4
     field public static final int CAPABILITY_MUTE = 64; // 0x40
@@ -36296,6 +36309,7 @@ package android.telecom {
     field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 2048; // 0x800
     field public static final int CAPABILITY_SUPPORT_HOLD = 2; // 0x2
     field public static final int CAPABILITY_SWAP_CONFERENCE = 8; // 0x8
+    field public static final java.lang.String EVENT_CALL_PULL_FAILED = "android.telecom.event.CALL_PULL_FAILED";
     field public static final java.lang.String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
     field public static final java.lang.String EXTRA_CHILD_ADDRESS = "android.telecom.extra.CHILD_ADDRESS";
     field public static final java.lang.String EXTRA_LAST_FORWARDED_NUMBER = "android.telecom.extra.LAST_FORWARDED_NUMBER";
@@ -36305,6 +36319,7 @@ package android.telecom {
     field public static final int STATE_HOLDING = 5; // 0x5
     field public static final int STATE_INITIALIZING = 0; // 0x0
     field public static final int STATE_NEW = 1; // 0x1
+    field public static final int STATE_PULLING_CALL = 7; // 0x7
     field public static final int STATE_RINGING = 2; // 0x2
   }
 
@@ -36382,7 +36397,9 @@ package android.telecom {
     method public java.lang.String getReason();
     method public int getTone();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ANSWERED_ELSEWHERE = 11; // 0xb
     field public static final int BUSY = 7; // 0x7
+    field public static final int CALL_PULLED = 12; // 0xc
     field public static final int CANCELED = 4; // 0x4
     field public static final int CONNECTION_MANAGER_NOT_SUPPORTED = 10; // 0xa
     field public static final android.os.Parcelable.Creator<android.telecom.DisconnectCause> CREATOR;
@@ -36418,6 +36435,7 @@ package android.telecom {
     method public void onCallAudioStateChanged(android.telecom.CallAudioState);
     method public void onCallRemoved(android.telecom.Call);
     method public void onCanAddCallChanged(boolean);
+    method public void onConnectionEvent(android.telecom.Call, java.lang.String, android.os.Bundle);
     method public void onSilenceRinger();
     method public final void setAudioRoute(int);
     method public final void setMuted(boolean);
@@ -36568,6 +36586,7 @@ package android.telecom {
     method public boolean isVoipAudioMode();
     method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
+    method public void pullExternalCall();
     method public void registerCallback(android.telecom.RemoteConnection.Callback);
     method public void registerCallback(android.telecom.RemoteConnection.Callback, android.os.Handler);
     method public void reject();
@@ -36584,6 +36603,7 @@ package android.telecom {
     method public void onConferenceChanged(android.telecom.RemoteConnection, android.telecom.RemoteConference);
     method public void onConferenceableConnectionsChanged(android.telecom.RemoteConnection, java.util.List<android.telecom.RemoteConnection>);
     method public void onConnectionCapabilitiesChanged(android.telecom.RemoteConnection, int);
+    method public void onConnectionEvent(android.telecom.RemoteConnection, java.lang.String, android.os.Bundle);
     method public void onDestroyed(android.telecom.RemoteConnection);
     method public void onDisconnected(android.telecom.RemoteConnection, android.telecom.DisconnectCause);
     method public void onExtrasChanged(android.telecom.RemoteConnection, android.os.Bundle);
@@ -36681,6 +36701,7 @@ package android.telecom {
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
     field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecom.extra.GATEWAY_ORIGINAL_ADDRESS";
     field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecom.extra.GATEWAY_PROVIDER_PACKAGE";
+    field public static final java.lang.String METADATA_INCLUDE_EXTERNAL_CALLS = "android.telecom.INCLUDE_EXTERNAL_CALLS";
     field public static final java.lang.String METADATA_IN_CALL_SERVICE_RINGING = "android.telecom.IN_CALL_SERVICE_RINGING";
     field public static final java.lang.String METADATA_IN_CALL_SERVICE_UI = "android.telecom.IN_CALL_SERVICE_UI";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1

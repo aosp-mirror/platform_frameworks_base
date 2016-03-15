@@ -16,6 +16,7 @@
 
 package com.android.internal.telecom;
 
+import android.os.Bundle;
 import android.telecom.PhoneAccountHandle;
 
 /**
@@ -60,4 +61,8 @@ oneway interface IInCallAdapter {
     void turnOnProximitySensor();
 
     void turnOffProximitySensor(boolean screenOnImmediately);
+
+    void pullExternalCall(String callId);
+
+    void sendCallEvent(String callId, String event, in Bundle extras);
 }

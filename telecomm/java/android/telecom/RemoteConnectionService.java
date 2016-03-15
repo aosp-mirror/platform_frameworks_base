@@ -332,9 +332,10 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void onConnectionEvent(String callId, String event) {
+        public void onConnectionEvent(String callId, String event, Bundle extras) {
             if (mConnectionById.containsKey(callId)) {
-                findConnectionForAction(callId, "onConnectionEvent").onConnectionEvent(event);
+                findConnectionForAction(callId, "onConnectionEvent").onConnectionEvent(event,
+                        extras);
             }
         }
     };

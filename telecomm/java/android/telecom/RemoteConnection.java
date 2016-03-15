@@ -212,12 +212,14 @@ public final class RemoteConnection {
 
         /**
          * Handles a connection event propagated to this {@link RemoteConnection}.
+         * <p>
+         * Connection events originate from {@link Connection#sendConnectionEvent(String, Bundle)}.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param event The connection event.
-         * @hide
+         * @param extras Extras associated with the event.
          */
-        public void onConnectionEvent(RemoteConnection connection, String event) {}
+        public void onConnectionEvent(RemoteConnection connection, String event, Bundle extras) {}
     }
 
     /**
@@ -962,6 +964,20 @@ public final class RemoteConnection {
     }
 
     /**
+     * Instructs this {@link RemoteConnection} to pull itself to the local device.
+     * <p>
+     * See {@link Call#pullExternalCall()} for more information.
+     */
+    public void pullExternalCall() {
+        try {
+            if (mConnected) {
+                mConnectionService.pullExternalCall(mConnectionId);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
      * Set the audio state of this {@code RemoteConnection}.
      *
      * @param state The audio state of this {@code RemoteConnection}.
@@ -1301,14 +1317,14 @@ public final class RemoteConnection {
     }
 
     /** @hide */
-    void onConnectionEvent(final String event) {
+    void onConnectionEvent(final String event, final Bundle extras) {
         for (CallbackRecord record : mCallbackRecords) {
             final RemoteConnection connection = this;
             final Callback callback = record.getCallback();
             record.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onConnectionEvent(connection, event);
+                    callback.onConnectionEvent(connection, event, extras);
                 }
             });
         }
