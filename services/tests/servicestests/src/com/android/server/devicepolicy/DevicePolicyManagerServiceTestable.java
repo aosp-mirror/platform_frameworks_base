@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
+import android.telephony.TelephonyManager;
 import android.view.IWindowManager;
 
 import java.io.File;
@@ -321,6 +322,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         boolean securityLogIsLoggingEnabled() {
             return context.settings.securityLogIsLoggingEnabled();
+        }
+
+        @Override
+        TelephonyManager getTelephonyManager() {
+            return context.telephonyManager;
         }
     }
 }
