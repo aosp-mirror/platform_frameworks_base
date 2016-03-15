@@ -46,8 +46,4 @@
         <item name="android:maxHeight">3dp</item>    
     </style>
 
-    <!--  TODO: use the proper dialog and/or inline if not overriding -->
-    <style name="AlertDialogTheme" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
-    </style>
-
 </resources>

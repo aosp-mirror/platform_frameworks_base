@@ -18,6 +18,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:theme="@style/Theme.AppCompat.Light.Dialog.Alert"
     android:orientation="vertical"
     android:paddingEnd="24dp"
     android:paddingStart="24dp" >
@@ -28,18 +29,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingEnd="24dp"
-        android:paddingStart="24dp"
-        android:paddingTop="24dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-        android:textColor="@*android:color/primary_text_default_material_light" >
+        android:paddingStart="32dp"
+        android:paddingTop="24dp">
     </TextView>
 
     <CheckBox
         android:id="@+id/do_not_ask_checkbox"
-        style="?android:attr/textAppearanceSmall"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dip"
         android:text="@string/never_ask_again"
+        android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone" />
 </LinearLayout>
