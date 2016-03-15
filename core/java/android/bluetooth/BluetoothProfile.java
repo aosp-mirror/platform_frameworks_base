@@ -131,6 +131,12 @@ public interface BluetoothProfile {
     public static final int HEADSET_CLIENT = 16;
 
     /**
+     * PBAP Client
+     * @hide
+     */
+    public static final int PBAP_CLIENT = 17;
+
+    /**
      * Default priority for devices that we try to auto-connect to and
      * and allow incoming connections for the profile
      * @hide
