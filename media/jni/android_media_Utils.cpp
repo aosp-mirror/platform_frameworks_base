@@ -307,6 +307,11 @@ status_t ConvertMessageToMap(
         AMessage::Type valueType;
         const char *key = msg->getEntryNameAt(i, &valueType);
 
+        if (!strncmp(key, "android._", 9)) {
+            // don't expose private keys (starting with android._)
+            continue;
+        }
+
         jobject valueObj = NULL;
 
         switch (valueType) {
@@ -459,6 +464,11 @@ status_t ConvertKeyValueArraysToMessage(
 
         env->ReleaseStringUTFChars((jstring)keyObj, tmp);
         tmp = NULL;
+
+        if (key.startsWith("android._")) {
+            // don't propagate private keys (starting with android._)
+            continue;
+        }
 
         jobject valueObj = env->GetObjectArrayElement(values, i);
 
