@@ -19,6 +19,7 @@ package android.media.tv;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
@@ -1241,6 +1242,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
     public void setParentalControlsEnabled(boolean enabled) {
         try {
             mService.setParentalControlsEnabled(enabled, mUserId);
@@ -1292,6 +1294,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
     public void addBlockedRating(@NonNull TvContentRating rating) {
         Preconditions.checkNotNull(rating);
         try {
@@ -1310,6 +1313,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
     public void removeBlockedRating(@NonNull TvContentRating rating) {
         Preconditions.checkNotNull(rating);
         try {
@@ -1444,6 +1448,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     public List<TvInputHardwareInfo> getHardwareList() {
         try {
             return mService.getHardwareList();
@@ -1462,6 +1467,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     public Hardware acquireTvInputHardware(int deviceId, final HardwareCallback callback,
             TvInputInfo info) {
         try {
@@ -1488,6 +1494,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     public void releaseTvInputHardware(int deviceId, Hardware hardware) {
         try {
             mService.releaseTvInputHardware(deviceId, hardware.getInterface(), mUserId);
