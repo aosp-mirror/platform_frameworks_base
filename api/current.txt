@@ -13035,9 +13035,9 @@ package android.graphics.drawable {
     method public void setPaddingMode(int);
     method public void setPaddingRelative(int, int, int, int);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
+    field public static final int INSET_UNDEFINED = -2147483648; // 0x80000000
     field public static final int PADDING_MODE_NEST = 0; // 0x0
     field public static final int PADDING_MODE_STACK = 1; // 0x1
-    field public static final int UNDEFINED_INSET = -2147483648; // 0x80000000
   }
 
   public class LevelListDrawable extends android.graphics.drawable.DrawableContainer {
