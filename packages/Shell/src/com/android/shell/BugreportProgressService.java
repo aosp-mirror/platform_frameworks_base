@@ -454,21 +454,15 @@ public class BugreportProgressService extends Service {
         final String name =
                 info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
 
-        final Notification notification = new Notification.Builder(mContext)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+        final Notification notification = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(name)
                 .setContentInfo(percentText)
                 .setProgress(info.max, info.progress, false)
                 .setOngoing(true)
-                .setLocalOnly(true)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
                 .setContentIntent(infoPendingIntent)
-                .addAction(infoAction)
-                .addAction(screenshotAction)
-                .addAction(cancelAction)
+                .setActions(infoAction, screenshotAction, cancelAction)
                 .build();
 
         if (info.finished) {
@@ -928,17 +922,13 @@ public class BugreportProgressService extends Service {
             title = context.getString(R.string.bugreport_finished_title, info.id);
             content = context.getString(R.string.bugreport_finished_text);
         }
-        final Notification.Builder builder = new Notification.Builder(context)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+        final Notification.Builder builder = newBaseNotification(context)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(content)
                 .setContentIntent(PendingIntent.getService(context, info.id, shareIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT))
-                .setDeleteIntent(newCancelIntent(context, info))
-                .setLocalOnly(true)
-                .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+                .setDeleteIntent(newCancelIntent(context, info));
 
         if (!TextUtils.isEmpty(info.name)) {
             builder.setContentInfo(info.name);
@@ -955,16 +945,21 @@ public class BugreportProgressService extends Service {
      */
     private static void sendBugreportBeingUpdatedNotification(Context context, int id) {
         final String title = context.getString(R.string.bugreport_updating_title);
-        final Notification.Builder builder = new Notification.Builder(context)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+        final Notification.Builder builder = newBaseNotification(context)
                 .setContentTitle(title)
                 .setTicker(title)
-                .setContentText(context.getString(R.string.bugreport_updating_wait))
+                .setContentText(context.getString(R.string.bugreport_updating_wait));
+        Log.v(TAG, "Sending 'Updating zip' notification for ID " + id + ": " + title);
+        NotificationManager.from(context).notify(TAG, id, builder.build());
+    }
+
+    private static Notification.Builder newBaseNotification(Context context) {
+        return new Notification.Builder(context)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
-        Log.v(TAG, "Sending 'Updating zip' notification for ID " + id + ": " + title);
-        NotificationManager.from(context).notify(TAG, id, builder.build());
     }
 
     /**
@@ -1281,9 +1276,6 @@ public class BugreportProgressService extends Service {
                         if (hasFocus) {
                             return;
                         }
-                        // Select-all is useful just initially, since the date-based filename is
-                        // full of hyphens.
-                        mInfoName.setSelectAllOnFocus(false);
                         sanitizeName();
                     }
                 });
