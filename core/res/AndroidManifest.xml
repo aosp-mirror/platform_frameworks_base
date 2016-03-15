@@ -1240,8 +1240,7 @@
     <eat-comment />
 
     <!-- Allows access to the list of accounts in the Accounts Service.
-         <p>Protection level: dangerous
-         @deprecated Not operative for apps apps with targetSdkVersion >= 24.
+        <p>Protection level: normal
     -->
     <permission android:name="android.permission.GET_ACCOUNTS"
         android:permissionGroup="android.permission-group.CONTACTS"
