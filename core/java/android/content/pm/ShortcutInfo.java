@@ -524,7 +524,7 @@ public class ShortcutInfo implements Parcelable {
     }
 
     /** @hide*/
-    public void setFlags(@ShortcutFlags int flags) {
+    public void replaceFlags(@ShortcutFlags int flags) {
         mFlags = flags;
     }
 

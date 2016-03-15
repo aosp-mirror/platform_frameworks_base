@@ -159,6 +159,8 @@ public class ShortcutService extends IShortcutService.Stub {
     static final String TAG_EXTRAS = "extras";
     static final String TAG_SHORTCUT = "shortcut";
     static final String TAG_LAUNCHER = "launcher";
+    static final String TAG_PIN = "pin";
+    static final String TAG_LAUNCHER_PINS = "launcher-pins";
 
     static final String ATTR_VALUE = "value";
     static final String ATTR_NAME = "name";
@@ -174,6 +176,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final String ATTR_FLAGS = "flags";
     static final String ATTR_ICON_RES = "icon-res";
     static final String ATTR_BITMAP_PATH = "bitmap-path";
+    static final String ATTR_PACKAGE_NAME = "package-name";
 
     @VisibleForTesting
     interface ConfigConstants {
@@ -723,7 +726,7 @@ public class ShortcutService extends IShortcutService.Stub {
     /** Return the per-user state. */
     @GuardedBy("mLock")
     @NonNull
-    private UserShortcuts getUserShortcutsLocked(@UserIdInt int userId) {
+    UserShortcuts getUserShortcutsLocked(@UserIdInt int userId) {
         UserShortcuts userPackages = mUsers.get(userId);
         if (userPackages == null) {
             userPackages = loadUserLocked(userId);
@@ -738,15 +741,16 @@ public class ShortcutService extends IShortcutService.Stub {
     /** Return the per-user per-package state. */
     @GuardedBy("mLock")
     @NonNull
-    private PackageShortcuts getPackageShortcutsLocked(
+    PackageShortcuts getPackageShortcutsLocked(
             @NonNull String packageName, @UserIdInt int userId) {
-        final UserShortcuts userPackages = getUserShortcutsLocked(userId);
-        PackageShortcuts shortcuts = userPackages.getPackages().get(packageName);
-        if (shortcuts == null) {
-            shortcuts = new PackageShortcuts(userId, packageName);
-            userPackages.getPackages().put(packageName, shortcuts);
-        }
-        return shortcuts;
+        return getUserShortcutsLocked(userId).getPackageShortcuts(packageName);
+    }
+
+    @GuardedBy("mLock")
+    @NonNull
+    LauncherShortcuts getLauncherShortcuts(
+            @NonNull String packageName, @UserIdInt int userId) {
+        return getUserShortcutsLocked(userId).getLauncherShortcuts(packageName);
     }
 
     // === Caller validation ===
@@ -1057,7 +1061,7 @@ public class ShortcutService extends IShortcutService.Stub {
         validatePersistableBundleForXml(shortcut.getIntentPersistableExtras());
         validatePersistableBundleForXml(shortcut.getExtras());
 
-        shortcut.setFlags(0);
+        shortcut.replaceFlags(0);
     }
 
     // KXmlSerializer is strict and doesn't allow certain characters, so we disallow those
@@ -1129,8 +1133,7 @@ public class ShortcutService extends IShortcutService.Stub {
             // Then, add/update all.  We need to make sure to take over "pinned" flag.
             for (int i = 0; i < size; i++) {
                 final ShortcutInfo newShortcut = newShortcuts.get(i);
-                newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
-                ps.updateShortcutWithCapping(this, newShortcut);
+                ps.addDynamicShortcut(this, newShortcut);
             }
         }
         userPackageChanged(packageName, userId);
@@ -1194,8 +1197,7 @@ public class ShortcutService extends IShortcutService.Stub {
             fixUpIncomingShortcutInfo(newShortcut, /* forUpdate= */ false);
 
             // Add it.
-            newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
-            ps.updateShortcutWithCapping(this, newShortcut);
+            ps.addDynamicShortcut(this, newShortcut);
         }
         userPackageChanged(packageName, userId);
 
@@ -1251,7 +1253,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
-        getPackageShortcutsLocked(packageName, userId).findAll(ret, query, cloneFlags);
+        getPackageShortcutsLocked(packageName, userId).findAll(this, ret, query, cloneFlags,
+                /* callingLauncher= */ null);
 
         return new ParceledListSlice<>(ret);
     }
@@ -1406,25 +1409,27 @@ public class ShortcutService extends IShortcutService.Stub {
 
             synchronized (mLock) {
                 if (packageName != null) {
-                    getShortcutsInnerLocked(packageName, changedSince, componentName, queryFlags,
-                            userId, ret, cloneFlag);
+                    getShortcutsInnerLocked(
+                            callingPackage, packageName, changedSince,
+                            componentName, queryFlags, userId, ret, cloneFlag);
                 } else {
                     final ArrayMap<String, PackageShortcuts> packages =
                             getUserShortcutsLocked(userId).getPackages();
                     for (int i = packages.size() - 1; i >= 0; i--) {
                         getShortcutsInnerLocked(
-                                packages.keyAt(i),
-                                changedSince, componentName, queryFlags, userId, ret, cloneFlag);
+                                callingPackage, packages.keyAt(i), changedSince,
+                                componentName, queryFlags, userId, ret, cloneFlag);
                     }
                 }
             }
             return ret;
         }
 
-        private void getShortcutsInnerLocked(@Nullable String packageName,long changedSince,
+        private void getShortcutsInnerLocked(@NonNull String callingPackage,
+                @Nullable String packageName,long changedSince,
                 @Nullable ComponentName componentName, int queryFlags,
                 int userId, ArrayList<ShortcutInfo> ret, int cloneFlag) {
-            getPackageShortcutsLocked(packageName, userId).findAll(ret,
+            getPackageShortcutsLocked(packageName, userId).findAll(ShortcutService.this, ret,
                     (ShortcutInfo si) -> {
                         if (si.getLastChangedTimestamp() < changedSince) {
                             return false;
@@ -1435,12 +1440,12 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                         final boolean matchDynamic =
                                 ((queryFlags & ShortcutQuery.FLAG_GET_DYNAMIC) != 0)
-                                && si.isDynamic();
+                                        && si.isDynamic();
                         final boolean matchPinned =
                                 ((queryFlags & ShortcutQuery.FLAG_GET_PINNED) != 0)
                                         && si.isPinned();
                         return matchDynamic || matchPinned;
-                    }, cloneFlag);
+                    }, cloneFlag, callingPackage);
         }
 
         @Override
@@ -1453,9 +1458,10 @@ public class ShortcutService extends IShortcutService.Stub {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>(ids.size());
             final ArraySet<String> idSet = new ArraySet<>(ids);
             synchronized (mLock) {
-                getPackageShortcutsLocked(packageName, userId).findAll(ret,
+                getPackageShortcutsLocked(packageName, userId).findAll(
+                        ShortcutService.this, ret,
                         (ShortcutInfo si) -> idSet.contains(si.getId()),
-                        ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+                        ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER, callingPackage);
             }
             return ret;
         }
@@ -1468,8 +1474,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
             synchronized (mLock) {
-                getPackageShortcutsLocked(packageName, userId).replacePinned(
-                        ShortcutService.this, callingPackage, shortcutIds);
+                getLauncherShortcuts(callingPackage, userId).pinShortcuts(
+                        ShortcutService.this, packageName, shortcutIds);
             }
             userPackageChanged(packageName, userId);
         }
@@ -1812,6 +1818,14 @@ public class ShortcutService extends IShortcutService.Stub {
         Binder.restoreCallingIdentity(token);
     }
 
+    final void wtf(String message) {
+        Slog.wtf(TAG, message, /* exception= */ null);
+    }
+
+    void wtf(String message, Exception e) {
+        Slog.wtf(TAG, message, e);
+    }
+
     File injectSystemDataPath() {
         return Environment.getDataSystemDirectory();
     }
@@ -1887,6 +1901,8 @@ class UserShortcuts {
 
     private final ArrayMap<String, PackageShortcuts> mPackages = new ArrayMap<>();
 
+    private final ArrayMap<String, LauncherShortcuts> mLaunchers = new ArrayMap<>();
+
     private ComponentName mLauncherComponent;
 
     public UserShortcuts(int userId) {
@@ -1897,13 +1913,41 @@ class UserShortcuts {
         return mPackages;
     }
 
+    public ArrayMap<String, LauncherShortcuts> getLaunchers() {
+        return mLaunchers;
+    }
+
+    public PackageShortcuts getPackageShortcuts(@NonNull String packageName) {
+        PackageShortcuts ret = mPackages.get(packageName);
+        if (ret == null) {
+            ret = new PackageShortcuts(mUserId, packageName);
+            mPackages.put(packageName, ret);
+        }
+        return ret;
+    }
+
+    public LauncherShortcuts getLauncherShortcuts(@NonNull String packageName) {
+        LauncherShortcuts ret = mLaunchers.get(packageName);
+        if (ret == null) {
+            ret = new LauncherShortcuts(mUserId, packageName);
+            mLaunchers.put(packageName, ret);
+        }
+        return ret;
+    }
+
     public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         out.startTag(null, ShortcutService.TAG_USER);
 
         ShortcutService.writeTagValue(out, ShortcutService.TAG_LAUNCHER,
                 mLauncherComponent);
 
-        for (int i = 0; i < mPackages.size(); i++) {
+        final int lsize = mLaunchers.size();
+        for (int i = 0; i < lsize; i++) {
+            mLaunchers.valueAt(i).saveToXml(out);
+        }
+
+        final int psize = mPackages.size();
+        for (int i = 0; i < psize; i++) {
             mPackages.valueAt(i).saveToXml(out);
         }
 
@@ -1924,16 +1968,26 @@ class UserShortcuts {
             final int depth = parser.getDepth();
             final String tag = parser.getName();
             switch (tag) {
-                case ShortcutService.TAG_LAUNCHER:
+                case ShortcutService.TAG_LAUNCHER: {
                     ret.mLauncherComponent = ShortcutService.parseComponentNameAttribute(
                             parser, ShortcutService.ATTR_VALUE);
                     continue;
-                case ShortcutService.TAG_PACKAGE:
+                }
+                case ShortcutService.TAG_PACKAGE: {
                     final PackageShortcuts shortcuts = PackageShortcuts.loadFromXml(parser, userId);
 
                     // Don't use addShortcut(), we don't need to save the icon.
                     ret.getPackages().put(shortcuts.mPackageName, shortcuts);
                     continue;
+                }
+
+                case ShortcutService.TAG_LAUNCHER_PINS: {
+                    final LauncherShortcuts shortcuts =
+                            LauncherShortcuts.loadFromXml(parser, userId);
+
+                    ret.getLaunchers().put(shortcuts.mPackageName, shortcuts);
+                    continue;
+                }
             }
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
@@ -1970,8 +2024,162 @@ class UserShortcuts {
         pw.print(mLauncherComponent);
         pw.println();
 
+        for (int i = 0; i < mLaunchers.size(); i++) {
+            mLaunchers.valueAt(i).dump(s, pw, prefix + "  ");
+        }
+
         for (int i = 0; i < mPackages.size(); i++) {
             mPackages.valueAt(i).dump(s, pw, prefix + "  ");
+        }
+    }
+}
+
+class LauncherShortcuts {
+    private static final String TAG = ShortcutService.TAG;
+
+    @UserIdInt
+    final int mUserId;
+
+    @NonNull
+    final String mPackageName;
+
+    /**
+     * Package name -> IDs.
+     */
+    final private ArrayMap<String, ArraySet<String>> mPinnedShortcuts = new ArrayMap<>();
+
+    LauncherShortcuts(@UserIdInt int userId, @NonNull String packageName) {
+        mUserId = userId;
+        mPackageName = packageName;
+    }
+
+    public void pinShortcuts(@NonNull ShortcutService s, @NonNull String packageName,
+            @NonNull List<String> ids) {
+        final int idSize = ids.size();
+        if (idSize == 0) {
+            mPinnedShortcuts.remove(packageName);
+        } else {
+            final ArraySet<String> prevSet = mPinnedShortcuts.get(packageName);
+
+            // Pin shortcuts.  Make sure only pin the ones that were visible to the caller.
+            // i.e. a non-dynamic, pinned shortcut by *other launchers* shouldn't be pinned here.
+
+            final PackageShortcuts packageShortcuts =
+                    s.getPackageShortcutsLocked(packageName, mUserId);
+            final ArraySet<String> newSet = new ArraySet<>();
+
+            for (int i = 0; i < idSize; i++) {
+                final String id = ids.get(i);
+                final ShortcutInfo si = packageShortcuts.findShortcutById(id);
+                if (si == null) {
+                    continue;
+                }
+                if (si.isDynamic() || (prevSet != null && prevSet.contains(id))) {
+                    newSet.add(id);
+                }
+            }
+            mPinnedShortcuts.put(packageName, newSet);
+        }
+        s.getPackageShortcutsLocked(packageName, mUserId).refreshPinnedFlags(s);
+    }
+
+    /**
+     * Return the pinned shortcut IDs for the publisher package.
+     */
+    public ArraySet<String> getPinnedShortcutIds(@NonNull String packageName) {
+        return mPinnedShortcuts.get(packageName);
+    }
+
+    /**
+     * Persist.
+     */
+    public void saveToXml(XmlSerializer out) throws IOException {
+        out.startTag(null, ShortcutService.TAG_LAUNCHER_PINS);
+        ShortcutService.writeAttr(out, ShortcutService.ATTR_PACKAGE_NAME,
+                mPackageName);
+
+        final int size = mPinnedShortcuts.size();
+        for (int i = 0; i < size; i++) {
+            out.startTag(null, ShortcutService.TAG_PACKAGE);
+            ShortcutService.writeAttr(out, ShortcutService.ATTR_PACKAGE_NAME,
+                    mPinnedShortcuts.keyAt(i));
+
+            final ArraySet<String> ids = mPinnedShortcuts.valueAt(i);
+            final int idSize = ids.size();
+            for (int j = 0; j < idSize; j++) {
+                ShortcutService.writeTagValue(out, ShortcutService.TAG_PIN, ids.valueAt(j));
+            }
+            out.endTag(null, ShortcutService.TAG_PACKAGE);
+        }
+
+        out.endTag(null, ShortcutService.TAG_LAUNCHER_PINS);
+    }
+
+    /**
+     * Load.
+     */
+    public static LauncherShortcuts loadFromXml(XmlPullParser parser, int userId)
+            throws IOException, XmlPullParserException {
+        final String launcherPackageName = ShortcutService.parseStringAttribute(parser,
+                ShortcutService.ATTR_PACKAGE_NAME);
+
+        final LauncherShortcuts ret = new LauncherShortcuts(userId, launcherPackageName);
+
+        ArraySet<String> ids = null;
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            final int depth = parser.getDepth();
+            final String tag = parser.getName();
+            switch (tag) {
+                case ShortcutService.TAG_PACKAGE: {
+                    final String packageName = ShortcutService.parseStringAttribute(parser,
+                            ShortcutService.ATTR_PACKAGE_NAME);
+                    ids = new ArraySet<>();
+                    ret.mPinnedShortcuts.put(packageName, ids);
+                    continue;
+                }
+                case ShortcutService.TAG_PIN: {
+                    ids.add(ShortcutService.parseStringAttribute(parser,
+                            ShortcutService.ATTR_VALUE));
+                    continue;
+                }
+            }
+            throw ShortcutService.throwForInvalidTag(depth, tag);
+        }
+        return ret;
+    }
+
+    public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println();
+
+        pw.print(prefix);
+        pw.print("Launcher: ");
+        pw.print(mPackageName);
+        pw.println();
+
+        final int size = mPinnedShortcuts.size();
+        for (int i = 0; i < size; i++) {
+            pw.println();
+
+            pw.print(prefix);
+            pw.print("  ");
+            pw.print("Package: ");
+            pw.println(mPinnedShortcuts.keyAt(i));
+
+            final ArraySet<String> ids = mPinnedShortcuts.valueAt(i);
+            final int idSize = ids.size();
+
+            for (int j = 0; j < idSize; j++) {
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print(ids.valueAt(j));
+                pw.println();
+            }
         }
     }
 }
@@ -2039,27 +2247,34 @@ class PackageShortcuts {
      *
      * It checks the max number of dynamic shortcuts.
      */
-    public void updateShortcutWithCapping(@NonNull ShortcutService s,
+    public void addDynamicShortcut(@NonNull ShortcutService s,
             @NonNull ShortcutInfo newShortcut) {
+        newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
+
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
 
-        int oldFlags = 0;
-        int newDynamicCount = mDynamicShortcutCount;
+        final boolean wasPinned;
+        final int newDynamicCount;
 
-        if (oldShortcut != null) {
-            oldFlags = oldShortcut.getFlags();
+        if (oldShortcut == null) {
+            wasPinned = false;
+            newDynamicCount = mDynamicShortcutCount + 1; // adding a dynamic shortcut.
+        } else {
+            wasPinned = oldShortcut.isPinned();
             if (oldShortcut.isDynamic()) {
-                newDynamicCount--;
+                newDynamicCount = mDynamicShortcutCount; // not adding a dynamic shortcut.
+            } else {
+                newDynamicCount = mDynamicShortcutCount + 1; // adding a dynamic shortcut.
             }
         }
-        if (newShortcut.isDynamic()) {
-            newDynamicCount++;
-        }
+
         // Make sure there's still room.
         s.enforceMaxDynamicShortcuts(newDynamicCount);
 
         // Okay, make it dynamic and add.
-        newShortcut.addFlags(oldFlags);
+        if (wasPinned) {
+            newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
+        }
 
         addShortcut(s, newShortcut);
         mDynamicShortcutCount = newDynamicCount;
@@ -2088,6 +2303,9 @@ class PackageShortcuts {
         }
     }
 
+    /**
+     * Remove all dynamic shortcuts.
+     */
     public void deleteAllDynamicShortcuts(@NonNull ShortcutService s) {
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_DYNAMIC);
@@ -2096,6 +2314,9 @@ class PackageShortcuts {
         mDynamicShortcutCount = 0;
     }
 
+    /**
+     * Remove a dynamic shortcut by ID.
+     */
     public void deleteDynamicWithId(@NonNull ShortcutService s, @NonNull String shortcutId) {
         final ShortcutInfo oldShortcut = mShortcuts.get(shortcutId);
 
@@ -2112,24 +2333,40 @@ class PackageShortcuts {
         }
     }
 
-    public void replacePinned(@NonNull ShortcutService s, String launcherPackage,
-            List<String> shortcutIds) {
-
-        // TODO Should be per launcherPackage.
-
+    /**
+     * Called after a launcher updates the pinned set.  For each shortcut in this package,
+     * set FLAG_PINNED if any launcher has pinned it.  Otherwise, clear it.
+     *
+     * <p>Then remove all shortcuts that are not dynamic and no longer pinned either.
+     */
+    public void refreshPinnedFlags(@NonNull ShortcutService s) {
         // First, un-pin all shortcuts
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_PINNED);
         }
 
-        // Then pin ALL
-        for (int i = shortcutIds.size() - 1; i >= 0; i--) {
-            final ShortcutInfo shortcut = mShortcuts.get(shortcutIds.get(i));
-            if (shortcut != null) {
-                shortcut.addFlags(ShortcutInfo.FLAG_PINNED);
+        // Then, for the pinned set for each launcher, set the pin flag one by one.
+        final ArrayMap<String, LauncherShortcuts> launchers =
+                s.getUserShortcutsLocked(mUserId).getLaunchers();
+
+        for (int l = launchers.size() - 1; l >= 0; l--) {
+            final LauncherShortcuts launcherShortcuts = launchers.valueAt(l);
+            final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(mPackageName);
+
+            if (pinned == null || pinned.size() == 0) {
+                continue;
+            }
+            for (int i = pinned.size() - 1; i >= 0; i--) {
+                final ShortcutInfo si = mShortcuts.get(pinned.valueAt(i));
+                if (si == null) {
+                    s.wtf("Shortcut not found");
+                } else {
+                    si.addFlags(ShortcutInfo.FLAG_PINNED);
+                }
             }
         }
 
+        // Lastly, remove the ones that are no longer pinned nor dynamic.
         removeOrphans(s);
     }
 
@@ -2173,12 +2410,40 @@ class PackageShortcuts {
     /**
      * Find all shortcuts that match {@code query}.
      */
-    public void findAll(@NonNull List<ShortcutInfo> result,
-            @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
+    public void findAll(@NonNull ShortcutService s, @NonNull List<ShortcutInfo> result,
+            @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
+            @Nullable String callingLauncher) {
+
+        // Set of pinned shortcuts by the calling launcher.
+        final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
+                : s.getLauncherShortcuts(callingLauncher, mUserId)
+                    .getPinnedShortcutIds(mPackageName);
+
         for (int i = 0; i < mShortcuts.size(); i++) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (query == null || query.test(si)) {
-                result.add(si.clone(cloneFlag));
+
+            // If it's called by non-launcher (i.e. publisher, always include -> true.
+            // Otherwise, only include non-dynamic pinned one, if the calling launcher has pinned
+            // it.
+            final boolean isPinnedByCaller = (callingLauncher == null)
+                    || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
+            if (!si.isDynamic()) {
+                if (!si.isPinned()) {
+                    s.wtf("Shortcut not pinned here");
+                    continue;
+                }
+                if (!isPinnedByCaller) {
+                    continue;
+                }
+            }
+            final ShortcutInfo clone = si.clone(cloneFlag);
+            // Fix up isPinned for the caller.  Note we need to do it before the "test" callback,
+            // since it may check isPinned.
+            if (!isPinnedByCaller) {
+                clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+            }
+            if (query == null || query.test(clone)) {
+                result.add(clone);
             }
         }
     }
@@ -2188,6 +2453,8 @@ class PackageShortcuts {
     }
 
     public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println();
+
         pw.print(prefix);
         pw.print("Package: ");
         pw.print(mPackageName);
