@@ -25,6 +25,11 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.server.notification.NotificationManagerService.DumpFilter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -33,6 +38,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class RankingHelper implements RankingConfig {
     private static final String TAG = "RankingHelper";
@@ -358,6 +365,14 @@ public class RankingHelper implements RankingConfig {
         updateConfig();
     }
 
+    public void setEnabled(String packageName, int uid, boolean enabled) {
+        boolean wasEnabled = getImportance(packageName, uid) != Ranking.IMPORTANCE_NONE;
+        if (wasEnabled == enabled) {
+            return;
+        }
+        setImportance(packageName, uid, enabled ? DEFAULT_IMPORTANCE : Ranking.IMPORTANCE_NONE);
+    }
+
     public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
         if (filter == null) {
             final int N = mSignalExtractors.length;
@@ -398,15 +413,95 @@ public class RankingHelper implements RankingConfig {
                 }
                 if (r.priority != DEFAULT_PRIORITY) {
                     pw.print(" priority=");
-                    pw.print(Ranking.importanceToString(r.priority));
+                    pw.print(Notification.priorityToString(r.priority));
                 }
                 if (r.visibility != DEFAULT_VISIBILITY) {
                     pw.print(" visibility=");
-                    pw.print(Ranking.importanceToString(r.visibility));
+                    pw.print(Notification.visibilityToString(r.visibility));
                 }
                 pw.println();
             }
         }
+    }
+
+    public JSONObject dumpJson(NotificationManagerService.DumpFilter filter) {
+        JSONObject ranking = new JSONObject();
+        JSONArray records = new JSONArray();
+        try {
+            ranking.put("noUid", mRestoredWithoutUids.size());
+        } catch (JSONException e) {
+           // pass
+        }
+        final int N = mRecords.size();
+        for (int i = 0; i < N; i++) {
+            final Record r = mRecords.valueAt(i);
+            if (filter == null || filter.matches(r.pkg)) {
+                JSONObject record = new JSONObject();
+                try {
+                    record.put("userId", UserHandle.getUserId(r.uid));
+                    record.put("packageName", r.pkg);
+                    if (r.importance != DEFAULT_IMPORTANCE) {
+                        record.put("importance", Ranking.importanceToString(r.importance));
+                    }
+                    if (r.priority != DEFAULT_PRIORITY) {
+                        record.put("priority", Notification.priorityToString(r.priority));
+                    }
+                    if (r.visibility != DEFAULT_VISIBILITY) {
+                        record.put("visibility", Notification.visibilityToString(r.visibility));
+                    }
+                } catch (JSONException e) {
+                   // pass
+                }
+                records.put(record);
+            }
+        }
+        try {
+            ranking.put("records", records);
+        } catch (JSONException e) {
+            // pass
+        }
+        return ranking;
+    }
+
+    /**
+     * Dump only the ban information as structured JSON for the stats collector.
+     *
+     * This is intentionally redundant with {#link dumpJson} because the old
+     * scraper will expect this format.
+     *
+     * @param filter
+     * @return
+     */
+    public JSONArray dumpBansJson(NotificationManagerService.DumpFilter filter) {
+        JSONArray bans = new JSONArray();
+        Map<Integer, String> packageBans = getPackageBans();
+        for(Entry<Integer, String> ban : packageBans.entrySet()) {
+            final int userId = UserHandle.getUserId(ban.getKey());
+            final String packageName = ban.getValue();
+            if (filter == null || filter.matches(packageName)) {
+                JSONObject banJson = new JSONObject();
+                try {
+                    banJson.put("userId", userId);
+                    banJson.put("packageName", packageName);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                bans.put(banJson);
+            }
+        }
+        return bans;
+    }
+
+    public Map<Integer, String> getPackageBans() {
+        final int N = mRecords.size();
+        ArrayMap<Integer, String> packageBans = new ArrayMap<>(N);
+        for (int i = 0; i < N; i++) {
+            final Record r = mRecords.valueAt(i);
+            if (r.importance == Ranking.IMPORTANCE_NONE) {
+                packageBans.put(r.uid, r.pkg);
+            }
+        }
+        return packageBans;
     }
 
     public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
