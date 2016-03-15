@@ -284,10 +284,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String EXTRA_BUGREPORT_HASH = "android.app.extra.BUGREPORT_HASH";
 
     /**
-     * An {@code int} failure code representing the reason of the bugreport failure.
+     * An {@code int} failure code representing the reason of the bugreport failure. One of
+     * {@link #BUGREPORT_FAILURE_FAILED_COMPLETING}
+     * or {@link #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE}
      *
      * @see #ACTION_BUGREPORT_FAILED
-     * @see #BUGREPORT_FAILURE_FAILED_COMPLETING, #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
      * @hide
      */
     public static final String EXTRA_BUGREPORT_FAILURE_REASON =
@@ -305,9 +306,24 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
     })
     public @interface BugreportFailureCode {}
-    /** Bugreport completion process failed. */
+
+    /**
+     * Bugreport completion process failed.
+     *
+     * <p>If this error code is received, the requesting of bugreport can be retried.
+     * @see DevicePolicyManager#requestBugreport
+     */
     public static final int BUGREPORT_FAILURE_FAILED_COMPLETING = 0;
-    /** Bugreport is no longer available for collection. */
+
+    /**
+     * Bugreport has been created, but is no longer available for collection.
+     *
+     * <p>This error likely occurs because the user of the device hasn't consented to share
+     * the bugreport for a long period after its creation.
+     *
+     * <p>If this error code is received, the requesting of bugreport can be retried.
+     * @see DevicePolicyManager#requestBugreport
+     */
     public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1;
 
     /** @hide */
@@ -598,7 +614,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param failureCode int containing failure code. One of
-     * #BUGREPORT_FAILURE_FAILED_COMPLETING or #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
+     * {@link #BUGREPORT_FAILURE_FAILED_COMPLETING}
+     * or {@link #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE}
      * @see DevicePolicyManager#requestBugreport
      */
     public void onBugreportFailed(Context context, Intent intent,
