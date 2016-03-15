@@ -89,6 +89,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     public void setHost(QSTileHost qsh) {
         qsh.addCallback(this);
+        updateAnimators();
     }
 
     @Override
@@ -133,6 +134,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         TouchAnimator.Builder translationYBuilder = new Builder();
         TouchAnimator.Builder lastRowBuilder = new Builder();
 
+        if (mQsPanel.getHost() == null) return;
         Collection<QSTile<?>> tiles = mQsPanel.getHost().getTiles();
         int count = 0;
         int[] loc1 = new int[2];

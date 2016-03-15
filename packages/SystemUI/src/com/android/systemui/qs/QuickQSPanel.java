@@ -26,6 +26,8 @@ import android.widget.Space;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.SignalState;
 import com.android.systemui.qs.QSTile.State;
+import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -95,9 +97,17 @@ public class QuickQSPanel extends QSPanel {
         return new QSTileBaseView(mContext, tile.createTileView(mContext));
     }
 
+    @Override
+    public void setHost(QSTileHost host, QSCustomizer customizer) {
+        super.setHost(host, customizer);
+        setTiles(mHost.getTiles());
+    }
+
     public void setMaxTiles(int maxTiles) {
         mMaxTiles = maxTiles;
-        setTiles(mHost.getTiles());
+        if (mHost != null) {
+            setTiles(mHost.getTiles());
+        }
     }
 
     @Override
