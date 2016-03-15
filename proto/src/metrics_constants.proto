@@ -1996,6 +1996,22 @@ message MetricsEvent {
     // Logs that the user docks window via shortcut key.
     WINDOW_DOCK_SHORTCUTS = 352;
 
+    // User already denied access to the request folder; action takes an integer
+    // representing the folder's index on Environment.STANDARD_DIRECTORIES
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED_BY_FOLDER = 353;
+
+    // User already denied access to the request folder; action pass package name
+    // of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED_BY_PACKAGE = 354;
+
+    // User denied access to the request folder and checked 'Do not ask again';
+    // action takes an integer representing the folder's index on Environment.STANDARD_DIRECTORIES
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_FOLDER = 355;
+
+    // User denied access to the request folder and checked 'Do not ask again';
+    // action pass package name of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_PACKAGE = 356;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

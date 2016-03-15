@@ -16,10 +16,20 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.State.MODE_UNKNOWN;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.UserHandle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.model.RootInfo;
@@ -29,29 +39,73 @@ public class LocalPreferences {
     private static final String ROOT_VIEW_MODE_PREFIX = "rootViewMode-";
 
     public static boolean getDisplayFileSize(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(KEY_FILE_SIZE, false);
+        return getPrefs(context).getBoolean(KEY_FILE_SIZE, false);
     }
 
-    public static @ViewMode int getViewMode(
-            Context context, RootInfo root, @ViewMode int fallback) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(createKey(root), fallback);
+    public static @ViewMode int getViewMode(Context context, RootInfo root,
+            @ViewMode int fallback) {
+        return getPrefs(context).getInt(createKey(root), fallback);
     }
 
     public static void setDisplayFileSize(Context context, boolean display) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putBoolean(KEY_FILE_SIZE, display).apply();
+        getPrefs(context).edit().putBoolean(KEY_FILE_SIZE, display).apply();
     }
 
     public static void setViewMode(Context context, RootInfo root, @ViewMode int viewMode) {
         assert(viewMode != MODE_UNKNOWN);
 
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putInt(createKey(root), viewMode).apply();
+        getPrefs(context).edit().putInt(createKey(root), viewMode).apply();
+    }
+
+    private static SharedPreferences getPrefs(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     private static String createKey(RootInfo root) {
         return ROOT_VIEW_MODE_PREFIX + root.authority + root.rootId;
+    }
+
+    public static final int PERMISSION_ASK = 0;
+    public static final int PERMISSION_ASK_AGAIN = 1;
+    public static final int PERMISSION_NEVER_ASK = -1;
+
+    @IntDef(flag = true, value = {
+            PERMISSION_ASK,
+            PERMISSION_ASK_AGAIN,
+            PERMISSION_NEVER_ASK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionStatus {}
+
+    /**
+     * Methods below are used to keep track of denied user requests on scoped directory access so
+     * the dialog is not offered when user checked the 'Do not ask again' box
+     *
+     * <p>It uses a shared preferences, whose key is:
+     * <ol>
+     * <li>{@code USER_ID|PACKAGE_NAME|VOLUME_UUID|DIRECTORY} for storage volumes that have a UUID
+     * (typically physical volumes like SD cards).
+     * <li>{@code USER_ID|PACKAGE_NAME||DIRECTORY} for storage volumes that do not have a UUID
+     * (typically the emulated volume used for primary storage
+     * </ol>
+     */
+    static @PermissionStatus int getScopedAccessPermissionStatus(Context context,
+            String packageName, @Nullable String uuid, String directory) {
+        final String key = getScopedAccessDenialsKey(packageName, uuid, directory);
+        return getPrefs(context).getInt(key, PERMISSION_ASK);
+    }
+
+    static void setScopedAccessPermissionStatus(Context context, String packageName,
+            @Nullable String uuid, String directory, @PermissionStatus int status) {
+      final String key = getScopedAccessDenialsKey(packageName, uuid, directory);
+      getPrefs(context).edit().putInt(key, status).apply();
+    }
+
+    private static String getScopedAccessDenialsKey(String packageName, String uuid,
+            String directory) {
+        final int userId = UserHandle.myUserId();
+        return uuid == null
+                ? userId + "|" + packageName + "||" + directory
+                : userId + "|" + packageName + "|" + uuid + "|" + directory;
     }
 }
