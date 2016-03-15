@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.os.Bundle;
 import android.os.RemoteException;
 
 import com.android.internal.telecom.IInCallAdapter;
@@ -246,6 +247,32 @@ public final class InCallAdapter {
     public void swapConference(String callId) {
         try {
             mAdapter.swapConference(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs Telecom to pull an external call to the local device.
+     *
+     * @param callId The callId to pull.
+     */
+    public void pullExternalCall(String callId) {
+        try {
+            mAdapter.pullExternalCall(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Intructs Telecom to send a call event.
+     *
+     * @param callId The callId to send the event for.
+     * @param event The event.
+     * @param extras Extras associated with the event.
+     */
+    public void sendCallEvent(String callId, String event, Bundle extras) {
+        try {
+            mAdapter.sendCallEvent(callId, event, extras);
         } catch (RemoteException ignored) {
         }
     }

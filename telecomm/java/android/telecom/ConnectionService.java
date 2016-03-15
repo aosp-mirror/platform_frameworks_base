@@ -103,6 +103,8 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_SWAP_CONFERENCE = 19;
     private static final int MSG_REJECT_WITH_MESSAGE = 20;
     private static final int MSG_SILENCE = 21;
+    private static final int MSG_PULL_EXTERNAL_CALL = 22;
+    private static final int MSG_SEND_CALL_EVENT = 23;
 
     private static Connection sNullConnection;
 
@@ -245,6 +247,20 @@ public abstract class ConnectionService extends Service {
             args.argi1 = proceed ? 1 : 0;
             mHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
         }
+
+        @Override
+        public void pullExternalCall(String callId) {
+            mHandler.obtainMessage(MSG_PULL_EXTERNAL_CALL, callId).sendToTarget();
+        }
+
+        @Override
+        public void sendCallEvent(String callId, String event, Bundle extras) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = event;
+            args.arg3 = extras;
+            mHandler.obtainMessage(MSG_SEND_CALL_EVENT, args).sendToTarget();
+        }
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -377,6 +393,22 @@ public abstract class ConnectionService extends Service {
                         String callId = (String) args.arg1;
                         boolean proceed = (args.argi1 == 1);
                         onPostDialContinue(callId, proceed);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_PULL_EXTERNAL_CALL: {
+                    pullExternalCall((String) msg.obj);
+                    break;
+                }
+                case MSG_SEND_CALL_EVENT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        String event = (String) args.arg2;
+                        Bundle extras = (Bundle) args.arg3;
+                        sendCallEvent(callId, event, extras);
                     } finally {
                         args.recycle();
                     }
@@ -615,10 +647,10 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onConnectionEvent(Connection connection, String event) {
+        public void onConnectionEvent(Connection connection, String event, Bundle extras) {
             String id = mIdByConnection.get(connection);
             if (id != null) {
-                mAdapter.onConnectionEvent(id, event);
+                mAdapter.onConnectionEvent(id, event, extras);
             }
         }
     };
@@ -862,6 +894,39 @@ public abstract class ConnectionService extends Service {
         if (conference != null) {
             conference.onSwap();
         }
+    }
+
+    /**
+     * Notifies a {@link Connection} of a request to pull an external call.
+     *
+     * See {@link Call#pullExternalCall()}.
+     *
+     * @param callId The ID of the call to pull.
+     */
+    private void pullExternalCall(String callId) {
+        Log.d(this, "pullExternalCall(%s)", callId);
+        Connection connection = findConnectionForAction(callId, "pullExternalCall");
+        if (connection != null) {
+            connection.onPullExternalCall();
+        }
+    }
+
+    /**
+     * Notifies a {@link Connection} of a call event.
+     *
+     * See {@link Call#sendCallEvent(String, Bundle)}.
+     *
+     * @param callId The ID of the call receiving the event.
+     * @param event The event.
+     * @param extras Extras associated with the event.
+     */
+    private void sendCallEvent(String callId, String event, Bundle extras) {
+        Log.d(this, "sendCallEvent(%s, %s)", callId, event);
+        Connection connection = findConnectionForAction(callId, "sendCallEvent");
+        if (connection != null) {
+            connection.onCallEvent(event, extras);
+        }
+
     }
 
     private void onPostDialContinue(String callId, boolean proceed) {

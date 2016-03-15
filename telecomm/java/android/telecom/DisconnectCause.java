@@ -64,6 +64,17 @@ public final class DisconnectCause implements Parcelable {
      */
     public static final int CONNECTION_MANAGER_NOT_SUPPORTED = 10;
 
+    /**
+     * Disconnected because the user did not locally answer the incoming call, but it was answered
+     * on another device where the call was ringing.
+     */
+    public static final int ANSWERED_ELSEWHERE = 11;
+
+    /**
+     * Disconnected because the call was pulled from the current device to another device.
+     */
+    public static final int CALL_PULLED = 12;
+
     private int mDisconnectCode;
     private CharSequence mDisconnectLabel;
     private CharSequence mDisconnectDescription;

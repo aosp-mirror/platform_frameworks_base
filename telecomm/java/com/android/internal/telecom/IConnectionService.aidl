@@ -75,4 +75,8 @@ oneway interface IConnectionService {
     void swapConference(String conferenceCallId);
 
     void onPostDialContinue(String callId, boolean proceed);
+
+    void pullExternalCall(String callId);
+
+    void sendCallEvent(String callId, String event, in Bundle extras);
 }
