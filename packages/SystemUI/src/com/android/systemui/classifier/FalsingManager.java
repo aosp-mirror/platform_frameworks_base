@@ -166,7 +166,9 @@ public class FalsingManager implements SensorEventListener {
      */
     public boolean isFalseTouch() {
         if (FalsingLog.ENABLED) {
-            if (!mSessionActive) {
+            // We're getting some false wtfs from touches that happen after the device went
+            // to sleep. Only report missing sessions that happen when the device is interactive.
+            if (!mSessionActive && mContext.getSystemService(PowerManager.class).isInteractive()) {
                 FalsingLog.wtf("isFalseTouch", new StringBuilder()
                         .append("Session is not active, yet there's a query for a false touch.")
                         .append(" enabled=").append(isEnabled() ? 1 : 0)
