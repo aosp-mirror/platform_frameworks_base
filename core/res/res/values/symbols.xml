@@ -2508,8 +2508,6 @@
   <java-symbol type="string" name="work_mode_off_title" />
   <java-symbol type="string" name="work_mode_off_message" />
   <java-symbol type="string" name="work_mode_turn_on" />
-  <java-symbol type="string" name="suspended_package_title" />
-  <java-symbol type="string" name="suspended_package_message" />
 
   <!-- New SMS notification while phone is locked. -->
   <java-symbol type="string" name="new_sms_notification_title" />
