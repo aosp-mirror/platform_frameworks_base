@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-#include <SkTypeface.h>
-#include <SkPaint.h>
-
-#define LOG_TAG "Minikin"
-#include <cutils/log.h>
-
 #include "MinikinSkia.h"
+
+#include <SkPaint.h>
+#include <SkTypeface.h>
+#include <cutils/log.h>
 
 namespace android {
 

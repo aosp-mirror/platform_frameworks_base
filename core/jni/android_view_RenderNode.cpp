@@ -29,7 +29,7 @@
 #include <Matrix.h>
 #include <RenderNode.h>
 #include <TreeInfo.h>
-#include <Paint.h>
+#include <hwui/Paint.h>
 
 #include "core_jni_helpers.h"
 

@@ -18,6 +18,8 @@
 
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
+#include <hwui/Paint.h>
+#include <minikin/Layout.h>
 #include <tests/common/TestUtils.h>
 #include <utils/Color.h>
 
@@ -131,13 +133,13 @@ TEST(RecordingCanvas, drawRoundRect) {
         << "Non-rounded rects should be converted";
 }
 
-TEST(RecordingCanvas, drawText) {
+TEST(RecordingCanvas, drawGlyphs) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+        TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
     });
 
     int count = 0;
@@ -152,7 +154,7 @@ TEST(RecordingCanvas, drawText) {
     ASSERT_EQ(1, count);
 }
 
-TEST(RecordingCanvas, drawText_strikeThruAndUnderline) {
+TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
@@ -162,7 +164,7 @@ TEST(RecordingCanvas, drawText_strikeThruAndUnderline) {
             for (int j = 0; j < 2; j++) {
                 paint.setUnderlineText(i != 0);
                 paint.setStrikeThruText(j != 0);
-                TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+                TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
             }
         }
     });
@@ -184,18 +186,18 @@ TEST(RecordingCanvas, drawText_strikeThruAndUnderline) {
     EXPECT_EQ(RecordedOpId::RectOp, ops[index++]->opId); // strikethrough
 }
 
-TEST(RecordingCanvas, drawText_forceAlignLeft) {
+TEST(RecordingCanvas, drawGlyphs_forceAlignLeft) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setTextAlign(SkPaint::kLeft_Align);
-        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+        TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
         paint.setTextAlign(SkPaint::kCenter_Align);
-        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+        TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
         paint.setTextAlign(SkPaint::kRight_Align);
-        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+        TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
     });
 
     int count = 0;
@@ -577,7 +579,7 @@ TEST(RecordingCanvas, refPaint) {
         canvas.drawRect(0, 0, 200, 10, paint);
         SkPaint paintCopy(paint);
         canvas.drawRect(0, 10, 200, 20, paintCopy);
-        TestUtils::drawTextToCanvas(&canvas, "helloworld", paint, 50, 25);
+        TestUtils::drawUtf8ToCanvas(&canvas, "helloworld", paint, 50, 25);
 
         // only here do we use different paint ptr
         paint.setColor(SK_ColorRED);
@@ -596,6 +598,55 @@ TEST(RecordingCanvas, refPaint) {
     EXPECT_NE(nullptr, ops[3]->paint);
     EXPECT_NE(ops[0]->paint, ops[3]->paint);
     EXPECT_NE(&paint, ops[3]->paint);
+}
+
+TEST(RecordingCanvas, drawText) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        Paint paint;
+        paint.setAntiAlias(true);
+        paint.setTextSize(20);
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        std::unique_ptr<uint16_t[]> dst = TestUtils::utf8ToUtf16("HELLO");
+        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
+    });
+
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        count++;
+        ASSERT_EQ(RecordedOpId::TextOp, op.opId);
+        EXPECT_EQ(nullptr, op.localClip);
+        EXPECT_TRUE(op.localMatrix.isIdentity());
+        EXPECT_TRUE(op.unmappedBounds.getHeight() >= 10);
+        EXPECT_TRUE(op.unmappedBounds.getWidth() >= 25);
+    });
+    ASSERT_EQ(1, count);
+}
+
+TEST(RecordingCanvas, drawTextInHighContrast) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.setHighContrastText(true);
+        Paint paint;
+        paint.setColor(SK_ColorWHITE);
+        paint.setAntiAlias(true);
+        paint.setTextSize(20);
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        std::unique_ptr<uint16_t[]> dst = TestUtils::utf8ToUtf16("HELLO");
+        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
+    });
+
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        ASSERT_EQ(RecordedOpId::TextOp, op.opId);
+        if (count++ == 0) {
+            EXPECT_EQ(SK_ColorBLACK, op.paint->getColor());
+            EXPECT_EQ(SkPaint::kStrokeAndFill_Style, op.paint->getStyle());
+        } else {
+            EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
+            EXPECT_EQ(SkPaint::kFill_Style, op.paint->getStyle());
+        }
+
+    });
+    ASSERT_EQ(2, count);
 }
 
 } // namespace uirenderer

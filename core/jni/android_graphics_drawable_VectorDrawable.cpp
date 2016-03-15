@@ -19,8 +19,9 @@
 #include "core_jni_helpers.h"
 #include "log/log.h"
 
-#include "Paint.h"
 #include "VectorDrawable.h"
+
+#include <hwui/Paint.h>
 
 namespace android {
 using namespace uirenderer;

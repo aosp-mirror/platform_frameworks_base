@@ -1,7 +1,6 @@
 #define LOG_TAG "Bitmap"
 #include "Bitmap.h"
 
-#include "Paint.h"
 #include "SkBitmap.h"
 #include "SkPixelRef.h"
 #include "SkImageEncoder.h"
@@ -18,6 +17,7 @@
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include <Caches.h>
+#include <hwui/Paint.h>
 
 #include "core_jni_helpers.h"
 
