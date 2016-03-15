@@ -518,6 +518,16 @@ public final class SystemServer {
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime", false);
         boolean disableRtt = SystemProperties.getBoolean("config.disable_rtt", false);
+        boolean disableMediaProjection = SystemProperties.getBoolean("config.disable_mediaproj",
+                false);
+        boolean disableSerial = SystemProperties.getBoolean("config.disable_serial", false);
+        boolean disableSearchManager = SystemProperties.getBoolean("config.disable_searchmanager",
+                false);
+        boolean disableTrustManager = SystemProperties.getBoolean("config.disable_trustmanager",
+                false);
+        boolean disableTextServices = SystemProperties.getBoolean("config.disable_textservices", false);
+        boolean disableSamplingProfiler = SystemProperties.getBoolean("config.disable_samplingprof",
+                false);
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
@@ -761,7 +771,7 @@ public final class SystemServer {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
 
-            if (!disableNonCoreServices) {
+            if (!disableNonCoreServices && !disableTextServices) {
                 mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
             }
 
@@ -912,7 +922,7 @@ public final class SystemServer {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
 
-            if (!disableNonCoreServices) {
+            if (!disableNonCoreServices && !disableSearchManager) {
                 traceBeginAndSlog("StartSearchManagerService");
                 try {
                     mSystemServiceManager.startService(SEARCH_MANAGER_SERVICE_CLASS);
@@ -974,15 +984,17 @@ public final class SystemServer {
                     Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                 }
 
-                traceBeginAndSlog("StartSerialService");
-                try {
-                    // Serial port support
-                    serial = new SerialService(context);
-                    ServiceManager.addService(Context.SERIAL_SERVICE, serial);
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Failure starting SerialService", e);
+                if (!disableSerial) {
+                    traceBeginAndSlog("StartSerialService");
+                    try {
+                        // Serial port support
+                        serial = new SerialService(context);
+                        ServiceManager.addService(Context.SERIAL_SERVICE, serial);
+                    } catch (Throwable e) {
+                        Slog.e(TAG, "Failure starting SerialService", e);
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                 }
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                         "StartHardwarePropertiesManagerService");
@@ -1030,18 +1042,20 @@ public final class SystemServer {
             }
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
-            traceBeginAndSlog("StartSamplingProfilerService");
-            try {
-                // need to add this service even if SamplingProfilerIntegration.isEnabled()
-                // is false, because it is this service that detects system property change and
-                // turns on SamplingProfilerIntegration. Plus, when sampling profiler doesn't work,
-                // there is little overhead for running this service.
-                ServiceManager.addService("samplingprofiler",
-                            new SamplingProfilerService(context));
-            } catch (Throwable e) {
-                reportWtf("starting SamplingProfiler Service", e);
+            if (!disableSamplingProfiler) {
+                traceBeginAndSlog("StartSamplingProfilerService");
+                try {
+                    // need to add this service even if SamplingProfilerIntegration.isEnabled()
+                    // is false, because it is this service that detects system property change and
+                    // turns on SamplingProfilerIntegration. Plus, when sampling profiler doesn't work,
+                    // there is little overhead for running this service.
+                    ServiceManager.addService("samplingprofiler",
+                                new SamplingProfilerService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting SamplingProfiler Service", e);
+                }
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             if (!disableNetwork && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
@@ -1122,7 +1136,9 @@ public final class SystemServer {
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
-                mSystemServiceManager.startService(TrustManagerService.class);
+                if (!disableTrustManager) {
+                    mSystemServiceManager.startService(TrustManagerService.class);
+                }
 
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
                     mSystemServiceManager.startService(FingerprintService.class);
@@ -1142,7 +1158,7 @@ public final class SystemServer {
             mSystemServiceManager.startService(LauncherAppsService.class);
         }
 
-        if (!disableNonCoreServices) {
+        if (!disableNonCoreServices && !disableMediaProjection) {
             mSystemServiceManager.startService(MediaProjectionManagerService.class);
         }
 
