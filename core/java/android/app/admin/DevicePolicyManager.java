@@ -25,16 +25,13 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
-import android.auditing.SecurityLog;
 import android.auditing.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
@@ -56,8 +53,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.org.conscrypt.TrustedCertificateStore;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -81,18 +76,18 @@ import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
- * registered with the system as a
- * <a href="{@docRoot}guide/topics/admin/device-admin.html">device administrator</a>. Additionally,
- * a device administrator may be registered as either a profile or device owner. A given method is
- * accessible to all device administrators unless the documentation for that method specifies that
- * it is restricted to either device or profile owners.
- *
+ * registered with the system as a <a href="{@docRoot}guide/topics/admin/device-admin.html">device
+ * administrator</a>. Additionally, a device administrator may be registered as either a profile or
+ * device owner. A given method is accessible to all device administrators unless the documentation
+ * for that method specifies that it is restricted to either device or profile owners. Any
+ * application calling an api may only pass as an argument a device administrator component it
+ * owns. Otherwise, a {@link SecurityException} will be thrown.
  * <div class="special reference">
  * <h3>Developer Guides</h3>
- * <p>For more information about managing policies for device administration, read the
- * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
- * developer guide.
- * </div>
+ * <p>
+ * For more information about managing policies for device administration, read the <a href=
+ * "{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a> developer
+ * guide. </div>
  */
 public class DevicePolicyManager {
     private static String TAG = "DevicePolicyManager";
@@ -1033,8 +1028,11 @@ public class DevicePolicyManager {
     public @interface UserProvisioningState {}
 
     /**
-     * Return true if the given administrator component is currently
-     * active (enabled) in the system.
+     * Return true if the given administrator component is currently active (enabled) in the system.
+     *
+     * @param admin The administrator component to check for.
+     * @return {@code true} if {@code admin} is currently enabled in the system, {@code false}
+     *         otherwise
      */
     public boolean isAdminActive(@NonNull ComponentName admin) {
         return isAdminActiveAsUser(admin, myUserId());
@@ -1128,6 +1126,9 @@ public class DevicePolicyManager {
      *
      * <p>Note that the operation is not synchronous and the admin might still be active (as
      * indicated by {@link #getActiveAdmins()}) by the time this method returns.
+     *
+     * @param admin The administration compononent to remove.
+     * @throws SecurityException if the caller is not in the owner application of {@code admin}.
      */
     public void removeActiveAdmin(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -1140,13 +1141,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns true if an administrator has been granted a particular device policy.  This can
-     * be used to check whether the administrator was activated under an earlier set of policies,
-     * but requires additional policies after an upgrade.
+     * Returns true if an administrator has been granted a particular device policy. This can be
+     * used to check whether the administrator was activated under an earlier set of policies, but
+     * requires additional policies after an upgrade.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.  Must be
-     * an active administrator, or an exception will be thrown.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Must be an
+     *            active administrator, or an exception will be thrown.
      * @param usesPolicy Which uses-policy to check, as defined in {@link DeviceAdminInfo}.
+     * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public boolean hasGrantedPolicy(@NonNull ComponentName admin, int usesPolicy) {
         if (mService != null) {
@@ -1253,34 +1255,32 @@ public class DevicePolicyManager {
     public static final int PASSWORD_QUALITY_MANAGED = 0x80000;
 
     /**
-     * Called by an application that is administering the device to set the
-     * password restrictions it is imposing.  After setting this, the user
-     * will not be able to enter a new password that is not at least as
-     * restrictive as what has been set.  Note that the current password
-     * will remain until the user has set a new one, so the change does not
-     * take place immediately.  To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} or
+     * Called by an application that is administering the device to set the password restrictions it
+     * is imposing. After setting this, the user will not be able to enter a new password that is
+     * not at least as restrictive as what has been set. Note that the current password will remain
+     * until the user has set a new one, so the change does not take place immediately. To prompt
+     * the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
      * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after calling this method.
-     *
-     * <p>Quality constants are ordered so that higher values are more restrictive;
-     * thus the highest requested quality constant (between the policy set here,
-     * the user's preference, and any other considerations) is the one that
-     * is in effect.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
+     * <p>
+     * Quality constants are ordered so that higher values are more restrictive; thus the highest
+     * requested quality constant (between the policy set here, the user's preference, and any other
+     * considerations) is the one that is in effect.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param quality The new desired quality.  One of
-     * {@link #PASSWORD_QUALITY_UNSPECIFIED}, {@link #PASSWORD_QUALITY_SOMETHING},
-     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX},
-     * {@link #PASSWORD_QUALITY_ALPHABETIC}, {@link #PASSWORD_QUALITY_ALPHANUMERIC}
-     * or {@link #PASSWORD_QUALITY_COMPLEX}.
+     * @param quality The new desired quality. One of {@link #PASSWORD_QUALITY_UNSPECIFIED},
+     *            {@link #PASSWORD_QUALITY_SOMETHING}, {@link #PASSWORD_QUALITY_NUMERIC},
+     *            {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}, {@link #PASSWORD_QUALITY_ALPHABETIC},
+     *            {@link #PASSWORD_QUALITY_ALPHANUMERIC} or {@link #PASSWORD_QUALITY_COMPLEX}.
+     * @throws SecurityException if {@code admin} is not an active administrator or if {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordQuality(@NonNull ComponentName admin, int quality) {
         if (mService != null) {
@@ -1321,30 +1321,30 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum allowed password length.  After setting this, the user
-     * will not be able to enter a new password that is not at least as
-     * restrictive as what has been set.  Note that the current password
-     * will remain until the user has set a new one, so the change does not
-     * take place immediately.  To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD}  or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value.  This
-     * constraint is only imposed if the administrator has also requested either
-     * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX},
-     * {@link #PASSWORD_QUALITY_ALPHABETIC}, {@link #PASSWORD_QUALITY_ALPHANUMERIC},
-     * or {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
+     * Called by an application that is administering the device to set the minimum allowed password
+     * length. After setting this, the user will not be able to enter a new password that is not at
+     * least as restrictive as what has been set. Note that the current password will remain until
+     * the user has set a new one, so the change does not take place immediately. To prompt the user
+     * for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
+     * only imposed if the administrator has also requested either {@link #PASSWORD_QUALITY_NUMERIC}
+     * , {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}, {@link #PASSWORD_QUALITY_ALPHABETIC},
+     * {@link #PASSWORD_QUALITY_ALPHANUMERIC}, or {@link #PASSWORD_QUALITY_COMPLEX} with
+     * {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param length The new desired minimum password length.  A value of 0
-     * means there is no restriction.
+     * @param length The new desired minimum password length. A value of 0 means there is no
+     *            restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumLength(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1386,31 +1386,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum number of upper case letters required in the password. After
-     * setting this, the user will not be able to enter a new password that is
-     * not at least as restrictive as what has been set. Note that the current
-     * password will remain until the user has set a new one, so the change does
-     * not take place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD}  or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
-     * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
-     * default value is 0.
+     * Called by an application that is administering the device to set the minimum number of upper
+     * case letters required in the password. After setting this, the user will not be able to enter
+     * a new password that is not at least as restrictive as what has been set. Note that the
+     * current password will remain until the user has set a new one, so the change does not take
+     * place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
+     * setting this value. This constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
      * <p>
      * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param length The new desired minimum number of upper case letters
-     *            required in the password. A value of 0 means there is no
-     *            restriction.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired minimum number of upper case letters required in the password.
+     *            A value of 0 means there is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumUpperCase(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1458,31 +1455,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum number of lower case letters required in the password. After
-     * setting this, the user will not be able to enter a new password that is
-     * not at least as restrictive as what has been set. Note that the current
-     * password will remain until the user has set a new one, so the change does
-     * not take place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
-     * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
-     * default value is 0.
+     * Called by an application that is administering the device to set the minimum number of lower
+     * case letters required in the password. After setting this, the user will not be able to enter
+     * a new password that is not at least as restrictive as what has been set. Note that the
+     * current password will remain until the user has set a new one, so the change does not take
+     * place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
+     * setting this value. This constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
      * <p>
      * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param length The new desired minimum number of lower case letters
-     *            required in the password. A value of 0 means there is no
-     *            restriction.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired minimum number of lower case letters required in the password.
+     *            A value of 0 means there is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumLowerCase(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1530,30 +1524,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum number of letters required in the password. After setting this,
-     * the user will not be able to enter a new password that is not at least as
-     * restrictive as what has been set. Note that the current password will
-     * remain until the user has set a new one, so the change does not take
-     * place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
-     * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
-     * default value is 1.
+     * Called by an application that is administering the device to set the minimum number of
+     * letters required in the password. After setting this, the user will not be able to enter a
+     * new password that is not at least as restrictive as what has been set. Note that the current
+     * password will remain until the user has set a new one, so the change does not take place
+     * immediately. To prompt the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
+     * only imposed if the administrator has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
+     * {@link #setPasswordQuality}. The default value is 1.
      * <p>
      * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param length The new desired minimum number of letters required in the
-     *            password. A value of 0 means there is no restriction.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired minimum number of letters required in the password. A value of
+     *            0 means there is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumLetters(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1600,30 +1592,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum number of numerical digits required in the password. After
-     * setting this, the user will not be able to enter a new password that is
-     * not at least as restrictive as what has been set. Note that the current
-     * password will remain until the user has set a new one, so the change does
-     * not take place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
-     * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
-     * default value is 1.
+     * Called by an application that is administering the device to set the minimum number of
+     * numerical digits required in the password. After setting this, the user will not be able to
+     * enter a new password that is not at least as restrictive as what has been set. Note that the
+     * current password will remain until the user has set a new one, so the change does not take
+     * place immediately. To prompt the user for a new password, use
+     * {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
+     * setting this value. This constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 1.
      * <p>
      * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param length The new desired minimum number of numerical digits required
-     *            in the password. A value of 0 means there is no restriction.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired minimum number of numerical digits required in the password. A
+     *            value of 0 means there is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumNumeric(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1670,30 +1660,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum number of symbols required in the password. After setting this,
-     * the user will not be able to enter a new password that is not at least as
-     * restrictive as what has been set. Note that the current password will
-     * remain until the user has set a new one, so the change does not take
-     * place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
-     * constraint is only imposed if the administrator has also requested
-     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
-     * default value is 1.
+     * Called by an application that is administering the device to set the minimum number of
+     * symbols required in the password. After setting this, the user will not be able to enter a
+     * new password that is not at least as restrictive as what has been set. Note that the current
+     * password will remain until the user has set a new one, so the change does not take place
+     * immediately. To prompt the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
+     * only imposed if the administrator has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
+     * {@link #setPasswordQuality}. The default value is 1.
      * <p>
      * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param length The new desired minimum number of symbols required in the
-     *            password. A value of 0 means there is no restriction.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired minimum number of symbols required in the password. A value of
+     *            0 means there is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumSymbols(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1739,30 +1727,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * minimum number of non-letter characters (numerical digits or symbols)
-     * required in the password. After setting this, the user will not be able
-     * to enter a new password that is not at least as restrictive as what has
-     * been set. Note that the current password will remain until the user has
-     * set a new one, so the change does not take place immediately. To prompt
-     * the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
-     * setting this value. This constraint is only imposed if the administrator
-     * has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
-     * {@link #setPasswordQuality}. The default value is 0.
+     * Called by an application that is administering the device to set the minimum number of
+     * non-letter characters (numerical digits or symbols) required in the password. After setting
+     * this, the user will not be able to enter a new password that is not at least as restrictive
+     * as what has been set. Note that the current password will remain until the user has set a new
+     * one, so the change does not take place immediately. To prompt the user for a new password,
+     * use {@link #ACTION_SET_NEW_PASSWORD} or {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
+     * setting this value. This constraint is only imposed if the administrator has also requested
+     * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The default value is 0.
      * <p>
      * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param length The new desired minimum number of letters required in the
-     *            password. A value of 0 means there is no restriction.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired minimum number of letters required in the password. A value of
+     *            0 means there is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public void setPasswordMinimumNonLetter(@NonNull ComponentName admin, int length) {
         if (mService != null) {
@@ -1808,33 +1794,31 @@ public class DevicePolicyManager {
         return 0;
     }
 
-  /**
-   * Called by an application that is administering the device to set the length
-   * of the password history. After setting this, the user will not be able to
-   * enter a new password that is the same as any password in the history. Note
-   * that the current password will remain until the user has set a new one, so
-   * the change does not take place immediately. To prompt the user for a new
-   * password, use {@link #ACTION_SET_NEW_PASSWORD} or
-   * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value.
-   * This constraint is only imposed if the administrator has also requested
-   * either {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}
-   * {@link #PASSWORD_QUALITY_ALPHABETIC}, or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
-   * with {@link #setPasswordQuality}.
-   *
-   * <p>
-   * The calling device admin must have requested
-   * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this
-   * method; if it has not, a security exception will be thrown.
-   *
-   * <p>This method can be called on the {@link DevicePolicyManager} instance
-   * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-   * restrictions on the parent profile.
-   *
-   * @param admin Which {@link DeviceAdminReceiver} this request is associated
-   *        with.
-   * @param length The new desired length of password history. A value of 0
-   *        means there is no restriction.
-   */
+    /**
+     * Called by an application that is administering the device to set the length of the password
+     * history. After setting this, the user will not be able to enter a new password that is the
+     * same as any password in the history. Note that the current password will remain until the
+     * user has set a new one, so the change does not take place immediately. To prompt the user for
+     * a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
+     * only imposed if the administrator has also requested either {@link #PASSWORD_QUALITY_NUMERIC}
+     * , {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX} {@link #PASSWORD_QUALITY_ALPHABETIC}, or
+     * {@link #PASSWORD_QUALITY_ALPHANUMERIC} with {@link #setPasswordQuality}.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param length The new desired length of password history. A value of 0 means there is no
+     *            restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     */
     public void setPasswordHistoryLength(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
@@ -1846,30 +1830,32 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to set the password expiration timeout. Calling this method
-     * will restart the countdown for password expiration for the given admin, as will changing
-     * the device password (for all admins).
-     *
-     * <p>The provided timeout is the time delta in ms and will be added to the current time.
-     * For example, to have the password expire 5 days from now, timeout would be
-     * 5 * 86400 * 1000 = 432000000 ms for timeout.
-     *
-     * <p>To disable password expiration, a value of 0 may be used for timeout.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this
-     * method; if it has not, a security exception will be thrown.
-     *
-     * <p> Note that setting the password will automatically reset the expiration time for all
-     * active admins. Active admins do not need to explicitly call this method in that case.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
+     * Called by a device admin to set the password expiration timeout. Calling this method will
+     * restart the countdown for password expiration for the given admin, as will changing the
+     * device password (for all admins).
+     * <p>
+     * The provided timeout is the time delta in ms and will be added to the current time. For
+     * example, to have the password expire 5 days from now, timeout would be 5 * 86400 * 1000 =
+     * 432000000 ms for timeout.
+     * <p>
+     * To disable password expiration, a value of 0 may be used for timeout.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * Note that setting the password will automatically reset the expiration time for all active
+     * admins. Active admins do not need to explicitly call this method in that case.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param timeout The limit (in ms) that a password can remain in effect. A value of 0
-     *        means there is no restriction (unlimited).
+     * @param timeout The limit (in ms) that a password can remain in effect. A value of 0 means
+     *            there is no restriction (unlimited).
+     * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD}
      */
     public void setPasswordExpirationTimeout(@NonNull ComponentName admin, long timeout) {
         if (mService != null) {
@@ -1971,20 +1957,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether the current password the user has set is sufficient
-     * to meet the policy requirements (e.g. quality, minimum length) that have been
-     * requested by the admins of this user and its participating profiles.
-     * Restrictions on profiles that have a separate challenge are not taken into account.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to determine
-     * if the password set on the parent profile is sufficient.
+     * Determine whether the current password the user has set is sufficient to meet the policy
+     * requirements (e.g. quality, minimum length) that have been requested by the admins of this
+     * user and its participating profiles. Restrictions on profiles that have a separate challenge
+     * are not taken into account.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to determine if the password set on
+     * the parent profile is sufficient.
      *
      * @return Returns true if the password meets the current requirements, else false.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
      */
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
@@ -2004,6 +1992,7 @@ public class DevicePolicyManager {
      *
      * @param userHandle the userId of the profile to check the password for.
      * @return Returns true if the password would meet the current requirements, else false.
+     * @throws SecurityException if {@code userHandle} is not a managed profile.
      * @hide
      */
     public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
@@ -2018,16 +2007,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the number of times the user has failed at entering a
-     * password since that last successful password entry.
+     * Retrieve the number of times the user has failed at entering a password since that last
+     * successful password entry.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to retrieve the number of failed
+     * password attemts for the parent user.
+     * <p>
+     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN}
+     * to be able to call this method; if it has not, a security exception will be thrown.
      *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
-     * the number of failed password attemts for the parent user.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * @return The number of times user has entered an incorrect password since the last correct
+     *         password entry.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN}
      */
     public int getCurrentFailedPasswordAttempts() {
         return getCurrentFailedPasswordAttempts(myUserId());
@@ -2072,27 +2065,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Setting this to a value greater than zero enables a built-in policy
-     * that will perform a device or profile wipe after too many incorrect
-     * device-unlock passwords have been entered.  This built-in policy combines
-     * watching for failed passwords and wiping the device, and requires
-     * that you request both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
+     * Setting this to a value greater than zero enables a built-in policy that will perform a
+     * device or profile wipe after too many incorrect device-unlock passwords have been entered.
+     * This built-in policy combines watching for failed passwords and wiping the device, and
+     * requires that you request both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}}.
-     *
-     * <p>To implement any other policy (e.g. wiping data for a particular
-     * application only, erasing or revoking credentials, or reporting the
-     * failure to a server), you should implement
-     * {@link DeviceAdminReceiver#onPasswordFailed(Context, android.content.Intent)}
-     * instead.  Do not use this API, because if the maximum count is reached,
-     * the device or profile will be wiped immediately, and your callback will not be invoked.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * a value on the parent profile.
+     * <p>
+     * To implement any other policy (e.g. wiping data for a particular application only, erasing or
+     * revoking credentials, or reporting the failure to a server), you should implement
+     * {@link DeviceAdminReceiver#onPasswordFailed(Context, android.content.Intent)} instead. Do not
+     * use this API, because if the maximum count is reached, the device or profile will be wiped
+     * immediately, and your callback will not be invoked.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set a value on the parent
+     * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param num The number of failed password attempts at which point the
-     * device or profile will be wiped.
+     * @param num The number of failed password attempts at which point the device or profile will
+     *            be wiped.
+     * @throws SecurityException if {@code admin} is not an active administrator or does not use
+     *             both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
+     *             {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}.
      */
     public void setMaximumFailedPasswordsForWipe(@NonNull ComponentName admin, int num) {
         if (mService != null) {
@@ -2170,42 +2164,41 @@ public class DevicePolicyManager {
     public static final int RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT = 0x0002;
 
     /**
-     * Force a new device unlock password (the password needed to access the
-     * entire device, not for individual accounts) on the user.  This takes
-     * effect immediately.
-     *
-     * <p>Calling this from a managed profile that shares the password with the owner profile
-     * will throw a security exception.
-     *
-     * <p><em>Note: This API has been limited as of {@link android.os.Build.VERSION_CODES#N} for
+     * Force a new device unlock password (the password needed to access the entire device, not for
+     * individual accounts) on the user. This takes effect immediately.
+     * <p>
+     * Calling this from a managed profile that shares the password with the owner profile will
+     * throw a security exception.
+     * <p>
+     * <em>Note: This API has been limited as of {@link android.os.Build.VERSION_CODES#N} for
      * device admins that are not device owner and not profile owner.
      * The password can now only be changed if there is currently no password set.  Device owner
      * and profile owner can still do this.</em>
-     *
-     * <p>The given password must be sufficient for the
-     * current password quality and length constraints as returned by
-     * {@link #getPasswordQuality(ComponentName)} and
-     * {@link #getPasswordMinimumLength(ComponentName)}; if it does not meet
-     * these constraints, then it will be rejected and false returned.  Note
-     * that the password may be a stronger quality (containing alphanumeric
-     * characters when the requested quality is only numeric), in which case
-     * the currently active quality will be increased to match.
-     *
-     * <p>Calling with a null or empty password will clear any existing PIN,
-     * pattern or password if the current password constraints allow it. <em>Note: This will not
+     * <p>
+     * The given password must be sufficient for the current password quality and length constraints
+     * as returned by {@link #getPasswordQuality(ComponentName)} and
+     * {@link #getPasswordMinimumLength(ComponentName)}; if it does not meet these constraints, then
+     * it will be rejected and false returned. Note that the password may be a stronger quality
+     * (containing alphanumeric characters when the requested quality is only numeric), in which
+     * case the currently active quality will be increased to match.
+     * <p>
+     * Calling with a null or empty password will clear any existing PIN, pattern or password if the
+     * current password constraints allow it. <em>Note: This will not
      * work in {@link android.os.Build.VERSION_CODES#N} and later for device admins that are not
      * device owner and not profile owner.  Once set, the password cannot be changed to null or
      * empty, except by device owner or profile owner.</em>
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call this method; if it has
+     * not, a security exception will be thrown.
      *
      * @param password The new password for the user. Null or empty clears the password.
      * @param flags May be 0 or combination of {@link #RESET_PASSWORD_REQUIRE_ENTRY} and
-     *              {@link #RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
-     * @return Returns true if the password was applied, or false if it is
-     * not acceptable for the current constraints or if the user has not been decrypted yet.
+     *            {@link #RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
+     * @return Returns true if the password was applied, or false if it is not acceptable for the
+     *         current constraints or if the user has not been decrypted yet.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD}
      */
     public boolean resetPassword(String password, int flags) {
         if (mParentInstance) {
@@ -2222,21 +2215,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to set the
-     * maximum time for user activity until the device will lock.  This limits
-     * the length that the user can set.  It takes effect immediately.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile.
+     * Called by an application that is administering the device to set the maximum time for user
+     * activity until the device will lock. This limits the length that the user can set. It takes
+     * effect immediately.
+     * <p>
+     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     * to be able to call this method; if it has not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param timeMs The new desired maximum time to lock in milliseconds.
-     * A value of 0 means there is no restriction.
+     * @param timeMs The new desired maximum time to lock in milliseconds. A value of 0 means there
+     *            is no restriction.
+     * @throws SecurityException if {@code admin} is not an active administrator or it does not use
+     *             {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      */
     public void setMaximumTimeToLock(@NonNull ComponentName admin, long timeMs) {
         if (mService != null) {
@@ -2279,16 +2273,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Make the device lock immediately, as if the lock screen timeout has
-     * expired at the point of this call.
+     * Make the device lock immediately, as if the lock screen timeout has expired at the point of
+     * this call.
+     * <p>
+     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     * to be able to call this method; if it has not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
      *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * <p>This method can be called on the {@link DevicePolicyManager} instance
-     * returned by {@link #getParentProfileInstance(ComponentName)} in order to lock
-     * the parent profile.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      */
     public void lockNow() {
         if (mService != null) {
@@ -2316,16 +2311,16 @@ public class DevicePolicyManager {
     public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
 
     /**
-     * Ask the user data be wiped.  Wiping the primary user will cause the
-     * device to reboot, erasing all user data while next booting up.
+     * Ask the user data be wiped. Wiping the primary user will cause the device to reboot, erasing
+     * all user data while next booting up.
+     * <p>
+     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
+     * be able to call this method; if it has not, a security exception will be thrown.
      *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * @param flags Bit mask of additional options: currently supported flags
-     * are {@link #WIPE_EXTERNAL_STORAGE} and
-     * {@link #WIPE_RESET_PROTECTION_DATA}.
+     * @param flags Bit mask of additional options: currently supported flags are
+     *            {@link #WIPE_EXTERNAL_STORAGE} and {@link #WIPE_RESET_PROTECTION_DATA}.
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      */
     public void wipeData(int flags) {
         if (mService != null) {
@@ -2409,20 +2404,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Set a network-independent global HTTP proxy.  This is not normally what you want
-     * for typical HTTP proxies - they are generally network dependent.  However if you're
-     * doing something unusual like general internal filtering this may be useful.  On
-     * a private network where the proxy is not accessible, you may break HTTP using this.
+     * Set a network-independent global HTTP proxy. This is not normally what you want for typical
+     * HTTP proxies - they are generally network dependent. However if you're doing something
+     * unusual like general internal filtering this may be useful. On a private network where the
+     * proxy is not accessible, you may break HTTP using this.
+     * <p>
+     * This method requires the caller to be the device owner.
+     * <p>
+     * This proxy is only a recommendation and it is possible that some apps will ignore it.
      *
-     * <p>This method requires the caller to be the device owner.
-     *
-     * <p>This proxy is only a recommendation and it is possible that some apps will ignore it.
      * @see ProxyInfo
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param proxyInfo The a {@link ProxyInfo} object defining the new global
-     *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param proxyInfo The a {@link ProxyInfo} object defining the new global HTTP proxy. A
+     *            {@code null} value will clear the global HTTP proxy.
+     * @throws SecurityException if {@code admin} is not the device owner.
      */
     public void setRecommendedGlobalProxy(@NonNull ComponentName admin, @Nullable ProxyInfo
             proxyInfo) {
@@ -2545,36 +2540,35 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_FEATURES_ALL = 0x7fffffff;
 
     /**
-     * Called by an application that is administering the device to
-     * request that the storage system be encrypted.
-     *
-     * <p>When multiple device administrators attempt to control device
-     * encryption, the most secure, supported setting will always be
-     * used.  If any device administrator requests device encryption,
-     * it will be enabled;  Conversely, if a device administrator
-     * attempts to disable device encryption while another
-     * device administrator has enabled it, the call to disable will
+     * Called by an application that is administering the device to request that the storage system
+     * be encrypted.
+     * <p>
+     * When multiple device administrators attempt to control device encryption, the most secure,
+     * supported setting will always be used. If any device administrator requests device
+     * encryption, it will be enabled; Conversely, if a device administrator attempts to disable
+     * device encryption while another device administrator has enabled it, the call to disable will
      * fail (most commonly returning {@link #ENCRYPTION_STATUS_ACTIVE}).
-     *
-     * <p>This policy controls encryption of the secure (application data) storage area.  Data
-     * written to other storage areas may or may not be encrypted, and this policy does not require
-     * or control the encryption of any other storage areas.
-     * There is one exception:  If {@link android.os.Environment#isExternalStorageEmulated()} is
-     * {@code true}, then the directory returned by
-     * {@link android.os.Environment#getExternalStorageDirectory()} must be written to disk
-     * within the encrypted storage area.
-     *
-     * <p>Important Note:  On some devices, it is possible to encrypt storage without requiring
-     * the user to create a device PIN or Password.  In this case, the storage is encrypted, but
-     * the encryption key may not be fully secured.  For maximum security, the administrator should
-     * also require (and check for) a pattern, PIN, or password.
+     * <p>
+     * This policy controls encryption of the secure (application data) storage area. Data written
+     * to other storage areas may or may not be encrypted, and this policy does not require or
+     * control the encryption of any other storage areas. There is one exception: If
+     * {@link android.os.Environment#isExternalStorageEmulated()} is {@code true}, then the
+     * directory returned by {@link android.os.Environment#getExternalStorageDirectory()} must be
+     * written to disk within the encrypted storage area.
+     * <p>
+     * Important Note: On some devices, it is possible to encrypt storage without requiring the user
+     * to create a device PIN or Password. In this case, the storage is encrypted, but the
+     * encryption key may not be fully secured. For maximum security, the administrator should also
+     * require (and check for) a pattern, PIN, or password.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param encrypt true to request encryption, false to release any previous request
      * @return the new request status (for all active admins) - will be one of
-     * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE}, or
-     * {@link #ENCRYPTION_STATUS_ACTIVE}.  This is the value of the requests;  Use
-     * {@link #getStorageEncryptionStatus()} to query the actual device state.
+     *         {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE}, or
+     *         {@link #ENCRYPTION_STATUS_ACTIVE}. This is the value of the requests; Use
+     *         {@link #getStorageEncryptionStatus()} to query the actual device state.
+     * @throws SecurityException if {@code admin} is not an active administrator or does not use
+     *             {@link DeviceAdminInfo#USES_ENCRYPTED_STORAGE}
      */
     public int setStorageEncryption(@NonNull ComponentName admin, boolean encrypt) {
         if (mService != null) {
@@ -2651,6 +2645,8 @@ public class DevicePolicyManager {
      *
      * @return false if the certBuffer cannot be parsed or installation is
      *         interrupted, true otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public boolean installCaCert(@Nullable ComponentName admin, byte[] certBuffer) {
         if (mService != null) {
@@ -2669,6 +2665,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *              {@code null} if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to remove.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public void uninstallCaCert(@Nullable ComponentName admin, byte[] certBuffer) {
         if (mService != null) {
@@ -2691,6 +2689,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *              {@code null} if calling from a delegated certificate installer.
      * @return a List of byte[] arrays, each encoding one user CA certificate.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public List<byte[]> getInstalledCaCerts(@Nullable ComponentName admin) {
         List<byte[]> certs = new ArrayList<byte[]>();
@@ -2718,6 +2718,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *              {@code null} if calling from a delegated certificate installer.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public void uninstallAllUserCaCerts(@Nullable ComponentName admin) {
         if (mService != null) {
@@ -2736,6 +2738,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *              {@code null} if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to look up.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public boolean hasCaCertInstalled(@Nullable ComponentName admin, byte[] certBuffer) {
         if (mService != null) {
@@ -2770,6 +2774,8 @@ public class DevicePolicyManager {
      * @param alias The private key alias under which to install the certificate. If a certificate
      * with that alias already exists, it will be overwritten.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias) {
@@ -2795,6 +2801,8 @@ public class DevicePolicyManager {
      *        credentials immediately. Otherwise, access to the credentials will be gated by user
      *        approval.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias, boolean requestAccess) {
@@ -2821,6 +2829,8 @@ public class DevicePolicyManager {
      *        {@code null} if calling from a delegated certificate installer.
      * @param alias The private key alias under which the certificate is installed.
      * @return {@code true} if the private key alias no longer exists, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
      */
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
         try {
@@ -2850,15 +2860,16 @@ public class DevicePolicyManager {
      * Delegated certificate installer is a per-user state. The delegated access is persistent until
      * it is later cleared by calling this method with a null value or uninstallling the certificate
      * installer.
-     *<p>
+     * <p>
      * <b>Note:</b>Starting from {@link android.os.Build.VERSION_CODES#N}, if the caller
      * application's target SDK version is {@link android.os.Build.VERSION_CODES#N} or newer, the
-     * supplied certificate installer package must be installed when calling this API,
-     * otherwise an {@link IllegalArgumentException} will be thrown.
+     * supplied certificate installer package must be installed when calling this API, otherwise an
+     * {@link IllegalArgumentException} will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param installerPackage The package name of the certificate installer which will be given
-     * access. If {@code null} is given the current package will be cleared.
+     *            access. If {@code null} is given the current package will be cleared.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
      */
     public void setCertInstallerPackage(@NonNull ComponentName admin, @Nullable String
             installerPackage) throws SecurityException {
@@ -2872,12 +2883,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner or device owner to retrieve the certificate installer for the
-     * user. null if none is set.
+     * Called by a profile owner or device owner to retrieve the certificate installer for the user.
+     * null if none is set.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The package name of the current delegated certificate installer, or {@code null}
-     * if none is set.
+     * @return The package name of the current delegated certificate installer, or {@code null} if
+     *         none is set.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
      */
     public String getCertInstallerPackage(@NonNull ComponentName admin) throws SecurityException {
         if (mService != null) {
@@ -2892,18 +2904,18 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device or profile owner to configure an always-on VPN connection through a
-     * specific application for the current user.
-     * This connection is automatically granted and persisted after a reboot.
+     * specific application for the current user. This connection is automatically granted and
+     * persisted after a reboot.
+     * <p>
+     * The designated package should declare a {@link android.net.VpnService} in its manifest
+     * guarded by {@link android.Manifest.permission#BIND_VPN_SERVICE}, otherwise the call will
+     * fail.
      *
-     * <p>The designated package should declare a {@link android.net.VpnService} in its
-     *    manifest guarded by {@link android.Manifest.permission#BIND_VPN_SERVICE},
-     *    otherwise the call will fail.
-     *
-     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
-     *                   to remove an existing always-on VPN configuration.
-     *
-     * @return {@code true} if the package is set as always-on VPN controller;
-     *         {@code false} otherwise.
+     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null} to
+     *            remove an existing always-on VPN configuration.
+     * @return {@code true} if the package is set as always-on VPN controller; {@code false}
+     *         otherwise.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
      */
     public boolean setAlwaysOnVpnPackage(@NonNull ComponentName admin,
             @Nullable String vpnPackage) {
@@ -2919,12 +2931,12 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device or profile owner to read the name of the package administering an
-     * always-on VPN connection for the current user.
-     * If there is no such package, or the always-on VPN is provided by the system instead
-     * of by an application, {@code null} will be returned.
+     * always-on VPN connection for the current user. If there is no such package, or the always-on
+     * VPN is provided by the system instead of by an application, {@code null} will be returned.
      *
-     * @return Package name of VPN controller responsible for always-on VPN,
-     *         or {@code null} if none is set.
+     * @return Package name of VPN controller responsible for always-on VPN, or {@code null} if none
+     *         is set.
+     * @throws SecurityException if {@code admin} is not a device or a profile owner.
      */
     public String getAlwaysOnVpnPackage(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -2938,18 +2950,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by an application that is administering the device to disable all cameras
-     * on the device, for this user. After setting this, no applications running as this user
-     * will be able to access any cameras on the device.
-     *
-     * <p>If the caller is device owner, then the restriction will be applied to all users.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * Called by an application that is administering the device to disable all cameras on the
+     * device, for this user. After setting this, no applications running as this user will be able
+     * to access any cameras on the device.
+     * <p>
+     * If the caller is device owner, then the restriction will be applied to all users.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
+     * not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled Whether or not the camera should be disabled.
+     * @throws SecurityException if {@code admin} is not an active administrator or does not use
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     public void setCameraDisabled(@NonNull ComponentName admin, boolean disabled) {
         if (mService != null) {
@@ -2985,14 +2999,16 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device owner to request a bugreport.
-     *
-     * <p>There must be only one user on the device, managed by the device owner.
-     * Otherwise a {@link SecurityException} will be thrown.
+     * <p>
+     * There must be only one user on the device, managed by the device owner. Otherwise a
+     * {@link SecurityException} will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return {@code true} if the bugreport collection started successfully, or {@code false}
-     * if it wasn't triggered because a previous bugreport operation is still active
-     * (either the bugreport is still running or waiting for the user to share or decline)
+     * @return {@code true} if the bugreport collection started successfully, or {@code false} if it
+     *         wasn't triggered because a previous bugreport operation is still active (either the
+     *         bugreport is still running or waiting for the user to share or decline)
+     * @throws SecurityException if {@code admin} is not a device owner, or if there are users other
+     *             than the one managed by the device owner.
      */
     public boolean requestBugreport(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -3021,15 +3037,16 @@ public class DevicePolicyManager {
      * screen capture also prevents the content from being shown on display devices that do not have
      * a secure video output. See {@link android.view.Display#FLAG_SECURE} for more details about
      * secure surfaces and secure displays.
-     *
-     * <p>The calling device admin must be a device or profile owner. If it is not, a
-     * security exception will be thrown.
-     *
-     * <p>From version {@link android.os.Build.VERSION_CODES#M} disabling screen capture also
-     * blocks assist requests for all activities of the relevant user.
+     * <p>
+     * The calling device admin must be a device or profile owner. If it is not, a security
+     * exception will be thrown.
+     * <p>
+     * From version {@link android.os.Build.VERSION_CODES#M} disabling screen capture also blocks
+     * assist requests for all activities of the relevant user.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled Whether screen capture is disabled or not.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setScreenCaptureDisabled(@NonNull ComponentName admin, boolean disabled) {
         if (mService != null) {
@@ -3064,16 +3081,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to set whether auto time is required. If auto time is
-     * required the user cannot set the date and time, but has to use network date and time.
-     *
-     * <p>Note: if auto time is required the user can still manually set the time zone.
-     *
-     * <p>The calling device admin must be a device owner. If it is not, a security exception will
-     * be thrown.
+     * Called by a device owner to set whether auto time is required. If auto time is required the
+     * user cannot set the date and time, but has to use network date and time.
+     * <p>
+     * Note: if auto time is required the user can still manually set the time zone.
+     * <p>
+     * The calling device admin must be a device owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param required Whether auto time is set required or not.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setAutoTimeRequired(@NonNull ComponentName admin, boolean required) {
         if (mService != null) {
@@ -3101,15 +3119,16 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device owner to set whether all users created on the device should be ephemeral.
-     *
-     * <p>The system user is exempt from this policy - it is never ephemeral.
-     *
-     * <p>The calling device admin must be the device owner. If it is not, a security exception will
-     * be thrown.
+     * <p>
+     * The system user is exempt from this policy - it is never ephemeral.
+     * <p>
+     * The calling device admin must be the device owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param forceEphemeralUsers If true, all the existing users will be deleted and all
-     *         subsequently created users will be ephemeral.
+     *            subsequently created users will be ephemeral.
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @hide
      */
     public void setForceEphemeralUsers(
@@ -3125,6 +3144,7 @@ public class DevicePolicyManager {
 
     /**
      * @return true if all users are created ephemeral.
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @hide
      */
     public boolean getForceEphemeralUsers(@NonNull ComponentName admin) {
@@ -3142,39 +3162,41 @@ public class DevicePolicyManager {
      * Called by an application that is administering the device to disable keyguard customizations,
      * such as widgets. After setting this, keyguard features will be disabled according to the
      * provided feature list.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
-     * this method; if it has not, a security exception will be thrown.
-     *
-     * <p>Calling this from a managed profile before version
-     * {@link android.os.Build.VERSION_CODES#M} will throw a security exception. From version
-     * {@link android.os.Build.VERSION_CODES#M} the profile owner of a managed profile can set:
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call this method;
+     * if it has not, a security exception will be thrown.
+     * <p>
+     * Calling this from a managed profile before version {@link android.os.Build.VERSION_CODES#M}
+     * will throw a security exception. From version {@link android.os.Build.VERSION_CODES#M} the
+     * profile owner of a managed profile can set:
      * <ul>
      * <li>{@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which affects the parent user, but only if there
-     *      is no separate challenge set on the managed profile.
+     * is no separate challenge set on the managed profile.
      * <li>{@link #KEYGUARD_DISABLE_FINGERPRINT} which affects the managed profile challenge if
-     *      there is one, or the parent user otherwise.
-     * <li>{@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS} which affects notifications
-     *      generated by applications in the managed profile.
+     * there is one, or the parent user otherwise.
+     * <li>{@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS} which affects notifications generated
+     * by applications in the managed profile.
      * </ul>
-     *
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} and {@link #KEYGUARD_DISABLE_FINGERPRINT} can also be
      * set on the {@link DevicePolicyManager} instance returned by
-     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the
-     * parent profile.
-     *
-     * <p>Requests to disable other features on a managed profile will be ignored.
-     *
-     * <p>The admin can check which features have been disabled by calling
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
+     * <p>
+     * Requests to disable other features on a managed profile will be ignored.
+     * <p>
+     * The admin can check which features have been disabled by calling
      * {@link #getKeyguardDisabledFeatures(ComponentName)}
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param which {@link #KEYGUARD_DISABLE_FEATURES_NONE} (default),
-     * {@link #KEYGUARD_DISABLE_WIDGETS_ALL}, {@link #KEYGUARD_DISABLE_SECURE_CAMERA},
-     * {@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS}, {@link #KEYGUARD_DISABLE_TRUST_AGENTS},
-     * {@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS}, {@link #KEYGUARD_DISABLE_FINGERPRINT},
-     * {@link #KEYGUARD_DISABLE_FEATURES_ALL}
+     *            {@link #KEYGUARD_DISABLE_WIDGETS_ALL}, {@link #KEYGUARD_DISABLE_SECURE_CAMERA},
+     *            {@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS},
+     *            {@link #KEYGUARD_DISABLE_TRUST_AGENTS},
+     *            {@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS},
+     *            {@link #KEYGUARD_DISABLE_FINGERPRINT}, {@link #KEYGUARD_DISABLE_FEATURES_ALL}
+     * @throws SecurityException if {@code admin} is not an active administrator or does not user
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
      */
     public void setKeyguardDisabledFeatures(@NonNull ComponentName admin, int which) {
         if (mService != null) {
@@ -3501,13 +3523,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Clears the current device owner.  The caller must be the device owner.
-     *
-     * This function should be used cautiously as once it is called it cannot
-     * be undone.  The device owner can only be set as a part of device setup
-     * before setup completes.
+     * Clears the current device owner. The caller must be the device owner. This function should be
+     * used cautiously as once it is called it cannot be undone. The device owner can only be set as
+     * a part of device setup before setup completes.
      *
      * @param packageName The package name of the device owner.
+     * @throws SecurityException if the caller is not in {@code packageName} or {@code packageName}
+     *             does not own the current device owner component.
      */
     public void clearDeviceOwnerApp(String packageName) {
         if (mService != null) {
@@ -3617,13 +3639,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Clears the active profile owner and removes all user restrictions. The caller must
-     * be from the same package as the active profile owner for this user, otherwise a
-     * SecurityException will be thrown.
-     *
-     * <p>This doesn't work for managed profile owners.
+     * Clears the active profile owner and removes all user restrictions. The caller must be from
+     * the same package as the active profile owner for this user, otherwise a SecurityException
+     * will be thrown.
+     * <p>
+     * This doesn't work for managed profile owners.
      *
      * @param admin The component to remove as the profile owner.
+     * @throws SecurityException if {@code admin} is not an active profile owner.
      */
     public void clearProfileOwner(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -3683,20 +3706,21 @@ public class DevicePolicyManager {
 
     /**
      * Sets the device owner information to be shown on the lock screen.
-     *
-     * <p>If the device owner information is {@code null} or empty then the device owner info is
+     * <p>
+     * If the device owner information is {@code null} or empty then the device owner info is
      * cleared and the user owner info is shown on the lock screen if it is set.
-     * <p>If the device owner information contains only whitespaces then the message on the lock
-     * screen will be blank and the user will not be allowed to change it.
-     *
-     * <p>If the device owner information needs to be localized, it is the responsibility of the
+     * <p>
+     * If the device owner information contains only whitespaces then the message on the lock screen
+     * will be blank and the user will not be allowed to change it.
+     * <p>
+     * If the device owner information needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
      * and set a new version of this string accordingly.
      *
      * @param admin The name of the admin component to check.
-     * @param info Device owner information which will be displayed instead of the user
-     * owner info.
+     * @param info Device owner information which will be displayed instead of the user owner info.
      * @return Whether the device owner information has been set.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean setDeviceOwnerLockScreenInfo(@NonNull ComponentName admin, String info) {
         if (mService != null) {
@@ -3725,21 +3749,22 @@ public class DevicePolicyManager {
 
     /**
      * Called by device or profile owners to suspend packages for this user.
-     *
-     * <p>A suspended package will not be able to start activities. Its notifications will
-     * be hidden, it will not show up in recents, will not be able to show toasts or dialogs
-     * or ring the device.
-     *
-     * <p>The package must already be installed. If the package is uninstalled while suspended
-     * the package will no longer be suspended. The admin can block this by using
+     * <p>
+     * A suspended package will not be able to start activities. Its notifications will be hidden,
+     * it will not show up in recents, will not be able to show toasts or dialogs or ring the
+     * device.
+     * <p>
+     * The package must already be installed. If the package is uninstalled while suspended the
+     * package will no longer be suspended. The admin can block this by using
      * {@link #setUninstallBlocked}.
      *
      * @param admin The name of the admin component to check.
      * @param packageNames The package names to suspend or unsuspend.
      * @param suspended If set to {@code true} than the packages will be suspended, if set to
-     * {@code false} the packages will be unsuspended.
+     *            {@code false} the packages will be unsuspended.
      * @return an array of package names for which the suspended status is not set as requested in
-     * this method.
+     *         this method.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public String[] setPackagesSuspended(@NonNull ComponentName admin, String[] packageNames,
             boolean suspended) {
@@ -3759,7 +3784,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to retrieve the suspended status of.
      * @return {@code true} if the package is suspended or {@code false} if the package is not
-     * suspended, could not be found or an error occurred.
+     *         suspended, could not be found or an error occurred.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getPackageSuspended(@NonNull ComponentName admin, String packageName) {
         if (mService != null) {
@@ -3777,8 +3803,8 @@ public class DevicePolicyManager {
      * be used. Only the profile owner can call this.
      *
      * @see #isProfileOwnerApp
-     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setProfileEnabled(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -3791,15 +3817,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets the name of the profile. In the device owner case it sets the name of the user
-     * which it is called from. Only a profile owner or device owner can call this. If this is
-     * never called by the profile or device owner, the name will be set to default values.
+     * Sets the name of the profile. In the device owner case it sets the name of the user which it
+     * is called from. Only a profile owner or device owner can call this. If this is never called
+     * by the profile or device owner, the name will be set to default values.
      *
      * @see #isProfileOwnerApp
      * @see #isDeviceOwnerApp
-     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associate with.
      * @param profileName The name of the profile.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setProfileName(@NonNull ComponentName admin, String profileName) {
         if (mService != null) {
@@ -3897,19 +3923,20 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner or device owner to add a default intent handler activity for
      * intents that match a certain intent filter. This activity will remain the default intent
-     * handler even if the set of potential event handlers for the intent filter changes and if
-     * the intent preferences are reset.
-     *
-     * <p>The default disambiguation mechanism takes over if the activity is not installed
-     * (anymore). When the activity is (re)installed, it is automatically reset as default
-     * intent handler for the filter.
-     *
-     * <p>The calling device admin must be a profile owner or device owner. If it is not, a
-     * security exception will be thrown.
+     * handler even if the set of potential event handlers for the intent filter changes and if the
+     * intent preferences are reset.
+     * <p>
+     * The default disambiguation mechanism takes over if the activity is not installed (anymore).
+     * When the activity is (re)installed, it is automatically reset as default intent handler for
+     * the filter.
+     * <p>
+     * The calling device admin must be a profile owner or device owner. If it is not, a security
+     * exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The IntentFilter for which a default handler is added.
      * @param activity The Activity that is added as default intent handler.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void addPersistentPreferredActivity(@NonNull ComponentName admin, IntentFilter filter,
             @NonNull ComponentName activity) {
@@ -3925,12 +3952,13 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner or device owner to remove all persistent intent handler preferences
      * associated with the given package that were set by {@link #addPersistentPreferredActivity}.
-     *
-     * <p>The calling device admin must be a profile owner. If it is not, a security
-     * exception will be thrown.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package for which preferences are removed.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void clearPackagePersistentPreferredActivities(@NonNull ComponentName admin,
             String packageName) {
@@ -3956,7 +3984,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package name which will be given access to application restrictions
-     * APIs. If {@code null} is given the current package will be cleared.
+     *            APIs. If {@code null} is given the current package will be cleared.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setApplicationRestrictionsManagingPackage(@NonNull ComponentName admin,
             @Nullable String packageName) {
@@ -3975,7 +4004,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The package name allowed to manage application restrictions on the current user, or
-     * {@code null} if none is set.
+     *         {@code null} if none is set.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public String getApplicationRestrictionsManagingPackage(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4006,34 +4036,34 @@ public class DevicePolicyManager {
 
     /**
      * Sets the application restrictions for a given target application running in the calling user.
-     *
-     * <p>The caller must be a profile or device owner on that user, or the package allowed to
-     * manage application restrictions via {@link #setApplicationRestrictionsManagingPackage};
-     * otherwise a security exception will be thrown.
-     *
-     * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be:
+     * <p>
+     * The caller must be a profile or device owner on that user, or the package allowed to manage
+     * application restrictions via {@link #setApplicationRestrictionsManagingPackage}; otherwise a
+     * security exception will be thrown.
+     * <p>
+     * The provided {@link Bundle} consists of key-value pairs, where the types of values may be:
      * <ul>
      * <li>{@code boolean}
      * <li>{@code int}
      * <li>{@code String} or {@code String[]}
      * <li>From {@link android.os.Build.VERSION_CODES#M}, {@code Bundle} or {@code Bundle[]}
      * </ul>
-     *
-     * <p>If the restrictions are not available yet, but may be applied in the near future,
-     * the caller can notify the target application of that by adding
+     * <p>
+     * If the restrictions are not available yet, but may be applied in the near future, the caller
+     * can notify the target application of that by adding
      * {@link UserManager#KEY_RESTRICTIONS_PENDING} to the settings parameter.
-     *
-     * <p>The application restrictions are only made visible to the target application via
-     * {@link UserManager#getApplicationRestrictions(String)}, in addition to the profile or
-     * device owner, and the application restrictions managing package via
+     * <p>
+     * The application restrictions are only made visible to the target application via
+     * {@link UserManager#getApplicationRestrictions(String)}, in addition to the profile or device
+     * owner, and the application restrictions managing package via
      * {@link #getApplicationRestrictions}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     * {@code null} if called by the application restrictions managing package.
+     *            {@code null} if called by the application restrictions managing package.
      * @param packageName The name of the package to update restricted settings for.
      * @param settings A {@link Bundle} to be parsed by the receiving application, conveying a new
-     * set of active restrictions.
-     *
+     *            set of active restrictions.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #setApplicationRestrictionsManagingPackage
      * @see UserManager#KEY_RESTRICTIONS_PENDING
      */
@@ -4049,23 +4079,29 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets a list of configuration features to enable for a TrustAgent component. This is meant
-     * to be used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which disables all
-     * trust agents but those enabled by this function call. If flag
+     * Sets a list of configuration features to enable for a TrustAgent component. This is meant to
+     * be used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which disables all trust
+     * agents but those enabled by this function call. If flag
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is not set, then this call has no effect.
-     *
-     * <p>The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
-     * this method; if not, a security exception will be thrown.
+     * <p>
+     * The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call this method;
+     * if not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param target Component name of the agent to be enabled.
-     * @param configuration TrustAgent-specific feature bundle. If null for any admin, agent
-     * will be strictly disabled according to the state of the
-     *  {@link #KEYGUARD_DISABLE_TRUST_AGENTS} flag.
-     * <p>If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all admins,
-     * then it's up to the TrustAgent itself to aggregate the values from all device admins.
-     * <p>Consult documentation for the specific TrustAgent to determine legal options parameters.
+     * @param configuration TrustAgent-specific feature bundle. If null for any admin, agent will be
+     *            strictly disabled according to the state of the
+     *            {@link #KEYGUARD_DISABLE_TRUST_AGENTS} flag.
+     *            <p>
+     *            If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all
+     *            admins, then it's up to the TrustAgent itself to aggregate the values from all
+     *            device admins.
+     *            <p>
+     *            Consult documentation for the specific TrustAgent to determine legal options
+     *            parameters.
+     * @throws SecurityException if {@code admin} is not an active administrator or does not use
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES}
      */
     public void setTrustAgentConfiguration(@NonNull ComponentName admin,
             @NonNull ComponentName target, PersistableBundle configuration) {
@@ -4111,14 +4147,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to set whether caller-Id information from
-     * the managed profile will be shown in the parent profile, for incoming calls.
-     *
-     * <p>The calling device admin must be a profile owner. If it is not, a
-     * security exception will be thrown.
+     * Called by a profile owner of a managed profile to set whether caller-Id information from the
+     * managed profile will be shown in the parent profile, for incoming calls.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled If true caller-Id information in the managed profile is not displayed.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setCrossProfileCallerIdDisabled(@NonNull ComponentName admin, boolean disabled) {
         if (mService != null) {
@@ -4133,11 +4170,12 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner of a managed profile to determine whether or not caller-Id
      * information has been disabled.
-     *
-     * <p>The calling device admin must be a profile owner. If it is not, a
-     * security exception will be thrown.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getCrossProfileCallerIdDisabled(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4168,14 +4206,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to set whether contacts search from
-     * the managed profile will be shown in the parent profile, for incoming calls.
-     *
-     * <p>The calling device admin must be a profile owner. If it is not, a
-     * security exception will be thrown.
+     * Called by a profile owner of a managed profile to set whether contacts search from the
+     * managed profile will be shown in the parent profile, for incoming calls.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled If true contacts search in the managed profile is not displayed.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setCrossProfileContactsSearchDisabled(@NonNull ComponentName admin,
             boolean disabled) {
@@ -4191,11 +4230,12 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner of a managed profile to determine whether or not contacts search
      * has been disabled.
-     *
-     * <p>The calling device admin must be a profile owner. If it is not, a
-     * security exception will be thrown.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getCrossProfileContactsSearchDisabled(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4255,18 +4295,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to set whether bluetooth
-     * devices can access enterprise contacts.
+     * Called by a profile owner of a managed profile to set whether bluetooth devices can access
+     * enterprise contacts.
      * <p>
-     * The calling device admin must be a profile owner. If it is not, a
-     * security exception will be thrown.
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      * <p>
      * This API works on managed profile only.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param disabled If true, bluetooth devices cannot access enterprise
-     *            contacts.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param disabled If true, bluetooth devices cannot access enterprise contacts.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setBluetoothContactSharingDisabled(@NonNull ComponentName admin, boolean disabled) {
         if (mService != null) {
@@ -4279,16 +4318,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to determine whether or
-     * not Bluetooth devices cannot access enterprise contacts.
+     * Called by a profile owner of a managed profile to determine whether or not Bluetooth devices
+     * cannot access enterprise contacts.
      * <p>
-     * The calling device admin must be a profile owner. If it is not, a
-     * security exception will be thrown.
+     * The calling device admin must be a profile owner. If it is not, a security exception will be
+     * thrown.
      * <p>
      * This API works on managed profile only.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean getBluetoothContactSharingDisabled(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4323,14 +4362,15 @@ public class DevicePolicyManager {
 
     /**
      * Called by the profile owner of a managed profile so that some intents sent in the managed
-     * profile can also be resolved in the parent, or vice versa.
-     * Only activity intents are supported.
+     * profile can also be resolved in the parent, or vice versa. Only activity intents are
+     * supported.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
-     * other profile
+     *            other profile
      * @param flags {@link DevicePolicyManager#FLAG_MANAGED_CAN_ACCESS_PARENT} and
-     * {@link DevicePolicyManager#FLAG_PARENT_CAN_ACCESS_MANAGED} are supported.
+     *            {@link DevicePolicyManager#FLAG_PARENT_CAN_ACCESS_MANAGED} are supported.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void addCrossProfileIntentFilter(@NonNull ComponentName admin, IntentFilter filter, int flags) {
         if (mService != null) {
@@ -4346,7 +4386,9 @@ public class DevicePolicyManager {
      * Called by a profile owner of a managed profile to remove the cross-profile intent filters
      * that go from the managed profile to the parent, or from the parent to the managed profile.
      * Only removes those that have been set by the profile owner.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void clearCrossProfileIntentFilters(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4359,25 +4401,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to set the permitted accessibility services. When
-     * set by a device owner or profile owner the restriction applies to all profiles of the
-     * user the device owner or profile owner is an admin for.
-     *
-     * By default the user can use any accessiblity service. When zero or more packages have
-     * been added, accessiblity services that are not in the list and not part of the system
-     * can not be enabled by the user.
-     *
-     * <p> Calling with a null value for the list disables the restriction so that all services
-     * can be used, calling with an empty list only allows the builtin system's services.
-     *
-     * <p> System accesibility services are always available to the user the list can't modify
-     * this.
+     * Called by a profile or device owner to set the permitted accessibility services. When set by
+     * a device owner or profile owner the restriction applies to all profiles of the user the
+     * device owner or profile owner is an admin for. By default the user can use any accessiblity
+     * service. When zero or more packages have been added, accessiblity services that are not in
+     * the list and not part of the system can not be enabled by the user.
+     * <p>
+     * Calling with a null value for the list disables the restriction so that all services can be
+     * used, calling with an empty list only allows the builtin system's services.
+     * <p>
+     * System accesibility services are always available to the user the list can't modify this.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of accessibility service package names.
-     *
-     * @return true if setting the restriction succeeded. It fail if there is
-     * one or more non-system accessibility services enabled, that are not in the list.
+     * @return true if setting the restriction succeeded. It fail if there is one or more non-system
+     *         accessibility services enabled, that are not in the list.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean setPermittedAccessibilityServices(@NonNull ComponentName admin,
             List<String> packageNames) {
@@ -4393,12 +4432,13 @@ public class DevicePolicyManager {
 
     /**
      * Returns the list of permitted accessibility services set by this device or profile owner.
-     *
-     * <p>An empty list means no accessibility services except system services are allowed.
-     * Null means all accessibility services are allowed.
+     * <p>
+     * An empty list means no accessibility services except system services are allowed. Null means
+     * all accessibility services are allowed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return List of accessiblity service package names.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public List<String> getPermittedAccessibilityServices(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4459,27 +4499,23 @@ public class DevicePolicyManager {
      }
 
     /**
-     * Called by a profile or device owner to set the permitted input methods services. When
-     * set by a device owner or profile owner the restriction applies to all profiles of the
-     * user the device owner or profile owner is an admin for.
-     *
-     * By default the user can use any input method. When zero or more packages have
-     * been added, input method that are not in the list and not part of the system
-     * can not be enabled by the user.
-     *
-     * This method will fail if it is called for a admin that is not for the foreground user
-     * or a profile of the foreground user.
-     *
-     * <p> Calling with a null value for the list disables the restriction so that all input methods
-     * can be used, calling with an empty list disables all but the system's own input methods.
-     *
-     * <p> System input methods are always available to the user this method can't modify this.
+     * Called by a profile or device owner to set the permitted input methods services. When set by
+     * a device owner or profile owner the restriction applies to all profiles of the user the
+     * device owner or profile owner is an admin for. By default the user can use any input method.
+     * When zero or more packages have been added, input method that are not in the list and not
+     * part of the system can not be enabled by the user. This method will fail if it is called for
+     * a admin that is not for the foreground user or a profile of the foreground user.
+     * <p>
+     * Calling with a null value for the list disables the restriction so that all input methods can
+     * be used, calling with an empty list disables all but the system's own input methods.
+     * <p>
+     * System input methods are always available to the user this method can't modify this.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of input method package names.
-     * @return true if setting the restriction succeeded. It will fail if there are
-     *     one or more non-system input methods currently enabled that are not in
-     *     the packageNames list.
+     * @return true if setting the restriction succeeded. It will fail if there are one or more
+     *         non-system input methods currently enabled that are not in the packageNames list.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean setPermittedInputMethods(@NonNull ComponentName admin, List<String> packageNames) {
         if (mService != null) {
@@ -4495,12 +4531,13 @@ public class DevicePolicyManager {
 
     /**
      * Returns the list of permitted input methods set by this device or profile owner.
-     *
-     * <p>An empty list means no input methods except system input methods are allowed.
-     * Null means all input methods are allowed.
+     * <p>
+     * An empty list means no input methods except system input methods are allowed. Null means all
+     * input methods are allowed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return List of input method package names.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public List<String> getPermittedInputMethods(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -4587,6 +4624,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of package names to keep cached.
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @hide
      */
     public void setKeepUninstalledPackages(@NonNull ComponentName admin,
@@ -4672,27 +4710,27 @@ public class DevicePolicyManager {
      * persisted as user handles are recycled as users are removed and created. If you need to
      * persist an identifier for this user, use {@link UserManager#getSerialNumberForUser}. The new
      * user will not be started in the background.
-     *
-     * <p>admin is the {@link DeviceAdminReceiver} which is the device owner. profileOwner is also
-     * a DeviceAdminReceiver in the same package as admin, and will become the profile owner and
-     * will be registered as an active admin on the new user. The profile owner package will be
-     * installed on the new user.
-     *
-     * <p>If the adminExtras are not null, they will be stored on the device until the user is
-     * started for the first time. Then the extras will be passed to the admin when
-     * onEnable is called.
+     * <p>
+     * admin is the {@link DeviceAdminReceiver} which is the device owner. profileOwner is also a
+     * DeviceAdminReceiver in the same package as admin, and will become the profile owner and will
+     * be registered as an active admin on the new user. The profile owner package will be installed
+     * on the new user.
+     * <p>
+     * If the adminExtras are not null, they will be stored on the device until the user is started
+     * for the first time. Then the extras will be passed to the admin when onEnable is called.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param name The user's name.
      * @param profileOwner Which {@link DeviceAdminReceiver} will be profile owner. Has to be in the
-     *      same package as admin, otherwise no user is created and an IllegalArgumentException is
-     *      thrown.
+     *            same package as admin, otherwise no user is created and an
+     *            IllegalArgumentException is thrown.
      * @param adminExtras Extras that will be passed to onEnable of the admin receiver on the new
-     *      user.
+     *            user.
      * @param flags {@link #SKIP_SETUP_WIZARD} is supported.
      * @see UserHandle
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public UserHandle createAndManageUser(@NonNull ComponentName admin, @NonNull String name,
             @NonNull ComponentName profileOwner, @Nullable PersistableBundle adminExtras,
@@ -4705,12 +4743,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to remove a user and all associated data. The primary user can
-     * not be removed.
+     * Called by a device owner to remove a user and all associated data. The primary user can not
+     * be removed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to remove.
      * @return {@code true} if the user was removed, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean removeUser(@NonNull ComponentName admin, UserHandle userHandle) {
         try {
@@ -4726,7 +4765,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to switch to; null will switch to primary.
      * @return {@code true} if the switch was successful, {@code false} otherwise.
-     *
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @see Intent#ACTION_USER_FOREGROUND
      */
     public boolean switchUser(@NonNull ComponentName admin, @Nullable UserHandle userHandle) {
@@ -4740,18 +4779,18 @@ public class DevicePolicyManager {
     /**
      * Retrieves the application restrictions for a given target application running in the calling
      * user.
-     *
-     * <p>The caller must be a profile or device owner on that user, or the package allowed to
-     * manage application restrictions via {@link #setApplicationRestrictionsManagingPackage};
-     * otherwise a security exception will be thrown.
+     * <p>
+     * The caller must be a profile or device owner on that user, or the package allowed to manage
+     * application restrictions via {@link #setApplicationRestrictionsManagingPackage}; otherwise a
+     * security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     * {@code null} if called by the application restrictions managing package.
+     *            {@code null} if called by the application restrictions managing package.
      * @param packageName The name of the package to fetch restricted settings of.
      * @return {@link Bundle} of settings corresponding to what was set last time
-     * {@link DevicePolicyManager#setApplicationRestrictions} was called, or an empty {@link Bundle}
-     * if no restrictions have been set.
-     *
+     *         {@link DevicePolicyManager#setApplicationRestrictions} was called, or an empty
+     *         {@link Bundle} if no restrictions have been set.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see {@link #setApplicationRestrictionsManagingPackage}
      */
     public Bundle getApplicationRestrictions(@Nullable ComponentName admin, String packageName) {
@@ -4768,13 +4807,13 @@ public class DevicePolicyManager {
     /**
      * Called by a profile or device owner to set a user restriction specified by the key.
      * <p>
-     * The calling device admin must be a profile or device owner; if it is not,
-     * a security exception will be thrown.
+     * The calling device admin must be a profile or device owner; if it is not, a security
+     * exception will be thrown.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param key The key of the restriction. See the constants in
-     *            {@link android.os.UserManager} for the list of keys.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param key The key of the restriction. See the constants in {@link android.os.UserManager}
+     *            for the list of keys.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void addUserRestriction(@NonNull ComponentName admin, String key) {
         if (mService != null) {
@@ -4789,13 +4828,13 @@ public class DevicePolicyManager {
     /**
      * Called by a profile or device owner to clear a user restriction specified by the key.
      * <p>
-     * The calling device admin must be a profile or device owner; if it is not,
-     * a security exception will be thrown.
+     * The calling device admin must be a profile or device owner; if it is not, a security
+     * exception will be thrown.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated
-     *            with.
-     * @param key The key of the restriction. See the constants in
-     *            {@link android.os.UserManager} for the list of keys.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param key The key of the restriction. See the constants in {@link android.os.UserManager}
+     *            for the list of keys.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void clearUserRestriction(@NonNull ComponentName admin, String key) {
         if (mService != null) {
@@ -4812,11 +4851,11 @@ public class DevicePolicyManager {
      * {@link #addUserRestriction(ComponentName, String)}.
      * <p>
      * The target user may have more restrictions set by the system or other device owner / profile
-     * owner.  To get all the user restrictions currently set, use
+     * owner. To get all the user restrictions currently set, use
      * {@link UserManager#getUserRestrictions()}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @throws SecurityException if the {@code admin} is not an active admin.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public Bundle getUserRestrictions(@NonNull ComponentName admin) {
         return getUserRestrictions(admin, myUserId());
@@ -4836,14 +4875,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to hide or unhide packages. When a package is hidden it
-     * is unavailable for use, but the data and actual package file remain.
+     * Called by profile or device owners to hide or unhide packages. When a package is hidden it is
+     * unavailable for use, but the data and actual package file remain.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to hide or unhide.
      * @param hidden {@code true} if the package should be hidden, {@code false} if it should be
-     *                 unhidden.
+     *            unhidden.
      * @return boolean Whether the hidden setting of the package was successfully updated.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean setApplicationHidden(@NonNull ComponentName admin, String packageName,
             boolean hidden) {
@@ -4863,6 +4903,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to retrieve the hidden status of.
      * @return boolean {@code true} if the package is hidden, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isApplicationHidden(@NonNull ComponentName admin, String packageName) {
         if (mService != null) {
@@ -4881,6 +4922,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package to be re-enabled in the calling profile.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void enableSystemApp(@NonNull ComponentName admin, String packageName) {
         if (mService != null) {
@@ -4893,13 +4935,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to re-enable system apps by intent that were disabled
-     * by default when the user was initialized.
+     * Called by profile or device owners to re-enable system apps by intent that were disabled by
+     * default when the user was initialized.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param intent An intent matching the app(s) to be installed. All apps that resolve for this
-     *               intent will be re-enabled in the calling profile.
+     *            intent will be re-enabled in the calling profile.
      * @return int The number of activities that matched the intent and were installed.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public int enableSystemApp(@NonNull ComponentName admin, Intent intent) {
         if (mService != null) {
@@ -4915,21 +4958,22 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner or profile owner to disable account management for a specific type
      * of account.
-     *
-     * <p>The calling device admin must be a device owner or profile owner. If it is not, a
-     * security exception will be thrown.
-     *
-     * <p>When account management is disabled for an account type, adding or removing an account
-     * of that type will not be possible.
-     *
-     * <p>From {@link android.os.Build.VERSION_CODES#N} the profile or device owner can still use
+     * <p>
+     * The calling device admin must be a device owner or profile owner. If it is not, a security
+     * exception will be thrown.
+     * <p>
+     * When account management is disabled for an account type, adding or removing an account of
+     * that type will not be possible.
+     * <p>
+     * From {@link android.os.Build.VERSION_CODES#N} the profile or device owner can still use
      * {@link android.accounts.AccountManager} APIs to add or remove accounts when account
      * management for a specific type is disabled.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param accountType For which account management is disabled or enabled.
      * @param disabled The boolean indicating that account management will be disabled (true) or
-     * enabled (false).
+     *            enabled (false).
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setAccountManagementDisabled(@NonNull ComponentName admin, String accountType,
             boolean disabled) {
@@ -4974,17 +5018,15 @@ public class DevicePolicyManager {
 
     /**
      * Sets which packages may enter lock task mode.
+     * <p>
+     * Any packages that shares uid with an allowed package will also be allowed to activate lock
+     * task. From {@link android.os.Build.VERSION_CODES#M} removing packages from the lock task
+     * package list results in locked tasks belonging to those packages to be finished. This
+     * function can only be called by the device owner.
      *
-     * <p>Any packages that shares uid with an allowed package will also be allowed
-     * to activate lock task.
-     *
-     * From {@link android.os.Build.VERSION_CODES#M} removing packages from the lock task
-     * package list results in locked tasks belonging to those packages to be finished.
-     *
-     * This function can only be called by the device owner.
      * @param packages The list of packages allowed to enter lock task mode
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     *
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @see Activity#startLockTask()
      * @see DeviceAdminReceiver#onLockTaskModeEntering(Context, Intent, String)
      * @see DeviceAdminReceiver#onLockTaskModeExiting(Context, Intent)
@@ -5037,7 +5079,8 @@ public class DevicePolicyManager {
     /**
      * Called by device owners to update {@link Settings.Global} settings. Validation that the value
      * of the setting is in the correct form for the setting type should be performed by the caller.
-     * <p>The settings that can be updated with this method are:
+     * <p>
+     * The settings that can be updated with this method are:
      * <ul>
      * <li>{@link Settings.Global#ADB_ENABLED}</li>
      * <li>{@link Settings.Global#AUTO_TIME}</li>
@@ -5045,30 +5088,30 @@ public class DevicePolicyManager {
      * <li>{@link Settings.Global#DATA_ROAMING}</li>
      * <li>{@link Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
      * <li>{@link Settings.Global#WIFI_SLEEP_POLICY}</li>
-     * <li>{@link Settings.Global#STAY_ON_WHILE_PLUGGED_IN}
-     *   This setting is only available from {@link android.os.Build.VERSION_CODES#M} onwards
-     *   and can only be set if {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
-     * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li>
-     *   This setting is only available from {@link android.os.Build.VERSION_CODES#M} onwards.
-     *   </li>
+     * <li>{@link Settings.Global#STAY_ON_WHILE_PLUGGED_IN} This setting is only available from
+     * {@link android.os.Build.VERSION_CODES#M} onwards and can only be set if
+     * {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
+     * <li>{@link Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li> This setting is only
+     * available from {@link android.os.Build.VERSION_CODES#M} onwards.</li>
      * </ul>
-     * <p>Changing the following settings has no effect as of
-     * {@link android.os.Build.VERSION_CODES#M}:
+     * <p>
+     * Changing the following settings has no effect as of {@link android.os.Build.VERSION_CODES#M}:
      * <ul>
-     * <li>{@link Settings.Global#BLUETOOTH_ON}.
-     *   Use {@link android.bluetooth.BluetoothAdapter#enable()} and
-     *   {@link android.bluetooth.BluetoothAdapter#disable()} instead.</li>
+     * <li>{@link Settings.Global#BLUETOOTH_ON}. Use
+     * {@link android.bluetooth.BluetoothAdapter#enable()} and
+     * {@link android.bluetooth.BluetoothAdapter#disable()} instead.</li>
      * <li>{@link Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
-     * <li>{@link Settings.Global#MODE_RINGER}.
-     *   Use {@link android.media.AudioManager#setRingerMode(int)} instead.</li>
+     * <li>{@link Settings.Global#MODE_RINGER}. Use
+     * {@link android.media.AudioManager#setRingerMode(int)} instead.</li>
      * <li>{@link Settings.Global#NETWORK_PREFERENCE}</li>
-     * <li>{@link Settings.Global#WIFI_ON}.
-     *   Use {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
+     * <li>{@link Settings.Global#WIFI_ON}. Use
+     * {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
      * </ul>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
      * @param value The value to update the setting to.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setGlobalSetting(@NonNull ComponentName admin, String setting, String value) {
         if (mService != null) {
@@ -5084,19 +5127,23 @@ public class DevicePolicyManager {
      * Called by profile or device owners to update {@link Settings.Secure} settings. Validation
      * that the value of the setting is in the correct form for the setting type should be performed
      * by the caller.
-     * <p>The settings that can be updated by a profile or device owner with this method are:
+     * <p>
+     * The settings that can be updated by a profile or device owner with this method are:
      * <ul>
      * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
      * <li>{@link Settings.Secure#INSTALL_NON_MARKET_APPS}</li>
      * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
      * </ul>
-     * <p>A device owner can additionally update the following settings:
+     * <p>
+     * A device owner can additionally update the following settings:
      * <ul>
      * <li>{@link Settings.Secure#LOCATION_MODE}</li>
      * </ul>
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
      * @param value The value to update the setting to.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setSecureSetting(@NonNull ComponentName admin, String setting, String value) {
         if (mService != null) {
@@ -5109,14 +5156,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Designates a specific service component as the provider for
-     * making permission requests of a local or remote administrator of the user.
+     * Designates a specific service component as the provider for making permission requests of a
+     * local or remote administrator of the user.
      * <p/>
      * Only a profile owner can designate the restrictions provider.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param provider The component name of the service that implements
-     * {@link RestrictionsReceiver}. If this param is null,
-     * it removes the restrictions provider previously assigned.
+     *            {@link RestrictionsReceiver}. If this param is null, it removes the restrictions
+     *            provider previously assigned.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setRestrictionsProvider(@NonNull ComponentName admin,
             @Nullable ComponentName provider) {
@@ -5134,6 +5183,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param on {@code true} to mute master volume, {@code false} to turn mute off.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setMasterVolumeMuted(@NonNull ComponentName admin, boolean on) {
         if (mService != null) {
@@ -5150,6 +5200,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return {@code true} if master volume is muted, {@code false} if it's not.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isMasterVolumeMuted(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -5163,12 +5214,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to change whether a user can uninstall
-     * a package.
+     * Called by profile or device owners to change whether a user can uninstall a package.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName package to change.
      * @param uninstallBlocked true if the user shouldn't be able to uninstall the package.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setUninstallBlocked(@NonNull ComponentName admin, String packageName,
             boolean uninstallBlocked) {
@@ -5186,14 +5237,15 @@ public class DevicePolicyManager {
      * Requires the caller to be the profile owner if checking a specific admin's policy.
      * <p>
      * <strong>Note:</strong> Starting from {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}, the
-     * behavior of this API is changed such that passing {@code null} as the {@code admin}
-     * parameter will return if any admin has blocked the uninstallation. Before L MR1, passing
-     * {@code null} will cause a NullPointerException to be raised.
+     * behavior of this API is changed such that passing {@code null} as the {@code admin} parameter
+     * will return if any admin has blocked the uninstallation. Before L MR1, passing {@code null}
+     * will cause a NullPointerException to be raised.
      *
      * @param admin The name of the admin component whose blocking policy will be checked, or
-     *              {@code null} to check whether any admin has blocked the uninstallation.
+     *            {@code null} to check whether any admin has blocked the uninstallation.
      * @param packageName package to check.
      * @return true if uninstallation is blocked.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public boolean isUninstallBlocked(@Nullable ComponentName admin, String packageName) {
         if (mService != null) {
@@ -5207,19 +5259,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner of a managed profile to enable widget providers from a
-     * given package to be available in the parent profile. As a result the user will be able to
-     * add widgets from the white-listed package running under the profile to a widget
-     * host which runs under the parent profile, for example the home screen. Note that
-     * a package may have zero or more provider components, where each component
-     * provides a different widget type.
+     * Called by the profile owner of a managed profile to enable widget providers from a given
+     * package to be available in the parent profile. As a result the user will be able to add
+     * widgets from the white-listed package running under the profile to a widget host which runs
+     * under the parent profile, for example the home screen. Note that a package may have zero or
+     * more provider components, where each component provides a different widget type.
      * <p>
      * <strong>Note:</strong> By default no widget provider package is white-listed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package from which widget providers are white-listed.
      * @return Whether the package was added.
-     *
+     * @throws SecurityException if {@code admin} is not a profile owner.
      * @see #removeCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
      */
@@ -5236,17 +5287,16 @@ public class DevicePolicyManager {
 
     /**
      * Called by the profile owner of a managed profile to disable widget providers from a given
-     * package to be available in the parent profile. For this method to take effect the
-     * package should have been added via {@link #addCrossProfileWidgetProvider(
-     * android.content.ComponentName, String)}.
+     * package to be available in the parent profile. For this method to take effect the package
+     * should have been added via
+     * {@link #addCrossProfileWidgetProvider( android.content.ComponentName, String)}.
      * <p>
      * <strong>Note:</strong> By default no widget provider package is white-listed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param packageName The package from which widget providers are no longer
-     *     white-listed.
+     * @param packageName The package from which widget providers are no longer white-listed.
      * @return Whether the package was removed.
-     *
+     * @throws SecurityException if {@code admin} is not a profile owner.
      * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
      */
@@ -5268,9 +5318,9 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The white-listed package list.
-     *
      * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #removeCrossProfileWidgetProvider(android.content.ComponentName, String)
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public List<String> getCrossProfileWidgetProviders(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -5291,6 +5341,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param icon the bitmap to set as the photo.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setUserIcon(@NonNull ComponentName admin, Bitmap icon) {
         try {
@@ -5305,10 +5356,10 @@ public class DevicePolicyManager {
      * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcasted.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. All
-     *              components in the device owner package can set system update policies and the
-     *              most recent policy takes
-     * effect.
+     *            components in the device owner package can set system update policies and the most
+     *            recent policy takes effect.
      * @param policy the new policy, or {@code null} to clear the current policy.
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @see SystemUpdatePolicy
      */
     public void setSystemUpdatePolicy(@NonNull ComponentName admin, SystemUpdatePolicy policy) {
@@ -5339,17 +5390,17 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device owner to disable the keyguard altogether.
-     *
-     * <p>Setting the keyguard to disabled has the same effect as choosing "None" as the screen
-     * lock type. However, this call has no effect if a password, pin or pattern is currently set.
-     * If a password, pin or pattern is set after the keyguard was disabled, the keyguard stops
-     * being disabled.
+     * <p>
+     * Setting the keyguard to disabled has the same effect as choosing "None" as the screen lock
+     * type. However, this call has no effect if a password, pin or pattern is currently set. If a
+     * password, pin or pattern is set after the keyguard was disabled, the keyguard stops being
+     * disabled.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the keyguard, {@code false} reenables it.
-     *
      * @return {@code false} if attempting to disable the keyguard while a lock password was in
-     * place. {@code true} otherwise.
+     *         place. {@code true} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean setKeyguardDisabled(@NonNull ComponentName admin, boolean disabled) {
         try {
@@ -5361,14 +5412,13 @@ public class DevicePolicyManager {
 
     /**
      * Called by device owner to disable the status bar. Disabling the status bar blocks
-     * notifications, quick settings and other screen overlays that allow escaping from
-     * a single use device.
+     * notifications, quick settings and other screen overlays that allow escaping from a single use
+     * device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the status bar, {@code false} reenables it.
-     *
-     * @return {@code false} if attempting to disable the status bar failed.
-     * {@code true} otherwise.
+     * @return {@code false} if attempting to disable the status bar failed. {@code true} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean setStatusBarDisabled(@NonNull ComponentName admin, boolean disabled) {
         try {
@@ -5400,19 +5450,19 @@ public class DevicePolicyManager {
 
     /**
      * Called by profile or device owners to set the default response for future runtime permission
-     * requests by applications. The policy can allow for normal operation which prompts the
-     * user to grant a permission, or can allow automatic granting or denying of runtime
-     * permission requests by an application. This also applies to new permissions declared by app
-     * updates. When a permission is denied or granted this way, the effect is equivalent to setting
-     * the permission grant state via {@link #setPermissionGrantState}.
-     *
-     * <p/>As this policy only acts on runtime permission requests, it only applies to applications
+     * requests by applications. The policy can allow for normal operation which prompts the user to
+     * grant a permission, or can allow automatic granting or denying of runtime permission requests
+     * by an application. This also applies to new permissions declared by app updates. When a
+     * permission is denied or granted this way, the effect is equivalent to setting the permission
+     * grant state via {@link #setPermissionGrantState}.
+     * <p/>
+     * As this policy only acts on runtime permission requests, it only applies to applications
      * built with a {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#M} or later.
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param policy One of the policy constants {@link #PERMISSION_POLICY_PROMPT},
-     * {@link #PERMISSION_POLICY_AUTO_GRANT} and {@link #PERMISSION_POLICY_AUTO_DENY}.
-     *
+     *            {@link #PERMISSION_POLICY_AUTO_GRANT} and {@link #PERMISSION_POLICY_AUTO_DENY}.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #setPermissionGrantState
      */
     public void setPermissionPolicy(@NonNull ComponentName admin, int policy) {
@@ -5438,29 +5488,28 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets the grant state of a runtime permission for a specific application. The state
-     * can be {@link #PERMISSION_GRANT_STATE_DEFAULT default} in which a user can manage it
-     * through the UI, {@link #PERMISSION_GRANT_STATE_DENIED denied}, in which the permission
-     * is denied and the user cannot manage it through the UI, and {@link
-     * #PERMISSION_GRANT_STATE_GRANTED granted} in which the permission is granted and the
-     * user cannot manage it through the UI. This might affect all permissions in a
-     * group that the runtime permission belongs to. This method can only be called
+     * Sets the grant state of a runtime permission for a specific application. The state can be
+     * {@link #PERMISSION_GRANT_STATE_DEFAULT default} in which a user can manage it through the UI,
+     * {@link #PERMISSION_GRANT_STATE_DENIED denied}, in which the permission is denied and the user
+     * cannot manage it through the UI, and {@link #PERMISSION_GRANT_STATE_GRANTED granted} in which
+     * the permission is granted and the user cannot manage it through the UI. This might affect all
+     * permissions in a group that the runtime permission belongs to. This method can only be called
      * by a profile or device owner.
-     *
-     * <p/>Setting the grant state to {@link #PERMISSION_GRANT_STATE_DEFAULT default} does not
-     * revoke the permission. It retains the previous grant, if any.
-     *
-     * <p/>Permissions can be granted or revoked only for applications built with a
+     * <p/>
+     * Setting the grant state to {@link #PERMISSION_GRANT_STATE_DEFAULT default} does not revoke
+     * the permission. It retains the previous grant, if any.
+     * <p/>
+     * Permissions can be granted or revoked only for applications built with a
      * {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#M} or later.
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
      * @param permission The permission to grant or revoke.
-     * @param grantState The permission grant state which is one of {@link
-     *         #PERMISSION_GRANT_STATE_DENIED}, {@link #PERMISSION_GRANT_STATE_DEFAULT},
-     *         {@link #PERMISSION_GRANT_STATE_GRANTED},
+     * @param grantState The permission grant state which is one of
+     *            {@link #PERMISSION_GRANT_STATE_DENIED}, {@link #PERMISSION_GRANT_STATE_DEFAULT},
+     *            {@link #PERMISSION_GRANT_STATE_GRANTED},
      * @return whether the permission was successfully granted or revoked.
-     *
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #PERMISSION_GRANT_STATE_DENIED
      * @see #PERMISSION_GRANT_STATE_DEFAULT
      * @see #PERMISSION_GRANT_STATE_GRANTED
@@ -5481,13 +5530,15 @@ public class DevicePolicyManager {
      * @param packageName The application to check the grant state for.
      * @param permission The permission to check for.
      * @return the current grant state specified by device policy. If the profile or device owner
-     * has not set a grant state, the return value is {@link #PERMISSION_GRANT_STATE_DEFAULT}.
-     * This does not indicate whether or not the permission is currently granted for the package.
-     *
-     * <p/>If a grant state was set by the profile or device owner, then the return value will
-     * be one of {@link #PERMISSION_GRANT_STATE_DENIED} or {@link #PERMISSION_GRANT_STATE_GRANTED},
-     * which indicates if the permission is currently denied or granted.
-     *
+     *         has not set a grant state, the return value is
+     *         {@link #PERMISSION_GRANT_STATE_DEFAULT}. This does not indicate whether or not the
+     *         permission is currently granted for the package.
+     *         <p/>
+     *         If a grant state was set by the profile or device owner, then the return value will
+     *         be one of {@link #PERMISSION_GRANT_STATE_DENIED} or
+     *         {@link #PERMISSION_GRANT_STATE_GRANTED}, which indicates if the permission is
+     *         currently denied or granted.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #setPermissionGrantState(ComponentName, String, String, int)
      * @see PackageManager#checkPermission(String, String)
      */
@@ -5553,10 +5604,11 @@ public class DevicePolicyManager {
      * Called by device owner to get the MAC address of the Wi-Fi device.
      *
      * @param admin Which device owner this request is associated with.
-     * @return the MAC address of the Wi-Fi device, or null when the information is not
-     * available. (For example, Wi-Fi hasn't been enabled, or the device doesn't support Wi-Fi.)
-     *
-     * <p>The address will be in the {@code XX:XX:XX:XX:XX:XX} format.
+     * @return the MAC address of the Wi-Fi device, or null when the information is not available.
+     *         (For example, Wi-Fi hasn't been enabled, or the device doesn't support Wi-Fi.)
+     *         <p>
+     *         The address will be in the {@code XX:XX:XX:XX:XX:XX} format.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public String getWifiMacAddress(@NonNull ComponentName admin) {
         try {
@@ -5569,7 +5621,9 @@ public class DevicePolicyManager {
     /**
      * Called by device owner to reboot the device. If there is an ongoing call on the device,
      * throws an {@link IllegalStateException}.
+     * @param admin Which device owner the request is associated with.
      * @throws IllegalStateException if device has an ongoing call.
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @see TelephonyManager#CALL_STATE_IDLE
      */
     public void reboot(@NonNull ComponentName admin) {
@@ -5581,24 +5635,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to set the short support message. This will
-     * be displayed to the user in settings screens where funtionality has
-     * been disabled by the admin.
-     *
-     * The message should be limited to a short statement such as
-     * "This setting is disabled by your administrator. Contact someone@example.com
-     *  for support."
-     * If the message is longer than 200 characters it may be truncated.
-     *
-     * <p>If the short support message needs to be localized, it is the responsibility of the
+     * Called by a device admin to set the short support message. This will be displayed to the user
+     * in settings screens where funtionality has been disabled by the admin. The message should be
+     * limited to a short statement such as "This setting is disabled by your administrator. Contact
+     * someone@example.com for support." If the message is longer than 200 characters it may be
+     * truncated.
+     * <p>
+     * If the short support message needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
      * and set a new version of this string accordingly.
      *
      * @see #setLongSupportMessage
-     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param message Short message to be displayed to the user in settings or null to
-     *        clear the existing message.
+     * @param message Short message to be displayed to the user in settings or null to clear the
+     *            existing message.
+     * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public void setShortSupportMessage(@NonNull ComponentName admin,
             @Nullable String message) {
@@ -5615,8 +5666,9 @@ public class DevicePolicyManager {
      * Called by a device admin to get the short support message.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The message set by {@link #setShortSupportMessage(ComponentName, String)}
-     *         or null if no message has been set.
+     * @return The message set by {@link #setShortSupportMessage(ComponentName, String)} or null if
+     *         no message has been set.
+     * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public String getShortSupportMessage(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -5630,18 +5682,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to set the long support message. This will
-     * be displayed to the user in the device administators settings screen.
-     *
-     * <p>If the long support message needs to be localized, it is the responsibility of the
+     * Called by a device admin to set the long support message. This will be displayed to the user
+     * in the device administators settings screen.
+     * <p>
+     * If the long support message needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
      * and set a new version of this string accordingly.
      *
      * @see #setShortSupportMessage
-     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param message Long message to be displayed to the user in settings or null to
-     *        clear the existing message.
+     * @param message Long message to be displayed to the user in settings or null to clear the
+     *            existing message.
+     * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public void setLongSupportMessage(@NonNull ComponentName admin,
             @Nullable String message) {
@@ -5658,8 +5710,9 @@ public class DevicePolicyManager {
      * Called by a device admin to get the long support message.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The message set by {@link #setLongSupportMessage(ComponentName, String)}
-     *         or null if no message has been set.
+     * @return The message set by {@link #setLongSupportMessage(ComponentName, String)} or null if
+     *         no message has been set.
+     * @throws SecurityException if {@code admin} is not an active administrator.
      */
     public String getLongSupportMessage(@NonNull ComponentName admin) {
         if (mService != null) {
@@ -5716,10 +5769,11 @@ public class DevicePolicyManager {
     /**
      * Called by the profile owner of a managed profile to obtain a {@link DevicePolicyManager}
      * whose calls act on the parent profile.
-     *
-     * <p> Note only some methods will work on the parent Manager.
+     * <p>
+     * Note only some methods will work on the parent Manager.
      *
      * @return a new instance of {@link DevicePolicyManager} that acts on the parent profile.
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         try {
@@ -5733,17 +5787,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to control the device logging feature. Logging can only be
-     * enabled on single user devices where the sole user is managed by the device owner.
-     *
-     * <p> Device logs contain various information intended for security auditing purposes.
-     * See {@link SecurityEvent} for details.
-     *
-     * <p>There must be only one user on the device, managed by the device owner.
-     * Otherwise a {@link SecurityException} will be thrown.
+     * Called by device owner to control the device logging feature. Logging can only be enabled on
+     * single user devices where the sole user is managed by the device owner.
+     * <p>
+     * Device logs contain various information intended for security auditing purposes. See
+     * {@link SecurityEvent} for details.
+     * <p>
+     * There must be only one user on the device, managed by the device owner. Otherwise a
+     * {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
      * @param enabled whether device logging should be enabled or not.
+     * @throws SecurityException if {@code admin} is not a device owner.
      * @see #retrieveDeviceLogs
      */
     public void setDeviceLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
@@ -5756,12 +5811,12 @@ public class DevicePolicyManager {
 
     /**
      * Return whether device logging is enabled or not by the device owner.
-     *
-     * <p>Can only be called by the device owner, otherwise a {@link SecurityException} will be
-     * thrown.
+     * <p>
+     * Can only be called by the device owner, otherwise a {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
      * @return {@code true} if device logging is enabled by device owner, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public boolean getDeviceLoggingEnabled(@NonNull ComponentName admin) {
         try {
@@ -5772,18 +5827,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to retrieve all new device logging entries since the last call to
-     * this API after device boots.
-     *
-     * <p> Access to the logs is rate limited and it will only return new logs after the device
-     * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
-     *
-     * <p>There must be only one user on the device, managed by the device owner.
-     * Otherwise a {@link SecurityException} will be thrown.
+     * Called by device owner to retrieve all new device logging entries since the last call to this
+     * API after device boots.
+     * <p>
+     * Access to the logs is rate limited and it will only return new logs after the device owner
+     * has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
+     * <p>
+     * There must be only one user on the device, managed by the device owner. Otherwise a
+     * {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
-     * @return the new batch of device logs which is a list of {@link SecurityEvent},
-     * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
+     * @return the new batch of device logs which is a list of {@link SecurityEvent}, or
+     *         {@code null} if rate limitation is exceeded or if logging is currently disabled.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public List<SecurityEvent> retrieveDeviceLogs(@NonNull ComponentName admin) {
         try {
@@ -5817,18 +5873,18 @@ public class DevicePolicyManager {
 
     /**
      * Called by device owners to retrieve device logs from before the device's last reboot.
-     *
      * <p>
      * <strong> The device logs are retrieved from a RAM region which is not guaranteed to be
-     * corruption-free during power cycles, due to hardware variations and limitations. As a
-     * result, this API is provided as best-effort and the returned logs may contain corrupted data.
-     * </strong>
-     *
-     * <p>There must be only one user on the device, managed by the device owner.
-     * Otherwise a {@link SecurityException} will be thrown.
+     * corruption-free during power cycles, due to hardware variations and limitations. As a result,
+     * this API is provided as best-effort and the returned logs may contain corrupted
+     * data. </strong>
+     * <p>
+     * There must be only one user on the device, managed by the device owner. Otherwise a
+     * {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
      * @return Device logs from before the latest reboot of the system.
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public List<SecurityEvent> retrievePreviousDeviceLogs(@NonNull ComponentName admin) {
         try {
@@ -5840,15 +5896,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to set the color used for customization.
-     * This color is used as background color of the confirm credentials screen for that user.
-     * The default color is {@link android.graphics.Color#GRAY}.
-     *
-     * <p>The confirm credentials screen can be created using
+     * Called by a profile owner of a managed profile to set the color used for customization. This
+     * color is used as background color of the confirm credentials screen for that user. The
+     * default color is {@link android.graphics.Color#GRAY}.
+     * <p>
+     * The confirm credentials screen can be created using
      * {@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param color The 32bit representation of the color to be used.
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setOrganizationColor(@NonNull ComponentName admin, int color) {
         try {
@@ -5883,6 +5940,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The 32bit representation of the color to be used.
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public int getOrganizationColor(@NonNull ComponentName admin) {
         try {
@@ -5910,13 +5968,14 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner of a managed profile to set the name of the organization under
      * management.
-     *
-     * <p>If the organization name needs to be localized, it is the responsibility of the
+     * <p>
+     * If the organization name needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
      * and set a new version of this string accordingly.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param title The organization name or {@code null} to clear a previously set name.
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public void setOrganizationName(@NonNull ComponentName admin, @Nullable String title) {
         try {
@@ -5927,11 +5986,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to retrieve the name of the organization
-     * under management.
+     * Called by a profile owner of a managed profile to retrieve the name of the organization under
+     * management.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The organization name or {@code null} if none is set.
+     * @throws SecurityException if {@code admin} is not a profile owner.
      */
     public String getOrganizationName(@NonNull ComponentName admin) {
         try {
