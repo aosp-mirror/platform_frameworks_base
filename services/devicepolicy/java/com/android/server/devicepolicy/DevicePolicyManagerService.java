@@ -1664,12 +1664,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             if (mOwners.hasDeviceOwner()) {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
+                Slog.i(LOG_TAG, "Set ro.device_owner property to true");
                 disableDeviceLoggingIfNotCompliant();
                 if (mInjector.securityLogGetLoggingEnabledProperty()) {
                     mSecurityLogMonitor.start();
                 }
             } else {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "false");
+                Slog.i(LOG_TAG, "Set ro.device_owner property to false");
             }
         }
     }
