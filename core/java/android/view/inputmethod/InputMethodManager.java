@@ -1224,6 +1224,7 @@ public final class InputMethodManager {
             notifyInputConnectionFinished();
             mServedInputConnection = ic;
             ControlledInputConnectionWrapper servedContext;
+            final int missingMethodFlags;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
@@ -1231,11 +1232,20 @@ public final class InputMethodManager {
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
                 mCursorAnchorInfo = null;
-                final Handler icHandler = ic.getHandler();
+                final Handler icHandler;
+                missingMethodFlags = InputConnectionInspector.getMissingMethodFlags(ic);
+                if ((missingMethodFlags & InputConnectionInspector.MissingMethodFlags.GET_HANDLER)
+                        != 0) {
+                    // InputConnection#getHandler() is not implemented.
+                    icHandler = null;
+                } else {
+                    icHandler = ic.getHandler();
+                }
                 servedContext = new ControlledInputConnectionWrapper(
                         icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this);
             } else {
                 servedContext = null;
+                missingMethodFlags = 0;
             }
             if (mServedInputConnectionWrapper != null) {
                 mServedInputConnectionWrapper.deactivate();
@@ -1248,7 +1258,7 @@ public final class InputMethodManager {
                         + Integer.toHexString(controlFlags));
                 final InputBindResult res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, controlFlags, softInputMode,
-                        windowFlags, tba, servedContext);
+                        windowFlags, tba, servedContext, missingMethodFlags);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res != null) {
                     if (res.id != null) {
@@ -1476,7 +1486,7 @@ public final class InputMethodManager {
                 mService.startInputOrWindowGainedFocus(
                         InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
-                        null);
+                        null, 0 /* missingMethodFlags */);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

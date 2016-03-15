@@ -112,6 +112,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerInternal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
+import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -325,6 +326,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * The input context last provided by the current client.
      */
     IInputContext mCurInputContext;
+
+    /**
+     * The missing method flags for the input context last provided by the current client.
+     *
+     * @see android.view.inputmethod.InputConnectionInspector.MissingMethodFlags
+     */
+    int mCurInputContextMissingMethods;
 
     /**
      * The attributes last provided by the current client.
@@ -1288,11 +1296,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         final SessionState session = mCurClient.curSession;
         if (initial) {
-            executeOrSendMessage(session.method, mCaller.obtainMessageOOO(
-                    MSG_START_INPUT, session, mCurInputContext, mCurAttribute));
+            executeOrSendMessage(session.method, mCaller.obtainMessageIOOO(
+                    MSG_START_INPUT, mCurInputContextMissingMethods, session, mCurInputContext,
+                    mCurAttribute));
         } else {
-            executeOrSendMessage(session.method, mCaller.obtainMessageOOO(
-                    MSG_RESTART_INPUT, session, mCurInputContext, mCurAttribute));
+            executeOrSendMessage(session.method, mCaller.obtainMessageIOOO(
+                    MSG_RESTART_INPUT, mCurInputContextMissingMethods, session, mCurInputContext,
+                    mCurAttribute));
         }
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
@@ -1305,7 +1315,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     InputBindResult startInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IInputContext inputContext, EditorInfo attribute,
+            IInputMethodClient client, IInputContext inputContext,
+            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
+            EditorInfo attribute,
             int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
@@ -1332,10 +1344,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } catch (RemoteException e) {
         }
 
-        return startInputUncheckedLocked(cs, inputContext, attribute, controlFlags);
+        return startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                controlFlags);
     }
 
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
+            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             @NonNull EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
@@ -1370,6 +1384,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurSeq <= 0) mCurSeq = 1;
         mCurClient = cs;
         mCurInputContext = inputContext;
+        mCurInputContextMissingMethods = missingMethods;
         mCurAttribute = attribute;
 
         // Check if the input method is changing.
@@ -1458,8 +1473,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private InputBindResult startInput(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IInputContext inputContext, EditorInfo attribute,
-            int controlFlags) {
+            IInputMethodClient client, IInputContext inputContext,
+            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
+            EditorInfo attribute, int controlFlags) {
         if (!calledFromValidUser()) {
             return null;
         }
@@ -1469,13 +1485,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + InputMethodClient.getStartInputReason(startInputReason)
                         + " client = " + client.asBinder()
                         + " inputContext=" + inputContext
+                        + " missingMethods="
+                        + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
                         + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags));
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return startInputLocked(startInputReason, client, inputContext, attribute,
-                        controlFlags);
+                return startInputLocked(startInputReason, client, inputContext, missingMethods,
+                        attribute, controlFlags);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2189,19 +2207,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
-            int windowFlags, EditorInfo attribute, IInputContext inputContext) {
+            int windowFlags, EditorInfo attribute, IInputContext inputContext,
+            /* @InputConnectionInspector.missingMethods */ final int missingMethods) {
         if (windowToken != null) {
             return windowGainedFocus(startInputReason, client, windowToken, controlFlags,
-                    softInputMode, windowFlags, attribute, inputContext);
+                    softInputMode, windowFlags, attribute, inputContext, missingMethods);
         } else {
-            return startInput(startInputReason, client, inputContext, attribute, controlFlags);
+            return startInput(startInputReason, client, inputContext, missingMethods, attribute,
+                    controlFlags);
         }
     }
 
     private InputBindResult windowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
-            int windowFlags, EditorInfo attribute, IInputContext inputContext) {
+            int windowFlags, EditorInfo attribute, IInputContext inputContext,
+            /* @InputConnectionInspector.missingMethods */  final int missingMethods) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
@@ -2212,6 +2233,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + InputMethodClient.getStartInputReason(startInputReason)
                         + " client=" + client.asBinder()
                         + " inputContext=" + inputContext
+                        + " missingMethods="
+                        + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
                         + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags)
                         + " softInputMode=#" + Integer.toHexString(softInputMode)
@@ -2249,8 +2272,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
                             + " attribute=" + attribute + ", token = " + windowToken);
                     if (attribute != null) {
-                        return startInputUncheckedLocked(cs, inputContext, attribute,
-                                controlFlags);
+                        return startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                attribute, controlFlags);
                     }
                     return null;
                 }
@@ -2299,8 +2322,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // is more room for the target window + IME.
                             if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                             if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                        controlFlags);
+                                res = startInputUncheckedLocked(cs, inputContext,
+                                        missingMethods, attribute, controlFlags);
                                 didStart = true;
                             }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2325,8 +2348,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
                             if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                        controlFlags);
+                                res = startInputUncheckedLocked(cs, inputContext,
+                                        missingMethods, attribute, controlFlags);
                                 didStart = true;
                             }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2335,8 +2358,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                         if (DEBUG) Slog.v(TAG, "Window asks to always show input");
                         if (attribute != null) {
-                            res = startInputUncheckedLocked(cs, inputContext, attribute,
-                                    controlFlags);
+                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                    attribute, controlFlags);
                             didStart = true;
                         }
                         showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2344,7 +2367,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
 
                 if (!didStart && attribute != null) {
-                    res = startInputUncheckedLocked(cs, inputContext, attribute,
+                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
                             controlFlags);
                 }
             }
@@ -2806,28 +2829,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             // ---------------------------------------------------------
 
-            case MSG_START_INPUT:
-                args = (SomeArgs)msg.obj;
+            case MSG_START_INPUT: {
+                int missingMethods = msg.arg1;
+                args = (SomeArgs) msg.obj;
                 try {
-                    SessionState session = (SessionState)args.arg1;
+                    SessionState session = (SessionState) args.arg1;
                     setEnabledSessionInMainThread(session);
-                    session.method.startInput((IInputContext)args.arg2,
-                            (EditorInfo)args.arg3);
+                    session.method.startInput((IInputContext) args.arg2, missingMethods,
+                            (EditorInfo) args.arg3);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
                 return true;
-            case MSG_RESTART_INPUT:
-                args = (SomeArgs)msg.obj;
+            }
+            case MSG_RESTART_INPUT: {
+                int missingMethods = msg.arg1;
+                args = (SomeArgs) msg.obj;
                 try {
-                    SessionState session = (SessionState)args.arg1;
+                    SessionState session = (SessionState) args.arg1;
                     setEnabledSessionInMainThread(session);
-                    session.method.restartInput((IInputContext)args.arg2,
-                            (EditorInfo)args.arg3);
+                    session.method.restartInput((IInputContext) args.arg2, missingMethods,
+                            (EditorInfo) args.arg3);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
                 return true;
+            }
 
             // ---------------------------------------------------------
 

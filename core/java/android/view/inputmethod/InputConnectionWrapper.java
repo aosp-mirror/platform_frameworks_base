@@ -26,6 +26,8 @@ import android.view.KeyEvent;
 public class InputConnectionWrapper implements InputConnection {
     private InputConnection mTarget;
     final boolean mMutable;
+    @InputConnectionInspector.MissingMethodFlags
+    private int mMissingMethodFlags;
 
     /**
      * Initializes a wrapper.
@@ -40,6 +42,7 @@ public class InputConnectionWrapper implements InputConnection {
     public InputConnectionWrapper(InputConnection target, boolean mutable) {
         mMutable = mutable;
         mTarget = target;
+        mMissingMethodFlags = InputConnectionInspector.getMissingMethodFlags(target);
     }
 
     /**
@@ -56,6 +59,15 @@ public class InputConnectionWrapper implements InputConnection {
             throw new SecurityException("not mutable");
         }
         mTarget = target;
+        mMissingMethodFlags = InputConnectionInspector.getMissingMethodFlags(target);
+    }
+
+    /**
+     * @hide
+     */
+    @InputConnectionInspector.MissingMethodFlags
+    public int getMissingMethodFlags() {
+        return mMissingMethodFlags;
     }
 
     /**

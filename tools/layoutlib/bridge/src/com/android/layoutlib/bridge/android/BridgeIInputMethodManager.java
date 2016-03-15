@@ -222,7 +222,8 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
-            int windowFlags, EditorInfo attribute, IInputContext inputContext)
+            int windowFlags, EditorInfo attribute, IInputContext inputContext,
+            /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;

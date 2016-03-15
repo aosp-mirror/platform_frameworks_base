@@ -28,10 +28,24 @@ import android.view.KeyEvent;
  * cursor, committing text to the text box, and sending raw key events
  * to the application.
  *
- * <p>Applications should never directly implement this interface, but
- * instead subclass from {@link BaseInputConnection}. This will ensure
- * that the application does not break when new methods are added to
- * the interface.</p>
+ * <p>Starting from API Level {@link android.os.Build.VERSION_CODES#N},
+ * the system can deal with the situation where the application directly
+ * implements this class but one or more of the following methods are
+ * not implemented.</p>
+ * <ul>
+ *     <li>{@link #getSelectedText(int)}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#GINGERBREAD}.</li>
+ *     <li>{@link #setComposingRegion(int, int)}, which was introduced
+ *     in {@link android.os.Build.VERSION_CODES#GINGERBREAD}.</li>
+ *     <li>{@link #commitCorrection(CorrectionInfo)}, which was introduced
+ *     in {@link android.os.Build.VERSION_CODES#HONEYCOMB}.</li>
+ *     <li>{@link #requestCursorUpdates(int)}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#LOLLIPOP}.</li>
+ *     <li>{@link #deleteSurroundingTextInCodePoints(int, int)}}, which
+ *     was introduced in {@link android.os.Build.VERSION_CODES#N}.</li>
+ *     <li>{@link #getHandler()}}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#N}.</li>
+ * </ul>
  *
  * <h3>Implementing an IME or an editor</h3>
  * <p>Text input is the result of the synergy of two essential components:
@@ -224,7 +238,9 @@ public interface InputConnection {
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text that is currently selected, if any, or null if
-     * no text is selected.
+     * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
+     * later, returns false when the target application does not implement
+     * this method.
      */
     public CharSequence getSelectedText(int flags);
 
@@ -371,7 +387,8 @@ public interface InputConnection {
      *        If this is greater than the number of existing characters between the cursor and
      *        the end of the text, then this method does not fail but deletes all the characters in
      *        that range.
-     * @return true on success, false if the input connection is no longer valid.
+     * @return true on success, false if the input connection is no longer valid.  Returns
+     * {@code false} when the target application does not implement this method.
      */
     public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
 
@@ -461,7 +478,8 @@ public interface InputConnection {
      * @param start the position in the text at which the composing region begins
      * @param end the position in the text at which the composing region ends
      * @return true on success, false if the input connection is no longer
-     * valid.
+     * valid. In {@link android.os.Build.VERSION_CODES#N} and later, false is returned when the
+     * target application does not implement this method.
      */
     public boolean setComposingRegion(int start, int end);
 
@@ -573,6 +591,8 @@ public interface InputConnection {
      *
      * @param correctionInfo Detailed information about the correction.
      * @return true on success, false if the input connection is no longer valid.
+     * In {@link android.os.Build.VERSION_CODES#N} and later, returns false
+     * when the target application does not implement this method.
      */
     public boolean commitCorrection(CorrectionInfo correctionInfo);
 
@@ -785,6 +805,8 @@ public interface InputConnection {
      * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
      * application will not call
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
+     * In {@link android.os.Build.VERSION_CODES#N} and later, returns {@code false} also when the
+     * target application does not implement this method.
      */
     public boolean requestCursorUpdates(int cursorUpdateMode);
 
