@@ -1070,16 +1070,15 @@ public final class MediaDrm {
      * A CryptoSession is obtained using {@link #getCryptoSession}
      */
     public final class CryptoSession {
-        private MediaDrm mDrm;
         private byte[] mSessionId;
 
-        CryptoSession(@NonNull MediaDrm drm, @NonNull byte[] sessionId,
-                @NonNull String cipherAlgorithm, @NonNull String macAlgorithm)
+        CryptoSession(@NonNull byte[] sessionId,
+                      @NonNull String cipherAlgorithm,
+                      @NonNull String macAlgorithm)
         {
             mSessionId = sessionId;
-            mDrm = drm;
-            setCipherAlgorithmNative(drm, sessionId, cipherAlgorithm);
-            setMacAlgorithmNative(drm, sessionId, macAlgorithm);
+            setCipherAlgorithmNative(MediaDrm.this, sessionId, cipherAlgorithm);
+            setMacAlgorithmNative(MediaDrm.this, sessionId, macAlgorithm);
         }
 
         /**
@@ -1092,7 +1091,7 @@ public final class MediaDrm {
         @NonNull
         public byte[] encrypt(
                 @NonNull byte[] keyid, @NonNull byte[] input, @NonNull byte[] iv) {
-            return encryptNative(mDrm, mSessionId, keyid, input, iv);
+            return encryptNative(MediaDrm.this, mSessionId, keyid, input, iv);
         }
 
         /**
@@ -1105,7 +1104,7 @@ public final class MediaDrm {
         @NonNull
         public byte[] decrypt(
                 @NonNull byte[] keyid, @NonNull byte[] input, @NonNull byte[] iv) {
-            return decryptNative(mDrm, mSessionId, keyid, input, iv);
+            return decryptNative(MediaDrm.this, mSessionId, keyid, input, iv);
         }
 
         /**
@@ -1116,7 +1115,7 @@ public final class MediaDrm {
          */
         @NonNull
         public byte[] sign(@NonNull byte[] keyid, @NonNull byte[] message) {
-            return signNative(mDrm, mSessionId, keyid, message);
+            return signNative(MediaDrm.this, mSessionId, keyid, message);
         }
 
         /**
@@ -1130,7 +1129,7 @@ public final class MediaDrm {
          */
         public boolean verify(
                 @NonNull byte[] keyid, @NonNull byte[] message, @NonNull byte[] signature) {
-            return verifyNative(mDrm, mSessionId, keyid, message, signature);
+            return verifyNative(MediaDrm.this, mSessionId, keyid, message, signature);
         }
     };
 
@@ -1158,7 +1157,7 @@ public final class MediaDrm {
             @NonNull byte[] sessionId,
             @NonNull String cipherAlgorithm, @NonNull String macAlgorithm)
     {
-        return new CryptoSession(this, sessionId, cipherAlgorithm, macAlgorithm);
+        return new CryptoSession(sessionId, cipherAlgorithm, macAlgorithm);
     }
 
     /**
