@@ -42,15 +42,13 @@ import com.android.internal.R;
 
 /**
  * A dialog shown to the user when they try to launch an app from a quiet profile
- * ({@link UserManager#isQuietModeEnabled(UserHandle)}, or when the app is suspended by the
- * profile owner or device owner.
+ * ({@link UserManager#isQuietModeEnabled(UserHandle)}.
  */
 public class UnlaunchableAppActivity extends Activity
         implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
     private static final String TAG = "UnlaunchableAppActivity";
 
     private static final int UNLAUNCHABLE_REASON_QUIET_MODE = 1;
-    private static final int UNLAUNCHABLE_REASON_SUSPENDED_PACKAGE = 2;
     private static final String EXTRA_UNLAUNCHABLE_REASON = "unlaunchable_reason";
 
     private int mUserId;
@@ -74,37 +72,6 @@ public class UnlaunchableAppActivity extends Activity
         if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE) {
             dialogTitle = getResources().getString(R.string.work_mode_off_title);
             dialogMessage = getResources().getString(R.string.work_mode_off_message);
-        } else if (mReason == UNLAUNCHABLE_REASON_SUSPENDED_PACKAGE) {
-            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(
-                    Context.DEVICE_POLICY_SERVICE);
-            String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
-            String packageLabel = packageName;
-            try {
-                Context userContext = createPackageContextAsUser(packageName, 0,
-                        UserHandle.of(mUserId));
-                ApplicationInfo appInfo = userContext.getApplicationInfo();
-                if (appInfo != null) {
-                    packageLabel = userContext.getPackageManager().getApplicationLabel(appInfo)
-                            .toString();
-                }
-            } catch (NameNotFoundException e) {
-            }
-            dialogTitle = String.format(getResources().getString(R.string.suspended_package_title),
-                    packageLabel);
-            ComponentName profileOwner = dpm.getProfileOwnerAsUser(mUserId);
-            String profileOwnerName = null;
-            if (profileOwner != null) {
-                dialogMessage = dpm.getShortSupportMessageForUser(profileOwner, mUserId);
-                profileOwnerName = dpm.getProfileOwnerNameAsUser(mUserId);
-            }
-            // Fall back to standard message if profile owner hasn't set something specific.
-            if (TextUtils.isEmpty(dialogMessage)) {
-                if (TextUtils.isEmpty(profileOwnerName)) {
-                    profileOwnerName = getResources().getString(R.string.unknownName);
-                }
-                dialogMessage = getResources().getString(R.string.suspended_package_message,
-                        profileOwnerName);
-            }
         } else {
             Log.wtf(TAG, "Invalid unlaunchable type: " + mReason);
             finish();
@@ -152,14 +119,6 @@ public class UnlaunchableAppActivity extends Activity
         Intent intent = createBaseIntent();
         intent.putExtra(EXTRA_UNLAUNCHABLE_REASON, UNLAUNCHABLE_REASON_QUIET_MODE);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        return intent;
-    }
-
-    public static Intent createPackageSuspendedDialogIntent(String packageName, int userId) {
-        Intent intent = createBaseIntent();
-        intent.putExtra(EXTRA_UNLAUNCHABLE_REASON, UNLAUNCHABLE_REASON_SUSPENDED_PACKAGE);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
         return intent;
     }
 }
