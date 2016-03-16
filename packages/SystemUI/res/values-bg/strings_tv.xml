@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"Пускане"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Пауза"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Контр. на PIP: Задр. "<b>"HOME"</b></string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"За контролиране на PIP\nнатиснете и задръжте HOME"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"За контролиране на PIP натиснете и задръжте бутона „HOME“"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Разбрах"</string>
 </resources>

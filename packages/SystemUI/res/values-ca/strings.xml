@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"S\'ha fet una captura de pantalla."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca per veure la captura de pantalla."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"No s\'ha pogut fer una captura de pantalla."</string>
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
-    <skip />
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"S\'ha trobat un problema en desar la captura de pantalla."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"La captura de pantalla no es pot desar perquè no hi ha prou espai d\'emmagatzematge."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"L\'aplicació o l\'organització no permeten fer captures de pantalla."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcions transf. fitxers USB"</string>

@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"Αναπαραγωγή"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Παύση"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Κρατήστε το πλήκτρο "<b>"HOME"</b>" πατημένο για έλεγχο του PIP"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"Πατήστε παρατεταμένα το κουμπί HOME\nγια έλεγχο του PIP"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Πιέστε παρατεταμένα το κουμπί HOME, για να ελέγξετε τη λειτουργία PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Κατάλαβα"</string>
 </resources>
