@@ -641,7 +641,12 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo getUserInfo(int userId) {
-        checkManageUsersPermission("query user");
+        if (!hasManageUsersPermission()
+                && !isSameProfileGroupLP(UserHandle.getCallingUserId(), userId)) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS permission to: query users outside profile group");
+        }
+
         synchronized (mUsersLock) {
             return getUserInfoLU(userId);
         }
@@ -1196,15 +1201,25 @@ public class UserManagerService extends IUserManager.Stub {
      *
      * @param message used as message if SecurityException is thrown
      * @throws SecurityException if the caller is not system or root
+     * @see #hasManageUsersPermission()
      */
     private static final void checkManageUsersPermission(String message) {
-        final int uid = Binder.getCallingUid();
-        if (!UserHandle.isSameApp(uid, Process.SYSTEM_UID) && uid != Process.ROOT_UID
-                && ActivityManager.checkComponentPermission(
-                        android.Manifest.permission.MANAGE_USERS,
-                        uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+        if (!hasManageUsersPermission()) {
             throw new SecurityException("You need MANAGE_USERS permission to: " + message);
         }
+    }
+
+    /**
+     * @return whether the calling UID is system UID or root's UID or the calling app has the
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS}.
+     */
+    private static final boolean hasManageUsersPermission() {
+        final int callingUid = Binder.getCallingUid();
+        return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
+                || callingUid == Process.ROOT_UID
+                || ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.MANAGE_USERS,
+                        callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**

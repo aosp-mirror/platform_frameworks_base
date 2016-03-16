@@ -972,7 +972,8 @@ public class UserManager {
 
     /**
      * Returns the UserInfo object describing a specific user.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission or the caller is
+     * in the same profile group of target user.
      * @param userHandle the user handle of the user whose information is being requested.
      * @return the UserInfo object for a specific user.
      * @hide
