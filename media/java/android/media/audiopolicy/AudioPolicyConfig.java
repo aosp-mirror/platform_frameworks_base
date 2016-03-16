@@ -84,7 +84,7 @@ public class AudioPolicyConfig implements Parcelable {
             // write callback flags
             dest.writeInt(mix.mCallbackFlags);
             // write device information
-            dest.writeInt(mix.mDeviceId);
+            dest.writeInt(mix.mDeviceSystemType);
             dest.writeString(mix.mDeviceAddress);
             // write mix format
             dest.writeInt(mix.getFormat().getSampleRate());
