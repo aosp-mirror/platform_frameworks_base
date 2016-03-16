@@ -119,6 +119,8 @@ class WindowSurfaceController {
             mSurfaceY = top;
 
             try {
+                if (SHOW_TRANSACTIONS) logSurface(
+                        "POS (setPositionAndLayer) @ (" + left + "," + top + ")", null);
                 mSurfaceControl.setPosition(left, top);
                 mSurfaceControl.setLayerStack(layerStack);
 
@@ -205,6 +207,9 @@ class WindowSurfaceController {
             mSurfaceY = top;
 
             try {
+                if (SHOW_TRANSACTIONS) logSurface(
+                        "POS (setPositionInTransaction) @ (" + left + "," + top + ")", null);
+
                 mSurfaceControl.setPosition(left, top);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error positioning surface of " + this

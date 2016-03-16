@@ -711,8 +711,6 @@ class WindowStateAnimator {
 
         // Start a new transaction and apply position & offset.
         final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
-        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                "POS " + mTmpSize.left + ", " + mTmpSize.top, false);
         mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack, mAnimLayer);
         mLastHidden = true;
 
