@@ -145,6 +145,9 @@ public class TimeController extends StateController {
                 final long jobDeadline = job.getLatestRunTimeElapsed();
 
                 if (jobDeadline <= nowElapsedMillis) {
+                    if (job.hasTimingDelayConstraint()) {
+                        job.setTimingDelayConstraintSatisfied(true);
+                    }
                     job.setDeadlineConstraintSatisfied(true);
                     mStateChangedListener.onRunJobNow(job);
                     it.remove();
@@ -281,7 +284,7 @@ public class TimeController extends StateController {
                 + "s");
         pw.println("Tracking:");
         for (JobStatus ts : mTrackedJobs) {
-            pw.println(String.valueOf(ts.hashCode()).substring(0, 3) + ".."
+            pw.println(String.valueOf(ts.getJobId() + "," + ts.getUid())
                     + ": (" + (ts.hasTimingDelayConstraint() ? ts.getEarliestRunTime() : "N/A")
                     + ", " + (ts.hasDeadlineConstraint() ?ts.getLatestRunTimeElapsed() : "N/A")
                     + ")");
