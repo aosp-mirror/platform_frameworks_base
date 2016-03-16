@@ -5225,7 +5225,6 @@ public abstract class PackageManager {
     public abstract void setComponentEnabledSetting(ComponentName componentName,
             int newState, int flags);
 
-
     /**
      * Return the enabled setting for a package component (activity,
      * receiver, service, provider).  This returns the last value set by
@@ -5281,6 +5280,16 @@ public abstract class PackageManager {
      * @throws IllegalArgumentException if the named package does not exist.
      */
     public abstract int getApplicationEnabledSetting(String packageName);
+
+    /**
+     * Flush the package restrictions for a given user to disk. This forces the package restrictions
+     * like component and package enabled settings to be written to disk and avoids the delay that
+     * is otherwise present when changing those settings.
+     *
+     * @param userId Ther userId of the user whose restrictions are to be flushed.
+     * @hide
+     */
+    public abstract void flushPackageRestrictionsAsUser(int userId);
 
     /**
      * Puts the package in a hidden state, which is almost like an uninstalled state,

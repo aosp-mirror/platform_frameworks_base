@@ -16662,6 +16662,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    @Override
+    public void flushPackageRestrictionsAsUser(int userId) {
+        if (!sUserManager.exists(userId)) {
+            return;
+        }
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false /* requireFullPermission*/,
+                false /* checkShell */, "flushPackageRestrictions");
+        synchronized (mPackages) {
+            mSettings.writePackageRestrictionsLPr(userId);
+            mDirtyUsers.remove(userId);
+            if (mDirtyUsers.isEmpty()) {
+                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+            }
+        }
+    }
+
     private void sendPackageChangedBroadcast(String packageName,
             boolean killFlag, ArrayList<String> componentNames, int packageUid) {
         if (DEBUG_INSTALL)
