@@ -62,7 +62,9 @@ public class TestModel extends Model {
         update(r);
     }
 
+    // Note that model id includes authority qualifier and is distinct
+    // WRT documentId because of this.
     String idForPosition(int p) {
-        return Integer.toString(p);
+        return createModelId(mAuthority, Integer.toString(p));
     }
 }
