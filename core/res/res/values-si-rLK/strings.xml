@@ -1551,8 +1551,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"වැඩ ප්‍රකාරය ක්‍රියාවිරහිතයි"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"යෙදුම්, පසුබිම සමමුහුර්ත කිරීම, සහ සම්බන්ධිත විශේෂාංග ඇතුළුව, ක්‍රියා කිරීමට කාර්යාල පැතිකඩට ඉඩ දෙන්න"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ක්‍රියාත්මක කරන්න"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s අබල කරන ලදී"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s පරිපාලක විසින් අබල කරන ලදී. තව දැන ගැනීමට ඔවුන් අමතන්න."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ඔබට නව පණිවිඩ තිබේ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"බැලීමට විවෘත SMS යෙදුම විවෘත කරන්න"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ඇතැම් ක්‍රියාකාරිත්ව සීමිත විය හැකිය"</string>
@@ -1566,6 +1564,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"ගලවන්න"</string>
     <string name="app_info" msgid="6856026610594615344">"යෙදුම් තොරතුරු"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"මෙම උපාංගය සාමාන්‍ය ලෙස භාවිත කිරීමට කර්මාන්තශාලා යළි සැකසීම"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"තව දැන ගැනීමට ස්පර්ශ කරන්න."</string>
 </resources>

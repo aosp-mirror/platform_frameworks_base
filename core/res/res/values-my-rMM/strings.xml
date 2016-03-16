@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"အလုပ်မုဒ် ပိတ်ထားသည်"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"အက်ပ်များ၊ နောက်ခံစင့်ခ်လုပ်ခြင်း၊ နှင့်သက်ဆိုင်သည့်အင်္ဂါရပ်များကို ဆောင်ရွက်ရန် အလုပ်ပရိုဖိုင်ကိုခွင့်ပြုပါ။"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ဖွင့်ပါ"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s ကိုပိတ်ထားသည်"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s စီမံခန့်ခွဲသူမှ ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် ၎င်းတို့ကိုဆက်သွယ်ပါ။"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ကြည့်ရှုရန် SMS အက်ပ်ကိုဖွင့်ပါ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"အချို့လုပ်ဆောင်ချက်များ ကန့်သတ်ချက်ရှိနိုင်သည်"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"ဖြုတ်ပါ"</string>
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"ဤစက်ပစ္စည်းကို သာမန်အသုံးပြုနိုင်ရန် စက်ရုံထုတ်အတိုင်း ပြန်လည်သတ်မှတ်ပါ"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ပိုမိုလေ့လာရန် တို့ပါ။"</string>
 </resources>

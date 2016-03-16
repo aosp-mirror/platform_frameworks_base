@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Chế độ làm việc đang TẮT"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Cho phép hồ sơ công việc hoạt động, bao gồm ứng dụng, đồng bộ hóa trong nền và các tính năng liên quan."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Bật"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s đã bị tắt"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Đã bị quản trị viên %1$s tắt. Hãy liên hệ với quản trị viên để tìm hiểu thêm."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Bạn có tin nhắn mới"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Mở ứng dụng SMS để xem"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Một số chức năng có thể bị hạn chế"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Bỏ ghim"</string>
     <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Thiết lập cài đặt gốc để sử dụng thiết bị này một cách bình thường"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Chạm để tìm hiểu thêm."</string>
 </resources>

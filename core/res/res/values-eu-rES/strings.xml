@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Desaktibatuta dago laneko modua"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Baimendu laneko profilak funtzionatzea, besteak beste, aplikazioak, atzeko planoko sinkronizazioa eta erlazionatutako eginbideak."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktibatu"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Desgaituta dago %1$s"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Desgaitu egin du %1$s gailuaren administratzaileak. Informazio gehiago lortu nahi baduzu, jarri harekin harremanetan."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Mezu berriak dituzu"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Mezuak ikusteko, ireki SMS mezuen aplikazioa"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Funtzioak mugatuta egon litezke"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Kendu aingura"</string>
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Berrezarri jatorrizko egoerara gailua ohi bezala erabiltzen jarraitu ahal izateko"</string>
-    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ukitu informazio gehiago lortzeko."</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Sakatu informazio gehiago lortzeko."</string>
 </resources>

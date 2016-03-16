@@ -1549,10 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Jobbmodus er AV"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Slå på jobbprofilen, inkludert apper, synkronisering i bakgrunnen og relaterte funksjoner."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Slå på"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s er slått av"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for suspended_package_message (6341091587106868601) -->
-    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Du har nye meldinger"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Åpne SMS-appen for å se"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Enkelte funksjoner kan være begrenset"</string>
@@ -1566,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Løsne"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Tilbakestill til fabrikkstandard for å bruke denne enheten som normalt"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Trykk for å finne ut mer."</string>
 </resources>

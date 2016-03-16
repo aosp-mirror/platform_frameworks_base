@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"NAKA-OFF ang work mode"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Payagang gumana ang profile sa trabaho, kasama na ang mga app, pag-sync sa background at mga may kaugnayang feature."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"I-on"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Na-disable ang %1$s"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Na-disable ng administrator ng %1$s. Makipag-ugnayan sa administrator upang matuto nang higit pa."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Mayroon kang mga bagong mensahe"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Buksan ang SMS app upang tingnan"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Limitado ilang functionality"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"I-unpin"</string>
     <string name="app_info" msgid="6856026610594615344">"Impormasyon ng app"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Mag-factory reset upang magamit nang normal ang device na ito"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Pindutin upang matuto nang higit pa."</string>
 </resources>

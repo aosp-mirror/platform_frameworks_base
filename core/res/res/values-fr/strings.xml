@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Mode professionnel DÉSACTIVÉ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Autoriser le fonctionnement du profil professionnel, y compris les applications, la synchronisation en arrière-plan et les fonctionnalités associées."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activer"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s désactivé"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Désactivé par l\'administrateur %1$s. Contactez-le pour en savoir plus."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Vous avez de nouveaux messages"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ouvrir l\'application de SMS pour afficher le message"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Des fonctionnalités peuvent être limitées"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Retirer"</string>
     <string name="app_info" msgid="6856026610594615344">"Infos sur l\'appli"</string>
     <string name="negative_duration" msgid="5688706061127375131">"− <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Rétablir la configuration d\'usine pour utiliser cet appareil normalement"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Appuyez ici pour en savoir plus."</string>
 </resources>

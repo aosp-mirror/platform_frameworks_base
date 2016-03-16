@@ -1568,8 +1568,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Radni je način ISKLJUČEN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Omogućuje radnom profilu da funkcionira, uključujući aplikacije, sinkronizaciju u pozadini i povezane značajke."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s – onemogućeno"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Onemogućio administrator (%1$s). Obratite mu se za više informacija."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Imate nove poruke"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Otvorite SMS aplikaciju da biste pregledali poruke"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Funkcije mogu biti ograničene"</string>
@@ -1583,6 +1581,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Otkvači"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Uređaj je vraćen na tvorničke postavke da biste ga mogli upotrebljavati na pravilan način"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Dodirnite da biste saznali više."</string>
 </resources>

@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Werkmodus is UIT"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Functioneren van werkprofiel toestaan, waaronder apps, synchronisatie op de achtergrond en gerelateerde functies."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Inschakelen"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s is uitgeschakeld"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Uitgeschakeld door de beheerder van %1$s. Neem voor meer informatie contact op met de beheerder."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Je hebt nieuwe berichten"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Open je sms-app om ze te bekijken"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Bepaalde functionaliteit kan zijn beperkt"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Losmaken"</string>
     <string name="app_info" msgid="6856026610594615344">"App-info"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Zet dit apparaat terug op de fabrieksinstellingen om het normaal te gebruiken"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Tik voor meer informatie."</string>
 </resources>
