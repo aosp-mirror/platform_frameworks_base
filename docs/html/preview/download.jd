@@ -264,7 +264,7 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   manually flash it to your device. See the table below to download the system
   image for your test device. Manually flashing a device is useful if you need
   precise control over the test environment or need to reinstall frequently,
-  such as for automated testing. 
+  such as for automated testing.
 </p>
 
 <!-- You can flash by ota or system image --><p>
@@ -287,10 +287,10 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 <p>
-  If you decide you want to get OTA updates after manually flashing a device, 
+  If you decide you want to get OTA updates after manually flashing a device,
   all you need to do is enroll the device in the <a href="https://g.co/androidbeta">Android
   Beta Program</a>. You can enroll the device at any time to receive the next Preview
-  update over the air. 
+  update over the air.
 </p>
 
 <table>
@@ -302,9 +302,9 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >bullhead-npc56p-preview-6c877a3d.tgz</a><br>
-      MD5: b5cf874021023b398f5b983b24913f5d<br>
-      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
+      >bullhead-npc56w-preview-d86c7559.tgz</a><br>
+      MD5: d84b6c31a7754e505149594887b3481a<br>
+      SHA-1: d86c7559c93724cca6af91040b012c48529f2c94
     </td>
   </tr>
 
@@ -320,27 +320,27 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >angler-npc56p-preview-85ffc1b1.tgz</a><br>
-      MD5: bc4934ea7bd325753eee1606d3725a24<br>
-      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
+      >angler-npc56w-preview-2834ca3c.tgz</a><br>
+      MD5: fd5c74f256cf82262779513854869570<br>
+      SHA-1: 2834ca3c425d7a61f5dfabb9d8dd108aec1ab58b
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
-      MD5: c901334c6158351e945f188167ae56f4<br>
-      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+      >volantis-npc56x-preview-5c323abd.tgz</a><br>
+      MD5: 474a13915e22d683cab5cf59ed868157<br>
+      SHA-1: 5c323abdec121b2f07fdabaa3d70d12106e450ad
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
-      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
-      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
+      >volantisg-npc56x-preview-41ae398c.tgz</a><br>
+      MD5: 5a145a546a4a9f68c2b8e2624cf9832b<br>
+      SHA-1: 41ae398c30536a2d96b04d61b9ef97a043bf59cf
     </td>
   </tr>
 
