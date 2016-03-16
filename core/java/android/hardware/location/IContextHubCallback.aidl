@@ -18,7 +18,9 @@ package android.hardware.location;
 
 import android.hardware.location.ContextHubMessage;
 
-/** @hide */
+/**
+ * @hide
+ */
 oneway interface IContextHubCallback {
     void onMessageReceipt(int hubId, int nanoAppId, in ContextHubMessage msg);
 }

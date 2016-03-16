@@ -110,8 +110,9 @@ public class NanoAppFilter {
         return true;
     }
     /**
+     * Test match method.
      *
-     * @param nano app instance info
+     * @param info nano app instance info
      *
      * @return true if this is a match, false otherwise
      */

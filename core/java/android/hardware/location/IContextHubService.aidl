@@ -24,11 +24,13 @@ import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.NanoAppFilter;
 import android.hardware.location.IContextHubCallback;
 
-/** @hide */
+/**
+ * @hide
+ */
 interface IContextHubService {
 
     // register a callback to receive messages
-    int registerCallBack(in IContextHubCallback callback);
+    int registerCallback(in IContextHubCallback callback);
 
     // Gets a list of available context hub handles
     int[] getContextHubHandles();
