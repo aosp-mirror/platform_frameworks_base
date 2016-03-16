@@ -8,8 +8,8 @@
     <application
         android:label="@string/app_label"
         android:process="com.android.proxyhandler"
-        android:forceDeviceEncrypted="true"
-        android:encryptionAware="true">
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
 
         <service android:name=".ProxyService"
             android:exported="true">

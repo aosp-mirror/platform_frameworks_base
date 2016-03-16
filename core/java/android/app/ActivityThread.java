@@ -5208,9 +5208,9 @@ public final class ActivityThread {
 
             // Setup a location to store generated/compiled graphics code and
             // JIT profiling data. Note that this data is stored in a
-            // device-encrypted storage area, so these caches must never contain
+            // device-protected storage area, so these caches must never contain
             // user sensitive user data.
-            final Context deviceContext = appContext.createDeviceEncryptedStorageContext();
+            final Context deviceContext = appContext.createDeviceProtectedStorageContext();
             final File codeCacheDir = deviceContext.getCodeCacheDir();
             if (codeCacheDir != null) {
                 setupGraphicsSupport(data.info, codeCacheDir);

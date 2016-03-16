@@ -22,8 +22,8 @@
 
     <application android:label="@string/app_name"
         android:allowBackup="false"
-        android:forceDeviceEncrypted="true"
-        android:encryptionAware="true">
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
 
         <library android:name="android.ext.shared"/>
 

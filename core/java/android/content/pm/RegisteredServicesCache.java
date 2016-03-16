@@ -365,7 +365,8 @@ public abstract class RegisteredServicesCache<V> {
     protected List<ResolveInfo> queryIntentServices(int userId) {
         final PackageManager pm = mContext.getPackageManager();
         return pm.queryIntentServicesAsUser(new Intent(mInterfaceName),
-                PackageManager.GET_META_DATA | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
+                PackageManager.GET_META_DATA | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
     }
 

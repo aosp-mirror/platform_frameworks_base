@@ -21,6 +21,9 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -1272,10 +1275,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     final String adminPackage = aa.info.getPackageName();
                     if (packageName == null || packageName.equals(adminPackage)) {
                         if (mIPackageManager.getPackageInfo(adminPackage, 0, userHandle) == null
-                                || mIPackageManager.getReceiverInfo(
-                                    aa.info.getComponent(),
-                                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
-                                    userHandle) == null) {
+                                || mIPackageManager.getReceiverInfo(aa.info.getComponent(),
+                                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                        userHandle) == null) {
                             removed = true;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
@@ -2096,8 +2099,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             ai = mIPackageManager.getReceiverInfo(adminName,
                     PackageManager.GET_META_DATA |
-                    PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
-                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, userHandle);
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS |
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE |
+                    PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
         } catch (RemoteException e) {
             // shouldn't happen.
         }
@@ -7193,11 +7197,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             try {
                 int parentUserId = getProfileParentId(userId);
-                List<ResolveInfo> activitiesToEnable = mIPackageManager.queryIntentActivities(
-                        intent,
-                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
-                        parentUserId).getList();
+                List<ResolveInfo> activitiesToEnable = mIPackageManager
+                        .queryIntentActivities(intent,
+                                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                parentUserId)
+                        .getList();
 
                 if (VERBOSE_LOG) {
                     Slog.d(LOG_TAG, "Enabling system activities: " + activitiesToEnable);

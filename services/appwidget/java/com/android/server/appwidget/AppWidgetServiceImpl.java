@@ -2487,7 +2487,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // from a profile that is still locked, so let them see those
             // widgets.
             if (isProfileWithUnlockedParent(userId)) {
-                flags |= PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+                flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
             }
 
             // Widgets referencing shared libraries need to have their

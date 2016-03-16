@@ -167,8 +167,8 @@
         android:process="com.android.systemui"
         android:supportsRtl="true"
         android:theme="@style/systemui_theme"
-        android:forceDeviceEncrypted="true"
-        android:encryptionAware="true">
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->

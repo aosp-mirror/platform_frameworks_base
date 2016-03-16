@@ -2679,8 +2679,8 @@
     <public type="attr" name="contextPopupMenuStyle" />
     <public type="attr" name="textAppearancePopupMenuHeader" />
     <public type="attr" name="windowBackgroundFallback" />
-    <public type="attr" name="forceDeviceEncrypted" />
-    <public type="attr" name="encryptionAware" />
+    <public type="attr" name="defaultToDeviceProtectedStorage" />
+    <public type="attr" name="directBootAware" />
     <public type="attr" name="preferenceFragmentStyle" />
     <public type="attr" name="canControlMagnification" />
     <public type="attr" name="languageTag" />

@@ -61,10 +61,9 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.MOVE_FAILED_DEVICE_ADMIN;
@@ -2565,7 +2564,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
@@ -2580,7 +2580,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
         final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
@@ -2592,7 +2593,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         final Intent intent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -2627,7 +2629,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
         final List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
-                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
 
         final int N = resolvers.size();
         if (N == 0) {
@@ -2672,7 +2675,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
         final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
         if (matches.size() == 0) {
             return null;
         } else if (matches.size() == 1) {
@@ -2886,8 +2890,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new SecurityException("Package " + packageName + " is currently frozen!");
             }
 
-            if (!userKeyUnlocked && !(ps.pkg.applicationInfo.isEncryptionAware()
-                    || ps.pkg.applicationInfo.isPartiallyEncryptionAware())) {
+            if (!userKeyUnlocked && !(ps.pkg.applicationInfo.isDirectBootAware()
+                    || ps.pkg.applicationInfo.isPartiallyDirectBootAware())) {
                 throw new SecurityException("Package " + packageName + " is not encryption aware!");
             }
         }
@@ -3255,17 +3259,17 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Update given flags based on encryption status of current user.
      */
     private int updateFlags(int flags, int userId) {
-        if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
-                | PackageManager.MATCH_ENCRYPTION_AWARE)) != 0) {
+        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE)) != 0) {
             // Caller expressed an explicit opinion about what encryption
             // aware/unaware components they want to see, so fall through and
             // give them what they want
         } else {
             // Caller expressed no opinion, so match based on user state
             if (isUserKeyUnlocked(userId)) {
-                flags |= PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+                flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
             } else {
-                flags |= PackageManager.MATCH_ENCRYPTION_AWARE;
+                flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
             }
         }
         return flags;
@@ -3280,8 +3284,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS)) != 0) {
             // Caller is asking for component details, so they'd better be
             // asking for specific encryption matching behavior, or be triaged
-            if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
-                    | PackageManager.MATCH_ENCRYPTION_AWARE
+            if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
                     | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
                 triaged = false;
             }
@@ -3318,8 +3322,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean triaged = true;
         // Caller is asking for component details, so they'd better be
         // asking for specific encryption matching behavior, or be triaged
-        if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
-                | PackageManager.MATCH_ENCRYPTION_AWARE
+        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
             triaged = false;
         }
@@ -6126,10 +6130,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final PackageParser.Package p = i.next();
                 if (p.applicationInfo == null) continue;
 
-                final boolean matchesUnaware = ((flags & MATCH_ENCRYPTION_UNAWARE) != 0)
-                        && !p.applicationInfo.isEncryptionAware();
-                final boolean matchesAware = ((flags & MATCH_ENCRYPTION_AWARE) != 0)
-                        && p.applicationInfo.isEncryptionAware();
+                final boolean matchesUnaware = ((flags & MATCH_DIRECT_BOOT_UNAWARE) != 0)
+                        && !p.applicationInfo.isDirectBootAware();
+                final boolean matchesAware = ((flags & MATCH_DIRECT_BOOT_AWARE) != 0)
+                        && p.applicationInfo.isDirectBootAware();
 
                 if ((p.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0
                         && (!mSafeMode || isSystemApp(p))
@@ -8289,8 +8293,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.splitSourceDirs = pkg.applicationInfo.splitSourceDirs;
                 a.info.splitPublicSourceDirs = pkg.applicationInfo.splitPublicSourceDirs;
                 a.info.dataDir = pkg.applicationInfo.dataDir;
-                a.info.deviceEncryptedDataDir = pkg.applicationInfo.deviceEncryptedDataDir;
-                a.info.credentialEncryptedDataDir = pkg.applicationInfo.credentialEncryptedDataDir;
+                a.info.deviceProtectedDataDir = pkg.applicationInfo.deviceProtectedDataDir;
+                a.info.credentialProtectedDataDir = pkg.applicationInfo.credentialProtectedDataDir;
 
                 // TODO: Update instrumentation.nativeLibraryDir as well ? Does it
                 // need other information about the application, like the ABI and what not ?
@@ -18386,13 +18390,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
     /**
      * For system apps on non-FBE devices, this method migrates any existing
-     * CE/DE data to match the {@code forceDeviceEncrypted} flag requested by
-     * the app.
+     * CE/DE data to match the {@code defaultToDeviceProtectedStorage} flag
+     * requested by the app.
      */
     private boolean maybeMigrateAppData(String volumeUuid, int userId, PackageParser.Package pkg) {
         if (pkg.isSystemApp() && !StorageManager.isFileEncryptedNativeOrEmulated()
-                && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
-            final int storageTarget = pkg.applicationInfo.isForceDeviceEncrypted()
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            final int storageTarget = pkg.applicationInfo.isDefaultToDeviceProtectedStorage()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
             synchronized (mInstallLock) {
                 try {

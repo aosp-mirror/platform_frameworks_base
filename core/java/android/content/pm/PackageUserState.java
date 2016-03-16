@@ -23,8 +23,8 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.util.ArraySet;
@@ -98,10 +98,10 @@ public class PackageUserState {
             }
         }
 
-        final boolean matchesUnaware = ((flags & MATCH_ENCRYPTION_UNAWARE) != 0)
-                && !componentInfo.encryptionAware;
-        final boolean matchesAware = ((flags & MATCH_ENCRYPTION_AWARE) != 0)
-                && componentInfo.encryptionAware;
+        final boolean matchesUnaware = ((flags & MATCH_DIRECT_BOOT_UNAWARE) != 0)
+                && !componentInfo.directBootAware;
+        final boolean matchesAware = ((flags & MATCH_DIRECT_BOOT_AWARE) != 0)
+                && componentInfo.directBootAware;
         return matchesUnaware || matchesAware;
     }
 

@@ -3048,7 +3048,8 @@ final class Settings {
             tmpPa.dump(new LogPrinter(Log.DEBUG, TAG), "  ");
         }
         Intent intent = new Intent();
-        int flags = PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+        int flags = PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
         intent.setAction(tmpPa.getAction(0));
         for (int i=0; i<tmpPa.countCategories(); i++) {
             String cat = tmpPa.getCategory(i);
@@ -4175,10 +4176,10 @@ final class Settings {
         ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK, "FORWARD_LOCK",
         ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, "PRIVILEGED",
         ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS, "HAS_DOMAIN_URLS",
-        ApplicationInfo.PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED, "FORCE_DEVICE_ENCRYPTED",
-        ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE, "ENCRYPTION_AWARE",
+        ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE, "DEFAULT_TO_DEVICE_PROTECTED_STORAGE",
+        ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE, "DIRECT_BOOT_AWARE",
         ApplicationInfo.PRIVATE_FLAG_AUTOPLAY, "AUTOPLAY",
-        ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE, "PARTIALLY_ENCRYPTION_AWARE",
+        ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE, "PARTIALLY_DIRECT_BOOT_AWARE",
         ApplicationInfo.PRIVATE_FLAG_EPHEMERAL, "EPHEMERAL",
         ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER, "REQUIRED_FOR_SYSTEM_USER",
         ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES, "RESIZEABLE_ACTIVITIES",
