@@ -1,0 +1,60 @@
+toc:
+- title: Asset Manager
+  path: /ndk/reference/group___asset.html
+  section:
+  - title: asset_manager.h
+    path: /ndk/reference/asset__manager_8h.html
+  - title: asset_manager_jni.h
+    path: /ndk/reference/asset__manager__jni_8h.html
+
+- title: Bitmap
+  path: /ndk/reference/group___bitmap.html
+  section:
+  - title: bitmap.h
+    path: /ndk/reference/bitmap_8h.html
+
+- title: Configuration
+  path: /ndk/reference/group___configuration.html
+  section:
+  - title: configuration.h
+    path: /ndk/reference/configuration_8h.html
+
+- title: Input
+  path: /ndk/reference/group___input.html
+  section:
+  - title: input.h
+    path: /ndk/reference/input_8h.html
+  - title: keycodes.h
+    path: /ndk/reference/keycodes_8h.html
+
+- title: Looper
+  path: /ndk/reference/group___looper.html
+  section:
+  - title: looper.h
+    path: /ndk/reference/looper_8h.html
+
+- title: Native Activity and Window
+  path: /ndk/reference/group___native_activity.html
+  section:
+  - title: native_activity.h
+    path: /ndk/reference/native__activity_8h.html
+  - title: native_window.h
+    path: /ndk/reference/native__window_8h.html
+  - title: native_window.h
+    path: /ndk/reference/native__window__jni_8h.html
+  - title: rect.h
+    path: /ndk/reference/rect_8h.html
+
+- title: Sensor
+  path: /ndk/reference/group___sensor.html
+  section:
+  - title: sensor.h
+    path: /ndk/reference/sensor_8h.html
+
+- title: Storage Manager
+  path: /ndk/reference/group___storage.html
+  section:
+  - title: storage_manager.h
+    path: /ndk/reference/storage__manager_8h.html
+  - title: obb.h
+    path: /ndk/reference/obb_8h.html
