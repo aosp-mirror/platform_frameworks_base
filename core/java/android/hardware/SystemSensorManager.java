@@ -31,11 +31,14 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import dalvik.system.CloseGuard;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Sensor manager implementation that communicates with the built-in
@@ -55,7 +58,9 @@ public class SystemSensorManager extends SensorManager {
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
     private static final Object sLock = new Object();
-    private static boolean sSensorModuleInitialized = false;
+    @GuardedBy("sLock")
+    private static boolean sNativeClassInited = false;
+    @GuardedBy("sLock")
     private static InjectEventQueue sInjectEventQueue = null;
 
     private final ArrayList<Sensor> mFullSensorsList = new ArrayList<>();
@@ -84,8 +89,8 @@ public class SystemSensorManager extends SensorManager {
     /** {@hide} */
     public SystemSensorManager(Context context, Looper mainLooper) {
         synchronized(sLock) {
-            if (!sSensorModuleInitialized) {
-                sSensorModuleInitialized = true;
+            if (!sNativeClassInited) {
+                sNativeClassInited = true;
                 nativeClassInit();
             }
         }

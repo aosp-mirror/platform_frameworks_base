@@ -36,14 +36,16 @@
 
 #include "core_jni_helpers.h"
 
-static struct {
+namespace {
+
+using namespace android;
+
+struct {
     jclass clazz;
     jmethodID dispatchSensorEvent;
     jmethodID dispatchFlushCompleteEvent;
     jmethodID dispatchAdditionalInfoEvent;
 } gBaseEventQueueClassInfo;
-
-namespace android {
 
 struct SensorOffsets
 {
@@ -72,9 +74,9 @@ struct ListOffsets {
 } gListOffsets;
 
 /*
- * The method below are not thread-safe and not intended to be
+ * nativeClassInit is not inteneded to be thread-safe. It should be called before other native...
+ * functions (except nativeCreate).
  */
-
 static void
 nativeClassInit (JNIEnv *_env, jclass _this)
 {
@@ -494,9 +496,7 @@ static const JNINativeMethod gBaseEventQueueMethods[] = {
             (void*)nativeInjectSensorData },
 };
 
-}; // namespace android
-
-using namespace android;
+} //unnamed namespace
 
 int register_android_hardware_SensorManager(JNIEnv *env)
 {
