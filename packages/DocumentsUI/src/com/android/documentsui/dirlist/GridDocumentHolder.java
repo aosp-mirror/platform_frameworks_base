@@ -69,12 +69,16 @@ final class GridDocumentHolder extends DocumentHolder {
     }
 
     @Override
-    public void setSelected(boolean selected) {
+    public void setSelected(boolean selected, boolean animate) {
         // We always want to make sure our check box disappears if we're not selected,
         // even if the item is disabled. This is because this object can be reused
         // and this method will be called to setup initial state.
         float checkAlpha = selected ? 1f : 0f;
-        mIconCheck.animate().alpha(checkAlpha).start();
+        if (animate) {
+            mIconCheck.animate().alpha(checkAlpha).start();
+        } else {
+            mIconCheck.setAlpha(checkAlpha);
+        }
 
         // But it should be an error to be set to selected && be disabled.
         if (!itemView.isEnabled()) {
@@ -82,9 +86,13 @@ final class GridDocumentHolder extends DocumentHolder {
             return;
         }
 
-        super.setSelected(selected);
+        super.setSelected(selected, animate);
 
-        mIconMimeSm.animate().alpha(1f - checkAlpha).start();
+        if (animate) {
+            mIconMimeSm.animate().alpha(1f - checkAlpha).start();
+        } else {
+            mIconMimeSm.setAlpha(1f - checkAlpha);
+        }
     }
 
     public void setEnabled(boolean enabled) {

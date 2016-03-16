@@ -42,12 +42,17 @@ final class GridDirectoryHolder extends DocumentHolder {
     }
 
     @Override
-    public void setSelected(boolean selected) {
-        super.setSelected(selected);
+    public void setSelected(boolean selected, boolean animate) {
+        super.setSelected(selected, animate);
         float checkAlpha = selected ? 1f : 0f;
 
-        mIconCheck.animate().alpha(checkAlpha).start();
-        mIconMime.animate().alpha(1f - checkAlpha).start();
+        if (animate) {
+            mIconCheck.animate().alpha(checkAlpha).start();
+            mIconMime.animate().alpha(1f - checkAlpha).start();
+        } else {
+            mIconCheck.setAlpha(checkAlpha);
+            mIconMime.setAlpha(1f - checkAlpha);
+        }
     }
 
     /**

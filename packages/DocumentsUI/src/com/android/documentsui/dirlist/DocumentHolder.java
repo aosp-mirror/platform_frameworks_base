@@ -77,10 +77,18 @@ public abstract class DocumentHolder
     /**
      * Makes the associated item view appear selected. Note that this merely affects the appearance
      * of the view, it doesn't actually select the item.
+     * TODO: Use the DirectoryItemAnimator instead of manually controlling animation using a boolean
+     * flag.
      *
      * @param selected
+     * @param animate Whether or not to animate the change. Only selection changes initiated by the
+     *            selection manager should be animated. See
+     *            {@link ModelBackedDocumentsAdapter#onBindViewHolder(DocumentHolder, int, java.util.List)}
      */
-    public void setSelected(boolean selected) {
+    public void setSelected(boolean selected, boolean animate) {
+        // Note: the animate param doesn't apply for this base implementation, because the
+        // DirectoryItemAnimator takes care of it. It's required by subclasses, which perform their
+        // own animation.
         itemView.setActivated(selected);
         itemView.setBackgroundColor(selected ? mSelectedBgColor : mDefaultBgColor);
     }

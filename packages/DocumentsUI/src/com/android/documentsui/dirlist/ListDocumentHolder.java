@@ -65,22 +65,31 @@ final class ListDocumentHolder extends DocumentHolder {
     }
 
     @Override
-    public void setSelected(boolean selected) {
+    public void setSelected(boolean selected, boolean animate) {
         // We always want to make sure our check box disappears if we're not selected,
         // even if the item is disabled. But it should be an error (see assert below)
         // to be set to selected && be disabled.
         float checkAlpha = selected ? 1f : 0f;
-        mIconCheck.animate().alpha(checkAlpha).start();
+        if (animate) {
+            mIconCheck.animate().alpha(checkAlpha).start();
+        } else {
+            mIconCheck.setAlpha(checkAlpha);
+        }
 
         if (!itemView.isEnabled()) {
             assert(!selected);
             return;
         }
 
-        super.setSelected(selected);
+        super.setSelected(selected, animate);
 
-        mIconMime.animate().alpha(1f - checkAlpha).start();
-        mIconThumb.animate().alpha(1f - checkAlpha).start();
+        if (animate) {
+            mIconMime.animate().alpha(1f - checkAlpha).start();
+            mIconThumb.animate().alpha(1f - checkAlpha).start();
+        } else {
+            mIconMime.setAlpha(1f - checkAlpha);
+            mIconThumb.setAlpha(1f - checkAlpha);
+        }
     }
 
     @Override
