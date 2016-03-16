@@ -19,7 +19,7 @@
     <string name="app_label" msgid="3701846017049540910">"Prostredie"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Generuje sa hlásenie chyby <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Hlásenie chyby <xliff:g id="ID">#%d</xliff:g> bolo zaznamenané"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Hlásenie chyby <xliff:g id="ID">#%d</xliff:g> bolo zaznamenané, ale čaká sa na snímku obrazovky"</string>
+    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Chyba <xliff:g id="ID">#%d</xliff:g> bola zaznamenaná, čaká sa na snímku obrazovky"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Pridanie podrobností o hlásení chyby"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Čakajte prosím…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Ak chcete hlásenie o chybe zdieľať, prejdite prstom doľava."</string>
