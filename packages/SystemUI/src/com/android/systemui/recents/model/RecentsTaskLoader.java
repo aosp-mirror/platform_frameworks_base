@@ -268,6 +268,14 @@ public class RecentsTaskLoader {
     BitmapDrawable mDefaultIcon;
     Bitmap mDefaultThumbnail;
 
+    private TaskKeyLruCache.EvictionCallback mClearActivityInfoOnEviction =
+            new TaskKeyLruCache.EvictionCallback() {
+        @Override
+        public void onEntryEvicted(Task.TaskKey key) {
+            mActivityInfoCache.remove(key.getComponent());
+        }
+    };
+
     public RecentsTaskLoader(Context context) {
         Resources res = context.getResources();
         mDefaultTaskBarBackgroundColor =
@@ -292,10 +300,11 @@ public class RecentsTaskLoader {
         // Initialize the proxy, cache and loaders
         int numRecentTasks = ActivityManager.getMaxRecentTasksStatic();
         mLoadQueue = new TaskResourceLoadQueue();
-        mIconCache = new TaskKeyLruCache<>(iconCacheSize);
+        mIconCache = new TaskKeyLruCache<>(iconCacheSize, mClearActivityInfoOnEviction);
         mThumbnailCache = new TaskKeyLruCache<>(thumbnailCacheSize);
-        mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks);
-        mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks);
+        mActivityLabelCache = new TaskKeyLruCache<>(numRecentTasks, mClearActivityInfoOnEviction);
+        mContentDescriptionCache = new TaskKeyLruCache<>(numRecentTasks,
+                mClearActivityInfoOnEviction);
         mActivityInfoCache = new LruCache(numRecentTasks);
         mLoader = new BackgroundTaskLoader(mLoadQueue, mIconCache, mThumbnailCache,
                 mDefaultThumbnail, mDefaultIcon);
@@ -375,7 +384,6 @@ public class RecentsTaskLoader {
         mIconCache.remove(t.key);
         mActivityLabelCache.remove(t.key);
         mContentDescriptionCache.remove(t.key);
-        mActivityInfoCache.remove(t.key.getComponent());
         if (notifyTaskDataUnloaded) {
             t.notifyTaskDataUnloaded(null, mDefaultIcon);
         }

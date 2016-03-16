@@ -179,6 +179,13 @@ public class TaskStackViewScroller {
 
     /** Animates the stack scroll */
     void animateScroll(float newScroll, final Runnable postRunnable) {
+        int duration = mContext.getResources().getInteger(
+                R.integer.recents_animate_task_stack_scroll_duration);
+        animateScroll(newScroll, duration, postRunnable);
+    }
+
+    /** Animates the stack scroll */
+    void animateScroll(float newScroll, int duration, final Runnable postRunnable) {
         // Finish any current scrolling animations
         if (mScrollAnimator != null && mScrollAnimator.isRunning()) {
             setStackScroll(mFinalAnimatedScroll);
@@ -190,8 +197,7 @@ public class TaskStackViewScroller {
         if (Float.compare(mStackScrollP, newScroll) != 0) {
             mFinalAnimatedScroll = newScroll;
             mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, getStackScroll(), newScroll);
-            mScrollAnimator.setDuration(mContext.getResources().getInteger(
-                    R.integer.recents_animate_task_stack_scroll_duration));
+            mScrollAnimator.setDuration(duration);
             mScrollAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             mScrollAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
