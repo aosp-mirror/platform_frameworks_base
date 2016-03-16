@@ -55002,6 +55002,7 @@ package java.util {
     method public E get(int);
     method public boolean removeIf(java.util.function.Predicate<? super E>);
     method public int size();
+    method public void sort(java.util.Comparator<? super E>);
     method public java.util.Spliterator<E> spliterator();
     method public void trimToSize();
   }
@@ -55129,6 +55130,14 @@ package java.util {
     method public static java.util.Spliterator.OfLong spliterator(long[], int, int);
     method public static java.util.Spliterator.OfDouble spliterator(double[]);
     method public static java.util.Spliterator.OfDouble spliterator(double[], int, int);
+    method public static java.util.stream.Stream<T> stream(T[]);
+    method public static java.util.stream.Stream<T> stream(T[], int, int);
+    method public static java.util.stream.IntStream stream(int[]);
+    method public static java.util.stream.IntStream stream(int[], int, int);
+    method public static java.util.stream.LongStream stream(long[]);
+    method public static java.util.stream.LongStream stream(long[], int, int);
+    method public static java.util.stream.DoubleStream stream(double[]);
+    method public static java.util.stream.DoubleStream stream(double[], int, int);
     method public static java.lang.String toString(long[]);
     method public static java.lang.String toString(int[]);
     method public static java.lang.String toString(short[]);
@@ -55288,11 +55297,13 @@ package java.util {
     method public abstract int hashCode();
     method public abstract boolean isEmpty();
     method public abstract java.util.Iterator<E> iterator();
+    method public default java.util.stream.Stream<E> parallelStream();
     method public abstract boolean remove(java.lang.Object);
     method public abstract boolean removeAll(java.util.Collection<?>);
     method public default boolean removeIf(java.util.function.Predicate<? super E>);
     method public abstract boolean retainAll(java.util.Collection<?>);
     method public abstract int size();
+    method public default java.util.stream.Stream<E> stream();
     method public abstract java.lang.Object[] toArray();
     method public abstract T[] toArray(T[]);
   }
@@ -56492,6 +56503,34 @@ package java.util {
     method public java.util.Spliterator<T> trySplit();
   }
 
+  public final class SplittableRandom {
+    ctor public SplittableRandom(long);
+    ctor public SplittableRandom();
+    method public java.util.stream.DoubleStream doubles(long);
+    method public java.util.stream.DoubleStream doubles();
+    method public java.util.stream.DoubleStream doubles(long, double, double);
+    method public java.util.stream.DoubleStream doubles(double, double);
+    method public java.util.stream.IntStream ints(long);
+    method public java.util.stream.IntStream ints();
+    method public java.util.stream.IntStream ints(long, int, int);
+    method public java.util.stream.IntStream ints(int, int);
+    method public java.util.stream.LongStream longs(long);
+    method public java.util.stream.LongStream longs();
+    method public java.util.stream.LongStream longs(long, long, long);
+    method public java.util.stream.LongStream longs(long, long);
+    method public boolean nextBoolean();
+    method public double nextDouble();
+    method public double nextDouble(double);
+    method public double nextDouble(double, double);
+    method public int nextInt();
+    method public int nextInt(int);
+    method public int nextInt(int, int);
+    method public long nextLong();
+    method public long nextLong(long);
+    method public long nextLong(long, long);
+    method public java.util.SplittableRandom split();
+  }
+
   public class Stack extends java.util.Vector {
     ctor public Stack();
     method public boolean empty();
@@ -57678,6 +57717,18 @@ package java.util.concurrent {
 
   public class ThreadLocalRandom extends java.util.Random {
     method public static java.util.concurrent.ThreadLocalRandom current();
+    method public java.util.stream.DoubleStream doubles(long);
+    method public java.util.stream.DoubleStream doubles();
+    method public java.util.stream.DoubleStream doubles(long, double, double);
+    method public java.util.stream.DoubleStream doubles(double, double);
+    method public java.util.stream.IntStream ints(long);
+    method public java.util.stream.IntStream ints();
+    method public java.util.stream.IntStream ints(long, int, int);
+    method public java.util.stream.IntStream ints(int, int);
+    method public java.util.stream.LongStream longs(long);
+    method public java.util.stream.LongStream longs();
+    method public java.util.stream.LongStream longs(long, long, long);
+    method public java.util.stream.LongStream longs(long, long);
     method public double nextDouble(double);
     method public double nextDouble(double, double);
     method public int nextInt(int, int);
@@ -59075,6 +59126,292 @@ package java.util.regex {
     method public java.lang.String getDescription();
     method public int getIndex();
     method public java.lang.String getPattern();
+  }
+
+}
+
+package java.util.stream {
+
+  public abstract interface BaseStream implements java.lang.AutoCloseable {
+    method public abstract void close();
+    method public abstract boolean isParallel();
+    method public abstract java.util.Iterator<T> iterator();
+    method public abstract S onClose(java.lang.Runnable);
+    method public abstract S parallel();
+    method public abstract S sequential();
+    method public abstract java.util.Spliterator<T> spliterator();
+    method public abstract S unordered();
+  }
+
+  public abstract interface Collector {
+    method public abstract java.util.function.BiConsumer<A, T> accumulator();
+    method public abstract java.util.Set<java.util.stream.Collector.Characteristics> characteristics();
+    method public abstract java.util.function.BinaryOperator<A> combiner();
+    method public abstract java.util.function.Function<A, R> finisher();
+    method public static java.util.stream.Collector<T, R, R> of(java.util.function.Supplier<R>, java.util.function.BiConsumer<R, T>, java.util.function.BinaryOperator<R>, java.util.stream.Collector.Characteristics...);
+    method public static java.util.stream.Collector<T, A, R> of(java.util.function.Supplier<A>, java.util.function.BiConsumer<A, T>, java.util.function.BinaryOperator<A>, java.util.function.Function<A, R>, java.util.stream.Collector.Characteristics...);
+    method public abstract java.util.function.Supplier<A> supplier();
+  }
+
+  public static final class Collector.Characteristics extends java.lang.Enum {
+    method public static java.util.stream.Collector.Characteristics valueOf(java.lang.String);
+    method public static final java.util.stream.Collector.Characteristics[] values();
+    enum_constant public static final java.util.stream.Collector.Characteristics CONCURRENT;
+    enum_constant public static final java.util.stream.Collector.Characteristics IDENTITY_FINISH;
+    enum_constant public static final java.util.stream.Collector.Characteristics UNORDERED;
+  }
+
+  public final class Collectors {
+    method public static java.util.stream.Collector<T, ?, java.lang.Double> averagingDouble(java.util.function.ToDoubleFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.lang.Double> averagingInt(java.util.function.ToIntFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.lang.Double> averagingLong(java.util.function.ToLongFunction<? super T>);
+    method public static java.util.stream.Collector<T, A, RR> collectingAndThen(java.util.stream.Collector<T, A, R>, java.util.function.Function<R, RR>);
+    method public static java.util.stream.Collector<T, ?, java.lang.Long> counting();
+    method public static java.util.stream.Collector<T, ?, java.util.Map<K, java.util.List<T>>> groupingBy(java.util.function.Function<? super T, ? extends K>);
+    method public static java.util.stream.Collector<T, ?, java.util.Map<K, D>> groupingBy(java.util.function.Function<? super T, ? extends K>, java.util.stream.Collector<? super T, A, D>);
+    method public static java.util.stream.Collector<T, ?, M> groupingBy(java.util.function.Function<? super T, ? extends K>, java.util.function.Supplier<M>, java.util.stream.Collector<? super T, A, D>);
+    method public static java.util.stream.Collector<T, ?, java.util.concurrent.ConcurrentMap<K, java.util.List<T>>> groupingByConcurrent(java.util.function.Function<? super T, ? extends K>);
+    method public static java.util.stream.Collector<T, ?, java.util.concurrent.ConcurrentMap<K, D>> groupingByConcurrent(java.util.function.Function<? super T, ? extends K>, java.util.stream.Collector<? super T, A, D>);
+    method public static java.util.stream.Collector<T, ?, M> groupingByConcurrent(java.util.function.Function<? super T, ? extends K>, java.util.function.Supplier<M>, java.util.stream.Collector<? super T, A, D>);
+    method public static java.util.stream.Collector<java.lang.CharSequence, ?, java.lang.String> joining();
+    method public static java.util.stream.Collector<java.lang.CharSequence, ?, java.lang.String> joining(java.lang.CharSequence);
+    method public static java.util.stream.Collector<java.lang.CharSequence, ?, java.lang.String> joining(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
+    method public static java.util.stream.Collector<T, ?, R> mapping(java.util.function.Function<? super T, ? extends U>, java.util.stream.Collector<? super U, A, R>);
+    method public static java.util.stream.Collector<T, ?, java.util.Optional<T>> maxBy(java.util.Comparator<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.util.Optional<T>> minBy(java.util.Comparator<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.util.Map<java.lang.Boolean, java.util.List<T>>> partitioningBy(java.util.function.Predicate<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.util.Map<java.lang.Boolean, D>> partitioningBy(java.util.function.Predicate<? super T>, java.util.stream.Collector<? super T, A, D>);
+    method public static java.util.stream.Collector<T, ?, T> reducing(T, java.util.function.BinaryOperator<T>);
+    method public static java.util.stream.Collector<T, ?, java.util.Optional<T>> reducing(java.util.function.BinaryOperator<T>);
+    method public static java.util.stream.Collector<T, ?, U> reducing(U, java.util.function.Function<? super T, ? extends U>, java.util.function.BinaryOperator<U>);
+    method public static java.util.stream.Collector<T, ?, java.util.DoubleSummaryStatistics> summarizingDouble(java.util.function.ToDoubleFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.util.IntSummaryStatistics> summarizingInt(java.util.function.ToIntFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.util.LongSummaryStatistics> summarizingLong(java.util.function.ToLongFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.lang.Double> summingDouble(java.util.function.ToDoubleFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.lang.Integer> summingInt(java.util.function.ToIntFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, java.lang.Long> summingLong(java.util.function.ToLongFunction<? super T>);
+    method public static java.util.stream.Collector<T, ?, C> toCollection(java.util.function.Supplier<C>);
+    method public static java.util.stream.Collector<T, ?, java.util.concurrent.ConcurrentMap<K, U>> toConcurrentMap(java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends U>);
+    method public static java.util.stream.Collector<T, ?, java.util.concurrent.ConcurrentMap<K, U>> toConcurrentMap(java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends U>, java.util.function.BinaryOperator<U>);
+    method public static java.util.stream.Collector<T, ?, M> toConcurrentMap(java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends U>, java.util.function.BinaryOperator<U>, java.util.function.Supplier<M>);
+    method public static java.util.stream.Collector<T, ?, java.util.List<T>> toList();
+    method public static java.util.stream.Collector<T, ?, java.util.Map<K, U>> toMap(java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends U>);
+    method public static java.util.stream.Collector<T, ?, java.util.Map<K, U>> toMap(java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends U>, java.util.function.BinaryOperator<U>);
+    method public static java.util.stream.Collector<T, ?, M> toMap(java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends U>, java.util.function.BinaryOperator<U>, java.util.function.Supplier<M>);
+    method public static java.util.stream.Collector<T, ?, java.util.Set<T>> toSet();
+  }
+
+  public abstract interface DoubleStream implements java.util.stream.BaseStream {
+    method public abstract boolean allMatch(java.util.function.DoublePredicate);
+    method public abstract boolean anyMatch(java.util.function.DoublePredicate);
+    method public abstract java.util.OptionalDouble average();
+    method public abstract java.util.stream.Stream<java.lang.Double> boxed();
+    method public static java.util.stream.DoubleStream.Builder builder();
+    method public abstract R collect(java.util.function.Supplier<R>, java.util.function.ObjDoubleConsumer<R>, java.util.function.BiConsumer<R, R>);
+    method public static java.util.stream.DoubleStream concat(java.util.stream.DoubleStream, java.util.stream.DoubleStream);
+    method public abstract long count();
+    method public abstract java.util.stream.DoubleStream distinct();
+    method public static java.util.stream.DoubleStream empty();
+    method public abstract java.util.stream.DoubleStream filter(java.util.function.DoublePredicate);
+    method public abstract java.util.OptionalDouble findAny();
+    method public abstract java.util.OptionalDouble findFirst();
+    method public abstract java.util.stream.DoubleStream flatMap(java.util.function.DoubleFunction<? extends java.util.stream.DoubleStream>);
+    method public abstract void forEach(java.util.function.DoubleConsumer);
+    method public abstract void forEachOrdered(java.util.function.DoubleConsumer);
+    method public static java.util.stream.DoubleStream generate(java.util.function.DoubleSupplier);
+    method public static java.util.stream.DoubleStream iterate(double, java.util.function.DoubleUnaryOperator);
+    method public abstract java.util.PrimitiveIterator.OfDouble iterator();
+    method public abstract java.util.stream.DoubleStream limit(long);
+    method public abstract java.util.stream.DoubleStream map(java.util.function.DoubleUnaryOperator);
+    method public abstract java.util.stream.IntStream mapToInt(java.util.function.DoubleToIntFunction);
+    method public abstract java.util.stream.LongStream mapToLong(java.util.function.DoubleToLongFunction);
+    method public abstract java.util.stream.Stream<U> mapToObj(java.util.function.DoubleFunction<? extends U>);
+    method public abstract java.util.OptionalDouble max();
+    method public abstract java.util.OptionalDouble min();
+    method public abstract boolean noneMatch(java.util.function.DoublePredicate);
+    method public static java.util.stream.DoubleStream of(double);
+    method public static java.util.stream.DoubleStream of(double...);
+    method public abstract java.util.stream.DoubleStream parallel();
+    method public abstract java.util.stream.DoubleStream peek(java.util.function.DoubleConsumer);
+    method public abstract double reduce(double, java.util.function.DoubleBinaryOperator);
+    method public abstract java.util.OptionalDouble reduce(java.util.function.DoubleBinaryOperator);
+    method public abstract java.util.stream.DoubleStream sequential();
+    method public abstract java.util.stream.DoubleStream skip(long);
+    method public abstract java.util.stream.DoubleStream sorted();
+    method public abstract java.util.Spliterator.OfDouble spliterator();
+    method public abstract double sum();
+    method public abstract java.util.DoubleSummaryStatistics summaryStatistics();
+    method public abstract double[] toArray();
+  }
+
+  public static abstract interface DoubleStream.Builder implements java.util.function.DoubleConsumer {
+    method public abstract void accept(double);
+    method public default java.util.stream.DoubleStream.Builder add(double);
+    method public abstract java.util.stream.DoubleStream build();
+  }
+
+  public abstract interface IntStream implements java.util.stream.BaseStream {
+    method public abstract boolean allMatch(java.util.function.IntPredicate);
+    method public abstract boolean anyMatch(java.util.function.IntPredicate);
+    method public abstract java.util.stream.DoubleStream asDoubleStream();
+    method public abstract java.util.stream.LongStream asLongStream();
+    method public abstract java.util.OptionalDouble average();
+    method public abstract java.util.stream.Stream<java.lang.Integer> boxed();
+    method public static java.util.stream.IntStream.Builder builder();
+    method public abstract R collect(java.util.function.Supplier<R>, java.util.function.ObjIntConsumer<R>, java.util.function.BiConsumer<R, R>);
+    method public static java.util.stream.IntStream concat(java.util.stream.IntStream, java.util.stream.IntStream);
+    method public abstract long count();
+    method public abstract java.util.stream.IntStream distinct();
+    method public static java.util.stream.IntStream empty();
+    method public abstract java.util.stream.IntStream filter(java.util.function.IntPredicate);
+    method public abstract java.util.OptionalInt findAny();
+    method public abstract java.util.OptionalInt findFirst();
+    method public abstract java.util.stream.IntStream flatMap(java.util.function.IntFunction<? extends java.util.stream.IntStream>);
+    method public abstract void forEach(java.util.function.IntConsumer);
+    method public abstract void forEachOrdered(java.util.function.IntConsumer);
+    method public static java.util.stream.IntStream generate(java.util.function.IntSupplier);
+    method public static java.util.stream.IntStream iterate(int, java.util.function.IntUnaryOperator);
+    method public abstract java.util.PrimitiveIterator.OfInt iterator();
+    method public abstract java.util.stream.IntStream limit(long);
+    method public abstract java.util.stream.IntStream map(java.util.function.IntUnaryOperator);
+    method public abstract java.util.stream.DoubleStream mapToDouble(java.util.function.IntToDoubleFunction);
+    method public abstract java.util.stream.LongStream mapToLong(java.util.function.IntToLongFunction);
+    method public abstract java.util.stream.Stream<U> mapToObj(java.util.function.IntFunction<? extends U>);
+    method public abstract java.util.OptionalInt max();
+    method public abstract java.util.OptionalInt min();
+    method public abstract boolean noneMatch(java.util.function.IntPredicate);
+    method public static java.util.stream.IntStream of(int);
+    method public static java.util.stream.IntStream of(int...);
+    method public abstract java.util.stream.IntStream parallel();
+    method public abstract java.util.stream.IntStream peek(java.util.function.IntConsumer);
+    method public static java.util.stream.IntStream range(int, int);
+    method public static java.util.stream.IntStream rangeClosed(int, int);
+    method public abstract int reduce(int, java.util.function.IntBinaryOperator);
+    method public abstract java.util.OptionalInt reduce(java.util.function.IntBinaryOperator);
+    method public abstract java.util.stream.IntStream sequential();
+    method public abstract java.util.stream.IntStream skip(long);
+    method public abstract java.util.stream.IntStream sorted();
+    method public abstract java.util.Spliterator.OfInt spliterator();
+    method public abstract int sum();
+    method public abstract java.util.IntSummaryStatistics summaryStatistics();
+    method public abstract int[] toArray();
+  }
+
+  public static abstract interface IntStream.Builder implements java.util.function.IntConsumer {
+    method public abstract void accept(int);
+    method public default java.util.stream.IntStream.Builder add(int);
+    method public abstract java.util.stream.IntStream build();
+  }
+
+  public abstract interface LongStream implements java.util.stream.BaseStream {
+    method public abstract boolean allMatch(java.util.function.LongPredicate);
+    method public abstract boolean anyMatch(java.util.function.LongPredicate);
+    method public abstract java.util.stream.DoubleStream asDoubleStream();
+    method public abstract java.util.OptionalDouble average();
+    method public abstract java.util.stream.Stream<java.lang.Long> boxed();
+    method public static java.util.stream.LongStream.Builder builder();
+    method public abstract R collect(java.util.function.Supplier<R>, java.util.function.ObjLongConsumer<R>, java.util.function.BiConsumer<R, R>);
+    method public static java.util.stream.LongStream concat(java.util.stream.LongStream, java.util.stream.LongStream);
+    method public abstract long count();
+    method public abstract java.util.stream.LongStream distinct();
+    method public static java.util.stream.LongStream empty();
+    method public abstract java.util.stream.LongStream filter(java.util.function.LongPredicate);
+    method public abstract java.util.OptionalLong findAny();
+    method public abstract java.util.OptionalLong findFirst();
+    method public abstract java.util.stream.LongStream flatMap(java.util.function.LongFunction<? extends java.util.stream.LongStream>);
+    method public abstract void forEach(java.util.function.LongConsumer);
+    method public abstract void forEachOrdered(java.util.function.LongConsumer);
+    method public static java.util.stream.LongStream generate(java.util.function.LongSupplier);
+    method public static java.util.stream.LongStream iterate(long, java.util.function.LongUnaryOperator);
+    method public abstract java.util.PrimitiveIterator.OfLong iterator();
+    method public abstract java.util.stream.LongStream limit(long);
+    method public abstract java.util.stream.LongStream map(java.util.function.LongUnaryOperator);
+    method public abstract java.util.stream.DoubleStream mapToDouble(java.util.function.LongToDoubleFunction);
+    method public abstract java.util.stream.IntStream mapToInt(java.util.function.LongToIntFunction);
+    method public abstract java.util.stream.Stream<U> mapToObj(java.util.function.LongFunction<? extends U>);
+    method public abstract java.util.OptionalLong max();
+    method public abstract java.util.OptionalLong min();
+    method public abstract boolean noneMatch(java.util.function.LongPredicate);
+    method public static java.util.stream.LongStream of(long);
+    method public static java.util.stream.LongStream of(long...);
+    method public abstract java.util.stream.LongStream parallel();
+    method public abstract java.util.stream.LongStream peek(java.util.function.LongConsumer);
+    method public static java.util.stream.LongStream range(long, long);
+    method public static java.util.stream.LongStream rangeClosed(long, long);
+    method public abstract long reduce(long, java.util.function.LongBinaryOperator);
+    method public abstract java.util.OptionalLong reduce(java.util.function.LongBinaryOperator);
+    method public abstract java.util.stream.LongStream sequential();
+    method public abstract java.util.stream.LongStream skip(long);
+    method public abstract java.util.stream.LongStream sorted();
+    method public abstract java.util.Spliterator.OfLong spliterator();
+    method public abstract long sum();
+    method public abstract java.util.LongSummaryStatistics summaryStatistics();
+    method public abstract long[] toArray();
+  }
+
+  public static abstract interface LongStream.Builder implements java.util.function.LongConsumer {
+    method public abstract void accept(long);
+    method public default java.util.stream.LongStream.Builder add(long);
+    method public abstract java.util.stream.LongStream build();
+  }
+
+  public abstract interface Stream implements java.util.stream.BaseStream {
+    method public abstract boolean allMatch(java.util.function.Predicate<? super T>);
+    method public abstract boolean anyMatch(java.util.function.Predicate<? super T>);
+    method public static java.util.stream.Stream.Builder<T> builder();
+    method public abstract R collect(java.util.function.Supplier<R>, java.util.function.BiConsumer<R, ? super T>, java.util.function.BiConsumer<R, R>);
+    method public abstract R collect(java.util.stream.Collector<? super T, A, R>);
+    method public static java.util.stream.Stream<T> concat(java.util.stream.Stream<? extends T>, java.util.stream.Stream<? extends T>);
+    method public abstract long count();
+    method public abstract java.util.stream.Stream<T> distinct();
+    method public static java.util.stream.Stream<T> empty();
+    method public abstract java.util.stream.Stream<T> filter(java.util.function.Predicate<? super T>);
+    method public abstract java.util.Optional<T> findAny();
+    method public abstract java.util.Optional<T> findFirst();
+    method public abstract java.util.stream.Stream<R> flatMap(java.util.function.Function<? super T, ? extends java.util.stream.Stream<? extends R>>);
+    method public abstract java.util.stream.DoubleStream flatMapToDouble(java.util.function.Function<? super T, ? extends java.util.stream.DoubleStream>);
+    method public abstract java.util.stream.IntStream flatMapToInt(java.util.function.Function<? super T, ? extends java.util.stream.IntStream>);
+    method public abstract java.util.stream.LongStream flatMapToLong(java.util.function.Function<? super T, ? extends java.util.stream.LongStream>);
+    method public abstract void forEach(java.util.function.Consumer<? super T>);
+    method public abstract void forEachOrdered(java.util.function.Consumer<? super T>);
+    method public static java.util.stream.Stream<T> generate(java.util.function.Supplier<T>);
+    method public static java.util.stream.Stream<T> iterate(T, java.util.function.UnaryOperator<T>);
+    method public abstract java.util.stream.Stream<T> limit(long);
+    method public abstract java.util.stream.Stream<R> map(java.util.function.Function<? super T, ? extends R>);
+    method public abstract java.util.stream.DoubleStream mapToDouble(java.util.function.ToDoubleFunction<? super T>);
+    method public abstract java.util.stream.IntStream mapToInt(java.util.function.ToIntFunction<? super T>);
+    method public abstract java.util.stream.LongStream mapToLong(java.util.function.ToLongFunction<? super T>);
+    method public abstract java.util.Optional<T> max(java.util.Comparator<? super T>);
+    method public abstract java.util.Optional<T> min(java.util.Comparator<? super T>);
+    method public abstract boolean noneMatch(java.util.function.Predicate<? super T>);
+    method public static java.util.stream.Stream<T> of(T);
+    method public static java.util.stream.Stream<T> of(T...);
+    method public abstract java.util.stream.Stream<T> peek(java.util.function.Consumer<? super T>);
+    method public abstract T reduce(T, java.util.function.BinaryOperator<T>);
+    method public abstract java.util.Optional<T> reduce(java.util.function.BinaryOperator<T>);
+    method public abstract U reduce(U, java.util.function.BiFunction<U, ? super T, U>, java.util.function.BinaryOperator<U>);
+    method public abstract java.util.stream.Stream<T> skip(long);
+    method public abstract java.util.stream.Stream<T> sorted();
+    method public abstract java.util.stream.Stream<T> sorted(java.util.Comparator<? super T>);
+    method public abstract java.lang.Object[] toArray();
+    method public abstract A[] toArray(java.util.function.IntFunction<A[]>);
+  }
+
+  public static abstract interface Stream.Builder implements java.util.function.Consumer {
+    method public abstract void accept(T);
+    method public default java.util.stream.Stream.Builder<T> add(T);
+    method public abstract java.util.stream.Stream<T> build();
+  }
+
+  public final class StreamSupport {
+    method public static java.util.stream.DoubleStream doubleStream(java.util.Spliterator.OfDouble, boolean);
+    method public static java.util.stream.DoubleStream doubleStream(java.util.function.Supplier<? extends java.util.Spliterator.OfDouble>, int, boolean);
+    method public static java.util.stream.IntStream intStream(java.util.Spliterator.OfInt, boolean);
+    method public static java.util.stream.IntStream intStream(java.util.function.Supplier<? extends java.util.Spliterator.OfInt>, int, boolean);
+    method public static java.util.stream.LongStream longStream(java.util.Spliterator.OfLong, boolean);
+    method public static java.util.stream.LongStream longStream(java.util.function.Supplier<? extends java.util.Spliterator.OfLong>, int, boolean);
+    method public static java.util.stream.Stream<T> stream(java.util.Spliterator<T>, boolean);
+    method public static java.util.stream.Stream<T> stream(java.util.function.Supplier<? extends java.util.Spliterator<T>>, int, boolean);
   }
 
 }
