@@ -247,23 +247,22 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      */
     public static Metrics isBoring(CharSequence text, TextPaint paint,
             TextDirectionHeuristic textDir, Metrics metrics) {
-        char[] temp = TextUtils.obtain(500);
-        int length = text.length();
+        final int MAX_BUF_LEN = 500;
+        final char[] buffer = TextUtils.obtain(MAX_BUF_LEN);
+        final int textLength = text.length();
         boolean boring = true;
 
         outer:
-        for (int i = 0; i < length; i += 500) {
-            int j = i + 500;
+        for (int start = 0; start < textLength; start += MAX_BUF_LEN) {
+            final int end = Math.min(start + MAX_BUF_LEN, textLength);
 
-            if (j > length)
-                j = length;
+            // No need to worry about getting half codepoints, since we reject surrogate code units
+            // as non-boring as soon we see one.
+            TextUtils.getChars(text, start, end, buffer, 0);
 
-            TextUtils.getChars(text, i, j, temp, 0);
-
-            int n = j - i;
-
-            for (int a = 0; a < n; a++) {
-                char c = temp[a];
+            final int len = end - start;
+            for (int i = 0; i < len; i++) {
+                final char c = buffer[i];
 
                 if (c == '\n' || c == '\t' ||
                         (c >= 0x0590 && c <= 0x08FF) ||  // RTL scripts
@@ -279,17 +278,19 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 }
             }
 
-            if (textDir != null && textDir.isRtl(temp, 0, n)) {
+            // TODO: This looks a little suspicious, and in some cases can result in O(n^2)
+            // run time. Consider moving outside the loop.
+            if (textDir != null && textDir.isRtl(buffer, 0, len)) {
                boring = false;
                break outer;
             }
         }
 
-        TextUtils.recycle(temp);
+        TextUtils.recycle(buffer);
 
         if (boring && text instanceof Spanned) {
             Spanned sp = (Spanned) text;
-            Object[] styles = sp.getSpans(0, length, ParagraphStyle.class);
+            Object[] styles = sp.getSpans(0, textLength, ParagraphStyle.class);
             if (styles.length > 0) {
                 boring = false;
             }
@@ -302,7 +303,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             }
 
             TextLine line = TextLine.obtain();
-            line.set(paint, text, 0, length, Layout.DIR_LEFT_TO_RIGHT,
+            line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
                     Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
             fm.width = (int) Math.ceil(line.metrics(fm));
             TextLine.recycle(line);
