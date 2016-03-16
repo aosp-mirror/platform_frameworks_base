@@ -33,7 +33,7 @@ public class Predicates {
      * will be "short-circuited" as soon as the answer is determined.
      */
     public static <T> Predicate<T> and(Predicate<? super T>... components) {
-        return and(Arrays.asList(components));
+        return Predicates.<T>and(Arrays.asList(components));
     }
 
     /**
@@ -54,7 +54,7 @@ public class Predicates {
      * will be "short-circuited" as soon as the answer is determined.
      */
     public static <T> Predicate<T> or(Predicate<? super T>... components) {
-        return or(Arrays.asList(components));
+        return Predicates.<T>or(Arrays.asList(components));
     }
 
     /**
