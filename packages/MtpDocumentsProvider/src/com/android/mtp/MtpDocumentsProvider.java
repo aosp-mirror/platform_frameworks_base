@@ -22,6 +22,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.sqlite.SQLiteDiskIOException;
 import android.graphics.Point;
 import android.media.MediaFile;
 import android.mtp.MtpConstants;
@@ -36,7 +37,6 @@ import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -103,25 +103,33 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
         // Check boot count and cleans database if it's first time to launch MtpDocumentsProvider
         // after booting.
-        final int bootCount = Settings.Global.getInt(mResolver, Settings.Global.BOOT_COUNT, -1);
-        final int lastBootCount = mDatabase.getLastBootCount();
-        if (bootCount != -1 && bootCount != lastBootCount) {
-            mDatabase.setLastBootCount(bootCount);
-            final List<UriPermission> permissions = mResolver.getOutgoingPersistedUriPermissions();
-            final Uri[] uris = new Uri[permissions.size()];
-            for (int i = 0; i < permissions.size(); i++) {
-                uris[i] = permissions.get(i).getUri();
+        try {
+            final int bootCount = Settings.Global.getInt(mResolver, Settings.Global.BOOT_COUNT, -1);
+            final int lastBootCount = mDatabase.getLastBootCount();
+            if (bootCount != -1 && bootCount != lastBootCount) {
+                mDatabase.setLastBootCount(bootCount);
+                final List<UriPermission> permissions =
+                        mResolver.getOutgoingPersistedUriPermissions();
+                final Uri[] uris = new Uri[permissions.size()];
+                for (int i = 0; i < permissions.size(); i++) {
+                    uris[i] = permissions.get(i).getUri();
+                }
+                mDatabase.cleanDatabase(uris);
             }
-            mDatabase.cleanDatabase(uris);
+        } catch (SQLiteDiskIOException error) {
+            // It can happen due to disk shortage.
+            Log.e(TAG, "Failed to clean database.", error);
+            return false;
         }
 
         // TODO: Mount AppFuse on demands.
         try {
             mAppFuse.mount(getContext().getSystemService(StorageManager.class));
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to start app fuse.", e);
+        } catch (IOException error) {
+            Log.e(TAG, "Failed to start app fuse.", error);
             return false;
         }
+
         resume();
         return true;
     }
