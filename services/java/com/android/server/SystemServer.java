@@ -1032,6 +1032,7 @@ public final class SystemServer {
                     mSystemServiceManager.startService(GestureLauncherService.class);
                 }
                 mSystemServiceManager.startService(SensorNotificationService.class);
+                mSystemServiceManager.startService(ContextHubSystemService.class);
             }
 
             traceBeginAndSlog("StartDiskStatsService");

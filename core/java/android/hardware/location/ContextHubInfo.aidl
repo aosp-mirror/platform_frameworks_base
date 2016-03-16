@@ -15,7 +15,7 @@
  */
 
 package android.hardware.location;
-/*
-@hide
-*/
+/**
+ * @hide
+ */
 parcelable ContextHubInfo;

@@ -51,6 +51,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
+import android.hardware.location.ContextHubManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
 import android.hardware.radio.RadioManager;
@@ -764,6 +765,14 @@ final class SystemServiceRegistry {
             @Override
             public SystemHealthManager createService(ContextImpl ctx) {
                 return new SystemHealthManager();
+            }});
+
+        registerService(Context.CONTEXTHUB_SERVICE, ContextHubManager.class,
+                new CachedServiceFetcher<ContextHubManager>() {
+            @Override
+            public ContextHubManager createService(ContextImpl ctx) {
+                return new ContextHubManager(ctx.getOuterContext(),
+                  ctx.mMainThread.getHandler().getLooper());
             }});
     }
 
