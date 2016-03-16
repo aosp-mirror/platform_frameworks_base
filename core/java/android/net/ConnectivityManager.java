@@ -1863,8 +1863,12 @@ public class ConnectivityManager {
                 .getPackageNameForUid(context, uid), true /* throwException */);
     }
 
-    /** {@hide */
-    public static final void enforceTetherChangePermission(Context context) {
+    /** {@hide} */
+    public static final void enforceTetherChangePermission(Context context, String callingPkg) {
+        if (null == context || null == callingPkg) {
+            throw new IllegalArgumentException("arguments should not be null");
+        }
+
         if (context.getResources().getStringArray(
                 com.android.internal.R.array.config_mobile_hotspot_provision_app).length == 2) {
             // Have a provisioning app - must only let system apps (which check this app)
@@ -1873,8 +1877,10 @@ public class ConnectivityManager {
                     android.Manifest.permission.TETHER_PRIVILEGED, "ConnectivityService");
         } else {
             int uid = Binder.getCallingUid();
-            Settings.checkAndNoteWriteSettingsOperation(context, uid, Settings
-                    .getPackageNameForUid(context, uid), true /* throwException */);
+            // If callingPkg's uid is not same as Binder.getCallingUid(),
+            // AppOpsService throws SecurityException.
+            Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPkg,
+                    true /* throwException */);
         }
     }
 
@@ -1997,7 +2003,9 @@ public class ConnectivityManager {
      */
     public int tether(String iface) {
         try {
-            return mService.tether(iface);
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "tether caller:" + pkgName);
+            return mService.tether(iface, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2023,7 +2031,9 @@ public class ConnectivityManager {
      */
     public int untether(String iface) {
         try {
-            return mService.untether(iface);
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "untether caller:" + pkgName);
+            return mService.untether(iface, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2114,7 +2124,9 @@ public class ConnectivityManager {
         };
 
         try {
-            mService.startTethering(type, wrappedCallback, showProvisioningUi);
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "startTethering caller:" + pkgName);
+            mService.startTethering(type, wrappedCallback, showProvisioningUi, pkgName);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception trying to start tethering.", e);
             wrappedCallback.send(TETHER_ERROR_SERVICE_UNAVAIL, null);
@@ -2134,7 +2146,9 @@ public class ConnectivityManager {
     @SystemApi
     public void stopTethering(int type) {
         try {
-            mService.stopTethering(type);
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "stopTethering caller:" + pkgName);
+            mService.stopTethering(type, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2219,7 +2233,9 @@ public class ConnectivityManager {
      */
     public int setUsbTethering(boolean enable) {
         try {
-            return mService.setUsbTethering(enable);
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "setUsbTethering caller:" + pkgName);
+            return mService.setUsbTethering(enable, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
