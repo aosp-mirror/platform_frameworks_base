@@ -16459,10 +16459,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
     }
 
-    ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
-            int userId) {
+    private Intent getHomeIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
+        return intent;
+    }
+
+    private IntentFilter getHomeFilter() {
+        IntentFilter filter = new IntentFilter(Intent.ACTION_MAIN);
+        filter.addCategory(Intent.CATEGORY_HOME);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        return filter;
+    }
+
+    ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
+            int userId) {
+        Intent intent  = getHomeIntent();
         List<ResolveInfo> list = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
         ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
@@ -16478,6 +16490,32 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 ? null
                 : new ComponentName(preferred.activityInfo.packageName,
                         preferred.activityInfo.name);
+    }
+
+    @Override
+    public void setHomeActivity(ComponentName comp, int userId) {
+        ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
+        getHomeActivitiesAsUser(homeActivities, userId);
+
+        boolean found = false;
+
+        final int size = homeActivities.size();
+        final ComponentName[] set = new ComponentName[size];
+        for (int i = 0; i < size; i++) {
+            final ResolveInfo candidate = homeActivities.get(i);
+            final ActivityInfo info = candidate.activityInfo;
+            final ComponentName activityName = new ComponentName(info.packageName, info.name);
+            set[i] = activityName;
+            if (!found && activityName.equals(comp)) {
+                found = true;
+            }
+        }
+        if (!found) {
+            throw new IllegalArgumentException("Component " + comp + " cannot be home on user "
+                    + userId);
+        }
+        replacePreferredActivity(getHomeFilter(), IntentFilter.MATCH_CATEGORY_EMPTY,
+                set, comp, userId);
     }
 
     @Override
