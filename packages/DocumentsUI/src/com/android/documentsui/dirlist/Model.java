@@ -22,6 +22,7 @@ import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.State.SORT_ORDER_SIZE;
 
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -70,16 +71,6 @@ public class Model {
     @Nullable String info;
     @Nullable String error;
     @Nullable DocumentInfo doc;
-
-    /**
-     * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a unique
-     * string that can be used to identify the document referred to by the cursor.
-     *
-     * @param c A cursor that refers to a document.
-     */
-    static String createModelId(String authority, String docId) {
-        return authority + "|" + docId;
-    }
 
     private void notifyUpdateListeners() {
         for (UpdateListener listener: mUpdateListeners) {
@@ -174,7 +165,13 @@ public class Model {
 
             // Generates a Model ID for a cursor entry that refers to a document. The Model ID is a
             // unique string that can be used to identify the document referred to by the cursor.
-            mIds[pos] = createModelId(getString(mAuthorityIndex), getString(mDocIdIndex));
+            // If the cursor is a merged cursor over multiple authorities, then prefix the ids
+            // with the authority to avoid collisions.
+            if (mCursor instanceof MergeCursor) {
+                mIds[pos] = getString(mAuthorityIndex) + "|" + mCursor.getString(mDocIdIndex);
+            } else {
+                mIds[pos] = mCursor.getString(mDocIdIndex);
+            }
 
             mimeType = getString(mMimeTypeIndex);
             isDirs[pos] = Document.MIME_TYPE_DIR.equals(mimeType);
