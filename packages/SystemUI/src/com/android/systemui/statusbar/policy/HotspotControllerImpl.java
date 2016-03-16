@@ -69,18 +69,22 @@ public class HotspotControllerImpl implements HotspotController {
 
     @Override
     public void addCallback(Callback callback) {
-        if (callback == null || mCallbacks.contains(callback)) return;
-        if (DEBUG) Log.d(TAG, "addCallback " + callback);
-        mCallbacks.add(callback);
-        mReceiver.setListening(!mCallbacks.isEmpty());
+        synchronized (mCallbacks) {
+            if (callback == null || mCallbacks.contains(callback)) return;
+            if (DEBUG) Log.d(TAG, "addCallback " + callback);
+            mCallbacks.add(callback);
+            mReceiver.setListening(!mCallbacks.isEmpty());
+        }
     }
 
     @Override
     public void removeCallback(Callback callback) {
         if (callback == null) return;
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
-        mCallbacks.remove(callback);
-        mReceiver.setListening(!mCallbacks.isEmpty());
+        synchronized (mCallbacks) {
+            mCallbacks.remove(callback);
+            mReceiver.setListening(!mCallbacks.isEmpty());
+        }
     }
 
     @Override
@@ -110,8 +114,10 @@ public class HotspotControllerImpl implements HotspotController {
     }
 
     private void fireCallback(boolean isEnabled) {
-        for (Callback callback : mCallbacks) {
-            callback.onHotspotChanged(isEnabled);
+        synchronized (mCallbacks) {
+            for (Callback callback : mCallbacks) {
+                callback.onHotspotChanged(isEnabled);
+            }
         }
     }
 
