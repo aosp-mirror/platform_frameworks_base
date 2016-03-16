@@ -641,12 +641,16 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo getUserInfo(int userId) {
-        if (!hasManageUsersPermission()
-                && !isSameProfileGroupLP(UserHandle.getCallingUserId(), userId)) {
-            throw new SecurityException(
-                    "You need MANAGE_USERS permission to: query users outside profile group");
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId && !hasManageUsersPermission()) {
+            synchronized (mPackagesLock) {
+                if (!isSameProfileGroupLP(callingUserId, userId)) {
+                    throw new SecurityException(
+                            "You need MANAGE_USERS permission to: query users outside profile" +
+                                    " group");
+                }
+            }
         }
-
         synchronized (mUsersLock) {
             return getUserInfoLU(userId);
         }
