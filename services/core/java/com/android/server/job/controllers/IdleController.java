@@ -197,7 +197,7 @@ public class IdleController extends StateController {
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.get(i);
             pw.print("  ");
-            pw.print(String.valueOf(js.hashCode()).substring(0, 3));
+            pw.print(String.valueOf(js.getJobId() + "," + js.getUid()));
             pw.println("..");
         }
     }
