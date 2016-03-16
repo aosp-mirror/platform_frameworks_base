@@ -87,11 +87,6 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     }
 
     @Override
-    public int getRowCount() {
-        return 0;
-    }
-
-    @Override
     public int getChildCount() {
         return 0;
     }
