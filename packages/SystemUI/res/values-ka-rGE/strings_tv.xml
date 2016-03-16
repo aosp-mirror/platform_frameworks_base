@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"დაკვრა"</string>
     <string name="pip_pause" msgid="8412075640017218862">"პაუზა"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP-ის სამართავად, გეჭიროთ "<b>"მთავარ ღილაკზე"</b></string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"PIP-ის სამართავად, ხანგრძლივად\nდააჭირეთ მთავარ ღილაკს"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP-ის სამართავად, ხანგრძლივად დააჭირეთ მთავარ ღილაკს"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"გასაგებია"</string>
 </resources>

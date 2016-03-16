@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captura de tela obtida."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toque para visualizar a captura de tela."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Não foi possível obter a captura de tela."</string>
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
-    <skip />
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Problema encontrado ao salvar captura de tela."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Não é possível salvar a captura de tela, porque não há espaço suficiente."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Capturas de tela não são permitidas pelo app ou por sua organização."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções transf. arq. por USB"</string>
@@ -222,10 +221,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Modo de trabalho ativado."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Modo de trabalho desativado."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Modo de trabalho ativado."</string>
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
-    <skip />
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Economia de dados desativada."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Economia de dados ativada."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Brilho da tela"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Os dados 2G e 3G foram pausados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Os dados 4G foram pausados"</string>

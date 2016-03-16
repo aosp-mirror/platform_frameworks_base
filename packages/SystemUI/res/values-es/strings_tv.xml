@@ -23,7 +23,7 @@
     <string name="pip_fullscreen" msgid="8604643018538487816">"Pantalla completa"</string>
     <string name="pip_play" msgid="674145557658227044">"Reproducir"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pausar"</string>
-    <string name="pip_hold_home" msgid="340086535668778109"><b>"INICIO"</b>" pulsado: control PIP"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"INICIO pulsado:\ncontrol PIP"</string>
+    <string name="pip_hold_home" msgid="340086535668778109">"Mantén el botón "<b>"INICIO"</b>" pulsado para control de PIP"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Mantén el botón de INICIO pulsado para controlar el modo PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Entendido"</string>
 </resources>

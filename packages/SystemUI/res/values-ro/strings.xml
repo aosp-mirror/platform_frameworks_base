@@ -74,8 +74,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Captură de ecran realizată."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Atingeți pentru a vedea captura de ecran."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Captura de ecran nu a putut fi realizată."</string>
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
-    <skip />
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Problemă întâmpinată la salvarea capturii de ecran."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Captura de ecran nu poate fi salvată din cauza spațiului de stocare limitat."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Crearea capturilor de ecran nu este permisă de aplicație sau de organizația dvs."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opțiuni pentru transferul de fișiere prin USB"</string>
