@@ -27,6 +27,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.server.ConnectivityService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
@@ -70,7 +71,8 @@ public class ConnectivityController extends StateController implements
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiverAsUser(
-                mConnectivityChangedReceiver, UserHandle.ALL, intentFilter, null, null);
+                mConnectivityChangedReceiver, UserHandle.ALL, intentFilter, null,
+                BackgroundThread.getHandler());
         ConnectivityService cs =
                 (ConnectivityService)ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
         if (cs != null) {
