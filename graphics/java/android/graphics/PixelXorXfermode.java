@@ -17,17 +17,11 @@
 package android.graphics;
 
 /**
- * PixelXorXfermode implements a simple pixel xor (op ^ src ^ dst).
- * This transformation does not follow premultiplied conventions, therefore
- * this mode *always* returns an opaque color (alpha == 255). Thus it is
- * not really usefull for operating on blended colors.
+ * @removed
  */
 @Deprecated
 public class PixelXorXfermode extends Xfermode {
 
     public PixelXorXfermode(int opColor) {
-        native_instance = nativeCreate(opColor);
     }
-
-    private static native long nativeCreate(int opColor);
 }
