@@ -156,6 +156,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -948,19 +949,7 @@ public class NotificationManagerService extends SystemService {
         // This is a MangedServices object that keeps track of the ranker.
         mRankerServices = new NotificationRankers();
         // Find the updatable ranker and register it.
-        Set<ComponentName> rankerComponents = mRankerServices.queryPackageForServices(
-                mRankerServicePackageName, UserHandle.USER_SYSTEM, null);
-        Iterator<ComponentName> iterator = rankerComponents.iterator();
-        if (iterator.hasNext()) {
-            ComponentName rankerComponent = iterator.next();
-            if (iterator.hasNext()) {
-                Slog.e(TAG, "found multiple ranker services:" + rankerComponents);
-            } else {
-                mRankerServices.registerSystemService(rankerComponent, UserHandle.USER_SYSTEM);
-            }
-        } else {
-            Slog.w(TAG, "could not start ranker service: none found");
-        }
+        mRankerServices.registerRanker();
 
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         if (mStatusBar != null) {
@@ -3584,6 +3573,45 @@ public class NotificationManagerService extends SystemService {
 
         public boolean isEnabled() {
             return !mServices.isEmpty();
+        }
+
+        @Override
+        public void onUserSwitched(int user) {
+            for (ManagedServiceInfo info : mServices) {
+                unregisterService(info.service, info.userid);
+            }
+            registerRanker();
+        }
+
+        @Override
+        public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
+            if (DEBUG) Slog.d(TAG, "onPackagesChanged queryReplace=" + queryReplace
+                    + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList)));
+
+            if (pkgList != null && (pkgList.length > 0)) {
+                for (String pkgName : pkgList) {
+                    if (mRankerServicePackageName.equals(pkgName)) {
+                        registerRanker();
+                    }
+                }
+            }
+        }
+
+        protected void registerRanker() {
+            // Find the updatable ranker and register it.
+            Set<ComponentName> rankerComponents = queryPackageForServices(
+                    mRankerServicePackageName, UserHandle.USER_SYSTEM, null);
+            Iterator<ComponentName> iterator = rankerComponents.iterator();
+            if (iterator.hasNext()) {
+                ComponentName rankerComponent = iterator.next();
+                if (iterator.hasNext()) {
+                    Slog.e(TAG, "found multiple ranker services:" + rankerComponents);
+                } else {
+                    registerSystemService(rankerComponent, UserHandle.USER_SYSTEM);
+                }
+            } else {
+                Slog.w(TAG, "could not start ranker service: none found");
+            }
         }
     }
 

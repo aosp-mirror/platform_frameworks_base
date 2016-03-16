@@ -238,7 +238,7 @@ abstract public class ManagedServices {
                 rebuildRestoredPackages();
             }
             // make sure we're still bound to any of our services who may have just upgraded
-            rebindServices();
+            rebindServices(false);
         }
     }
 
@@ -249,13 +249,13 @@ abstract public class ManagedServices {
             if (DEBUG) Slog.d(TAG, "Current profile IDs didn't change, skipping rebindServices().");
             return;
         }
-        rebindServices();
+        rebindServices(true);
     }
 
     public void onUserUnlocked(int user) {
         if (DEBUG) Slog.d(TAG, "onUserUnlocked u=" + user);
         rebuildRestoredPackages();
-        rebindServices();
+        rebindServices(false);
     }
 
     public ManagedServiceInfo getServiceFromTokenLocked(IInterface service) {
@@ -543,7 +543,7 @@ abstract public class ManagedServices {
      * Called whenever packages change, the user switches, or the secure setting
      * is altered. (For example in response to USER_SWITCHED in our broadcast receiver)
      */
-    private void rebindServices() {
+    private void rebindServices(boolean forceRebind) {
         if (DEBUG) Slog.d(TAG, "rebindServices");
         final int[] userIds = mUserProfiles.getCurrentProfileIds();
         final int nUserIds = userIds.length;
@@ -559,15 +559,15 @@ abstract public class ManagedServices {
         final SparseArray<Set<ComponentName>> toAdd = new SparseArray<>();
 
         synchronized (mMutex) {
-            // Potentially unbind automatically bound services, retain system services.
+            // Rebind to non-system services if user switched
             for (ManagedServiceInfo service : mServices) {
                 if (!service.isSystem && !service.isGuest(this)) {
                     removableBoundServices.add(service);
                 }
             }
 
-            final ArraySet<ComponentName> newEnabled = new ArraySet<>();
-            final ArraySet<String> newPackages = new ArraySet<>();
+            mEnabledServicesForCurrentProfiles.clear();
+            mEnabledServicesPackageNames.clear();
 
             for (int i = 0; i < nUserIds; ++i) {
                 // decode the list of components
@@ -591,15 +591,13 @@ abstract public class ManagedServices {
 
                 toAdd.put(userIds[i], add);
 
-                newEnabled.addAll(userComponents);
+                mEnabledServicesForCurrentProfiles.addAll(userComponents);
 
                 for (int j = 0; j < userComponents.size(); j++) {
                     final ComponentName component = userComponents.valueAt(j);
-                    newPackages.add(component.getPackageName());
+                    mEnabledServicesPackageNames.add(component.getPackageName());
                 }
             }
-            mEnabledServicesForCurrentProfiles = newEnabled;
-            mEnabledServicesPackageNames = newPackages;
         }
 
         for (ManagedServiceInfo info : removableBoundServices) {
@@ -607,11 +605,11 @@ abstract public class ManagedServices {
             final int oldUser = info.userid;
             final Set<ComponentName> allowedComponents = toAdd.get(info.userid);
             if (allowedComponents != null) {
-                if (allowedComponents.contains(component)) {
+                if (allowedComponents.contains(component) && !forceRebind) {
                     // Already bound, don't need to bind again.
                     allowedComponents.remove(component);
                 } else {
-                    // No longer allowed to be bound.
+                    // No longer allowed to be bound, or must rebind.
                     Slog.v(TAG, "disabling " + getCaption() + " for user "
                             + oldUser + ": " + component);
                     unregisterService(component, oldUser);
@@ -622,8 +620,7 @@ abstract public class ManagedServices {
         for (int i = 0; i < nUserIds; ++i) {
             final Set<ComponentName> add = toAdd.get(userIds[i]);
             for (ComponentName component : add) {
-                Slog.v(TAG, "enabling " + getCaption() + " for user " + userIds[i] + ": "
-                        + component);
+                Slog.v(TAG, "enabling " + getCaption() + " for " + userIds[i] + ": " + component);
                 registerService(component, userIds[i]);
             }
         }
@@ -859,7 +856,7 @@ abstract public class ManagedServices {
             if (uri == null || mSecureSettingsUri.equals(uri)) {
                 if (DEBUG) Slog.d(TAG, "Setting changed: mSecureSettingsUri=" + mSecureSettingsUri +
                         " / uri=" + uri);
-                rebindServices();
+                rebindServices(false);
                 rebuildRestoredPackages();
             }
         }
