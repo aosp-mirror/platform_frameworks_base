@@ -3173,16 +3173,9 @@ public class Notification implements Parcelable
         }
 
         private void bindHeaderAppName(RemoteViews contentView) {
-            PackageManager packageManager = mContext.getPackageManager();
-            ApplicationInfo info = null;
-            try {
-                info = packageManager.getApplicationInfo(mContext.getApplicationInfo().packageName,
-                        0);
-            } catch (final NameNotFoundException e) {
-                return;
-            }
-            CharSequence appName = info != null ? packageManager.getApplicationLabel(info)
-                    : null;
+            CharSequence appName = mContext.getPackageManager()
+                    .getApplicationLabel(mContext.getApplicationInfo());
+
             if (TextUtils.isEmpty(appName)) {
                 return;
             }

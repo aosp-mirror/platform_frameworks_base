@@ -1147,7 +1147,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     private Drawable getManagedProfileIconForDensity(UserHandle user, int drawableId, int density) {
-        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        UserInfo userInfo = getUserInfo(user.getIdentifier());
         if (userInfo != null && userInfo.isManagedProfile()) {
             return getDrawableForDensity(drawableId, density);
         }
@@ -1156,7 +1156,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
-        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        UserInfo userInfo = getUserInfo(user.getIdentifier());
         if (userInfo != null && userInfo.isManagedProfile()) {
             return Resources.getSystem().getString(
                     com.android.internal.R.string.managed_profile_label_badge, label);
@@ -2252,21 +2252,15 @@ public class ApplicationPackageManager extends PackageManager {
 
     private int getBadgeResIdForUser(int userHandle) {
         // Return the framework-provided badge.
-        UserInfo userInfo = getUserIfProfile(userHandle);
+        UserInfo userInfo = getUserInfo(userHandle);
         if (userInfo != null && userInfo.isManagedProfile()) {
             return com.android.internal.R.drawable.ic_corp_icon_badge;
         }
         return 0;
     }
 
-    private UserInfo getUserIfProfile(int userHandle) {
-        List<UserInfo> userProfiles = getUserManager().getProfiles(mContext.getUserId());
-        for (UserInfo user : userProfiles) {
-            if (user.id == userHandle) {
-                return user;
-            }
-        }
-        return null;
+    private UserInfo getUserInfo(int userHandle) {
+        return getUserManager().getUserInfo(userHandle);
     }
 
     /** {@hide} */
