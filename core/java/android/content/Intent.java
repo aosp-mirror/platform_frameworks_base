@@ -660,6 +660,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: Quick view the data. Launches a quick viewer for
      * a URI or a list of URIs.
+     * <p>Activities handling this intent action should handle the vast majority of
+     * MIME types rather than only specific ones.
      * <p>Input: {@link #getData} is a mandatory content URI of the item to
      * preview. {@link #getClipData} contains an optional list of content URIs
      * if there is more than one item to preview. {@link #EXTRA_INDEX} is an
@@ -4142,7 +4144,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Optional index with semantics depending on the intent action.
-     * @see #ACTION_QUICK_VIEW
+     *
+     * <p>The value must be an integer greater or equal to 0.
      */
     public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
 
