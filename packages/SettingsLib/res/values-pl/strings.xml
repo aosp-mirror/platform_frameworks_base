@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Pokaż wszystkie ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Pokaż okno Aplikacja Nie Reaguje dla aplikacji w tle"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Wymuś zezwalanie na aplikacje w pamięci zewn."</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Pozwala na zapis aplikacji w pamięci zewn. niezależnie od wartości w pliku manifestu"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Pozwala na zapis aplikacji w pamięci zewnętrznej niezależnie od wartości w pliku manifestu"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Wymuś zmianę rozmiaru okien aktywności"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Zezwól na zmianę rozmiaru wszystkich okien aktywności w trybie wielu okien niezależnie od ustawień w pliku manifestu."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Włącz dowolny rozmiar okien"</string>

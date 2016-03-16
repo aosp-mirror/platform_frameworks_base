@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Hamma ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Ilova javob bermayotgani haqida xabar qilish"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tashqi xotira qurilmasidagi ilova dasturlariga majburiy ruxsat berish"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Manifest qiymatidan qat’i nazar istalgan ilovani tashqi xotiraga saqlash imkonini beradi"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Manifest qiymatidan qat’i nazar istalgan ilovani tashqi xotiraga saqlash imkonini beradi"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Harakatlarni moslashuvchan o‘lchamga keltirish"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Manifest qiymatidan qat’i nazar barcha harakatlarni ko‘p oynali rejimga moslashtirish."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Erkin shakldagi oynalarni yoqish"</string>

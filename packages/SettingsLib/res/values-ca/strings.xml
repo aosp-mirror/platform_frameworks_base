@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Tots els errors sense resposta"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Informa que una aplicació en segon pla no respon"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Força permís d\'aplicacions a l\'emmagatzem. extern"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Permet que les aplicacions es puguin escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Permet que les aplicacions es puguin escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Força l\'ajust de la mida de les activitats"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activa les finestres de format lliure"</string>

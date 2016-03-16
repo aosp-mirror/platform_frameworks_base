@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Ցույց տալ բոլոր ANR-երը"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Ցուցադրել այն ծրագիրը, որը չի արձագանքում երկխոսությունը հետնաշերտի ծրագրերի համար"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Միշտ թույլատրել ծրագրեր արտաքին պահեստում"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Թույլ է տալիս պահել հավելվածը արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ստիպել, որ ակտիվությունների չափերը լինեն փոփոխելի"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Բոլոր ակտիվությունների չափերը բազմապատուհան ռեժիմի համար դարձնել փոփոխելի՝ մանիֆեստի արժեքներից անկախ:"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ակտիվացնել կամայական ձևի պատուհանները"</string>
