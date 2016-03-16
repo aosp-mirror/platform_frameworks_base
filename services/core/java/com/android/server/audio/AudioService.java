@@ -205,7 +205,6 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_SET_FORCE_USE = 8;
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
     private static final int MSG_SET_ALL_VOLUMES = 10;
-    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 11;
     private static final int MSG_REPORT_NEW_ROUTES = 12;
     private static final int MSG_SET_FORCE_BT_A2DP_USE = 13;
     private static final int MSG_CHECK_MUSIC_ACTIVE = 14;
@@ -217,7 +216,6 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 20;
     private static final int MSG_SYSTEM_READY = 21;
     private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = 22;
-    private static final int MSG_PERSIST_MICROPHONE_MUTE = 23;
     private static final int MSG_UNMUTE_STREAM = 24;
     private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 25;
     private static final int MSG_INDICATE_SYSTEM_READY = 26;
@@ -665,6 +663,7 @@ public class AudioService extends IAudioService.Stub {
         // array initialized by updateStreamVolumeAlias()
         updateStreamVolumeAlias(false /*updateVolumes*/, TAG);
         readPersistedSettings();
+        readUserRestrictions();
         mSettingsObserver = new SettingsObserver();
         createStreamStates();
 
@@ -1111,35 +1110,6 @@ public class AudioService extends IAudioService.Stub {
                 System.MUTE_STREAMS_AFFECTED, AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED,
                 UserHandle.USER_CURRENT);
 
-        final int currentUser = getCurrentUserId();
-
-        // In addition to checking the system setting, also check the current user restriction.
-        // Because of the delay before persisting VOLUME_MASTER_MUTE, there's a window where
-        // DISALLOW_ADJUST_VOLUME will be ignored when it's set right before switching users.
-        boolean masterMute = (System.getIntForUser(cr, System.VOLUME_MASTER_MUTE,
-                0, UserHandle.USER_CURRENT) == 1)
-                || mUserManagerInternal.getUserRestriction(
-                    currentUser, UserManager.DISALLOW_ADJUST_VOLUME);
-        if (mUseFixedVolume) {
-            masterMute = false;
-            AudioSystem.setMasterVolume(1.0f);
-        }
-        if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Master mute %s, user=%d", masterMute, currentUser));
-        }
-        setSystemAudioMute(masterMute);
-        AudioSystem.setMasterMute(masterMute);
-        broadcastMasterMuteStatus(masterMute);
-
-        boolean microphoneMute =
-                (System.getIntForUser(cr, System.MICROPHONE_MUTE, 0, UserHandle.USER_CURRENT) == 1)
-                || mUserManagerInternal.getUserRestriction(
-                        currentUser, UserManager.DISALLOW_UNMUTE_MICROPHONE);
-        if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Mic mute %s, user=%d", microphoneMute, currentUser));
-        }
-        AudioSystem.muteMicrophone(microphoneMute);
-
         updateMasterMono(cr);
 
         // Each stream will read its own persisted settings
@@ -1154,6 +1124,31 @@ public class AudioService extends IAudioService.Stub {
 
         // Load settings for the volume controller
         mVolumeController.loadSettings(cr);
+    }
+
+    private void readUserRestrictions() {
+        final int currentUser = getCurrentUserId();
+
+        // Check the current user restriction.
+        boolean masterMute = mUserManagerInternal.getUserRestriction(
+                    currentUser, UserManager.DISALLOW_ADJUST_VOLUME);
+        if (mUseFixedVolume) {
+            masterMute = false;
+            AudioSystem.setMasterVolume(1.0f);
+        }
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Master mute %s, user=%d", masterMute, currentUser));
+        }
+        setSystemAudioMute(masterMute);
+        AudioSystem.setMasterMute(masterMute);
+        broadcastMasterMuteStatus(masterMute);
+
+        boolean microphoneMute = mUserManagerInternal.getUserRestriction(
+                currentUser, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Mic mute %s, user=%d", microphoneMute, currentUser));
+        }
+        AudioSystem.muteMicrophone(microphoneMute);
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
@@ -1911,20 +1906,12 @@ public class AudioService extends IAudioService.Stub {
             if (mute != AudioSystem.getMasterMute()) {
                 setSystemAudioMute(mute);
                 AudioSystem.setMasterMute(mute);
-                // Post a persist master volume msg
-                sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, mute ? 1
-                        : 0, userId, null, PERSIST_DELAY);
                 sendMasterMuteUpdate(mute, flags);
 
                 Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
                 intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, mute);
                 sendBroadcastToAll(intent);
             }
-        } else {
-            // If not the current user just persist the setting which will be loaded
-            // on user switch.
-            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, mute ? 1
-                    : 0, userId, null, PERSIST_DELAY);
         }
     }
 
@@ -2017,8 +2004,6 @@ public class AudioService extends IAudioService.Stub {
             AudioSystem.muteMicrophone(on);
         }
         // Post a persist microphone msg.
-        sendMsg(mAudioHandler, MSG_PERSIST_MICROPHONE_MUTE, SENDMSG_REPLACE, on ? 1
-                : 0, userId, null, PERSIST_DELAY);
     }
 
     @Override
@@ -2607,6 +2592,7 @@ public class AudioService extends IAudioService.Stub {
     private void readAudioSettings(boolean userSwitch) {
         // restore ringer mode, ringer mode affected streams, mute affected streams and vibrate settings
         readPersistedSettings();
+        readUserRestrictions();
 
         // restore volume settings
         int numStreamTypes = AudioSystem.getNumStreamTypes();
@@ -4545,16 +4531,6 @@ public class AudioService extends IAudioService.Stub {
                     persistVolume((VolumeStreamState) msg.obj, msg.arg1);
                     break;
 
-                case MSG_PERSIST_MASTER_VOLUME_MUTE:
-                    if (mUseFixedVolume) {
-                        return;
-                    }
-                    Settings.System.putIntForUser(mContentResolver,
-                                                 Settings.System.VOLUME_MASTER_MUTE,
-                                                 msg.arg1,
-                                                 msg.arg2);
-                    break;
-
                 case MSG_PERSIST_RINGER_MODE:
                     // note that the value persisted is the current ringer mode, not the
                     // value of ringer mode as of the time the request was made to persist
@@ -4677,15 +4653,11 @@ public class AudioService extends IAudioService.Stub {
                             Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, musicActiveMs,
                             UserHandle.USER_CURRENT);
                     break;
-                case MSG_PERSIST_MICROPHONE_MUTE:
-                    Settings.System.putIntForUser(mContentResolver,
-                                                 Settings.System.MICROPHONE_MUTE,
-                                                 msg.arg1,
-                                                 msg.arg2);
-                    break;
+
                 case MSG_UNMUTE_STREAM:
                     onUnmuteStream(msg.arg1, msg.arg2);
                     break;
+
                 case MSG_DYN_POLICY_MIX_STATE_UPDATE:
                     onDynPolicyMixStateUpdate((String) msg.obj, msg.arg1);
                     break;
