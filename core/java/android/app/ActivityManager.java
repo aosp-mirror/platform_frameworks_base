@@ -217,6 +217,13 @@ public class ActivityManager {
     public static final int START_FLAG_TRACK_ALLOCATION = 1<<3;
 
     /**
+     * Flag for IActivityManaqer.startActivity: launch the app with
+     * native debugging support.
+     * @hide
+     */
+    public static final int START_FLAG_NATIVE_DEBUGGING = 1<<4;
+
+    /**
      * Result for IActivityManaqer.broadcastIntent: success!
      * @hide
      */

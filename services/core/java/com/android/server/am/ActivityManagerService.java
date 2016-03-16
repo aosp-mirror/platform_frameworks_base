@@ -1229,6 +1229,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mMemWatchDumpPid;
     int mMemWatchDumpUid;
     String mTrackAllocationApp = null;
+    String mNativeDebuggingApp = null;
 
     final long[] mTmpLong = new long[1];
 
@@ -3351,6 +3352,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
+            }
+            if (mNativeDebuggingApp != null && mNativeDebuggingApp.equals(app.processName)) {
+                // Enable all debug flags required by the native debugger.
+                debugFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything
+                debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO; // Generate debug info
+                debugFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;   // Disbale optimizations
+                mNativeDebuggingApp = null;
             }
 
             String requiredAbi = (abiOverride != null) ? abiOverride : app.info.primaryCpuAbi;
@@ -10651,6 +10659,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void setNativeDebuggingAppLocked(ApplicationInfo app, String processName) {
+        boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+        if (!isDebuggable) {
+            if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                throw new SecurityException("Process not debuggable: " + app.packageName);
+            }
+        }
+        mNativeDebuggingApp = processName;
+    }
+
     @Override
     public void setAlwaysFinish(boolean enabled) {
         enforceCallingPermission(android.Manifest.permission.SET_ALWAYS_FINISH,
@@ -13724,6 +13742,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  mSamplingInterval=" + mSamplingInterval + " mAutoStopProfiler="
                         + mAutoStopProfiler);
                 pw.println("  mProfileType=" + mProfileType);
+            }
+        }
+        if (mNativeDebuggingApp != null) {
+            if (dumpPackage == null || dumpPackage.equals(mNativeDebuggingApp)) {
+                if (needSep) {
+                    pw.println();
+                    needSep = false;
+                }
+                pw.println("  mNativeDebuggingApp=" + mNativeDebuggingApp);
             }
         }
         if (dumpPackage == null) {
