@@ -879,12 +879,13 @@ public class ListPopupWindow implements ShowableListMenu {
     /**
      * Filter key down events. By forwarding key down events to this function,
      * views using non-modal ListPopupWindow can have it handle key selection of items.
-     *  
+     *
      * @param keyCode keyCode param passed to the host view's onKeyDown
      * @param event event param passed to the host view's onKeyDown
      * @return true if the event was handled, false if it was ignored.
-     * 
+     *
      * @see #setModal(boolean)
+     * @see #onKeyUp(int, KeyEvent)
      */
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         // when the drop down is shown, we drive it directly
@@ -972,14 +973,15 @@ public class ListPopupWindow implements ShowableListMenu {
     }
 
     /**
-     * Filter key down events. By forwarding key up events to this function,
+     * Filter key up events. By forwarding key up events to this function,
      * views using non-modal ListPopupWindow can have it handle key selection of items.
-     *  
+     *
      * @param keyCode keyCode param passed to the host view's onKeyUp
      * @param event event param passed to the host view's onKeyUp
      * @return true if the event was handled, false if it was ignored.
-     * 
+     *
      * @see #setModal(boolean)
+     * @see #onKeyDown(int, KeyEvent)
      */
     public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
         if (isShowing() && mDropDownList.getSelectedItemPosition() >= 0) {
@@ -998,11 +1000,11 @@ public class ListPopupWindow implements ShowableListMenu {
      * Filter pre-IME key events. By forwarding {@link View#onKeyPreIme(int, KeyEvent)}
      * events to this function, views using ListPopupWindow can have it dismiss the popup
      * when the back key is pressed.
-     *  
+     *
      * @param keyCode keyCode param passed to the host view's onKeyPreIme
      * @param event event param passed to the host view's onKeyPreIme
      * @return true if the event was handled, false if it was ignored.
-     * 
+     *
      * @see #setModal(boolean)
      */
     public boolean onKeyPreIme(int keyCode, @NonNull KeyEvent event) {
