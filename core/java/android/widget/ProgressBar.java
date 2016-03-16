@@ -617,6 +617,7 @@ public class ProgressBar extends View {
     private void swapCurrentDrawable(Drawable newDrawable) {
         final Drawable oldDrawable = mCurrentDrawable;
         mCurrentDrawable = newDrawable;
+
         if (oldDrawable != mCurrentDrawable) {
             if (oldDrawable != null) {
                 oldDrawable.setVisible(false, false);
@@ -1645,10 +1646,9 @@ public class ProgressBar extends View {
     }
 
     @Override
-    public void onVisibilityAggregated(View changedView, @Visibility int visibility) {
-        super.onVisibilityAggregated(changedView, visibility);
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
 
-        final boolean isVisible = visibility == VISIBLE;
         if (isVisible != mAggregatedIsVisible) {
             mAggregatedIsVisible = isVisible;
 
