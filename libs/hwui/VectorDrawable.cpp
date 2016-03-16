@@ -229,19 +229,25 @@ void FullPath::applyTrim() {
         // No trimming necessary.
         return;
     }
+    mTrimDirty = false;
+    mTrimmedSkPath.reset();
+    if (mProperties.trimPathStart == mProperties.trimPathEnd) {
+        // Trimmed path should be empty.
+        return;
+    }
     SkPathMeasure measure(mSkPath, false);
     float len = SkScalarToFloat(measure.getLength());
     float start = len * fmod((mProperties.trimPathStart + mProperties.trimPathOffset), 1.0f);
     float end = len * fmod((mProperties.trimPathEnd + mProperties.trimPathOffset), 1.0f);
 
-    mTrimmedSkPath.reset();
     if (start > end) {
         measure.getSegment(start, len, &mTrimmedSkPath, true);
-        measure.getSegment(0, end, &mTrimmedSkPath, true);
+        if (end > 0) {
+            measure.getSegment(0, end, &mTrimmedSkPath, true);
+        }
     } else {
         measure.getSegment(start, end, &mTrimmedSkPath, true);
     }
-    mTrimDirty = false;
 }
 
 REQUIRE_COMPATIBLE_LAYOUT(FullPath::Properties);
