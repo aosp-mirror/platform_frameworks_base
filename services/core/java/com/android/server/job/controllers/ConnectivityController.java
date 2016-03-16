@@ -195,7 +195,7 @@ public class ConnectivityController extends StateController implements
         pw.println("Conn.");
         pw.println("connected: " + mNetworkConnected + " unmetered: " + mNetworkUnmetered);
         for (JobStatus js: mTrackedJobs) {
-            pw.println(String.valueOf(js.hashCode()).substring(0, 3) + ".."
+            pw.println(String.valueOf(js.getJobId() + "," + js.getUid())
                     + ": C=" + js.hasConnectivityConstraint()
                     + ", UM=" + js.hasUnmeteredConstraint());
         }
