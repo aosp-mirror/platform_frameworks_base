@@ -30,16 +30,29 @@ import android.util.SparseArray;
  */
 public class TaskKeyLruCache<V> {
 
+    public interface EvictionCallback {
+        public void onEntryEvicted(Task.TaskKey key);
+    }
+
     private static final String TAG = "TaskKeyLruCache";
 
     private final SparseArray<Task.TaskKey> mKeys = new SparseArray<>();
     private final LruCache<Integer, V> mCache;
+    private final EvictionCallback mEvictionCallback;
 
     public TaskKeyLruCache(int cacheSize) {
+        this(cacheSize, null);
+    }
+
+    public TaskKeyLruCache(int cacheSize, EvictionCallback evictionCallback) {
+        mEvictionCallback = evictionCallback;
         mCache = new LruCache<Integer, V>(cacheSize) {
 
             @Override
             protected void entryRemoved(boolean evicted, Integer taskId, V oldV, V newV) {
+                if (mEvictionCallback != null) {
+                    mEvictionCallback.onEntryEvicted(mKeys.get(taskId));
+                }
                 mKeys.remove(taskId);
             }
         };
@@ -84,8 +97,9 @@ public class TaskKeyLruCache<V> {
 
     /** Removes a cache entry for a specific key. */
     final void remove(Task.TaskKey key) {
-        mKeys.remove(key.id);
+        // Remove the key after the cache value because we need it to make the callback
         mCache.remove(key.id);
+        mKeys.remove(key.id);
     }
 
     /** Removes all the entries in the cache. */

@@ -61,6 +61,7 @@ import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimati
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -112,6 +113,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public static final int DEFAULT_SYNC_STACK_DURATION = 200;
     private static final int DRAG_SCALE_DURATION = 175;
     private static final float DRAG_SCALE_FACTOR = 1.05f;
+
+    private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 200;
+    private static final int LAUNCH_NEXT_SCROLL_INCR_DURATION = 32;
 
     private static final ArraySet<Task.TaskKey> EMPTY_TASK_SET = new ArraySet<>();
 
@@ -1618,12 +1622,34 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mUIDozeTrigger.stopDozing();
             cancelAllTaskViewAnimations();
 
-            Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
-            EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(launchTask),
-                    launchTask, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+            final Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
+            if (getChildViewForTask(launchTask) == null) {
+                List<TaskView> taskViews = getTaskViews();
+                int lastTaskIndex = !taskViews.isEmpty()
+                        ? mStack.indexOfStackTask(taskViews.get(taskViews.size() - 1).getTask())
+                        : mStack.getTaskCount() - 1;
+                int duration = LAUNCH_NEXT_SCROLL_BASE_DURATION +
+                        Math.abs(mStack.indexOfStackTask(launchTask) - lastTaskIndex)
+                                * LAUNCH_NEXT_SCROLL_INCR_DURATION;
+                mStackScroller.animateScroll(mLayoutAlgorithm.getStackScrollForTask(launchTask),
+                        duration, new Runnable() {
+                            @Override
+                            public void run() {
+                                EventBus.getDefault().send(new LaunchTaskEvent(
+                                        getChildViewForTask(launchTask), launchTask, null,
+                                        INVALID_STACK_ID, false /* screenPinningRequested */));
+                            }
+                        });
+            } else {
+                EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(launchTask),
+                        launchTask, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+            }
 
             MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
                     launchTask.key.getComponent().toString());
+        } else if (mStack.getTaskCount() == 0) {
+            // If there are no tasks, then just hide recents back to home.
+            EventBus.getDefault().send(new HideRecentsEvent(false, true));
         }
     }
 

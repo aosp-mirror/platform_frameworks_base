@@ -715,7 +715,9 @@
     <string name="quick_settings_work_mode_label">Work mode</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
-    <string name="recents_empty_message">Your recent screens appear here</string>
+    <string name="recents_empty_message">No recent items</string>
+    <!-- Recents: The empty recents string after dismissing all tasks. [CHAR LIMIT=NONE] -->
+    <string name="recents_empty_message_dismissed_all">You\'ve cleared everything</string>
     <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
     <string name="recents_app_info_button_label">Application Info</string>
     <!-- Recents: The screen pinning button. [CHAR LIMIT=NONE] -->
@@ -1183,11 +1185,6 @@
     <string name="show_brightness">Show brightness in Quick Settings</string>
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
-
-    <!-- Disables fast-toggling recents via the recents button. DO NOT TRANSLATE -->
-    <string name="overview_disable_fast_toggle_via_button">Disable fast toggle</string>
-    <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
-    <string name="overview_disable_fast_toggle_via_button_desc">Disable launch timeout while paging</string>
 
     <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=60]-->
     <string name="overview_nav_bar_gesture">Enable split-screen swipe-up gesture</string>

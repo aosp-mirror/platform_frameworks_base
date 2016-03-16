@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -361,7 +362,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!loadPlan.hasTasks()) {
-            loader.preloadTasks(loadPlan, -1, launchState.launchedFromHome);
+            loader.preloadTasks(loadPlan, launchState.launchedToTaskId,
+                    launchState.launchedFromHome);
         }
 
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
@@ -431,6 +433,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         mIgnoreAltTabRelease = false;
         mIterateTrigger.stopDozing();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        EventBus.getDefault().send(new ConfigurationChangedEvent());
     }
 
     @Override
@@ -740,7 +749,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.hasDockedTask()) {
-            mRecentsView.showEmptyView();
+            mRecentsView.showEmptyView(R.string.recents_empty_message_dismissed_all);
         } else {
             // Just go straight home (no animation necessary because there are no more task views)
             dismissRecentsToHome(false /* animateTaskViews */);
