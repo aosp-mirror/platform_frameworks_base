@@ -291,6 +291,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.assertName(NAME);
 
         // Change name - it should have changed system property once focus is changed.
+        detailsUi.focusOnName();
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.focusAwayFromName();
         assertPropertyValue(NAME_PROPERTY, NEW_NAME);
@@ -966,40 +967,44 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             cancelButton = mUiBot.getObjectById("android:id/button2");
         }
 
-        private void assertField(String name, UiObject field, String expected) {
-            try {
-                String actual = field.getText().toString();
-                assertEquals("Wrong value on field '" + name + "'", expected, actual);
-            } catch (UiObjectNotFoundException e) {
-                // Should not happen...
-                throw new IllegalStateException("field not found: " + name, e);
-            }
+        private void assertField(String name, UiObject field, String expected)
+                throws UiObjectNotFoundException {
+            String actual = field.getText().toString();
+            assertEquals("Wrong value on field '" + name + "'", expected, actual);
         }
 
-        void assertName(String expected) {
+        void assertName(String expected) throws UiObjectNotFoundException {
             assertField("name", nameField, expected);
         }
 
-        void assertTitle(String expected) {
+        void assertTitle(String expected) throws UiObjectNotFoundException {
             assertField("title", titleField, expected);
         }
 
-        void assertDescription(String expected) {
+        void assertDescription(String expected) throws UiObjectNotFoundException {
             assertField("description", descField, expected);
+        }
+
+        /**
+         * Set focus on the name field so it can be validated once focus is lost.
+         */
+        void focusOnName() throws UiObjectNotFoundException {
+            mUiBot.click(nameField, "name_field");
+            assertTrue("name_field not focused", nameField.isFocused());
         }
 
         /**
          * Takes focus away from the name field so it can be validated.
          */
-        void focusAwayFromName() {
+        void focusAwayFromName() throws UiObjectNotFoundException {
             mUiBot.click(titleField, "title_field"); // Change focus.
             mUiBot.pressBack(); // Dismiss keyboard.
+            assertFalse("name_field is focused", nameField.isFocused());
         }
 
         void reOpen() {
             openProgressNotification(ID);
             mUiBot.click(detailsButton, "details_button");
-
         }
 
         void clickOk() {
