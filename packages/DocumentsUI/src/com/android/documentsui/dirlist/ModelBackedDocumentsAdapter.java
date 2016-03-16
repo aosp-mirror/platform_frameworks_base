@@ -29,7 +29,6 @@ import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.State;
-
 import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
@@ -103,7 +102,7 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
     public void onBindViewHolder(DocumentHolder holder, int position, List<Object> payload) {
         if (payload.contains(SELECTION_CHANGED_MARKER)) {
             final boolean selected = mEnv.isSelected(mModelIds.get(position));
-            holder.setSelected(selected);
+            holder.setSelected(selected, true);
         } else {
             onBindViewHolder(holder, position);
         }
@@ -124,7 +123,7 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
             assert(!selected);
         }
         holder.setEnabled(enabled);
-        holder.setSelected(mEnv.isSelected(modelId));
+        holder.setSelected(mEnv.isSelected(modelId), false);
 
         mEnv.onBindDocumentHolder(holder, cursor);
     }
