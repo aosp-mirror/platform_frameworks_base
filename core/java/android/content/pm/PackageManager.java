@@ -4387,10 +4387,8 @@ public abstract class PackageManager {
         int badgeDensity);
 
     /**
-     * If the target user is a managed profile of the calling user or if the
-     * target user is the caller and is itself a managed profile, then this
-     * returns a badged copy of the given icon to be able to distinguish it from
-     * the original icon. For badging an arbitrary drawable use
+     * If the target user is a managed profile, then this returns a badged copy of the given icon
+     * to be able to distinguish it from the original icon. For badging an arbitrary drawable use
      * {@link #getUserBadgedDrawableForDensity(
      * android.graphics.drawable.Drawable, UserHandle, android.graphics.Rect, int)}.
      * <p>
