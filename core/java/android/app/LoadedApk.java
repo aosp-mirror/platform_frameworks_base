@@ -356,14 +356,18 @@ public final class LoadedApk {
             if (instrumentationSplitAppDirs != null) {
                 Collections.addAll(outZipPaths, instrumentationSplitAppDirs);
             }
-            outZipPaths.add(instrumentedAppDir);
-            if (instrumentedSplitAppDirs != null) {
-                Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
+            if (!instrumentationAppDir.equals(instrumentedAppDir)) {
+                outZipPaths.add(instrumentedAppDir);
+                if (instrumentedSplitAppDirs != null) {
+                    Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
+                }
             }
 
             if (outLibPaths != null) {
                 outLibPaths.add(instrumentationLibDir);
-                outLibPaths.add(instrumentedLibDir);
+                if (!instrumentationLibDir.equals(instrumentedLibDir)) {
+                    outLibPaths.add(instrumentedLibDir);
+                }
             }
 
             if (!instrumentedAppDir.equals(instrumentationAppDir)) {
