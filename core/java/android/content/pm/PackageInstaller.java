@@ -37,7 +37,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
-import android.util.Log;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -47,7 +46,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -393,13 +391,6 @@ public class PackageInstaller {
      * Return list of all known install sessions, regardless of the installer.
      */
     public @NonNull List<SessionInfo> getAllSessions() {
-        final ApplicationInfo info = mContext.getApplicationInfo();
-        if ("com.google.android.googlequicksearchbox".equals(info.packageName)
-                && info.versionCode <= 300400110) {
-            Log.d(TAG, "Ignoring callback request from old prebuilt");
-            return Collections.EMPTY_LIST;
-        }
-
         try {
             return mInstaller.getAllSessions(mUserId).getList();
         } catch (RemoteException e) {
@@ -597,14 +588,6 @@ public class PackageInstaller {
      *            calling thread.
      */
     public void registerSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
-        // TODO: remove this temporary guard once we have new prebuilts
-        final ApplicationInfo info = mContext.getApplicationInfo();
-        if ("com.google.android.googlequicksearchbox".equals(info.packageName)
-                && info.versionCode <= 300400110) {
-            Log.d(TAG, "Ignoring callback request from old prebuilt");
-            return;
-        }
-
         synchronized (mDelegates) {
             final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
                     handler.getLooper());
