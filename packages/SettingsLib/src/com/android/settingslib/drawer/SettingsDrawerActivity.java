@@ -103,16 +103,6 @@ public class SettingsDrawerActivity extends Activity {
     }
 
     @Override
-    public void onBackPressed() {
-        if (mShowingMenu) {
-            // If we are showing the menu, then we are a top level activity and the back should
-            // kick back to settings home.
-            openTile(null);
-        }
-        super.onBackPressed();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mShowingMenu && mDrawerLayout != null && item.getItemId() == android.R.id.home
                 && mDrawerAdapter.getCount() != 0) {
