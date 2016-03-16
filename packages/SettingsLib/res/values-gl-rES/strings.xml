@@ -248,9 +248,9 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Mostrar todos os ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Informa que aplicación segundo plano non responde"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permiso de aplicacións de forma externa"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Fai que calquera aplicación se poida escribir nun almacenamento externo, independentemente dos valores expresados"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Permite que calquera aplicación apta se poida escribir nun almacenamento externo, independentemente dos valores expresados"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar o axuste do tamaño das actividades"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permite axustar o tamaño de todas as actividades para o modo de varias ventás, independentemente dos valores definidos."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permite axustar o tamaño de todas as actividades para o modo multiventá, independentemente dos valores definidos."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activar ventás de forma libre"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Activa a compatibilidade con ventás de forma libre experimentais."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Contrasinal para copias"</string>

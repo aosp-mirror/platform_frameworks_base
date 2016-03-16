@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Vis alle ANR-er"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tving frem tillatelse for ekstern lagring av apper"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Gjør at apper kan skrives til ekstern lagring, uavhengig av manifestverdier"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Dette gjør at alle apper kan lagres på ekstern lagring – uavhengig av manifestverdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til å kunne endre størrelse"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gjør at alle aktivitetene kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Slå på vinduer i fritt format"</string>

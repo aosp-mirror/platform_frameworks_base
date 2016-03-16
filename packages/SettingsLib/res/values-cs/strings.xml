@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Zobrazit všechny ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Zobrazovat dialog „Aplikace neodpovídá“ pro aplikace na pozadí"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Vynutit povolení aplikací na externím úložišti"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Každou aplikaci bude možné zapsat do externího úložiště, bez ohledu na hodnoty manifestu"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Každou aplikaci bude možné zapsat do externího úložiště, bez ohledu na hodnoty manifestu"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Vynutit možnost změny velikosti aktivit"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Umožnit změnu velikosti všech aktivit na několik oken (bez ohledu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivovat okna s volným tvarem"</string>

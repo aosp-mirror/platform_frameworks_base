@@ -248,7 +248,8 @@
     <string name="show_all_anrs" msgid="28462979638729082">"បង្ហាញ ANRs ទាំងអស់"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"បង្ហាញ​ប្រអប់​កម្មវិធី​មិន​ឆ្លើយតប​សម្រាប់​កម្មវិធី​ផ្ទៃ​ខាង​ក្រោយ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"បង្ខំឲ្យអនុញ្ញាតកម្មវិធីលើឧបករណ៍ផ្ទុកខាងក្រៅ"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ធ្វើឲ្យកម្មវិធីទាំងឡាយមានសិទ្ធិសរសេរទៅកាន់ឧបករណ៍ផ្ទុកខាងក្រៅ ដោយមិនគិតពីតម្លៃជាក់លាក់"</string>
+    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
+    <skip />
     <string name="force_resizable_activities" msgid="8615764378147824985">"បង្ខំឲ្យសកម្មភាពអាចប្តូរទំហំបាន"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"កំណត់ឲ្យសកម្មភាពទាំងអស់អាចប្តូរទំហំបានសម្រាប់ពហុផ្ទាំងវិនដូ ដោយមិនគិតពីតម្លៃមេនីហ្វេស។"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"បើកដំណើរការផ្ទាំងវិនដូទម្រង់សេរី"</string>

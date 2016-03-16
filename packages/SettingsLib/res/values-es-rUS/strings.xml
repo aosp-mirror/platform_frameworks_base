@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Errores sin respuesta"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Mostrar diálogo cuando las aplic. en 2do plano no responden"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permisos en almacenamiento externo"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Cualquier aplicación puede escribirse en una memoria externa, independientemente de los valores del manifiesto."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar actividades para que cambien de tamaño"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permitir que todas las actividades puedan cambiar de tamaño para el modo multiventana, sin importar los valores del manifiesto."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Habilitar ventanas de forma libre"</string>

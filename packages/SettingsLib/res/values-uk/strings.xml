@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Показувати всі ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Сповіщати, коли додаток не відповідає"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Примусово записувати додатки в зовнішню пам’ять"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Додатки можна записувати на зовнішню пам’ять незалежно від значень маніфесту"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Можна записувати додатки в зовнішню пам’ять, незалежно від значень у маніфесті"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Примусово масштабувати активність"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Масштабувати активність на кілька вікон, незалежно від значень у файлі маніфесту."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Увімкнути вікна довільного формату"</string>

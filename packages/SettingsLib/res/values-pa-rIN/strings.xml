@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"ਸਾਰੇ ANR ਦਿਖਾਓ"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"ਪਿਛੋਕੜ ਐਪਸ ਲਈ ਐਪਸ ਜਵਾਬ ਨਹੀਂ ਦੇ ਰਹੇ ਡਾਇਲੌਗ ਦਿਖਾਓ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ਐਪਸ ਨੂੰ ਬਾਹਰਲੇ ਤੇ ਜ਼ਬਰਦਸਤੀ ਆਗਿਆ ਦਿਓ"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ਇੱਕ ਐਪ ਨੂੰ ਬਾਹਰਲੀ ਸਟੋਰੇਜ ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਮੈਨੀਫੈਸਟ ਵੈਲਯੂਜ ਤੇ ਵਿਚਾਰ ਕੀਤੇ ਬਿਨਾਂ"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"freeform windows ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
