@@ -417,7 +417,7 @@ public class OpenExternalDirectoryActivity extends Activity {
             final View view = View.inflate(mActivity, R.layout.dialog_open_scoped_directory, null);
             final TextView messageField = (TextView) view.findViewById(R.id.message);
             messageField.setText(message);
-            mDialog = new AlertDialog.Builder(mActivity, R.style.AlertDialogTheme)
+            mDialog = new AlertDialog.Builder(mActivity, R.style.Theme_AppCompat_Light_Dialog_Alert)
                     .setView(view)
                     .setPositiveButton(R.string.allow, listener)
                     .setNegativeButton(R.string.deny, listener)
