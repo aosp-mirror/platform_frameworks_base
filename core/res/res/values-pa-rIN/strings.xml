@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"ਕੰਮ ਮੋਡ ਬੰਦ ਹੈ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ਐਪਾਂ, ਬੈਕਗ੍ਰਾਊਂਡ ਸਮਕਾਲੀਕਰਨ, ਅਤੇ ਸਬੰਧਿਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋਏ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਕੰਮ ਕਰਨ ਦੀ ਮਨਜ਼ੂਰੀ ਦਿਓ।"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ਚਾਲੂ ਕਰੋ"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ। ਹੋਰ ਜਾਣਨ ਲਈ ਉਹਨਾਂ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ਵੇਖਣ ਲਈ SMS ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸੀਮਿਤ ਹੋ ਸਕਦੀ ਹੈ"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"ਅਨਪਿੰਨ ਕਰੋ"</string>
     <string name="app_info" msgid="6856026610594615344">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਸਧਾਰਨ ਰੂਪ ਵਿੱਚ ਵਰਤਣ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ਹੋਰ ਜਾਣਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
 </resources>

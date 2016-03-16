@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Ish rejimi O‘CHIQ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Ishchi profilini yoqish: ilovalar, fonda sinxronlash va bog‘liq funksiyalar."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Yoqish"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s o‘chirilgan"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s administratori tomonidan o‘chirilgan. Batafsil ma’lumot uchun bog‘laning."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Sizga yangi SMS keldi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ko‘rish uchun SMS ilovasini oching"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Ba’zi funksiyalar cheklanishi m-n"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Olib tashlash"</string>
     <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Bu qurilmadan odatdagidek foydalanish uchun zavod sozlamalarini tiklang"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ko‘proq o‘rganish uchun bosing."</string>
 </resources>

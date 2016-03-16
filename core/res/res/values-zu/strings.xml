@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Imodi yomsebenzi IVALIWE"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Vumela iphrofayela yomsebenzi ukuze isebenze, efaka izinhlelo zokusebenza, ukuvumelanisa kwangemuva, nezici ezisondelene."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Vula"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"I-%1$s ikhutshaziwe"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Ikhutshazwe umlawuli we-%1$s. Xhumana nabo ukuze ufunde kabanzi."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Unemilayezo emisha"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Vula uhlelo lokusebenza lwe-SMS ukuze ubuke"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Okunye ukusebenza kungakhawulelwe"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Susa ukuphina"</string>
     <string name="app_info" msgid="6856026610594615344">"Ulwazi lohlelo lokusebenza"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Setha kabusha ngokwefekthri ukuze usebenzise le divayisi ngokuvamile"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Thinta ukuze ufunde kabanzi."</string>
 </resources>

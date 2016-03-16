@@ -1587,8 +1587,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Pracovní režim je VYPNUTÝ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Povolí fungování pracovního profilu, včetně aplikací, synchronizace na pozadí a souvisejících funkcí."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Zapnout"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Balíček %1$s byl zakázán"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Zakázáno administrátorem zařízení %1$s. Chcete-li získat další informace, kontaktujte jej."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Máte nové zprávy"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Zobrazíte je v aplikaci pro SMS"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Funkce mohou být omezeny"</string>
@@ -1602,6 +1600,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Odepnout"</string>
     <string name="app_info" msgid="6856026610594615344">"Informace o aplikaci"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Chcete-li toto zařízení normálně používat, obnovte jej do továrního nastavení"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Klepnutím zobrazíte další informace."</string>
 </resources>

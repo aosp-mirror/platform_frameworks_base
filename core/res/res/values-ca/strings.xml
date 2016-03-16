@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Mode de feina desactivat"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Permet que el perfil professional funcioni, incloses les aplicacions, la sincronització en segon pla i les funcions relacionades."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activa"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Aplicació %1$s desactivada"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"L\'administrador de l\'empresa %1$s ha desactivat el paquet. Contacta-hi per obtenir-ne més informació."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació de SMS per veure\'ls"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Algunes funcions es limitaran"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"No fixis"</string>
     <string name="app_info" msgid="6856026610594615344">"Informació de l\'aplicació"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Restableix les dades de fàbrica del dispositiu per utilitzar-lo amb normalitat"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca per obtenir més informació."</string>
 </resources>
