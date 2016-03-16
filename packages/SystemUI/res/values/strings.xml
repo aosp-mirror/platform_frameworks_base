@@ -1261,6 +1261,9 @@
     <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="notification_done">Done</string>
 
+    <!-- Notification: Gear: Content description for the gear. [CHAR LIMIT=NONE] -->
+    <string name="notification_gear_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> notification controls</string>
+
     <!-- SysUI Tuner: Color and appearance screen title [CHAR LIMIT=50] -->
     <string name="color_and_appearance">Color and appearance</string>
 

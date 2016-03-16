@@ -109,6 +109,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationGuts mGuts;
     private NotificationData.Entry mEntry;
     private StatusBarNotification mStatusBarNotification;
+    private String mAppName;
     private boolean mIsHeadsUp;
     private boolean mLastChronometerRunning = true;
     private NotificationHeaderView mNotificationHeader;
@@ -283,6 +284,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setRemoteInputController(RemoteInputController r) {
         mPrivateLayout.setRemoteInputController(r);
+    }
+
+    public void setAppName(String appName) {
+        mAppName = appName;
+        if (mSettingsIconRow != null) {
+            mSettingsIconRow.setAppName(mAppName);
+        }
     }
 
     public void addChildNotification(ExpandableNotificationRow row) {
@@ -564,6 +572,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mSettingsIconRow = (NotificationSettingsIconRow) LayoutInflater.from(mContext).inflate(
                     R.layout.notification_settings_icon_row, this, false);
             mSettingsIconRow.setNotificationRowParent(ExpandableNotificationRow.this);
+            mSettingsIconRow.setAppName(mAppName);
             mSettingsIconRow.setVisibility(oldSettings.getVisibility());
             addView(mSettingsIconRow, settingsIndex);
 
@@ -653,6 +662,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             public void onInflate(ViewStub stub, View inflated) {
                 mSettingsIconRow = (NotificationSettingsIconRow) inflated;
                 mSettingsIconRow.setNotificationRowParent(ExpandableNotificationRow.this);
+                mSettingsIconRow.setAppName(mAppName);
             }
         });
         mGutsStub = (ViewStub) findViewById(R.id.notification_guts_stub);

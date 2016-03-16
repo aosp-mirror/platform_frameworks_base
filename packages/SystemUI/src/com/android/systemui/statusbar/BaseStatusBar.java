@@ -1498,6 +1498,21 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setHeadsUpManager(mHeadsUpManager);
             row.setRemoteInputController(mRemoteInputController);
             row.setOnExpandClickListener(this);
+
+            // Get the app name
+            final String pkg = sbn.getPackageName();
+            String appname = pkg;
+            try {
+                final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
+                        PackageManager.GET_UNINSTALLED_PACKAGES
+                                | PackageManager.GET_DISABLED_COMPONENTS);
+                if (info != null) {
+                    appname = String.valueOf(pmUser.getApplicationLabel(info));
+                }
+            } catch (NameNotFoundException e) {
+                // Do nothing
+            }
+            row.setAppName(appname);
         }
 
         workAroundBadLayerDrawableOpacity(row);
