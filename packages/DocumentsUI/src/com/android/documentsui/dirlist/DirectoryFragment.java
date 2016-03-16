@@ -98,7 +98,6 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
-
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
@@ -406,9 +405,9 @@ public class DirectoryFragment extends Fragment
         int cellMargin = 2 * getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
         int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
 
-        assert(mRecView.getWidth() > 0);
-
-        int columnCount = Math.max(1,
+        // RecyclerView sometimes gets a width of 0 (see b/27150284).  Clamp so that we always lay
+        // out the grid with at least 2 columns.
+        int columnCount = Math.max(2,
                 (mRecView.getWidth() - viewPadding) / (cellWidth + cellMargin));
 
         return columnCount;
