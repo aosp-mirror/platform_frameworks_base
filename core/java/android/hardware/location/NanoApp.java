@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.hardware.location;
-
 
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * A class describing nano apps.
+/** A class describing nano apps.
  * A nano app is a piece of executable code that can be
  * downloaded onto a specific architecture. These are targtted
  * for low power compute domains on a device.

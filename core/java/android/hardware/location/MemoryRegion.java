@@ -23,7 +23,6 @@ import android.os.Parcelable;
 /**
  * @hide
  */
-
 @SystemApi
 public class MemoryRegion implements Parcelable{
 

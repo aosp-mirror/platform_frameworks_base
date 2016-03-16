@@ -2681,6 +2681,7 @@ public abstract class Context {
             HARDWARE_PROPERTIES_SERVICE,
             //@hide: SOUND_TRIGGER_SERVICE,
             SHORTCUT_SERVICE,
+            //@hide: CONTEXTHUB_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3583,6 +3584,18 @@ public abstract class Context {
      * @see android.content.pm.ShortcutManager
      */
     public static final String SHORTCUT_SERVICE = "shortcut";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.hardware.location.ContextHubManager} for accessing context hubs.
+     *
+     * @see #getSystemService
+     * @see android.hardware.location.ContextHubManager
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CONTEXTHUB_SERVICE = "contexthub";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
