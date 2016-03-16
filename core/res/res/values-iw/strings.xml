@@ -1587,8 +1587,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"מצב העבודה כבוי"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"אפשר לפרופיל העבודה לפעול, כולל אפליקציות, סנכרון ברקע ותכונות קשורות."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"הפעל"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"‏החבילה %1$s הושבתה"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"‏הושבתה על ידי מנהל המערכת של %1$s. צור איתו קשר כדי לקבל מידע נוסף."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"יש לך הודעות חדשות"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏פתח את אפליקציית ה-SMS כדי להציג"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ייתכן שחלק מהפונקציונליות תהיה מוגבלת"</string>
@@ -1602,6 +1600,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"בטל הצמדה"</string>
     <string name="app_info" msgid="6856026610594615344">"פרטי אפליקציה"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"איפוס להגדרות היצרן לצורך שימוש במכשיר זה באופן רגיל"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"גע לקבלת מידע נוסף."</string>
 </resources>

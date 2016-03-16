@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Work mode is OFF"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Allow work profile to function, including apps, background sync and related features."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Turn on"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s disabled"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Disabled by %1$s administrator. Contact them to find out more."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"You have new messages"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Open SMS app to view"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Some functionality may be limited"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Unpin"</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Restore this device to factory settings to use normally"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Touch to find out more."</string>
 </resources>

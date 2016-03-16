@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已关闭"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"启用工作资料，包括应用、后台同步和相关功能。"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"开启"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s已被禁用"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"该软件包已被%1$s管理员禁用。请与管理员联系以了解详情。"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新消息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"打开短信应用查看"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"部分功能可能会受到限制"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"恢复出厂设置即可正常使用此设备"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"触摸即可了解详情。"</string>
 </resources>
