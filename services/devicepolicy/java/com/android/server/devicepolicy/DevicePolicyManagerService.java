@@ -6233,19 +6233,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setApplicationRestrictionsManagingPackage(ComponentName admin, String packageName) {
+    public boolean setApplicationRestrictionsManagingPackage(ComponentName admin,
+            String packageName) {
         Preconditions.checkNotNull(admin, "ComponentName is null");
 
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (packageName != null && !isPackageInstalledForUser(packageName, userHandle)) {
-                throw new IllegalArgumentException("Package " + packageName + " is not installed "
-                        + "on the current user");
+                return false;
             }
             DevicePolicyData policy = getUserData(userHandle);
             policy.mApplicationRestrictionsManagingPackage = packageName;
             saveSettingsLocked(userHandle);
+            return true;
         }
     }
 
