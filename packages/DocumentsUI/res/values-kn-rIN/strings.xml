@@ -110,6 +110,10 @@
     <string name="menu_rename" msgid="7678802479104285353">"ಮರುಹೆಸರಿಸು"</string>
     <string name="rename_error" msgid="4203041674883412606">"ಡಾಕ್ಯುಮೆಂಟ್ ಮರುಹೆಸರಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ಕೆಲವು ಫೈಲ್‌ಗಳನ್ನು ಪರಿವರ್ತಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
+    <skip />
+    <!-- no translation found for never_ask_again (4295278542972859268) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"ಅನುಮತಿಸು"</string>
     <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸು"</string>
     <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">

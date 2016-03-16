@@ -110,6 +110,10 @@
     <string name="menu_rename" msgid="7678802479104285353">"पुनर्नामित करा"</string>
     <string name="rename_error" msgid="4203041674883412606">"दस्तऐवज पुनर्नामित करण्‍यात अयशस्वी झाले"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"काही फायली रूपांतरित केल्या होत्या"</string>
+    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
+    <skip />
+    <!-- no translation found for never_ask_again (4295278542972859268) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"अनुमती द्या"</string>
     <string name="deny" msgid="2081879885755434506">"नकार द्या"</string>
     <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">

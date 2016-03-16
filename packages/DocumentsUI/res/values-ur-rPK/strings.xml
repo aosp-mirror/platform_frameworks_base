@@ -110,6 +110,10 @@
     <string name="menu_rename" msgid="7678802479104285353">"نام تبدیل کریں"</string>
     <string name="rename_error" msgid="4203041674883412606">"دستاویز کا نام تبدیل کرنے میں ناکام"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"کچھ فائلوں کو تبدیل کیا گیا تھا"</string>
+    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
+    <skip />
+    <!-- no translation found for never_ask_again (4295278542972859268) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"اجازت دیں"</string>
     <string name="deny" msgid="2081879885755434506">"مسترد کریں"</string>
     <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
