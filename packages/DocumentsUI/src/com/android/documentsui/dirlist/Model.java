@@ -20,8 +20,6 @@ import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.State.SORT_ORDER_SIZE;
-import static com.android.documentsui.model.DocumentInfo.getCursorLong;
-import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.Cursor;
 import android.os.Bundle;
@@ -62,23 +60,16 @@ public class Model {
     private String mIds[] = new String[0];
     private int mSortOrder = SORT_ORDER_DISPLAY_NAME;
 
+    private int mAuthorityIndex = -1;
+    private int mDocIdIndex = -1;
+    private int mMimeTypeIndex = -1;
+    private int mDisplayNameIndex = -1;
+    private int mColumnSizeIndex = -1;
+    private int mLastModifiedIndex = -1;
+
     @Nullable String info;
     @Nullable String error;
     @Nullable DocumentInfo doc;
-
-    /**
-     * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a unique
-     * string that can be used to identify the document referred to by the cursor.
-     *
-     * @param c A cursor that refers to a document.
-     */
-    private static String createModelId(Cursor c) {
-        // TODO: Maybe more efficient to use just the document ID, in cases where there is only one
-        // authority (which should be the majority of cases).
-        return createModelId(
-                getCursorString(c, RootCursorWrapper.COLUMN_AUTHORITY),
-                getCursorString(c, Document.COLUMN_DOCUMENT_ID));
-    }
 
     /**
      * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a unique
@@ -127,6 +118,13 @@ public class Model {
         mCursor = result.cursor;
         mCursorCount = mCursor.getCount();
         mSortOrder = result.sortOrder;
+        mAuthorityIndex = mCursor.getColumnIndex(RootCursorWrapper.COLUMN_AUTHORITY);
+        assert(mAuthorityIndex != -1);
+        mDocIdIndex = mCursor.getColumnIndex(Document.COLUMN_DOCUMENT_ID);
+        mMimeTypeIndex = mCursor.getColumnIndex(Document.COLUMN_MIME_TYPE);
+        mDisplayNameIndex = mCursor.getColumnIndex(Document.COLUMN_DISPLAY_NAME);
+        mColumnSizeIndex = mCursor.getColumnIndex(Document.COLUMN_SIZE);
+
         doc = result.doc;
 
         updateModelData();
@@ -173,22 +171,24 @@ public class Model {
         for (int pos = 0; pos < mCursorCount; ++pos) {
             mCursor.moveToNext();
             positions[pos] = pos;
-            mIds[pos] = createModelId(mCursor);
 
-            mimeType = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
+            // Generates a Model ID for a cursor entry that refers to a document. The Model ID is a
+            // unique string that can be used to identify the document referred to by the cursor.
+            mIds[pos] = createModelId(getString(mAuthorityIndex), getString(mDocIdIndex));
+
+            mimeType = getString(mMimeTypeIndex);
             isDirs[pos] = Document.MIME_TYPE_DIR.equals(mimeType);
 
-            switch(mSortOrder) {
+            switch (mSortOrder) {
                 case SORT_ORDER_DISPLAY_NAME:
-                    final String displayName = getCursorString(
-                            mCursor, Document.COLUMN_DISPLAY_NAME);
-                    displayNames[pos] = displayName;
+                    displayNames[pos] = getString(mDisplayNameIndex);
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
-                    longValues[pos] = getLastModified(mCursor);
+                    longValues[pos] = getLastModified();
                     break;
                 case SORT_ORDER_SIZE:
-                    longValues[pos] = getCursorLong(mCursor, Document.COLUMN_SIZE);
+                    longValues[pos] = mColumnSizeIndex != -1
+                            ? mCursor.getLong(mColumnSizeIndex) : 0;
                     break;
             }
         }
@@ -364,13 +364,17 @@ public class Model {
         }
     }
 
+    private String getString(int columnIndex) {
+        return columnIndex != -1 ? mCursor.getString(columnIndex) : null;
+    }
+
     /**
      * @return Timestamp for the given document. Some docs (e.g. active downloads) have a null
      * timestamp - these will be replaced with MAX_LONG so that such files get sorted to the top
      * when sorting by date.
      */
-    long getLastModified(Cursor cursor) {
-        long l = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+    private long getLastModified() {
+        long l = mCursor.getLong(mLastModifiedIndex);
         return (l == -1) ? Long.MAX_VALUE : l;
     }
 
