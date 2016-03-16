@@ -585,21 +585,8 @@ public class CarrierConfigManager {
      * When {@code true}, video calls to emergency numbers will be allowed.  When {@code false},
      * video calls to emergency numbers will be initiated as audio-only calls instead.
      */
-    @SystemApi
-    public static final String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS =
-            "bool_allow_emergency_video_calls";
-
-    /**
-     * Flag indicating whether the carrier supports video pause signaling.  When {@code true}, the
-     * carrier supports use of the {@link android.telecom.VideoProfile#STATE_PAUSED} video state
-     * to pause transmission of video when the In-Call app is sent to the background.
-     * When {@code false}, video pause signaling is not supported.  {@code True} by default unless
-     * a carrier configuration overrides the default.
-     */
-    @SystemApi
-    public static final String BOOL_ALLOW_VIDEO_PAUSE =
-            "bool_allow_video_pause";
-
+    public static final String KEY_ALLOW_EMERGENCY_VIDEO_CALLS_BOOL =
+            "allow_emergency_video_calls_bool";
 
     /**
      * Flag indicating whether the carrier supports RCS presence indication for video calls.  When
@@ -612,7 +599,6 @@ public class CarrierConfigManager {
      * and can choose to hide or show the video calling icon based on whether a contact supports
      * video.
      */
-    @SystemApi
     public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
 
     /**
@@ -709,8 +695,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
-        sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_VIDEO_CALLS, false);
-        sDefaults.putBoolean(BOOL_ALLOW_VIDEO_PAUSE, true);
+        sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_VIDEO_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_MODE_BOOL, true);
 
         // MMS defaults
