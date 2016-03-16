@@ -4019,9 +4019,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns {@code true} if the calling package has been granted permission via
-     * {@link #setApplicationRestrictionsManagingPackage} to manage application
-     * restrictions for the calling user.
+     * Called by any application to find out whether it has been granted permission via
+     * {@link #setApplicationRestrictionsManagingPackage} to manage application restrictions
+     * for the calling user.
+     *
+     * <p>This is done by comparing the calling Linux uid with the uid of the package specified by
+     * that method.
      */
     public boolean isCallerApplicationRestrictionsManagingPackage() {
         if (mService != null) {
