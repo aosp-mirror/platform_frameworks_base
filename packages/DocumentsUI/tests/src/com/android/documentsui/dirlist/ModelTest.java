@@ -284,7 +284,7 @@ public class ModelTest extends AndroidTestCase {
             String id = Integer.toString(i);
             row.add(RootCursorWrapper.COLUMN_AUTHORITY, AUTHORITY);
             row.add(Document.COLUMN_DOCUMENT_ID, id);
-            currentDownloads.add(Model.createModelId(AUTHORITY, id));
+            currentDownloads.add(id);
         }
 
         DirectoryResult r = new DirectoryResult();
