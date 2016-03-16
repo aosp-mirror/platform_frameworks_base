@@ -108,7 +108,7 @@ system indicators.
   <div class="col-4">
 
     <img src="{@docRoot}design/media/downloads_wear_Slide_Ai_Icon.png" width="150"
-         style="width:150px;margin:0 auto;display:block">
+         style="width:150px;margin:0 auto 15px;display:block">
 
   </div>
   <div class="col-4">
@@ -128,7 +128,7 @@ system indicators.
   <div class="col-4">
 
     <img src="{@docRoot}design/media/downloads_wear_Slide_Psd_Icon.png" width="150"
-         style="width:150px;margin:0 auto;display:block">
+         style="width:150px;margin:0 auto 15px;display:block">
 
   </div>
   <div class="col-4">
@@ -148,11 +148,35 @@ system indicators.
   <div class="col-4">
 
     <img src="{@docRoot}design/media/downloads_wear_Slide_IconExample.png" width="150"
-         style="width:150px;margin:0 auto;display:block">
+         style="width:150px;margin:0 auto 20px;display:block">
 
   </div>
   <div class="col-4">
   <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Watch Face Example Specifications');"
     href="{@docRoot}downloads/design/Slide_IconExample.psd">Adobe&reg; Photoshop&reg; Icon</a>
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-5">
+  <h4>Hardware technical drawings</h4>
+<p>Technical drawings and specifications for the latest Android Wear devices.
+</p>
+
+  </div>
+  <div class="col-4">
+
+    <img src="{@docRoot}design/media/nemo_preview.png" width="150"
+         style="width:150px;margin:0 auto;display:block">
+
+  </div>
+  <div class="col-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Hardware Technical Drawings');"
+    href="{@docRoot}downloads/design/AndroidWear_AllGear_TechDrawings&Spec_20151101_square.png">
+PNG Toolkit (Square)</a>
+
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Hardware Technical Drawings');"
+    href="{@docRoot}downloads/design/AndroidWear_AllGear_TechDrawings&Spec_20151101_round.png">
+PNG Toolkit (Round)</a>
   </div>
 </div>
