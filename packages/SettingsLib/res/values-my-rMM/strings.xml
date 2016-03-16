@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"ANRsအားလုံးအား ပြသရန်"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"နောက်ခံအပ်ပလီကေးရှင်းအတွက်တုံ့ပြန်မှုမရှိပြရန်"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"အပြင်မှာ အတင်း ခွင့်ပြုရန်"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ပြနေတဲ့ တန်ဖိုး ဘယ်လိုပဲရှိနေနေ၊ ဘယ် appကို မဆို အပြင် သိုလှောင်ခန်းသို့ ရေးသားခွင့် ပေးတယ်"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"တိကျစွာ သတ်မှတ်ထားသည့်တန်ဖိုးများရှိသော်လည်း၊ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို သိမ်းဆည်းခွင့်ပြုပါ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"လုပ်ဆောင်ချက်များ ဆိုက်ညှိရနိုင်ရန် လုပ်ခိုင်းပါ"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"မန်နီးဖက်စ်တန်ဖိုးများ မည်မျှပင်ရှိစေကာမူ၊ ဝင်းဒိုးများအတွက် လှုပ်ရှားမှုများအားလုံးကို အရွယ်အစားချိန်ခြင်း ပြုလုပ်ပါ။"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"အခမဲ့ပုံစံ ဝင်းဒိုးကို ဖွင့်ပါ"</string>

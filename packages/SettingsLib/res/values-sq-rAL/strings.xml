@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Shfaq raportet ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Shfaq raportet ANR (Aplikacioni nuk përgjigjet) për aplikacionet në sfond"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Detyro lejimin në hapësirën e jashtme"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Bëj që të gjitha aktivitetet të kenë madhësi të ndryshueshme për përdorimin me shumë dritare, pavarësisht vlerave të manifestit."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivizo dritaret me formë të lirë"</string>

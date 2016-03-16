@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Mostrar todos os ANRS"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Exibir \"App não responde\" para app em 2º plano"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forçar permissão de apps em armazenamento externo"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Qualifica apps p/ gravação em armazenamento externo, independentemente de valores de manifestos"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Qualifica apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forçar atividades a serem redimensionáveis"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ativar janelas de forma livre"</string>

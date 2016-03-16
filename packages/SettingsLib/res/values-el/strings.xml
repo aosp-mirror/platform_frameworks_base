@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Εμφάνιση όλων των ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Εμφ.του παραθ. \"Η εφαρμ.δεν αποκρ.\" για εφ.παρασκ."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Να επιτρέπονται υποχρεωτικά εφαρμογές σε εξωτ.συσ."</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό χώρο αποθήκευσης, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό αποθηκευτικό χώρο, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Αναγκαστική δυνατότητα αλλαγής μεγέθους δραστηριοτήτων"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Να έχουν όλες οι δραστηριότητες δυνατότητα αλλαγής μεγέθους για την προβολή πολλαπλών παραθύρων, ανεξάρτητα από τις τιμές του μανιφέστου."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ενεργοποίηση παραθύρων ελεύθερης μορφής"</string>

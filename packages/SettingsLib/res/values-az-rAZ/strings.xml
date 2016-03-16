@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Bütün ANRları göstər"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Arxa tətbiqlər dialoquna cavab verməyən tətbiqi göstər"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tətbiqlərə xaricdən məcburi icazə"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Seçilmiş hər hansı tətbiqi bəyannamə dəyərlərindən aslı olmayaraq xarici yaddaşa yazılabilən edir."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Seçilmiş hər hansı tətbiqi bəyannamə dəyərlərindən aslı olmayaraq xarici yaddaşa yazılabilən edir."</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ölçü dəyişdirmək üçün məcburi fəaliyyətlər"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Bəyannamə dəyərlərindən aslı olmayaraq, bütün fəaliyyətləri çoxsaylı pəncərə üçün dəyişkən ölçülü edin."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Freeform windows aktiv edin"</string>

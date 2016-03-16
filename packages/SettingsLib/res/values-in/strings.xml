@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Tampilkan semua ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Tmplkn dialog Apl Tidak Merespons utk apl ltr blkg"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Paksa izinkan aplikasi di eksternal"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksterna"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Paksa aktivitas agar ukurannya dapat diubah"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Buat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktifkan jendela berformat bebas"</string>
