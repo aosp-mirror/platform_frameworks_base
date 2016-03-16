@@ -54,10 +54,9 @@ public class SystemSensorManager extends SensorManager {
     private static native void nativeGetDynamicSensors(long nativeInstance, List<Sensor> list);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
+    private static final Object sLock = new Object();
     private static boolean sSensorModuleInitialized = false;
-    private static InjectEventQueue mInjectEventQueue = null;
-
-    private final Object mLock = new Object();
+    private static InjectEventQueue sInjectEventQueue = null;
 
     private final ArrayList<Sensor> mFullSensorsList = new ArrayList<>();
     private List<Sensor> mFullDynamicSensorsList = new ArrayList<>();
@@ -84,24 +83,24 @@ public class SystemSensorManager extends SensorManager {
 
     /** {@hide} */
     public SystemSensorManager(Context context, Looper mainLooper) {
+        synchronized(sLock) {
+            if (!sSensorModuleInitialized) {
+                sSensorModuleInitialized = true;
+                nativeClassInit();
+            }
+        }
+
         mMainLooper = mainLooper;
         mTargetSdkLevel = context.getApplicationInfo().targetSdkVersion;
         mContext = context;
         mNativeInstance = nativeCreate(context.getOpPackageName());
 
-        synchronized(mLock) {
-            if (!sSensorModuleInitialized) {
-                sSensorModuleInitialized = true;
-                nativeClassInit();
-            }
-
-            // initialize the sensor list
-            for (int index = 0;;++index) {
-                Sensor sensor = new Sensor();
-                if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
-                mFullSensorsList.add(sensor);
-                mHandleToSensor.put(sensor.getHandle(), sensor);
-            }
+        // initialize the sensor list
+        for (int index = 0;;++index) {
+            Sensor sensor = new Sensor();
+            if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+            mFullSensorsList.add(sensor);
+            mHandleToSensor.put(sensor.getHandle(), sensor);
         }
     }
 
@@ -257,7 +256,7 @@ public class SystemSensorManager extends SensorManager {
     }
 
     protected boolean initDataInjectionImpl(boolean enable) {
-        synchronized (mLock) {
+        synchronized (sLock) {
             if (enable) {
                 boolean isDataInjectionModeEnabled = nativeIsDataInjectionEnabled(mNativeInstance);
                 // The HAL does not support injection OR SensorService hasn't been set in DI mode.
@@ -266,15 +265,15 @@ public class SystemSensorManager extends SensorManager {
                     return false;
                 }
                 // Initialize a client for data_injection.
-                if (mInjectEventQueue == null) {
-                    mInjectEventQueue = new InjectEventQueue(mMainLooper, this,
+                if (sInjectEventQueue == null) {
+                    sInjectEventQueue = new InjectEventQueue(mMainLooper, this,
                             mContext.getPackageName());
                 }
             } else {
                 // If data injection is being disabled clean up the native resources.
-                if (mInjectEventQueue != null) {
-                    mInjectEventQueue.dispose();
-                    mInjectEventQueue = null;
+                if (sInjectEventQueue != null) {
+                    sInjectEventQueue.dispose();
+                    sInjectEventQueue = null;
                 }
             }
             return true;
@@ -283,17 +282,17 @@ public class SystemSensorManager extends SensorManager {
 
     protected boolean injectSensorDataImpl(Sensor sensor, float[] values, int accuracy,
             long timestamp) {
-        synchronized (mLock) {
-            if (mInjectEventQueue == null) {
+        synchronized (sLock) {
+            if (sInjectEventQueue == null) {
                 Log.e(TAG, "Data injection mode not activated before calling injectSensorData");
                 return false;
             }
-            int ret = mInjectEventQueue.injectSensorData(sensor.getHandle(), values, accuracy,
+            int ret = sInjectEventQueue.injectSensorData(sensor.getHandle(), values, accuracy,
                                                          timestamp);
             // If there are any errors in data injection clean up the native resources.
             if (ret != 0) {
-                mInjectEventQueue.dispose();
-                mInjectEventQueue = null;
+                sInjectEventQueue.dispose();
+                sInjectEventQueue = null;
             }
             return ret == 0;
         }
