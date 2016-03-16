@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"प्ले गर्नुहोस्"</string>
     <string name="pip_pause" msgid="8412075640017218862">"रोक्नुहोस्"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP लाई नियन्त्रण गर्न "<b>"गृह"</b>" कुञ्जीलाई थिचिरहनुहोस्"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"PIP लाई नियन्त्रण गर्न गृह\nबटनलाई थिचेर होल्ड गर्नुहोस्"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"IP लाई नियन्त्रण गर्न गृह बटनलाई थिची होल्ड गर्नुहोस्"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"बुझेँ"</string>
 </resources>

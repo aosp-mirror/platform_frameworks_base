@@ -27,6 +27,6 @@
     <!-- no translation found for pip_pause (8412075640017218862) -->
     <skip />
     <string name="pip_hold_home" msgid="340086535668778109">"Za kontr. PIP držite "<b>"HOME"</b></string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"Za kontrolu PIP \n držite dugme POČETAK"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Za kontrolu PIP, pritisnite i držite dugme POČETAK"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Jasno mi je"</string>
 </resources>

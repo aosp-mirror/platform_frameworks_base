@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"Atskaņot"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Apturēt"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Turiet taustiņu "<b>"SĀKUMS"</b>", lai kontrolētu PIP"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"Nospiediet un turiet pogu SĀKUMS,\n lai kontrolētu PIP"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Nospiediet un turiet pogu SĀKUMS, lai kontrolētu PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Labi"</string>
 </resources>

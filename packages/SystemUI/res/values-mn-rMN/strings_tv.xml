@@ -24,6 +24,7 @@
     <string name="pip_play" msgid="674145557658227044">"Тоглуулах"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Түр зогсоох"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP-г удирдахын тулд "<b>"HOME"</b>" товчлуурыг дарна уу"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"PIP-г удирдахын тулд HOME\nтовчлуурыг дараад хүлээнэ үү"</string>
+    <!-- no translation found for pip_onboarding_description (2882896641362814195) -->
+    <skip />
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Ойлголоо"</string>
 </resources>

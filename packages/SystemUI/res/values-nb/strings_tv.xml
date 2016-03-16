@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"Spill av"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Sett på pause"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Hold inne "<b>"STARTSIDE"</b>" for å kontrollere PIP"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"Trykk og hold STARTSIDE-\nknappen for å kontrollere PIP"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Trykk og hold inne STARTSIDE-knappen for å kontrollere PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Greit"</string>
 </resources>

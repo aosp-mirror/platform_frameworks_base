@@ -24,6 +24,6 @@
     <string name="pip_play" msgid="674145557658227044">"Odtwórz"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Wstrzymaj"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Przytrzymaj "<b>"EKRAN GŁÓWNY"</b>", by sterować PIP"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"Przytrzymaj EKRAN GŁÓWNY,\nby sterować PIP"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Przytrzymaj przycisk EKRAN GŁÓWNY, by sterować PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
 </resources>

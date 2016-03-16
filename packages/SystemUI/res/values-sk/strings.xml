@@ -75,8 +75,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Snímka obrazovky bola zaznamenaná."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Snímku obrazovky zobrazíte dotykom."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Snímku obrazovky sa nepodarilo zachytiť."</string>
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
-    <skip />
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Pri ukladaní snímky obrazovky sa vyskytol problém."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Snímku obrazovky nie je možné vytvoriť z dôvodu nedostatku miesta v úložisku."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Vytváranie snímok obrazovky je zakázané aplikáciou alebo vašou organizáciou."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosu súborov USB"</string>
