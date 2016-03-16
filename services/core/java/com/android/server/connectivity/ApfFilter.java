@@ -155,6 +155,9 @@ public class ApfFilter {
 
         // From RFC4861:
         private static final int ICMP6_RA_HEADER_LEN = 16;
+        private static final int ICMP6_RA_CHECKSUM_OFFSET =
+                ETH_HEADER_LEN + IPV6_HEADER_LEN + 2;
+        private static final int ICMP6_RA_CHECKSUM_LEN = 2;
         private static final int ICMP6_RA_OPTION_OFFSET =
                 ETH_HEADER_LEN + IPV6_HEADER_LEN + ICMP6_RA_HEADER_LEN;
         private static final int ICMP6_RA_ROUTER_LIFETIME_OFFSET =
@@ -216,9 +219,16 @@ public class ApfFilter {
             mPacket.clear();
             mLastSeen = curTime();
 
+            // Ignore the checksum.
+            int lastNonLifetimeStart = addNonLifetime(0,
+                    ICMP6_RA_CHECKSUM_OFFSET,
+                    ICMP6_RA_CHECKSUM_LEN);
+
             // Parse router lifetime
-            int lastNonLifetimeStart = addNonLifetime(0, ICMP6_RA_ROUTER_LIFETIME_OFFSET,
+            lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
+                    ICMP6_RA_ROUTER_LIFETIME_OFFSET,
                     ICMP6_RA_ROUTER_LIFETIME_LEN);
+
             // Parse ICMP6 options
             mPacket.position(ICMP6_RA_OPTION_OFFSET);
             while (mPacket.hasRemaining()) {
@@ -282,6 +292,12 @@ public class ApfFilter {
             ByteBuffer byteBuffer = ByteBuffer.wrap(packet);
             for (int i = 0; (i + 1) < mNonLifetimes.size(); i++) {
                 int offset = mNonLifetimes.get(i).first + mNonLifetimes.get(i).second;
+
+                // The checksum is in mNonLifetimes, but it's not a lifetime.
+                if (offset == ICMP6_RA_CHECKSUM_OFFSET) {
+                     continue;
+                }
+
                 int lifetimeLength = mNonLifetimes.get(i+1).first - offset;
                 long val;
                 switch (lifetimeLength) {
@@ -329,6 +345,10 @@ public class ApfFilter {
                 if ((i + 1) < mNonLifetimes.size()) {
                     Pair<Integer, Integer> nextNonLifetime = mNonLifetimes.get(i + 1);
                     int offset = nonLifetime.first + nonLifetime.second;
+                    // Skip the checksum.
+                    if (offset == ICMP6_RA_CHECKSUM_OFFSET) {
+                        continue;
+                    }
                     int length = nextNonLifetime.first - offset;
                     switch (length) {
                         case 4: gen.addLoad32(Register.R0, offset); break;
