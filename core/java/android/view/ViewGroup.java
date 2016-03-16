@@ -1291,6 +1291,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    int dispatchVisibilityAggregated(View changedView, @Visibility int visibility) {
+        visibility = super.dispatchVisibilityAggregated(changedView, visibility);
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            // Only dispatch to children with at least the same level of visibility
+            // that we're reporting, otherwise it won't affect that child/subtree at all
+            // so it's not worth telling them about it. Note that we use <= here
+            // because VISIBLE < INVISIBLE < GONE as constant values.
+            if (children[i].getVisibility() <= visibility) {
+                children[i].dispatchVisibilityAggregated(changedView, visibility);
+            }
+        }
+        return visibility;
+    }
+
+    @Override
     public void dispatchConfigurationChanged(Configuration newConfig) {
         super.dispatchConfigurationChanged(newConfig);
         final int count = mChildrenCount;
