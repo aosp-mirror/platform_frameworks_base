@@ -1787,6 +1787,38 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return false;
     }
 
+    private void dumpNetworkDiagnostics(IndentingPrintWriter pw) {
+        final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
+        final long DIAG_TIME_MS = 5000;
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            // Start gathering diagnostic information.
+            netDiags.add(new NetworkDiagnostics(
+                    nai.network,
+                    new LinkProperties(nai.linkProperties),  // Must be a copy.
+                    DIAG_TIME_MS));
+        }
+
+        for (NetworkDiagnostics netDiag : netDiags) {
+            pw.println();
+            netDiag.waitForMeasurements();
+            netDiag.dump(pw);
+        }
+    }
+
+    private void dumpApf(IndentingPrintWriter pw) {
+        pw.println("APF filters:");
+        pw.increaseIndent();
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (nai.apfFilter != null) {
+                pw.println(nai.name() + ":");
+                pw.increaseIndent();
+                nai.apfFilter.dump(pw);
+                pw.decreaseIndent();
+            }
+        }
+        pw.decreaseIndent();
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -1799,23 +1831,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        final List<NetworkDiagnostics> netDiags = new ArrayList<NetworkDiagnostics>();
         if (argsContain(args, "--diag")) {
-            final long DIAG_TIME_MS = 5000;
-            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                // Start gathering diagnostic information.
-                netDiags.add(new NetworkDiagnostics(
-                        nai.network,
-                        new LinkProperties(nai.linkProperties),  // Must be a copy.
-                        DIAG_TIME_MS));
-            }
+            dumpNetworkDiagnostics(pw);
+            return;
+        }
 
-            for (NetworkDiagnostics netDiag : netDiags) {
-                pw.println();
-                netDiag.waitForMeasurements();
-                netDiag.dump(pw);
-            }
-
+        if (argsContain(args, "apf")) {
+            dumpApf(pw);
             return;
         }
 
@@ -1880,6 +1902,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.println();
         mKeepaliveTracker.dump(pw);
+
+        pw.println();
+        dumpApf(pw);
 
         if (mInetLog != null && mInetLog.size() > 0) {
             pw.println();

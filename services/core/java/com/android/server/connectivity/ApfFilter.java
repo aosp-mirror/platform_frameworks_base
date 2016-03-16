@@ -29,14 +29,19 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.util.HexDump;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.ConnectivityService;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.Thread;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -85,6 +90,7 @@ public class ApfFilter {
     }
 
     private static final String TAG = "ApfFilter";
+    private static final boolean VDBG = true;
 
     private final ConnectivityService mConnectivityService;
     private final NetworkAgentInfo mNai;
@@ -152,6 +158,8 @@ public class ApfFilter {
         private static final int ETH_HEADER_LEN = 14;
 
         private static final int IPV6_HEADER_LEN = 40;
+        private static final int IPV6_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 8;
+        private static final int IPV6_DST_ADDR_OFFSET = ETH_HEADER_LEN + 24;
 
         // From RFC4861:
         private static final int ICMP6_RA_HEADER_LEN = 16;
@@ -192,6 +200,66 @@ public class ApfFilter {
         // When the packet was last captured, in seconds since Unix Epoch
         long mLastSeen;
 
+        // For debugging only. Offsets into the packet where PIOs are.
+        private final ArrayList<Integer> mPrefixOptionOffsets;
+        // For debugging only. How many times this RA was seen.
+        int seenCount = 0;
+
+
+        private String IPv6AddresstoString(int pos) {
+            try {
+                byte[] array = mPacket.array();
+                // Can't just call copyOfRange() and see if it throws, because if it reads past the
+                // end it pads with zeros instead of throwing.
+                if (pos < 0 || pos + 16 > array.length || pos + 16 < pos) {
+                    return "???";
+                }
+                byte[] addressBytes = Arrays.copyOfRange(array, pos, pos + 16);
+                InetAddress address = (Inet6Address) InetAddress.getByAddress(addressBytes);
+                return address.getHostAddress();
+            } catch (UnsupportedOperationException e) {
+                // array() failed. Cannot happen, mPacket is array-backed and read-write.
+                return "???";
+            } catch (ClassCastException | UnknownHostException e) {
+                // Cannot happen.
+                return "???";
+            }
+        }
+
+        // Can't be static because it's in a non-static inner class.
+        // TODO: Make this final once RA is its own class.
+        private int uint8(byte b) {
+            return b & 0xff;
+        }
+
+        private int uint16(short s) {
+            return s & 0xffff;
+        }
+
+        private long uint32(int s) {
+            return s & 0xffffffff;
+        }
+
+        public String toString() {
+            try {
+                StringBuffer sb = new StringBuffer();
+                sb.append(String.format("RA %s -> %s %d ",
+                        IPv6AddresstoString(IPV6_SRC_ADDR_OFFSET),
+                        IPv6AddresstoString(IPV6_DST_ADDR_OFFSET),
+                        uint16(mPacket.getShort(ICMP6_RA_ROUTER_LIFETIME_OFFSET))));
+                for (int i: mPrefixOptionOffsets) {
+                    String prefix = IPv6AddresstoString(i + 16);
+                    int length = uint8(mPacket.get(i + 2));
+                    long valid = mPacket.getInt(i + 4);
+                    long preferred = mPacket.getInt(i + 8);
+                    sb.append(String.format("%s/%d %d/%d ", prefix, length, valid, preferred));
+                }
+                return sb.toString();
+            } catch (BufferUnderflowException | IndexOutOfBoundsException e) {
+                return "<Malformed RA>";
+            }
+        }
+
         /**
          * Add a binary range of the packet that does not include a lifetime to mNonLifetimes.
          * Assumes mPacket.position() is as far as we've parsed the packet.
@@ -230,6 +298,7 @@ public class ApfFilter {
                     ICMP6_RA_ROUTER_LIFETIME_LEN);
 
             // Parse ICMP6 options
+            mPrefixOptionOffsets = new ArrayList<>();
             mPacket.position(ICMP6_RA_OPTION_OFFSET);
             while (mPacket.hasRemaining()) {
                 int optionType = ((int)mPacket.get(mPacket.position())) & 0xff;
@@ -244,6 +313,7 @@ public class ApfFilter {
                         lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
                                 ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_OFFSET,
                                 ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_LEN);
+                        mPrefixOptionOffsets.add(mPacket.position());
                         break;
                     // These three options have the same lifetime offset and size, so process
                     // together:
@@ -383,6 +453,9 @@ public class ApfFilter {
     // How long should the last installed filter program live for? In seconds.
     private long mLastInstalledProgramMinLifetime;
 
+    // For debugging only. The length in bytes of the last program.
+    private long mLastInstalledProgramLength;
+
     private void installNewProgram() {
         if (mRas.size() == 0) return;
         final byte[] program;
@@ -422,7 +495,12 @@ public class ApfFilter {
         }
         mLastTimeInstalledProgram = curTime();
         mLastInstalledProgramMinLifetime = programMinLifetime;
-        hexDump("Installing filter: ", program, program.length);
+        mLastInstalledProgramLength = program.length;
+        if (VDBG) {
+            hexDump("Installing filter: ", program, program.length);
+        } else {
+            Log.d(TAG, "Installing filter length=" + program.length);
+        }
         mConnectivityService.pushApfProgramToNetwork(mNai, program);
     }
 
@@ -441,16 +519,17 @@ public class ApfFilter {
     }
 
     private void processRa(byte[] packet, int length) {
-        hexDump("Read packet = ", packet, length);
+        if (VDBG) hexDump("Read packet = ", packet, length);
 
         // Have we seen this RA before?
         for (int i = 0; i < mRas.size(); i++) {
             Ra ra = mRas.get(i);
             if (ra.matches(packet, length)) {
-                log("matched RA");
+                if (VDBG) log("matched RA " + ra);
                 // Update lifetimes.
                 ra.mLastSeen = curTime();
                 ra.mMinLifetime = ra.minLifetime(packet, length);
+                ra.seenCount++;
 
                 // Keep mRas in LRU order so as to prioritize generating filters for recently seen
                 // RAs. LRU prioritizes this because RA filters are generated in order from mRas
@@ -468,7 +547,7 @@ public class ApfFilter {
         // Purge expired RAs.
         for (int i = 0; i < mRas.size();) {
             if (mRas.get(i).isExpired()) {
-                log("expired RA");
+                log("Expired RA " + mRas.get(i));
                 mRas.remove(i);
             } else {
                 i++;
@@ -477,8 +556,9 @@ public class ApfFilter {
         // TODO: figure out how to proceed when we've received more then MAX_RAS RAs.
         if (mRas.size() >= MAX_RAS) return;
         try {
-            log("adding RA");
-            mRas.add(new Ra(packet, length));
+            Ra ra = new Ra(packet, length);
+            log("Adding " + ra);
+            mRas.add(ra);
         } catch (Exception e) {
             Log.e(TAG, "Error parsing RA: " + e);
             return;
@@ -493,8 +573,8 @@ public class ApfFilter {
     public static void maybeInstall(ConnectivityService connectivityService, NetworkAgentInfo nai) {
         if (nai.networkMisc == null) return;
         if (nai.networkMisc.apfVersionSupported == 0) return;
-        if (nai.networkMisc.maximumApfProgramSize < 200) {
-            Log.e(TAG, "Uselessly small APF size limit: " + nai.networkMisc.maximumApfProgramSize);
+        if (nai.networkMisc.maximumApfProgramSize < 512) {
+            Log.e(TAG, "Unacceptably small APF limit: " + nai.networkMisc.maximumApfProgramSize);
             return;
         }
         // For now only support generating programs for Ethernet frames. If this restriction is
@@ -511,9 +591,35 @@ public class ApfFilter {
 
     public void shutdown() {
         if (mReceiveThread != null) {
-            log("shuting down");
+            log("shutting down");
             mReceiveThread.halt();  // Also closes socket.
             mReceiveThread = null;
         }
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("APF version: " + mNai.networkMisc.apfVersionSupported);
+        pw.println("Max program size: " + mNai.networkMisc.maximumApfProgramSize);
+        pw.println("Receive thread: " + (mReceiveThread != null ? "RUNNING" : "STOPPED"));
+        if (mLastTimeInstalledProgram == 0) {
+            pw.println("No program installed.");
+            return;
+        }
+
+        pw.println(String.format(
+                "Last program length %d, installed %ds ago, lifetime %d",
+                mLastInstalledProgramLength, curTime() - mLastTimeInstalledProgram,
+                mLastInstalledProgramMinLifetime));
+
+        pw.println("RA filters:");
+        pw.increaseIndent();
+        for (Ra ra: mRas) {
+            pw.println(ra);
+            pw.increaseIndent();
+            pw.println(String.format(
+                    "Seen: %d, last %ds ago", ra.seenCount, curTime() - ra.mLastSeen));
+            pw.decreaseIndent();
+        }
+        pw.decreaseIndent();
     }
 }
