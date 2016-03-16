@@ -166,7 +166,7 @@ page.image=images/cards/card-n-changes_2x.png
 <p>If your app uses any of these intents, you should remove dependencies
   on them as soon as possible so that you can target Android N devices properly.
   The Android framework provides several solutions to mitigate the need for
-  these implicit broadcasts or background services. For example, the {@link
+  these implicit broadcasts. For example, the {@link
   android.app.job.JobScheduler} API provides a robust mechanism to schedule
   network operations when specified conditions, such as connection to an
   unmetered network, are met. You can even use {@link
@@ -174,7 +174,7 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 <p>
-  For more information about this behavior change and how to adapt your app,
+  For more information about background optimizations in N and how to adapt your app,
   see <a href=
   "{@docRoot}preview/features/background-optimization.html">Background
   Optimizations</a>.
