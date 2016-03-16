@@ -1332,9 +1332,14 @@ class ContextImpl extends Context {
             }
         }
         try {
-            return ActivityManagerNative.getDefault().registerReceiver(
+            final Intent intent = ActivityManagerNative.getDefault().registerReceiver(
                     mMainThread.getApplicationThread(), mBasePackageName,
                     rd, filter, broadcastPermission, userId);
+            if (intent != null) {
+                intent.setExtrasClassLoader(getClassLoader());
+                intent.prepareToEnterProcess();
+            }
+            return intent;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
