@@ -903,7 +903,7 @@ public final class MultiSelectManager {
             public Selection createFromParcel(Parcel in, ClassLoader loader) {
                 return new Selection(
                         in.readString(),
-                        (ArrayList<String>) in.readArrayList(loader));
+                        in.readArrayList(loader));
             }
 
             @Override
@@ -931,7 +931,6 @@ public final class MultiSelectManager {
         Rect getAbsoluteRectForChildViewAt(int index);
         int getAdapterPositionAt(int index);
         int getColumnCount();
-        int getRowCount();
         int getChildCount();
         int getVisibleChildCount();
         /**
@@ -1005,13 +1004,6 @@ public final class MultiSelectManager {
 
             // Otherwise, it is a list with 1 column.
             return 1;
-        }
-
-        @Override
-        public int getRowCount() {
-            int numFullColumns = getChildCount() / getColumnCount();
-            boolean hasPartiallyFullColumn = getChildCount() % getColumnCount() != 0;
-            return numFullColumns + (hasPartiallyFullColumn ? 1 : 0);
         }
 
         @Override
@@ -1202,6 +1194,7 @@ public final class MultiSelectManager {
             }
 
             mCurrentPosition = input.getOrigin();
+            mModel.resizeSelection(input.getOrigin());
             scrollViewIfNecessary();
             resizeBandSelectRectangle();
         }
@@ -1549,11 +1542,7 @@ public final class MultiSelectManager {
                         mColumnBounds, new Limits(absoluteChildRect.left, absoluteChildRect.right));
             }
 
-            if (mRowBounds.size() != mHelper.getRowCount()) {
-                // If not all y-limits have been recorded, record this one.
-                recordLimits(
-                        mRowBounds, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
-            }
+            recordLimits(mRowBounds, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
 
             SparseIntArray columnList = mColumns.get(absoluteChildRect.left);
             if (columnList == null) {
@@ -1746,6 +1735,11 @@ public final class MultiSelectManager {
 
                 return ((Limits) other).lowerLimit == lowerLimit &&
                         ((Limits) other).upperLimit == upperLimit;
+            }
+
+            @Override
+            public String toString() {
+                return "(" + lowerLimit + ", " + upperLimit + ")";
             }
         }
 
