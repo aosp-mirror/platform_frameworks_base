@@ -913,10 +913,6 @@ public class NotificationManager
      * (e.g. via sound &amp; vibration) and is applied globally.
      * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
      * unavailable.
-     *
-     * <p>
-     * Only available if policy access is granted to this package.
-     * See {@link #isNotificationPolicyAccessGranted}.
      */
     public final @InterruptionFilter int getCurrentInterruptionFilter() {
         final INotificationManager service = getService();
