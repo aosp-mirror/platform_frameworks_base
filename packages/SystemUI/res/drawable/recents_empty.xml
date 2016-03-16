@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="132dp"
+    android:viewportWidth="100"
+    android:viewportHeight="132">
+
+    <path
+        android:fillColor="#5AFFFFFF"
+        android:pathData="M86.91,68.67H13.09c-4.96,0-9,4.04-9,9V119c0,4.96,4.04,9,9,9h73.82c4.96,0,9-4.04,9-9V77.67
+C95.91,72.7,91.87,68.67,86.91,68.67z M27.59,77.27h26.72v3.94H27.59V77.27z
+M18.73,74.74c2.49,0,4.5,2.01,4.5,4.5
+c0,2.49-2.01,4.5-4.5,4.5s-4.5-2.01-4.5-4.5C14.23,76.75,16.24,74.74,18.73,74.74z
+M89.91,119c0,1.65-1.35,3-3,3H13.09 c-1.65,0-3-1.35-3-3V88.67h79.82V119z" />
+    <path
+        android:fillColor="#5AFFFFFF"
+        android:pathData="M86.91,36.3H13.09c-4.96,0-9,4.04-9,9v23c1.65-1.58,3.71-2.73,6-3.28v-9.08h79.82v9.08
+c2.29,0.55,4.35,1.69,6,3.28v-23C95.91,40.34,91.87,36.3,86.91,36.3z
+M18.73,51.38c-2.49,0-4.5-2.01-4.5-4.5s2.01-4.5,4.5-4.5
+s4.5,2.01,4.5,4.5S21.22,51.38,18.73,51.38z M54.31,48.84H27.59v-3.94h26.72V48.84z" />
+    <path
+        android:fillColor="#5AFFFFFF"
+        android:pathData="M86.91,4H13.09c-4.96,0-9,4.04-9,9v22.94c1.65-1.58,3.71-2.73,6-3.28V24h79.82v8.67
+c2.29,0.55,4.35,1.69,6,3.28V13C95.91,8.04,91.87,4,86.91,4z
+M18.73,18.5c-2.49,0-4.5-2.01-4.5-4.5s2.01-4.5,4.5-4.5
+s4.5,2.01,4.5,4.5S21.22,18.5,18.73,18.5z M54.31,15.97H27.59v-3.94h26.72V15.97z" />
+    <path
+        android:pathData="M 0 0 H 100 V 132 H 0 V 0 Z" />
+</vector>
