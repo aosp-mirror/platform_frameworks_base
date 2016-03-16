@@ -104,7 +104,8 @@ public abstract class FragmentTuner {
                 return false;
             }
 
-            if (mState.action == ACTION_OPEN_TREE) {
+            if (mState.action == ACTION_OPEN_TREE
+                    || mState.action == ACTION_PICK_COPY_DESTINATION) {
                 // In this case nothing *ever* is selectable...the expected user behavior is
                 // they navigate *into* a folder, then click a confirmation button indicating
                 // that the current directory is the directory they are picking.
