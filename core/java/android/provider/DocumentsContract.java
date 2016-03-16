@@ -379,8 +379,18 @@ public final class DocumentsContract {
          * @see DocumentsProvider#queryChildDocuments(String, String[], String)
          * @hide
          */
-
         public static final int FLAG_ARCHIVE = 1 << 15;
+
+        /**
+         * Flag indicating that a document is not complete, likely its
+         * contents are being downloaded. Partial files cannot be opened,
+         * copied, moved in the UI. But they can be deleted and retried
+         * if they represent a failed download.
+         *
+         * @see #COLUMN_FLAGS
+         * @hide
+         */
+        public static final int FLAG_PARTIAL = 1 << 16;
     }
 
     /**

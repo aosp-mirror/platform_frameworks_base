@@ -58,9 +58,9 @@ public abstract class FragmentTuner {
         }
     }
 
-
     public abstract void updateActionMenu(
-            Menu menu, @ResultType int dirType, boolean canDelete, boolean canRename);
+            Menu menu, @ResultType int dirType,
+            boolean canCopy, boolean canDelete, boolean canRename);
 
     // Subtly different from isDocumentEnabled. The reason may be illuminated as follows.
     // A folder is enabled such that it may be double clicked, even in settings
@@ -140,7 +140,8 @@ public abstract class FragmentTuner {
 
         @Override
         public void updateActionMenu(
-                Menu menu, @ResultType int dirType, boolean canDelete, boolean canRename) {
+                Menu menu, @ResultType int dirType,
+                boolean canCopy, boolean canDelete, boolean canRename) {
 
             MenuItem open = menu.findItem(R.id.menu_open);
             MenuItem share = menu.findItem(R.id.menu_share);
@@ -198,22 +199,28 @@ public abstract class FragmentTuner {
 
         @Override
         public void updateActionMenu(
-                Menu menu, @ResultType int dirType, boolean canDelete, boolean canRename) {
+                Menu menu, @ResultType int dirType,
+                boolean canCopy, boolean canDelete, boolean canRename) {
 
             MenuItem copy = menu.findItem(R.id.menu_copy_to_clipboard);
             MenuItem paste = menu.findItem(R.id.menu_paste_from_clipboard);
-            copy.setEnabled(dirType != DirectoryFragment.TYPE_RECENT_OPEN);
+            copy.setEnabled(canCopy);
 
             MenuItem rename = menu.findItem(R.id.menu_rename);
+            MenuItem moveTo = menu.findItem(R.id.menu_move_to);
+            MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
+
+            copyTo.setVisible(true);
+            moveTo.setVisible(true);
             rename.setVisible(true);
+
+            copyTo.setEnabled(canCopy);
+            moveTo.setEnabled(canCopy && canDelete);
             rename.setEnabled(canRename);
 
             menu.findItem(R.id.menu_share).setVisible(true);
             menu.findItem(R.id.menu_delete).setVisible(canDelete);
             menu.findItem(R.id.menu_open).setVisible(false);
-            menu.findItem(R.id.menu_copy_to).setVisible(true);
-            menu.findItem(R.id.menu_move_to).setVisible(true);
-            menu.findItem(R.id.menu_move_to).setEnabled(canDelete);
 
             Menus.disableHiddenItems(menu, copy, paste);
         }
