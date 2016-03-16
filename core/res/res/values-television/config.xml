@@ -33,5 +33,5 @@
 
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
          when the PIP is shown with Recents. -->
-    <string translatable="false" name="config_pictureInPictureBoundsInRecents">"1480 123 1760 303"</string>
+    <string translatable="false" name="config_pictureInPictureBoundsInRecents">"1484 96 1804 276"</string>
 </resources>
