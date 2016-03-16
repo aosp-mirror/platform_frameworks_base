@@ -85,6 +85,11 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_inversion_label);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;

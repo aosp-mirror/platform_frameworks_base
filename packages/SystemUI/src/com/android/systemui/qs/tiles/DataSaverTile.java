@@ -57,6 +57,11 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.data_saver);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = arg instanceof Boolean ? (Boolean) arg
                 : mDataSaverController.isDataSaverEnabled();

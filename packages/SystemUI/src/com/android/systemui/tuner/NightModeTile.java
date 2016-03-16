@@ -15,18 +15,13 @@
  */
 package com.android.systemui.tuner;
 
-import android.app.ActivityManager;
 import android.content.Intent;
-import android.provider.Settings;
-
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.NightModeController;
-
-import java.util.Objects;
 
 
 public class NightModeTile extends QSTile<QSTile.State> implements NightModeController.Listener {
@@ -78,6 +73,11 @@ public class NightModeTile extends QSTile<QSTile.State> implements NightModeCont
     protected void handleClick() {
         mNightModeController.setNightMode(!mNightModeController.isEnabled());
         refreshState();
+    }
+
+    @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.night_mode);
     }
 
     @Override

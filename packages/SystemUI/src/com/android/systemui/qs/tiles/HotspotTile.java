@@ -74,6 +74,11 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_hotspot_label);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 

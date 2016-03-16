@@ -101,6 +101,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_cellular_detail_title);
+    }
+
+    @Override
     protected void handleUpdateState(SignalState state, Object arg) {
         CallbackInfo cb = (CallbackInfo) arg;
         if (cb == null) {

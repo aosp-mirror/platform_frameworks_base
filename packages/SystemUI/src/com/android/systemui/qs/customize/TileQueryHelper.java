@@ -33,7 +33,6 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.DrawableIcon;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,6 +74,8 @@ public class TileQueryHelper {
                 public void run() {
                     final QSTile.State state = tile.newTileState();
                     tile.getState().copyTo(state);
+                    // Ignore the current state and get the generic label instead.
+                    state.label = tile.getTileLabel();
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {

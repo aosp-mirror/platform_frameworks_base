@@ -37,22 +37,14 @@ public class SystemUIDialog extends AlertDialog {
         super(context, theme);
         mContext = context;
 
-        getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        applyFlags(this);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
     }
 
     public void setShowForAllUsers(boolean show) {
-        if (show) {
-            getWindow().getAttributes().privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        } else {
-            getWindow().getAttributes().privateFlags &=
-                    ~WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        }
+        setShowForAllUsers(this, show);
     }
 
     public void setMessage(int resId) {
@@ -65,5 +57,21 @@ public class SystemUIDialog extends AlertDialog {
 
     public void setNegativeButton(int resId, OnClickListener onClick) {
         setButton(BUTTON_NEGATIVE, mContext.getString(resId), onClick);
+    }
+
+    public static void setShowForAllUsers(AlertDialog dialog, boolean show) {
+        if (show) {
+            dialog.getWindow().getAttributes().privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        } else {
+            dialog.getWindow().getAttributes().privateFlags &=
+                    ~WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        }
+    }
+
+    public static void applyFlags(AlertDialog dialog) {
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
     }
 }

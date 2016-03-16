@@ -119,6 +119,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_wifi_label);
+    }
+
+    @Override
     protected void handleUpdateState(SignalState state, Object arg) {
         if (DEBUG) Log.d(TAG, "handleUpdateState arg=" + arg);
         CallbackInfo cb = (CallbackInfo) arg;

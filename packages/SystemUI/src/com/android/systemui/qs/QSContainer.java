@@ -140,6 +140,8 @@ public class QSContainer extends FrameLayout {
     public void notifyCustomizeChanged() {
         // The customize state changed, so our height changed.
         updateBottom();
+        mQSPanel.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
+        mHeader.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
         mPanelView.onQsHeightChanged();

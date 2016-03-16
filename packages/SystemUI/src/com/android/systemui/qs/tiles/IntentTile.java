@@ -119,6 +119,11 @@ public class IntentTile extends QSTile<QSTile.State> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return getState().label;
+    }
+
+    @Override
     protected void handleUpdateState(State state, Object arg) {
         Intent intent = (Intent) arg;
         if (intent == null) {

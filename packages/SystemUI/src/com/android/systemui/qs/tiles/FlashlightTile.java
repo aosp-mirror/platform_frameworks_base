@@ -87,6 +87,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_flashlight_label);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         if (!mFlashlightController.isAvailable()) {
