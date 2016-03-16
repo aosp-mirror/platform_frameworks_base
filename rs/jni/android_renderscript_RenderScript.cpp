@@ -2071,6 +2071,8 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
         sc.array4End = 0;
 
         sca = &sc;
+        // sc_size is required, but unused, by the runtime and drivers.
+        sc_size = sizeof(sc);
     }
 
     rsScriptForEachMulti((RsContext)con, (RsScript)script, slot,
