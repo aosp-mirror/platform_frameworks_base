@@ -248,7 +248,8 @@
     <string name="show_all_anrs" msgid="28462979638729082">"顯示所有無回應程式"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許將應用程式寫入外部儲存空間"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"允許將任何應用程式寫入外部儲存空間 (無論資訊清單值為何)"</string>
+    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
+    <skip />
     <string name="force_resizable_activities" msgid="8615764378147824985">"將活動強制設為可調整大小"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"將所有活動設為可配合多重視窗環境調整大小 (無論資訊清單值為何)。"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"啟用自由形式視窗"</string>

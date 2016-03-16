@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Прикажи све ANR-ове"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Прикажи дијалог Апликација не реагује за апликације у позадини"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Принудно дозволи апликације у спољној"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Омогућава уписивање свих апликација у спољну меморију, без обзира на вредности манифеста"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Омогућава уписивање свих апликација у спољну меморију, без обзира на вредности манифеста"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Принудно омогући промену величине активности"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Омогући промену величине свих активности за режим са више прозора, без обзира на вредности манифеста."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Омогући прозоре произвољног формата"</string>

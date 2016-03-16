@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"બધા ANR બતાવો"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"પૃષ્ઠભૂમિ એપ્લિકેશનો માટે એપ્લિકેશન પ્રતિસાદ આપતી નથી સંવાદ બતાવો"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"બાહ્ય પર એપ્લિકેશનોને મંજૂરી આપવાની ફરજ પાડો"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ એપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"મૅનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, તમામ પ્રવૃત્તિઓને મલ્ટી-વિંડો માટે ફરીથી કદ બદલી શકે તેવી બનાવો."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"ફ્રિફોર્મ વિંડોઝ સક્ષમ કરો"</string>

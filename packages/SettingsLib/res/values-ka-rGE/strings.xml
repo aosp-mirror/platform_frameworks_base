@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"ყველა ANR-ის ჩვენება"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"შეტყობინების ჩვენება, როცა ფონური აპლიკაცია არ პასუხობს"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"აპების დაშვება გარე მეხსიერებაში"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"აპები ჩაიწერ. გარე მეხს.-ზე აღწ. ფაილის მნიშვნ. მიუხედ."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"აპები ჩაიწერება გარე მეხსიერებაზე აღწერის ფაილების მნიშვნელობების მიუხედავად"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ზომაცვლადი აქტივობების იძულება"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"მანიფესტის მნიშვნელობების მიუხედავად, მრავალი ფანჯრის რეჟიმისთვის ყველა აქტივობის ზომაცვლადად გადაქცევა."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"თავისუფალი ფორმის მქონე ფანჯრების ჩართვა"</string>

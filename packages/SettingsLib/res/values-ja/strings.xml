@@ -248,7 +248,8 @@
     <string name="show_all_anrs" msgid="28462979638729082">"すべてのANRを表示"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"バックグラウンドアプリが応答しない場合に通知する"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"外部ストレージへのアプリの書き込みを許可"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
+    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
+    <skip />
     <string name="force_resizable_activities" msgid="8615764378147824985">"アクティビティをサイズ変更可能にする"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようにします。"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"フリーフォーム ウィンドウの有効化"</string>

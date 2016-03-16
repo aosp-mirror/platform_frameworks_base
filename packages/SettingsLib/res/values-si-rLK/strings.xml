@@ -248,7 +248,8 @@
     <string name="show_all_anrs" msgid="28462979638729082">"සියලුම ANR පෙන්වන්න"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"පසුබිම් යෙදුම් වලට යෙදුම ප්‍රතිචාර නොදක්වයි කවුළුව පෙන්වන්න"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"බාහිර මත යෙදුම් ඉඩ දීම බල කරන්න"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"මැනිෆෙස්ට් අගයන් නොසලකා, ඕනෑම යෙදුමක් අභ්‍යන්තර ගබඩාවට ලිවීමට සුදුසුකම් ලබා දෙයි"</string>
+    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
+    <skip />
     <string name="force_resizable_activities" msgid="8615764378147824985">"ක්‍රියාකාරකම් ප්‍රතිප්‍රමාණ කළ හැකි බවට බල කරන්න"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"මැනිෆෙස්ට් අගයන් නොසලකා, සියලු ක්‍රියාකාරකම් බහු-කවුළුව සඳහා ප්‍රතිප්‍රමාණ කළ හැකි බවට පත් කරන්න."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"අනියම් හැඩැති කවුළු සබල කරන්න"</string>

@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Visa alla som inte svarar"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tillåt appar i externt lagringsutrymme"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Appen kan skrivas till extern lagring, oavsett manifestvärden"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Allar appar kan skrivas till extern lagring, oavsett manifestvärden"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Framtvinga storleksanpassning för aktiviteter"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gör det möjligt att ändra storleken på alla aktiviteter i flerfönsterläge, oavsett manifestvärden."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivera frihandsfönster"</string>

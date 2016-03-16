@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Rodyti visus ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Fon. programose rodyti dialogo langą „Neatsako“"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Priverstinai leisti programas išorinėje atmintin."</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Vis. pr. gal. įr. į vid. saug. nepais. apr. vert."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Nustatoma, kad visas programas būtų galima įrašyti į išorinę saugyklą, nepaisant aprašo verčių"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Priv. nust., kad veiksm. b. g. atl. kelių d. lang."</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Nustatyti, kad visus veiksmus būtų galima atlikti kelių dydžių languose, nepaisant aprašo verčių."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Įgalinti laisvos formos langus"</string>

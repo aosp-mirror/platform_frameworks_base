@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Prikaži sve ANR-ove"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Prik. dijalog Aplikacija ne reagira za apl. u poz."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Nametni aplikacije na vanjskoj pohrani"</string>
-    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Dozvoljava da bilo koja aplikacija bude upisana na vanjsku pohranu, bez obzira na vrijednosti manifesta."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Omogućava da svaka aplikacija bude pogodna za upisivanje na vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Nametni aktivnostima mijenjanje veličina"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Neka sve aktivnosti budu takve da mogu mijenjati veličinu za prikaz sa više prozora, bez obzira na prikazane vrijednosti."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Omogući prozore nepravilnih oblika"</string>
