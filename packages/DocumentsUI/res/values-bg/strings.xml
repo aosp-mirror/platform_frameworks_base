@@ -110,6 +110,10 @@
     <string name="menu_rename" msgid="7678802479104285353">"Преименуване"</string>
     <string name="rename_error" msgid="4203041674883412606">"Преименуването на документа не бе успешно"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Някои файлове бяха преобразувани"</string>
+    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
+    <skip />
+    <!-- no translation found for never_ask_again (4295278542972859268) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"Разрешаване"</string>
     <string name="deny" msgid="2081879885755434506">"Отказване"</string>
     <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
