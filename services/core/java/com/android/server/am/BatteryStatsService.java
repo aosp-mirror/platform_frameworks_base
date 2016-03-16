@@ -1223,7 +1223,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     // WiFi keeps an accumulated total of stats, unlike Bluetooth.
     // Keep the last WiFi stats so we can compute a delta.
     @GuardedBy("mExternalStatsLock")
-    private WifiActivityEnergyInfo mLastInfo = new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);
+    private WifiActivityEnergyInfo mLastInfo =
+            new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0);
 
     @GuardedBy("mExternalStatsLock")
     private WifiActivityEnergyInfo pullWifiEnergyInfoLocked() {
