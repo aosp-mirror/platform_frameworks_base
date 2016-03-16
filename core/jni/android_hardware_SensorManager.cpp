@@ -248,7 +248,7 @@ nativeGetDynamicSensors(JNIEnv *env, jclass clazz, jlong sensorManager, jobject 
 
     mgr->getDynamicSensorList(nativeList);
 
-    ALOGI("DYNS native SensorManager.getDynamicSensorList return %d sensors", nativeList.size());
+    ALOGI("DYNS native SensorManager.getDynamicSensorList return %zu sensors", nativeList.size());
     for (size_t i = 0; i < nativeList.size(); ++i) {
         jobject sensor = translateNativeSensorToJavaSensor(env, NULL, nativeList[i]);
         // add to list
