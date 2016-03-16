@@ -1263,12 +1263,15 @@ public class DirectoryFragment extends Fragment
             }
 
             // Handle enter key events
-            if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                if (event.isShiftPressed()) {
-                    return onSelect(doc);
-                } else {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_ENTER:
+                    if (event.isShiftPressed()) {
+                        return onSelect(doc);
+                    }
+                    // For non-shifted enter keypresses, fall through.
+                case KeyEvent.KEYCODE_DPAD_CENTER:
+                case KeyEvent.KEYCODE_BUTTON_A:
                     return onActivate(doc);
-                }
             }
 
             return false;
