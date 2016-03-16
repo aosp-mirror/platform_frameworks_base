@@ -84,7 +84,6 @@ import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
 import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -10151,19 +10150,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                   {@link #INVISIBLE} or {@link #GONE}.
      */
     protected void onVisibilityChanged(@NonNull View changedView, @Visibility int visibility) {
-        final boolean visible = visibility == VISIBLE && getVisibility() == VISIBLE;
-        if (visible && mAttachInfo != null) {
-            initialAwakenScrollBars();
-        }
-
-        final Drawable dr = mBackground;
-        if (dr != null && visible != dr.isVisible()) {
-            dr.setVisible(visible, false);
-        }
-        final Drawable fg = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
-        if (fg != null && visible != fg.isVisible()) {
-            fg.setVisible(visible, false);
-        }
     }
 
     /**
@@ -10216,6 +10202,52 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void onWindowVisibilityChanged(@Visibility int visibility) {
         if (visibility == VISIBLE) {
             initialAwakenScrollBars();
+        }
+    }
+
+    /**
+     * Internal dispatching method for {@link #onVisibilityAggregated}. Overridden by
+     * ViewGroup. Intended to only be called when {@link #isAttachedToWindow()},
+     * {@link #getWindowVisibility()} is {@link #VISIBLE} and this view's parent {@link #isShown()}.
+     *
+     * @param changedView the view that changed, either <code>this</code> or an ancestor
+     * @param visibility aggregated visibility of this view's parent or changedView, whichever
+     *                   is closer
+     * @return the aggregated visibility for this view
+     */
+    int dispatchVisibilityAggregated(View changedView, @Visibility int visibility) {
+        visibility = Math.max(visibility, getVisibility());
+        onVisibilityAggregated(changedView, visibility);
+        return visibility;
+    }
+
+    /**
+     * Called when the user-visibility of this View is potentially affected by a change
+     * to this view itself, an ancestor view or the window this view is attached to.
+     *
+     * <p>The visibility value reported will be one of {@link #VISIBLE}, {@link #INVISIBLE}
+     * or {@link #GONE}, reflecting this view's aggregated visibility within its window.
+     * The visibility parameter takes this view's own visibility into account.
+     * Calls to this method may be repeated with the same visibility values; implementations
+     * should ensure that work done is not duplicated unnecessarily.</p>
+     *
+     * @param changedView the view that changed; may be <code>this</code> or an ancestor
+     * @param visibility the visibility of this view in the context of the full window
+     */
+    @CallSuper
+    public void onVisibilityAggregated(View changedView, @Visibility int visibility) {
+        final boolean visible = visibility == VISIBLE && getVisibility() == VISIBLE;
+        if (visible && mAttachInfo != null) {
+            initialAwakenScrollBars();
+        }
+
+        final Drawable dr = mBackground;
+        if (dr != null && visible != dr.isVisible()) {
+            dr.setVisible(visible, false);
+        }
+        final Drawable fg = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
+        if (fg != null && visible != fg.isVisible()) {
+            fg.setVisible(visible, false);
         }
     }
 
@@ -11336,6 +11368,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mAttachInfo != null) {
                 dispatchVisibilityChanged(this, newVisibility);
+
+                // Aggregated visibility changes are dispatched to attached views
+                // in visible windows where the parent is currently shown/drawn
+                // or the parent is not a ViewGroup (and therefore assumed to be a ViewRoot),
+                // discounting clipping or overlapping. This makes it a good place
+                // to change animation states.
+                if (mParent != null && getWindowVisibility() == VISIBLE &&
+                        ((!(mParent instanceof ViewGroup)) || ((ViewGroup) mParent).isShown())) {
+                    dispatchVisibilityAggregated(this, newVisibility);
+                }
                 notifySubtreeAccessibilityStateChangedIfNeeded();
             }
         }
@@ -15246,6 +15288,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int vis = info.mWindowVisibility;
         if (vis != GONE) {
             onWindowVisibilityChanged(vis);
+            if (isShown()) {
+                onVisibilityAggregated(this, vis);
+            }
         }
 
         // Send onVisibilityChanged directly instead of dispatchVisibilityChanged.
@@ -15266,6 +15311,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int vis = info.mWindowVisibility;
             if (vis != GONE) {
                 onWindowVisibilityChanged(GONE);
+                if (isShown()) {
+                    onVisibilityAggregated(this, GONE);
+                }
             }
         }
 
@@ -17958,6 +18006,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackground != null) {
             mBackground.setCallback(null);
             unscheduleDrawable(mBackground);
+            mBackground.setVisible(false, false);
         }
 
         if (background != null) {
@@ -17998,7 +18047,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (background.isStateful()) {
                 background.setState(getDrawableState());
             }
-            background.setVisible(getVisibility() == VISIBLE, false);
+            background.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             mBackground = background;
 
             applyBackgroundTint();
@@ -18180,6 +18229,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mForegroundInfo.mDrawable != null) {
             mForegroundInfo.mDrawable.setCallback(null);
             unscheduleDrawable(mForegroundInfo.mDrawable);
+            mForegroundInfo.mDrawable.setVisible(false, false);
         }
 
         mForegroundInfo.mDrawable = foreground;
@@ -18194,6 +18244,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 foreground.setState(getDrawableState());
             }
             applyForegroundTint();
+            foreground.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
         } else if ((mViewFlags & WILL_NOT_DRAW) != 0 && mBackground == null) {
             mPrivateFlags |= PFLAG_SKIP_DRAW;
         }

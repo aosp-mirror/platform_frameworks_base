@@ -913,6 +913,7 @@ public class ImageView extends View {
         if (mDrawable != null) {
             mDrawable.setCallback(null);
             unscheduleDrawable(mDrawable);
+            mDrawable.setVisible(false, false);
         }
 
         mDrawable = d;
@@ -923,7 +924,8 @@ public class ImageView extends View {
             if (d.isStateful()) {
                 d.setState(getDrawableState());
             }
-            d.setVisible(getVisibility() == VISIBLE, true);
+            d.setVisible(isAttachedToWindow() && getWindowVisibility() == VISIBLE && isShown(),
+                    true);
             d.setLevel(mLevel);
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
@@ -1498,28 +1500,11 @@ public class ImageView extends View {
         }
     }
 
-    @RemotableViewMethod
     @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
+    public void onVisibilityAggregated(View changedView, @Visibility int visibility) {
+        super.onVisibilityAggregated(changedView, visibility);
         if (mDrawable != null) {
             mDrawable.setVisible(visibility == VISIBLE, false);
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (mDrawable != null) {
-            mDrawable.setVisible(getVisibility() == VISIBLE, false);
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mDrawable != null) {
-            mDrawable.setVisible(false, false);
         }
     }
 
