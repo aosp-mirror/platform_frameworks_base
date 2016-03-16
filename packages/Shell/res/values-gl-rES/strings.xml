@@ -19,7 +19,7 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Estase xerando o informe de erros <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Rexistrouse o informe de erros <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Inf. erros rexistrado <xliff:g id="ID">#%d</xliff:g> e captura pantalla pendente"</string>
+    <string name="bugreport_finished_pending_screenshot_title" msgid="5460883450679439591">"Inf. erros <xliff:g id="ID">#%d</xliff:g> rexistrado e captura pantalla pendente"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Engadindo detalles ao informe de erro"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Agarda..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Pasa o dedo á esquerda para compartir o teu informe de erros"</string>
