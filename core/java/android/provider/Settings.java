@@ -2723,24 +2723,6 @@ public final class Settings {
         public static final String VOLUME_MASTER = "volume_master";
 
         /**
-         * Master volume mute (int 1 = mute, 0 = not muted).
-         *
-         * @hide
-         */
-        public static final String VOLUME_MASTER_MUTE = "volume_master_mute";
-
-        private static final Validator VOLUME_MASTER_MUTE_VALIDATOR = sBooleanValidator;
-
-        /**
-         * Microphone mute (int 1 = mute, 0 = not muted).
-         *
-         * @hide
-         */
-        public static final String MICROPHONE_MUTE = "microphone_mute";
-
-        private static final Validator MICROPHONE_MUTE_VALIDATOR = sBooleanValidator;
-
-        /**
          * Master mono (int 1 = mono, 0 = normal).
          *
          * @hide
@@ -3530,8 +3512,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SCREEN_AUTO_BRIGHTNESS_ADJ);
             PRIVATE_SETTINGS.add(VIBRATE_INPUT_DEVICES);
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
-            PRIVATE_SETTINGS.add(VOLUME_MASTER_MUTE);
-            PRIVATE_SETTINGS.add(MICROPHONE_MUTE);
             PRIVATE_SETTINGS.add(MASTER_MONO);
             PRIVATE_SETTINGS.add(NOTIFICATIONS_USE_RING_VOLUME);
             PRIVATE_SETTINGS.add(VIBRATE_IN_SILENT);
@@ -3609,8 +3589,6 @@ public final class Settings {
             VALIDATORS.put(ADVANCED_SETTINGS, ADVANCED_SETTINGS_VALIDATOR);
             VALIDATORS.put(SCREEN_AUTO_BRIGHTNESS_ADJ, SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR);
             VALIDATORS.put(VIBRATE_INPUT_DEVICES, VIBRATE_INPUT_DEVICES_VALIDATOR);
-            VALIDATORS.put(VOLUME_MASTER_MUTE, VOLUME_MASTER_MUTE_VALIDATOR);
-            VALIDATORS.put(MICROPHONE_MUTE, MICROPHONE_MUTE_VALIDATOR);
             VALIDATORS.put(MASTER_MONO, MASTER_MONO_VALIDATOR);
             VALIDATORS.put(NOTIFICATIONS_USE_RING_VOLUME, NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR);
             VALIDATORS.put(VIBRATE_IN_SILENT, VIBRATE_IN_SILENT_VALIDATOR);
