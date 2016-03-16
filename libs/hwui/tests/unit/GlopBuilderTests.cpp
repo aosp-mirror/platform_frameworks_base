@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 
-#include "BakedOpRenderer.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
 #include "Rect.h"
