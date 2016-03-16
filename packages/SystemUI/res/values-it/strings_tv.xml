@@ -19,11 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="pip_close" msgid="3480680679023423574">"Chiudi visualizzazione PIP"</string>
+    <string name="pip_close" msgid="3480680679023423574">"Chiudi PIP"</string>
     <string name="pip_fullscreen" msgid="8604643018538487816">"Schermo intero"</string>
     <string name="pip_play" msgid="674145557658227044">"Riproduci"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pausa"</string>
-    <string name="pip_hold_home" msgid="340086535668778109">"Tieni premuto "<b>"HOME"</b>" per controllare la visualizzazione PIP"</string>
-    <string name="pip_onboarding_description" msgid="2627737116380318292">"Premi e tieni premuto HOME\nper controllare la visualizzazione PIP"</string>
+    <string name="pip_hold_home" msgid="340086535668778109">"Tieni premuto "<b>"HOME"</b>" per controllare PIP"</string>
+    <string name="pip_onboarding_description" msgid="2882896641362814195">"Tieni premuto il pulsante HOME per controllare PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
 </resources>

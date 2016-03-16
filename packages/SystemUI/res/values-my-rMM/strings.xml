@@ -221,10 +221,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"အလုပ် မုဒ်ကို ဖွင့်ထားပါသည်။"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"အလုပ် မုဒ်ကို ပိတ်ထားပါသည်။"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"အလုပ် မုဒ်ကို ဖွင့်ထားပါသည်။"</string>
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
-    <skip />
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ဒေတာချွေတာမှု ပိတ်ထားသည်။"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ဒေတာချွေတာမှု ဖွင့်ထားသည်။"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"တောက်ပမှုကို ပြရန်"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ဒေတာ ခေတ္တရပ်တန့်သည်"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G data ခေတ္တရပ်တန့်သည်"</string>

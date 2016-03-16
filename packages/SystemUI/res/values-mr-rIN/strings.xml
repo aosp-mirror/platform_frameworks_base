@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रीनशॉट कॅप्चर केला."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"आपला स्क्रीनशॉट पाहण्यासाठी स्पर्श करा."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट कॅप्चर करू शकलो नाही."</string>
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
-    <skip />
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रीनशॉट जतन करताना समस्या आली."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"मर्यादित संचय जागेमुळे स्क्रीनशॉट जतन करू शकत नाही."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"अॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्यास अनुमती नाही."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाईल स्थानांतरण पर्याय"</string>

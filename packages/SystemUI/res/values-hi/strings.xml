@@ -73,8 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्‍क्रीनशॉट कैप्‍चर किया गया."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"अपना स्‍क्रीनशॉट देखने के लिए स्‍पर्श करें."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट को कैप्चर नहीं किया जा सका."</string>
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (7887826345701753830) -->
-    <skip />
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रीनशॉट सहेजते समय समस्या आई"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"सीमित मेमोरी स्थान के कारण स्क्रीनशॉट सहेजा नहीं जा सकता."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"आपके ऐप्लिकेशन या आपके संगठन द्वारा स्क्रीनशॉट लेने की अनुमति नहीं है."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
