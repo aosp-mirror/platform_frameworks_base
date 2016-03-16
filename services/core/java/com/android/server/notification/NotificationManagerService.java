@@ -1807,6 +1807,16 @@ public class NotificationManagerService extends SystemService {
                     message);
         }
 
+        private void enforceSystemOrSystemUIOrSamePackage(String pkg, String message) {
+            try {
+                checkCallerIsSystemOrSameApp(pkg);
+            } catch (SecurityException e) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        message);
+            }
+        }
+
         private void enforcePolicyAccess(int uid, String method) {
             if (PackageManager.PERMISSION_GRANTED == getContext().checkCallingPermission(
                     android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
@@ -1933,8 +1943,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
-            enforceSystemOrSystemUI("request policy access status for another package");
+        public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {;
+            enforceSystemOrSystemUIOrSamePackage(pkg,
+                    "request policy access status for another package");
             return checkPackagePolicyAccess(pkg);
         }
 

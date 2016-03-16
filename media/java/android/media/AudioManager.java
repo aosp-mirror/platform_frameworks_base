@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -1004,6 +1005,9 @@ public class AudioManager {
      * according to user settings.
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     * * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
+     * unless the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param ringerMode The ringer mode, one of {@link #RINGER_MODE_NORMAL},
      *            {@link #RINGER_MODE_SILENT}, or {@link #RINGER_MODE_VIBRATE}.
      * @see #getRingerMode()
@@ -1025,6 +1029,9 @@ public class AudioManager {
      * Sets the volume index for a particular stream.
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
+     * the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
      *            {@link #getStreamMaxVolume(int)} for the largest valid value.
@@ -1069,6 +1076,9 @@ public class AudioManager {
      * <p>
      * This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, stream mute changes that would toggle Do Not Disturb are not allowed unless
+     * the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * <p>
      * This method was deprecated in API level 22. Prior to API level 22 this
      * method had significantly different behavior and should be used carefully.

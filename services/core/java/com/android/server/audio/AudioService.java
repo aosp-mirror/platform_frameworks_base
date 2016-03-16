@@ -28,6 +28,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -40,6 +41,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -105,9 +107,6 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
-import android.view.OrientationEventListener;
-import android.view.Surface;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.util.XmlUtils;
@@ -557,6 +556,7 @@ public class AudioService extends IAudioService.Stub {
 
     private static Long mLastDeviceConnectMsgTime = new Long(0);
 
+    private NotificationManager mNm;
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
     private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
@@ -750,6 +750,8 @@ public class AudioService extends IAudioService.Stub {
                 mHdmiCecSink = false;
             }
         }
+
+        mNm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         sendMsg(mAudioHandler,
                 MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED,
@@ -1293,7 +1295,7 @@ public class AudioService extends IAudioService.Stub {
             // Check if the ringer mode handles this adjustment. If it does we don't
             // need to adjust the volume further.
             final int result = checkForRingerModeChange(aliasIndex, direction, step,
-                    streamState.mIsMuted);
+                    streamState.mIsMuted, caller);
             adjustVolume = (result & FLAG_ADJUST_VOLUME) != 0;
             // If suppressing a volume adjustment in silent mode, display the UI hint
             if ((result & AudioManager.FLAG_SHOW_SILENT_HINT) != 0) {
@@ -1309,7 +1311,6 @@ public class AudioService extends IAudioService.Stub {
                 && (mRingerModeMutedStreams & (1 << AudioSystem.STREAM_MUSIC)) != 0) {
             adjustVolume = false;
         }
-
         int oldIndex = mStreamStates[streamType].getIndex(device);
 
         if (adjustVolume && (direction != AudioManager.ADJUST_SAME)) {
@@ -1453,10 +1454,7 @@ public class AudioService extends IAudioService.Stub {
         }
     };
 
-    private void onSetStreamVolume(int streamType, int index, int flags, int device,
-            String caller) {
-        final int stream = mStreamVolumeAlias[streamType];
-        setStreamVolumeInt(stream, index, device, false, caller);
+    private int getNewRingerMode(int stream, int index, int flags) {
         // setting volume on ui sounds stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (stream == getUiSoundsStreamType())) {
@@ -1464,11 +1462,49 @@ public class AudioService extends IAudioService.Stub {
             if (index == 0) {
                 newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
                         : mVolumePolicy.volumeDownToEnterSilent ? AudioManager.RINGER_MODE_SILENT
-                        : AudioManager.RINGER_MODE_NORMAL;
+                                : AudioManager.RINGER_MODE_NORMAL;
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
             }
-            setRingerMode(newRingerMode, TAG + ".onSetStreamVolume", false /*external*/);
+            return newRingerMode;
+        }
+        return getRingerModeExternal();
+    }
+
+    private boolean isAndroidNPlus(String caller) {
+        try {
+            final ApplicationInfo applicationInfo =
+                    mContext.getPackageManager().getApplicationInfoAsUser(
+                            caller, 0, UserHandle.getUserId(Binder.getCallingUid()));
+            if (applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
+                return true;
+            }
+            return false;
+        } catch (PackageManager.NameNotFoundException e) {
+            return true;
+        }
+    }
+
+    private boolean wouldToggleZenMode(int newMode) {
+        if (getRingerModeExternal() == AudioManager.RINGER_MODE_SILENT
+                && newMode != AudioManager.RINGER_MODE_SILENT) {
+            return true;
+        } else if (getRingerModeExternal() != AudioManager.RINGER_MODE_SILENT
+                && newMode == AudioManager.RINGER_MODE_SILENT) {
+            return true;
+        }
+        return false;
+    }
+
+    private void onSetStreamVolume(int streamType, int index, int flags, int device,
+            String caller) {
+        final int stream = mStreamVolumeAlias[streamType];
+        setStreamVolumeInt(stream, index, device, false, caller);
+        // setting volume on ui sounds stream type also controls silent mode
+        if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+                (stream == getUiSoundsStreamType())) {
+            setRingerMode(getNewRingerMode(stream, index, flags),
+                    TAG + ".onSetStreamVolume", false /*external*/);
         }
         // setting non-zero volume for a muted stream unmutes the stream and vice versa
         mStreamStates[stream].mute(index == 0);
@@ -1507,6 +1543,12 @@ public class AudioService extends IAudioService.Stub {
         if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
+        }
+
+        if (isAndroidNPlus(callingPackage)
+                && wouldToggleZenMode(getNewRingerMode(streamTypeAlias, index, flags))
+                && !mNm.isNotificationPolicyAccessGrantedForPackage(callingPackage)) {
+            throw new SecurityException("Not allowed to change Do Not Disturb state");
         }
 
         synchronized (mSafeMediaVolumeState) {
@@ -2005,6 +2047,11 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public void setRingerModeExternal(int ringerMode, String caller) {
+        if (isAndroidNPlus(caller) && wouldToggleZenMode(ringerMode)
+                && !mNm.isNotificationPolicyAccessGrantedForPackage(caller)) {
+            throw new SecurityException("Not allowed to change Do Not Disturb state");
+        }
+
         setRingerMode(ringerMode, caller, true /*external*/);
     }
 
@@ -3328,7 +3375,8 @@ public class AudioService extends IAudioService.Stub {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted) {
+    private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted,
+            String caller) {
         final boolean isTv = mPlatformType == AudioSystem.PLATFORM_TELEVISION;
         int result = FLAG_ADJUST_VOLUME;
         int ringerMode = getRingerModeInternal();
@@ -3415,6 +3463,11 @@ public class AudioService extends IAudioService.Stub {
         default:
             Log.e(TAG, "checkForRingerModeChange() wrong ringer mode: "+ringerMode);
             break;
+        }
+
+        if (isAndroidNPlus(caller) && wouldToggleZenMode(ringerMode)
+                && !mNm.isNotificationPolicyAccessGrantedForPackage(caller)) {
+            throw new SecurityException("Not allowed to change Do Not Disturb state");
         }
 
         setRingerMode(ringerMode, TAG + ".checkForRingerModeChange", false /*external*/);
