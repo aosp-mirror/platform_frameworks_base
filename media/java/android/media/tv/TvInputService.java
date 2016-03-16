@@ -904,9 +904,7 @@ public abstract class TvInputService extends Service {
          *            i.e. prefixed with a package name you own, so that different developers will
          *            not create conflicting commands.
          * @param data Any data to include with the command.
-         * @hide
          */
-        @SystemApi
         public void onAppPrivateCommand(@NonNull String action, Bundle data) {
         }
 
@@ -1755,9 +1753,7 @@ public abstract class TvInputService extends Service {
          *            i.e. prefixed with a package name you own, so that different developers will
          *            not create conflicting commands.
          * @param data Any data to include with the command.
-         * @hide
          */
-        @SystemApi
         public void onAppPrivateCommand(@NonNull String action, Bundle data) {
         }
 
