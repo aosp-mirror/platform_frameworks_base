@@ -440,6 +440,7 @@ public class DirectoryFragment extends Fragment
 
         private Selection mSelected = new Selection();
         private ActionMode mActionMode;
+        private int mNoCopyCount = 0;
         private int mNoDeleteCount = 0;
         private int mNoRenameCount = -1;
         private Menu mMenu;
@@ -471,6 +472,9 @@ public class DirectoryFragment extends Fragment
             // triggered on "silent" selection updates (i.e. we might be reacting to unfinalized
             // selection changes here)
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+            if ((docFlags & Document.FLAG_PARTIAL) != 0) {
+                mNoCopyCount += selected ? 1 : -1;
+            }
             if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0
                     && (docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
@@ -537,19 +541,24 @@ public class DirectoryFragment extends Fragment
             return true;
         }
 
-        boolean canRenameSelection() {
-            return mNoRenameCount == 0 && mSelectionManager.getSelection().size() == 1;
+        boolean canCopySelection() {
+            return mNoCopyCount == 0;
         }
 
         boolean canDeleteSelection() {
             return mNoDeleteCount == 0;
         }
 
+        boolean canRenameSelection() {
+            return mNoRenameCount == 0 && mSelectionManager.getSelection().size() == 1;
+        }
+
         private void updateActionMenu() {
             assert(mMenu != null);
 
             // Delegate update logic to our owning action, since specialized logic is desired.
-            mTuner.updateActionMenu(mMenu, mType, canDeleteSelection(), canRenameSelection());
+            mTuner.updateActionMenu(
+                    mMenu, mType, canCopySelection(), canDeleteSelection(), canRenameSelection());
             Menus.disableHiddenItems(mMenu);
         }
 
