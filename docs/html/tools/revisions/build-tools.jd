@@ -51,7 +51,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 23.0.2</a> <em>(November 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -65,7 +65,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 23.0.1</a> <em>(October 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -75,7 +75,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 23.0.0</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -86,7 +86,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 22.0.1</a> <em>(March 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -99,7 +99,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 22.0.0</a> <em>(March 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -110,7 +110,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.1.2</a> <em>(February 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -121,7 +121,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.1.1</a> <em>(November 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -132,7 +132,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.1</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -144,7 +144,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.0.2</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -155,7 +155,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.0.1</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -166,7 +166,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.0.0</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -189,7 +189,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 20.0.0</a> <em>(June 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -208,7 +208,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.1.0</a> <em>(May 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -228,7 +228,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.0.3</a> <em>(March 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -240,7 +240,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.0.2</a> <em>(February 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -267,7 +267,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19.0.1</a> <em>(December 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -290,7 +290,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 19</a> <em>(October 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -302,7 +302,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 18.1.1</a> <em>(September 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -314,7 +314,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 18.1.0</a> <em>(September 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -326,7 +326,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 18.0.1</a> <em>(July 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -338,7 +338,7 @@ listing in the Android SDK Manager.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 17</a> <em>(May 2013)</em>
   </p>
   <div class="toggle-content-toggleme">

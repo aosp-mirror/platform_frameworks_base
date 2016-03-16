@@ -61,7 +61,7 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p id="rev23-2-1">
     <a href="#" onclick="return toggleContent(this)"><img src=
-    "{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    "{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
     alt="">Android Support Library, revision 23.2.1</a> <em>(March
     2016)</em>
   </p>
@@ -366,7 +366,7 @@ page.title=Support Library
 <div class="toggle-content closed">
   <p id="rev23-2-0">
     <a href="#" onclick="return toggleContent(this)"><img src=
-    "{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    "{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
     alt="">Android Support Library, revision 23.2.0</a> <em>(February
     2016)</em>
   </p>
@@ -722,7 +722,7 @@ android {
 
 <div class="toggle-content closed">
   <p id="rev23-1-1"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23.1.1</a> <em>(November 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -767,7 +767,7 @@ android {
 
 <div class="toggle-content closed">
   <p id="rev23-1-0"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23.1.0</a> <em>(October 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -929,7 +929,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev23-0-1"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23.0.1</a> <em>(September 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -996,7 +996,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev23"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1026,7 +1026,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev22-2-1"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.2.1</a> <em>(July 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1066,7 +1066,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.2.0</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1222,7 +1222,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22.1.0</a> <em>(April 2015)</em>
   </p>
 
@@ -1446,7 +1446,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22</a> <em>(March 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1552,7 +1552,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 21.0.3</a> <em>(December 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1579,7 +1579,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 21.0.2</a> <em>(November 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1638,7 +1638,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 21.0.1</a> <em>(November 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1657,7 +1657,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 21</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1740,7 +1740,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 20</a> <em>(July 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1767,7 +1767,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 19.1.0</a> <em>(March 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1794,7 +1794,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 19.0.1</a> <em>(December 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1837,7 +1837,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 19</a> <em>(October 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1889,7 +1889,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 18</a> <em>(July 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1990,7 +1990,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 13</a> <em>(May 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2041,7 +2041,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 12</a> <em>(February 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2066,7 +2066,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 11</a> <em>(November 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2128,7 +2128,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 10</a> <em>(August 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2147,7 +2147,7 @@ if (animator instanceof SimpleItemAnimator) {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 9</a> <em>(June 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2217,7 +2217,7 @@ isActiveNetworkMetered()} method.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 8</a> <em>(April 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2240,7 +2240,7 @@ isActiveNetworkMetered()} method.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 7</a> <em>(March 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2270,7 +2270,7 @@ for creating standardized system notifications.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 6</a> <em>(December 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2323,7 +2323,7 @@ for creating standardized system notifications.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 5</a> <em>(December 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2382,7 +2382,7 @@ for creating standardized system notifications.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 4</a> <em>(October 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2424,7 +2424,7 @@ for creating standardized system notifications.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 3</a> <em>(July 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2475,7 +2475,7 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 2</a> <em>(May 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -2495,7 +2495,7 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 1</a> <em>(March 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
