@@ -1153,7 +1153,7 @@
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Служба читання сповіщень"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"Обробник віртуальної реальності"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Постачальник умов"</string>
-    <string name="notification_ranker_binding_label" msgid="774540592299064747">"Служба позиціонування сповіщень"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"Служба встановлення пріоритетності сповіщень"</string>
     <string name="vpn_title" msgid="19615213552042827">"Мережу VPN активовано"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Мережу VPN активовано програмою <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Торкніться, щоб керувати мережею."</string>
@@ -1587,8 +1587,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Робочий профіль ВИМКНЕНО"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Увімкнути робочий профіль, зокрема додатки, фонову синхронізацію та пов’язані функції."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Увімкнути"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s вимкнено"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Вимкнув адміністратор %1$s. Зв’яжіться з ним, щоб дізнатися більше."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"У вас є нові повідомлення"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Щоб переглянути, відкрийте додаток для SMS"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Деякі функції можуть не працювати"</string>
@@ -1602,6 +1600,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Відкріпити"</string>
     <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Відновлення заводських налаштувань для належної роботи пристрою"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Торкніться, щоб дізнатися більше."</string>
 </resources>

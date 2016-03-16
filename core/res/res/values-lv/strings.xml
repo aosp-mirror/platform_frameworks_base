@@ -1568,8 +1568,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Darba režīms IZSLĒGTS"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Atļaujiet darboties darba profilam, tostarp lietotnēm, sinhronizācijai fonā un saistītajām funkcijām."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Ieslēgt"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Pakotne %1$s atspējota"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Atspējoja %1$s administrators. Lai uzzinātu vairāk, sazinieties ar administratoru."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Jums ir jaunas īsziņas."</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Lai skatītu, atveriet īsziņu lietotni."</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Funkcijas var būt ierobežotas"</string>
@@ -1583,6 +1581,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Atspraust"</string>
     <string name="app_info" msgid="6856026610594615344">"Lietotnes informācija"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Rūpnīcas datu atiestatīšana ierīces normālai darbībai"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Pieskarieties, lai uzzinātu vairāk."</string>
 </resources>

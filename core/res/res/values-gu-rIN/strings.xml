@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"કાર્ય મોડ બંધ છે"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"કાર્ય પ્રોફાઇલને ઍપ્લિકેશનો, પૃષ્ઠભૂમિ સમન્વયન અને સંબંધિત સુવિધાઓ સહિતનું કાર્ય કરવાની મંજૂરી આપો."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ચાલુ કરો"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s અક્ષમ કરેલ"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s વ્યવસ્થાપક દ્વારા અક્ષમ કરેલ. વધુ જાણવા માટે તેમનો સંપર્ક કરો."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"તમારી પાસે નવા સંદેશા છે"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"જોવા માટે SMS ઍપ્લિકેશન ખોલો"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"કેટલીક કાર્યક્ષમતા મર્યાદિત હોઈ શકે છે"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"અનપિન કરો"</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"આ ઉપકરણને સામાન્ય રીતે ઉપયોગ કરવા માટે ફેક્ટરી રીસેટ કરો"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"વધુ જાણવા માટે ટચ કરો."</string>
 </resources>

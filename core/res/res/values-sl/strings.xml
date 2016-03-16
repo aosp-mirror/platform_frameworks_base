@@ -1587,8 +1587,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Delovni način IZKLOPLJEN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Dovoljeno delovanje delovnega profila, vključno z aplikacijami, sinhronizacijo v ozadju in povezanimi funkcijami."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Vklop"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s – onemogočeno"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Onemogočil skrbnik %1$s. Za več informacij se obrnite nanj."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Imate nova sporočila."</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Za ogled odprite aplikacijo za SMS-je"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Nekatere funkcije bodo omejene"</string>
@@ -1602,6 +1600,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Odpenjanje"</string>
     <string name="app_info" msgid="6856026610594615344">"Podatki o aplikaciji"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Napravo ponastavite na tovarniške nastavitve, če jo želite uporabljati brez težav"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Dotaknite se, če želite izvedeti več."</string>
 </resources>

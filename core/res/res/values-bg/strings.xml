@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"Работният режим е ИЗКЛЮЧЕН"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Разрешаване на функционирането на служебния потребителски профил, включително приложенията, синхронизирането на заден план и свързаните функции."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Включване"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"Пакетът „%1$s“ е деактивиран"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"Деактивирано от администратора на %1$s. Свържете се с него, за да научите повече."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Имате нови съобщения"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Преглед в приложението за SMS"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Някои функции може да са огранич."</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"Освобождаване"</string>
     <string name="app_info" msgid="6856026610594615344">"Информация за приложението"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"Възстановете фабричните настройки, за да използвате това устройство нормално"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Докоснете, за да научите повече."</string>
 </resources>

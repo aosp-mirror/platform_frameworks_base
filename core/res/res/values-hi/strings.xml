@@ -1549,8 +1549,6 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"कार्य मोड बंद है"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ऐप्स, पृष्ठभूमि समन्वयन और संबंधित सुविधाओं सहित कार्य प्रोफ़ाइल को काम करने की अनुमति दें"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"चालू करें"</string>
-    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s को अक्षम किया गया"</string>
-    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s व्‍यवस्‍थापक द्वारा अक्षम किया गया. अधिक जानने के लिए उनसे संपर्क करें."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"आपके पास नए संदेश हैं"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"देखने के लिए SMS ऐप खोलें"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"कुछ कार्य क्षमताएं सीमित हो सकती हैं"</string>
@@ -1564,6 +1562,7 @@
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन करें"</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6351827251856877200">"इस डिवाइस का सामान्य रूप से उपयोग करने के लिए फ़ैक्टरी रीसेट करें"</string>
+    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
+    <skip />
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"अधिक जानने के लिए स्पर्श करें."</string>
 </resources>
