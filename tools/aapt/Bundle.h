@@ -249,7 +249,7 @@ public:
      * above. SDK levels that have a non-numeric identifier are assumed
      * to be newer than any SDK level that has a number designated.
      */
-    bool isMinSdkAtLeast(int desired) {
+    bool isMinSdkAtLeast(int desired) const {
         /* If the application specifies a minSdkVersion in the manifest
          * then use that. Otherwise, check what the user specified on
          * the command line. If neither, it's not available since
