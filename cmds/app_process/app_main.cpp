@@ -305,7 +305,7 @@ int main(int argc, char* const argv[])
     }
 
     if (zygote) {
-        PreloadPublicNativeLibraries();
+        InitializeNativeLoader();
         runtime.start("com.android.internal.os.ZygoteInit", args, zygote);
     } else if (className) {
         runtime.start("com.android.internal.os.RuntimeInit", args, zygote);
