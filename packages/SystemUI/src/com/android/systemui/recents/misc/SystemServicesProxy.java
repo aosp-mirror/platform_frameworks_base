@@ -16,6 +16,12 @@
 
 package com.android.systemui.recents.misc;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -34,6 +40,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -63,6 +70,7 @@ import android.util.MutableBoolean;
 import android.util.Pair;
 import android.view.Display;
 import android.view.IDockedStackListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
@@ -82,12 +90,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -985,25 +987,37 @@ public class SystemServicesProxy {
      * Returns the smallest width/height.
      */
     public int getDeviceSmallestWidth() {
-        if (mWm == null) return 0;
+        if (mDisplay == null) return 0;
 
         Point smallestSizeRange = new Point();
         Point largestSizeRange = new Point();
-        mWm.getDefaultDisplay().getCurrentSizeRange(smallestSizeRange, largestSizeRange);
+        mDisplay.getCurrentSizeRange(smallestSizeRange, largestSizeRange);
         return smallestSizeRange.x;
     }
 
     /**
-     * Returns the display rect.
+     * Returns the current display rect in the current display orientation.
      */
     public Rect getDisplayRect() {
         Rect displayRect = new Rect();
-        if (mWm == null) return displayRect;
+        if (mDisplay == null) return displayRect;
 
         Point p = new Point();
-        mWm.getDefaultDisplay().getRealSize(p);
+        mDisplay.getRealSize(p);
         displayRect.set(0, 0, p.x, p.y);
         return displayRect;
+    }
+
+    /**
+     * Returns the current display orientation.
+     */
+    public int getDisplayOrientation() {
+        // Because of multi-window, the configuration orientation does not necessarily reflect the
+        // orientation of the display, instead we just use the display's real-size.
+        Rect displayRect = getDisplayRect();
+        return displayRect.width() > displayRect.height()
+                ? Configuration.ORIENTATION_LANDSCAPE
+                : Configuration.ORIENTATION_PORTRAIT;
     }
 
     /**

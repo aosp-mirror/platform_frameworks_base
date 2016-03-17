@@ -562,7 +562,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mNavBarWidth = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_width);
         mTaskBarHeight = res.getDimensionPixelSize(
-                R.dimen.recents_task_bar_height);
+                R.dimen.recents_task_view_header_height);
         mDummyStackView = new TaskStackView(mContext);
         mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
                 null, false);
@@ -577,7 +577,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * @param stack the stack to initialize the stack layout with
      */
     private void updateHeaderBarLayout(boolean tryAndBindSearchWidget, TaskStack stack) {
-        RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect systemInsets = new Rect();
         ssp.getStableInsets(systemInsets);
@@ -586,28 +585,28 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         windowRect.offsetTo(0, 0);
 
         // Update the configuration for the current state
-        config.update(systemInsets);
+        Recents.getConfiguration().update(systemInsets);
 
+        TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
         if (RecentsDebugFlags.Static.EnableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
             // have the right thumbnail bounds to animate to.
             // Note: We have to reload the widget id before we get the task stack bounds below
             if (ssp.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
-                config.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
+                stackLayout.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
             }
         }
-        config.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
+        stackLayout.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
                 mSearchBarBounds, mTaskStackBounds);
 
         // Rebind the header bar and draw it for the transition
-        TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         stackLayout.setSystemInsets(systemInsets);
         if (stack != null) {
-            stackLayout.initialize(taskStackBounds,
+            stackLayout.initialize(windowRect, taskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
             mDummyStackView.setTasks(stack, false /* notifyStackChanges */,
-                    false /* relayoutTaskStack */);
+                    false /* relayoutTaskStack */, false /* multiWindowChange */);
         }
         Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {

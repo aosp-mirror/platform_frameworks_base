@@ -16,7 +16,9 @@
 
 package com.android.systemui.recents.views;
 
+import android.annotation.IntDef;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -36,6 +38,8 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,8 +101,10 @@ class Range {
 }
 
 /**
- * The layout logic for a TaskStackView.  This layout can have two states focused and unfocused,
- * and in the focused state, there is a task that is displayed more prominently in the stack.
+ * The layout logic for a TaskStackView.  This layout needs to be able to calculate the stack layout
+ * without an activity-specific context only with the information passed in.  This layout can have
+ * two states focused and unfocused, and in the focused state, there is a task that is displayed
+ * more prominently in the stack.
  */
 public class TaskStackLayoutAlgorithm {
 
@@ -107,12 +113,27 @@ public class TaskStackLayoutAlgorithm {
     public static final float OUTLINE_ALPHA_MIN_VALUE = 0f;
     public static final float OUTLINE_ALPHA_MAX_VALUE = 2f;
 
-    // The maximum dim on the tasks
+    // The medium/maximum dim on the tasks
+    private static final float MED_DIM = 0.15f;
     private static final float MAX_DIM = 0.25f;
 
     // The various focus states
     public static final int STATE_FOCUSED = 1;
     public static final int STATE_UNFOCUSED = 0;
+
+    // The side that an offset is anchored
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FROM_TOP, FROM_BOTTOM})
+    public @interface AnchorSide {}
+    private static final int FROM_TOP = 0;
+    private static final int FROM_BOTTOM = 1;
+
+    // The extent that we care about when calculating fractions
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({WIDTH, HEIGHT})
+    public @interface Extent {}
+    private static final int WIDTH = 0;
+    private static final int HEIGHT = 1;
 
     public interface TaskStackLayoutAlgorithmCallbacks {
         void onFocusStateChanged(int prevFocusState, int curFocusState);
@@ -165,22 +186,24 @@ public class TaskStackLayoutAlgorithm {
          * @param taskStackBounds the full rect that the freeform rect can take up
          */
         public void computeRects(Rect freeformRectOut, Rect stackRectOut,
-                Rect taskStackBounds, int widthPadding, int heightPadding, int stackBottomOffset) {
-            int availableHeight = taskStackBounds.height() - stackBottomOffset;
+                Rect taskStackBounds, int topMargin, int freeformGap, int stackBottomOffset) {
+            // The freeform height is the visible height (not including system insets) - padding
+            // above freeform and below stack - gap between the freeform and stack
+            int availableHeight = taskStackBounds.height() - topMargin - stackBottomOffset;
             int ffPaddedHeight = (int) (availableHeight * freeformHeightPct);
-            int ffHeight = Math.max(0, ffPaddedHeight - (2 * heightPadding));
-            freeformRectOut.set(taskStackBounds.left + widthPadding,
-                    taskStackBounds.top + heightPadding,
-                    taskStackBounds.right - widthPadding,
-                    taskStackBounds.top + heightPadding + ffHeight);
-            stackRectOut.set(taskStackBounds.left + widthPadding,
+            int ffHeight = Math.max(0, ffPaddedHeight - freeformGap);
+            freeformRectOut.set(taskStackBounds.left,
+                    taskStackBounds.top + topMargin,
+                    taskStackBounds.right,
+                    taskStackBounds.top + topMargin + ffHeight);
+            stackRectOut.set(taskStackBounds.left,
                     taskStackBounds.top,
-                    taskStackBounds.right - widthPadding,
+                    taskStackBounds.right,
                     taskStackBounds.bottom);
             if (ffPaddedHeight > 0) {
                 stackRectOut.top += ffPaddedHeight;
             } else {
-                stackRectOut.top += heightPadding;
+                stackRectOut.top += topMargin;
             }
         }
     }
@@ -222,26 +245,38 @@ public class TaskStackLayoutAlgorithm {
     private Range mUnfocusedRange;
     private Range mFocusedRange;
 
-    // The initial offset from the top and bottom of the stack
+    // The base top margin for the stack from the system insets
     @ViewDebug.ExportedProperty(category="recents")
-    private int mInitialTopPeekHeight;
+    private int mBaseTopMargin;
+    // The base side margin for the stack from the system insets
     @ViewDebug.ExportedProperty(category="recents")
-    private int mInitialBottomPeekHeight;
+    private int mBaseSideMargin;
+    // The base bottom margin for the stack from the system insets
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mBaseBottomMargin;
+    private int mMinMargin;
+    // The height of the search bar
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mSearchBarHeight;
+    // The gap between the freeform and stack layouts
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mFreeformStackGap;
 
-    // The offset from the top when scrolled to the top of the stack
+    // The initial offset that the focused task is from the top
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mInitialTopOffset;
+    private int mBaseInitialTopOffset;
+    // The initial offset that the launch-from task is from the bottom
+    @ViewDebug.ExportedProperty(category="recents")
+    private int mInitialBottomOffset;
+    private int mBaseInitialBottomOffset;
+
+    // The height between the top margin and the top of the focused task
     @ViewDebug.ExportedProperty(category="recents")
     private int mFocusedTopPeekHeight;
+    // The height between the bottom margin and the top of task in front of the focused task
     @ViewDebug.ExportedProperty(category="recents")
-    private int mFocusedBottomTaskPeekHeight;
-
-    // The offset from the top of the stack to the top of the bounds when the stack is scrolled to
-    // the end
-    @ViewDebug.ExportedProperty(category="recents")
-    private int mStackTopOffset;
-
-    // The height of the header bar
-    @ViewDebug.ExportedProperty(category="recents")
-    private int mHeaderBarHeight;
+    private int mFocusedBottomPeekHeight;
 
     // The offset from the bottom of the stack to the bottom of the bounds when the stack is
     // scrolled to the front
@@ -307,9 +342,27 @@ public class TaskStackLayoutAlgorithm {
     TaskViewTransform mFrontOfStackTransform = new TaskViewTransform();
 
     public TaskStackLayoutAlgorithm(Context context, TaskStackLayoutAlgorithmCallbacks cb) {
+        Resources res = context.getResources();
         mContext = context;
         mCb = cb;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
+        mMinMargin = res.getDimensionPixelSize(R.dimen.recents_layout_min_margin);
+        mBaseTopMargin = getDimensionForDevice(res,
+                R.dimen.recents_layout_top_margin_phone,
+                R.dimen.recents_layout_top_margin_tablet,
+                R.dimen.recents_layout_top_margin_tablet_xlarge);
+        mBaseSideMargin = getDimensionForDevice(res,
+                R.dimen.recents_layout_side_margin_phone,
+                R.dimen.recents_layout_side_margin_tablet,
+                R.dimen.recents_layout_side_margin_tablet_xlarge);
+        mBaseBottomMargin = res.getDimensionPixelSize(R.dimen.recents_layout_bottom_margin);
+        mSearchBarHeight = getDimensionForDevice(res,
+                R.dimen.recents_layout_search_bar_height_phone,
+                R.dimen.recents_layout_search_bar_height_tablet,
+                R.dimen.recents_layout_search_bar_height_tablet);
+        mFreeformStackGap =
+                res.getDimensionPixelSize(R.dimen.recents_freeform_layout_bottom_margin);
+
         reloadOnConfigurationChange(context);
     }
 
@@ -323,17 +376,25 @@ public class TaskStackLayoutAlgorithm {
         mUnfocusedRange = new Range(res.getFloat(R.integer.recents_layout_unfocused_range_min),
                 res.getFloat(R.integer.recents_layout_unfocused_range_max));
         mFocusState = getInitialFocusState();
-        mInitialTopPeekHeight = res.getDimensionPixelSize(R.dimen.recents_initial_top_peek_size);
-        mInitialBottomPeekHeight =
-                res.getDimensionPixelSize(R.dimen.recents_initial_bottom_peek_size);
-        mFocusedTopPeekHeight =
-                res.getDimensionPixelSize(R.dimen.recents_layout_focused_top_peek_size);
-        mFocusedBottomTaskPeekHeight =
-                res.getDimensionPixelSize(R.dimen.recents_layout_focused_bottom_task_peek_size);
-        mHeaderBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-
-        mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
-        mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
+        mFocusedTopPeekHeight = res.getDimensionPixelSize(R.dimen.recents_layout_top_peek_size);
+        mFocusedBottomPeekHeight =
+                res.getDimensionPixelSize(R.dimen.recents_layout_bottom_peek_size);
+        mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_layout_z_min);
+        mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_layout_z_max);
+        mBaseInitialTopOffset = getDimensionForDevice(res,
+                R.dimen.recents_layout_initial_top_offset_phone_port,
+                R.dimen.recents_layout_initial_top_offset_phone_land,
+                R.dimen.recents_layout_initial_top_offset_tablet,
+                R.dimen.recents_layout_initial_top_offset_tablet,
+                R.dimen.recents_layout_initial_top_offset_tablet,
+                R.dimen.recents_layout_initial_top_offset_tablet);
+        mBaseInitialBottomOffset = getDimensionForDevice(res,
+                R.dimen.recents_layout_initial_bottom_offset_phone_port,
+                R.dimen.recents_layout_initial_bottom_offset_phone_land,
+                R.dimen.recents_layout_initial_bottom_offset_tablet,
+                R.dimen.recents_layout_initial_bottom_offset_tablet,
+                R.dimen.recents_layout_initial_bottom_offset_tablet,
+                R.dimen.recents_layout_initial_bottom_offset_tablet);
         mFreeformLayoutAlgorithm.reloadOnConfigurationChange(context);
     }
 
@@ -372,52 +433,52 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
-     * Computes the stack and task rects.  The given task stack bounds is the whole bounds not
-     * including the search bar.
+     * Computes the stack and task rects.  The given task stack bounds already has the top/right
+     * insets and left/right padding already applied.
      */
-    public void initialize(Rect taskStackBounds, StackState state) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        int widthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
-        int heightPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.recents_stack_top_padding);
+    public void initialize(Rect windowRect, Rect taskStackBounds, StackState state) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         Rect lastStackRect = new Rect(mStackRect);
+        Rect displayRect = ssp.getDisplayRect();
 
-        // The freeform height is the visible height (not including system insets) - padding above
-        // freeform and below stack - gap between the freeform and stack
+        int topMargin = getScaleForExtent(windowRect, displayRect, mBaseTopMargin, mMinMargin, HEIGHT);
+        int bottomMargin = getScaleForExtent(windowRect, displayRect, mBaseBottomMargin, mMinMargin,
+                HEIGHT);
+        mInitialTopOffset = getScaleForExtent(windowRect, displayRect, mBaseInitialTopOffset,
+                mMinMargin, HEIGHT);
+        mInitialBottomOffset = mBaseInitialBottomOffset;
+
+        // Compute the stack bounds
         mState = state;
-        mStackTopOffset = mFocusedTopPeekHeight + heightPadding;
-        mStackBottomOffset = mSystemInsets.bottom + heightPadding;
-        state.computeRects(mFreeformRect, mStackRect, taskStackBounds, widthPadding, heightPadding,
-                mStackBottomOffset);
+        mStackBottomOffset = mSystemInsets.bottom + bottomMargin;
+        state.computeRects(mFreeformRect, mStackRect, taskStackBounds, topMargin,
+                mFreeformStackGap, mStackBottomOffset);
+
         // The history button will take the full un-padded header space above the stack
-        mHistoryButtonRect.set(mStackRect.left, mStackRect.top - heightPadding,
+        mHistoryButtonRect.set(mStackRect.left, mStackRect.top - topMargin,
                 mStackRect.right, mStackRect.top + mFocusedTopPeekHeight);
 
-        // Anchor the task rect to the top-center of the non-freeform stack rect
-        float aspect = (float) (taskStackBounds.width() - mSystemInsets.left - mSystemInsets.right)
-                / (taskStackBounds.height() - mSystemInsets.bottom);
-        int width = mStackRect.width();
-        int minHeight = mStackRect.height() - mFocusedTopPeekHeight - mStackBottomOffset;
-        int height = (int) Math.min(width / aspect, minHeight);
-        mTaskRect.set(mStackRect.left, mStackRect.top,
-                mStackRect.left + width, mStackRect.top + height);
+        // Anchor the task rect top aligned to the non-freeform stack rect
+        float aspect = (float) (windowRect.width() - (mSystemInsets.left + mSystemInsets.right)) /
+                (windowRect.height() - (mSystemInsets.top + mSystemInsets.bottom));
+        int minHeight = mStackRect.height() - mInitialTopOffset - mStackBottomOffset;
+        int height = (int) Math.min(mStackRect.width() / aspect, minHeight);
+        mTaskRect.set(mStackRect.left, mStackRect.top, mStackRect.right, mStackRect.top + height);
 
         // Short circuit here if the stack rects haven't changed so we don't do all the work below
-        if (lastStackRect.equals(mStackRect)) {
-            return;
+        if (!lastStackRect.equals(mStackRect)) {
+            // Reinitialize the focused and unfocused curves
+            mUnfocusedCurve = constructUnfocusedCurve();
+            mUnfocusedCurveInterpolator = new FreePathInterpolator(mUnfocusedCurve);
+            mFocusedCurve = constructFocusedCurve();
+            mFocusedCurveInterpolator = new FreePathInterpolator(mFocusedCurve);
+            mUnfocusedDimCurve = constructUnfocusedDimCurve();
+            mUnfocusedDimCurveInterpolator = new FreePathInterpolator(mUnfocusedDimCurve);
+            mFocusedDimCurve = constructFocusedDimCurve();
+            mFocusedDimCurveInterpolator = new FreePathInterpolator(mFocusedDimCurve);
+
+            updateFrontBackTransforms();
         }
-
-        // Reinitialize the focused and unfocused curves
-        mUnfocusedCurve = constructUnfocusedCurve();
-        mUnfocusedCurveInterpolator = new FreePathInterpolator(mUnfocusedCurve);
-        mFocusedCurve = constructFocusedCurve();
-        mFocusedCurveInterpolator = new FreePathInterpolator(mFocusedCurve);
-        mUnfocusedDimCurve = constructUnfocusedDimCurve();
-        mUnfocusedDimCurveInterpolator = new FreePathInterpolator(mUnfocusedDimCurve);
-        mFocusedDimCurve = constructFocusedDimCurve();
-        mFocusedDimCurveInterpolator = new FreePathInterpolator(mFocusedDimCurve);
-
-        updateFrontBackTransforms();
     }
 
     /**
@@ -435,7 +496,7 @@ public class TaskStackLayoutAlgorithm {
         ArrayList<Task> tasks = stack.getStackTasks();
         if (tasks.isEmpty()) {
             mFrontMostTaskP = 0;
-            mMinScrollP = mMaxScrollP = 0;
+            mMinScrollP = mMaxScrollP = mInitialScrollP = 0;
             mNumStackTasks = mNumFreeformTasks = 0;
             return;
         }
@@ -492,8 +553,7 @@ public class TaskStackLayoutAlgorithm {
             // Set the max scroll to be the point where the front most task is visible with the
             // stack bottom offset
             int maxBottomOffset = mStackBottomOffset + mTaskRect.height();
-            float maxBottomOffsetPct = (float) maxBottomOffset / mStackRect.height();
-            float maxBottomNormX = mUnfocusedCurveInterpolator.getX(maxBottomOffsetPct);
+            float maxBottomNormX = getNormalizedXFromUnfocusedY(maxBottomOffset, FROM_BOTTOM);
             mUnfocusedRange.offset(0f);
             mMinScrollP = 0;
             mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
@@ -502,34 +562,19 @@ public class TaskStackLayoutAlgorithm {
                     launchState.launchedFromAppDocked;
             if (scrollToFront) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
+                mInitialNormX = null;
             } else {
-                mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
-            }
+                float normX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
+                mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, (mNumStackTasks - 2)) -
+                        Math.max(0, mUnfocusedRange.getAbsoluteX(normX)));
 
-            // Set the initial scroll to the predefined state (which differs from the stack)
-            int initialPeekOffset = mStackRect.height() - mInitialTopPeekHeight;
-            float initialPeekOffsetPct = (float) initialPeekOffset / mStackRect.height();
-            float initialPeekOffsetNormX = mUnfocusedCurveInterpolator.getX(initialPeekOffsetPct);
-            float initialFocusedOffset = mStackRect.height() - mInitialTopPeekHeight -
-                    (mHeaderBarHeight * 1f) + 1;
-            float initialFocusedOffsetPct = initialFocusedOffset / mStackRect.height();
-            float initialFocusedNormX = mUnfocusedCurveInterpolator.getX(initialFocusedOffsetPct);
-            float initialBottomOffset = mStackBottomOffset +
-                    (ssp.hasDockedTask()
-                        ? mHeaderBarHeight
-                        : mInitialBottomPeekHeight);
-            float initialBottomOffsetPct = initialBottomOffset / mStackRect.height();
-            float initialBottomNormX = mUnfocusedCurveInterpolator.getX(initialBottomOffsetPct);
-            /*
-            // If we want to offset the top card slightly
-            mInitialNormX = scrollToFront
-                    ? new float[] { initialFocusedNormX, initialPeekOffsetNormX, 0f }
-                    : new float[] { initialBottomNormX, initialFocusedNormX,
-                            initialPeekOffsetNormX, 0f };
-            */
-            mInitialNormX = scrollToFront
-                    ? new float[] { initialFocusedNormX, initialPeekOffsetNormX, 0f }
-                    : new float[] { initialBottomNormX, 0.5f, 0f };
+                // Set the initial scroll to the predefined state (which differs from the stack)
+                mInitialNormX = new float[] {
+                        getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
+                                FROM_BOTTOM),
+                        normX
+                };
+            }
         }
     }
 
@@ -669,7 +714,7 @@ public class TaskStackLayoutAlgorithm {
         Range currentRange = getInitialFocusState() > 0f ? mFocusedRange : mUnfocusedRange;
         currentRange.offset(mInitialScrollP);
         int taskBarHeight = mContext.getResources().getDimensionPixelSize(
-                R.dimen.recents_task_bar_height);
+                R.dimen.recents_task_view_header_height);
         int numVisibleTasks = Math.max(mNumFreeformTasks, 1);
         int numVisibleThumbnails = Math.max(mNumFreeformTasks, 1);
         float prevScreenY = Integer.MAX_VALUE;
@@ -869,6 +914,25 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Returns the original scroll progress to scroll to such that the top of the task is at the top
+     * of the stack.
+     */
+    float getStackScrollForTaskIgnoreOverrides(Task t) {
+        return (float) mTaskIndexMap.get(t.key.id, 0);
+    }
+
+    /**
+     * Returns the scroll progress to scroll to such that the top of the task at the initial top
+     * offset (which is at the task's brightest point).
+     */
+    float getStackScrollForTaskAtInitialOffset(Task t) {
+        float normX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
+        mUnfocusedRange.offset(0f);
+        return (float) mTaskIndexMap.get(t.key.id, 0) - Math.max(0,
+                mUnfocusedRange.getAbsoluteX(normX));
+    }
+
+    /**
      * Maps a movement in screen y, relative to {@param downY}, to a movement in along the arc
      * length of the curve.  We know the curve is mostly flat, so we just map the length of the
      * screen along the arc-length proportionally (1/arclength).
@@ -890,6 +954,95 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Returns the task stack bounds in the current orientation.  This rect takes into account the
+     * top and right system insets (but not the bottom inset) and left/right paddings, but _not_
+     * the top/bottom padding or insets.
+     */
+    public void getTaskStackBounds(Rect windowRect, int topInset, int rightInset,
+            Rect searchBarBounds, Rect taskStackBounds) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        if (config.hasTransposedNavBar) {
+            taskStackBounds.set(windowRect.left, windowRect.top + topInset,
+                    windowRect.right - rightInset, windowRect.bottom);
+        } else {
+            // In portrait, the search bar appears on the top (which already has the inset)
+            int top = searchBarBounds.isEmpty() ? topInset : 0;
+            taskStackBounds.set(windowRect.left, windowRect.top + searchBarBounds.bottom + top,
+                    windowRect.right - rightInset, windowRect.bottom);
+        }
+
+        // Ensure that the new width is at most the smaller display edge size
+        Rect displayRect = Recents.getSystemServices().getDisplayRect();
+        int sideMargin = getScaleForExtent(windowRect, displayRect, mBaseSideMargin, mMinMargin,
+                WIDTH);
+        int targetStackWidth = Math.min(taskStackBounds.width() - 2 * sideMargin,
+                Math.min(displayRect.width(), displayRect.height()));
+        taskStackBounds.inset((taskStackBounds.width() - targetStackWidth) / 2, 0);
+    }
+
+    /**
+     * Returns the search bar bounds in the current orientation.  These bounds do not account for
+     * the system insets.
+     */
+    public void getSearchBarBounds(Rect windowBounds, int topInset, Rect searchBarSpaceBounds) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        if (config.hasTransposedSearchBar) {
+            // In landscape phones, the search bar appears on the left
+            searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
+                    windowBounds.left + mSearchBarHeight, windowBounds.bottom);
+        } else {
+            // In portrait, the search bar appears on the top
+            searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
+                    windowBounds.right, windowBounds.top + topInset + mSearchBarHeight);
+        }
+    }
+
+    /**
+     * Retrieves resources that are constant regardless of the current configuration of the device.
+     */
+    public static int getDimensionForDevice(Resources res, int phoneResId,
+            int tabletResId, int xlargeTabletResId) {
+        return getDimensionForDevice(res, phoneResId, phoneResId, tabletResId, tabletResId,
+                xlargeTabletResId, xlargeTabletResId);
+    }
+
+    /**
+     * Retrieves resources that are constant regardless of the current configuration of the device.
+     */
+    public static int getDimensionForDevice(Resources res, int phonePortResId, int phoneLandResId,
+            int tabletPortResId, int tabletLandResId, int xlargeTabletPortResId,
+            int xlargeTabletLandResId) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        boolean isLandscape = Recents.getSystemServices().getDisplayOrientation() ==
+                Configuration.ORIENTATION_LANDSCAPE;
+        if (config.isXLargeScreen) {
+            return res.getDimensionPixelSize(isLandscape
+                    ? xlargeTabletLandResId
+                    : xlargeTabletPortResId);
+        } else if (config.isLargeScreen) {
+            return res.getDimensionPixelSize(isLandscape
+                    ? tabletLandResId
+                    : tabletPortResId);
+        } else {
+            return res.getDimensionPixelSize(isLandscape
+                    ? phoneLandResId
+                    : phonePortResId);
+        }
+    }
+
+    /**
+     * Returns the normalized x on the unfocused curve given an absolute Y position (relative to the
+     * stack height).
+     */
+    private float getNormalizedXFromUnfocusedY(float y, @AnchorSide int fromSide) {
+        float offset = (fromSide == FROM_TOP)
+                ? mStackRect.height() - y
+                : y;
+        float offsetPct = offset / mStackRect.height();
+        return mUnfocusedCurveInterpolator.getX(offsetPct);
+    }
+
+    /**
      * Creates a new path for the focused curve.
      */
     private Path constructFocusedCurve() {
@@ -897,13 +1050,12 @@ public class TaskStackLayoutAlgorithm {
         // linear pieces that goes from (0,1) through (0.5, peek height offset),
         // (0.5, bottom task offsets), and (1,0).
         float topPeekHeightPct = (float) mFocusedTopPeekHeight / mStackRect.height();
-        float bottomPeekHeightPct = Math.max(
-                mSystemInsets.bottom + mFocusedRange.relativeMax * mFocusedBottomTaskPeekHeight,
-                mStackBottomOffset + mFocusedBottomTaskPeekHeight) / mStackRect.height();
+        float bottomPeekHeightPct = (float) (mStackBottomOffset + mFocusedBottomPeekHeight) /
+                mStackRect.height();
         Path p = new Path();
         p.moveTo(0f, 1f);
         p.lineTo(0.5f, 1f - topPeekHeightPct);
-        p.lineTo(0.5f + (0.5f / mFocusedRange.relativeMax), bottomPeekHeightPct);
+        p.lineTo(1f - (0.5f / mFocusedRange.relativeMax), bottomPeekHeightPct);
         p.lineTo(1f, 0f);
         return p;
     }
@@ -919,16 +1071,16 @@ public class TaskStackLayoutAlgorithm {
         // the control point of the second bezier such that between it and a first known point,
         // there is a tangent at (0.5, peek height offset).
         float cpoint1X = 0.4f;
-        float cpoint1Y = 1f;
-        float peekHeightPct = (float) mFocusedTopPeekHeight / mStackRect.height();
-        float slope = ((1f - peekHeightPct) - cpoint1Y) / (0.5f - cpoint1X);
+        float cpoint1Y = 0.975f;
+        float topPeekHeightPct = (float) mFocusedTopPeekHeight / mStackRect.height();
+        float slope = ((1f - topPeekHeightPct) - cpoint1Y) / (0.5f - cpoint1X);
         float b = 1f - slope * cpoint1X;
         float cpoint2X = 0.65f;
         float cpoint2Y = slope * cpoint2X + b;
         Path p = new Path();
         p.moveTo(0f, 1f);
-        p.cubicTo(0f, 1f, cpoint1X, cpoint1Y, 0.5f, 1f - peekHeightPct);
-        p.cubicTo(0.5f, 1f - peekHeightPct, cpoint2X, cpoint2Y, 1f, 0f);
+        p.cubicTo(0f, 1f, cpoint1X, cpoint1Y, 0.5f, 1f - topPeekHeightPct);
+        p.cubicTo(0.5f, 1f - topPeekHeightPct, cpoint2X, cpoint2Y, 1f, 0f);
         return p;
     }
 
@@ -950,15 +1102,30 @@ public class TaskStackLayoutAlgorithm {
      * Creates a new path for the unfocused dim curve.
      */
     private Path constructUnfocusedDimCurve() {
+        float focusX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
+        float cpoint2X = focusX + (1f - focusX) / 2;
         Path p = new Path();
         // The unfocused dim interpolator starts at max dim, reduces to zero at 0.5 (the focused
         // task), then goes back to max dim towards the front of the stack
         p.moveTo(0f, MAX_DIM);
-        p.cubicTo(0.1f, MAX_DIM, 0.4f, 0.0f, 0.5f, 0f);
-        p.cubicTo(0.6f, 0f, 0.9f, MAX_DIM / 2f, 1f, MAX_DIM / 2f);
+        p.cubicTo(focusX * 0.5f, MAX_DIM, focusX * 0.75f, MAX_DIM * 0.75f, focusX, 0f);
+        p.cubicTo(cpoint2X, 0f, cpoint2X, MED_DIM, 1f, MED_DIM);
         return p;
     }
 
+    /**
+     * Scales the given {@param value} to the scale of the {@param instance} rect relative to the
+     * {@param other} rect in the {@param extent} side.
+     */
+    private int getScaleForExtent(Rect instance, Rect other, int value, int minValue,
+                                  @Extent int extent) {
+        if (extent == WIDTH) {
+            return Math.max(minValue, (int) (((float) instance.width() / other.width()) * value));
+        } else if (extent == HEIGHT) {
+            return Math.max(minValue, (int) (((float) instance.height() / other.height()) * value));
+        }
+        return value;
+    }
 
     /**
      * Updates the current transforms that would put a TaskView at the front and back of the stack.

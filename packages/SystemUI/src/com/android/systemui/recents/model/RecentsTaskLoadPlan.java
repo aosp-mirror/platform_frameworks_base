@@ -39,7 +39,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 
 

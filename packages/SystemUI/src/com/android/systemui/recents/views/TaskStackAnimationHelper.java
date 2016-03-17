@@ -65,6 +65,12 @@ public class TaskStackAnimationHelper {
          */
         void onStartLaunchTargetLaunchAnimation(int duration, boolean screenPinningRequested,
                 ReferenceCountedTrigger postAnimationTrigger);
+
+        /**
+         * Callback to start the animation for the front {@link TaskView} if there is no launch
+         * target.
+         */
+        void onStartFrontTaskEnterAnimation(boolean screenPinningEnabled);
     }
 
     private static final int FRAME_OFFSET_MS = 16;
@@ -126,9 +132,9 @@ public class TaskStackAnimationHelper {
 
         int offscreenYOffset = stackLayout.mStackRect.height();
         int taskViewAffiliateGroupEnterOffset = res.getDimensionPixelSize(
-                R.dimen.recents_task_view_affiliate_group_enter_offset);
+                R.dimen.recents_task_stack_animation_affiliate_enter_offset);
         int launchedWhileDockingOffset = res.getDimensionPixelSize(
-                R.dimen.recents_task_view_launched_while_docking_offset);
+                R.dimen.recents_task_stack_animation_launched_while_docking_offset);
 
         // Prepare each of the task views for their enter animation from front to back
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -164,6 +170,7 @@ public class TaskStackAnimationHelper {
                 // Move the task view off screen (below) so we can animate it in
                 RectF bounds = new RectF(mTmpTransform.rect);
                 bounds.offset(0, offscreenYOffset);
+                tv.setAlpha(0f);
                 tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
                         (int) bounds.bottom);
             } else if (launchState.launchedWhileDocking) {
@@ -232,7 +239,7 @@ public class TaskStackAnimationHelper {
                                     @Override
                                     public void onAnimationEnd(Animator animation) {
                                         postAnimationTrigger.decrement();
-                                        tv.setClipViewInStack(false);
+                                        tv.setClipViewInStack(true);
                                     }
                                 });
                         postAnimationTrigger.increment();
@@ -254,6 +261,9 @@ public class TaskStackAnimationHelper {
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
+                if (i == taskViewCount - 1) {
+                    tv.onStartFrontTaskEnterAnimation(mStackView.mScreenPinningEnabled);
+                }
             } else if (launchState.launchedWhileDocking) {
                 // Animate the tasks up
                 AnimationProps taskAnimation = new AnimationProps()
@@ -312,6 +322,7 @@ public class TaskStackAnimationHelper {
 
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
+            mTmpTransform.alpha = 0f;
             mTmpTransform.rect.offset(0, offscreenYOffset);
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
@@ -330,7 +341,7 @@ public class TaskStackAnimationHelper {
         int taskViewExitToAppDuration = res.getInteger(
                 R.integer.recents_task_exit_to_app_duration);
         int taskViewAffiliateGroupEnterOffset = res.getDimensionPixelSize(
-                R.dimen.recents_task_view_affiliate_group_enter_offset);
+                R.dimen.recents_task_stack_animation_affiliate_enter_offset);
 
         Task launchingTask = launchingTaskView.getTask();
         List<TaskView> taskViews = mStackView.getTaskViews();

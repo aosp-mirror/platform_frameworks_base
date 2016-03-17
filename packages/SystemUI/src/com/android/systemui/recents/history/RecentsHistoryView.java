@@ -32,9 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ClearHistoryEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
@@ -42,6 +40,7 @@ import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
 import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.AnimateableViewBounds;
+import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 
 /**
  * A list of the recent tasks that are not in the stack.
@@ -56,6 +55,7 @@ public class RecentsHistoryView extends LinearLayout
     private RecentsHistoryAdapter mAdapter;
     private RecentsHistoryItemTouchCallbacks mItemTouchHandler;
     private AnimateableViewBounds mViewBounds;
+    private TaskStackLayoutAlgorithm mLayoutAlgorithm;
     private boolean mIsVisible;
     private Rect mSystemInsets = new Rect();
     private int mHeaderHeight;
@@ -166,10 +166,11 @@ public class RecentsHistoryView extends LinearLayout
     }
 
     /**
-     * Updates the header height to account for the history button bar.
+     * Updates the the stack layout and header height to account for the history button bar.
      */
-    public void setHeaderHeight(int height) {
-        mHeaderHeight = height;
+    public void update(TaskStackLayoutAlgorithm layoutAlgorithm, int headerHeight) {
+        mLayoutAlgorithm = layoutAlgorithm;
+        mHeaderHeight = headerHeight;
         requestLayout();
     }
 
@@ -193,20 +194,23 @@ public class RecentsHistoryView extends LinearLayout
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        RecentsConfiguration config = Recents.getConfiguration();
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Pad the view to align the history with the stack layout
         Rect taskStackBounds = new Rect();
-        config.getTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
-                mSystemInsets.right, new Rect() /* searchBarSpaceBounds */, taskStackBounds);
-        int stackWidthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
-        int stackHeightPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.recents_stack_top_padding);
-        mRecyclerView.setPadding(stackWidthPadding + mSystemInsets.left,
-                stackHeightPadding + mSystemInsets.top + mHeaderHeight,
-                stackWidthPadding + mSystemInsets.right, mSystemInsets.bottom);
+        mLayoutAlgorithm.getTaskStackBounds(new Rect(0, 0, width, height),
+                mSystemInsets.top, mSystemInsets.right, new Rect() /* searchBarSpaceBounds */,
+                taskStackBounds);
+        int stackTopPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(
+                getResources(),
+                R.dimen.recents_layout_top_margin_phone,
+                R.dimen.recents_layout_top_margin_tablet,
+                R.dimen.recents_layout_top_margin_tablet_xlarge
+        );
+        mRecyclerView.setPadding(taskStackBounds.left,
+                taskStackBounds.top + stackTopPadding + mHeaderHeight,
+                taskStackBounds.right, mSystemInsets.bottom);
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }

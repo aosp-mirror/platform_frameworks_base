@@ -16,6 +16,16 @@
 
 package com.android.systemui.recents.model;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -37,29 +47,19 @@ import android.view.animation.Interpolator;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.views.DropTarget;
 import com.android.systemui.recents.views.AnimationProps;
+import com.android.systemui.recents.views.DropTarget;
+import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
-import static android.view.WindowManager.DOCKED_TOP;
 
 
 /**
@@ -375,17 +375,14 @@ public class TaskStack {
          * {@param height}.
          */
         public Rect getDockedTaskStackBounds(int width, int height, int dividerSize, Rect insets,
-                Resources res) {
-            RecentsConfiguration config = Recents.getConfiguration();
-
+                TaskStackLayoutAlgorithm layoutAlgorithm, Resources res, Rect windowRectOut) {
             // Calculate the inverse docked task bounds
             boolean isHorizontalDivision =
                     res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
             int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
                     insets, width, height, dividerSize);
-            Rect newWindowBounds = new Rect();
             DockedDividerUtils.calculateBoundsForPosition(position,
-                    DockedDividerUtils.invertDockSide(dockSide), newWindowBounds, width, height,
+                    DockedDividerUtils.invertDockSide(dockSide), windowRectOut, width, height,
                     dividerSize);
 
             // Calculate the task stack bounds from the new window bounds
@@ -396,7 +393,7 @@ public class TaskStack {
             int top = dockArea.bottom < 1f
                     ? 0
                     : insets.top;
-            config.getTaskStackBounds(newWindowBounds, top, insets.right,
+            layoutAlgorithm.getTaskStackBounds(windowRectOut, top, insets.right,
                     searchBarSpaceBounds, taskStackBounds);
             return taskStackBounds;
         }

@@ -55,8 +55,8 @@ import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
-import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -372,7 +372,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
         loader.loadTasks(this, loadPlan, loadOpts);
         TaskStack stack = loadPlan.getTaskStack();
-        mRecentsView.onResume(mIsVisible, stack);
+        mRecentsView.onResume(mIsVisible, false /* multiWindowChange */, stack);
 
         // Animate the SystemUI scrims into view
         Task launchTarget = stack.getLaunchTarget();
@@ -439,7 +439,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        EventBus.getDefault().send(new ConfigurationChangedEvent());
+        EventBus.getDefault().post(new ConfigurationChangedEvent());
     }
 
     @Override
@@ -541,7 +541,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
         loader.loadTasks(this, loadPlan, loadOpts);
 
-        mRecentsView.onResume(mIsVisible, loadPlan.getTaskStack());
+        mRecentsView.onResume(mIsVisible, true /* multiWindowChange */, loadPlan.getTaskStack());
 
         EventBus.getDefault().send(new MultiWindowStateChangedEvent(inMultiWindow));
     }
