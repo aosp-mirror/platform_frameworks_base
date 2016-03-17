@@ -19,14 +19,22 @@ package android.widget.espresso;
 import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
+import android.annotation.IntDef;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.ViewAssertion;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import junit.framework.AssertionFailedError;
 import org.hamcrest.Matcher;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A collection of assertions on a {@link android.widget.TextView}.
@@ -113,6 +121,22 @@ public final class TextViewAssertions {
     }
 
     /**
+     * Returns a {@link ViewAssertion} that asserts that the EditText insertion pointer is on
+     * the left edge.
+     */
+    public static ViewAssertion hasInsertionPointerOnLeft() {
+        return new CursorPositionAssertion(CursorPositionAssertion.LEFT);
+    }
+
+    /**
+     * Returns a {@link ViewAssertion} that asserts that the EditText insertion pointer is on
+     * the right edge.
+     */
+    public static ViewAssertion hasInsertionPointerOnRight() {
+        return new CursorPositionAssertion(CursorPositionAssertion.RIGHT);
+    }
+
+    /**
      * A {@link ViewAssertion} to check the selected text in a {@link TextView}.
      */
     private static final class TextSelectionAssertion implements ViewAssertion {
@@ -140,6 +164,56 @@ public final class TextViewAssertions {
             } else {
                 throw new AssertionFailedError("TextView not found");
             }
+        }
+    }
+
+    /**
+     * {@link ViewAssertion} to check that EditText cursor is on a given position.
+     */
+    static class CursorPositionAssertion implements ViewAssertion {
+
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({LEFT, RIGHT})
+        public @interface CursorEdgePositionType {}
+        public static final int LEFT = 0;
+        public static final int RIGHT = 1;
+
+        private final int mPosition;
+
+        private CursorPositionAssertion(@CursorEdgePositionType int position) {
+            this.mPosition = position;
+        }
+
+        @Override
+        public void check(View view, NoMatchingViewException exception) {
+            if (!(view instanceof EditText)) {
+                throw new AssertionFailedError("View should be an instance of EditText");
+            }
+            EditText editText = (EditText) view;
+            Drawable drawable = editText.getEditorForTesting().getCursorDrawable()[0];
+            Rect drawableBounds = drawable.getBounds();
+            Rect drawablePadding = new Rect();
+            drawable.getPadding(drawablePadding);
+
+            final int diff;
+            final String positionStr;
+            switch (mPosition) {
+                case LEFT:
+                    positionStr = "left";
+                    diff = drawableBounds.left - editText.getScrollX() + drawablePadding.left;
+                    break;
+                case RIGHT:
+                    positionStr = "right";
+                    int maxRight = editText.getWidth() - editText.getCompoundPaddingRight()
+                            - editText.getCompoundPaddingLeft() + editText.getScrollX();
+                    diff = drawableBounds.right - drawablePadding.right - maxRight;
+                    break;
+                default:
+                    throw new AssertionFailedError("Unknown position for cursor assertion");
+            }
+
+            assertThat("Cursor should be on the " + positionStr, Double.valueOf(diff),
+                    closeTo(0f, 1f));
         }
     }
 }

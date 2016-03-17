@@ -54,6 +54,16 @@ public class FloatingToolbarEspressoUtils {
     }
 
     /**
+     * Creates a {@link ViewInteraction} for the floating bar menu item with the given matcher.
+     *
+     * @param matcher The matcher for the menu item.
+     */
+    public static ViewInteraction onFloatingToolBarItem(Matcher<View> matcher) {
+        return onView(matcher)
+                .inRoot(withDecorView(hasDescendant(withTagValue(is(TAG)))));
+    }
+
+    /**
      * Asserts that the floating toolbar is displayed on screen.
      *
      * @throws AssertionError if the assertion fails

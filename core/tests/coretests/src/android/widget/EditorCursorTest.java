@@ -16,16 +16,34 @@
 
 package android.widget;
 
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.Choreographer;
 import android.view.ViewGroup;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.widget.espresso.TextViewAssertions.hasInsertionPointerOnLeft;
+import static android.widget.espresso.TextViewAssertions.hasInsertionPointerOnRight;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 
 public class EditorCursorTest extends ActivityInstrumentationTestCase2<TextViewActivity> {
 
+
+    private final static String LTR_STRING = "aaaaaaaaaaaaaaaaaaaaaa";
+    private final static String LTR_HINT = "hint";
+    private final static String RTL_STRING = "مرحبا الروبوت مرحبا الروبوت مرحبا الروبوت";
+    private final static String RTL_HINT = "الروبوت";
+    private final static int CURSOR_BLINK_MS = 500;
+
     private EditText mEditText;
-    private final String RTL_STRING = "مرحبا الروبوت مرحبا الروبوت مرحبا الروبوت";
 
     public EditorCursorTest() {
         super(TextViewActivity.class);
@@ -55,110 +73,160 @@ public class EditorCursorTest extends ActivityInstrumentationTestCase2<TextViewA
             @Override
             public void run() {
                 getActivity().setContentView(layout);
-                mEditText.requestFocus();
             }
         });
         getInstrumentation().waitForIdleSync();
+        onView(sameInstance(mEditText)).perform(click());
     }
 
     @SmallTest
-    public void testCursorIsInViewBoundariesWhenOnRightForLtr() throws Exception {
+    public void testCursorIsInViewBoundariesWhenOnRightForLtr() {
         // Asserts that when an EditText has LTR text, and cursor is at the end (right),
         // cursor is drawn to the right edge of the view
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mEditText.setText("aaaaaaaaaaaaaaaaaaaaaa");
-                int length = mEditText.getText().length();
-                mEditText.setSelection(length, length);
-            }
-        });
-        getInstrumentation().waitForIdleSync();
+        setEditTextText(LTR_STRING, LTR_STRING.length());
 
-        Editor editor = mEditText.getEditorForTesting();
-        Drawable drawable = editor.getCursorDrawable()[0];
-        Rect drawableBounds = drawable.getBounds();
-        Rect drawablePadding = new Rect();
-        drawable.getPadding(drawablePadding);
-
-        // right edge of the view including the scroll
-        int maxRight = mEditText.getWidth() - mEditText.getCompoundPaddingRight()
-                - mEditText.getCompoundPaddingLeft() + +mEditText.getScrollX();
-        int diff = drawableBounds.right - drawablePadding.right - maxRight;
-        assertTrue(diff >= 0 && diff <= 1);
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
     }
 
     @SmallTest
-    public void testCursorIsInViewBoundariesWhenOnLeftForLtr() throws Exception {
+    public void testCursorIsInViewBoundariesWhenOnLeftForLtr() {
         // Asserts that when an EditText has LTR text, and cursor is at the beginning,
         // cursor is drawn to the left edge of the view
+        setEditTextText(LTR_STRING, 0);
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mEditText.setText("aaaaaaaaaaaaaaaaaaaaaa");
-                mEditText.setSelection(0, 0);
-            }
-        });
-        getInstrumentation().waitForIdleSync();
-
-        Drawable drawable = mEditText.getEditorForTesting().getCursorDrawable()[0];
-        Rect drawableBounds = drawable.getBounds();
-        Rect drawablePadding = new Rect();
-        drawable.getPadding(drawablePadding);
-
-        int diff = drawableBounds.left + drawablePadding.left;
-        assertTrue(diff >= 0 && diff <= 1);
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
     }
 
     @SmallTest
-    public void testCursorIsInViewBoundariesWhenOnRightForRtl() throws Exception {
+    public void testCursorIsInViewBoundariesWhenOnRightForRtl() {
         // Asserts that when an EditText has RTL text, and cursor is at the end,
         // cursor is drawn to the left edge of the view
+        setEditTextText(RTL_STRING, 0);
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mEditText.setText(RTL_STRING);
-                mEditText.setSelection(0, 0);
-            }
-        });
-        getInstrumentation().waitForIdleSync();
-
-        Drawable drawable = mEditText.getEditorForTesting().getCursorDrawable()[0];
-        Rect drawableBounds = drawable.getBounds();
-        Rect drawablePadding = new Rect();
-        drawable.getPadding(drawablePadding);
-
-        int maxRight = mEditText.getWidth() - mEditText.getCompoundPaddingRight()
-                - mEditText.getCompoundPaddingLeft() + mEditText.getScrollX();
-
-        int diff = drawableBounds.right - drawablePadding.right - maxRight;
-        assertTrue(diff >= 0 && diff <= 1);
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
     }
 
     @SmallTest
-    public void testCursorIsInViewBoundariesWhenOnLeftForRtl() throws Exception {
+    public void testCursorIsInViewBoundariesWhenOnLeftForRtl() {
         // Asserts that when an EditText has RTL text, and cursor is at the beginning,
         // cursor is drawn to the right edge of the view
+        setEditTextText(RTL_STRING, RTL_STRING.length());
 
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+    }
+
+    /* Tests for cursor positioning with hint */
+    @SmallTest
+    public void testCursorIsOnLeft_withFirstStrongLtrAlgorithm() {
+        setEditTextHint(null, TextView.TEXT_DIRECTION_FIRST_STRONG_LTR, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+        assertThat(mEditText.getHint(), nullValue());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+
+        setEditTextHint(RTL_HINT, TextView.TEXT_DIRECTION_FIRST_STRONG_LTR, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+
+        setEditTextHint(LTR_HINT, TextView.TEXT_DIRECTION_FIRST_STRONG_LTR, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+    }
+
+    @SmallTest
+    public void testCursorIsOnRight_withFirstStrongRtlAlgorithm() {
+        setEditTextHint(null, TextView.TEXT_DIRECTION_FIRST_STRONG_RTL, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+        assertThat(mEditText.getHint(), nullValue());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
+
+        setEditTextHint(LTR_HINT, TextView.TEXT_DIRECTION_FIRST_STRONG_RTL, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
+
+        setEditTextHint(RTL_HINT, TextView.TEXT_DIRECTION_FIRST_STRONG_RTL, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
+    }
+
+    @SmallTest
+    public void testCursorIsOnLeft_withLtrAlgorithm() {
+        setEditTextHint(null, TextView.TEXT_DIRECTION_LTR, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+        assertThat(mEditText.getHint(), nullValue());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+
+        setEditTextHint(RTL_HINT, TextView.TEXT_DIRECTION_LTR, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+
+        setEditTextHint(LTR_HINT, TextView.TEXT_DIRECTION_LTR, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnLeft());
+    }
+
+    @SmallTest
+    public void testCursorIsOnRight_withRtlAlgorithm() {
+        setEditTextHint(null, TextView.TEXT_DIRECTION_RTL, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+        assertThat(mEditText.getHint(), nullValue());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
+
+        setEditTextHint(LTR_HINT, TextView.TEXT_DIRECTION_RTL, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
+
+        setEditTextHint(RTL_HINT, TextView.TEXT_DIRECTION_RTL, 0);
+        assertThat(mEditText.getText().toString(), isEmptyString());
+
+        onView(sameInstance(mEditText)).check(hasInsertionPointerOnRight());
+    }
+
+    private void setEditTextProperties(final String text, final String hint,
+            final Integer textDirection, final Integer selection) {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mEditText.setText(RTL_STRING);
-                int length = mEditText.getText().length();
-                mEditText.setSelection(length, length);
+                if (textDirection != null) mEditText.setTextDirection(textDirection);
+                if (text != null) mEditText.setText(text);
+                if (hint != null) mEditText.setHint(hint);
+                if (selection != null) mEditText.setSelection(selection);
             }
         });
         getInstrumentation().waitForIdleSync();
 
-        Drawable drawable = mEditText.getEditorForTesting().getCursorDrawable()[0];
-        Rect drawableBounds = drawable.getBounds();
-        Rect drawablePadding = new Rect();
-        drawable.getPadding(drawablePadding);
-
-        int diff = drawableBounds.left - mEditText.getScrollX() + drawablePadding.left;
-        assertTrue(diff >= 0 && diff <= 1);
+        // wait for cursor to be drawn. updateCursorPositions function is called during draw() and
+        // only when cursor is visible during blink.
+        final CountDownLatch latch = new CountDownLatch(1);
+        mEditText.postOnAnimationDelayed(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        }, CURSOR_BLINK_MS);
+        try {
+            assertThat("Problem while waiting for the cursor to blink",
+                    latch.await(10, TimeUnit.SECONDS), equalTo(true));
+        } catch (Exception e) {
+            fail("Problem while waiting for the cursor to blink");
+        }
     }
 
+    private void setEditTextHint(final String hint, final int textDirection, final int selection) {
+        setEditTextProperties(null, hint, textDirection, selection);
+    }
+
+    private void setEditTextText(final String text, final Integer selection) {
+        setEditTextProperties(text, null, null, selection);
+    }
 }
