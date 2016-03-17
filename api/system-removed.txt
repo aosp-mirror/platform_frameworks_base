@@ -15,10 +15,38 @@ package android.app.admin {
 
 }
 
+package android.content {
+
+  public abstract class Context {
+    method public deprecated android.content.Context createCredentialEncryptedStorageContext();
+    method public deprecated android.content.Context createDeviceEncryptedStorageContext();
+    method public deprecated boolean isCredentialEncryptedStorage();
+    method public deprecated boolean isDeviceEncryptedStorage();
+    method public deprecated boolean migrateDatabaseFrom(android.content.Context, java.lang.String);
+    method public deprecated boolean migrateSharedPreferencesFrom(android.content.Context, java.lang.String);
+  }
+
+}
+
 package android.content.pm {
+
+  public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public deprecated java.lang.String credentialEncryptedDataDir;
+    field public deprecated java.lang.String deviceEncryptedDataDir;
+  }
+
+  public class ComponentInfo extends android.content.pm.PackageItemInfo {
+    field public deprecated boolean encryptionAware;
+  }
 
   public class PackageInfo implements android.os.Parcelable {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
+  }
+
+  public abstract class PackageManager {
+    field public static final deprecated int MATCH_ENCRYPTION_AWARE = 524288; // 0x80000
+    field public static final deprecated int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = 786432; // 0xc0000
+    field public static final deprecated int MATCH_ENCRYPTION_UNAWARE = 262144; // 0x40000
   }
 
 }
@@ -96,6 +124,19 @@ package android.os {
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
     method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
+    method public deprecated boolean isUserRunningAndLocked();
+    method public deprecated boolean isUserRunningAndLocked(android.os.UserHandle);
+    method public deprecated boolean isUserRunningAndUnlocked();
+    method public deprecated boolean isUserRunningAndUnlocked(android.os.UserHandle);
+  }
+
+}
+
+package android.preference {
+
+  public class PreferenceManager {
+    method public deprecated void setStorageCredentialEncrypted();
+    method public deprecated void setStorageDeviceEncrypted();
   }
 
 }

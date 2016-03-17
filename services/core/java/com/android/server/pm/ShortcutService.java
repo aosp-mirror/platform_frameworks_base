@@ -985,12 +985,11 @@ public class ShortcutService extends IShortcutService.Stub {
     // Test overrides it.
     int injectGetPackageUid(@NonNull String packageName, @UserIdInt int userId) {
         try {
-
-            // TODO Is MATCH_UNINSTALLED_PACKAGES correct to get SD card app info?
-
             return mContext.getPackageManager().getPackageUidAsUser(packageName,
-                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-                            | PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                            | PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                    userId);
         } catch (NameNotFoundException e) {
             return -1;
         }

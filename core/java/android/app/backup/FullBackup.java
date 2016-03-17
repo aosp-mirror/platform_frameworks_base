@@ -19,7 +19,7 @@ package android.app.backup;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
-import android.os.*;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -31,16 +31,15 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.xmlpull.v1.XmlPullParserException;
 /**
  * Global constant definitions et cetera related to the full-backup-to-fd
  * binary format.  Nothing in this namespace is part of any API; it's all
@@ -289,7 +288,7 @@ public class FullBackup {
 
             // System apps have control over where their default storage context
             // is pointed, so we're always explicit when building paths.
-            final Context ceContext = context.createCredentialEncryptedStorageContext();
+            final Context ceContext = context.createCredentialProtectedStorageContext();
             FILES_DIR = ceContext.getFilesDir();
             DATABASE_DIR = ceContext.getDatabasePath("foo").getParentFile();
             ROOT_DIR = ceContext.getDataDir();
@@ -297,7 +296,7 @@ public class FullBackup {
             CACHE_DIR = ceContext.getCacheDir();
             NOBACKUP_DIR = ceContext.getNoBackupFilesDir();
 
-            final Context deContext = context.createDeviceEncryptedStorageContext();
+            final Context deContext = context.createDeviceProtectedStorageContext();
             DEVICE_FILES_DIR = deContext.getFilesDir();
             DEVICE_DATABASE_DIR = deContext.getDatabasePath("foo").getParentFile();
             DEVICE_ROOT_DIR = deContext.getDataDir();

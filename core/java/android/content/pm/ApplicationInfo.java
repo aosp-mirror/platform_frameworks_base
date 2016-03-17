@@ -16,7 +16,9 @@
 
 package android.content.pm;
 
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -24,7 +26,6 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Printer;
 
@@ -109,8 +110,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * include/exclude criteria.
      * <p>If android:allowBackup is set to false, this attribute is ignored.
      *
-     * @see {@link android.content.Context#getNoBackupFilesDir}
-     * @see {@link #FLAG_ALLOW_BACKUP}
+     * @see android.content.Context#getNoBackupFilesDir()
+     * @see #FLAG_ALLOW_BACKUP
      *
      * @hide
      */
@@ -469,20 +470,20 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_HAS_DOMAIN_URLS = 1<<4;
 
     /**
-     * When set, default data storage directory for given app is pointed at
-     * device-encrypted location.
+     * When set, the default data storage directory for this app is pointed at
+     * the device-protected location.
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED = 1 << 5;
+    public static final int PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = 1 << 5;
 
     /**
-     * When set, assume that all components under the given app are encryption
+     * When set, assume that all components under the given app are direct boot
      * aware, unless otherwise specified.
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_ENCRYPTION_AWARE = 1 << 6;
+    public static final int PRIVATE_FLAG_DIRECT_BOOT_AWARE = 1 << 6;
 
     /**
      * Value for {@link #privateFlags}: set to {@code true} if the application
@@ -493,11 +494,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_AUTOPLAY = 1 << 7;
 
     /**
-     * When set, at least one component inside this application is encryption aware.
+     * When set, at least one component inside this application is direct boot
+     * aware.
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE = 1 << 8;
+    public static final int PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE = 1 << 8;
 
     /**
      * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
@@ -627,15 +629,28 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String dataDir;
 
     /**
-     * Full path to the device-encrypted directory assigned to the package for
+     * Full path to the device-protected directory assigned to the package for
      * its persistent data.
+     *
+     * @see Context#createDeviceProtectedStorageContext()
      */
+    public String deviceProtectedDataDir;
+
+    /** @removed */
+    @Deprecated
     public String deviceEncryptedDataDir;
 
     /**
-     * Full path to the credential-encrypted directory assigned to the package
+     * Full path to the credential-protected directory assigned to the package
      * for its persistent data.
+     *
+     * @hide
      */
+    @SystemApi
+    public String credentialProtectedDataDir;
+
+    /** @removed */
+    @Deprecated
     public String credentialEncryptedDataDir;
 
     /**
@@ -790,8 +805,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
         pw.println(prefix + "dataDir=" + dataDir);
         if ((flags&DUMP_FLAG_DETAILS) != 0) {
-            pw.println(prefix + "deviceEncryptedDataDir=" + deviceEncryptedDataDir);
-            pw.println(prefix + "credentialEncryptedDataDir=" + credentialEncryptedDataDir);
+            pw.println(prefix + "deviceProtectedDataDir=" + deviceProtectedDataDir);
+            pw.println(prefix + "credentialProtectedDataDir=" + credentialProtectedDataDir);
             if (sharedLibraryFiles != null) {
                 pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
             }
@@ -889,8 +904,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seinfo = orig.seinfo;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
-        deviceEncryptedDataDir = orig.deviceEncryptedDataDir;
-        credentialEncryptedDataDir = orig.credentialEncryptedDataDir;
+        deviceEncryptedDataDir = deviceProtectedDataDir = orig.deviceProtectedDataDir;
+        credentialEncryptedDataDir = credentialProtectedDataDir = orig.credentialProtectedDataDir;
         uid = orig.uid;
         minSdkVersion = orig.minSdkVersion;
         targetSdkVersion = orig.targetSdkVersion;
@@ -944,8 +959,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(seinfo);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
-        dest.writeString(deviceEncryptedDataDir);
-        dest.writeString(credentialEncryptedDataDir);
+        dest.writeString(deviceProtectedDataDir);
+        dest.writeString(credentialProtectedDataDir);
         dest.writeInt(uid);
         dest.writeString(minSdkVersion);
         dest.writeInt(targetSdkVersion);
@@ -999,8 +1014,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seinfo = source.readString();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();
-        deviceEncryptedDataDir = source.readString();
-        credentialEncryptedDataDir = source.readString();
+        deviceEncryptedDataDir = deviceProtectedDataDir = source.readString();
+        credentialEncryptedDataDir = credentialProtectedDataDir = source.readString();
         uid = source.readInt();
         minSdkVersion = source.readString();
         targetSdkVersion = source.readInt();
@@ -1056,18 +1071,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return;
         }
 
-        deviceEncryptedDataDir = Environment
+        deviceEncryptedDataDir = deviceProtectedDataDir = Environment
                 .getDataUserDePackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
-        credentialEncryptedDataDir = Environment
+        credentialEncryptedDataDir = credentialProtectedDataDir = Environment
                 .getDataUserCePackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
 
-        if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0
-                && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
-            dataDir = deviceEncryptedDataDir;
+        if ((privateFlags & PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            dataDir = deviceProtectedDataDir;
         } else {
-            dataDir = credentialEncryptedDataDir;
+            dataDir = credentialProtectedDataDir;
         }
     }
 
@@ -1134,18 +1149,19 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** @hide */
-    public boolean isForceDeviceEncrypted() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0;
+    public boolean isDefaultToDeviceProtectedStorage() {
+        return (privateFlags
+                & ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0;
     }
 
     /** @hide */
-    public boolean isEncryptionAware() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE) != 0;
+    public boolean isDirectBootAware() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE) != 0;
     }
 
     /** @hide */
-    public boolean isPartiallyEncryptionAware() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE) != 0;
+    public boolean isPartiallyDirectBootAware() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
     }
 
     /**

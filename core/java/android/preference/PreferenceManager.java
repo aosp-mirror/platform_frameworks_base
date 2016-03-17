@@ -113,8 +113,8 @@ public class PreferenceManager {
     private int mSharedPreferencesMode;
 
     private static final int STORAGE_DEFAULT = 0;
-    private static final int STORAGE_DEVICE_ENCRYPTED = 1;
-    private static final int STORAGE_CREDENTIAL_ENCRYPTED = 2;
+    private static final int STORAGE_DEVICE_PROTECTED = 1;
+    private static final int STORAGE_CREDENTIAL_PROTECTED = 2;
 
     private int mStorage = STORAGE_DEFAULT;
 
@@ -360,33 +360,56 @@ public class PreferenceManager {
 
     /**
      * Explicitly set the storage location used internally by this class to be
-     * device-encrypted storage.
+     * device-protected storage.
      * <p>
-     * Data stored in device-encrypted storage is typically encrypted with a key
-     * tied to the physical device, and it can be accessed when the device has
-     * booted successfully, both <em>before and after</em> the user has
-     * authenticated with their credentials (such as a lock pattern or PIN).
-     * Because device-encrypted data is available before user authentication,
-     * you should carefully consider what data you store using this mode.
+     * <p>
+     * When a device is encrypted, data stored in this location is encrypted
+     * with a key tied to the physical device, and it can be accessed
+     * immediately after the device has booted successfully, both
+     * <em>before and after</em> the user has authenticated with their
+     * credentials (such as a lock pattern or PIN).
+     * <p>
+     * Because device-protected data is available without user authentication,
+     * you should carefully limit the data you store using this Context. For
+     * example, storing sensitive authentication tokens or passwords in the
+     * device-protected area is strongly discouraged.
      *
-     * @see Context#createDeviceEncryptedStorageContext()
+     * @see Context#createDeviceProtectedStorageContext()
      */
-    public void setStorageDeviceEncrypted() {
-        mStorage = STORAGE_DEVICE_ENCRYPTED;
+    public void setStorageDeviceProtected() {
+        mStorage = STORAGE_DEVICE_PROTECTED;
         mSharedPreferences = null;
+    }
+
+    /** @removed */
+    @Deprecated
+    public void setStorageDeviceEncrypted() {
+        setStorageDeviceProtected();
     }
 
     /**
      * Explicitly set the storage location used internally by this class to be
-     * credential-encrypted storage.
+     * credential-protected storage. This is the default storage area for apps
+     * unless {@code forceDeviceProtectedStorage} was requested.
+     * <p>
+     * When a device is encrypted, data stored in this location is encrypted
+     * with a key tied to user credentials, which can be accessed
+     * <em>only after</em> the user has entered their credentials (such as a
+     * lock pattern or PIN).
      *
-     * @see Context#createCredentialEncryptedStorageContext()
+     * @see Context#createCredentialProtectedStorageContext()
      * @hide
      */
     @SystemApi
-    public void setStorageCredentialEncrypted() {
-        mStorage = STORAGE_CREDENTIAL_ENCRYPTED;
+    public void setStorageCredentialProtected() {
+        mStorage = STORAGE_CREDENTIAL_PROTECTED;
         mSharedPreferences = null;
+    }
+
+    /** @removed */
+    @Deprecated
+    public void setStorageCredentialEncrypted() {
+        setStorageCredentialProtected();
     }
 
     /**
@@ -400,11 +423,11 @@ public class PreferenceManager {
         if (mSharedPreferences == null) {
             final Context storageContext;
             switch (mStorage) {
-                case STORAGE_DEVICE_ENCRYPTED:
-                    storageContext = mContext.createDeviceEncryptedStorageContext();
+                case STORAGE_DEVICE_PROTECTED:
+                    storageContext = mContext.createDeviceProtectedStorageContext();
                     break;
-                case STORAGE_CREDENTIAL_ENCRYPTED:
-                    storageContext = mContext.createCredentialEncryptedStorageContext();
+                case STORAGE_CREDENTIAL_PROTECTED:
+                    storageContext = mContext.createCredentialProtectedStorageContext();
                     break;
                 default:
                     storageContext = mContext;

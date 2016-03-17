@@ -48,6 +48,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.VolumeInfo;
 import android.util.AndroidException;
 import android.util.Log;
@@ -69,7 +70,7 @@ public abstract class PackageManager {
     private static final String TAG = "PackageManager";
 
     /** {@hide} */
-    public static final boolean APPLY_FORCE_DEVICE_ENCRYPTED = true;
+    public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
 
     /**
      * This exception is thrown when a given package, application, or component
@@ -154,9 +155,8 @@ public abstract class PackageManager {
             MATCH_DEFAULT_ONLY,
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
-            MATCH_ENCRYPTION_AWARE,
-            MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
-            MATCH_ENCRYPTION_UNAWARE,
+            MATCH_DIRECT_BOOT_AWARE,
+            MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
     })
@@ -173,9 +173,8 @@ public abstract class PackageManager {
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_DEFAULT_ONLY,
-            MATCH_ENCRYPTION_AWARE,
-            MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
-            MATCH_ENCRYPTION_UNAWARE,
+            MATCH_DIRECT_BOOT_AWARE,
+            MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
     })
@@ -365,21 +364,47 @@ public abstract class PackageManager {
     public static final int MATCH_ALL = 0x00020000;
 
     /**
-     * Querying flag: include only components which are encryption unaware in
+     * Querying flag: match components which are direct boot <em>unaware</em> in
      * the returned info, regardless of the current user state.
+     * <p>
+     * When neither {@link #MATCH_DIRECT_BOOT_AWARE} nor
+     * {@link #MATCH_DIRECT_BOOT_UNAWARE} are specified, the default behavior is
+     * to match only runnable components based on the user state. For example,
+     * when a user is started but credentials have not been presented yet, the
+     * user is running "locked" and only {@link #MATCH_DIRECT_BOOT_AWARE}
+     * components are returned. Once the user credentials have been presented,
+     * the user is running "unlocked" and both {@link #MATCH_DIRECT_BOOT_AWARE}
+     * and {@link #MATCH_DIRECT_BOOT_UNAWARE} components are returned.
+     *
+     * @see UserManager#isUserUnlocked()
      */
+    public static final int MATCH_DIRECT_BOOT_UNAWARE = 0x00040000;
+
+    /**
+     * Querying flag: match components which are direct boot <em>aware</em> in
+     * the returned info, regardless of the current user state.
+     * <p>
+     * When neither {@link #MATCH_DIRECT_BOOT_AWARE} nor
+     * {@link #MATCH_DIRECT_BOOT_UNAWARE} are specified, the default behavior is
+     * to match only runnable components based on the user state. For example,
+     * when a user is started but credentials have not been presented yet, the
+     * user is running "locked" and only {@link #MATCH_DIRECT_BOOT_AWARE}
+     * components are returned. Once the user credentials have been presented,
+     * the user is running "unlocked" and both {@link #MATCH_DIRECT_BOOT_AWARE}
+     * and {@link #MATCH_DIRECT_BOOT_UNAWARE} components are returned.
+     *
+     * @see UserManager#isUserUnlocked()
+     */
+    public static final int MATCH_DIRECT_BOOT_AWARE = 0x00080000;
+
+    /** @removed */
+    @Deprecated
     public static final int MATCH_ENCRYPTION_UNAWARE = 0x00040000;
-
-    /**
-     * Querying flag: include only components which are encryption aware in the
-     * returned info, regardless of the current user state.
-     */
+    /** @removed */
+    @Deprecated
     public static final int MATCH_ENCRYPTION_AWARE = 0x00080000;
-
-    /**
-     * Querying flag: include both encryption aware and unaware components in
-     * the returned info, regardless of the current user state.
-     */
+    /** @removed */
+    @Deprecated
     public static final int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = MATCH_ENCRYPTION_AWARE
             | MATCH_ENCRYPTION_UNAWARE;
 
@@ -401,7 +426,8 @@ public abstract class PackageManager {
      * </ul>
      *
      * @see #MATCH_UNINSTALLED_PACKAGES
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @hide
      */
     public static final int MATCH_DEBUG_TRIAGED_MISSING = 0x10000000;
@@ -2742,21 +2768,21 @@ public abstract class PackageManager {
      * class.
      *
      * @param component The full component name (i.e.
-     * com.google.apps.contacts/com.google.apps.contacts.ContactsList) of an Activity
-     * class.
+     *            com.google.apps.contacts/com.google.apps.contacts.
+     *            ContactsList) of an Activity class.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return An {@link ActivityInfo} containing information about the activity.
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return An {@link ActivityInfo} containing information about the
+     *         activity.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -2764,9 +2790,8 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -2778,21 +2803,21 @@ public abstract class PackageManager {
      * class.
      *
      * @param component The full component name (i.e.
-     * com.google.apps.calendar/com.google.apps.calendar.CalendarAlarm) of a Receiver
-     * class.
+     *            com.google.apps.calendar/com.google.apps.calendar.
+     *            CalendarAlarm) of a Receiver class.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return An {@link ActivityInfo} containing information about the receiver.
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return An {@link ActivityInfo} containing information about the
+     *         receiver.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -2800,9 +2825,8 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -2810,25 +2834,24 @@ public abstract class PackageManager {
             @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
-     * Retrieve all of the information we know about a particular service
-     * class.
+     * Retrieve all of the information we know about a particular service class.
      *
      * @param component The full component name (i.e.
-     * com.google.apps.media/com.google.apps.media.BackgroundPlayback) of a Service
-     * class.
+     *            com.google.apps.media/com.google.apps.media.
+     *            BackgroundPlayback) of a Service class.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return A {@link ServiceInfo} object containing information about the service.
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return A {@link ServiceInfo} object containing information about the
+     *         service.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -2836,9 +2859,8 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -2850,21 +2872,21 @@ public abstract class PackageManager {
      * provider class.
      *
      * @param component The full component name (i.e.
-     * com.google.providers.media/com.google.providers.media.MediaProvider) of a
-     * ContentProvider class.
+     *            com.google.providers.media/com.google.providers.media.
+     *            MediaProvider) of a ContentProvider class.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return A {@link ProviderInfo} object containing information about the provider.
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return A {@link ProviderInfo} object containing information about the
+     *         provider.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -2872,9 +2894,8 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3499,36 +3520,37 @@ public abstract class PackageManager {
     public abstract boolean hasSystemFeature(String name, int version);
 
     /**
-     * Determine the best action to perform for a given Intent.  This is how
-     * {@link Intent#resolveActivity} finds an activity if a class has not
-     * been explicitly specified.
-     *
-     * <p><em>Note:</em> if using an implicit Intent (without an explicit ComponentName
-     * specified), be sure to consider whether to set the {@link #MATCH_DEFAULT_ONLY}
-     * only flag.  You need to do so to resolve the activity in the same way
-     * that {@link android.content.Context#startActivity(Intent)} and
+     * Determine the best action to perform for a given Intent. This is how
+     * {@link Intent#resolveActivity} finds an activity if a class has not been
+     * explicitly specified.
+     * <p>
+     * <em>Note:</em> if using an implicit Intent (without an explicit
+     * ComponentName specified), be sure to consider whether to set the
+     * {@link #MATCH_DEFAULT_ONLY} only flag. You need to do so to resolve the
+     * activity in the same way that
+     * {@link android.content.Context#startActivity(Intent)} and
      * {@link android.content.Intent#resolveActivity(PackageManager)
-     * Intent.resolveActivity(PackageManager)} do.</p>
+     * Intent.resolveActivity(PackageManager)} do.
+     * </p>
      *
      * @param intent An intent containing all of the desired specification
-     *               (action, data, type, category, and/or component).
+     *            (action, data, type, category, and/or component).
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned. The most important is
-     *         {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
-     *         those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned. The most important is {@link #MATCH_DEFAULT_ONLY},
+     *            to limit the resolution to only those activities that support
+     *            the {@link android.content.Intent#CATEGORY_DEFAULT}.
      * @return Returns a ResolveInfo object containing the final activity intent
-     *         that was determined to be the best action.  Returns null if no
+     *         that was determined to be the best action. Returns null if no
      *         matching activity was found. If multiple matching activities are
      *         found and there is no default set, returns a ResolveInfo object
      *         containing something else, such as the activity resolver.
-     *
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3536,46 +3558,46 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
     public abstract ResolveInfo resolveActivity(Intent intent, @ResolveInfoFlags int flags);
 
     /**
-     * Determine the best action to perform for a given Intent for a given user. This
-     * is how {@link Intent#resolveActivity} finds an activity if a class has not
-     * been explicitly specified.
-     *
-     * <p><em>Note:</em> if using an implicit Intent (without an explicit ComponentName
-     * specified), be sure to consider whether to set the {@link #MATCH_DEFAULT_ONLY}
-     * only flag.  You need to do so to resolve the activity in the same way
-     * that {@link android.content.Context#startActivity(Intent)} and
+     * Determine the best action to perform for a given Intent for a given user.
+     * This is how {@link Intent#resolveActivity} finds an activity if a class
+     * has not been explicitly specified.
+     * <p>
+     * <em>Note:</em> if using an implicit Intent (without an explicit
+     * ComponentName specified), be sure to consider whether to set the
+     * {@link #MATCH_DEFAULT_ONLY} only flag. You need to do so to resolve the
+     * activity in the same way that
+     * {@link android.content.Context#startActivity(Intent)} and
      * {@link android.content.Intent#resolveActivity(PackageManager)
-     * Intent.resolveActivity(PackageManager)} do.</p>
+     * Intent.resolveActivity(PackageManager)} do.
+     * </p>
      *
      * @param intent An intent containing all of the desired specification
-     *               (action, data, type, category, and/or component).
+     *            (action, data, type, category, and/or component).
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned. The most important is
-     *         {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
-     *         those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned. The most important is {@link #MATCH_DEFAULT_ONLY},
+     *            to limit the resolution to only those activities that support
+     *            the {@link android.content.Intent#CATEGORY_DEFAULT}.
      * @param userId The user id.
-     *
      * @return Returns a ResolveInfo object containing the final activity intent
-     *         that was determined to be the best action.  Returns null if no
+     *         that was determined to be the best action. Returns null if no
      *         matching activity was found. If multiple matching activities are
      *         found and there is no default set, returns a ResolveInfo object
      *         containing something else, such as the activity resolver.
-     *
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3583,12 +3605,10 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
-     *
      * @hide
      */
     public abstract ResolveInfo resolveActivityAsUser(Intent intent, @ResolveInfoFlags int flags,
@@ -3599,22 +3619,22 @@ public abstract class PackageManager {
      *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned. The most important is
-     *         {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
-     *         those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
-     *         Or, set {@link #MATCH_ALL} to prevent any filtering of the results.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching activity, ordered from best to worst. In other words, the
-     *         first item is what would be returned by {@link #resolveActivity}.
-     *         If there are no matching activities, an empty list is returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned. The most important is {@link #MATCH_DEFAULT_ONLY},
+     *            to limit the resolution to only those activities that support
+     *            the {@link android.content.Intent#CATEGORY_DEFAULT}. Or, set
+     *            {@link #MATCH_ALL} to prevent any filtering of the results.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching activity, ordered from best to worst. In other
+     *         words, the first item is what would be returned by
+     *         {@link #resolveActivity}. If there are no matching activities, an
+     *         empty list is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3622,9 +3642,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3632,26 +3651,27 @@ public abstract class PackageManager {
             @ResolveInfoFlags int flags);
 
     /**
-     * Retrieve all activities that can be performed for the given intent, for a specific user.
+     * Retrieve all activities that can be performed for the given intent, for a
+     * specific user.
      *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned. The most important is
-     *         {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
-     *         those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
-     *         Or, set {@link #MATCH_ALL} to prevent any filtering of the results.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching activity, ordered from best to worst. In other words, the
-     *         first item is what would be returned by {@link #resolveActivity}.
-     *         If there are no matching activities, an empty list is returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned. The most important is {@link #MATCH_DEFAULT_ONLY},
+     *            to limit the resolution to only those activities that support
+     *            the {@link android.content.Intent#CATEGORY_DEFAULT}. Or, set
+     *            {@link #MATCH_ALL} to prevent any filtering of the results.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching activity, ordered from best to worst. In other
+     *         words, the first item is what would be returned by
+     *         {@link #resolveActivity}. If there are no matching activities, an
+     *         empty list is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3659,12 +3679,10 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
-     *
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
@@ -3672,36 +3690,35 @@ public abstract class PackageManager {
 
     /**
      * Retrieve a set of activities that should be presented to the user as
-     * similar options.  This is like {@link #queryIntentActivities}, except it
+     * similar options. This is like {@link #queryIntentActivities}, except it
      * also allows you to supply a list of more explicit Intents that you would
      * like to resolve to particular options, and takes care of returning the
      * final ResolveInfo list in a reasonable order, with no duplicates, based
      * on those inputs.
      *
-     * @param caller The class name of the activity that is making the
-     *               request.  This activity will never appear in the output
-     *               list.  Can be null.
-     * @param specifics An array of Intents that should be resolved to the
-     *                  first specific results.  Can be null.
+     * @param caller The class name of the activity that is making the request.
+     *            This activity will never appear in the output list. Can be
+     *            null.
+     * @param specifics An array of Intents that should be resolved to the first
+     *            specific results. Can be null.
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned. The most important is
-     *         {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
-     *         those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching activity. The list is ordered first by all of the intents resolved
-     *         in <var>specifics</var> and then any additional activities that
-     *         can handle <var>intent</var> but did not get included by one of
-     *         the <var>specifics</var> intents.  If there are no matching
-     *         activities, an empty list is returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned. The most important is {@link #MATCH_DEFAULT_ONLY},
+     *            to limit the resolution to only those activities that support
+     *            the {@link android.content.Intent#CATEGORY_DEFAULT}.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching activity. The list is ordered first by all of the
+     *         intents resolved in <var>specifics</var> and then any additional
+     *         activities that can handle <var>intent</var> but did not get
+     *         included by one of the <var>specifics</var> intents. If there are
+     *         no matching activities, an empty list is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3709,9 +3726,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3723,18 +3739,17 @@ public abstract class PackageManager {
      *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching receiver, ordered from best to worst. If there are no matching
-     *         receivers, an empty list or null is returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching receiver, ordered from best to worst. If there are
+     *         no matching receivers, an empty list or null is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3742,9 +3757,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3752,24 +3766,23 @@ public abstract class PackageManager {
             @ResolveInfoFlags int flags);
 
     /**
-     * Retrieve all receivers that can handle a broadcast of the given intent, for a specific
-     * user.
+     * Retrieve all receivers that can handle a broadcast of the given intent,
+     * for a specific user.
      *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
      * @param userHandle UserHandle of the user being queried.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching receiver, ordered from best to worst. If there are no matching
-     *         receivers, an empty list or null is returned.
-     *
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching receiver, ordered from best to worst. If there are
+     *         no matching receivers, an empty list or null is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3777,12 +3790,10 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
-     *
      * @hide
      */
     @SystemApi
@@ -3810,20 +3821,19 @@ public abstract class PackageManager {
      * Determine the best service to handle for a given Intent.
      *
      * @param intent An intent containing all of the desired specification
-     *               (action, data, type, category, and/or component).
+     *            (action, data, type, category, and/or component).
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
      * @return Returns a ResolveInfo object containing the final service intent
-     *         that was determined to be the best action.  Returns null if no
+     *         that was determined to be the best action. Returns null if no
      *         matching service was found.
-     *
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3831,9 +3841,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3844,19 +3853,19 @@ public abstract class PackageManager {
      *
      * @param intent The desired intent as per resolveService().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching service, ordered from best to worst. In other words, the first
-     *         item is what would be returned by {@link #resolveService}. If there are
-     *         no matching services, an empty list or null is returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching service, ordered from best to worst. In other
+     *         words, the first item is what would be returned by
+     *         {@link #resolveService}. If there are no matching services, an
+     *         empty list or null is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3864,9 +3873,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3878,20 +3886,20 @@ public abstract class PackageManager {
      *
      * @param intent The desired intent as per resolveService().
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
      * @param userId The user id.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching service, ordered from best to worst. In other words, the first
-     *         item is what would be returned by {@link #resolveService}. If there are
-     *         no matching services, an empty list or null is returned.
-     *
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching service, ordered from best to worst. In other
+     *         words, the first item is what would be returned by
+     *         {@link #resolveService}. If there are no matching services, an
+     *         empty list or null is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3899,12 +3907,10 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
-     *
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentServicesAsUser(Intent intent,
@@ -3916,19 +3922,18 @@ public abstract class PackageManager {
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
      * @param userId The user id.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching provider, ordered from best to worst. If there are no
-     *         matching services, an empty list or null is returned.
-     *
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching provider, ordered from best to worst. If there are
+     *         no matching services, an empty list or null is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3936,12 +3941,10 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
-     *
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
@@ -3953,18 +3956,17 @@ public abstract class PackageManager {
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
-     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
-     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_ENCRYPTION_AWARE},
-     *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
-     *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return Returns a List of ResolveInfo objects containing one entry for each
-     *         matching provider, ordered from best to worst. If there are no
-     *         matching services, an empty list or null is returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_RESOLVED_FILTER},
+     *            {@link #GET_SHARED_LIBRARY_FILES}, {@link #MATCH_ALL},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DEFAULT_ONLY}, {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return Returns a List of ResolveInfo objects containing one entry for
+     *         each matching provider, ordered from best to worst. If there are
+     *         no matching services, an empty list or null is returned.
      * @see #GET_META_DATA
      * @see #GET_RESOLVED_FILTER
      * @see #GET_SHARED_LIBRARY_FILES
@@ -3972,9 +3974,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_DEFAULT_ONLY
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3986,17 +3987,16 @@ public abstract class PackageManager {
      *
      * @param name The name of the provider to find.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
-     * @return A {@link ProviderInfo} object containing information about the provider.
-     *         If a provider was not found, returns null.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
+     * @return A {@link ProviderInfo} object containing information about the
+     *         provider. If a provider was not found, returns null.
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -4004,9 +4004,8 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -4018,18 +4017,17 @@ public abstract class PackageManager {
      *
      * @param name The name of the provider to find.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
      * @param userId The user id.
-     *
-     * @return A {@link ProviderInfo} object containing information about the provider.
-     *         If a provider was not found, returns null.
-     *
+     * @return A {@link ProviderInfo} object containing information about the
+     *         provider. If a provider was not found, returns null.
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -4037,12 +4035,10 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
-     *
      * @hide
      */
     public abstract ProviderInfo resolveContentProviderAsUser(String name,
@@ -4050,29 +4046,28 @@ public abstract class PackageManager {
 
     /**
      * Retrieve content provider information.
-     *
-     * <p><em>Note: unlike most other methods, an empty result set is indicated
+     * <p>
+     * <em>Note: unlike most other methods, an empty result set is indicated
      * by a null return instead of an empty list.</em>
      *
      * @param processName If non-null, limits the returned providers to only
-     *                    those that are hosted by the given process.  If null,
-     *                    all content providers are returned.
+     *            those that are hosted by the given process. If null, all
+     *            content providers are returned.
      * @param uid If <var>processName</var> is non-null, this is the required
-     *        uid owning the requested content providers.
+     *            uid owning the requested content providers.
      * @param flags Additional option flags. Use any combination of
-     *         {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
-     *         {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
-     *         {@link #MATCH_DISABLED_COMPONENTS},  {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
-     *         {@link #MATCH_ENCRYPTION_AWARE}, {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE},
-     *         {@link #MATCH_ENCRYPTION_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
-     *         {@link #MATCH_UNINSTALLED_PACKAGES}
-     *         to modify the data returned.
-     *
+     *            {@link #GET_META_DATA}, {@link #GET_SHARED_LIBRARY_FILES},
+     *            {@link #MATCH_ALL}, {@link #MATCH_DEFAULT_ONLY},
+     *            {@link #MATCH_DISABLED_COMPONENTS},
+     *            {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *            {@link #MATCH_DIRECT_BOOT_AWARE},
+     *            {@link #MATCH_DIRECT_BOOT_UNAWARE}, {@link #MATCH_SYSTEM_ONLY}
+     *            or {@link #MATCH_UNINSTALLED_PACKAGES} to modify the data
+     *            returned.
      * @return A list of {@link ProviderInfo} objects containing one entry for
      *         each provider either matching <var>processName</var> or, if
      *         <var>processName</var> is null, all known content providers.
      *         <em>If there are no matching providers, null is returned.</em>
-     *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #MATCH_ALL
@@ -4080,9 +4075,8 @@ public abstract class PackageManager {
      * @see #MATCH_DEFAULT_ONLY
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
-     * @see #MATCH_ENCRYPTION_AWARE
-     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-     * @see #MATCH_ENCRYPTION_UNAWARE
+     * @see #MATCH_DIRECT_BOOT_AWARE
+     * @see #MATCH_DIRECT_BOOT_UNAWARE
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -4618,13 +4612,13 @@ public abstract class PackageManager {
         final PackageParser parser = new PackageParser();
         final File apkFile = new File(archiveFilePath);
         try {
-            if ((flags & (MATCH_ENCRYPTION_UNAWARE | MATCH_ENCRYPTION_AWARE)) != 0) {
+            if ((flags & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
                 // Caller expressed an explicit opinion about what encryption
                 // aware/unaware components they want to see, so fall through and
                 // give them what they want
             } else {
                 // Caller expressed no opinion, so match everything
-                flags |= MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+                flags |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
             }
 
             PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);

@@ -13,8 +13,8 @@
 
     <application android:label="@string/service_name"
                  android:allowBackup="false"
-                 android:forceDeviceEncrypted="true"
-                 android:encryptionAware="true">
+                 android:defaultToDeviceProtectedStorage="true"
+                 android:directBootAware="true">
 
         <service android:name=".DefaultContainerService"
                  android:enabled="true"

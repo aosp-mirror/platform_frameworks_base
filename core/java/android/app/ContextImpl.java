@@ -400,7 +400,7 @@ class ContextImpl extends Context {
      *
      * @return the number of files moved, or -1 if there was trouble.
      */
-    private static int migrateFiles(File sourceDir, File targetDir, final String prefix) {
+    private static int moveFiles(File sourceDir, File targetDir, final String prefix) {
         final File[] sourceFiles = FileUtils.listFilesOrEmpty(sourceDir, new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -430,12 +430,12 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+    public boolean moveSharedPreferencesFrom(Context sourceContext, String name) {
         synchronized (ContextImpl.class) {
             final File source = sourceContext.getSharedPreferencesPath(name);
             final File target = getSharedPreferencesPath(name);
 
-            final int res = migrateFiles(source.getParentFile(), target.getParentFile(),
+            final int res = moveFiles(source.getParentFile(), target.getParentFile(),
                     source.getName());
             if (res > 0) {
                 // We moved at least one file, so evict any in-memory caches for
@@ -681,11 +681,11 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+    public boolean moveDatabaseFrom(Context sourceContext, String name) {
         synchronized (ContextImpl.class) {
             final File source = sourceContext.getDatabasePath(name);
             final File target = getDatabasePath(name);
-            return migrateFiles(source.getParentFile(), target.getParentFile(),
+            return moveFiles(source.getParentFile(), target.getParentFile(),
                     source.getName()) != -1;
         }
     }
@@ -1905,17 +1905,17 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedStorageContext() {
-        final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE)
-                | Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE;
+    public Context createDeviceProtectedStorageContext() {
+        final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE)
+                | Context.CONTEXT_DEVICE_PROTECTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
                 mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
     }
 
     @Override
-    public Context createCredentialEncryptedStorageContext() {
-        final int flags = (mFlags & ~Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE)
-                | Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE;
+    public Context createCredentialProtectedStorageContext() {
+        final int flags = (mFlags & ~Context.CONTEXT_DEVICE_PROTECTED_STORAGE)
+                | Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
                 mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
     }
@@ -1926,13 +1926,13 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean isDeviceEncryptedStorage() {
-        return (mFlags & Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE) != 0;
+    public boolean isDeviceProtectedStorage() {
+        return (mFlags & Context.CONTEXT_DEVICE_PROTECTED_STORAGE) != 0;
     }
 
     @Override
-    public boolean isCredentialEncryptedStorage() {
-        return (mFlags & Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE) != 0;
+    public boolean isCredentialProtectedStorage() {
+        return (mFlags & Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE) != 0;
     }
 
     @Override
@@ -1944,10 +1944,10 @@ class ContextImpl extends Context {
     public File getDataDir() {
         if (mPackageInfo != null) {
             File res = null;
-            if (isCredentialEncryptedStorage()) {
-                res = mPackageInfo.getCredentialEncryptedDataDirFile();
-            } else if (isDeviceEncryptedStorage()) {
-                res = mPackageInfo.getDeviceEncryptedDataDirFile();
+            if (isCredentialProtectedStorage()) {
+                res = mPackageInfo.getCredentialProtectedDataDirFile();
+            } else if (isDeviceProtectedStorage()) {
+                res = mPackageInfo.getDeviceProtectedDataDirFile();
             } else {
                 res = mPackageInfo.getDataDirFile();
             }
@@ -2013,13 +2013,13 @@ class ContextImpl extends Context {
 
         // If creator didn't specify which storage to use, use the default
         // location for application.
-        if ((flags & (Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE
-                | Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE)) == 0) {
+        if ((flags & (Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE
+                | Context.CONTEXT_DEVICE_PROTECTED_STORAGE)) == 0) {
             final File dataDir = packageInfo.getDataDirFile();
-            if (Objects.equals(dataDir, packageInfo.getCredentialEncryptedDataDirFile())) {
-                flags |= Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE;
-            } else if (Objects.equals(dataDir, packageInfo.getDeviceEncryptedDataDirFile())) {
-                flags |= Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE;
+            if (Objects.equals(dataDir, packageInfo.getCredentialProtectedDataDirFile())) {
+                flags |= Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE;
+            } else if (Objects.equals(dataDir, packageInfo.getDeviceProtectedDataDirFile())) {
+                flags |= Context.CONTEXT_DEVICE_PROTECTED_STORAGE;
             }
         }
 

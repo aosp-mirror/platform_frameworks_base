@@ -2865,13 +2865,13 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
         }
 
-        if (sa.getBoolean(R.styleable.AndroidManifestApplication_forceDeviceEncrypted, false)
-                && (flags & PARSE_IS_SYSTEM) != 0) {
-            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED;
+        if (sa.getBoolean(R.styleable.AndroidManifestApplication_defaultToDeviceProtectedStorage,
+                false) && (flags & PARSE_IS_SYSTEM) != 0) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
         }
-        if (sa.getBoolean(R.styleable.AndroidManifestApplication_encryptionAware, false)
+        if (sa.getBoolean(R.styleable.AndroidManifestApplication_directBootAware, false)
                 && (flags & PARSE_IS_SYSTEM) != 0) {
-            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE;
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
         }
 
         if (sa.getBoolean(R.styleable.AndroidManifestApplication_resizeableActivity,
@@ -3493,9 +3493,9 @@ public class PackageParser {
             a.info.lockTaskLaunchMode =
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
 
-            a.info.encryptionAware = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_encryptionAware,
-                    owner.applicationInfo.isEncryptionAware());
+            a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_directBootAware,
+                    owner.applicationInfo.isDirectBootAware());
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
@@ -3511,14 +3511,14 @@ public class PackageParser {
                 }
             }
 
-            a.info.encryptionAware = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_encryptionAware,
-                    owner.applicationInfo.isEncryptionAware());
+            a.info.encryptionAware = a.info.directBootAware = sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_directBootAware,
+                    owner.applicationInfo.isDirectBootAware());
         }
 
-        if (a.info.encryptionAware) {
+        if (a.info.directBootAware) {
             owner.applicationInfo.privateFlags |=
-                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE;
+                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
         sa.recycle();
@@ -3732,7 +3732,7 @@ public class PackageParser {
         info.maxRecents = target.info.maxRecents;
         info.layout = target.info.layout;
         info.resizeMode = target.info.resizeMode;
-        info.encryptionAware = target.info.encryptionAware;
+        info.encryptionAware = info.directBootAware = target.info.directBootAware;
 
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {
@@ -3921,12 +3921,12 @@ public class PackageParser {
             }
         }
 
-        p.info.encryptionAware = sa.getBoolean(
-                R.styleable.AndroidManifestProvider_encryptionAware,
-                owner.applicationInfo.isEncryptionAware());
-        if (p.info.encryptionAware) {
+        p.info.encryptionAware = p.info.directBootAware = sa.getBoolean(
+                R.styleable.AndroidManifestProvider_directBootAware,
+                owner.applicationInfo.isDirectBootAware());
+        if (p.info.directBootAware) {
             owner.applicationInfo.privateFlags |=
-                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE;
+                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
         sa.recycle();
@@ -4213,12 +4213,12 @@ public class PackageParser {
             }
         }
 
-        s.info.encryptionAware = sa.getBoolean(
-                R.styleable.AndroidManifestService_encryptionAware,
-                owner.applicationInfo.isEncryptionAware());
-        if (s.info.encryptionAware) {
+        s.info.encryptionAware = s.info.directBootAware = sa.getBoolean(
+                R.styleable.AndroidManifestService_directBootAware,
+                owner.applicationInfo.isDirectBootAware());
+        if (s.info.directBootAware) {
             owner.applicationInfo.privateFlags |=
-                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE;
+                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
         sa.recycle();

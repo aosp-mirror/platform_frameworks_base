@@ -12,8 +12,8 @@
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:label="Fake OEM Features"
-        android:forceDeviceEncrypted="true"
-        android:encryptionAware="true">
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
 
         <service android:name=".FakeCoreService" android:process=":core"
                 android:label="Fake OEM Core Service" />

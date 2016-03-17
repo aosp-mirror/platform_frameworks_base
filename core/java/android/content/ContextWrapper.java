@@ -33,8 +33,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -170,8 +170,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
-        return mBase.migrateSharedPreferencesFrom(sourceContext, name);
+    public boolean moveSharedPreferencesFrom(Context sourceContext, String name) {
+        return mBase.moveSharedPreferencesFrom(sourceContext, name);
     }
 
     @Override
@@ -288,8 +288,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
-        return mBase.migrateDatabaseFrom(sourceContext, name);
+    public boolean moveDatabaseFrom(Context sourceContext, String name) {
+        return mBase.moveDatabaseFrom(sourceContext, name);
     }
 
     @Override
@@ -818,26 +818,26 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedStorageContext() {
-        return mBase.createDeviceEncryptedStorageContext();
+    public Context createDeviceProtectedStorageContext() {
+        return mBase.createDeviceProtectedStorageContext();
     }
 
     /** {@hide} */
     @SystemApi
     @Override
-    public Context createCredentialEncryptedStorageContext() {
-        return mBase.createCredentialEncryptedStorageContext();
+    public Context createCredentialProtectedStorageContext() {
+        return mBase.createCredentialProtectedStorageContext();
     }
 
     @Override
-    public boolean isDeviceEncryptedStorage() {
-        return mBase.isDeviceEncryptedStorage();
+    public boolean isDeviceProtectedStorage() {
+        return mBase.isDeviceProtectedStorage();
     }
 
     /** {@hide} */
     @SystemApi
     @Override
-    public boolean isCredentialEncryptedStorage() {
-        return mBase.isCredentialEncryptedStorage();
+    public boolean isCredentialProtectedStorage() {
+        return mBase.isCredentialProtectedStorage();
     }
 }
