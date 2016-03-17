@@ -605,6 +605,30 @@ public class FileUtils {
      */
     public static File buildUniqueFile(File parent, String mimeType, String displayName)
             throws FileNotFoundException {
+        final String[] parts = splitFileName(mimeType, displayName);
+        final String name = parts[0];
+        final String ext = parts[1];
+        File file = buildFile(parent, name, ext);
+
+        // If conflicting file, try adding counter suffix
+        int n = 0;
+        while (file.exists()) {
+            if (n++ >= 32) {
+                throw new FileNotFoundException("Failed to create unique file");
+            }
+            file = buildFile(parent, name + " (" + n + ")", ext);
+        }
+
+        return file;
+    }
+
+    /**
+     * Splits file name into base name and extension.
+     * If the display name doesn't have an extension that matches the requested MIME type, the
+     * extension is regarded as a part of filename and default extension for that MIME type is
+     * appended.
+     */
+    public static String[] splitFileName(String mimeType, String displayName) {
         String name;
         String ext;
 
@@ -642,18 +666,11 @@ public class FileUtils {
             }
         }
 
-        File file = buildFile(parent, name, ext);
-
-        // If conflicting file, try adding counter suffix
-        int n = 0;
-        while (file.exists()) {
-            if (n++ >= 32) {
-                throw new FileNotFoundException("Failed to create unique file");
-            }
-            file = buildFile(parent, name + " (" + n + ")", ext);
+        if (ext == null) {
+            ext = "";
         }
 
-        return file;
+        return new String[] { name, ext };
     }
 
     private static File buildFile(File parent, String name, String ext) {

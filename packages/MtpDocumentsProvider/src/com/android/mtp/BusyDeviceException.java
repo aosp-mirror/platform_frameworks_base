@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.mtp.exceptions;
+package com.android.mtp;
 
 import java.io.IOException;
 
 /**
  * Exception thrown when the device is busy and the requested operation cannon be completed.
  */
-public class BusyDeviceException extends IOException {
+class BusyDeviceException extends IOException {
+    BusyDeviceException() {
+        super("The MTP device is busy.");
+    }
 }

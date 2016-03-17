@@ -30,6 +30,8 @@ import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.FileUriExposedException;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Document;
@@ -41,7 +43,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.mtp.exceptions.BusyDeviceException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -324,25 +325,61 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (DEBUG) {
             Log.d(TAG, "createDocument: " + displayName);
         }
+        final Identifier parentId;
+        final MtpDeviceRecord record;
+        final ParcelFileDescriptor[] pipe;
         try {
-            final Identifier parentId = mDatabase.createIdentifier(parentDocumentId);
+            parentId = mDatabase.createIdentifier(parentDocumentId);
             openDevice(parentId.mDeviceId);
-            final MtpDeviceRecord record = getDeviceToolkit(parentId.mDeviceId).mDeviceRecord;
+            record = getDeviceToolkit(parentId.mDeviceId).mDeviceRecord;
             if (!MtpDeviceRecord.isWritingSupported(record.operationsSupported)) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException(
+                        "Writing operation is not supported by the device.");
             }
-            final ParcelFileDescriptor pipe[] = ParcelFileDescriptor.createReliablePipe();
-            pipe[0].close();  // 0 bytes for a new document.
-            final int formatCode = Document.MIME_TYPE_DIR.equals(mimeType) ?
-                    MtpConstants.FORMAT_ASSOCIATION :
-                    MediaFile.getFormatCode(displayName, mimeType);
-            final MtpObjectInfo info = new MtpObjectInfo.Builder()
-                    .setStorageId(parentId.mStorageId)
-                    .setParent(parentId.mObjectHandle)
-                    .setFormat(formatCode)
-                    .setName(displayName)
-                    .build();
-            final int objectHandle = mMtpManager.createDocument(parentId.mDeviceId, info, pipe[1]);
+            pipe = ParcelFileDescriptor.createReliablePipe();
+            int objectHandle = -1;
+            MtpObjectInfo info = null;
+            try {
+                pipe[0].close();  // 0 bytes for a new document.
+
+                final int formatCode = Document.MIME_TYPE_DIR.equals(mimeType) ?
+                        MtpConstants.FORMAT_ASSOCIATION :
+                        MediaFile.getFormatCode(displayName, mimeType);
+                info = new MtpObjectInfo.Builder()
+                        .setStorageId(parentId.mStorageId)
+                        .setParent(parentId.mObjectHandle)
+                        .setFormat(formatCode)
+                        .setName(displayName)
+                        .build();
+
+                final String[] parts = FileUtils.splitFileName(mimeType, displayName);
+                final String baseName = parts[0];
+                final String extension = parts[1];
+                for (int i = 0; i <= 32; i++) {
+                    final MtpObjectInfo infoUniqueName;
+                    if (i == 0) {
+                        infoUniqueName = info;
+                    } else {
+                        infoUniqueName = new MtpObjectInfo.Builder(info).setName(
+                                baseName + " (" + i + ")." + extension).build();
+                    }
+                    try {
+                        objectHandle = mMtpManager.createDocument(
+                                parentId.mDeviceId, infoUniqueName, pipe[1]);
+                        break;
+                    } catch (SendObjectInfoFailure exp) {
+                        // This can be caused when we have an existing file with the same name.
+                        continue;
+                    }
+                }
+            } finally {
+                pipe[1].close();
+            }
+            if (objectHandle == -1) {
+                throw new IllegalArgumentException(
+                        "The file name \"" + displayName + "\" is conflicted with existing files " +
+                        "and the provider failed to find unique name.");
+            }
             final MtpObjectInfo infoWithHandle =
                     new MtpObjectInfo.Builder(info).setObjectHandle(objectHandle).build();
             final String documentId = mDatabase.putNewDocument(
@@ -351,9 +388,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             getDocumentLoader(parentId).clearTask(parentId);
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;
+        } catch (FileNotFoundException | RuntimeException error) {
+            Log.e(TAG, "createDocument", error);
+            throw error;
         } catch (IOException error) {
             Log.e(TAG, "createDocument", error);
-            throw new FileNotFoundException(error.getMessage());
+            throw new IllegalStateException(error);
         }
     }
 
