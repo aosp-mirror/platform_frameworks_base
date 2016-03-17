@@ -3552,6 +3552,9 @@ public class NotificationManagerService extends SystemService {
         public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
             if (DEBUG) Slog.d(TAG, "onPackagesChanged queryReplace=" + queryReplace
                     + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList)));
+            if (mRankerServicePackageName == null) {
+                return;
+            }
 
             if (pkgList != null && (pkgList.length > 0)) {
                 for (String pkgName : pkgList) {
@@ -3564,6 +3567,10 @@ public class NotificationManagerService extends SystemService {
 
         protected void registerRanker() {
             // Find the updatable ranker and register it.
+            if (mRankerServicePackageName == null) {
+                Slog.w(TAG, "could not start ranker service: no package specified!");
+                return;
+            }
             Set<ComponentName> rankerComponents = queryPackageForServices(
                     mRankerServicePackageName, UserHandle.USER_SYSTEM, null);
             Iterator<ComponentName> iterator = rankerComponents.iterator();
