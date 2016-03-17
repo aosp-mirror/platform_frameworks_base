@@ -128,6 +128,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void hide(int x, int y) {
         if (isShown) {
             isShown = false;
+            mToolbar.dismissPopupMenus();
             setCustomizing(false);
             save();
             mClipper.animateCircularClip(x, y, false, mCollapseAnimationListener);
