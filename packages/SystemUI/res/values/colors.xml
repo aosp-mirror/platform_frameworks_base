@@ -155,6 +155,8 @@
     <color name="default_remote_input_background">@*android:color/notification_default_color</color>
     <color name="remote_input_hint">#4dffffff</color>
 
+    <color name="remote_input_accent">#eeeeee</color>
+
     <color name="qs_tile_tint_unavailable">#40ffffff</color>
     <color name="qs_tile_tint_inactive">#4dffffff</color>
     <color name="qs_tile_tint_active">#ffffffff</color>
