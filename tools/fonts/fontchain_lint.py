@@ -164,6 +164,7 @@ def check_emoji_availability():
 
 def check_emoji_defaults():
     default_emoji_chars = _emoji_properties['Emoji_Presentation']
+    missing_text_chars = _emoji_properties['Emoji'] - default_emoji_chars
     emoji_font_seen = False
     for name, scripts, variant, weight, style, font in _fallback_chain:
         if 'Zsye' in scripts:
@@ -176,32 +177,39 @@ def check_emoji_defaults():
         if emoji_font_seen and not scripts:
             continue
 
-        if font[1] is None:
-            emoji_to_skip = set()
-        else:
-            # CJK font, skip checking the following characters for now.
-            # See b/26153752
-            emoji_to_skip = ({
-                0x26BD, # SOCCER BALL
-                0x26BE, # BASEBALL
-                0x1F18E, # NEGATIVE SQUARED AB
-                0x1F201, # SQUARED KATAKANA KOKO
-                0x1F21A, # SQUARED CJK UNIFIED IDEOGRAPH-7121
-                0x1F22F, # SQUARED CJK UNIFIED IDEOGRAPH-6307
-            } | set(xrange(0x1F191, 0x1F19A+1))
-              | set(xrange(0x1F232, 0x1F236+1))
-              | set(xrange(0x1F238, 0x1F23A+1))
-              | set(xrange(0x1F250, 0x1F251+1)))
+        # Check default emoji-style characters
+        assert_font_supports_none_of_chars(font, sorted(default_emoji_chars))
 
-        assert_font_supports_none_of_chars(font,
-            sorted(default_emoji_chars - emoji_to_skip))
+        # Mark default text-style characters appearing in fonts above the emoji
+        # font as seen
+        if not emoji_font_seen:
+            missing_text_chars -= set(get_best_cmap(font))
+
+    # Noto does not have monochrome symbols for Unicode 7.0 wingdings and
+    # webdings
+    missing_text_chars -= _chars_by_age['7.0']
+    # TODO: Remove these after b/26113320 is fixed
+    missing_text_chars -= {
+        0x263A, # WHITE SMILING FACE
+        0x270C, # VICTORY HAND
+        0x2744, # SNOWFLAKE
+        0x2764, # HEAVY BLACK HEART
+    }
+    assert missing_text_chars == set(), (
+        'Text style version of some emoji characters are missing.')
 
 
-def parse_ucd(ucd_path):
-    global _emoji_properties
-    _emoji_properties = collections.defaultdict(set)
-    with open(path.join(ucd_path, 'emoji-data.txt')) as emoji_data_txt:
-        for line in emoji_data_txt:
+# Setting reverse to true returns a dictionary that maps the values to sets of
+# characters, useful for some binary properties. Otherwise, we get a
+# dictionary that maps characters to the property values, assuming there's only
+# one property in the file.
+def parse_unicode_datafile(file_path, reverse=False):
+    if reverse:
+        output_dict = collections.defaultdict(set)
+    else:
+        output_dict = {}
+    with open(file_path) as datafile:
+        for line in datafile:
             if '#' in line:
                 line = line[:line.index('#')]
             line = line.strip()
@@ -216,7 +224,22 @@ def parse_ucd(ucd_path):
                 char_start = char_end = char_range
             char_start = int(char_start, 16)
             char_end = int(char_end, 16)
-            _emoji_properties[prop].update(xrange(char_start, char_end+1))
+            char_range = xrange(char_start, char_end+1)
+            if reverse:
+                output_dict[prop].update(char_range)
+            else:
+                for char in char_range:
+                    assert char not in output_dict
+                    output_dict[char] = prop
+    return output_dict
+
+
+def parse_ucd(ucd_path):
+    global _emoji_properties, _chars_by_age
+    _emoji_properties = parse_unicode_datafile(
+        path.join(ucd_path, 'emoji-data.txt'), reverse=True)
+    _chars_by_age = parse_unicode_datafile(
+        path.join(ucd_path, 'DerivedAge.txt'), reverse=True)
 
 
 def main():
