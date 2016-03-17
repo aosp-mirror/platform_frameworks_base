@@ -286,18 +286,11 @@ public final class GnssNavigationMessage implements Parcelable {
             navigationMessage.setSvid(parcel.readInt());
             navigationMessage.setMessageId(parcel.readInt());
             navigationMessage.setSubmessageId(parcel.readInt());
-
             int dataLength = parcel.readInt();
             byte[] data = new byte[dataLength];
             parcel.readByteArray(data);
             navigationMessage.setData(data);
-
-            if (parcel.dataAvail() >= Integer.SIZE) {
-                int status = parcel.readInt();
-                navigationMessage.setStatus(status);
-            } else {
-                navigationMessage.setStatus(STATUS_UNKNOWN);
-            }
+            navigationMessage.setStatus(parcel.readInt());
 
             return navigationMessage;
         }
