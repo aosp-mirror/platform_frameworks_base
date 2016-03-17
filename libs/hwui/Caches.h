@@ -92,6 +92,8 @@ public:
      */
     bool init();
 
+    bool isInitialized() { return mInitialized; }
+
     /**
      * Flush the cache.
      *
