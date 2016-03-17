@@ -109,7 +109,8 @@ static struct {
     jfieldID    mRule;
     jfieldID    mFormat;
     jfieldID    mRouteFlags;
-    jfieldID    mRegistrationId;
+    jfieldID    mDeviceType;
+    jfieldID    mDeviceAddress;
     jfieldID    mMixType;
     jfieldID    mCallbackFlags;
 } gAudioMixFields;
@@ -1561,13 +1562,15 @@ static jint convertAudioMixToNative(JNIEnv *env,
 {
     nAudioMix->mMixType = env->GetIntField(jAudioMix, gAudioMixFields.mMixType);
     nAudioMix->mRouteFlags = env->GetIntField(jAudioMix, gAudioMixFields.mRouteFlags);
+    nAudioMix->mDeviceType = (audio_devices_t)
+            env->GetIntField(jAudioMix, gAudioMixFields.mDeviceType);
 
-    jstring jRegistrationId = (jstring)env->GetObjectField(jAudioMix,
-                                                           gAudioMixFields.mRegistrationId);
-    const char *nRegistrationId = env->GetStringUTFChars(jRegistrationId, NULL);
-    nAudioMix->mRegistrationId = String8(nRegistrationId);
-    env->ReleaseStringUTFChars(jRegistrationId, nRegistrationId);
-    env->DeleteLocalRef(jRegistrationId);
+    jstring jDeviceAddress = (jstring)env->GetObjectField(jAudioMix,
+                                                           gAudioMixFields.mDeviceAddress);
+    const char *nDeviceAddress = env->GetStringUTFChars(jDeviceAddress, NULL);
+    nAudioMix->mDeviceAddress = String8(nDeviceAddress);
+    env->ReleaseStringUTFChars(jDeviceAddress, nDeviceAddress);
+    env->DeleteLocalRef(jDeviceAddress);
 
     nAudioMix->mCbFlags = env->GetIntField(jAudioMix, gAudioMixFields.mCallbackFlags);
 
@@ -1857,7 +1860,8 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioMixFields.mFormat = GetFieldIDOrDie(env, audioMixClass, "mFormat",
                                                 "Landroid/media/AudioFormat;");
     gAudioMixFields.mRouteFlags = GetFieldIDOrDie(env, audioMixClass, "mRouteFlags", "I");
-    gAudioMixFields.mRegistrationId = GetFieldIDOrDie(env, audioMixClass, "mRegistrationId",
+    gAudioMixFields.mDeviceType = GetFieldIDOrDie(env, audioMixClass, "mDeviceSystemType", "I");
+    gAudioMixFields.mDeviceAddress = GetFieldIDOrDie(env, audioMixClass, "mDeviceAddress",
                                                       "Ljava/lang/String;");
     gAudioMixFields.mMixType = GetFieldIDOrDie(env, audioMixClass, "mMixType", "I");
     gAudioMixFields.mCallbackFlags = GetFieldIDOrDie(env, audioMixClass, "mCallbackFlags", "I");
