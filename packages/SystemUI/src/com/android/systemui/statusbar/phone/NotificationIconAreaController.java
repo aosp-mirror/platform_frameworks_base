@@ -114,6 +114,9 @@ public class NotificationIconAreaController {
             if (!PhoneStatusBar.isTopLevelChild(ent)) {
                 continue;
             }
+            if (ent.row.getVisibility() == View.GONE) {
+                continue;
+            }
             toShow.add(ent.icon);
         }
 

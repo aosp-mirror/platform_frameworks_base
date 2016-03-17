@@ -91,6 +91,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         } else {
             group.summary = null;
         }
+        updateSuppression(group);
         if (group.children.isEmpty()) {
             if (group.summary == null) {
                 mGroupMap.remove(groupKey);
@@ -109,12 +110,22 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         }
         if (isGroupChild) {
             group.children.add(added);
+            updateSuppression(group);
         } else {
             group.summary = added;
             group.expanded = added.row.areChildrenExpanded();
+            updateSuppression(group);
             if (!group.children.isEmpty()) {
                 mListener.onGroupCreatedFromChildren(group);
             }
+        }
+    }
+
+    private void updateSuppression(NotificationGroup group) {
+        boolean prevSuppressed = group.suppressed;
+        group.suppressed = group.summary != null && group.children.size() == 1 && !group.expanded;
+        if (prevSuppressed != group.suppressed) {
+            mListener.onGroupsChanged();
         }
     }
 
@@ -126,26 +137,17 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         onEntryAdded(entry);
     }
 
-    public boolean isVisible(StatusBarNotification sbn) {
-        if (!isGroupChild(sbn)) {
-            return true;
-        }
-        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
-        if (group != null && (group.expanded || group.summary == null)) {
-            return true;
-        }
-        return false;
+    public boolean isSummaryOfSuppressedGroup(StatusBarNotification sbn) {
+        return isGroupSuppressed(sbn) && sbn.getNotification().isGroupSummary();
     }
 
-    public boolean hasGroupChildren(StatusBarNotification sbn) {
-        if (!isGroupSummary(sbn)) {
-            return false;
-        }
+    public boolean isChildInSuppressedGroup(StatusBarNotification sbn) {
+        return isGroupSuppressed(sbn) && sbn.getNotification().isGroupChild();
+    }
+
+    private boolean isGroupSuppressed(StatusBarNotification sbn) {
         NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
-        if (group == null) {
-            return false;
-        }
-        return !group.children.isEmpty();
+        return group != null && group.suppressed;
     }
 
     public void setStatusBarState(int newState) {
@@ -163,6 +165,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
             if (group.expanded) {
                 setGroupExpanded(group, false);
             }
+            updateSuppression(group);
         }
     }
 
@@ -174,7 +177,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
             return false;
         }
         NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
-        if (group == null || group.summary == null) {
+        if (group == null || group.summary == null || group.suppressed) {
             return false;
         }
         return true;
@@ -258,7 +261,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 mHeadsUpedEntries.add(sbn.getKey());
                 if (groupChild) {
                     onEntryAdded(entry);
-                    mListener.onChildIsolationChanged();
+                    mListener.onGroupsChanged();
                 }
             }
         } else {
@@ -271,7 +274,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 mHeadsUpedEntries.remove(sbn.getKey());
                 if (isolatedBefore) {
                     onEntryAdded(entry);
-                    mListener.onChildIsolationChanged();
+                    mListener.onGroupsChanged();
                 }
             }
         }
@@ -281,6 +284,10 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         public final HashSet<NotificationData.Entry> children = new HashSet<>();
         public NotificationData.Entry summary;
         public boolean expanded;
+        /**
+         * Is this notification group suppressed, i.e its summary is hidden
+         */
+        public boolean suppressed;
     }
 
     public interface OnGroupChangeListener {
@@ -301,8 +308,9 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         void onGroupCreatedFromChildren(NotificationGroup group);
 
         /**
-         * The isolation of a child has changed i.e it's group changes.
+         * The groups have changed. This can happen if the isolation of a child has changes or if a
+         * group became suppressed / unsuppressed
          */
-        void onChildIsolationChanged();
+        void onGroupsChanged();
     }
 }
