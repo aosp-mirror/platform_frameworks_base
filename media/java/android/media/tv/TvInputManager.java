@@ -302,7 +302,6 @@ public final class TvInputManager {
      * Interface used to receive the created session.
      * @hide
      */
-    @SystemApi
     public abstract static class SessionCallback {
         /**
          * This is called after {@link TvInputManager#createSession} has been processed.
@@ -418,9 +417,7 @@ public final class TvInputManager {
          * @param top Top position.
          * @param right Right position.
          * @param bottom Bottom position.
-         * @hide
          */
-        @SystemApi
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
         }
 
@@ -430,9 +427,7 @@ public final class TvInputManager {
          * @param session A {@link TvInputManager.Session} associated with this callback
          * @param eventType The type of the event.
          * @param eventArgs Optional arguments of the event.
-         * @hide
          */
-        @SystemApi
         public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
         }
 
@@ -1347,7 +1342,6 @@ public final class TvInputManager {
      * @param handler A {@link Handler} that the session creation will be delivered to.
      * @hide
      */
-    @SystemApi
     public void createSession(@NonNull String inputId, @NonNull final SessionCallback callback,
             @NonNull Handler handler) {
         createSessionInternal(inputId, false, callback, handler);
@@ -1364,7 +1358,6 @@ public final class TvInputManager {
      * @param handler A {@link Handler} that the session creation will be delivered to.
      * @hide
      */
-    @SystemApi
     public void createRecordingSession(@NonNull String inputId,
             @NonNull final SessionCallback callback, @NonNull Handler handler) {
         createSessionInternal(inputId, true, callback, handler);
@@ -1544,7 +1537,6 @@ public final class TvInputManager {
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
-    @SystemApi
     public static final class Session {
         static final int DISPATCH_IN_PROGRESS = -1;
         static final int DISPATCH_NOT_HANDLED = 0;
@@ -1656,9 +1648,7 @@ public final class TvInputManager {
          * @param format The new PixelFormat of the surface.
          * @param width The new width of the surface.
          * @param height The new height of the surface.
-         * @hide
          */
-        @SystemApi
         public void dispatchSurfaceChanged(int format, int width, int height) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
@@ -1706,9 +1696,7 @@ public final class TvInputManager {
          *
          * @param channelUri The URI of a channel.
          * @param params A set of extra parameters which might be handled with this tune event.
-         * @hide
          */
-        @SystemApi
         public void tune(@NonNull Uri channelUri, Bundle params) {
             Preconditions.checkNotNull(channelUri);
             if (mToken == null) {
@@ -2065,9 +2053,7 @@ public final class TvInputManager {
          *            i.e. prefixed with a package name you own, so that different developers will
          *            not create conflicting commands.
          * @param data Any data to include with the command.
-         * @hide
          */
-        @SystemApi
         public void sendAppPrivateCommand(String action, Bundle data) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
