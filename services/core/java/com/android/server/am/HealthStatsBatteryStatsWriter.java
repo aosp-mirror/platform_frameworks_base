@@ -122,7 +122,8 @@ public class HealthStatsBatteryStatsWriter {
             // Battery Stats stores the GPS sensors with a bogus key in this API. Pull it out
             // as a separate metric here so as to not expose that in the API.
             if (sensorId == BatteryStats.Uid.Sensor.GPS) {
-                addTimer(uidWriter, UidHealthStats.TIMER_GPS_SENSOR, sensors.valueAt(i).getSensorTime());
+                addTimer(uidWriter, UidHealthStats.TIMER_GPS_SENSOR,
+                        sensors.valueAt(i).getSensorTime());
             } else {
                 addTimers(uidWriter, UidHealthStats.TIMERS_SENSORS, Integer.toString(sensorId),
                         sensors.valueAt(i).getSensorTime());
@@ -131,7 +132,7 @@ public class HealthStatsBatteryStatsWriter {
 
         // STATS_PIDS
         pids = uid.getPidStats();
-        N = sensors.size();
+        N = pids.size();
         for (int i=0; i<N; i++) {
             final HealthStatsWriter writer = new HealthStatsWriter(PidHealthStats.CONSTANTS);
             writePid(writer, pids.valueAt(i));
@@ -241,7 +242,8 @@ public class HealthStatsBatteryStatsWriter {
         addTimer(uidWriter, UidHealthStats.TIMER_CAMERA, uid.getCameraTurnedOnTimer());
 
         // TIMER_FOREGROUND_ACTIVITY
-        addTimer(uidWriter, UidHealthStats.TIMER_FOREGROUND_ACTIVITY, uid.getForegroundActivityTimer());
+        addTimer(uidWriter, UidHealthStats.TIMER_FOREGROUND_ACTIVITY,
+                uid.getForegroundActivityTimer());
 
         // TIMER_BLUETOOTH_SCAN
         addTimer(uidWriter, UidHealthStats.TIMER_BLUETOOTH_SCAN, uid.getBluetoothScanTimer());
