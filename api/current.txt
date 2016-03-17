@@ -55103,6 +55103,10 @@ package java.util {
     method public static void parallelSort(T[], int, int);
     method public static void parallelSort(T[], java.util.Comparator<? super T>);
     method public static void parallelSort(T[], int, int, java.util.Comparator<? super T>);
+    method public static void setAll(T[], java.util.function.IntFunction<? extends T>);
+    method public static void setAll(int[], java.util.function.IntUnaryOperator);
+    method public static void setAll(long[], java.util.function.IntToLongFunction);
+    method public static void setAll(double[], java.util.function.IntToDoubleFunction);
     method public static void sort(int[]);
     method public static void sort(int[], int, int);
     method public static void sort(long[]);
