@@ -28,23 +28,23 @@
 #include <minikin/Layout.h>
 #include "Paint.h"
 #include "MinikinSkia.h"
-#include "TypefaceImpl.h"
+#include "Typeface.h"
 
 namespace android {
 
 class MinikinUtils {
 public:
     ANDROID_API static FontStyle prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
-            const Paint* paint, TypefaceImpl* typeface);
+            const Paint* paint, Typeface* typeface);
 
     ANDROID_API static void doLayout(Layout* layout, const Paint* paint, int bidiFlags,
-            TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
+            Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
             size_t bufSize);
 
-    ANDROID_API static float measureText(const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
+    ANDROID_API static float measureText(const Paint* paint, int bidiFlags, Typeface* typeface,
             const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances);
 
-    ANDROID_API static bool hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs);
+    ANDROID_API static bool hasVariationSelector(Typeface* typeface, uint32_t codepoint, uint32_t vs);
 
     ANDROID_API static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 

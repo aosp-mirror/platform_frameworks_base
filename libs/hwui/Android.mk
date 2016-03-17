@@ -16,7 +16,7 @@ hwui_src_files := \
     hwui/MinikinSkia.cpp \
     hwui/MinikinUtils.cpp \
     hwui/PaintImpl.cpp \
-    hwui/TypefaceImpl.cpp \
+    hwui/Typeface.cpp \
     renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
     renderstate/OffscreenBufferPool.cpp \

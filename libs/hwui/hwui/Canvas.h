@@ -60,7 +60,7 @@ class Tree;
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 class Paint;
-struct TypefaceImpl;
+struct Typeface;
 
 class ANDROID_API Canvas {
 public:
@@ -237,10 +237,10 @@ public:
      * and delegating the final draw to virtual drawGlyphs method.
      */
     void drawText(const uint16_t* text, int start, int count, int contextCount,
-            float x, float y, int bidiFlags, const Paint& origPaint, TypefaceImpl* typeface);
+            float x, float y, int bidiFlags, const Paint& origPaint, Typeface* typeface);
 
     void drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
-            float hOffset, float vOffset, const Paint& paint, TypefaceImpl* typeface);
+            float hOffset, float vOffset, const Paint& paint, Typeface* typeface);
 
 protected:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
