@@ -475,6 +475,7 @@ public class TypedArray {
      *         been recycled.
      * @throws UnsupportedOperationException if the attribute is defined but is
      *         not an integer color, color state list or GradientColor.
+     * @hide
      */
     @Nullable
     public ComplexColor getComplexColor(@StyleableRes int index) {
