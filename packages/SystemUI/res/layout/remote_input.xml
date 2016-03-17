@@ -62,6 +62,7 @@
                 android:paddingBottom="12dp"
                 android:id="@+id/remote_input_send"
                 android:src="@drawable/ic_send"
+                android:contentDescription="@*android:string/ime_action_send"
                 android:tint="@color/remote_input_send"
                 android:tintMode="src_in"
                 android:background="@drawable/ripple_drawable" />
