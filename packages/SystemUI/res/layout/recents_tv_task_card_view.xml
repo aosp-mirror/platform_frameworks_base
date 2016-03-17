@@ -59,7 +59,7 @@
         <ImageView
                 android:id="@+id/card_view_thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/recents_tv_card_height"
+                android:layout_height="@dimen/recents_tv_screenshot_height"
                 android:scaleType="centerCrop"
                 android:gravity="center"
                 android:layout_alignParentTop="true"

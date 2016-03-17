@@ -16,10 +16,8 @@
 package com.android.systemui.recents.tv.views;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -121,10 +119,10 @@ public class RecentsTvTransitionHelper {
             };
         }
         try {
-            Rect taskRect = taskView.getGlobalRect();
+            Rect taskRect = taskView.getFocusedThumbnailRect();
             WindowManagerGlobal.getWindowManagerService()
-                    .overridePendingAppTransitionThumb(task.thumbnail, taskRect.left,
-                            taskRect.top, callback, true);
+                    .overridePendingAppTransitionAspectScaledThumb(task.thumbnail, taskRect.left,
+                            taskRect.top, taskRect.width(), taskRect.height(), callback, true);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
         }
