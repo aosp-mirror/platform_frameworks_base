@@ -898,12 +898,6 @@ public final class ObjectAnimator extends ValueAnimator {
         return mTarget == null ? null : mTarget.get();
     }
 
-    /**
-     * Sets the target object whose property will be animated by this animation. If the
-     * animator has been started, it will be canceled.
-     *
-     * @param target The object being animated
-     */
     @Override
     public void setTarget(@Nullable Object target) {
         final Object oldTarget = getTarget();

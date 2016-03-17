@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.annotation.Nullable;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 
@@ -436,10 +437,14 @@ public abstract class Animator implements Cloneable {
      * operate on target objects (for example, {@link ValueAnimator}, but this method
      * is on the superclass for the convenience of dealing generically with those subclasses
      * that do handle targets.
+     * <p>
+     * <strong>Note:</strong> The target is stored as a weak reference internally to avoid leaking
+     * resources by having animators directly reference old targets. Therefore, you should
+     * ensure that animator targets always have a hard reference elsewhere.
      *
      * @param target The object being animated
      */
-    public void setTarget(Object target) {
+    public void setTarget(@Nullable Object target) {
     }
 
     // Hide reverse() and canReverse() for now since reverse() only work for simple
