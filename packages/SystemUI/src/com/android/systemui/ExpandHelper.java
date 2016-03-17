@@ -535,31 +535,43 @@ public class ExpandHelper implements Gefingerpoken {
         boolean nowExpanded;
         int naturalHeight = mScaler.getNaturalHeight();
         if (wasClosed) {
-            nowExpanded = (force || currentHeight > mOldHeight);
+            nowExpanded = (force || currentHeight > mOldHeight && velocity >= 0);
         } else {
-            nowExpanded = !force && currentHeight >= mOldHeight;
+            nowExpanded = !force && (currentHeight >= mOldHeight || velocity > 0);
         }
         nowExpanded |= mNaturalHeight == mSmallSize;
         if (mScaleAnimation.isRunning()) {
             mScaleAnimation.cancel();
         }
-        mCallback.setUserExpandedChild(mResizedView, nowExpanded);
         mCallback.expansionStateChanged(false);
         float targetHeight = nowExpanded ? naturalHeight : mSmallSize;
         if (targetHeight != currentHeight) {
             mScaleAnimation.setFloatValues(targetHeight);
             mScaleAnimation.setupStartValues();
             final View scaledView = mResizedView;
+            final boolean expand = nowExpanded;
             mScaleAnimation.addListener(new AnimatorListenerAdapter() {
+                public boolean mCancelled;
+
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (!mCancelled) {
+                        mCallback.setUserExpandedChild(scaledView, expand);
+                    }
                     mCallback.setUserLockedChild(scaledView, false);
                     mScaleAnimation.removeListener(this);
                 }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mCancelled = true;
+                }
             });
+            velocity = nowExpanded == velocity >= 0 ? velocity : 0;
             mFlingAnimationUtils.apply(mScaleAnimation, currentHeight, targetHeight, velocity);
             mScaleAnimation.start();
         } else {
+            mCallback.setUserExpandedChild(mResizedView, nowExpanded);
             mCallback.setUserLockedChild(mResizedView, false);
         }
 
