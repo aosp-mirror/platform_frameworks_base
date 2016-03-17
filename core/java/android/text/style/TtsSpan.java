@@ -1013,7 +1013,7 @@ public class TtsSpan implements ParcelableSpan {
          * @return This instance.
          */
         public MeasureBuilder setIntegerPart(long integerPart) {
-            return setNumber(String.valueOf(integerPart));
+            return setIntegerPart(String.valueOf(integerPart));
         }
 
         /**
