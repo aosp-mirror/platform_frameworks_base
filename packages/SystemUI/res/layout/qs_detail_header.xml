@@ -30,6 +30,7 @@
         android:padding="16dp"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@*android:string/action_bar_up_description"
         android:src="?android:attr/homeAsUpIndicator" />
 
     <TextView
