@@ -179,10 +179,10 @@ public class FontListParser {
         int tag = 0;
         String tagStr = parser.getAttributeValue(null, "tag");
         if (tagStr != null && TAG_PATTERN.matcher(tagStr).matches()) {
-            tag = tagStr.charAt(0) << 24 +
-                  tagStr.charAt(1) << 16 +
-                  tagStr.charAt(2) <<  8 +
-                  tagStr.charAt(3);
+            tag = (tagStr.charAt(0) << 24) +
+                  (tagStr.charAt(1) << 16) +
+                  (tagStr.charAt(2) <<  8) +
+                  (tagStr.charAt(3)      );
         } else {
             throw new XmlPullParserException("Invalid tag attribute value.", parser, null);
         }
