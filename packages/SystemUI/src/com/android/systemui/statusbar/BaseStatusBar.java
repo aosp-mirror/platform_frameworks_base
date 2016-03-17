@@ -1860,15 +1860,16 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     /**
      * The LEDs are turned off when the notification panel is shown, even just a little bit.
+     * See also NotificationStackScrollLayout.setIsExpanded() for another place where we
+     * attempt to do this.
      */
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         try {
             if (visibleToUser) {
                 boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
                 boolean clearNotificationEffects =
-                    ((mShowLockscreenNotifications && mState == StatusBarState.KEYGUARD) ||
-                            (!pinnedHeadsUp && (mState == StatusBarState.SHADE
-                                    || mState == StatusBarState.SHADE_LOCKED)));
+                        !isPanelFullyCollapsed() &&
+                        (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
                 int notificationLoad = mNotificationData.getActiveNotifications().size();
                 if (pinnedHeadsUp && isPanelFullyCollapsed())  {
                     notificationLoad = 1;
