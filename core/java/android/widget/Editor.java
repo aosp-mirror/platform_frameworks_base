@@ -1827,7 +1827,7 @@ public class Editor {
             return;
         }
 
-        Layout layout = getActiveLayout();
+        Layout layout = mTextView.getLayout();
         final int offset = mTextView.getSelectionStart();
         final int line = layout.getLineForOffset(offset);
         final int top = layout.getLineTop(line);
@@ -2192,27 +2192,35 @@ public class Editor {
             mCursorDrawable[cursorIndex] = mTextView.getContext().getDrawable(
                     mTextView.mCursorDrawableRes);
         final Drawable drawable = mCursorDrawable[cursorIndex];
-        final int left = clampCursorHorizontalPosition(drawable, horizontal);
+        final int left = clampHorizontalPosition(drawable, horizontal);
         final int width = drawable.getIntrinsicWidth();
         drawable.setBounds(left, top - mTempRect.top, left + width,
                 bottom + mTempRect.bottom);
     }
 
     /**
-     * Return clamped position for the cursor. If the cursor is within the boundaries of the view,
-     * then it is offset with the left padding of the cursor drawable. If the cursor is at
+     * Return clamped position for the drawable. If the drawable is within the boundaries of the
+     * view, then it is offset with the left padding of the cursor drawable. If the drawable is at
      * the beginning or the end of the text then its drawable edge is aligned with left or right of
-     * the view boundary.
+     * the view boundary. If the drawable is null, horizontal parameter is aligned to left or right
+     * of the view.
      *
-     * @param drawable   Cursor drawable.
-     * @param horizontal Horizontal position for the cursor.
-     * @return The clamped horizontal position for the cursor.
+     * @param drawable Drawable. Can be null.
+     * @param horizontal Horizontal position for the drawable.
+     * @return The clamped horizontal position for the drawable.
      */
-    private final int clampCursorHorizontalPosition(final Drawable drawable, float
-            horizontal) {
+    private int clampHorizontalPosition(@Nullable final Drawable drawable, float horizontal) {
         horizontal = Math.max(0.5f, horizontal - 0.5f);
         if (mTempRect == null) mTempRect = new Rect();
-        drawable.getPadding(mTempRect);
+
+        int drawableWidth = 0;
+        if (drawable != null) {
+            drawable.getPadding(mTempRect);
+            drawableWidth = drawable.getIntrinsicWidth();
+        } else {
+            mTempRect.setEmpty();
+        }
+
         int scrollX = mTextView.getScrollX();
         float horizontalDiff = horizontal - scrollX;
         int viewClippedWidth = mTextView.getWidth() - mTextView.getCompoundPaddingLeft()
@@ -2221,9 +2229,11 @@ public class Editor {
         final int left;
         if (horizontalDiff >= (viewClippedWidth - 1f)) {
             // at the rightmost position
-            final int cursorWidth = drawable.getIntrinsicWidth();
-            left = viewClippedWidth + scrollX - (cursorWidth - mTempRect.right);
-        } else if (Math.abs(horizontalDiff) <= 1f) {
+            left = viewClippedWidth + scrollX - (drawableWidth - mTempRect.right);
+        } else if (Math.abs(horizontalDiff) <= 1f ||
+                (TextUtils.isEmpty(mTextView.getText())
+                        && (TextView.VERY_WIDE - scrollX) <= (viewClippedWidth + 1f)
+                        && horizontal <= 1f)) {
             // at the leftmost position
             left = scrollX - mTempRect.left;
         } else {
@@ -3772,10 +3782,10 @@ public class Editor {
                                 + mHandleHeight);
             } else {
                 // We have a single cursor.
-                Layout layout = getActiveLayout();
+                Layout layout = mTextView.getLayout();
                 int line = layout.getLineForOffset(mTextView.getSelectionStart());
-                float primaryHorizontal =
-                        layout.getPrimaryHorizontal(mTextView.getSelectionStart());
+                float primaryHorizontal = clampHorizontalPosition(null,
+                        layout.getPrimaryHorizontal(mTextView.getSelectionStart()));
                 mSelectionBounds.set(
                         primaryHorizontal,
                         layout.getLineTop(line),
@@ -4152,7 +4162,7 @@ public class Editor {
                 prepareCursorControllers();
                 return;
             }
-            layout = getActiveLayout();
+            layout = mTextView.getLayout();
 
             boolean offsetChanged = offset != mPreviousOffset;
             if (offsetChanged || parentScrolled) {
@@ -4322,19 +4332,6 @@ public class Editor {
         public void onDetached() {}
     }
 
-    /**
-     * Returns the active layout (hint or text layout). Note that the text layout can be null.
-     */
-    private Layout getActiveLayout() {
-        Layout layout = mTextView.getLayout();
-        Layout hintLayout = mTextView.getHintLayout();
-        if (TextUtils.isEmpty(layout.getText()) && hintLayout != null &&
-                !TextUtils.isEmpty(hintLayout.getText())) {
-            layout = hintLayout;
-        }
-        return layout;
-    }
-
     private class InsertionHandleView extends HandleView {
         private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
@@ -4431,7 +4428,7 @@ public class Editor {
             final Drawable drawable = mCursorCount > 0 ? mCursorDrawable[0] : null;
             if (drawable != null) {
                 final float horizontal = layout.getPrimaryHorizontal(offset);
-                return clampCursorHorizontalPosition(drawable, horizontal) + mTempRect.left;
+                return clampHorizontalPosition(drawable, horizontal) + mTempRect.left;
             }
             return super.getCursorHorizontalPosition(layout, offset);
         }

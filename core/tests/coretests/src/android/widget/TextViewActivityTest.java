@@ -16,8 +16,10 @@
 
 package android.widget;
 
+import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.onFloatingToolBarItem;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.doubleTapAndDragOnText;
 import static android.widget.espresso.TextViewActions.doubleClickOnTextAtIndex;
@@ -49,6 +51,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.InputType;
 import android.view.KeyEvent;
 
 import static org.hamcrest.Matchers.anyOf;
@@ -231,6 +234,33 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         final String text2 = "Toolbar disappears after typing text.";
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text2));
         assertFloatingToolbarIsNotDisplayed();
+    }
+
+    @SmallTest
+    public void testToolbarAppearsAfterSelection_withFirstStringLtrAlgorithmAndRtlHint()
+            throws Exception {
+        // after the hint layout change, the floating toolbar was not visible in the case below
+        // this test tests that the floating toolbar is displayed on the screen and is visible to
+        // user.
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
+        textView.post(new Runnable() {
+            @Override
+            public void run() {
+                textView.setTextDirection(TextView.TEXT_DIRECTION_FIRST_STRONG_LTR);
+                textView.setInputType(InputType.TYPE_CLASS_TEXT);
+                textView.setSingleLine(true);
+                textView.setHint("الروبوت");
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView("test"));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(1));
+        onFloatingToolBarItem(withText(com.android.internal.R.string.cut)).perform(click());
+        onView(withId(R.id.textview)).perform(longClick());
+        sleepForFloatingToolbarPopup();
+
+        assertFloatingToolbarIsDisplayed();
     }
 
     @SmallTest
