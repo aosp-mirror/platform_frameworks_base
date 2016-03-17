@@ -28,6 +28,7 @@
 #include <DamageAccumulator.h>
 #include <Matrix.h>
 #include <RenderNode.h>
+#include <renderthread/CanvasContext.h>
 #include <TreeInfo.h>
 #include <Paint.h>
 
@@ -487,15 +488,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
         virtual void onPositionUpdated(RenderNode& node, const TreeInfo& info) override {
             if (CC_UNLIKELY(!mWeakRef || !info.updateWindowPositions)) return;
-            ATRACE_NAME("Update SurfaceView position");
 
-            JNIEnv* env = jnienv();
-            jobject localref = env->NewLocalRef(mWeakRef);
-            if (CC_UNLIKELY(!localref)) {
-                jnienv()->DeleteWeakGlobalRef(mWeakRef);
-                mWeakRef = nullptr;
-                return;
-            }
             Matrix4 transform;
             info.damageAccumulator->computeCurrentTransform(&transform);
             const RenderProperties& props = node.properties();
@@ -505,10 +498,13 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             bounds.right -= info.windowInsetLeft;
             bounds.top -= info.windowInsetTop;
             bounds.bottom -= info.windowInsetTop;
-            env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
-                    (jlong) info.frameNumber, (jint) bounds.left, (jint) bounds.top,
-                    (jint) bounds.right, (jint) bounds.bottom);
-            env->DeleteLocalRef(localref);
+
+            auto functor = std::bind(
+                std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePosition), this,
+                (jlong) info.frameNumber, (jint) bounds.left, (jint) bounds.top,
+                (jint) bounds.right, (jint) bounds.bottom);
+
+            info.canvasContext.enqueueFrameWork(std::move(functor));
         }
 
     private:
@@ -518,6 +514,23 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", mVm);
             }
             return env;
+        }
+
+        void doUpdatePosition(jlong frameNumber, jint left, jint top,
+                jint right, jint bottom) {
+            ATRACE_NAME("Update SurfaceView position");
+
+            JNIEnv* env = jnienv();
+            jobject localref = env->NewLocalRef(mWeakRef);
+            if (CC_UNLIKELY(!localref)) {
+                jnienv()->DeleteWeakGlobalRef(mWeakRef);
+                mWeakRef = nullptr;
+                return;
+            }
+
+            env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
+                    frameNumber, left, top, right, bottom);
+            env->DeleteLocalRef(localref);
         }
 
         JavaVM* mVm;
