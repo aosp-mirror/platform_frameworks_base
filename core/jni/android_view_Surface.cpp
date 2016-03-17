@@ -144,7 +144,7 @@ android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
         PublicFormat f) {
     switch(f) {
         case PublicFormat::JPEG:
-            return HAL_DATASPACE_JFIF;
+            return HAL_DATASPACE_V0_JFIF;
         case PublicFormat::DEPTH_POINT_CLOUD:
         case PublicFormat::DEPTH16:
             return HAL_DATASPACE_DEPTH;
@@ -156,7 +156,7 @@ android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
         case PublicFormat::YUV_420_888:
         case PublicFormat::NV21:
         case PublicFormat::YV12:
-            return HAL_DATASPACE_JFIF;
+            return HAL_DATASPACE_V0_JFIF;
         default:
             // Most formats map to UNKNOWN
             return HAL_DATASPACE_UNKNOWN;
@@ -210,7 +210,7 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
             switch (dataSpace) {
                 case HAL_DATASPACE_DEPTH:
                     return PublicFormat::DEPTH_POINT_CLOUD;
-                case HAL_DATASPACE_JFIF:
+                case HAL_DATASPACE_V0_JFIF:
                     return PublicFormat::JPEG;
                 default:
                     // Assume otherwise-marked blobs are also JPEG
