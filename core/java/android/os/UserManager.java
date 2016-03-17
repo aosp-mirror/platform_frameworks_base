@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.os;
 
 import android.Manifest;
@@ -882,25 +883,13 @@ public class UserManager {
         }
     }
 
-    /**
-     * Return whether the calling user is running in a "locked" state. A user is
-     * unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-encrypted private app data storage is
-     * available.
-     */
+    /** @removed */
     @Deprecated
     public boolean isUserRunningAndLocked() {
         return isUserRunningAndLocked(Process.myUserHandle());
     }
 
-    /**
-     * Return whether the given user is running in a "locked" state. A user
-     * is unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-encrypted private app data storage is
-     * available.
-     *
-     * @param user to retrieve the unlocked state for.
-     */
+    /** @removed */
     @Deprecated
     public boolean isUserRunningAndLocked(UserHandle user) {
         try {
@@ -911,25 +900,13 @@ public class UserManager {
         }
     }
 
-    /**
-     * Return whether the calling user is running in an "unlocked" state. A user
-     * is unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-encrypted private app data storage is
-     * available.
-     */
+    /** @removed */
     @Deprecated
     public boolean isUserRunningAndUnlocked() {
         return isUserRunningAndUnlocked(Process.myUserHandle());
     }
 
-    /**
-     * Return whether the given user is running in an "unlocked" state. A user
-     * is unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-encrypted private app data storage is
-     * available.
-     *
-     * @param user to retrieve the unlocked state for.
-     */
+    /** @removed */
     @Deprecated
     public boolean isUserRunningAndUnlocked(UserHandle user) {
         try {
@@ -944,7 +921,11 @@ public class UserManager {
      * Return whether the calling user is running in an "unlocked" state. A user
      * is unlocked only after they've entered their credentials (such as a lock
      * pattern or PIN), and credential-encrypted private app data storage is
+     * available. When a user is locked, only device-protected data storage is
      * available.
+     *
+     * @see Intent#ACTION_USER_UNLOCKED
+     * @see Context#createDeviceProtectedStorageContext()
      */
     public boolean isUserUnlocked() {
         return isUserUnlocked(Process.myUserHandle());
@@ -953,10 +934,13 @@ public class UserManager {
     /**
      * Return whether the given user is running in an "unlocked" state. A user
      * is unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-encrypted private app data storage is
+     * pattern or PIN), and credential-protected private app data storage is
+     * available. When a user is locked, only device-protected data storage is
      * available.
      *
      * @param user to retrieve the unlocked state for.
+     * @see Intent#ACTION_USER_UNLOCKED
+     * @see Context#createDeviceProtectedStorageContext()
      */
     public boolean isUserUnlocked(UserHandle user) {
         return isUserUnlocked(user.getIdentifier());

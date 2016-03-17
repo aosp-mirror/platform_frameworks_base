@@ -9,8 +9,8 @@
                  android:backupAgent="SettingsBackupAgent"
                  android:killAfterRestore="false"
                  android:icon="@mipmap/ic_launcher_settings"
-                 android:forceDeviceEncrypted="true"
-                 android:encryptionAware="true">
+                 android:defaultToDeviceProtectedStorage="true"
+                 android:directBootAware="true">
 
         <provider android:name="SettingsProvider"
                   android:authorities="settings"

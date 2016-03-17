@@ -16,8 +16,6 @@
 
 package android.app;
 
-import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,15 +35,17 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.DisplayAdjustments;
 import android.view.Display;
-import android.os.SystemProperties;
+import android.view.DisplayAdjustments;
 
 import dalvik.system.VMRuntime;
 
@@ -56,11 +56,10 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Objects;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
@@ -95,8 +94,8 @@ public final class LoadedApk {
     private String mDataDir;
     private String mLibDir;
     private File mDataDirFile;
-    private File mDeviceEncryptedDataDirFile;
-    private File mCredentialEncryptedDataDirFile;
+    private File mDeviceProtectedDataDirFile;
+    private File mCredentialProtectedDataDirFile;
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
@@ -186,8 +185,8 @@ public final class LoadedApk {
         mSharedLibraries = null;
         mDataDir = null;
         mDataDirFile = null;
-        mDeviceEncryptedDataDirFile = null;
-        mCredentialEncryptedDataDirFile = null;
+        mDeviceProtectedDataDirFile = null;
+        mCredentialProtectedDataDirFile = null;
         mLibDir = null;
         mBaseClassLoader = null;
         mSecurityViolation = false;
@@ -303,8 +302,8 @@ public final class LoadedApk {
         mDataDir = aInfo.dataDir;
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
-        mDeviceEncryptedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceEncryptedDataDir);
-        mCredentialEncryptedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialEncryptedDataDir);
+        mDeviceProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceProtectedDataDir);
+        mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialProtectedDataDir);
     }
 
     public static void makePaths(ActivityThread activityThread, ApplicationInfo aInfo,
@@ -651,12 +650,12 @@ public final class LoadedApk {
         return mDataDirFile;
     }
 
-    public File getDeviceEncryptedDataDirFile() {
-        return mDeviceEncryptedDataDirFile;
+    public File getDeviceProtectedDataDirFile() {
+        return mDeviceProtectedDataDirFile;
     }
 
-    public File getCredentialEncryptedDataDirFile() {
-        return mCredentialEncryptedDataDirFile;
+    public File getCredentialProtectedDataDirFile() {
+        return mCredentialProtectedDataDirFile;
     }
 
     public AssetManager getAssets(ActivityThread mainThread) {

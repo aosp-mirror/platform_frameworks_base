@@ -151,7 +151,7 @@ public class MockContext extends Context {
     }
 
     @Override
-    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+    public boolean moveSharedPreferencesFrom(Context sourceContext, String name) {
         throw new UnsupportedOperationException();
     }
 
@@ -258,7 +258,7 @@ public class MockContext extends Context {
     }
 
     @Override
-    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+    public boolean moveDatabaseFrom(Context sourceContext, String name) {
         throw new UnsupportedOperationException();
     }
 
@@ -726,26 +726,26 @@ public class MockContext extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedStorageContext() {
+    public Context createDeviceProtectedStorageContext() {
         throw new UnsupportedOperationException();
     }
 
     /** {@hide} */
     @SystemApi
     @Override
-    public Context createCredentialEncryptedStorageContext() {
+    public Context createCredentialProtectedStorageContext() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isDeviceEncryptedStorage() {
+    public boolean isDeviceProtectedStorage() {
         throw new UnsupportedOperationException();
     }
 
     /** {@hide} */
     @SystemApi
     @Override
-    public boolean isCredentialEncryptedStorage() {
+    public boolean isCredentialProtectedStorage() {
         throw new UnsupportedOperationException();
     }
 }

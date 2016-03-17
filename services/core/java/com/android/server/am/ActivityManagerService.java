@@ -267,7 +267,7 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -1910,7 +1910,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mRecentTasks.loadUserRecentsLocked(userId);
                 }
                 if (userId == UserHandle.USER_SYSTEM) {
-                    startPersistentApps(PackageManager.MATCH_ENCRYPTION_UNAWARE);
+                    startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 }
                 installEncryptionUnawareProviders(userId);
                 break;
@@ -10961,7 +10961,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // We're only interested in providers that are encryption unaware, and
         // we don't care about uninstalled apps, since there's no way they're
         // running at this point.
-        final int matchFlags = GET_PROVIDERS | MATCH_ENCRYPTION_UNAWARE;
+        final int matchFlags = GET_PROVIDERS | MATCH_DIRECT_BOOT_UNAWARE;
 
         synchronized (this) {
             final int NP = mProcessNames.getMap().size();
@@ -12882,7 +12882,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
             // unlocked we'll come back around and start unaware apps
-            startPersistentApps(PackageManager.MATCH_ENCRYPTION_AWARE);
+            startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
 
             // Start up initial activity.
             mBooting = true;

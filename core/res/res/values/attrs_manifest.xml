@@ -109,13 +109,6 @@
          included in the system image. Third-party apps cannot use it.</em> -->
     <attr name="allowClearUserData" format="boolean" />
 
-    <!-- Option to let applications specify that user data should
-         never be encrypted if an Encrypted File System solution
-         is enabled. Specifically, this is an "opt-out" feature, meaning
-         that, by default, user data will be encrypted if the EFS feature
-         is enabled. -->
-    <attr name="neverEncrypt" format="boolean" />
-
     <!-- Option to indicate this application is only for testing purposes.
          For example, it may expose functionality or data outside of itself
          that would cause a security hole, but is useful for testing.  This
@@ -579,10 +572,10 @@
          single integer, with higher numbers considered to be better. -->
     <attr name="priority" format="integer" />
 
-    <!-- Indicate if this component is aware of encryption lifecycle, and can be
+    <!-- Indicate if this component is aware of direct boot lifecycle, and can be
          safely run before the user has entered their credentials (such as a lock
          pattern or PIN). -->
-    <attr name="encryptionAware" format="boolean" />
+    <attr name="directBootAware" format="boolean" />
 
     <!-- Specify how an activity should be launched.  See the
          <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
@@ -1262,7 +1255,6 @@
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
         <attr name="backupInForeground" />
-        <attr name="neverEncrypt" />
         <!-- Request that your application's processes be created with
              a large Dalvik heap.  This applies to <em>all</em> processes
              created for the application.  It only applies to the first
@@ -1306,8 +1298,8 @@
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
         <attr name="extractNativeLibs" />
-        <attr name="forceDeviceEncrypted" format="boolean" />
-        <attr name="encryptionAware" />
+        <attr name="defaultToDeviceProtectedStorage" format="boolean" />
+        <attr name="directBootAware" />
         <attr name="resizeableActivity" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -1686,7 +1678,7 @@
         <attr name="enabled" />
         <attr name="exported" />
         <attr name="singleUser" />
-        <attr name="encryptionAware" />
+        <attr name="directBootAware" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -1770,7 +1762,7 @@
              with it is through the Service API (binding and starting). -->
         <attr name="isolatedProcess" format="boolean" />
         <attr name="singleUser" />
-        <attr name="encryptionAware" />
+        <attr name="directBootAware" />
         <!-- If the service is an {@link android.R.attr#isolatedProcess} service, this permits a
              client to bind to the service as if it were running it its own package.  The service
              must also be {@link android.R.attr#exported} if this flag is set. -->
@@ -1810,7 +1802,7 @@
         <attr name="enabled" />
         <attr name="exported" />
         <attr name="singleUser" />
-        <attr name="encryptionAware" />
+        <attr name="directBootAware" />
     </declare-styleable>
 
     <!-- The <code>activity</code> tag declares an
@@ -1883,7 +1875,7 @@
         <attr name="supportsPictureInPicture" />
         <attr name="lockTaskMode" />
         <attr name="showForAllUsers" />
-        <attr name="encryptionAware" />
+        <attr name="directBootAware" />
         <!-- @hide This activity is always focusable regardless of if it is in a task/stack whose
              activities are normally not focusable.
              For example, {@link android.R.attr#supportsPictureInPicture} activities are placed

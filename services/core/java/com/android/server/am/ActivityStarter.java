@@ -620,7 +620,8 @@ class ActivityStarter {
                         && userManager.isUserUnlocked(parent.getUserHandle())
                         && !userManager.isUserUnlocked(userInfo.getUserHandle())) {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
-                            PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 }
             }
         }

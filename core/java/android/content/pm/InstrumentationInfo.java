@@ -62,9 +62,9 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public String dataDir;
 
     /** {@hide} */
-    public String deviceEncryptedDataDir;
+    public String deviceProtectedDataDir;
     /** {@hide} */
-    public String credentialEncryptedDataDir;
+    public String credentialProtectedDataDir;
 
     /**
      * Full path to the directory where the native JNI libraries are stored.
@@ -92,8 +92,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         splitSourceDirs = orig.splitSourceDirs;
         splitPublicSourceDirs = orig.splitPublicSourceDirs;
         dataDir = orig.dataDir;
-        deviceEncryptedDataDir = orig.deviceEncryptedDataDir;
-        credentialEncryptedDataDir = orig.credentialEncryptedDataDir;
+        deviceProtectedDataDir = orig.deviceProtectedDataDir;
+        credentialProtectedDataDir = orig.credentialProtectedDataDir;
         nativeLibraryDir = orig.nativeLibraryDir;
         handleProfiling = orig.handleProfiling;
         functionalTest = orig.functionalTest;
@@ -117,8 +117,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
         dest.writeString(dataDir);
-        dest.writeString(deviceEncryptedDataDir);
-        dest.writeString(credentialEncryptedDataDir);
+        dest.writeString(deviceProtectedDataDir);
+        dest.writeString(credentialProtectedDataDir);
         dest.writeString(nativeLibraryDir);
         dest.writeInt((handleProfiling == false) ? 0 : 1);
         dest.writeInt((functionalTest == false) ? 0 : 1);
@@ -142,8 +142,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
         dataDir = source.readString();
-        deviceEncryptedDataDir = source.readString();
-        credentialEncryptedDataDir = source.readString();
+        deviceProtectedDataDir = source.readString();
+        credentialProtectedDataDir = source.readString();
         nativeLibraryDir = source.readString();
         handleProfiling = source.readInt() != 0;
         functionalTest = source.readInt() != 0;
@@ -157,8 +157,8 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         ai.splitSourceDirs = splitSourceDirs;
         ai.splitPublicSourceDirs = splitPublicSourceDirs;
         ai.dataDir = dataDir;
-        ai.deviceEncryptedDataDir = deviceEncryptedDataDir;
-        ai.credentialEncryptedDataDir = credentialEncryptedDataDir;
+        ai.deviceProtectedDataDir = deviceProtectedDataDir;
+        ai.credentialProtectedDataDir = credentialProtectedDataDir;
         ai.nativeLibraryDir = nativeLibraryDir;
     }
 }

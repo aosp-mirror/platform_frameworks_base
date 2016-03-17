@@ -809,7 +809,9 @@ class MountService extends IMountService.Stub
                 if (user.isSystemOnly()) continue;
 
                 final ProviderInfo provider = mPms.resolveContentProvider(MediaStore.AUTHORITY,
-                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.id);
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                        user.id);
                 if (provider != null) {
                     final IActivityManager am = ActivityManagerNative.getDefault();
                     try {

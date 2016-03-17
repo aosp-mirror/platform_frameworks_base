@@ -1258,7 +1258,7 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+    public boolean moveDatabaseFrom(Context sourceContext, String name) {
         // pass
         return false;
     }
@@ -1451,7 +1451,7 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+    public boolean moveSharedPreferencesFrom(Context sourceContext, String name) {
         // pass
         return false;
     }
@@ -1838,24 +1838,24 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedStorageContext() {
+    public Context createDeviceProtectedStorageContext() {
         // pass
         return null;
     }
 
     @Override
-    public Context createCredentialEncryptedStorageContext() {
+    public Context createCredentialProtectedStorageContext() {
         // pass
         return null;
     }
 
     @Override
-    public boolean isDeviceEncryptedStorage() {
+    public boolean isDeviceProtectedStorage() {
         return false;
     }
 
     @Override
-    public boolean isCredentialEncryptedStorage() {
+    public boolean isCredentialProtectedStorage() {
         return false;
     }
 }

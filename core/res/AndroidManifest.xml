@@ -2959,8 +2959,8 @@
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true"
                  android:theme="@style/Theme.Material.DayNight.DarkActionBar"
-                 android:forceDeviceEncrypted="true"
-                 android:encryptionAware="true">
+                 android:defaultToDeviceProtectedStorage="true"
+                 android:directBootAware="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.DeviceDefault.Resolver"
                 android:finishOnCloseSystemDialogs="true"
