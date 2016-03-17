@@ -323,6 +323,9 @@
     <protected-broadcast android:name="android.app.action.DEVICE_OWNER_CHANGED" />
 
     <protected-broadcast android:name="android.net.action.SHOW_NETWORK_POLICY_NOTIFICATION" />
+    <!-- @hide UCE service Notification -->
+    <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_UP" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -694,6 +697,26 @@
         android:label="@string/permlab_recordAudio"
         android:description="@string/permdesc_recordAudio"
         android:protectionLevel="dangerous"/>
+
+    <!-- ====================================================================== -->
+    <!-- Permissions for accessing the UCE Service                              -->
+    <!-- ====================================================================== -->
+
+    <!-- @hide Allows an application to Access UCE-Presence.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.ACCESS_UCE_PRESENCE_SERVICE"
+        android:permissionGroup="android.permission-group.PHONE"
+        android:protectionLevel="dangerous"/>
+
+    <!-- @hide Allows an application to Access UCE-OPTIONS.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.ACCESS_UCE_OPTIONS_SERVICE"
+        android:permissionGroup="android.permission-group.PHONE"
+        android:protectionLevel="dangerous"/>
+
+
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device camera                            -->
