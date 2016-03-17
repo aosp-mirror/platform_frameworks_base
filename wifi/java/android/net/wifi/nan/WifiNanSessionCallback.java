@@ -16,12 +16,6 @@
 
 package android.net.wifi.nan;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
-
 /**
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are registered when a
@@ -36,23 +30,6 @@ import android.util.Log;
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanSessionCallback {
-    private static final String TAG = "WifiNanSessionCallback";
-    private static final boolean DBG = false;
-    private static final boolean VDBG = false; // STOPSHIP if true
-
-    /** @hide */
-    public static final int CALLBACK_SESSION_CONFIG_FAIL = 0;
-    /** @hide */
-    public static final int CALLBACK_SESSION_TERMINATED = 1;
-    /** @hide */
-    public static final int CALLBACK_MATCH = 2;
-    /** @hide */
-    public static final int CALLBACK_MESSAGE_SEND_SUCCESS = 3;
-    /** @hide */
-    public static final int CALLBACK_MESSAGE_SEND_FAIL = 4;
-    /** @hide */
-    public static final int CALLBACK_MESSAGE_RECEIVED = 5;
-
     /**
      * Failure reason flag for {@link WifiNanEventCallback} and
      * {@link WifiNanSessionCallback} callbacks. Indicates no resources to
@@ -75,11 +52,21 @@ public class WifiNanSessionCallback {
     public static final int FAIL_REASON_NO_MATCH_SESSION = 2;
 
     /**
+     * Failure reason flag for {@link WifiNanSessionCallback} callbacks.
+     * Indicates that a command has been issued to a session which is
+     * terminated. Session termination may have been caused explicitly by the
+     * user using the {@code WifiNanSession#terminate()} or implicitly as a
+     * result of the original session reaching its lifetime or being terminated
+     * due to an error.
+     */
+    public static final int FAIL_REASON_SESSION_TERMINATED = 3;
+
+    /**
      * Failure reason flag for {@link WifiNanEventCallback} and
      * {@link WifiNanSessionCallback} callbacks. Indicates an unspecified error
      * occurred during the operation.
      */
-    public static final int FAIL_REASON_OTHER = 3;
+    public static final int FAIL_REASON_OTHER = 4;
 
     /**
      * Failure reason flag for
@@ -98,90 +85,51 @@ public class WifiNanSessionCallback {
      */
     public static final int TERMINATE_REASON_FAIL = 1;
 
-    private static final String MESSAGE_BUNDLE_KEY_PEER_ID = "peer_id";
-    private static final String MESSAGE_BUNDLE_KEY_MESSAGE = "message";
-    private static final String MESSAGE_BUNDLE_KEY_MESSAGE2 = "message2";
-
-    private final Handler mHandler;
-
     /**
-     * Constructs a {@link WifiNanSessionCallback} using the looper of the
-     * current thread. I.e. all callbacks will be delivered on the current
-     * thread.
-     */
-    public WifiNanSessionCallback() {
-        this(Looper.myLooper());
-    }
-
-    /**
-     * Constructs a {@link WifiNanSessionCallback} using the specified looper.
-     * I.e. all callbacks will delivered on the thread of the specified looper.
+     * Called when a publish operation is started successfully.
      *
-     * @param looper The looper on which to execute the callbacks.
+     * @param session The {@link WifiNanPublishSession} used to control the
+     *            discovery session.
      */
-    public WifiNanSessionCallback(Looper looper) {
-        if (VDBG) Log.v(TAG, "ctor: looper=" + looper);
-        mHandler = new Handler(looper) {
-            @Override
-            public void handleMessage(Message msg) {
-                if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
-                switch (msg.what) {
-                    case CALLBACK_SESSION_CONFIG_FAIL:
-                        WifiNanSessionCallback.this.onSessionConfigFail(msg.arg1);
-                        break;
-                    case CALLBACK_SESSION_TERMINATED:
-                        WifiNanSessionCallback.this.onSessionTerminated(msg.arg1);
-                        break;
-                    case CALLBACK_MATCH:
-                        WifiNanSessionCallback.this.onMatch(
-                                msg.getData().getInt(MESSAGE_BUNDLE_KEY_PEER_ID),
-                                msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE), msg.arg1,
-                                msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2), msg.arg2);
-                        break;
-                    case CALLBACK_MESSAGE_SEND_SUCCESS:
-                        WifiNanSessionCallback.this.onMessageSendSuccess(msg.arg1);
-                        break;
-                    case CALLBACK_MESSAGE_SEND_FAIL:
-                        WifiNanSessionCallback.this.onMessageSendFail(msg.arg1, msg.arg2);
-                        break;
-                    case CALLBACK_MESSAGE_RECEIVED:
-                        WifiNanSessionCallback.this.onMessageReceived(msg.arg2,
-                                msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE), msg.arg1);
-                        break;
-                }
-            }
-        };
+    public void onPublishStarted(WifiNanPublishSession session) {
+        /* empty */
     }
 
     /**
-     * Called when a session configuration (publish or subscribe setup) fails.
-     * It is dummy method (empty implementation printing out a log message).
-     * Override to implement your custom response.
+     * Called when a subscribe operation is started successfully.
+     *
+     * @param session The {@link WifiNanSubscribeSession} used to control the
+     *            discovery session.
+     */
+    public void onSubscribeStarted(WifiNanSubscribeSession session) {
+        /* empty */
+    }
+
+
+    /**
+     * Called when a session configuration (publish or subscribe setup or
+     * update) fails.
      *
      * @param reason The failure reason using
      *            {@code WifiNanSessionCallback.FAIL_*} codes.
      */
     public void onSessionConfigFail(int reason) {
-        if (VDBG) Log.v(TAG, "onSessionConfigFail: called in stub - override if interested");
+        /* empty */
     }
 
     /**
-     * Called when a session (publish or subscribe) terminates. A dummy (empty
-     * implementation printing out a warning). Make sure to override if
-     * registered.
+     * Called when a session (publish or subscribe) terminates.
      *
      * @param reason The termination reason using
      *            {@code WifiNanSessionCallback.TERMINATE_*} codes.
      */
     public void onSessionTerminated(int reason) {
-        Log.w(TAG, "onSessionTerminated: called in stub - override if interested or disable");
+        /* empty */
     }
 
     /**
      * Called when a discovery (publish or subscribe) operation results in a
-     * match - i.e. when a peer is discovered. It is dummy method (empty
-     * implementation printing out a log message). Override to implement your
-     * custom response.
+     * match - i.e. when a peer is discovered.
      *
      * @param peerId The ID of the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
@@ -195,21 +143,20 @@ public class WifiNanSessionCallback {
      */
     public void onMatch(int peerId, byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, byte[] matchFilter, int matchFilterLength) {
-        if (VDBG) Log.v(TAG, "onMatch: called in stub - override if interested");
+        /* empty */
     }
 
     /**
      * Called when a message is transmitted successfully - i.e. when we know
      * that it was received successfully (corresponding to an ACK being
-     * received). It is dummy method (empty implementation printing out a log
-     * message). Override to implement your custom response.
+     * received).
      * <p>
      * Note that either this callback or
      * {@link WifiNanSessionCallback#onMessageSendFail(int, int)} will be
      * received - never both.
      */
-    public void onMessageSendSuccess(int messageId) {
-        if (VDBG) Log.v(TAG, "onMessageSendSuccess: called in stub - override if interested");
+    public void onMessageSendSuccess(@SuppressWarnings("unused") int messageId) {
+        /* empty */
     }
 
     /**
@@ -217,8 +164,7 @@ public class WifiNanSessionCallback {
      * The hardware will usually attempt to re-transmit several times - this
      * event is received after all retries are exhausted. There is a possibility
      * that message was received by the destination successfully but the ACK was
-     * lost. It is dummy method (empty implementation printing out a log
-     * message). Override to implement your custom response.
+     * lost
      * <p>
      * Note that either this callback or
      * {@link WifiNanSessionCallback#onMessageSendSuccess(int)} will be received
@@ -227,14 +173,12 @@ public class WifiNanSessionCallback {
      * @param reason The failure reason using
      *            {@code WifiNanSessionCallback.FAIL_*} codes.
      */
-    public void onMessageSendFail(int messageId, int reason) {
-        if (VDBG) Log.v(TAG, "onMessageSendFail: called in stub - override if interested");
+    public void onMessageSendFail(@SuppressWarnings("unused") int messageId, int reason) {
+        /* empty */
     }
 
     /**
-     * Called when a message is received from a discovery session peer. It is
-     * dummy method (empty implementation printing out a log message). Override
-     * to implement your custom response.
+     * Called when a message is received from a discovery session peer.
      *
      * @param peerId The ID of the peer sending the message.
      * @param message A byte array containing the message.
@@ -242,82 +186,6 @@ public class WifiNanSessionCallback {
      *            message bytes.
      */
     public void onMessageReceived(int peerId, byte[] message, int messageLength) {
-        if (VDBG) Log.v(TAG, "onMessageReceived: called in stub - override if interested");
+        /* empty */
     }
-
-    /**
-     * {@hide}
-     */
-    public IWifiNanSessionCallback callback = new IWifiNanSessionCallback.Stub() {
-        @Override
-        public void onSessionConfigFail(int reason) {
-            if (VDBG) Log.v(TAG, "onSessionConfigFail: reason=" + reason);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_SESSION_CONFIG_FAIL);
-            msg.arg1 = reason;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onSessionTerminated(int reason) {
-            if (VDBG) Log.v(TAG, "onSessionTerminated: reason=" + reason);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_SESSION_TERMINATED);
-            msg.arg1 = reason;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onMatch(int peerId, byte[] serviceSpecificInfo,
-                int serviceSpecificInfoLength, byte[] matchFilter, int matchFilterLength) {
-            if (VDBG) Log.v(TAG, "onMatch: peerId=" + peerId);
-
-            Bundle data = new Bundle();
-            data.putInt(MESSAGE_BUNDLE_KEY_PEER_ID, peerId);
-            data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, serviceSpecificInfo);
-            data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2, matchFilter);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_MATCH);
-            msg.arg1 = serviceSpecificInfoLength;
-            msg.arg2 = matchFilterLength;
-            msg.setData(data);
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onMessageSendSuccess(int messageId) {
-            if (VDBG) Log.v(TAG, "onMessageSendSuccess");
-
-            Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_SEND_SUCCESS);
-            msg.arg1 = messageId;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onMessageSendFail(int messageId, int reason) {
-            if (VDBG) Log.v(TAG, "onMessageSendFail: reason=" + reason);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_SEND_FAIL);
-            msg.arg1 = messageId;
-            msg.arg2 = reason;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onMessageReceived(int peerId, byte[] message, int messageLength) {
-            if (VDBG) {
-                Log.v(TAG, "onMessageReceived: peerId='" + peerId + "', messageLength="
-                        + messageLength);
-            }
-
-            Bundle data = new Bundle();
-            data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, message);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_RECEIVED);
-            msg.arg1 = messageLength;
-            msg.arg2 = peerId;
-            msg.setData(data);
-            mHandler.sendMessage(msg);
-        }
-    };
 }
