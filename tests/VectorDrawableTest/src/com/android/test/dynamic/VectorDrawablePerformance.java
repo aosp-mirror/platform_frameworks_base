@@ -35,6 +35,8 @@ import java.text.DecimalFormat;
 public class VectorDrawablePerformance extends Activity {
     private static final String LOGCAT = "VectorDrawable1";
     protected int[] icon = {
+            R.drawable.vector_icon_filltype_nonzero,
+            R.drawable.vector_icon_filltype_evenodd,
             R.drawable.vector_icon_gradient_1,
             R.drawable.vector_icon_gradient_2,
             R.drawable.vector_icon_gradient_3,

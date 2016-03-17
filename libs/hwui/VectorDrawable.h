@@ -96,7 +96,7 @@ public:
 
 protected:
     virtual const SkPath& getUpdatedPath();
-    virtual void drawPath(SkCanvas *outCanvas, const SkPath& renderPath,
+    virtual void drawPath(SkCanvas *outCanvas, SkPath& renderPath,
             float strokeScale, const SkMatrix& matrix) = 0;
     Data mData;
     SkPath mSkPath;
@@ -118,6 +118,7 @@ struct Properties {
     int32_t strokeLineCap = SkPaint::Cap::kButt_Cap;
     int32_t strokeLineJoin = SkPaint::Join::kMiter_Join;
     float strokeMiterLimit = 4;
+    int fillType = 0; /* non-zero or kWinding_FillType in Skia */
 };
 
     FullPath(const FullPath& path); // for cloning
@@ -133,7 +134,7 @@ struct Properties {
     void updateProperties(float strokeWidth, SkColor strokeColor,
             float strokeAlpha, SkColor fillColor, float fillAlpha,
             float trimPathStart, float trimPathEnd, float trimPathOffset,
-            float strokeMiterLimit, int strokeLineCap, int strokeLineJoin);
+            float strokeMiterLimit, int strokeLineCap, int strokeLineJoin, int fillType);
     // TODO: Cleanup: Remove the setter and getters below, and their counterparts in java and JNI
     float getStrokeWidth() {
         return mProperties.strokeWidth;
@@ -197,7 +198,7 @@ struct Properties {
 
 protected:
     const SkPath& getUpdatedPath() override;
-    void drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
+    void drawPath(SkCanvas* outCanvas, SkPath& renderPath,
             float strokeScale, const SkMatrix& matrix) override;
 
 private:
@@ -213,6 +214,7 @@ private:
         StrokeLineCap,
         StrokeLineJoin,
         StrokeMiterLimit,
+        FillType,
         Count,
     };
     // Applies trimming to the specified path.
@@ -233,7 +235,7 @@ public:
     ClipPath(const Data& nodes) : Path(nodes) {}
 
 protected:
-    void drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
+    void drawPath(SkCanvas* outCanvas, SkPath& renderPath,
             float strokeScale, const SkMatrix& matrix) override;
 };
 

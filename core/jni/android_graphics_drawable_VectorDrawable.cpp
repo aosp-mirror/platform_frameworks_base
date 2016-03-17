@@ -78,11 +78,11 @@ static jlong createFullPath(JNIEnv*, jobject, jlong srcFullPathPtr) {
 static void updateFullPathPropertiesAndStrokeStyles(JNIEnv*, jobject, jlong fullPathPtr,
         jfloat strokeWidth, jint strokeColor, jfloat strokeAlpha, jint fillColor, jfloat fillAlpha,
         jfloat trimPathStart, jfloat trimPathEnd, jfloat trimPathOffset, jfloat strokeMiterLimit,
-        jint strokeLineCap, jint strokeLineJoin) {
+        jint strokeLineCap, jint strokeLineJoin, jint fillType) {
     VectorDrawable::FullPath* fullPath = reinterpret_cast<VectorDrawable::FullPath*>(fullPathPtr);
     fullPath->updateProperties(strokeWidth, strokeColor, strokeAlpha, fillColor, fillAlpha,
             trimPathStart, trimPathEnd, trimPathOffset, strokeMiterLimit, strokeLineCap,
-            strokeLineJoin);
+            strokeLineJoin, fillType);
 }
 
 static void updateFullPathFillGradient(JNIEnv*, jobject, jlong pathPtr, jlong fillGradientPtr) {
@@ -331,7 +331,7 @@ static const JNINativeMethod gMethods[] = {
         {"nDraw", "(JJJLandroid/graphics/Rect;ZZ)V", (void*)draw},
         {"nCreateFullPath", "!()J", (void*)createEmptyFullPath},
         {"nCreateFullPath", "!(J)J", (void*)createFullPath},
-        {"nUpdateFullPathProperties", "!(JFIFIFFFFFII)V", (void*)updateFullPathPropertiesAndStrokeStyles},
+        {"nUpdateFullPathProperties", "!(JFIFIFFFFFIII)V", (void*)updateFullPathPropertiesAndStrokeStyles},
         {"nUpdateFullPathFillGradient", "!(JJ)V", (void*)updateFullPathFillGradient},
         {"nUpdateFullPathStrokeGradient", "!(JJ)V", (void*)updateFullPathStrokeGradient},
         {"nGetFullPathProperties", "(J[BI)Z", (void*)getFullPathProperties},
