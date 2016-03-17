@@ -73,6 +73,9 @@ jstring encodedFormatToString(JNIEnv* env, SkEncodedFormat format) {
         case SkEncodedFormat::kWBMP_SkEncodedFormat:
             mimeType = "image/vnd.wap.wbmp";
             break;
+        case SkEncodedFormat::kRAW_SkEncodedFormat:
+            mimeType = "image/x-adobe-dng";
+            break;
         default:
             mimeType = nullptr;
             break;
