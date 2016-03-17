@@ -17,9 +17,12 @@
 package android.graphics;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Defines a simple shape, used for bounding graphical regions.
@@ -34,11 +37,28 @@ import android.graphics.drawable.Drawable;
 public final class Outline {
     private static final float RADIUS_UNDEFINED = Float.NEGATIVE_INFINITY;
 
-    /** @hide */
-    public Path mPath;
+    private static final int MODE_EMPTY = 0;
+    private static final int MODE_RECT = 1;
+    private static final int MODE_CONVEX_PATH = 2;
 
     /** @hide */
-    public Rect mRect;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false,
+            value = {
+                    MODE_EMPTY,
+                    MODE_RECT,
+                    MODE_CONVEX_PATH,
+            })
+    public @interface Mode {}
+
+    @Mode
+    private int mMode = MODE_EMPTY;
+
+    /** @hide */
+    public final Path mPath = new Path();
+
+    /** @hide */
+    public final Rect mRect = new Rect();
     /** @hide */
     public float mRadius = RADIUS_UNDEFINED;
     /** @hide */
@@ -63,8 +83,9 @@ public final class Outline {
      * @see #isEmpty()
      */
     public void setEmpty() {
-        mPath = null;
-        mRect = null;
+        mMode = MODE_EMPTY;
+        mPath.rewind();
+        mRect.setEmpty();
         mRadius = RADIUS_UNDEFINED;
     }
 
@@ -77,7 +98,7 @@ public final class Outline {
      * @see #setEmpty()
      */
     public boolean isEmpty() {
-        return mRect == null && mPath == null;
+        return mMode == MODE_EMPTY;
     }
 
 
@@ -90,7 +111,7 @@ public final class Outline {
      * @see {@link android.view.View#setClipToOutline(boolean)}
      */
     public boolean canClip() {
-        return !isEmpty() && mRect != null;
+        return mMode != MODE_CONVEX_PATH;
     }
 
     /**
@@ -122,19 +143,9 @@ public final class Outline {
      * @param src Source outline to copy from.
      */
     public void set(@NonNull Outline src) {
-        if (src.mPath != null) {
-            if (mPath == null) {
-                mPath = new Path();
-            }
-            mPath.set(src.mPath);
-            mRect = null;
-        }
-        if (src.mRect != null) {
-            if (mRect == null) {
-                mRect = new Rect();
-            }
-            mRect.set(src.mRect);
-        }
+        mMode = src.mMode;
+        mPath.set(src.mPath);
+        mRect.set(src.mRect);
         mRadius = src.mRadius;
         mAlpha = src.mAlpha;
     }
@@ -165,10 +176,10 @@ public final class Outline {
             return;
         }
 
-        if (mRect == null) mRect = new Rect();
+        mMode = MODE_RECT;
         mRect.set(left, top, right, bottom);
         mRadius = radius;
-        mPath = null;
+        mPath.rewind();
     }
 
     /**
@@ -188,7 +199,7 @@ public final class Outline {
      *         bounds, or {@code false} if no outline bounds are set
      */
     public boolean getRect(@NonNull Rect outRect) {
-        if (mRect == null) {
+        if (mMode != MODE_RECT) {
             return false;
         }
         outRect.set(mRect);
@@ -221,10 +232,10 @@ public final class Outline {
             return;
         }
 
-        if (mPath == null) mPath = new Path();
-        mPath.reset();
+        mMode = MODE_CONVEX_PATH;
+        mPath.rewind();
         mPath.addOval(left, top, right, bottom, Path.Direction.CW);
-        mRect = null;
+        mRect.setEmpty();
         mRadius = RADIUS_UNDEFINED;
     }
 
@@ -248,10 +259,10 @@ public final class Outline {
         if (!convexPath.isConvex()) {
             throw new IllegalArgumentException("path must be convex");
         }
-        if (mPath == null) mPath = new Path();
 
+        mMode = MODE_CONVEX_PATH;
         mPath.set(convexPath);
-        mRect = null;
+        mRect.setEmpty();
         mRadius = RADIUS_UNDEFINED;
     }
 
@@ -259,9 +270,9 @@ public final class Outline {
      * Offsets the Outline by (dx,dy)
      */
     public void offset(int dx, int dy) {
-        if (mRect != null) {
+        if (mMode == MODE_RECT) {
             mRect.offset(dx, dy);
-        } else if (mPath != null) {
+        } else if (mMode == MODE_CONVEX_PATH) {
             mPath.offset(dx, dy);
         }
     }
