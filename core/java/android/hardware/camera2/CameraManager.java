@@ -1099,6 +1099,11 @@ public final class CameraManager {
                 if (oldHandler == null) {
                     updateCallbackLocked(callback, handler);
                 }
+
+                // If not connected to camera service, schedule a reconnect to camera service.
+                if (mCameraService == null) {
+                    scheduleCameraServiceReconnectionLocked();
+                }
             }
         }
 
@@ -1122,6 +1127,11 @@ public final class CameraManager {
                 // For new callbacks, provide initial torch information
                 if (oldHandler == null) {
                     updateTorchCallbackLocked(callback, handler);
+                }
+
+                // If not connected to camera service, schedule a reconnect to camera service.
+                if (mCameraService == null) {
+                    scheduleCameraServiceReconnectionLocked();
                 }
             }
         }
