@@ -36,7 +36,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.IDockedStackListener.Stub;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -46,7 +45,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
-
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
@@ -54,7 +52,6 @@ import com.android.systemui.statusbar.policy.DeadZone;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
@@ -100,6 +97,7 @@ public class NavigationBarView extends LinearLayout {
     private boolean mDockedStackExists;
 
     private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
+    private int mDensity;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -190,6 +188,7 @@ public class NavigationBarView extends LinearLayout {
         mShowMenu = false;
         mGestureHelper = new NavigationBarGestureHelper(context);
 
+        mDensity = context.getResources().getConfiguration().densityDpi;
         getIcons(context);
 
         mBarTransitions = new NavigationBarTransitions(this);
@@ -598,6 +597,10 @@ public class NavigationBarView extends LinearLayout {
             // replace the nav bar button icons based on which mode
             // we are switching to.
             setNavigationIconHints(mNavigationIconHints, true);
+        }
+        if (mDensity != newConfig.densityDpi) {
+            mDensity = newConfig.densityDpi;
+            getIcons(getContext());
         }
     }
 
