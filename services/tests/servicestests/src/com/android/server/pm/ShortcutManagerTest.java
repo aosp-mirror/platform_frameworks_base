@@ -57,6 +57,7 @@ import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.util.Preconditions;
@@ -249,6 +250,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             final long token = mContext.injectClearCallingIdentity();
             r.run();
             mContext.injectRestoreCallingIdentity(token);
+        }
+
+        @Override
+        void wtf(String message, Exception e) {
+            // During tests, WTF is fatal.
+            fail(message + "  exception: " + e);
         }
     }
 
@@ -1752,68 +1759,320 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     public void testPinShortcutAndGetPinnedShortcuts() {
         // Create some shortcuts.
-        setCaller(CALLING_PACKAGE_1);
-        final ShortcutInfo s1_1 = makeShortcutWithTimestamp("s1", 1000);
-        final ShortcutInfo s1_2 = makeShortcutWithTimestamp("s2", 2000);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ShortcutInfo s1_1 = makeShortcutWithTimestamp("s1", 1000);
+            final ShortcutInfo s1_2 = makeShortcutWithTimestamp("s2", 2000);
 
-        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(s1_1, s1_2)));
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(s1_1, s1_2)));
+        });
 
-        setCaller(CALLING_PACKAGE_2);
-        final ShortcutInfo s2_2 = makeShortcutWithTimestamp("s2", 1500);
-        final ShortcutInfo s2_3 = makeShortcutWithTimestamp("s3", 3000);
-        final ShortcutInfo s2_4 = makeShortcutWithTimestamp("s4", 500);
-        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(s2_2, s2_3, s2_4)));
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            final ShortcutInfo s2_2 = makeShortcutWithTimestamp("s2", 1500);
+            final ShortcutInfo s2_3 = makeShortcutWithTimestamp("s3", 3000);
+            final ShortcutInfo s2_4 = makeShortcutWithTimestamp("s4", 500);
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(s2_2, s2_3, s2_4)));
+        });
 
-        setCaller(CALLING_PACKAGE_3);
-        final ShortcutInfo s3_2 = makeShortcutWithTimestamp("s2", 1000);
-        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(s2_2)));
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            final ShortcutInfo s3_2 = makeShortcutWithTimestamp("s2", 1000);
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(s3_2)));
+        });
 
         // Pin some.
-        setCaller(LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    Arrays.asList("s2", "s3"), getCallingUser());
 
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                Arrays.asList("s2", "s3"), getCallingUser());
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
+                    Arrays.asList("s3", "s4", "s5"), getCallingUser());
 
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
-                Arrays.asList("s3", "s4", "s5"), getCallingUser());
-
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_3,
-                Arrays.asList("s3"), getCallingUser());  // Note ID doesn't exist
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3,
+                    Arrays.asList("s3"), getCallingUser());  // Note ID doesn't exist
+        });
 
         // Delete some.
-        setCaller(CALLING_PACKAGE_1);
-        assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
-        mManager.deleteDynamicShortcut("s2");
-        assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
+            mManager.deleteDynamicShortcut("s2");
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
+        });
 
-        setCaller(CALLING_PACKAGE_2);
-        assertShortcutIds(mManager.getPinnedShortcuts(), "s3", "s4");
-        mManager.deleteDynamicShortcut("s3");
-        assertShortcutIds(mManager.getPinnedShortcuts(), "s3", "s4");
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s3", "s4");
+            mManager.deleteDynamicShortcut("s3");
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s3", "s4");
+        });
 
-        setCaller(CALLING_PACKAGE_3);
-        assertShortcutIds(mManager.getPinnedShortcuts() /* none */);
-        mManager.deleteDynamicShortcut("s2");
-        assertShortcutIds(mManager.getPinnedShortcuts() /* none */);
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertShortcutIds(mManager.getPinnedShortcuts() /* none */);
+            mManager.deleteDynamicShortcut("s2");
+            assertShortcutIds(mManager.getPinnedShortcuts() /* none */);
+        });
 
         // Get pinned shortcuts from launcher
-        setCaller(LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            // CALLING_PACKAGE_1 deleted s2, but it's pinned, so it still exists.
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s2");
 
-        // CALLING_PACKAGE_1 deleted s2, but it's pinned, so it still exists.
-        assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
-                mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
-                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
-                "s2");
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s3", "s4");
 
-        assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
-                mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
-                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
-                "s3", "s4");
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_3,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))
+                    /* none */);
+        });
+    }
 
-        assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
-                mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_3,
-                /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))
-                /* none */);
+    public void testPinShortcutAndGetPinnedShortcuts_multi() {
+        // Create some shortcuts.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
+        dumpsysOnLogcat();
+
+        // Pin some.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    Arrays.asList("s3", "s4"), getCallingUser());
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
+                    Arrays.asList("s1", "s2", "s4"), getCallingUser());
+        });
+
+        dumpsysOnLogcat();
+
+        // Delete some.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s3");
+            mManager.deleteDynamicShortcut("s3");
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s3");
+        });
+
+        dumpsysOnLogcat();
+
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s1", "s2");
+            mManager.deleteDynamicShortcut("s1");
+            mManager.deleteDynamicShortcut("s3");
+            assertShortcutIds(mManager.getPinnedShortcuts(), "s1", "s2");
+        });
+
+        dumpsysOnLogcat();
+
+        // Get pinned shortcuts from launcher
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s3");
+
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s1", "s2");
+
+            assertShortcutIds(assertAllDynamicOrPinned(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s1", "s2", "s3");
+
+            assertShortcutIds(assertAllDynamicOrPinned(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s1", "s2");
+        });
+
+        dumpsysOnLogcat();
+
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            // Launcher2 still has no pinned ones.
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))
+                    /* none */);
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))
+                    /* none */);
+
+            assertShortcutIds(assertAllDynamic(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s1", "s2");
+            assertShortcutIds(assertAllDynamic(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s2");
+
+            // Now pin some.
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    Arrays.asList("s1", "s2"), getCallingUser());
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
+                    Arrays.asList("s1", "s2"), getCallingUser());
+
+            assertShortcutIds(assertAllDynamic(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s1", "s2");
+
+            // S1 was not visible to it, so shouldn't be pinned.
+            assertShortcutIds(assertAllDynamic(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s2");
+        });
+
+        // Re-initialize and load from the files.
+        initService();
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s3");
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s1", "s2");
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s1", "s2");
+            assertShortcutIds(assertAllDynamic(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED
+                                    | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
+                    "s2");
+        });
+
+        // Delete all dynamic.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.deleteAllDynamicShortcuts();
+
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s1", "s2", "s3");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            mManager.deleteAllDynamicShortcuts();
+
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s2", "s1");
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s3");
+
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s1", "s2");
+
+            // from all packages.
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, null,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s1", "s2", "s3");
+
+            // Update pined.  Note s2 and s3 are actually available, but not visible to this
+            // launcher, so still can't be pinned.
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList("s1", "s2", "s3", "s4"),
+                    getCallingUser());
+
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s3");
+        });
+        // Re-publish s1.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()), "s1");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s1", "s2", "s3");
+        });
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s3");
+
+            // Now "s1" is visible, so can be pinned.
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList("s1", "s2", "s3", "s4"),
+                    getCallingUser());
+
+            assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
+                    "s1", "s3");
+        });
+
+        // Now clear pinned shortcuts.  First, from launcher 1.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList(), getCallingUser());
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, Arrays.asList(), getCallingUser());
+
+            assertEquals(0,
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()).size());
+            assertEquals(0,
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()).size());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()), "s1");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s1", "s2");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s2");
+        });
+
+        // Clear all pins from launcher 2.
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList(), getCallingUser());
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, Arrays.asList(), getCallingUser());
+
+            assertEquals(0,
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()).size());
+            assertEquals(0,
+                    mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
+                    /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()).size());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()), "s1");
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
     }
 
     public void testCreateShortcutIntent() {
@@ -1880,8 +2139,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     }
 
     public void testLauncherCallback() throws Throwable {
-        LauncherApps.Callback c0 = mock(LauncherApps.Callback.class);
 
+        // TODO Add "multi" version -- run the test with two launchers and make sure the callback
+        // argument only contains the ones that are actually visible to each launcher.
+
+        LauncherApps.Callback c0 = mock(LauncherApps.Callback.class);
 
         // Set listeners
 
