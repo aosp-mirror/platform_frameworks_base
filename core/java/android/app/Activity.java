@@ -744,7 +744,7 @@ public class Activity extends ContextThemeWrapper
     Activity mParent;
     boolean mCalled;
     /*package*/ boolean mResumed;
-    private boolean mStopped;
+    /*package*/ boolean mStopped;
     boolean mFinished;
     boolean mStartedActivity;
     private boolean mDestroyed;
