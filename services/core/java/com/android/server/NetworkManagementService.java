@@ -49,6 +49,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
@@ -122,7 +123,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private static final String TAG = "NetworkManagement";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String NETD_TAG = "NetdConnector";
-    private static final String NETD_SOCKET_NAME = "netd";
+    private static final String NETD_SERVICE_NAME = "netd";
 
     private static final int MAX_UID_RANGES_PER_COMMAND = 10;
 
@@ -187,6 +188,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private final Handler mFgHandler;
     private final Handler mDaemonHandler;
+
+    private INetd mNetdService;
 
     private IBatteryStats mBatteryStats;
 
@@ -306,7 +309,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        return create(context, NETD_SOCKET_NAME);
+        return create(context, NETD_SERVICE_NAME);
     }
 
     public void systemReady() {
@@ -515,6 +518,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * existing in-memory rules.
      */
     private void prepareNativeDaemon() {
+        boolean nativeServiceAvailable = false;
+        try {
+            mNetdService = INetd.Stub.asInterface(ServiceManager.getService(NETD_SERVICE_NAME));
+            nativeServiceAvailable = mNetdService.isAlive();
+        } catch (RemoteException e) {}
+        if (!nativeServiceAvailable) {
+            Slog.wtf(TAG, "Can't connect to NativeNetdService " + NETD_SERVICE_NAME);
+        }
+
         mBandwidthControlEnabled = false;
 
         // only enable bandwidth control when support exists
