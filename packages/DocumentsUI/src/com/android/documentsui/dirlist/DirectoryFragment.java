@@ -164,6 +164,7 @@ public class DirectoryFragment extends Fragment
     private String mQuery = null;
     private Selection mSelection = null;
     private boolean mSearchMode = false;
+    private @Nullable ActionMode mActionMode;
 
     @Override
     public View onCreateView(
@@ -438,7 +439,6 @@ public class DirectoryFragment extends Fragment
             implements MultiSelectManager.Callback, ActionMode.Callback {
 
         private Selection mSelected = new Selection();
-        private ActionMode mActionMode;
         private int mNoCopyCount = 0;
         private int mNoDeleteCount = 0;
         private int mNoRenameCount = -1;
@@ -577,10 +577,9 @@ public class DirectoryFragment extends Fragment
                     return true;
 
                 case R.id.menu_delete:
-                    // Pass mode along to the delete function so it can
-                    // end action mode when documents are deleted.
+                    // deleteDocuments will end action mode if the documents are deleted.
                     // It won't end action mode if user cancels the delete.
-                    deleteDocuments(selection, mode);
+                    deleteDocuments(selection);
                     return true;
 
                 case R.id.menu_copy_to:
@@ -689,7 +688,7 @@ public class DirectoryFragment extends Fragment
         }.execute(selected);
     }
 
-    private void deleteDocuments(final Selection selected, final ActionMode mode) {
+    private void deleteDocuments(final Selection selected) {
         assert(!selected.isEmpty());
 
         final DocumentInfo srcParent = getDisplayState().stack.peek();
@@ -726,7 +725,9 @@ public class DirectoryFragment extends Fragment
                                 // This is done here, rather in the onActionItemClicked
                                 // so we can avoid de-selecting items in the case where
                                 // the user cancels the delete.
-                                mode.finish();
+                                if (mActionMode != null) {
+                                    mActionMode.finish();
+                                }
                                 // Hide the files in the UI...since the operation
                                 // might be queued up on FileOperationService.
                                 // We're walking a line here.
@@ -1271,6 +1272,16 @@ public class DirectoryFragment extends Fragment
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_BUTTON_A:
                     return onActivate(doc);
+                case KeyEvent.KEYCODE_FORWARD_DEL:
+                    // This has to be handled here instead of in a keyboard shortcut, because
+                    // keyboard shortcuts all have to be modified with the 'Ctrl' key.
+                    if (mSelectionManager.hasSelection()) {
+                        deleteDocuments(mSelectionManager.getSelection());
+                    }
+                    // Always handle the key, even if there was nothing to delete. This is a
+                    // precaution to prevent other handlers from potentially picking up the event
+                    // and triggering extra behaviours.
+                    return true;
             }
 
             return false;
