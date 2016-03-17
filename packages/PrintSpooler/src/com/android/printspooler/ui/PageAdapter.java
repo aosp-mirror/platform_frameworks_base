@@ -20,6 +20,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
 import android.print.PrintAttributes.MediaSize;
@@ -570,7 +572,14 @@ public final class PageAdapter extends Adapter<ViewHolder> {
             if (DEBUG) {
                 Log.i(LOG_TAG, "Requesting pages: " + Arrays.toString(mRequestedPages));
             }
-            mCallbacks.onRequestContentUpdate();
+
+            // This call might come from a recylerview that is currently updating. Hence delay to
+            // after the update
+            (new Handler(Looper.getMainLooper())).post(new Runnable() {
+                @Override public void run() {
+                    mCallbacks.onRequestContentUpdate();
+                }
+            });
         }
     }
 
