@@ -86,6 +86,11 @@ public final class Shared {
      */
     public static final String EXTRA_IGNORE_STATE = "ignoreState";
 
+    /**
+     * Extra for an Intent for enabling performance benchmark. Used only by tests.
+     */
+    public static final String EXTRA_BENCHMARK = "com.android.documentsui.benchmark";
+
     private static final Collator sCollator;
 
     static {
