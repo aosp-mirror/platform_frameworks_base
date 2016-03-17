@@ -37,6 +37,8 @@ import android.print.mockservice.PrintServiceCallbacks;
 import android.print.mockservice.PrinterDiscoverySessionCallbacks;
 import android.print.mockservice.StubbablePrinterDiscoverySession;
 
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -253,6 +255,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.getPrintJobInfo
      */
+    @LargeTest
     public void testGetPrintJobInfo() throws Exception {
         startPrinting();
 
@@ -274,6 +277,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.getPrintJobInfos
      */
+    @LargeTest
     public void testGetPrintJobInfos() throws Exception {
         startPrinting();
 
@@ -301,6 +305,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.print
      */
+    @LargeTest
     public void testPrint() throws Exception {
         final String name = "dummy print job";
 
@@ -354,6 +359,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.cancelPrintJob
      */
+    @LargeTest
     public void testCancelPrintJob() throws Exception {
         startPrinting();
 
@@ -377,6 +383,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.restartPrintJob
      */
+    @LargeTest
     public void testRestartPrintJob() throws Exception {
         startPrinting();
 
@@ -399,6 +406,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.addPrintJobStateChangeListener
      */
+    @MediumTest
     public void testAddPrintJobStateChangeListener() throws Exception {
         final IPrintJobStateChangeListener listener = createMockIPrintJobStateChangeListener();
 
@@ -424,6 +432,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.removePrintJobStateChangeListener
      */
+    @MediumTest
     public void testRemovePrintJobStateChangeListener() throws Exception {
         final IPrintJobStateChangeListener listener = createMockIPrintJobStateChangeListener();
 
@@ -447,6 +456,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.addPrintServicesChangeListener
      */
+    @MediumTest
     public void testAddPrintServicesChangeListener() throws Exception {
         final IPrintServicesChangeListener listener = createMockIPrintServicesChangeListener();
 
@@ -465,6 +475,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.removePrintServicesChangeListener
      */
+    @MediumTest
     public void testRemovePrintServicesChangeListener() throws Exception {
         final IPrintServicesChangeListener listener = createMockIPrintServicesChangeListener();
 
@@ -488,6 +499,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.getPrintServices
      */
+    @MediumTest
     public void testGetPrintServices() throws Exception {
         List<PrintServiceInfo> printServices = mIPrintManager.getPrintServices(
                 PrintManager.ALL_SERVICES, mUserId);
@@ -509,6 +521,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.setPrintServiceEnabled
      */
+    @MediumTest
     public void testSetPrintServiceEnabled() throws Exception {
         final ComponentName printService = mIPrintManager.getPrintServices(
                 PrintManager.ALL_SERVICES, mUserId).get(0).getComponentName();
@@ -548,6 +561,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.createPrinterDiscoverySession
      */
+    @MediumTest
     public void testCreatePrinterDiscoverySession() throws Exception {
         final IPrinterDiscoveryObserver listener = createMockIPrinterDiscoveryObserver();
 
@@ -573,6 +587,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.startPrinterDiscovery
      */
+    @LargeTest
     public void testStartPrinterDiscovery() throws Exception {
         startPrinting();
 
@@ -615,6 +630,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.stopPrinterDiscovery
      */
+    @MediumTest
     public void testStopPrinterDiscovery() throws Exception {
         final IPrinterDiscoveryObserver listener = createMockIPrinterDiscoveryObserver();
 
@@ -638,6 +654,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.validatePrinters
      */
+    @LargeTest
     public void testValidatePrinters() throws Exception {
         startPrinting();
 
@@ -678,6 +695,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.startPrinterStateTracking
      */
+    @LargeTest
     public void testStartPrinterStateTracking() throws Exception {
         startPrinting();
 
@@ -699,6 +717,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.getCustomPrinterIcon
      */
+    @LargeTest
     public void testGetCustomPrinterIcon() throws Exception {
         startPrinting();
 
@@ -720,6 +739,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.stopPrinterStateTracking
      */
+    @LargeTest
     public void testStopPrinterStateTracking() throws Exception {
         startPrinting();
 
@@ -746,6 +766,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     /**
      * test IPrintManager.destroyPrinterDiscoverySession
      */
+    @MediumTest
     public void testDestroyPrinterDiscoverySession() throws Exception {
         final IPrinterDiscoveryObserver listener = createMockIPrinterDiscoveryObserver();
 
