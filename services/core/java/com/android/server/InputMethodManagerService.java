@@ -456,6 +456,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     class SettingsObserver extends ContentObserver {
         int mUserId;
         boolean mRegistered = false;
+        @NonNull
         String mLastEnabled = "";
 
         /**

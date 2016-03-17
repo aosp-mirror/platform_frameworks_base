@@ -854,7 +854,8 @@ public class InputMethodUtils {
         private final HashMap<String, String> mCopyOnWriteDataStore = new HashMap<>();
 
         private boolean mCopyOnWrite = false;
-        private String mEnabledInputMethodsStrCache;
+        @NonNull
+        private String mEnabledInputMethodsStrCache = "";
         @UserIdInt
         private int mCurrentUserId;
         private int[] mCurrentProfileIds = new int[0];
@@ -949,7 +950,7 @@ public class InputMethodUtils {
             // TODO: mCurrentProfileIds should be updated here.
         }
 
-        private void putString(final String key, final String str) {
+        private void putString(@NonNull final String key, @Nullable final String str) {
             if (mCopyOnWrite) {
                 mCopyOnWriteDataStore.put(key, str);
             } else {
@@ -957,12 +958,15 @@ public class InputMethodUtils {
             }
         }
 
-        private String getString(final String key) {
+        @Nullable
+        private String getString(@NonNull final String key, @Nullable final String defaultValue) {
+            final String result;
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? result : "";
+                result = mCopyOnWriteDataStore.get(key);
+            } else {
+                result = Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
             }
-            return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
+            return result != null ? result : defaultValue;
         }
 
         private void putInt(final String key, final int value) {
@@ -1124,16 +1128,24 @@ public class InputMethodUtils {
             return res;
         }
 
-        private void putEnabledInputMethodsStr(String str) {
+        private void putEnabledInputMethodsStr(@Nullable String str) {
             if (DEBUG) {
                 Slog.d(TAG, "putEnabledInputMethodStr: " + str);
             }
-            putString(Settings.Secure.ENABLED_INPUT_METHODS, str);
-            mEnabledInputMethodsStrCache = str;
+            if (TextUtils.isEmpty(str)) {
+                // OK to coalesce to null, since getEnabledInputMethodsStr() can take care of the
+                // empty data scenario.
+                putString(Settings.Secure.ENABLED_INPUT_METHODS, null);
+            } else {
+                putString(Settings.Secure.ENABLED_INPUT_METHODS, str);
+            }
+            // TODO: Update callers of putEnabledInputMethodsStr to make str @NonNull.
+            mEnabledInputMethodsStrCache = (str != null ? str : "");
         }
 
+        @NonNull
         public String getEnabledInputMethodsStr() {
-            mEnabledInputMethodsStrCache = getString(Settings.Secure.ENABLED_INPUT_METHODS);
+            mEnabledInputMethodsStrCache = getString(Settings.Secure.ENABLED_INPUT_METHODS, "");
             if (DEBUG) {
                 Slog.d(TAG, "getEnabledInputMethodsStr: " + mEnabledInputMethodsStrCache
                         + ", " + mCurrentUserId);
@@ -1187,11 +1199,17 @@ public class InputMethodUtils {
             saveSubtypeHistory(subtypeHistory, imeId, subtypeId);
         }
 
-        private void putSubtypeHistoryStr(String str) {
+        private void putSubtypeHistoryStr(@NonNull String str) {
             if (DEBUG) {
                 Slog.d(TAG, "putSubtypeHistoryStr: " + str);
             }
-            putString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, str);
+            if (TextUtils.isEmpty(str)) {
+                // OK to coalesce to null, since getSubtypeHistoryStr() can take care of the empty
+                // data scenario.
+                putString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, null);
+            } else {
+                putString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, str);
+            }
         }
 
         public Pair<String, String> getLastInputMethodAndSubtypeLocked() {
@@ -1308,8 +1326,9 @@ public class InputMethodUtils {
             return imsList;
         }
 
+        @NonNull
         private String getSubtypeHistoryStr() {
-            final String history = getString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY);
+            final String history = getString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, "");
             if (DEBUG) {
                 Slog.d(TAG, "getSubtypeHistoryStr: " + history);
             }
@@ -1332,8 +1351,9 @@ public class InputMethodUtils {
             putInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, subtypeId);
         }
 
+        @Nullable
         public String getSelectedInputMethod() {
-            final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD);
+            final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD, null);
             if (DEBUG) {
                 Slog.d(TAG, "getSelectedInputMethodStr: " + imi);
             }
