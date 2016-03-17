@@ -2093,7 +2093,7 @@ public final class Settings {
          */
         public static void clearConfiguration(Configuration inoutConfig) {
             inoutConfig.fontScale = 0;
-            if (!inoutConfig.userSetLocale) {
+            if (!inoutConfig.userSetLocale && !inoutConfig.getLocales().isEmpty()) {
                 inoutConfig.setLocales(LocaleList.getEmptyLocaleList());
             }
         }
