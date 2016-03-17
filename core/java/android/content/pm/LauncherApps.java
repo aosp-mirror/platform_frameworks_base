@@ -160,7 +160,8 @@ public class LauncherApps {
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
          *
          * @param packageName The name of the package that has the shortcuts.
-         * @param shortcuts all shortcuts from the package (dynamic and/or pinned).
+         * @param shortcuts all shortcuts from the package (dynamic and/or pinned).  Only "key"
+         *    information will be provided, as defined in {@link ShortcutInfo#hasKeyFieldsOnly()}.
          * @param user The UserHandle of the profile that generated the change.
          */
         public void onShortcutsChanged(@NonNull String packageName,
