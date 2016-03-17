@@ -50,7 +50,10 @@ public final class SpellCheckerSubtype implements Parcelable {
     private static final String TAG = SpellCheckerSubtype.class.getSimpleName();
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
-    private static final int SUBTYPE_ID_NONE = 0;
+    /**
+     * @hide
+     */
+    public static final int SUBTYPE_ID_NONE = 0;
     private static final String SUBTYPE_LANGUAGE_TAG_NONE = "";
 
     private final int mSubtypeId;
