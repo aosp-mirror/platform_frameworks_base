@@ -109,7 +109,7 @@ namespace android {
  * JNI-based registration functions.  Note these are properly contained in
  * namespace android.
  */
-extern int register_android_auditing_SecurityLog(JNIEnv* env);
+extern int register_android_app_admin_SecurityLog(JNIEnv* env);
 extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
@@ -1253,7 +1253,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),
     REG_JNI(register_android_util_PathParser),
-    REG_JNI(register_android_auditing_SecurityLog),
+    REG_JNI(register_android_app_admin_SecurityLog),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
     REG_JNI(register_android_content_XmlBlock),

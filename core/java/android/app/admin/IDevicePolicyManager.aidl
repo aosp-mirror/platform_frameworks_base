@@ -290,10 +290,10 @@ interface IDevicePolicyManager {
     void setAffiliationIds(in ComponentName admin, in List<String> ids);
     boolean isAffiliatedUser();
 
-    void setDeviceLoggingEnabled(in ComponentName admin, boolean enabled);
-    boolean getDeviceLoggingEnabled(in ComponentName admin);
-    ParceledListSlice retrieveDeviceLogs(in ComponentName admin);
-    ParceledListSlice retrievePreviousDeviceLogs(in ComponentName admin);
+    void setSecurityLoggingEnabled(in ComponentName admin, boolean enabled);
+    boolean isSecurityLoggingEnabled(in ComponentName admin);
+    ParceledListSlice retrieveSecurityLogs(in ComponentName admin);
+    ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin);
 
     boolean isUninstallInQueue(String packageName);
     void uninstallPackageWithActiveAdmins(String packageName);
