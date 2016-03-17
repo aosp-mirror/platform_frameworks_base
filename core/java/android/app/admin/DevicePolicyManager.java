@@ -25,7 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
-import android.auditing.SecurityLog.SecurityEvent;
+import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -5787,63 +5787,80 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to control the device logging feature. Logging can only be enabled on
-     * single user devices where the sole user is managed by the device owner.
-     * <p>
-     * Device logs contain various information intended for security auditing purposes. See
-     * {@link SecurityEvent} for details.
-     * <p>
-     * There must be only one user on the device, managed by the device owner. Otherwise a
-     * {@link SecurityException} will be thrown.
+     * Called by device owner to control the security logging feature. Logging can only be
+     * enabled on single user devices where the sole user is managed by the device owner.
+     *
+     * <p> Security logs contain various information intended for security auditing purposes.
+     * See {@link SecurityEvent} for details.
+     *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
-     * @param enabled whether device logging should be enabled or not.
+     * @param enabled whether security logging should be enabled or not.
      * @throws SecurityException if {@code admin} is not a device owner.
-     * @see #retrieveDeviceLogs
+     * @see #retrieveSecurityLogs
+     */
+    public void setSecurityLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
+        try {
+            mService.setSecurityLoggingEnabled(admin, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
+     * @hide
      */
     public void setDeviceLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
+        setSecurityLoggingEnabled(admin, enabled);
+    }
+
+    /**
+     * Return whether security logging is enabled or not by the device owner.
+     *
+     * <p>Can only be called by the device owner, otherwise a {@link SecurityException} will be
+     * thrown.
+     *
+     * @param admin Which device owner this request is associated with.
+     * @return {@code true} if security logging is enabled by device owner, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public boolean isSecurityLoggingEnabled(@NonNull ComponentName admin) {
         try {
-            mService.setDeviceLoggingEnabled(admin, enabled);
+            return mService.isSecurityLoggingEnabled(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Return whether device logging is enabled or not by the device owner.
-     * <p>
-     * Can only be called by the device owner, otherwise a {@link SecurityException} will be thrown.
-     *
-     * @param admin Which device owner this request is associated with.
-     * @return {@code true} if device logging is enabled by device owner, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
+     * @hide
      */
     public boolean getDeviceLoggingEnabled(@NonNull ComponentName admin) {
-        try {
-            return mService.getDeviceLoggingEnabled(admin);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return isSecurityLoggingEnabled(admin);
     }
 
     /**
-     * Called by device owner to retrieve all new device logging entries since the last call to this
-     * API after device boots.
-     * <p>
-     * Access to the logs is rate limited and it will only return new logs after the device owner
-     * has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
-     * <p>
-     * There must be only one user on the device, managed by the device owner. Otherwise a
-     * {@link SecurityException} will be thrown.
+     * Called by device owner to retrieve all new security logging entries since the last call to
+     * this API after device boots.
+     *
+     * <p> Access to the logs is rate limited and it will only return new logs after the device
+     * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
+     *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
-     * @return the new batch of device logs which is a list of {@link SecurityEvent}, or
-     *         {@code null} if rate limitation is exceeded or if logging is currently disabled.
+     * @return the new batch of security logs which is a list of {@link SecurityEvent},
+     * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public List<SecurityEvent> retrieveDeviceLogs(@NonNull ComponentName admin) {
+    public List<SecurityEvent> retrieveSecurityLogs(@NonNull ComponentName admin) {
         try {
-            ParceledListSlice<SecurityEvent> list = mService.retrieveDeviceLogs(admin);
+            ParceledListSlice<SecurityEvent> list = mService.retrieveSecurityLogs(admin);
             if (list != null) {
                 return list.getList();
             } else {
@@ -5853,6 +5870,14 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
+     * @hide
+     */
+    public List<SecurityEvent> retrieveDeviceLogs(@NonNull ComponentName admin) {
+        return retrieveSecurityLogs(admin);
     }
 
     /**
@@ -5886,13 +5911,21 @@ public class DevicePolicyManager {
      * @return Device logs from before the latest reboot of the system.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public List<SecurityEvent> retrievePreviousDeviceLogs(@NonNull ComponentName admin) {
+    public List<SecurityEvent> retrievePreRebootSecurityLogs(@NonNull ComponentName admin) {
         try {
-            ParceledListSlice<SecurityEvent> list = mService.retrievePreviousDeviceLogs(admin);
+            ParceledListSlice<SecurityEvent> list = mService.retrievePreRebootSecurityLogs(admin);
             return list.getList();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
+     * @hide
+     */
+    public List<SecurityEvent> retrievePreviousDeviceLogs(@NonNull ComponentName admin) {
+        return retrievePreRebootSecurityLogs(admin);
     }
 
     /**

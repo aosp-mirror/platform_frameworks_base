@@ -268,7 +268,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             "android.app.action.BUGREPORT_SHARE";
 
     /**
-     * Broadcast action: notify that a new batch of device logs is ready to be collected.
+     * Broadcast action: notify that a new batch of security logs is ready to be collected.
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -623,13 +623,13 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called when a new batch of device logs can be retrieved.
+     * Called when a new batch of security logs can be retrieved.
      *
      * <p>This callback is only applicable to device owners.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
-     * @see DevicePolicyManager#retrieveDeviceLogs(ComponentName)
+     * @see DevicePolicyManager#retrieveSecurityLogs(ComponentName)
      */
     public void onSecurityLogsAvailable(Context context, Intent intent) {
     }

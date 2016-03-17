@@ -4,7 +4,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.AppGlobals;
-import android.auditing.SecurityLog;
+import android.app.admin.SecurityLog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
