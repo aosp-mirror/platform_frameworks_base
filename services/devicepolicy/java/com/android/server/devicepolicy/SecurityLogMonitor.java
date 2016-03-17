@@ -17,8 +17,8 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.DeviceAdminReceiver;
-import android.auditing.SecurityLog;
-import android.auditing.SecurityLog.SecurityEvent;
+import android.app.admin.SecurityLog;
+import android.app.admin.SecurityLog.SecurityEvent;
 import android.util.Log;
 import android.util.Slog;
 

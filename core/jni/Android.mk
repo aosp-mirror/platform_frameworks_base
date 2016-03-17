@@ -36,7 +36,7 @@ LOCAL_SRC_FILES:= \
     android_app_Activity.cpp \
     android_app_ApplicationLoaders.cpp \
     android_app_NativeActivity.cpp \
-    android_auditing_SecurityLog.cpp \
+    android_app_admin_SecurityLog.cpp \
     android_opengl_EGL14.cpp \
     android_opengl_EGLExt.cpp \
     android_opengl_GLES10.cpp \
