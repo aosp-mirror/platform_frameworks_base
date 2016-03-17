@@ -11,7 +11,6 @@ trainingnavtop=true
 <ol>
     <li><a href="#RunByMessage">Run the Sync Adapter When Server Data Changes</a>
     <li><a href="#RunDataChange">Run the Sync Adapter When Content Provider Data Changes</a></li>
-    <li><a href="#RunByNetwork">Run the Sync Adapter After a Network Message</a></li>
     <li><a href="#RunPeriodic">Run the Sync Adapter Periodically</a></li>
     <li><a href="#RunOnDemand">Run the Sync Adapter On Demand</a></li>
 </ol>
@@ -67,15 +66,6 @@ trainingnavtop=true
         that the server always has the latest device data. This option is straightforward to
         implement if you actually store data in your content provider. If you're using a stub
         content provider, detecting data changes may be more difficult.
-    </dd>
-    <dt>
-        When the system sends out a network message
-    </dt>
-    <dd>
-        Run a sync adapter when the Android system sends out a network message that keeps the
-        TCP/IP connection open; this message is a basic part of the networking framework. Using
-        this option is one way to run the sync adapter automatically. Consider using it in
-        conjunction with interval-based sync adapter runs.
     </dd>
     <dt>
         At regular intervals
@@ -278,60 +268,6 @@ public class MainActivity extends FragmentActivity {
          * and any of its subpaths trigger the observer.
          */
         mResolver.registerContentObserver(mUri, true, observer);
-        ...
-    }
-    ...
-}
-</pre>
-<h2 id="RunByNetwork">Run the Sync Adapter After a Network Message</h2>
-<p>
-    When a network connection is available, the Android system sends out a message
-    every few seconds to keep the device's TCP/IP connection open. This message also goes to
-    the {@link android.content.ContentResolver} of each app. By calling
-    {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()},
-    you can run the sync adapter whenever the {@link android.content.ContentResolver}
-    receives the message.
-</p>
-<p>
-    By scheduling your sync adapter to run when the network message is sent, you ensure that your
-    sync adapter is always scheduled to run while the network is available. Use this option if you
-    don't have to force a data transfer in response to data changes, but you do want to ensure
-    your data is regularly updated. Similarly, you can use this option if you don't want a fixed
-    schedule for your sync adapter, but you do want it to run frequently.
-</p>
-<p>
-    Since the method
-    {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()}
-    doesn't disable {@link android.content.ContentResolver#addPeriodicSync addPeriodicSync()}, your
-    sync adapter may be triggered repeatedly in a short period of time. If you do want to run
-    your sync adapter periodically on a regular schedule, you should disable
-    {@link android.content.ContentResolver#setSyncAutomatically setSyncAutomatically()}.
-</p>
-<p>
-    The following code snippet shows you how to configure your
-    {@link android.content.ContentResolver} to run your sync adapter in response to a network
-    message:
-</p>
-<pre>
-public class MainActivity extends FragmentActivity {
-    ...
-    // Constants
-    // Content provider authority
-    public static final String AUTHORITY = "com.example.android.datasync.provider";
-    // Account
-    public static final String ACCOUNT = "default_account";
-    // Global variables
-    // A content resolver for accessing the provider
-    ContentResolver mResolver;
-    ...
-    &#64;Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ...
-        // Get the content resolver for your app
-        mResolver = getContentResolver();
-        // Turn on automatic syncing for the default account and authority
-        mResolver.setSyncAutomatically(ACCOUNT, AUTHORITY, true);
         ...
     }
     ...
