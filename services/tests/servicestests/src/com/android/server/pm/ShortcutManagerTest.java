@@ -166,8 +166,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private final class ShortcutServiceTestable extends ShortcutService {
         final ServiceContext mContext;
 
-        public ShortcutServiceTestable(ServiceContext context) {
-            super(context);
+        public ShortcutServiceTestable(ServiceContext context, Looper looper) {
+            super(context, looper);
             mContext = context;
         }
 
@@ -248,7 +248,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         @Override
         void postToHandler(Runnable r) {
             final long token = mContext.injectClearCallingIdentity();
-            r.run();
+            super.postToHandler(r);
+            try {
+                runTestOnUiThread(() -> {});
+            } catch (Throwable e) {
+                fail("runTestOnUiThread failed: " + e);
+            }
             mContext.injectRestoreCallingIdentity(token);
         }
 
@@ -302,7 +307,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        void postToPackageMonitor(Runnable r) {
+        void postToPackageMonitorHandler(Runnable r) {
             final long token = mContext.injectClearCallingIdentity();
             r.run();
             mContext.injectRestoreCallingIdentity(token);
@@ -368,7 +373,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private static final int USER_10 = 10;
     private static final int USER_11 = 11;
 
-    private static final long START_TIME = 1234560000000L;
+    private static final long START_TIME = 1440000000101L;
 
     private static final long INTERVAL = 10000;
 
@@ -424,7 +429,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
 
         // Instantiate targets.
-        mService = new ShortcutServiceTestable(mServiceContext);
+        mService = new ShortcutServiceTestable(mServiceContext, Looper.getMainLooper());
         mManager = new ShortcutManagerTestable(mClientContext, mService);
 
         mInternal = LocalServices.getService(ShortcutServiceInternal.class);
@@ -509,6 +514,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
      * For debugging, dump the main state file on logcat.
      */
     private void dumpBaseStateFile() {
+        mService.saveDirtyInfo();
         dumpFileOnLogcat(mInjectedFilePathRoot.getAbsolutePath()
                 + "/system/" + ShortcutService.FILENAME_BASE_STATE);
     }
@@ -517,6 +523,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
      * For debugging, dump per-user state file on logcat.
      */
     private void dumpUserFile(int userId) {
+        mService.saveDirtyInfo();
         dumpFileOnLogcat(mInjectedFilePathRoot.getAbsolutePath()
                 + "/user-" + userId
                 + "/" + ShortcutService.FILENAME_USER_PACKAGES);
@@ -890,6 +897,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         dumpBaseStateFile();
 
+        mService.saveDirtyInfo();
+
         // Restore.
         initService();
 
@@ -1125,50 +1134,101 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
 
         mInjectedCurrentTimeLillis++;
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(1, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
 
         mInjectedCurrentTimeLillis++;
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(0, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
 
         // Reached the max
 
         mInjectedCurrentTimeLillis++;
         assertFalse(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(0, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
 
         // Still throttled
         mInjectedCurrentTimeLillis = START_TIME + INTERVAL - 1;
         assertFalse(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(0, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
 
         // Now it should work.
         mInjectedCurrentTimeLillis++;
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1))); // fail
         assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 2, mManager.getRateLimitResetTime());
 
         mInjectedCurrentTimeLillis++;
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(1, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 2, mManager.getRateLimitResetTime());
 
         mInjectedCurrentTimeLillis++;
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(0, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 2, mManager.getRateLimitResetTime());
 
         mInjectedCurrentTimeLillis++;
         assertFalse(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(0, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 2, mManager.getRateLimitResetTime());
 
         // 4 days later...
         mInjectedCurrentTimeLillis = START_TIME + 4 * INTERVAL;
         assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
         assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 5, mManager.getRateLimitResetTime());
 
-        // Make sure getRemainingCallCount() itself gets reset withou calling setDynamicShortcuts().
+        mInjectedCurrentTimeLillis++;
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
+        assertEquals(1, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 5, mManager.getRateLimitResetTime());
+
+        // Make sure getRemainingCallCount() itself gets reset without calling setDynamicShortcuts().
         mInjectedCurrentTimeLillis = START_TIME + 8 * INTERVAL;
+        assertEquals(3, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 9, mManager.getRateLimitResetTime());
+
+        mInjectedCurrentTimeLillis++;
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
+        assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL * 9, mManager.getRateLimitResetTime());
+    }
+
+    public void testThrottling_rewind() {
+        final ShortcutInfo si1 = makeShortcut("shortcut1");
+
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
+        assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+
+        mInjectedCurrentTimeLillis = 12345; // Clock reset!
+
+        // Since the clock looks invalid, the counter shouldn't have reset.
+        assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+
+        // Forward again.  Still haven't reset yet.
+        mInjectedCurrentTimeLillis = START_TIME + INTERVAL - 1;
+        assertEquals(2, mManager.getRemainingCallCount());
+        assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+
+        // Now rewind -- this will reset the counters.
+        mInjectedCurrentTimeLillis = START_TIME - 100000;
+        assertEquals(3, mManager.getRemainingCallCount());
+
+        assertTrue(mManager.setDynamicShortcuts(Arrays.asList(si1)));
+        assertEquals(2, mManager.getRemainingCallCount());
+
+        // Forward again, should be reset now.
+        mInjectedCurrentTimeLillis += INTERVAL;
         assertEquals(3, mManager.getRemainingCallCount());
     }
 
@@ -1291,6 +1351,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 "none");
 
         // Re-initialize and load from the files.
+        mService.saveDirtyInfo();
         initService();
 
         // Load from launcher.
@@ -1943,6 +2004,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         });
 
         // Re-initialize and load from the files.
+        mService.saveDirtyInfo();
         initService();
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {
@@ -2270,6 +2332,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         dumpUserFile(0);
 
         // Restore.
+        mService.saveDirtyInfo();
         initService();
 
         assertEquals(0, mManager.getDynamicShortcuts().size());
@@ -2366,6 +2429,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 mService, new ComponentName("pkg1", "class"));
 
         // Restore.
+        mService.saveDirtyInfo();
         initService();
 
         // Before the load, the map should be empty.
@@ -2414,7 +2478,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(mService.getShortcutsForTest().get(USER_10).getLauncherComponent());
 
         // Try stopping the user
-        mService.onCleanupUserInner(USER_10);
+        mService.onCleanupUserLocked(USER_10);
 
         // Now it's unloaded.
         assertEquals(1, mService.getShortcutsForTest().size());

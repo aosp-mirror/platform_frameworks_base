@@ -537,7 +537,7 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
-        void postToPackageMonitor(Runnable r) {
+        void postToPackageMonitorHandler(Runnable r) {
             mPackageMonitor.getRegisteredHandler().post(r);
         }
 
@@ -681,7 +681,7 @@ public class LauncherAppsService extends SystemService {
             @Override
             public void onShortcutChanged(@NonNull String packageName,
                     @UserIdInt int userId) {
-                postToPackageMonitor(() -> onShortcutChangedInner(packageName, userId));
+                postToPackageMonitorHandler(() -> onShortcutChangedInner(packageName, userId));
             }
 
             private void onShortcutChangedInner(@NonNull String packageName,
