@@ -1472,7 +1472,7 @@ public final class ViewRootImpl implements ViewParent,
         if (viewVisibilityChanged) {
             mAttachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
-            host.dispatchVisibilityAggregated(host, viewVisibility);
+            host.dispatchVisibilityAggregated(viewVisibility == View.VISIBLE);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
                 endDragResizing();
                 destroyHardwareResources();
