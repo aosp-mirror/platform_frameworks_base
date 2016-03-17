@@ -150,8 +150,7 @@ public class RecentsViewTouchHandler {
         mTaskView.setTranslationY(y);
 
         mVisibleDockStates.clear();
-        if (ActivityManager.supportsMultiWindow() &&
-                !ssp.hasDockedTask() && mRv.getTaskStack().getTaskCount() > 1) {
+        if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()) {
             if (!event.task.isDockable) {
                 Toast.makeText(mRv.getContext(), R.string.recents_drag_non_dockable_task_message,
                         Toast.LENGTH_SHORT).show();

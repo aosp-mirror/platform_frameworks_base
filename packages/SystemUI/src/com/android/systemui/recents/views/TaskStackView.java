@@ -1395,7 +1395,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, AnimationProps animation) {
+            Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture) {
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
         }
@@ -1426,7 +1426,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // If there are no remaining tasks, then just close recents
         if (mStack.getTaskCount() == 0) {
-            EventBus.getDefault().send(new AllTaskViewsDismissedEvent());
+            EventBus.getDefault().send(new AllTaskViewsDismissedEvent(fromDockGesture
+                    ? R.string.recents_empty_message
+                    : R.string.recents_empty_message_dismissed_all));
         }
     }
 
@@ -1599,7 +1601,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     tv.dismissTask();
                 } else {
                     // Otherwise, remove the task from the stack immediately
-                    mStack.removeTask(t, AnimationProps.IMMEDIATE);
+                    mStack.removeTask(t, AnimationProps.IMMEDIATE, false /* fromDockGesture */);
                 }
             }
         }
@@ -1937,7 +1939,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Remove the task from the stack
         mStack.removeTask(task, new AnimationProps(DEFAULT_SYNC_STACK_DURATION,
-                Interpolators.FAST_OUT_SLOW_IN));
+                Interpolators.FAST_OUT_SLOW_IN), false /* fromDockGesture */);
     }
 
     /**
