@@ -913,6 +913,8 @@ public final class LoadedApk {
                 mDispatcher = new WeakReference<LoadedApk.ReceiverDispatcher>(rd);
                 mStrongRef = strong ? rd : null;
             }
+
+            @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                 LoadedApk.ReceiverDispatcher rd = mDispatcher.get();
@@ -996,6 +998,7 @@ public final class LoadedApk {
                 try {
                     ClassLoader cl =  mReceiver.getClass().getClassLoader();
                     intent.setExtrasClassLoader(cl);
+                    intent.prepareToEnterProcess();
                     setExtrasClassLoader(cl);
                     receiver.setPendingResult(this);
                     receiver.onReceive(mContext, intent);

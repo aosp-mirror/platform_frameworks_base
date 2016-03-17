@@ -26,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * A mapping from String values to various types.
+ * A mapping from String keys to values of various types. In most cases, you
+ * should work directly with either the {@link Bundle} or
+ * {@link PersistableBundle} subclass.
  */
 public class BaseBundle {
     private static final String TAG = "Bundle";
@@ -35,6 +37,32 @@ public class BaseBundle {
     // Keep in sync with frameworks/native/libs/binder/PersistableBundle.cpp.
     static final int BUNDLE_MAGIC = 0x4C444E42; // 'B' 'N' 'D' 'L'
 
+    /**
+     * Flag indicating that this Bundle is okay to "defuse." That is, it's okay
+     * for system processes to ignore any {@link BadParcelableException}
+     * encountered when unparceling it, leaving an empty bundle in its place.
+     * <p>
+     * This should <em>only</em> be set when the Bundle reaches its final
+     * destination, otherwise a system process may clobber contents that were
+     * destined for an app that could have unparceled them.
+     */
+    static final int FLAG_DEFUSABLE = 1 << 0;
+
+    private static volatile boolean sShouldDefuse = false;
+
+    /**
+     * Set global variable indicating that any Bundles parsed in this process
+     * should be "defused." That is, any {@link BadParcelableException}
+     * encountered will be suppressed and logged, leaving an empty Bundle
+     * instead of crashing.
+     *
+     * @hide
+     */
+    public static void setShouldDefuse(boolean shouldDefuse) {
+        sShouldDefuse = shouldDefuse;
+    }
+
+    /** {@hide} */
     static final Parcel EMPTY_PARCEL;
 
     static {
@@ -57,6 +85,9 @@ public class BaseBundle {
      * The ClassLoader used when unparcelling data from mParcelledData.
      */
     private ClassLoader mClassLoader;
+
+    /** {@hide} */
+    int mFlags;
 
     /**
      * Constructs a new, empty Bundle that uses a specific ClassLoader for
@@ -185,6 +216,11 @@ public class BaseBundle {
             return;
         }
 
+        if (sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
+            Log.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
+                    + "clobber all data inside!", new Throwable());
+        }
+
         if (mParcelledData == EMPTY_PARCEL) {
             if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
                     + ": empty");
@@ -209,9 +245,19 @@ public class BaseBundle {
             mMap.erase();
             mMap.ensureCapacity(N);
         }
-        mParcelledData.readArrayMapInternal(mMap, N, mClassLoader);
-        mParcelledData.recycle();
-        mParcelledData = null;
+        try {
+            mParcelledData.readArrayMapInternal(mMap, N, mClassLoader);
+        } catch (BadParcelableException e) {
+            if (sShouldDefuse) {
+                Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
+                mMap.erase();
+            } else {
+                throw e;
+            }
+        } finally {
+            mParcelledData.recycle();
+            mParcelledData = null;
+        }
         if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
                 + " final map: " + mMap);
     }
@@ -1431,9 +1477,8 @@ public class BaseBundle {
             return;
         }
 
-        int magic = parcel.readInt();
+        final int magic = parcel.readInt();
         if (magic != BUNDLE_MAGIC) {
-            //noinspection ThrowableInstanceNeverThrown
             throw new IllegalStateException("Bad magic number for Bundle: 0x"
                     + Integer.toHexString(magic));
         }

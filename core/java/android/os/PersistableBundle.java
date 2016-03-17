@@ -18,7 +18,9 @@ package android.os;
 
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -27,9 +29,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * A mapping from String values to various types that can be saved to persistent and later
- * restored.
+ * A mapping from String keys to values of various types. The set of types
+ * supported by this class is purposefully restricted to simple objects that can
+ * safely be persisted to and restored from disk.
  *
+ * @see Bundle
  */
 public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
         XmlUtils.WriteMapCallback {
@@ -58,6 +62,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      */
     public PersistableBundle() {
         super();
+        mFlags = FLAG_DEFUSABLE;
     }
 
     /**
@@ -68,6 +73,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      */
     public PersistableBundle(int capacity) {
         super(capacity);
+        mFlags = FLAG_DEFUSABLE;
     }
 
     /**
@@ -78,6 +84,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      */
     public PersistableBundle(PersistableBundle b) {
         super(b);
+        mFlags = b.mFlags;
     }
 
 
@@ -102,6 +109,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      */
     private PersistableBundle(ArrayMap<String, Object> map) {
         super();
+        mFlags = FLAG_DEFUSABLE;
 
         // First stuff everything in.
         putAll(map);
@@ -124,6 +132,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /* package */ PersistableBundle(Parcel parcelledData, int length) {
         super(parcelledData, length);
+        mFlags = FLAG_DEFUSABLE;
     }
 
     /**
@@ -299,5 +308,4 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         }
         return "PersistableBundle[" + mMap.toString() + "]";
     }
-
 }

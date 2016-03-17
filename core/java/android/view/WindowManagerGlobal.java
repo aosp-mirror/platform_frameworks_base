@@ -170,7 +170,7 @@ public final class WindowManagerGlobal {
                     sWindowManagerService = getWindowManagerService();
                     ValueAnimator.setDurationScale(sWindowManagerService.getCurrentAnimatorScale());
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to get WindowManagerService, cannot set animator scale", e);
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return sWindowManagerService;
@@ -192,7 +192,7 @@ public final class WindowManagerGlobal {
                             },
                             imm.getClient(), imm.getInputContext());
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to open window session", e);
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return sWindowSession;
