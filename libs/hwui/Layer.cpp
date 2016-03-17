@@ -197,7 +197,12 @@ void Layer::generateTexture() {
 }
 
 void Layer::clearTexture() {
-    caches.textureState().unbindTexture(texture.mId);
+    // There's a rare possibility that Caches could have been destroyed already
+    // since this method is queued up as a task.
+    // Since this is a reset method, treat this as non-fatal.
+    if (caches.isInitialized()) {
+        caches.textureState().unbindTexture(texture.mId);
+    }
     texture.mId = 0;
 }
 
