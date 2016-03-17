@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTileView;
@@ -153,7 +154,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
-        if (holder.getItemViewType() == TYPE_EDIT) return;
+        if (holder.getItemViewType() == TYPE_EDIT) {
+            ((TextView) holder.itemView.findViewById(android.R.id.title)).setText(
+                    mCurrentDrag != null ? R.string.drag_to_remove_tiles
+                    : R.string.drag_to_add_tiles);
+            return;
+        }
 
         TileInfo info = mTiles.get(position);
         holder.mTileView.onStateChanged(info.state);
@@ -250,11 +256,13 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             super.onSelectedChanged(viewHolder, actionState);
             if (mCurrentDrag != null) {
                 mCurrentDrag.stopDrag();
+                mCurrentDrag = null;
             }
             if (viewHolder != null) {
                 mCurrentDrag = (Holder) viewHolder;
                 mCurrentDrag.startDrag();
             }
+            notifyItemChanged(mDividerIndex);
         }
 
         @Override
