@@ -1392,7 +1392,7 @@ public class MediaScanner implements AutoCloseable {
             prescan(path, true);
 
             File file = new File(path);
-            if (!file.exists()) {
+            if (!file.exists() || !file.canRead()) {
                 return null;
             }
 
