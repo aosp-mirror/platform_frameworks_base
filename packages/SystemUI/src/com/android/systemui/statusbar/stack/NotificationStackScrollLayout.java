@@ -83,7 +83,7 @@ import java.util.HashSet;
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
-        SettingsIconRowListener {
+        SettingsIconRowListener, LongPressCancelable {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -2625,6 +2625,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!hasWindowFocus) {
             removeLongPressCallback();
         }
+    }
+
+    @Override
+    public void requestDisallowLongPress() {
+        removeLongPressCallback();
     }
 
     public void removeLongPressCallback() {
