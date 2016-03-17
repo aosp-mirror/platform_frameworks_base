@@ -54,17 +54,11 @@ public class WifiNanManager {
 
     /**
      * Re-connect to the Wi-Fi NAN service - enabling the application to execute
-     * {@link WifiNanManager} APIs. Application don't normally need to call this
-     * API since it is executed in the constructor. However, applications which
-     * have explicitly {@link WifiNanManager#disconnect()} need to call this
-     * function to re-connect.
+     * {@link WifiNanManager} APIs.
      *
      * @param callback A callback extended from {@link WifiNanEventCallback}.
-     * @param events The set of events to be delivered to the {@code callback}.
-     *            OR'd event flags from {@link WifiNanEventCallback
-     *            WifiNanEventCallback.LISTEN*}.
      */
-    public void connect(WifiNanEventCallback callback, int events) {
+    public void connect(WifiNanEventCallback callback) {
         try {
             if (VDBG) Log.v(TAG, "connect()");
             if (callback == null) {
@@ -77,7 +71,7 @@ public class WifiNanManager {
             if (mBinder == null) {
                 mBinder = new Binder();
             }
-            mClientId = mService.connect(mBinder, callback.callback, events);
+            mClientId = mService.connect(mBinder, callback.callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
