@@ -508,7 +508,8 @@ public final class MediaFormat {
      * The associated value is an integer.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * This key is used as a hint, and is only supported for codecs
-     * that specify a profile.
+     * that specify a profile. Note: Codecs are free to use all the available
+     * coding tools at the specified profile.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
