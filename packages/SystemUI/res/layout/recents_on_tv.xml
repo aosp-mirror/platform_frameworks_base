@@ -18,7 +18,6 @@
     android:id="@+id/recents_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/recents_tv_background_gradient"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:layoutDirection="rtl">
