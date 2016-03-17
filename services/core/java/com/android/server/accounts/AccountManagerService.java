@@ -597,7 +597,7 @@ public class AccountManagerService
         if (sharedAccounts == null || sharedAccounts.length == 0) return;
         Account[] accounts = getAccountsAsUser(null, userId, mContext.getOpPackageName());
         int parentUserId = UserManager.isSplitSystemUser()
-                ? mUserManager.getUserInfo(userId).restrictedProfileParentId
+                ? getUserManager().getUserInfo(userId).restrictedProfileParentId
                 : UserHandle.USER_SYSTEM;
         if (parentUserId < 0) {
             Log.w(TAG, "User " + userId + " has shared accounts, but no parent user");
@@ -1061,7 +1061,7 @@ public class AccountManagerService
         for (UserInfo user : users) {
             if (user.isRestricted() && (parentUserId == user.restrictedProfileParentId)) {
                 addSharedAccountAsUser(account, user.id);
-                if (mUserManager.isUserUnlocked(user.id)) {
+                if (getUserManager().isUserUnlocked(user.id)) {
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
                             MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
                 }
@@ -1270,7 +1270,7 @@ public class AccountManagerService
                          * Owner or system user account was renamed, rename the account for
                          * those users with which the account was shared.
                          */
-                        List<UserInfo> users = mUserManager.getUsers(true);
+                        List<UserInfo> users = getUserManager().getUsers(true);
                         for (UserInfo user : users) {
                             if (user.isRestricted()
                                     && (user.restrictedProfileParentId == parentUserId)) {
@@ -1286,7 +1286,7 @@ public class AccountManagerService
     }
 
     private boolean canHaveProfile(final int parentUserId) {
-        final UserInfo userInfo = mUserManager.getUserInfo(parentUserId);
+        final UserInfo userInfo = getUserManager().getUserInfo(parentUserId);
         return userInfo != null && userInfo.canHaveProfile();
     }
 
@@ -1477,7 +1477,7 @@ public class AccountManagerService
             int parentUserId = accounts.userId;
             if (canHaveProfile(parentUserId)) {
                 // Remove from any restricted profiles that are sharing this account.
-                List<UserInfo> users = mUserManager.getUsers(true);
+                List<UserInfo> users = getUserManager().getUsers(true);
                 for (UserInfo user : users) {
                     if (user.isRestricted() && parentUserId == (user.restrictedProfileParentId)) {
                         removeSharedAccountAsUser(account, user.id, callingUid);
@@ -4730,7 +4730,7 @@ public class AccountManagerService
                 || callingUid == Process.myUid()) {
             return unfiltered;
         }
-        UserInfo user = mUserManager.getUserInfo(userAccounts.userId);
+        UserInfo user = getUserManager().getUserInfo(userAccounts.userId);
         if (user != null && user.isRestricted()) {
             String[] packages = mPackageManager.getPackagesForUid(callingUid);
             // If any of the packages is a white listed package, return the full set,
