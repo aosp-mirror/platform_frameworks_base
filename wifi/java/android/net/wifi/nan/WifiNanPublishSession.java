@@ -18,7 +18,7 @@ package android.net.wifi.nan;
 
 /**
  * A representation of a NAN publish session. Created when
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionListener, int)} is
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback, int)} is
  * executed. The object can be used to stop and re-start (re-configure) the
  * publish session.
  *
@@ -34,7 +34,7 @@ public class WifiNanPublishSession extends WifiNanSession {
 
     /**
      * Restart/re-configure the publish session. Note that the
-     * {@link WifiNanSessionListener} is not replaced - the same listener used
+     * {@link WifiNanSessionCallback} is not replaced - the same listener used
      * at creation is still used.
      *
      * @param publishConfig The configuration ({@link PublishConfig}) of the

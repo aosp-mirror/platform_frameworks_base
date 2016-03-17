@@ -24,7 +24,7 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionListener, int)}
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback, int)}
  * or {@link WifiNanSubscribeSession#subscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
@@ -45,6 +45,18 @@ public class SubscribeConfig implements Parcelable {
      * using {@link SubscribeConfig.Builder#setSubscribeType(int)}.
      */
     public static final int SUBSCRIBE_TYPE_ACTIVE = 1;
+
+    /**
+     * Specifies that only the first match of a set of identical matches (same
+     * publish) will be reported to the subscriber.
+     */
+    public static final int MATCH_STYLE_FIRST_ONLY = 0;
+
+    /**
+     * Specifies that all matches of a set of identical matches (same publish)
+     * will be reported to the subscriber.
+     */
+    public static final int MATCH_STYLE_ALL = 1;
 
     /**
      * @hide
@@ -96,9 +108,14 @@ public class SubscribeConfig implements Parcelable {
      */
     public final int mTtlSec;
 
+    /**
+     * @hide
+     */
+    public final int mMatchStyle;
+
     private SubscribeConfig(String serviceName, byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, byte[] txFilter, int txFilterLength, byte[] rxFilter,
-            int rxFilterLength, int subscribeType, int publichCount, int ttlSec) {
+            int rxFilterLength, int subscribeType, int publichCount, int ttlSec, int matchStyle) {
         mServiceName = serviceName;
         mServiceSpecificInfoLength = serviceSpecificInfoLength;
         mServiceSpecificInfo = serviceSpecificInfo;
@@ -109,6 +126,7 @@ public class SubscribeConfig implements Parcelable {
         mSubscribeType = subscribeType;
         mSubscribeCount = publichCount;
         mTtlSec = ttlSec;
+        mMatchStyle = matchStyle;
     }
 
     @Override
@@ -120,7 +138,7 @@ public class SubscribeConfig implements Parcelable {
                 + ", mRxFilter="
                 + (new TlvBufferUtils.TlvIterable(0, 1, mRxFilter, mRxFilterLength)).toString()
                 + ", mSubscribeType=" + mSubscribeType + ", mSubscribeCount=" + mSubscribeCount
-                + ", mTtlSec=" + mTtlSec + "']";
+                + ", mTtlSec=" + mTtlSec + ", mMatchType=" + mMatchStyle + "']";
     }
 
     @Override
@@ -146,6 +164,7 @@ public class SubscribeConfig implements Parcelable {
         dest.writeInt(mSubscribeType);
         dest.writeInt(mSubscribeCount);
         dest.writeInt(mTtlSec);
+        dest.writeInt(mMatchStyle);
     }
 
     public static final Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
@@ -175,8 +194,9 @@ public class SubscribeConfig implements Parcelable {
             int subscribeType = in.readInt();
             int subscribeCount = in.readInt();
             int ttlSec = in.readInt();
+            int matchStyle = in.readInt();
             return new SubscribeConfig(serviceName, ssi, ssiLength, txFilter, txFilterLength,
-                    rxFilter, rxFilterLength, subscribeType, subscribeCount, ttlSec);
+                    rxFilter, rxFilterLength, subscribeType, subscribeCount, ttlSec, matchStyle);
         }
     };
 
@@ -230,7 +250,7 @@ public class SubscribeConfig implements Parcelable {
         }
 
         return mSubscribeType == lhs.mSubscribeType && mSubscribeCount == lhs.mSubscribeCount
-                && mTtlSec == lhs.mTtlSec;
+                && mTtlSec == lhs.mTtlSec && mMatchStyle == lhs.mMatchStyle;
     }
 
     @Override
@@ -247,6 +267,7 @@ public class SubscribeConfig implements Parcelable {
         result = 31 * result + mSubscribeType;
         result = 31 * result + mSubscribeCount;
         result = 31 * result + mTtlSec;
+        result = 31 * result + mMatchStyle;
 
         return result;
     }
@@ -262,9 +283,10 @@ public class SubscribeConfig implements Parcelable {
         private byte[] mTxFilter = new byte[0];
         private int mRxFilterLength;
         private byte[] mRxFilter = new byte[0];
-        private int mSubscribeType;
-        private int mSubscribeCount;
-        private int mTtlSec;
+        private int mSubscribeType = SUBSCRIBE_TYPE_PASSIVE;
+        private int mSubscribeCount = 0;
+        private int mTtlSec = 0;
+        private int mMatchStyle = MATCH_STYLE_ALL;
 
         /**
          * Specify the service name of the subscribe session. The actual on-air
@@ -390,8 +412,8 @@ public class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe
          * session will transmit a packet. When the count is reached an event
          * will be generated for
-         * {@link WifiNanSessionListener#onSubscribeTerminated(int)} with
-         * reason= {@link WifiNanSessionListener#TERMINATE_REASON_DONE}.
+         * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} with
+         * reason= {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param subscribeCount Number of subscribe packets to transmit.
          * @return The builder to facilitate chaining
@@ -410,8 +432,8 @@ public class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe
          * session will be alive - i.e. transmitting a packet. When the TTL is
          * reached an event will be generated for
-         * {@link WifiNanSessionListener#onSubscribeTerminated(int)} with
-         * reason= {@link WifiNanSessionListener#TERMINATE_REASON_DONE}.
+         * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} with
+         * reason= {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
          * @return The builder to facilitate chaining
@@ -426,13 +448,35 @@ public class SubscribeConfig implements Parcelable {
         }
 
         /**
+         * Sets the match style of the subscription - how are matches from a
+         * single match session (corresponding to the same publish action on the
+         * peer) reported to the host (using the
+         * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}
+         * ). The options are: only report the first match and ignore the rest
+         * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
+         * match {@link SubscribeConfig#MATCH_STYLE_ALL}.
+         *
+         * @param matchStyle The reporting style for the discovery match.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setMatchStyle(int matchStyle) {
+            if (matchStyle != MATCH_STYLE_FIRST_ONLY && matchStyle != MATCH_STYLE_ALL) {
+                throw new IllegalArgumentException(
+                        "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
+            }
+            mMatchStyle = matchStyle;
+            return this;
+        }
+
+        /**
          * Build {@link SubscribeConfig} given the current requests made on the
          * builder.
          */
         public SubscribeConfig build() {
             return new SubscribeConfig(mServiceName, mServiceSpecificInfo,
                     mServiceSpecificInfoLength, mTxFilter, mTxFilterLength, mRxFilter,
-                    mRxFilterLength, mSubscribeType, mSubscribeCount, mTtlSec);
+                    mRxFilterLength, mSubscribeType, mSubscribeCount, mTtlSec, mMatchStyle);
         }
     }
 }
