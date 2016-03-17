@@ -30,6 +30,7 @@ import static android.service.notification.NotificationRankerService.REASON_PACK
 import static android.service.notification.NotificationRankerService.REASON_PACKAGE_CHANGED;
 import static android.service.notification.NotificationRankerService.REASON_PACKAGE_SUSPENDED;
 import static android.service.notification.NotificationRankerService.REASON_PROFILE_TURNED_OFF;
+import static android.service.notification.NotificationRankerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationRankerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF;
@@ -39,8 +40,6 @@ import static android.service.notification.NotificationListenerService.TRIM_LIGH
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
-import static org.xmlpull.v1.XmlPullParser.END_TAG;
-import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -97,6 +96,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
@@ -136,7 +136,6 @@ import com.android.server.notification.ManagedServices.UserProfiles;
 
 import libcore.io.IoUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -158,7 +157,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -263,6 +261,7 @@ public class NotificationManagerService extends SystemService {
             new ArrayList<NotificationRecord>();
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
+    final ArrayMap<String, String> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
     final PolicyAccess mPolicyAccess = new PolicyAccess();
@@ -282,11 +281,6 @@ public class NotificationManagerService extends SystemService {
 
     private static final String TAG_NOTIFICATION_POLICY = "notification-policy";
     private static final String ATTR_VERSION = "version";
-
-    // Obsolete:  converted if present, but not resaved to disk.
-    private static final String TAG_BLOCKED_PKGS = "blocked-packages";
-    private static final String TAG_PACKAGE = "package";
-    private static final String ATTR_NAME = "name";
 
     private RankingHelper mRankingHelper;
 
@@ -1259,10 +1253,13 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrSameApp(pkg);
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, true, false, "cancelNotificationWithTag", pkg);
-            // Don't allow client applications to cancel foreground service notis.
+            // Don't allow client applications to cancel foreground service notis or autobundled
+            // summaries.
             cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
-                    Binder.getCallingUid() == Process.SYSTEM_UID
-                            ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId,
+                    (Binder.getCallingUid() == Process.SYSTEM_UID
+                            ? 0 : Notification.FLAG_FOREGROUND_SERVICE)
+                            | (Binder.getCallingUid() == Process.SYSTEM_UID
+                            ? 0 : Notification.FLAG_AUTOGROUP_SUMMARY), false, userId,
                     REASON_APP_CANCEL, null);
         }
 
@@ -1404,7 +1401,9 @@ public class NotificationManagerService extends SystemService {
                 final int N = mNotificationList.size();
                 for (int i = 0; i < N; i++) {
                     final StatusBarNotification sbn = mNotificationList.get(i).sbn;
-                    if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
+                    if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId
+                            && (sbn.getNotification().flags
+                            & Notification.FLAG_AUTOGROUP_SUMMARY) != 0) {
                         // We could pass back a cloneLight() but clients might get confused and
                         // try to send this thing back to notify() again, which would not work
                         // very well.
@@ -1519,7 +1518,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrSameApp(component.getPackageName());
             long identity = Binder.clearCallingIdentity();
             try {
-                ManagedServices manager = mRankerServices.isComponentEnabledForCurrentProfiles(component)
+                ManagedServices manager =
+                        mRankerServices.isComponentEnabledForCurrentProfiles(component)
                         ? mRankerServices
                         : mListeners;
                 manager.setComponentState(component, true);
@@ -2035,24 +2035,122 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setImportanceFromRankerService(INotificationListener token, String key,
-                int importance, CharSequence explanation) throws RemoteException {
-            if (importance == IMPORTANCE_NONE) {
-                throw new IllegalArgumentException("blocking not allowed: key=" + key);
-            }
+        public void applyAdjustmentFromRankerService(INotificationListener token,
+                Adjustment adjustment) throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
                     mRankerServices.checkServiceTokenLocked(token);
-                    NotificationRecord n = mNotificationsByKey.get(key);
-                    n.setImportance(importance, explanation);
-                    mRankingHandler.requestSort();
+                    applyAdjustmentLocked(adjustment);
                 }
+                maybeAddAutobundleSummary(adjustment);
+                mRankingHandler.requestSort();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void applyAdjustmentsFromRankerService(INotificationListener token,
+                List<Adjustment> adjustments) throws RemoteException {
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    mRankerServices.checkServiceTokenLocked(token);
+                    for (Adjustment adjustment : adjustments) {
+                        applyAdjustmentLocked(adjustment);
+                    }
+                }
+                for (Adjustment adjustment : adjustments) {
+                    maybeAddAutobundleSummary(adjustment);
+                }
+                mRankingHandler.requestSort();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
         }
     };
+
+    private void applyAdjustmentLocked(Adjustment adjustment) {
+        maybeClearAutobundleSummaryLocked(adjustment);
+        NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
+        if (n == null) {
+            return;
+        }
+        if (adjustment.getImportance() != IMPORTANCE_NONE) {
+            n.setImportance(adjustment.getImportance(), adjustment.getExplanation());
+        }
+        if (adjustment.getSignals() != null) {
+            Bundle.setDefusable(adjustment.getSignals(), true);
+            n.sbn.setOverrideGroupKey(adjustment.getSignals().getString(
+                    Adjustment.GROUP_KEY_OVERRIDE_KEY, null));
+        }
+    }
+
+    // Clears the 'fake' auto-bunding summary.
+    private void maybeClearAutobundleSummaryLocked(Adjustment adjustment) {
+        if (adjustment.getSignals() != null
+                && adjustment.getSignals().containsKey(Adjustment.NEEDS_AUTOGROUPING_KEY)
+                && !adjustment.getSignals().getBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false)) {
+            if (mAutobundledSummaries.containsKey(adjustment.getPackage())) {
+                // Clear summary.
+                final NotificationRecord removed = mNotificationsByKey.get(
+                        mAutobundledSummaries.remove(adjustment.getPackage()));
+                if (removed != null) {
+                    mNotificationList.remove(removed);
+                    cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED);
+                }
+            }
+        }
+    }
+
+    // Posts a 'fake' summary for a package that has exceeded the solo-notification limit.
+    private void maybeAddAutobundleSummary(Adjustment adjustment) {
+        if (adjustment.getSignals() != null
+                && adjustment.getSignals().getBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false)) {
+            final String newAutoBundleKey =
+                    adjustment.getSignals().getString(Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
+            int userId = -1;
+            NotificationRecord summaryRecord = null;
+            synchronized (mNotificationList) {
+                if (!mAutobundledSummaries.containsKey(adjustment.getPackage())
+                        && newAutoBundleKey != null) {
+                    // Add summary
+                    final StatusBarNotification adjustedSbn
+                            = mNotificationsByKey.get(adjustment.getKey()).sbn;
+
+                    final ApplicationInfo appInfo =
+                            adjustedSbn.getNotification().extras.getParcelable(
+                                    Notification.EXTRA_BUILDER_APPLICATION_INFO);
+                    final Bundle extras = new Bundle();
+                    extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
+                    final Notification summaryNotification =
+                            new Notification.Builder(getContext()).setSmallIcon(
+                                    adjustedSbn.getNotification().getSmallIcon())
+                                    .setGroupSummary(true)
+                                    .setGroup(newAutoBundleKey)
+                                    .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true)
+                                    .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
+                                    .build();
+                    summaryNotification.extras.putAll(extras);
+                    final StatusBarNotification summarySbn =
+                            new StatusBarNotification(adjustedSbn.getPackageName(),
+                                    adjustedSbn.getOpPkg(),
+                                    Integer.MAX_VALUE, Adjustment.GROUP_KEY_OVERRIDE_KEY,
+                                    adjustedSbn.getUid(), adjustedSbn.getInitialPid(),
+                                    summaryNotification, adjustedSbn.getUser(), newAutoBundleKey,
+                                    System.currentTimeMillis());
+                    summaryRecord = new NotificationRecord(getContext(), summarySbn);
+                    mAutobundledSummaries.put(adjustment.getPackage(), summarySbn.getKey());
+                    userId = adjustedSbn.getUser().getIdentifier();
+                }
+            }
+            if (summaryRecord != null) {
+                mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord));
+            }
+        }
+    }
 
     private String disableNotificationEffects(NotificationRecord record) {
         if (mDisableNotificationEffects) {
@@ -2252,6 +2350,17 @@ public class NotificationManagerService extends SystemService {
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
         final UserHandle user = new UserHandle(userId);
+
+        // Fix the notification as best we can.
+        try {
+            Notification.addFieldsFromContext(getContext().createApplicationContext(
+                    getContext().getPackageManager().getApplicationInfoAsUser(
+                            pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId),
+                    Context.CONTEXT_RESTRICTED), notification);
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Cannot create a context for sending app", e);
+            return;
+        }
 
         // Limit the number of notifications that any given package except the android
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
@@ -2492,7 +2601,7 @@ public class NotificationManagerService extends SystemService {
             StatusBarNotification sbn = r.sbn;
             String group = sbn.getGroupKey();
             boolean isSummary = sbn.getNotification().isGroupSummary();
-            boolean isChild = sbn.getNotification().isGroupChild();
+            boolean isChild = !isSummary && sbn.isGroup();
 
             NotificationRecord summary = mSummaryByGroupKey.get(group);
             if (isChild && summary != null) {
@@ -2857,11 +2966,13 @@ public class NotificationManagerService extends SystemService {
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             ArrayList<String> orderBefore = new ArrayList<String>(N);
+            ArrayList<String> groupOverrideBefore = new ArrayList<>(N);
             int[] visibilities = new int[N];
-            int [] importances = new int[N];
+            int[] importances = new int[N];
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
+                groupOverrideBefore.add(r.sbn.getGroupKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
                 importances[i] = r.getImportance();
                 mRankingHelper.extractSignals(r);
@@ -2871,7 +2982,8 @@ public class NotificationManagerService extends SystemService {
                 final NotificationRecord r = mNotificationList.get(i);
                 if (!orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()
-                        || importances[i] != r.getImportance()) {
+                        || importances[i] != r.getImportance()
+                        || !groupOverrideBefore.get(i).equals(r.sbn.getGroupKey())) {
                     scheduleSendRankingUpdate();
                     return;
                 }
@@ -3070,6 +3182,7 @@ public class NotificationManagerService extends SystemService {
         mLights.remove(canceledKey);
 
         // Record usage stats
+        // TODO: add unbundling stats?
         switch (reason) {
             case REASON_DELEGATE_CANCEL:
             case REASON_DELEGATE_CANCEL_ALL:
@@ -3088,6 +3201,9 @@ public class NotificationManagerService extends SystemService {
         NotificationRecord groupSummary = mSummaryByGroupKey.get(groupKey);
         if (groupSummary != null && groupSummary.getKey().equals(r.getKey())) {
             mSummaryByGroupKey.remove(groupKey);
+        }
+        if (r.sbn.getKey().equals(mAutobundledSummaries.get(r.sbn.getPackageName()))) {
+            mAutobundledSummaries.remove(r.sbn.getPackageName());
         }
 
         // Save it for users of getHistoricalNotifications()
@@ -3287,7 +3403,7 @@ public class NotificationManagerService extends SystemService {
         for (int i = N - 1; i >= 0; i--) {
             NotificationRecord childR = mNotificationList.get(i);
             StatusBarNotification childSbn = childR.sbn;
-            if (childR.getNotification().isGroupChild() &&
+            if ((childSbn.isGroup() && !childSbn.getNotification().isGroupSummary()) &&
                     childR.getGroupKey().equals(r.getGroupKey())) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
@@ -3438,6 +3554,7 @@ public class NotificationManagerService extends SystemService {
         ArrayList<String> keys = new ArrayList<String>(N);
         ArrayList<String> interceptedKeys = new ArrayList<String>(N);
         ArrayList<Integer> importance = new ArrayList<>(N);
+        Bundle overrideGroupKeys = new Bundle();
         Bundle visibilityOverrides = new Bundle();
         Bundle suppressedVisualEffects = new Bundle();
         Bundle explanation = new Bundle();
@@ -3461,6 +3578,7 @@ public class NotificationManagerService extends SystemService {
                     != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE) {
                 visibilityOverrides.putInt(key, record.getPackageVisibilityOverride());
             }
+            overrideGroupKeys.putString(key, record.sbn.getOverrideGroupKey());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -3470,7 +3588,7 @@ public class NotificationManagerService extends SystemService {
             importanceAr[i] = importance.get(i);
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
-                suppressedVisualEffects, importanceAr, explanation);
+                suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {

@@ -30,16 +30,18 @@ public class NotificationRankingUpdate implements Parcelable {
     private final Bundle mSuppressedVisualEffects;
     private final int[] mImportance;
     private final Bundle mImportanceExplanation;
+    private final Bundle mOverrideGroupKeys;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
             Bundle visibilityOverrides, Bundle suppressedVisualEffects,
-            int[] importance, Bundle explanation) {
+            int[] importance, Bundle explanation, Bundle overrideGroupKeys) {
         mKeys = keys;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
         mSuppressedVisualEffects = suppressedVisualEffects;
         mImportance = importance;
         mImportanceExplanation = explanation;
+        mOverrideGroupKeys = overrideGroupKeys;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -50,6 +52,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mImportance = new int[mKeys.length];
         in.readIntArray(mImportance);
         mImportanceExplanation = in.readBundle();
+        mOverrideGroupKeys = in.readBundle();
     }
 
     @Override
@@ -65,6 +68,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBundle(mSuppressedVisualEffects);
         out.writeIntArray(mImportance);
         out.writeBundle(mImportanceExplanation);
+        out.writeBundle(mOverrideGroupKeys);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -100,5 +104,9 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getImportanceExplanation() {
         return mImportanceExplanation;
+    }
+
+    public Bundle getOverrideGroupKeys() {
+        return mOverrideGroupKeys;
     }
 }
