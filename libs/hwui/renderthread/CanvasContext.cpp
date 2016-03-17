@@ -484,6 +484,8 @@ void CanvasContext::draw() {
     bool drew = mCanvas->finish();
 #endif
 
+    waitOnFences();
+
     GL_CHECKPOINT(LOW);
 
     // Even if we decided to cancel the frame, from the perspective of jank
@@ -724,6 +726,37 @@ void CanvasContext::serializeDisplayListTree() {
     write(fd, data.c_str(), data.length());
     close(fd);
 #endif
+}
+
+void CanvasContext::waitOnFences() {
+    if (mFrameFences.size()) {
+        ATRACE_CALL();
+        for (auto& fence : mFrameFences) {
+            fence->getResult();
+        }
+        mFrameFences.clear();
+    }
+}
+
+class CanvasContext::FuncTaskProcessor : public TaskProcessor<bool> {
+public:
+    FuncTaskProcessor(Caches& caches)
+            : TaskProcessor<bool>(&caches.tasks) {}
+
+    virtual void onProcess(const sp<Task<bool> >& task) override {
+        FuncTask* t = static_cast<FuncTask*>(task.get());
+        t->func();
+        task->setResult(true);
+    }
+};
+
+void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
+    if (!mFrameWorkProcessor.get()) {
+        mFrameWorkProcessor = new FuncTaskProcessor(Caches::getInstance());
+    }
+    sp<FuncTask> task(new FuncTask());
+    task->func = func;
+    mFrameWorkProcessor->add(task);
 }
 
 } /* namespace renderthread */
