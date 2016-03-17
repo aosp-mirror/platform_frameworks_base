@@ -67,6 +67,20 @@ def assert_font_supports_any_of_chars(font, chars):
     sys.exit('None of characters in %s were found in %s' % (chars, font))
 
 
+def assert_font_supports_all_of_chars(font, chars):
+    best_cmap = get_best_cmap(font)
+    for char in chars:
+        assert char in best_cmap, (
+            'U+%04X was not found in %s' % (char, font))
+
+
+def assert_font_supports_none_of_chars(font, chars):
+    best_cmap = get_best_cmap(font)
+    for char in chars:
+        assert char not in best_cmap, (
+            'U+%04X was found in %s' % (char, font))
+
+
 def check_hyphens(hyphens_dir):
     # Find all the scripts that need automatic hyphenation
     scripts = set()
@@ -141,6 +155,70 @@ def parse_fonts_xml(fonts_xml_path):
                 _script_to_font_map[script].add((font_file, index))
 
 
+def check_emoji_availability():
+    emoji_fonts = [font[5] for font in _fallback_chain if 'Zsye' in font[1]]
+    emoji_chars = _emoji_properties['Emoji']
+    for emoji_font in emoji_fonts:
+        assert_font_supports_all_of_chars(emoji_font, emoji_chars)
+
+
+def check_emoji_defaults():
+    default_emoji_chars = _emoji_properties['Emoji_Presentation']
+    emoji_font_seen = False
+    for name, scripts, variant, weight, style, font in _fallback_chain:
+        if 'Zsye' in scripts:
+            emoji_font_seen = True
+            # No need to check the emoji font
+            continue
+        # For later fonts, we only check them if they have a script
+        # defined, since the defined script may get them to a higher
+        # score even if they appear after the emoji font.
+        if emoji_font_seen and not scripts:
+            continue
+
+        if font[1] is None:
+            emoji_to_skip = set()
+        else:
+            # CJK font, skip checking the following characters for now.
+            # See b/26153752
+            emoji_to_skip = ({
+                0x26BD, # SOCCER BALL
+                0x26BE, # BASEBALL
+                0x1F18E, # NEGATIVE SQUARED AB
+                0x1F201, # SQUARED KATAKANA KOKO
+                0x1F21A, # SQUARED CJK UNIFIED IDEOGRAPH-7121
+                0x1F22F, # SQUARED CJK UNIFIED IDEOGRAPH-6307
+            } | set(xrange(0x1F191, 0x1F19A+1))
+              | set(xrange(0x1F232, 0x1F236+1))
+              | set(xrange(0x1F238, 0x1F23A+1))
+              | set(xrange(0x1F250, 0x1F251+1)))
+
+        assert_font_supports_none_of_chars(font,
+            sorted(default_emoji_chars - emoji_to_skip))
+
+
+def parse_ucd(ucd_path):
+    global _emoji_properties
+    _emoji_properties = collections.defaultdict(set)
+    with open(path.join(ucd_path, 'emoji-data.txt')) as emoji_data_txt:
+        for line in emoji_data_txt:
+            if '#' in line:
+                line = line[:line.index('#')]
+            line = line.strip()
+            if not line:
+                continue
+            char_range, prop = line.split(';')
+            char_range = char_range.strip()
+            prop = prop.strip()
+            if '..' in char_range:
+                char_start, char_end = char_range.split('..')
+            else:
+                char_start = char_end = char_range
+            char_start = int(char_start, 16)
+            char_end = int(char_end, 16)
+            _emoji_properties[prop].update(xrange(char_start, char_end+1))
+
+
 def main():
     target_out = sys.argv[1]
     global _fonts_dir
@@ -151,6 +229,11 @@ def main():
 
     hyphens_dir = path.join(target_out, 'usr', 'hyphen-data')
     check_hyphens(hyphens_dir)
+
+    ucd_path = sys.argv[2]
+    parse_ucd(ucd_path)
+    check_emoji_availability()
+    check_emoji_defaults()
 
 
 if __name__ == '__main__':
