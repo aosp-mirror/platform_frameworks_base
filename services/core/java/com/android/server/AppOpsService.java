@@ -121,6 +121,8 @@ public class AppOpsService extends IAppOpsService.Stub {
      *       - SparseArray w/ mapping:
      *          AppOp code --> Set of packages that are not restricted for this code
      *
+     * For efficiency, a core assumption here is that the number of per-package exemptions stored
+     * here will be relatively small.  If this changes, this data structure should be revisited.
      */
     private final ArrayMap<IBinder, SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>>>
             mOpUserRestrictions = new ArrayMap<>();
@@ -1304,9 +1306,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             if (opRestrictions[code]) {
-                if (opExceptions != null && opExceptions.get(code) != null &&
-                        opExceptions.get(code).contains(packageName)) {
-                    continue; // AppOps code is restricted, but this package is exempt
+
+                if (opExceptions != null) {
+                    ArraySet<String> ex = opExceptions.get(code);
+                    if (ex != null && ex.contains(packageName)) {
+                        continue; // AppOps code is restricted, but this package is exempt
+                    }
                 }
 
                 if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
@@ -2143,9 +2148,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SparseArray<ArraySet<String>> opExceptions =
                     getUserPackageExemptionsForToken(token, userHandle);
 
-            // If exceptionPackages is not null, update the exception packages for this AppOps code
             ArraySet<String> exceptions = opExceptions.get(code);
-            if (exceptionPackages != null) {
+            if (exceptionPackages != null && exceptionPackages.length > 0) {
                 if (exceptions == null) {
                     exceptions = new ArraySet<>(exceptionPackages.length);
                     opExceptions.put(code, exceptions);
@@ -2153,7 +2157,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     exceptions.clear();
                 }
 
-                exceptions.addAll(Arrays.asList(exceptionPackages));
+                for (String p : exceptionPackages) {
+                    exceptions.add(p);
+                }
+            } else {
+                opExceptions.remove(code);
             }
         }
 
@@ -2219,12 +2227,21 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             if (restrictions != null) {
                 final boolean[] opRestrictions = restrictions.first;
+                final SparseArray<ArraySet<String>> opExceptions = restrictions.second;
+                boolean stillHasRestrictions = false;
                 if (opRestrictions != null) {
-                    for (boolean restriction : opRestrictions) {
+                    for (int i = 0; i < opRestrictions.length; i++) {
+                        boolean restriction = opRestrictions[i];
                         if (restriction) {
-                            return;
+                            stillHasRestrictions = true;
+                        } else {
+                            opExceptions.remove(i);
                         }
                     }
+                }
+
+                if (stillHasRestrictions) {
+                    return;
                 }
 
                 // No restrictions set for this client
