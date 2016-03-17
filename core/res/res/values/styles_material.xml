@@ -993,7 +993,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.SuggestionItem" parent="@android:style/TextAppearance.Material.Body1">
-        <item name="textColor">#8a000000</item>  <!-- alpha=.54, textColor=@color/black -->
+        <item name="textColor">?attr/textColorSecondary</item>
         <item name="drawablePadding">8dip</item>
         <item name="gravity">start|center_vertical</item>
         <item name="layout_gravity">start|center_vertical</item>
@@ -1008,11 +1008,11 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.TextSuggestionHighlight" parent="Widget.Material.SuggestionItem">
-        <item name="textColor">#de000000</item>  <!-- alpha=.87, textColor=@color/black -->
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="Widget.Material.SuggestionButton" parent="@android:style/TextAppearance.Material.Button">
-        <item name="textColor">#de009688</item>  <!-- alpha=.87, textColor=#009688 -->
+        <item name="textColor">?attr/colorAccent</item>
         <item name="drawablePadding">8dip</item>
         <item name="gravity">start|center_vertical</item>
         <item name="layout_gravity">start|center_vertical</item>
