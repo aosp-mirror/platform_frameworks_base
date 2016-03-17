@@ -379,6 +379,33 @@ public final class ActivityThread {
                         ? "no component name" : componentName.toShortString())
                 + "}";
         }
+
+        public String getStateString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("ActivityClientRecord{");
+            sb.append("paused=").append(paused);
+            sb.append(", stopped=").append(stopped);
+            sb.append(", hideForNow=").append(hideForNow);
+            sb.append(", startsNotResumed=").append(startsNotResumed);
+            sb.append(", isForward=").append(isForward);
+            sb.append(", pendingConfigChanges=").append(pendingConfigChanges);
+            sb.append(", onlyLocalRequest=").append(onlyLocalRequest);
+            sb.append(", preserveWindow=").append(mPreserveWindow);
+            if (activity != null) {
+                sb.append(", Activity{");
+                sb.append("resumed=").append(activity.mResumed);
+                sb.append(", stopped=").append(activity.mStopped);
+                sb.append(", finished=").append(activity.isFinishing());
+                sb.append(", destroyed=").append(activity.isDestroyed());
+                sb.append(", startedActivity=").append(activity.mStartedActivity);
+                sb.append(", temporaryPause=").append(activity.mTemporaryPause);
+                sb.append(", changingConfigurations=").append(activity.mChangingConfigurations);
+                sb.append(", visibleBehind=").append(activity.mVisibleBehind);
+                sb.append("}");
+            }
+            sb.append("}");
+            return sb.toString();
+        }
     }
 
     final class ProviderClientRecord {
@@ -3752,9 +3779,10 @@ public final class ActivityThread {
                     return;
                 }
                 RuntimeException e = new RuntimeException(
-                        "Performing stop of activity that is not resumed: "
+                        "Performing stop of activity that is already stopped: "
                         + r.intent.getComponent().toShortString());
                 Slog.e(TAG, e.getMessage(), e);
+                Slog.e(TAG, r.getStateString());
             }
 
             if (info != null) {
