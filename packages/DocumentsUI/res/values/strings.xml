@@ -211,13 +211,29 @@
     <!-- Text in the button asking user to deny access to a given directory. -->
     <string name="deny">Deny</string>
     <!-- Dialog text shown to users when asking if they want to delete files (a confirmation). -->
-    <plurals name="delete_confirmation_message">
-        <item quantity="one">Delete <xliff:g id="count" example="1">%1$d</xliff:g> file?</item>
-        <item quantity="other">Delete <xliff:g id="count" example="3">%1$d</xliff:g> files?</item>
-    </plurals>
     <!-- Label text showing user how many items are selected. Can be one or more elements. -->
     <plurals name="elements_selected">
         <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
         <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
+    </plurals>
+
+    <!-- Dialog text shown to users when asking if they want to delete a file (a confirmation) -->
+    <string name="delete_filename_confirmation_message">Delete \"<xliff:g id="name" example="cat.jpg">%1$s</xliff:g>\"?</string>
+    <!-- Dialog text shown to users when asking if they want to delete a folder (a confirmation) -->
+    <string name="delete_foldername_confirmation_message">Delete folder \"<xliff:g id="name" example="Photos">%1$s</xliff:g>\" and its contents?</string>
+    <!-- Dialog text shown to users when asking if they want to delete files (a confirmation). -->
+    <plurals name="delete_files_confirmation_message">
+        <item quantity="one">Delete <xliff:g id="count" example="1">%1$d</xliff:g> file?</item>
+        <item quantity="other">Delete <xliff:g id="count" example="3">%1$d</xliff:g> files?</item>
+    </plurals>
+    <!-- Dialog text shown to users when asking if they want to delete folders (a confirmation). -->
+    <plurals name="delete_folders_confirmation_message">
+        <item quantity="one">Delete <xliff:g id="count" example="1">%1$d</xliff:g> folder and its contents?</item>
+        <item quantity="other">Delete <xliff:g id="count" example="3">%1$d</xliff:g> folders and their contents?</item>
+    </plurals>
+    <!-- Dialog text shown to users when asking if they want to delete mixed type items: files and folders (a confirmation). -->
+    <plurals name="delete_items_confirmation_message">
+        <item quantity="one">Delete <xliff:g id="count" example="1">%1$d</xliff:g> item?</item>
+        <item quantity="other">Delete <xliff:g id="count" example="3">%1$d</xliff:g> items?</item>
     </plurals>
 </resources>
