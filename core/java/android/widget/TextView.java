@@ -9101,6 +9101,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mBufferType == BufferType.EDITABLE) {
             info.setEditable(true);
+            if (isEnabled()) {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT);
+            }
         }
 
         if (mEditor != null) {
@@ -9232,6 +9235,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             } return false;
+            case AccessibilityNodeInfo.ACTION_SET_TEXT: {
+                if (!isEnabled() || (mBufferType != BufferType.EDITABLE)) {
+                    return false;
+                }
+                CharSequence text = (arguments != null) ? arguments.getCharSequence(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE) : null;
+                setText(text);
+                if (text != null && text.length() > 0) {
+                    Selection.setSelection((Spannable) mText, text.length());
+                }
+            } return true;
             default: {
                 return super.performAccessibilityActionInternal(action, arguments);
             }
