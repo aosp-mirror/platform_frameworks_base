@@ -116,6 +116,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         // on file when we loaded them.
         if (mPersistedTaskIds.get(userId) == null) {
             mPersistedTaskIds.put(userId, mTaskPersister.loadPersistedTaskIdsForUser(userId));
+            Slog.i(TAG, "Loaded persisted task ids for user " + userId);
         }
     }
 
@@ -146,6 +147,12 @@ class RecentTasks extends ArrayList<TaskRecord> {
             TaskRecord task = get(i);
             if (task.isPersistable && (task.stack == null || !task.stack.isHomeStack())) {
                 // Set of persisted taskIds for task.userId should not be null here
+                // TODO Investigate why it can happen. For now initialize with an empty set
+                if (mPersistedTaskIds.get(task.userId) == null) {
+                    Slog.wtf(TAG, "No task ids found for userId " + task.userId + ". task=" + task
+                            + " mPersistedTaskIds=" + mPersistedTaskIds);
+                    mPersistedTaskIds.put(task.userId, new SparseBooleanArray());
+                }
                 mPersistedTaskIds.get(task.userId).put(task.taskId, true);
             }
         }
