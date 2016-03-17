@@ -160,6 +160,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -276,9 +277,6 @@ public class NotificationManagerService extends SystemService {
     // Persistent storage for notification policy
     private AtomicFile mPolicyFile;
 
-    // Temporary holder for <blocked-packages> config coming from old policy files.
-    private HashSet<String> mBlockedPackages = new HashSet<String>();
-
     private static final int DB_VERSION = 1;
 
     private static final String TAG_NOTIFICATION_POLICY = "notification-policy";
@@ -354,27 +352,7 @@ public class NotificationManagerService extends SystemService {
         final XmlPullParser parser = Xml.newPullParser();
         parser.setInput(stream, StandardCharsets.UTF_8.name());
 
-        int type;
-        String tag;
-        int version = DB_VERSION;
-        while ((type = parser.next()) != END_DOCUMENT) {
-            tag = parser.getName();
-            if (type == START_TAG) {
-                if (TAG_NOTIFICATION_POLICY.equals(tag)) {
-                    version = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_VERSION));
-                } else if (TAG_BLOCKED_PKGS.equals(tag)) {
-                    while ((type = parser.next()) != END_DOCUMENT) {
-                        tag = parser.getName();
-                        if (TAG_PACKAGE.equals(tag)) {
-                            mBlockedPackages.add(
-                                    parser.getAttributeValue(null, ATTR_NAME));
-                        } else if (TAG_BLOCKED_PKGS.equals(tag) && type == END_TAG) {
-                            break;
-                        }
-                    }
-                }
-            }
+        while (parser.next() != END_DOCUMENT) {
             mZenModeHelper.readXml(parser, forRestore);
             mRankingHelper.readXml(parser, forRestore);
         }
@@ -383,7 +361,6 @@ public class NotificationManagerService extends SystemService {
     private void loadPolicyFile() {
         if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized(mPolicyFile) {
-            mBlockedPackages.clear();
 
             FileInputStream infile = null;
             try {
@@ -941,7 +918,7 @@ public class NotificationManagerService extends SystemService {
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
 
-        importOldBlockDb();
+        syncBlockDb();
 
         // This is a MangedServices object that keeps track of the listeners.
         mListeners = new NotificationListeners();
@@ -1041,22 +1018,43 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Read the old XML-based app block database and import those blockages into the AppOps system.
+     * Make sure the XML config and the the AppOps system agree about blocks.
      */
-    private void importOldBlockDb() {
+    private void syncBlockDb() {
         loadPolicyFile();
 
-        PackageManager pm = getContext().getPackageManager();
-        for (String pkg : mBlockedPackages) {
-            PackageInfo info = null;
-            try {
-                info = pm.getPackageInfo(pkg, 0);
-                setNotificationsEnabledForPackageImpl(pkg, info.applicationInfo.uid, false);
-            } catch (NameNotFoundException e) {
-                // forget you
+        // sync bans from ranker into app opps
+        Map<Integer, String> packageBans = mRankingHelper.getPackageBans();
+        for(Entry<Integer, String> ban : packageBans.entrySet()) {
+            final int uid = ban.getKey();
+            final String packageName = ban.getValue();
+            setNotificationsEnabledForPackageImpl(packageName, uid, false);
+        }
+
+        // sync bans from app opps into ranker
+        packageBans.clear();
+        for (UserInfo user : UserManager.get(getContext()).getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+            final PackageManager packageManager = getContext().getPackageManager();
+            List<PackageInfo> packages = packageManager.getInstalledPackagesAsUser(0, userId);
+            final int packageCount = packages.size();
+            for (int p = 0; p < packageCount; p++) {
+                final String packageName = packages.get(p).packageName;
+                try {
+                    final int uid = packageManager.getPackageUidAsUser(packageName, userId);
+                    if (!checkNotificationOp(packageName, uid)) {
+                        packageBans.put(uid, packageName);
+                    }
+                } catch (NameNotFoundException e) {
+                    // forget you
+                }
             }
         }
-        mBlockedPackages.clear();
+        for (Entry<Integer, String> ban : packageBans.entrySet()) {
+            mRankingHelper.setImportance(ban.getValue(), ban.getKey(), IMPORTANCE_NONE);
+        }
+
+        savePolicyFile();
     }
 
     @Override
@@ -1261,6 +1259,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
 
             setNotificationsEnabledForPackageImpl(pkg, uid, enabled);
+            mRankingHelper.setEnabled(pkg, uid, enabled);
+            savePolicyFile();
         }
 
         /**
@@ -2034,21 +2034,8 @@ public class NotificationManagerService extends SystemService {
         JSONObject dump = new JSONObject();
         try {
             dump.put("service", "Notification Manager");
-            JSONArray bans = new JSONArray();
-            try {
-                ArrayMap<Integer, ArrayList<String>> packageBans = getPackageBans(filter);
-                for (Integer userId : packageBans.keySet()) {
-                    for (String packageName : packageBans.get(userId)) {
-                        JSONObject ban = new JSONObject();
-                        ban.put("userId", userId);
-                        ban.put("packageName", packageName);
-                        bans.put(ban);
-                    }
-                }
-            } catch (NameNotFoundException e) {
-                // pass
-            }
-            dump.put("bans", bans);
+            dump.put("bans", mRankingHelper.dumpBansJson(filter));
+            dump.put("ranking", mRankingHelper.dumpJson(filter));
             dump.put("stats", mUsageStats.dumpJson(filter));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -2175,45 +2162,7 @@ public class NotificationManagerService extends SystemService {
                     r.dump(pw, "      ", getContext(), filter.redact);
                 }
             }
-
-            try {
-                pw.println("\n  Banned Packages:");
-                ArrayMap<Integer, ArrayList<String>> packageBans = getPackageBans(filter);
-                for (Integer userId : packageBans.keySet()) {
-                    for (String packageName : packageBans.get(userId)) {
-                        pw.println("    " + userId + ": " + packageName);
-                    }
-                }
-            } catch (NameNotFoundException e) {
-                // pass
-            }
         }
-    }
-
-    private ArrayMap<Integer, ArrayList<String>> getPackageBans(DumpFilter filter)
-            throws NameNotFoundException {
-        ArrayMap<Integer, ArrayList<String>> packageBans = new ArrayMap<>();
-        ArrayList<String> packageNames = new ArrayList<>();
-        for (UserInfo user : UserManager.get(getContext()).getUsers()) {
-            final int userId = user.getUserHandle().getIdentifier();
-            final PackageManager packageManager = getContext().getPackageManager();
-            List<PackageInfo> packages = packageManager.getInstalledPackagesAsUser(0, userId);
-            final int packageCount = packages.size();
-            for (int p = 0; p < packageCount; p++) {
-                final String packageName = packages.get(p).packageName;
-                if (filter == null || filter.matches(packageName)) {
-                    final int uid = packageManager.getPackageUidAsUser(packageName, userId);
-                    if (!checkNotificationOp(packageName, uid)) {
-                        packageNames.add(packageName);
-                    }
-                }
-            }
-            if (!packageNames.isEmpty()) {
-                packageBans.put(userId, packageNames);
-                packageNames = new ArrayList<>();
-            }
-        }
-        return packageBans;
     }
 
     /**
