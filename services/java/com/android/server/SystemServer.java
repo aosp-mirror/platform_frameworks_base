@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
+import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
@@ -35,7 +36,6 @@ import android.os.FileUtils;
 import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -53,6 +53,7 @@ import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.os.ZygoteInit;
+import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.am.ActivityManagerService;
@@ -69,10 +70,9 @@ import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
-import com.android.internal.widget.ILockSettings;
+import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
-import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -270,6 +270,10 @@ public final class SystemServer {
             // Within the system server, it is an error to access Environment paths without
             // explicitly specifying a user.
             Environment.setUserRequired(true);
+
+            // Within the system server, any incoming Bundles should be defused
+            // to avoid throwing BadParcelableException.
+            BaseBundle.setShouldDefuse(true);
 
             // Ensure binder calls into the system always run at foreground priority.
             BinderInternal.disableBackgroundScheduling(true);

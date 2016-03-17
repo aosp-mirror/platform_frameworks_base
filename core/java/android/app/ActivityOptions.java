@@ -710,6 +710,10 @@ public class ActivityOptions {
 
     /** @hide */
     public ActivityOptions(Bundle opts) {
+        // If the remote side sent us bad parcelables, they won't get the
+        // results they want, which is their loss.
+        opts.setDefusable(true);
+
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         try {
             mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT);

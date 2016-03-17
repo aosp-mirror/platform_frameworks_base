@@ -6913,6 +6913,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        // We're going to be splicing together extras before sending, so we're
+        // okay poking into any contained extras.
+        if (intents != null) {
+            for (int i = 0; i < intents.length; i++) {
+                intents[i].setDefusable(true);
+            }
+        }
+
         final boolean noCreate = (flags&PendingIntent.FLAG_NO_CREATE) != 0;
         final boolean cancelCurrent = (flags&PendingIntent.FLAG_CANCEL_CURRENT) != 0;
         final boolean updateCurrent = (flags&PendingIntent.FLAG_UPDATE_CURRENT) != 0;

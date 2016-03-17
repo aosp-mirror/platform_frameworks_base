@@ -6037,10 +6037,17 @@ public class Intent implements Parcelable, Cloneable {
         return mExtras != null && mExtras.hasFileDescriptors();
     }
 
-    /** @hide */
+    /** {@hide} */
     public void setAllowFds(boolean allowFds) {
         if (mExtras != null) {
             mExtras.setAllowFds(allowFds);
+        }
+    }
+
+    /** {@hide} */
+    public void setDefusable(boolean defusable) {
+        if (mExtras != null) {
+            mExtras.setDefusable(defusable);
         }
     }
 
@@ -8938,6 +8945,17 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void prepareToEnterProcess() {
+        // We just entered destination process, so we should be able to read all
+        // parcelables inside.
+        setDefusable(true);
+
+        if (mSelector != null) {
+            mSelector.prepareToEnterProcess();
+        }
+        if (mClipData != null) {
+            mClipData.prepareToEnterProcess();
+        }
+
         if (mContentUserHint != UserHandle.USER_CURRENT) {
             if (UserHandle.getAppId(Process.myUid()) != Process.SYSTEM_UID) {
                 fixUris(mContentUserHint);

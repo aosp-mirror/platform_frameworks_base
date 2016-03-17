@@ -836,6 +836,17 @@ public class ClipData implements Parcelable {
         }
     }
 
+    /** {@hide} */
+    public void prepareToEnterProcess() {
+        final int size = mItems.size();
+        for (int i = 0; i < size; i++) {
+            final Item item = mItems.get(i);
+            if (item.mIntent != null) {
+                item.mIntent.prepareToEnterProcess();
+            }
+        }
+    }
+
     /** @hide */
     public void fixUris(int contentUserHint) {
         final int size = mItems.size();
