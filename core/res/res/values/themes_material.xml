@@ -223,6 +223,7 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandleWindowStyle">@style/Widget.Material.TextSelectHandle</item>
         <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item_material</item>
         <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container_material</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Material.TextSuggestionHighlight</item>
         <item name="textCursorDrawable">@drawable/text_cursor_material</item>
 
         <!-- Widget styles -->
