@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -138,6 +140,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
+    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+
     // Should match the values in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
     public static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
@@ -146,6 +150,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             "com.android.systemui.statusbar.banner_action_cancel";
     private static final String BANNER_ACTION_SETUP =
             "com.android.systemui.statusbar.banner_action_setup";
+    private static final String WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION
+            = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -198,6 +204,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private UserManager mUserManager;
     private int mDensity;
+
+    private KeyguardManager mKeyguardManager;
+    private LockPatternUtils mLockPatternUtils;
 
     // UI-specific methods
 
@@ -499,6 +508,20 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                     );
                 }
+            } else if (WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION.equals(action)) {
+                final IntentSender intentSender = (IntentSender) intent
+                        .getParcelableExtra(Intent.EXTRA_INTENT);
+                final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
+                try {
+                    mContext.startIntentSender(intentSender, null, 0, 0, 0);
+                } catch (IntentSender.SendIntentException e) {
+                    /* ignore */
+                }
+                try {
+                    mBarService.onNotificationClick(notificationKey);
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
             }
         }
     };
@@ -661,6 +684,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mDensity = currentConfig.densityDpi;
 
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mLockPatternUtils = new LockPatternUtils(mContext);
 
         // Connect in to the status bar manager service
         mCommandQueue = new CommandQueue(this);
@@ -723,9 +748,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(BANNER_ACTION_CANCEL);
-        filter.addAction(BANNER_ACTION_SETUP);
         mContext.registerReceiver(mBroadcastReceiver, filter);
+
+        IntentFilter internalFilter = new IntentFilter();
+        internalFilter.addAction(WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION);
+        internalFilter.addAction(BANNER_ACTION_CANCEL);
+        internalFilter.addAction(BANNER_ACTION_SETUP);
+        mContext.registerReceiver(mBroadcastReceiver, internalFilter, PERMISSION_SELF, null);
 
         IntentFilter allUsersFilter = new IntentFilter();
         allUsersFilter.addAction(
@@ -739,8 +768,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (0 != Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 1)) {
             Log.d(TAG, "user hasn't seen notification about hidden notifications");
-            final LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
-            if (!lockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
+            if (!mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
                 Log.d(TAG, "insecure lockscreen, skipping notification");
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
@@ -1680,7 +1708,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                             ActivityManagerNative.getDefault().resumeAppSwitches();
                         } catch (RemoteException e) {
                         }
-
                         try {
                             intent.send();
                         } catch (PendingIntent.CanceledException e) {
@@ -1773,8 +1800,22 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 ActivityManagerNative.getDefault().resumeAppSwitches();
                             } catch (RemoteException e) {
                             }
-
                             if (intent != null) {
+                                // If we are launching a work activity and require to launch
+                                // separate work challenge, we defer the activity action and cancel
+                                // notification until work challenge is unlocked.
+                                if (intent.isActivity()) {
+                                    final int userId = intent.getCreatorUserHandle()
+                                            .getIdentifier();
+                                    if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
+                                            && mKeyguardManager.isDeviceLocked(userId)) {
+                                        // Show work challenge, do not run pendingintent and
+                                        // remove notification
+                                        startWorkChallenge(userId, intent.getIntentSender(),
+                                                notificationKey);
+                                        return;
+                                    }
+                                }
                                 try {
                                     intent.send();
                                 } catch (PendingIntent.CanceledException e) {
@@ -1807,6 +1848,23 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return true;
                 }
             }, afterKeyguardGone);
+        }
+
+        public void startWorkChallenge(int userId, IntentSender intendSender,
+                String notificationKey) {
+            final Intent callBackIntent = new Intent(
+                    WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION);
+            callBackIntent.putExtra(Intent.EXTRA_INTENT, intendSender);
+            callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
+            callBackIntent.setPackage(mContext.getPackageName());
+
+            final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
+                    null, userId);
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            newIntent.putExtra(Intent.EXTRA_INTENT, PendingIntent
+                    .getBroadcast(mContext, 0, callBackIntent, 0).getIntentSender());
+            mContext.startActivity(newIntent);
         }
 
         public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
