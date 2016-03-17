@@ -1076,9 +1076,6 @@ public class AudioManager {
      * <p>
      * This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
-     * <p>From N onward, stream mute changes that would toggle Do Not Disturb are not allowed unless
-     * the app has been granted Do Not Disturb Access.
-     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * <p>
      * This method was deprecated in API level 22. Prior to API level 22 this
      * method had significantly different behavior and should be used carefully.
