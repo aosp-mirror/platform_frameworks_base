@@ -464,9 +464,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             return null;
         }
         synchronized (mSpellCheckerMap) {
-            final String subtypeHashCodeStr = mSettings.getSelectedSpellCheckerSubtype();
+            final int subtypeHashCode =
+                    mSettings.getSelectedSpellCheckerSubtype(SpellCheckerSubtype.SUBTYPE_ID_NONE);
             if (DBG) {
-                Slog.w(TAG, "getCurrentSpellCheckerSubtype: " + subtypeHashCodeStr);
+                Slog.w(TAG, "getCurrentSpellCheckerSubtype: " + subtypeHashCode);
             }
             final SpellCheckerInfo sci = getCurrentSpellChecker(null);
             if (sci == null || sci.getSubtypeCount() == 0) {
@@ -475,17 +476,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 }
                 return null;
             }
-            final int hashCode;
-            if (!TextUtils.isEmpty(subtypeHashCodeStr)) {
-                hashCode = Integer.valueOf(subtypeHashCodeStr);
-            } else {
-                hashCode = 0;
-            }
-            if (hashCode == 0 && !allowImplicitlySelectedSubtype) {
+            if (subtypeHashCode == SpellCheckerSubtype.SUBTYPE_ID_NONE
+                    && !allowImplicitlySelectedSubtype) {
                 return null;
             }
             String candidateLocale = null;
-            if (hashCode == 0) {
+            if (subtypeHashCode == 0) {
                 // Spell checker language settings == "auto"
                 final InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                 if (imm != null) {
@@ -507,7 +503,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             SpellCheckerSubtype candidate = null;
             for (int i = 0; i < sci.getSubtypeCount(); ++i) {
                 final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
-                if (hashCode == 0) {
+                if (subtypeHashCode == 0) {
                     final String scsLocale = scs.getLocale();
                     if (candidateLocale.equals(scsLocale)) {
                         return scs;
@@ -518,7 +514,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                             candidate = scs;
                         }
                     }
-                } else if (scs.hashCode() == hashCode) {
+                } else if (scs.hashCode() == subtypeHashCode) {
                     if (DBG) {
                         Slog.w(TAG, "Return subtype " + scs.hashCode() + ", input= " + locale
                                 + ", " + scs.getLocale());
@@ -1154,7 +1150,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         public void putSelectedSpellCheckerSubtype(int hashCode) {
-            putString(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, String.valueOf(hashCode));
+            putInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, hashCode);
         }
 
         public void setSpellCheckerEnabled(boolean enabled) {
@@ -1165,8 +1161,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             return getString(Settings.Secure.SELECTED_SPELL_CHECKER);
         }
 
-        public String getSelectedSpellCheckerSubtype() {
-            return getString(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE);
+        public int getSelectedSpellCheckerSubtype(final int defaultValue) {
+            return getInt(Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE, defaultValue);
         }
 
         public boolean isSpellCheckerEnabled() {
