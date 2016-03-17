@@ -316,6 +316,61 @@ TEST(FrameBuilder, textStrikethrough) {
             << "Expect number of ops = 2 * loop count";
 }
 
+static auto styles = {
+        SkPaint::kFill_Style, SkPaint::kStroke_Style, SkPaint::kStrokeAndFill_Style };
+
+TEST(FrameBuilder, textStyle) {
+    class TextStyleTestRenderer : public TestRendererBase {
+    public:
+        void onMergedTextOps(const MergedBakedOpList& opList) override {
+            ASSERT_EQ(0, mIndex);
+            ASSERT_EQ(3u, opList.count);
+            mIndex += opList.count;
+
+            int index = 0;
+            for (auto style : styles) {
+                auto state = opList.states[index++];
+                ASSERT_EQ(style, state->op->paint->getStyle())
+                        << "Remainder of validation relies upon stable merged order";
+                ASSERT_EQ(0, state->computedState.clipSideFlags)
+                        << "Clipped bounds validation requires unclipped ops";
+            }
+
+            Rect fill = opList.states[0]->computedState.clippedBounds;
+            Rect stroke = opList.states[1]->computedState.clippedBounds;
+            EXPECT_EQ(stroke, opList.states[2]->computedState.clippedBounds)
+                    << "Stroke+Fill should be same as stroke";
+
+            EXPECT_TRUE(stroke.contains(fill));
+            EXPECT_FALSE(fill.contains(stroke));
+
+            Rect outsetFill(fill);
+            outsetFill.outset(10);
+            EXPECT_EQ(stroke, outsetFill);
+        }
+    };
+    auto node = TestUtils::createNode(0, 0, 400, 400,
+            [](RenderProperties& props, TestCanvas& canvas) {
+        SkPaint paint;
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        paint.setAntiAlias(true);
+        paint.setTextSize(50);
+        paint.setStrokeWidth(10);
+
+        // draw 3 copies of the same text overlapping, each with a different style.
+        // They'll get merged, but with
+        for (auto style : styles) {
+            paint.setStyle(style);
+            TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 100);
+        }
+    });
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, nullptr);
+    TextStyleTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex()) << "Expect 3 ops";
+}
+
 RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
     class TextureLayerTestRenderer : public TestRendererBase {
     public:

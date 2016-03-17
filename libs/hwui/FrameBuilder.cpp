@@ -646,7 +646,9 @@ static batchid_t textBatchId(const SkPaint& paint) {
 }
 
 void FrameBuilder::deferTextOp(const TextOp& op) {
-    BakedOpState* bakedState = tryBakeOpState(op);
+    BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
+            mAllocator, *mCanvasState.writableSnapshot(), op,
+            BakedOpState::StrokeBehavior::StyleDefined);
     if (!bakedState) return; // quick rejected
 
     batchid_t batchId = textBatchId(*(op.paint));
