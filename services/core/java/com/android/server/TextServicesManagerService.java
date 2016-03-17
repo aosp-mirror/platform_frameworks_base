@@ -28,6 +28,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -1092,12 +1093,15 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
         }
 
-        private String getString(final String key) {
+        @Nullable
+        private String getString(@NonNull final String key, @Nullable final String defaultValue) {
+            final String result;
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? result : "";
+                result = mCopyOnWriteDataStore.get(key);
+            } else {
+                result = Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
             }
-            return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
+            return result != null ? result : defaultValue;
         }
 
         private void putInt(final String key, final int value) {
@@ -1145,8 +1149,14 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             return mCurrentUserId;
         }
 
-        public void putSelectedSpellChecker(String sciId) {
-            putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
+        public void putSelectedSpellChecker(@Nullable String sciId) {
+            if (TextUtils.isEmpty(sciId)) {
+                // OK to coalesce to null, since getSelectedSpellChecker() can take care of the
+                // empty data scenario.
+                putString(Settings.Secure.SELECTED_SPELL_CHECKER, null);
+            } else {
+                putString(Settings.Secure.SELECTED_SPELL_CHECKER, sciId);
+            }
         }
 
         public void putSelectedSpellCheckerSubtype(int hashCode) {
@@ -1157,8 +1167,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             putBoolean(Settings.Secure.SPELL_CHECKER_ENABLED, enabled);
         }
 
+        @NonNull
         public String getSelectedSpellChecker() {
-            return getString(Settings.Secure.SELECTED_SPELL_CHECKER);
+            return getString(Settings.Secure.SELECTED_SPELL_CHECKER, "");
         }
 
         public int getSelectedSpellCheckerSubtype(final int defaultValue) {
