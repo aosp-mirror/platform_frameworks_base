@@ -133,8 +133,7 @@ public final class Shared {
 
     /**
      * Compare two strings against each other using system default collator in a
-     * case-insensitive mode. Clusters strings prefixed with {@link DIR_PREFIX}
-     * before other items.
+     * case-insensitive mode.
      */
     public static int compareToIgnoreCaseNullable(String lhs, String rhs) {
         final boolean leftEmpty = TextUtils.isEmpty(lhs);
