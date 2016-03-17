@@ -388,7 +388,7 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
                                   0,
                                   android_media_visualizer_effect_callback,
                                   lpJniStorage,
-                                  sessionId);
+                                  (audio_session_t) sessionId);
     if (lpVisualizer == 0) {
         ALOGE("Error creating Visualizer");
         goto setup_failure;
