@@ -1057,8 +1057,13 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        public void setInstallFlagsDontKillApp() {
-            installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
+        @SystemApi
+        public void setDontKillApp(boolean dontKillApp) {
+            if (dontKillApp) {
+                installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_DONT_KILL_APP;
+            }
         }
 
         /** {@hide} */
