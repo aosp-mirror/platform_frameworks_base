@@ -1281,8 +1281,10 @@ public class VectorDrawable extends Drawable {
         private static final int STROKE_LINE_CAP_INDEX = 8;
         private static final int STROKE_LINE_JOIN_INDEX = 9;
         private static final int STROKE_MITER_LIMIT_INDEX = 10;
-        private static final int TOTAL_PROPERTY_COUNT = 11;
+        private static final int FILL_TYPE_INDEX = 11;
+        private static final int TOTAL_PROPERTY_COUNT = 12;
 
+        // Property map for animatable attributes.
         private final static HashMap<String, Integer> sPropertyMap
                 = new HashMap<String, Integer> () {
             {
@@ -1399,6 +1401,7 @@ public class VectorDrawable extends Drawable {
             int strokeLineCap =  properties.getInt(STROKE_LINE_CAP_INDEX * 4);
             int strokeLineJoin = properties.getInt(STROKE_LINE_JOIN_INDEX * 4);
             float strokeMiterLimit = properties.getFloat(STROKE_MITER_LIMIT_INDEX * 4);
+            int fillType = properties.getInt(FILL_TYPE_INDEX * 4);
             Shader fillGradient = null;
             Shader strokeGradient = null;
             // Account for any configuration changes.
@@ -1474,10 +1477,11 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_trimPathOffset, trimPathOffset);
             trimPathStart = a.getFloat(
                     R.styleable.VectorDrawablePath_trimPathStart, trimPathStart);
+            fillType = a.getInt(R.styleable.VectorDrawablePath_fillType, fillType);
 
             nUpdateFullPathProperties(mNativePtr, strokeWidth, strokeColor, strokeAlpha,
                     fillColor, fillAlpha, trimPathStart, trimPathEnd, trimPathOffset,
-                    strokeMiterLimit, strokeLineCap, strokeLineJoin);
+                    strokeMiterLimit, strokeLineCap, strokeLineJoin, fillType);
         }
 
         @Override
@@ -1645,7 +1649,7 @@ public class VectorDrawable extends Drawable {
     private static native void nUpdateFullPathProperties(long pathPtr, float strokeWidth,
             int strokeColor, float strokeAlpha, int fillColor, float fillAlpha, float trimPathStart,
             float trimPathEnd, float trimPathOffset, float strokeMiterLimit, int strokeLineCap,
-            int strokeLineJoin);
+            int strokeLineJoin, int fillType);
     private static native void nUpdateFullPathFillGradient(long pathPtr, long fillGradientPtr);
     private static native void nUpdateFullPathStrokeGradient(long pathPtr, long strokeGradientPtr);
 
