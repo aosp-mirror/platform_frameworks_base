@@ -1432,6 +1432,9 @@
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
     <string name="drag_to_add_tiles">Drag to add tiles</string>
 
+    <!-- Label for area where tiles can be dragged in to [CHAR LIMIT=60] -->
+    <string name="drag_to_remove_tiles">Drag here to remove</string>
+
     <!-- Button to edit the tile ordering of quick settings [CHAR LIMIT=60] -->
     <string name="qs_edit">Edit</string>
 
