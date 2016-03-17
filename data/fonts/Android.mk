@@ -105,4 +105,4 @@ FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
 .PHONY: fontchain_lint
 fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml
 	PYTHONPATH=$$PYTHONPATH:external/fonttools/Lib \
-	python $(FONTCHAIN_LINTER) $(TARGET_OUT)
+	python $(FONTCHAIN_LINTER) $(TARGET_OUT) external/unicode
