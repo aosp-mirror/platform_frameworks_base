@@ -311,10 +311,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
 
             toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
-        }
-        startTrackingJob(jobStatus, toCancel);
-        if (toCancel != null) {
-            cancelJobImpl(toCancel);
+            if (toCancel != null) {
+                cancelJobImpl(toCancel);
+            }
+            startTrackingJob(jobStatus, toCancel);
         }
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
         return JobScheduler.RESULT_SUCCESS;
