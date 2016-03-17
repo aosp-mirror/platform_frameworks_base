@@ -2073,11 +2073,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public void requestKeyboardShortcuts(List<KeyboardShortcutGroup> list) {
         final PanelFeatureState st = mWindow.getPanelState(FEATURE_OPTIONS_PANEL, false);
         if (!mWindow.isDestroyed() && st != null && mWindow.getCallback() != null) {
-            try {
-                mWindow.getCallback().onProvideKeyboardShortcuts(list, st.menu);
-            } catch (AbstractMethodError e) {
-                // We run into this if the app is using supportlib.
-            }
+            mWindow.getCallback().onProvideKeyboardShortcuts(list, st.menu);
         }
     }
 

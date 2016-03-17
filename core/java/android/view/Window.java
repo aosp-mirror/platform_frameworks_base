@@ -566,8 +566,8 @@ public abstract class Window {
          * @param data The data list to populate with shortcuts.
          * @param menu The current menu, which may be null.
          */
-        public void onProvideKeyboardShortcuts(
-                List<KeyboardShortcutGroup> data, @Nullable Menu menu);
+        default public void onProvideKeyboardShortcuts(
+                List<KeyboardShortcutGroup> data, @Nullable Menu menu) { };
     }
 
     /** @hide */
