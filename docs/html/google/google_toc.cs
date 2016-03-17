@@ -57,6 +57,11 @@
               <span class="en">Google Play Developer API</span></a>
       </div>
   </li>
+  <li class="nav-section">
+  <div class="nav-section-header empty"><a href="<?cs var:toroot?>google/play-services/id.html">
+              <span class="en">Google Play Developer API</span></a>
+      </div>
+  </li>
     <li class="nav-section">
   <div class="nav-section-header empty"><a href="<?cs var:toroot ?>google/play/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
