@@ -364,16 +364,17 @@ System V Application Binary Interface</a></li>
 ABI</a></li>
 </ul>
 
-<p>The MIPS-specific documentation is available
-<a href="http://www.imgtec.com/mips/architectures/mips32.asp">here</a>, with
-further information
-<a href="https://sourcery.mentor.com/sgpp/lite/mips/portal/target_arch?@action=faq&amp;target_arch=MIPS">here</a>.</p>
+<p>For more specific details, see
+<a href="http://www.imgtec.com/mips/architectures/mips32/">MIPS32 Architecture</a>.
+Answers to common questions are in the
+<a href="https://sourcery.mentor.com/sgpp/lite/mips/portal/target_arch?@action=faq&amp;target_arch=MIPS">MIPS FAQ</a>.
+</p>
 </li>
 </ul>
 
 <h3 id="mips64">mips64</h3>
 <p>This ABI is for MIPS64 R6. For more information, see
-<a href="http://www.imgtec.com/mips/architectures/mips64.asp">MIPS64 Architecture</a>.</p>
+<a href="http://www.imgtec.com/mips/architectures/mips64/">MIPS64 Architecture</a>.</p>
 
 <h2 id="gc">Generating Code for a Specific ABI</h2>
 <p>By default, the NDK generates machine code for the armeabi ABI. You can
