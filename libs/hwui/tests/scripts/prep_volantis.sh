@@ -49,6 +49,6 @@ adb shell "echo 0 > /sys/devices/system/cpu/cpuquiet/tegra_cpuquiet/enable"
 # 684000 708000 756000 804000 852000 (kHz)
 
 S=324000000
-echo "set gpu to $s hz"
+echo "set gpu to $S hz"
 adb shell "echo 1 > /d/clock/override.gbus/state"
 adb shell "echo $S > /d/clock/override.gbus/rate"
