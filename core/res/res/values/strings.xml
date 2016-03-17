@@ -2936,8 +2936,8 @@
 
     <!-- Title of the pop-up dialog in which the user switches keyboard, also known as input method. -->
     <string name="select_input_method">Change keyboard</string>
-    <!-- Title of a button to open the settings to enable or disable keyboards, also known as input methods [CHAR LIMIT=30] -->
-    <string name="configure_input_methods">Choose keyboards</string>
+    <!-- Title of a button to open the settings to enable or disable other soft keyboards (also known as input methods) [CHAR LIMIT=30] -->
+    <string name="configure_input_methods">Other keyboards</string>
     <!-- Summary text of a toggle switch to enable/disable use of the IME while a physical
          keyboard is connected -->
     <string name="show_ime">Keep it on screen while physical keyboard is active</string>
