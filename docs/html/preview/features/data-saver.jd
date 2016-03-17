@@ -15,8 +15,11 @@ page.keywords="android N", "data usage", "metered network"
       </li>
 
       <li>
-        <a href="#monitor-changes">Monitoring Changes to Data Saver
-        Preferences</a>
+        <a href="#monitor-changes">Monitoring Changes to Data Saver Preferences</a>
+      </li>
+
+      <li>
+        <a href="#testing">Testing with Android Debug Bridge Commands</a>
       </li>
     </ol>
   </div>
@@ -102,7 +105,7 @@ ConnectivityManager connMgr = (ConnectivityManager)
 // Checks if the device is on a metered network
 if (connMgr.isActiveNetworkMetered()) {
   // Checks user’s Data Saver settings.
-  switch (connMgr.getRestrictBackgroundStatus) {
+  switch (connMgr.getRestrictBackgroundStatus()) {
     case RESTRICT_BACKGROUND_STATUS_ENABLED:
     // Background data usage is blocked for this app. Wherever possible,
     // the app should also use less data in the foreground.
@@ -144,3 +147,61 @@ if (connMgr.isActiveNetworkMetered()) {
   that register to receive this broadcast in their manifest will not receive
   them.
 </p>
+
+<h2 id="testing">
+  Testing with Android Debug Bridge Commands
+</h2>
+
+The <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
+provides a few commands that you can use to check and configure network
+permissions:
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    Generates a report that includes the current global background network
+    restriction setting, package UIDs currently on a whitelist, and the network
+    permissions of other known packages.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    Displays a full list of Network Policy Manager (netpolicy) commands.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    Enables or disables Data Saver mode when passing <code>true</code> or
+    <code>false</code>, respectively.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Adds the specified package UID to the whitelist to allow background metered
+    data usage.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Removes the specified package UID from the whitelist to block background
+    metered data usage while Data Saver is enabled.
+  </dd>
+</dl>
