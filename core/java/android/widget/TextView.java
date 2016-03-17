@@ -6552,7 +6552,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (TextUtils.equals(content.subSequence(start, end), text.text)) {
                     if (text.text instanceof Spanned) {
                         // OK to copy spans only.
-                        TextUtils.copySpansFrom((Spanned) text.text, start, end,
+                        TextUtils.copySpansFrom((Spanned) text.text, 0, end - start,
                                 Object.class, content, start);
                     }
                 } else {
