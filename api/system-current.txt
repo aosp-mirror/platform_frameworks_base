@@ -20080,9 +20080,11 @@ package android.net {
 
   public class ScoredNetwork implements android.os.Parcelable {
     ctor public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve);
+    ctor public ScoredNetwork(android.net.NetworkKey, android.net.RssiCurve, boolean);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.ScoredNetwork> CREATOR;
+    field public final boolean meteredHint;
     field public final android.net.NetworkKey networkKey;
     field public final android.net.RssiCurve rssiCurve;
   }
