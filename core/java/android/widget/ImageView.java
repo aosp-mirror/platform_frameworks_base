@@ -1501,10 +1501,10 @@ public class ImageView extends View {
     }
 
     @Override
-    public void onVisibilityAggregated(View changedView, @Visibility int visibility) {
-        super.onVisibilityAggregated(changedView, visibility);
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
         if (mDrawable != null) {
-            mDrawable.setVisible(visibility == VISIBLE, false);
+            mDrawable.setVisible(isVisible, false);
         }
     }
 
