@@ -444,6 +444,11 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VVM_PACKAGE_NAME_STRING = "carrier_vvm_package_name_string";
 
     /**
+     * Flag specifying whether ICCID is showed in SIM Status screen, default to false.
+     */
+    public static final String KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL = "show_iccid_in_sim_status_bool";
+
+    /**
      * Flag specifying whether an additional (client initiated) intent needs to be sent on System
      * update
      */
@@ -680,6 +685,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN,false);
         sDefaults.putBoolean(KEY_VVM_PREFETCH_BOOLEAN,true);
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
