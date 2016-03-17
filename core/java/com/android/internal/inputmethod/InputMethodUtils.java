@@ -909,14 +909,6 @@ public class InputMethodUtils {
             return imsList;
         }
 
-        @Deprecated
-        public InputMethodSettings(
-                Resources res, ContentResolver resolver,
-                HashMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-                @UserIdInt int userId) {
-            this(res, resolver, methodMap, methodList, userId, false /* copyOnWrite */);
-        }
-
         public InputMethodSettings(
                 Resources res, ContentResolver resolver,
                 HashMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
