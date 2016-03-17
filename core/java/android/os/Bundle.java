@@ -51,7 +51,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle() {
         super();
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -62,7 +62,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     Bundle(Parcel parcelledData) {
         super(parcelledData);
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
         if (mParcelledData.hasFileDescriptors()) {
             mFlags |= FLAG_HAS_FDS;
         }
@@ -70,7 +70,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     /* package */ Bundle(Parcel parcelledData, int length) {
         super(parcelledData, length);
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
         if (mParcelledData.hasFileDescriptors()) {
             mFlags |= FLAG_HAS_FDS;
         }
@@ -85,7 +85,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(ClassLoader loader) {
         super(loader);
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -96,7 +96,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(int capacity) {
         super(capacity);
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -118,7 +118,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(PersistableBundle b) {
         super(b);
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -196,7 +196,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @Override
     public void clear() {
         super.clear();
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -1122,7 +1122,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public void readFromParcel(Parcel parcel) {
         super.readFromParcelInner(parcel);
-        mFlags = FLAG_HAS_FDS_KNOWN;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
         if (mParcelledData.hasFileDescriptors()) {
             mFlags |= FLAG_HAS_FDS;
         }
