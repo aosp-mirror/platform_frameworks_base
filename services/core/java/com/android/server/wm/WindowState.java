@@ -645,15 +645,23 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final boolean fullscreenTask = !inMultiWindowMode();
         final boolean windowsAreFloating = task != null && task.isFloating();
 
-        if (fullscreenTask || (isChildWindow()
-                && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0)) {
+        // If the task has temp inset bounds set, we have to make sure all its windows uses
+        // the temp inset frame. Otherwise different display frames get applied to the main
+        // window and the child window, making them misaligned.
+        if (fullscreenTask) {
+            mInsetFrame.setEmpty();
+        } else {
+            task.getTempInsetBounds(mInsetFrame);
+        }
+
+        if (mInsetFrame.isEmpty()  && (fullscreenTask
+                || (isChildWindow() && (mAttrs.privateFlags
+                        & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0))) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mContainingFrame.set(pf);
             mDisplayFrame.set(df);
-            mInsetFrame.setEmpty();
         } else {
             task.getBounds(mContainingFrame);
-            task.getTempInsetBounds(mInsetFrame);
             if (mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) {
 
                 // If the bounds are frozen, we still want to translate the window freely and only
