@@ -16,7 +16,7 @@
 package android.speech.tts;
 
 import android.content.Context;
-import android.media.AudioSystem;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.ConditionVariable;
@@ -57,7 +57,7 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         int sessionId = mAudioParams.mSessionId;
         mPlayer = MediaPlayer.create(
                 mContext, mUri, null, mAudioParams.mAudioAttributes,
-                sessionId > 0 ? sessionId : AudioSystem.AUDIO_SESSION_ALLOCATE);
+                sessionId > 0 ? sessionId : AudioManager.AUDIO_SESSION_ID_GENERATE);
         if (mPlayer == null) {
             dispatcher.dispatchOnError(TextToSpeech.ERROR_OUTPUT);
             return;

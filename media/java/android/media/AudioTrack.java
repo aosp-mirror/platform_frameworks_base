@@ -295,7 +295,7 @@ public class AudioTrack implements AudioRouting
     /**
      * Audio session ID
      */
-    private int mSessionId = AudioSystem.AUDIO_SESSION_ALLOCATE;
+    private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
     /**
      * Reference to the app-ops service.
      */
@@ -368,7 +368,7 @@ public class AudioTrack implements AudioRouting
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
         this(streamType, sampleRateInHz, channelConfig, audioFormat,
-                bufferSizeInBytes, mode, AudioSystem.AUDIO_SESSION_ALLOCATE);
+                bufferSizeInBytes, mode, AudioManager.AUDIO_SESSION_ID_GENERATE);
     }
 
     /**
