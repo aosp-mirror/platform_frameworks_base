@@ -317,295 +317,52 @@ Notwithstanding this, you agree that Google shall still be allowed to apply for 
 $('#Downloads').after($('#download-table'));
 </script>
 
-  <h2 id="extract">Extraction</h2>
-  <p>The NDK package is a self-extracting binary. To unpack it, follow the procedure for your
-  development platform:</p>
-       <ul>
-       <li>On Linux and Mac OS X (Darwin):
-          <ul>
-          <ol>
-          <li>Download the appropriate package from this page.</li>
-          <li>Open a terminal window.</li>
-          <li>Go to the directory to which you downloaded the package.</li>
-          <li>Run <code>chmod a+x</code> on the downloaded package.</li>
-          <li>Execute the package. For example:
-          <pre class="no-pretty-print">
-ndk$ chmod a+x android-ndk-r10c-darwin-x86_64.bin
-ndk$ ./android-ndk-r10c-darwin-x86_64.bin
-          </pre></li>
-          <p>The folder containing the NDK extracts itself.</p>
-          <p>You can also use a program like 7z to extract the package.</p>
-          </ol>
-          </ul>
-       </li>
-    <li>On Windows:</li>
-       <ul>
-       <ol>
-       <li>Download the appropriate package from this page.</li>
-       <li>Navigate to the folder to which you downloaded the package.</li>
-       <li>Double-click the downloaded file. The folder containing the NDK extracts itself.</li>
-       </ol>
-       </ul>
-     </ul>When uncompressed, the NDK files are contained in a directory called
-    <code>android-ndk-&lt;version&gt;</code>. You can rename the NDK directory if necessary and you
-    can move it to any location on your computer. This documentation refers to the NDK directory as
-    <code>&lt;ndk&gt;</code>.
-
-
-  <p>You are now ready to start working with the NDK.</p>
-
 <h2 id="rel">Release Notes</h2>
 
- <p>Android NDK, Revision 11</a> <em>(March 2016)</em></p>
-    <dl>
-      <dt>Clang</dt>
-      <dd>
-      <ul>
-      <li>Important announcements
-      <ul>
-         <li>We strongly recommend switching to Clang.
-            <ul>
-                 <li>If you experience problems with Clang, file bugs
-         <a href="https://github.com/android-ndk/ndk/issues">here</a> for issues
-         specific to Clang in the NDK. For more general Clang issues,
-         file bugs by following the instructions on
-         <a href="http://llvm.org/docs/HowToSubmitABug.html">this page</a>.</li>
-            </ul>
-         </li>
-         <li>Clang has been updated to 3.8svn (r243773, build 2481030).
-            <ul>
-               <li>This version is a nearly pure upstream Clang.</li>
-               <li>The Windows 64-bit downloadable NDK package contains a 32-bit
-               version of Clang.</li>
-            </ul>
-         </li>
-     </ul>
-     </li>
-
-     <li>Additions
-        <ul>
-         <li>Clang now provides support for emulated TLS.
-            <ul>
-               <li>The compiler now supports {@code __thread} by emulating
-               ELF TLS with pthread thread-specific data.</li>
-               <li>C++11 {@code thread_local} works in some cases, but not
-               for data with non-trivial destructors, because those cases
-               require support from libc. This limitation does not
-               apply when running on Android 6.0 (API level 23) or newer.</li>
-               <li>Emulated TLS does not yet work with Aarch64 when
-               TLS variables are accessed from a shared library.</li>
-            </ul>
-         </li>
-       </ul>
-      </dd>
-   <dl>
-
-    <dl>
-      <dt>GCC</dt>
-      <dd>
-      <ul>
-      <li>Important announcements</li>
-          <ul>
-             <li>GCC in the NDK is now deprecated in favor of Clang.
-            <ul>
-               <li>The NDK will neither be upgrading to 5.x, nor accept
-               non-critical backports.</li>
-               <li>Maintenance for miscompiles and internal compiler errors
-               in 4.9 will be handled on a case by case basis.</li>
-            </ul>
-            </li>
-          </ul>
-      <li>Removals
-         <ul>
-         <li>Removed GCC 4.8. All targets now use GCC 4.9.</li>
-         </ul>
-       </li>
-      <li>Other changes
-         <ul>
-         <li>Synchronized google/gcc-4_9 to r224707. Previously, it had been
-         synchronized with r214835.</li>
-         </ul>
-       </li>
-       </ul>
-      </dd>
-   <dl>
+ <p>Android NDK, Revision 11b</a> <em>(March 2016)</em></p>
     <dl>
       <dt>NDK</dt>
       <dd>
       <ul>
       <li>Important announcements
-         <ul>
-            <li>The samples are no longer included in the NDK package.
-            They are instead available on
-            <a href="https://github.com/googlesamples/android-ndk">GitHub.</a>
-            </li>
-            <li>The documentation is no longer included in the NDK package.
-            Instead, it is on the <a href="{@docRoot}ndk/index.html">Android
-            developer website.</a></li>
-         </ul>
-      </li>
+      <ul>
+         <li>We’ve moved our bug tracker to <a href="https://github.com/android-ndk/ndk/issues">
+         GitHub.</a></li>
+     </ul>
+     </li>
 
-      <li>Additions
-          <ul>
-         <li>Added a native tracing API to {@code android-23}.</li>
-         <li>Added a native multinetwork API to {@code android-23}.</li>
-         <li>Enabled libc, m, and dl to provide versioned symbols, starting
-         from API level 21.</li>
-         <li>Added Vulkan headers and library to API level N.</li>
-          </ul>
-       </li>
-
-      <li>Removals
-          <ul>
-         <li>Removed support for {@code _WCHAR_IS_8BIT}.</li>
-         <li>Removed sed.</li>
-         <li>Removed mclinker.</li>
-         <li>Removed Perl.</li>
-         <li>Removed from all versions of NDK libc, m, and dl all symbols which
-         the platform versions of those libs do not support.</li>
-         <li>Partially removed support for mips64r2. The rest will be removed
-         in the future.</li>
-          </ul>
-       </li>
-
-      <li>Other changes
-          <ul>
-            <li>Changed ARM standalone toolchains to default to arm7.
-               <ul>
-                  <li>You can restore the old behavior by passing specifying the
-                  {@code -target} option as {@code armv5te-linux-androideabi}.
-                  </li>
-               </ul>
-            </li>
-         <li>Changed the build system to use {@code -isystem} for platform
-         includes.
-            <ul>
-               <li>Warnings that bionic causes no longer break app builds.</li>
-            </ul>
+     <li>Changes
+        <ul>
+         <li>{@code ndk-gdb.py} is fixed. It had
+               <a href="https://github.com/android-ndk/ndk/issues/3">regressed entirely</a>
+               in r11.</li>
+               <li>{@code ndk-gdb} for Mac <a href="https://github.com/android-ndk/ndk/issues/2">
+               is fixed</a>.</li>
+               <li>Added more top-level shortcuts for command line tools:
+                  <ul>
+                     <li>{@code ndk-depends}.</li>
+                     <li>{@code ndk-gdb}.</li>
+                     <li>{@code ndk-stack}.</li>
+                     <li>{@code ndk-which}. This command had been entirely absent from previous
+                     releases.</li>
+                  </ul>
+               </li>
+               <li>Fixed standalone toolchains for libc++, which had been missing
+               {@code __cxxabi_config.h}.</li>
+               <li>Fixed help documentation for {@code --toolchain} in
+               {@code make-standalone-toolchain.sh}.</li>
          </li>
-         <li>Fixed a segfault that occurred when a binary threw exceptions
-         via gabi++. (Issue <a href="http://b.android.com/179410">179410</a>)
-         </li>
-         <li>Changed libc++’s inline namespace to {@code std::__ndk1}
-         to prevent ODR issues with platform libc++.</li>
-
-         <li>All libc++ libraries are now built with libc++abi.
-         <li>Bumped default {@code APP_PLATFORM} to Gingerbread.
-            <ul>
-               <li>Expect support for Froyo and older to be dropped in a
-               future release.</ul>
-            </ul>
-         <li>Updated gabi++ {@code _Unwind_Exception} struct for 64 bits.
-         <li>Added the following capabilities to cpufeatures:
-            <ul>
-            <li>Detect SSE4.1 and SSE4.2.</li>
-            <li>Detect cpu features on x86_64.</li>
-            </ul>
-        </li>
-         <li>Updated libc++abi to upstream
-         <a href="http://lists.llvm.org/pipermail/cfe-commits/Week-of-Mon-20150302/124603.html">
-         r231075</a>.
-         <li>Updated {@code byteswap.h}, {@code endian.h}, {@code sys/procfs.h},
-         {@code sys/ucontext.h}, {@code sys/user.h}, and {@code uchar.h} from
-         ToT Bionic.
-         <li>Synchronized {@code sys/cdefs.h} across all API levels.
-
-         <li>Fixed {@code fegetenv and fesetenv} for arm.
-         <li>Fix end pointer size/alignment of {@code crtend_*} for mips64
-         and x86_64.
-          </ul>
-       </li>
-      </ul>
-      </ul>
+       </ul>
       </dd>
    <dl>
-    <dl>
-      <dt>Binutils</dt>
+      <dt>Clang</dt>
       <dd>
       <ul>
-      <li>Additions
-         <ul>
-         <li>Added a new option: {@code --pic-veneer}.</li>
-         </ul>
-       </li>
-
-      <li>Removals
-         <ul>
-         <li>The 32-bit Windows package no longer contains ld.gold.
-         You can instead get ld.gold from the 64-bit Windows package.</li>
-         </ul>
-       </li>
-
-      <li>Changes
+      <li>Errata</li>
           <ul>
-             <li>Unified binutils source between Android and ChromiumOS.
-             For more information on this change, see the comments
-             <a href="https://android-review.googlesource.com/#/c/182865/">
-             here.</a></li>
-             <li>Improved reliability of Gold for aarch64. Use
-             {@code -fuse-ld=gold} at link time to use gold instead of bfd.
-             The default will likely switch in the next release.</li>
-             <li>Improved linking time for huge binaries for Gold ARM back end
-             (up to 50% linking time reduction for debuggable Chrome Browser).
-             </li>
+             <li>Contrary to what we reported in the r11 Release Notes, {@code __thread}
+             does not work. This is because the version of Clang we ship is missing a bug fix for
+             emulated TLS support.</li>
           </ul>
-     </li>
-       </ul>
-      </dd>
-         <dl>
-    <dl>
-      <dt>GDB</dt>
-      <dd>
-      <ul>
-
-      <li>Removals
-         <ul>
-         <li>Removed ndk-gdb in favor of ndk-gdb.py.</li>
-         </ul>
-       </li>
-
-      <li>Changes
-          <ul>
-              <li>Updated gdb to version 7.10.</li>
-              <li>Improved performance.</li>
-              <li>Improved error messages.</li>
-              <li>Fixed relative project paths.</li>
-              <li>Stopped Ctrl-C from killing the backgrounded gdbserver.</li>
-              <li>Improved Windows support.</li>
-          </ul>
-     </li>
-       </ul>
-      </dd>
-
-               <dl>
-    <dl>
-      <dt>YASM</dt>
-      <dd>
-      <ul>
-
-      <li>Changes
-          <ul>
-              <li>Updated YASM to version 1.3.0.</li>
-          </ul>
-     </li>
-       </ul>
-      </dd>
-
-        <dl>
-    <dl>
-      <dt>Known issues</dt>
-      <dd>
-      <ul>
-      <li>x86 ASAN does not currently work. For more information, see the
-      discussion <a href="https://android-review.googlesource.com/#/c/186276/">
-      here.</a></li>
-      <li>The combination of Clang, x86, stlport_static, and optimization
-      levels higher than {@code -O0} causes test failures with
-      {@code dynamic_cast}. For more information, see the comments
-      <a href="https://android-review.googlesource.com/#/c/185920">here</a>.
-      </li>
-      <li>Exception handling often fails with c++_shared on ARM32. The root
-      cause is incompatibility between the LLVM unwinder that libc++abi uses
-      for ARM32 and libgcc. This behavior is not a regression from r10e.</li>
       </ul>
       </dd>

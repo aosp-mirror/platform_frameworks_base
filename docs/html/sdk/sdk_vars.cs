@@ -39,18 +39,18 @@ set:sdk.win_installer_bytes='151659917' ?><?cs
 set:sdk.win_installer_checksum='f9b59d72413649d31e633207e31f456443e7ea0b' ?><?cs
 
 
-set:ndk.mac64_download='android-ndk-r11-darwin-x86_64.zip' ?><?cs
-set:ndk.mac64_bytes='772314112' ?><?cs
-set:ndk.mac64_checksum='a3764714eff7d187c80d989a9bf1ff8ebf5a0dfa' ?><?cs
+set:ndk.mac64_download='android-ndk-r11b-darwin-x86_64.zip' ?><?cs
+set:ndk.mac64_bytes='772411311' ?><?cs
+set:ndk.mac64_checksum='c64fb355fec4da57d329ab45bf0aa29a1aec58dc' ?><?cs
 
-set:ndk.linux64_download='android-ndk-r11-linux-x86_64.zip' ?><?cs
-set:ndk.linux64_bytes='794012672' ?><?cs
-set:ndk.linux64_checksum='7b4e0d13f6bbf48dd87475be9d052273dc766fb6' ?><?cs
+set:ndk.linux64_download='android-ndk-r11b-linux-x86_64.zip' ?><?cs
+set:ndk.linux64_bytes='794138413' ?><?cs
+set:ndk.linux64_checksum='cf0658956945c81d3d3fad5f9a24fa062d4c9d41' ?><?cs
 
-set:ndk.win64_download='android-ndk-r11-windows-x86_64.zip' ?><?cs
-set:ndk.win64_bytes='771291648' ?><?cs
-set:ndk.win64_checksum='49fcdae88724c74bb52b332b648edba9700b9529' ?><?cs
-set:ndk.win32_download='android-ndk-r11-windows-x86.zip' ?><?cs
-set:ndk.win32_bytes='728773632' ?><?cs
-set:ndk.win32_checksum='0c9e895e400ab539c2005759410ef3e33d048291'
+set:ndk.win64_download='android-ndk-r11b-windows-x86_64.zip' ?><?cs
+set:ndk.win64_bytes='771396549' ?><?cs
+set:ndk.win64_checksum='480eca1b29cfe73a5b35374730e6a82ca65c2aa6' ?><?cs
+set:ndk.win32_download='android-ndk-r11b-windows-x86.zip' ?><?cs
+set:ndk.win32_bytes='728894948' ?><?cs
+set:ndk.win32_checksum='b42da395440cc1c5dc4eeeb383679331addeb3ea'
 ?>
