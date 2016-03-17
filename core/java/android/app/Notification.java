@@ -3197,6 +3197,7 @@ public class Notification implements Parcelable
         }
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
+            big.setViewVisibility(R.id.actions_container, View.GONE);
             big.setViewVisibility(R.id.actions, View.GONE);
             big.removeAllViews(R.id.actions);
 
@@ -3218,6 +3219,7 @@ public class Notification implements Parcelable
 
             int N = mActions.size();
             if (N > 0) {
+                big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
