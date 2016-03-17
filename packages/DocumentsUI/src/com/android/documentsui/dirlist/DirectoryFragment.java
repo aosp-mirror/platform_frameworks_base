@@ -688,6 +688,39 @@ public class DirectoryFragment extends Fragment
         }.execute(selected);
     }
 
+    private String generateDeleteMessage(final List<DocumentInfo> docs) {
+        String message;
+        int dirsCount = 0;
+
+        for (DocumentInfo doc : docs) {
+            if (doc.isDirectory()) {
+                ++dirsCount;
+            }
+        }
+
+        if (docs.size() == 1) {
+            // Deleteing 1 file xor 1 folder in cwd
+            message = dirsCount == 0
+                    ? getActivity().getString(R.string.delete_filename_confirmation_message,
+                            docs.get(0).displayName)
+                    : getActivity().getString(R.string.delete_foldername_confirmation_message,
+                            docs.get(0).displayName);
+        } else if (dirsCount == 0) {
+            // Deleting only files in cwd
+            message = Shared.getQuantityString(getActivity(),
+                    R.plurals.delete_files_confirmation_message, docs.size());
+        } else if (dirsCount == docs.size()) {
+            // Deleting only folders in cwd
+            message = Shared.getQuantityString(getActivity(),
+                    R.plurals.delete_folders_confirmation_message, docs.size());
+        } else {
+            // Deleting mixed items (files and folders) in cwd
+            message = Shared.getQuantityString(getActivity(),
+                    R.plurals.delete_items_confirmation_message, docs.size());
+        }
+        return message;
+    }
+
     private void deleteDocuments(final Selection selected) {
         assert(!selected.isEmpty());
 
@@ -698,11 +731,7 @@ public class DirectoryFragment extends Fragment
 
                 TextView message =
                         (TextView) mInflater.inflate(R.layout.dialog_delete_confirmation, null);
-                message.setText(
-                        Shared.getQuantityString(
-                                getActivity(),
-                                R.plurals.delete_confirmation_message,
-                                docs.size()));
+                message.setText(generateDeleteMessage(docs));
 
                 // This "insta-hides" files that are being deleted, because
                 // the delete operation may be not execute immediately (it
