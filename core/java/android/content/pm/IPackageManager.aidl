@@ -291,6 +291,8 @@ interface IPackageManager {
      */
      ComponentName getHomeActivities(out List<ResolveInfo> outHomeCandidates);
 
+    void setHomeActivity(in ComponentName className, int userId);
+
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */
@@ -535,5 +537,4 @@ interface IPackageManager {
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
 
     List<String> getPreviousCodePaths(in String packageName);
-
 }

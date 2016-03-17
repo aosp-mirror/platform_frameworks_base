@@ -117,6 +117,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSuspend(true);
                 case "unsuspend":
                     return runSuspend(false);
+                case "set-home-activity":
+                    return runSetHomeActivity();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -963,6 +965,39 @@ class PackageManagerShellCommand extends ShellCommand {
         return params;
     }
 
+    private int runSetHomeActivity() {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_SYSTEM;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        String component = getNextArg();
+        ComponentName componentName =
+                component != null ? ComponentName.unflattenFromString(component) : null;
+
+        if (componentName == null) {
+            pw.println("Error: component name not specified or invalid");
+            return 1;
+        }
+
+        try {
+            mInterface.setHomeActivity(componentName, userId);
+            return 0;
+        } catch (RemoteException e) {
+            pw.println(e.toString());
+            return 1;
+        }
+    }
+
     private static String checkAbiArgument(String abi) {
         if (TextUtils.isEmpty(abi)) {
             throw new IllegalArgumentException("Missing ABI argument");
@@ -1303,6 +1338,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Suspends the specified package (as user).");
         pw.println("  unsuspend [--user USER_ID] TARGET-PACKAGE");
         pw.println("    Unsuspends the specified package (as user).");
+        pw.println("  set-home-activity [--user USER_ID] TARGET-COMPONENT");
+        pw.println("    set the default home activity (aka launcher).");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
