@@ -41,7 +41,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
       alt=""/>Android Studio v1.5.1</a> <em>(December 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -71,7 +71,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.5.0</a> <em>(November 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -125,7 +125,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.4.1</a> <em>(October 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -162,7 +162,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.4.0</a> <em>(September 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -190,7 +190,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.2</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -213,7 +213,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.1</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -233,7 +233,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.3.0</a> <em>(July 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -290,7 +290,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.2</a> <em>(June 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -304,7 +304,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.1</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -319,7 +319,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.2.0</a> <em>(April 2015)</em>
   </p>
 
@@ -366,7 +366,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -394,7 +394,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.0.1</a> <em>(December 2014)</em>
   </p>
 
@@ -417,7 +417,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v1.0</a> <em>(December 2014)</em>
   </p>
 
@@ -429,7 +429,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.14</a> <em>(October 2014)</em>
   </p>
 
@@ -442,7 +442,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.6</a> <em>(August 2014)</em>
   </p>
 
@@ -453,7 +453,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.0</a> <em>(June 2014)</em>
   </p>
 
@@ -465,7 +465,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.5.2</a> <em>(May 2014)</em>
   </p>
 
@@ -478,7 +478,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.4.6</a> <em>(March 2014)</em>
   </p>
 
@@ -491,7 +491,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.4.2</a> <em>(Jan 2014)</em>
   </p>
 
@@ -504,7 +504,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.3.2</a> <em>(Oct 2013)</em>
   </p>
 
@@ -517,7 +517,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.2.x</a> <em>(July 2013)</em>
   </p>
 
@@ -578,7 +578,7 @@ Android Studio, as denoted by revision number. </p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v0.1.x</a> <em>(May 2013)</em>
   </p>
 

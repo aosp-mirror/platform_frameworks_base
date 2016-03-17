@@ -38,7 +38,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.5.0</a> <em>(November 2015)</em>
   </p>
 
@@ -134,7 +134,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.3.1</a> <em>(August 2015)</em>
   </p>
 
@@ -174,7 +174,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.3.0</a> <em>(July 2015)</em>
   </p>
 
@@ -274,7 +274,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.2.0</a> <em>(April 2015)</em>
   </p>
 
@@ -341,7 +341,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.3</a> <em>(March 2015)</em>
   </p>
 
@@ -371,7 +371,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.2</a> <em>(February 2015)</em>
   </p>
 
@@ -403,7 +403,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.1</a> <em>(February 2015)</em>
   </p>
 
@@ -440,7 +440,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -510,7 +510,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.0.1</a> <em>(January 2015)</em>
   </p>
 
@@ -551,7 +551,7 @@ android {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.0.0</a> <em>(December 2014)</em>
   </p>
 

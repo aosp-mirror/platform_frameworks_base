@@ -38,7 +38,7 @@ or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
 
 <div class="toggle-content closed">
 <p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  <img src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
   />Using Android Studio</a></p>
 
   <div class="toggle-content-toggleme">
@@ -59,7 +59,7 @@ or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
 
 <div class="toggle-content closed">
 <p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+  <img src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
   />Using Device Monitor</a></p>
 
   <div class="toggle-content-toggleme">

@@ -272,7 +272,7 @@ took place in each new version.</p>
 <a name="10e"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10e</a> <em>(May 2015)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -436,7 +436,7 @@ in add_stores, at var-tracking.c:6000
 <a name="10d"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10d</a> <em>(December 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -564,7 +564,7 @@ in add_stores, at var-tracking.c:6000
 <a name="10c"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10c</a> <em>(October 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -751,7 +751,7 @@ Symbol not found: _environ
 <a name="10b"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10b</a> <em>(September 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -822,7 +822,7 @@ Symbol not found: _environ
 <a name="10"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10</a> <em>(July 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -999,7 +999,7 @@ mode.</li>
 <a name="9d"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 9d</a> <em>(March 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -1186,7 +1186,7 @@ not exist.</li>
 <a name="9c"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 9c</a> <em>(December 2013)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -1310,7 +1310,7 @@ href="http://b.android.com/60705">60705</a>)</li>
 <a name="9b"></a>
   <p>
     <a href="#" onclick="return toggleContent(this)"> <img
-      src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+      src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
     >Android NDK, Revision 9b</a> <em>(October 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1473,7 +1473,7 @@ area.</li>
 <a name="9"></a>
   <p>
     <a href="#" onclick="return toggleContent(this)"> <img
-      src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+      src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
     >Android NDK, Revision 9</a> <em>(July 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -1749,7 +1749,7 @@ return
 <div class="toggle-content closed">
 <a name="lower"></a>
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8e</a> <em>(March 2013)</em>
   </p>
 
@@ -1968,7 +1968,7 @@ contain
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8d</a> <em>(December 2012)</em>
   </p>
 
@@ -2134,7 +2134,7 @@ s.html</a></li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8c</a> <em>(November 2012)</em>
   </p>
 
@@ -2447,7 +2447,7 @@ static const struct {
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8b</a> <em>(July 2012)</em>
   </p>
 
@@ -2642,7 +2642,7 @@ in Linux).</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8</a> <em>(May 2012)</em>
   </p>
 
@@ -2715,7 +2715,7 @@ is compiled for the device's CPU architecture.</p>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 7c</a> <em>(April 2012)</em>
   </p>
 
@@ -2769,7 +2769,7 @@ was called, rather than the total number of <em>physically available</em> cores.
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 7b</a> <em>(February 2012)</em>
   </p>
 
@@ -2880,7 +2880,7 @@ was called, rather than the total number of <em>physically available</em> cores.
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 7</a> <em>(November 2011)</em>
   </p>
 
@@ -3184,7 +3184,7 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 6b</a> <em>(August 2011)</em>
   </p>
 
@@ -3218,7 +3218,7 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 6</a> <em>(July 2011)</em>
   </p>
 
@@ -3272,7 +3272,7 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 5c</a> <em>(June 2011)</em>
   </p>
 
@@ -3358,7 +3358,7 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 5b</a> <em>(January 2011)</em>
   </p>
 
@@ -3419,7 +3419,7 @@ compilation with <code>-std=c99</code>.</li>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 5</a> <em>(December 2010)</em>
   </p>
 
@@ -3510,7 +3510,7 @@ more
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 4b</a> <em>(June 2010)</em>
   </p>
 
@@ -3583,7 +3583,7 @@ more
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 3</a> <em>(March 2010)</em>
   </p>
 
@@ -3610,7 +3610,7 @@ more
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 2</a> <em>(September 2009)</em>
   </p>
 
@@ -3635,7 +3635,7 @@ more
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt="">Android NDK, Revision 1</a> <em>(June 2009)</em>
   </p>
 
