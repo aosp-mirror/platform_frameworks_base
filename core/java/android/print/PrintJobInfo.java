@@ -21,7 +21,10 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.TestApi;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -181,7 +184,11 @@ public final class PrintJobInfo implements Parcelable {
     private float mProgress;
 
     /** A short string describing the status of this job. */
-    private CharSequence mStatus;
+    private @Nullable CharSequence mStatus;
+
+    /** A string resource describing the status of this job. */
+    private @StringRes int mStatusRes;
+    private @Nullable CharSequence mStatusResAppPackageName;
 
     /** Advanced printer specific options. */
     private Bundle mAdvancedOptions;
@@ -210,6 +217,8 @@ public final class PrintJobInfo implements Parcelable {
         mDocumentInfo = other.mDocumentInfo;
         mProgress = other.mProgress;
         mStatus = other.mStatus;
+        mStatusRes = other.mStatusRes;
+        mStatusResAppPackageName = other.mStatusResAppPackageName;
         mCanceling = other.mCanceling;
         mAdvancedOptions = other.mAdvancedOptions;
     }
@@ -235,8 +244,14 @@ public final class PrintJobInfo implements Parcelable {
         mDocumentInfo = (PrintDocumentInfo) parcel.readParcelable(null);
         mProgress = parcel.readFloat();
         mStatus = parcel.readCharSequence();
+        mStatusRes = parcel.readInt();
+        mStatusResAppPackageName = parcel.readCharSequence();
         mCanceling = (parcel.readInt() == 1);
         mAdvancedOptions = parcel.readBundle();
+
+        if (mAdvancedOptions != null) {
+            Preconditions.checkArgument(!mAdvancedOptions.containsKey(null));
+        }
     }
 
     /**
@@ -370,7 +385,25 @@ public final class PrintJobInfo implements Parcelable {
      * @hide
      */
     public void setStatus(@Nullable CharSequence status) {
+        mStatusRes = 0;
+        mStatusResAppPackageName = null;
+
         mStatus = status;
+    }
+
+    /**
+     * Sets the status of the print job.
+     *
+     * @param status The new status as a string resource
+     * @param appPackageName App package name the resource belongs to
+     *
+     * @hide
+     */
+    public void setStatus(@StringRes int status, @NonNull CharSequence appPackageName) {
+        mStatus = null;
+
+        mStatusRes = status;
+        mStatusResAppPackageName = appPackageName;
     }
 
     /**
@@ -633,6 +666,8 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeParcelable(mDocumentInfo, 0);
         parcel.writeFloat(mProgress);
         parcel.writeCharSequence(mStatus);
+        parcel.writeInt(mStatusRes);
+        parcel.writeCharSequence(mStatusResAppPackageName);
         parcel.writeInt(mCanceling ? 1 : 0);
         parcel.writeBundle(mAdvancedOptions);
     }
@@ -659,6 +694,9 @@ public final class PrintJobInfo implements Parcelable {
         builder.append(", progress: " + mProgress);
         builder.append(", status: " + (mStatus != null
                 ? mStatus.toString() : null));
+        builder.append(", statusRes: " + mStatusRes);
+        builder.append(", statusResAppPackageName: " + (mStatusResAppPackageName != null
+                ? mStatusResAppPackageName.toString() : null));
         builder.append("}");
         return builder.toString();
     }
@@ -707,12 +745,23 @@ public final class PrintJobInfo implements Parcelable {
     /**
      * Get the status of this job.
      *
+     * @param pm Package manager used to resolve the string
+     *
      * @return the status of this job or null if not set
      * @hide
      */
     @TestApi
-    public @Nullable CharSequence getStatus() {
-        return mStatus;
+    public @Nullable CharSequence getStatus(@NonNull PackageManager pm) {
+        if (mStatusRes == 0) {
+            return mStatus;
+        } else {
+            try {
+                return pm.getResourcesForApplication(mStatusResAppPackageName.toString())
+                        .getString(mStatusRes);
+            } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
+                return null;
+            }
+        }
     }
 
     /**
@@ -789,6 +838,8 @@ public final class PrintJobInfo implements Parcelable {
          * @param value The option value.
          */
         public void putAdvancedOption(@NonNull String key, @Nullable String value) {
+            Preconditions.checkNotNull(key, "key cannot be null");
+
             if (mPrototype.mAdvancedOptions == null) {
                 mPrototype.mAdvancedOptions = new Bundle();
             }

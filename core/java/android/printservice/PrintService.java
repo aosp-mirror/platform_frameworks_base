@@ -329,7 +329,7 @@ public abstract class PrintService extends Service {
                 final int printJobInfoCount = printJobInfos.size();
                 printJobs = new ArrayList<PrintJob>(printJobInfoCount);
                 for (int i = 0; i < printJobInfoCount; i++) {
-                    printJobs.add(new PrintJob(printJobInfos.get(i), mClient));
+                    printJobs.add(new PrintJob(this, printJobInfos.get(i), mClient));
                 }
             }
             if (printJobs != null) {
@@ -549,7 +549,7 @@ public abstract class PrintService extends Service {
                                 + getPackageName());
                     }
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
-                    onRequestCancelPrintJob(new PrintJob(printJobInfo, mClient));
+                    onRequestCancelPrintJob(new PrintJob(PrintService.this, printJobInfo, mClient));
                 } break;
 
                 case MSG_ON_PRINTJOB_QUEUED: {
@@ -561,7 +561,7 @@ public abstract class PrintService extends Service {
                     if (DEBUG) {
                         Log.i(LOG_TAG, "Queued: " + printJobInfo);
                     }
-                    onPrintJobQueued(new PrintJob(printJobInfo, mClient));
+                    onPrintJobQueued(new PrintJob(PrintService.this, printJobInfo, mClient));
                 } break;
 
                 case MSG_SET_CLIENT: {
