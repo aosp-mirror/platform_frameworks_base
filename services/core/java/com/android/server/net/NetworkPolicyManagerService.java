@@ -2509,8 +2509,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // update rules for all installed applications
         final List<UserInfo> users = mUserManager.getUsers();
         final List<ApplicationInfo> apps = pm.getInstalledApplications(
-                PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS
-                        | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+                PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.MATCH_DISABLED_COMPONENTS
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
 
         final int usersSize = users.size();
         final int appsSize = apps.size();

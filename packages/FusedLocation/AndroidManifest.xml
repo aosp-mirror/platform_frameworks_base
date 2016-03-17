@@ -29,8 +29,8 @@
     <application
             android:label="@string/app_label"
             android:process="system"
-            android:forceDeviceEncrypted="true"
-            android:encryptionAware="true">
+            android:defaultToDeviceProtectedStorage="true"
+            android:directBootAware="true">
 
         <uses-library android:name="com.android.location.provider" />
 

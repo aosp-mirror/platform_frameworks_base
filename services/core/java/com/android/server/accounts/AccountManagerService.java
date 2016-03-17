@@ -3825,7 +3825,7 @@ public class AccountManagerService
 
             final ActivityManager am = mContext.getSystemService(ActivityManager.class);
             if (am.isUserRunningAndLocked(mAccounts.userId)
-                    && !authenticatorInfo.componentInfo.encryptionAware) {
+                    && !authenticatorInfo.componentInfo.directBootAware) {
                 Slog.w(TAG, "Blocking binding to authenticator " + authenticatorInfo.componentName
                         + " which isn't encryption aware");
                 return false;

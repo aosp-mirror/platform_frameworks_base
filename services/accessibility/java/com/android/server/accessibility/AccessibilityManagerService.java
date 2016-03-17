@@ -1013,7 +1013,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 PackageManager.GET_SERVICES
                         | PackageManager.GET_META_DATA
                         | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-                        | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 mCurrentUserId);
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {

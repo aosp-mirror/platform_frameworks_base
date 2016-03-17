@@ -66,10 +66,14 @@ public class ComponentInfo extends PackageItemInfo {
     public boolean exported = false;
 
     /**
-     * Indicate if this component is aware of encryption lifecycle, and can be
+     * Indicates if this component is aware of direct boot lifecycle, and can be
      * safely run before the user has entered their credentials (such as a lock
      * pattern or PIN).
      */
+    public boolean directBootAware = false;
+
+    /** @removed */
+    @Deprecated
     public boolean encryptionAware = false;
 
     public ComponentInfo() {
@@ -82,7 +86,7 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = orig.descriptionRes;
         enabled = orig.enabled;
         exported = orig.exported;
-        encryptionAware = orig.encryptionAware;
+        encryptionAware = directBootAware = orig.directBootAware;
     }
 
     @Override public CharSequence loadLabel(PackageManager pm) {
@@ -160,7 +164,7 @@ public class ComponentInfo extends PackageItemInfo {
             pw.println(prefix + "processName=" + processName);
         }
         pw.println(prefix + "enabled=" + enabled + " exported=" + exported
-                + " encryptionAware=" + encryptionAware);
+                + " directBootAware=" + directBootAware);
         if (descriptionRes != 0) {
             pw.println(prefix + "description=" + descriptionRes);
         }
@@ -194,7 +198,7 @@ public class ComponentInfo extends PackageItemInfo {
         dest.writeInt(descriptionRes);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(exported ? 1 : 0);
-        dest.writeInt(encryptionAware ? 1 : 0);
+        dest.writeInt(directBootAware ? 1 : 0);
     }
     
     protected ComponentInfo(Parcel source) {
@@ -207,9 +211,9 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);
         exported = (source.readInt() != 0);
-        encryptionAware = (source.readInt() != 0);
+        encryptionAware = directBootAware = (source.readInt() != 0);
     }
-    
+
     /**
      * @hide
      */

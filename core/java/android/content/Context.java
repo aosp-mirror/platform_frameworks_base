@@ -695,20 +695,26 @@ public abstract class Context {
     public abstract SharedPreferences getSharedPreferences(File file, int mode);
 
     /**
-     * Migrate an existing shared preferences file from the given source storage
+     * Move an existing shared preferences file from the given source storage
      * context to this context. This is typically used to migrate data between
-     * storage locations after an upgrade, such as migrating from credential
-     * encrypted to device encrypted storage.
+     * storage locations after an upgrade, such as moving to device protected
+     * storage.
      *
      * @param sourceContext The source context which contains the existing
-     *            shared preferences to migrate.
+     *            shared preferences to move.
      * @param name The name of the shared preferences file.
-     * @return {@code true} if the migration was successful or if the shared
+     * @return {@code true} if the move was successful or if the shared
      *         preferences didn't exist in the source context, otherwise
      *         {@code false}.
-     * @see #createDeviceEncryptedStorageContext()
+     * @see #createDeviceProtectedStorageContext()
      */
-    public abstract boolean migrateSharedPreferencesFrom(Context sourceContext, String name);
+    public abstract boolean moveSharedPreferencesFrom(Context sourceContext, String name);
+
+    /** @removed */
+    @Deprecated
+    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+        return moveSharedPreferencesFrom(sourceContext, name);
+    }
 
     /**
      * Delete an existing shared preferences file.
@@ -1397,19 +1403,25 @@ public abstract class Context {
             @Nullable DatabaseErrorHandler errorHandler);
 
     /**
-     * Migrate an existing database file from the given source storage context
-     * to this context. This is typically used to migrate data between storage
-     * locations after an upgrade, such as migrating from credential encrypted
-     * to device encrypted storage.
+     * Move an existing database file from the given source storage context to
+     * this context. This is typically used to migrate data between storage
+     * locations after an upgrade, such as migrating to device protected
+     * storage.
      *
      * @param sourceContext The source context which contains the existing
-     *            database to migrate.
+     *            database to move.
      * @param name The name of the database file.
-     * @return {@code true} if the migration was successful or if the database
-     *         didn't exist in the source context, otherwise {@code false}.
-     * @see #createDeviceEncryptedStorageContext()
+     * @return {@code true} if the move was successful or if the database didn't
+     *         exist in the source context, otherwise {@code false}.
+     * @see #createDeviceProtectedStorageContext()
      */
-    public abstract boolean migrateDatabaseFrom(Context sourceContext, String name);
+    public abstract boolean moveDatabaseFrom(Context sourceContext, String name);
+
+    /** @removed */
+    @Deprecated
+    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+        return moveDatabaseFrom(sourceContext, name);
+    }
 
     /**
      * Delete an existing private SQLiteDatabase associated with this Context's
@@ -4038,19 +4050,19 @@ public abstract class Context {
 
     /**
      * Flag for use with {@link #createPackageContext}: point all file APIs at
-     * device-encrypted storage.
+     * device-protected storage.
      *
      * @hide
      */
-    public static final int CONTEXT_DEVICE_ENCRYPTED_STORAGE = 0x00000008;
+    public static final int CONTEXT_DEVICE_PROTECTED_STORAGE = 0x00000008;
 
     /**
      * Flag for use with {@link #createPackageContext}: point all file APIs at
-     * credential-encrypted storage.
+     * credential-protected storage.
      *
      * @hide
      */
-    public static final int CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE = 0x00000010;
+    public static final int CONTEXT_CREDENTIAL_PROTECTED_STORAGE = 0x00000010;
 
     /**
      * @hide Used to indicate we should tell the activity manager about the process
@@ -4154,53 +4166,73 @@ public abstract class Context {
 
     /**
      * Return a new Context object for the current Context but whose storage
-     * APIs are backed by device-encrypted storage.
+     * APIs are backed by device-protected storage.
      * <p>
-     * Data stored in device-encrypted storage is typically encrypted with a key
-     * tied to the physical device, and it can be accessed when the device has
-     * booted successfully, both <em>before and after</em> the user has
-     * authenticated with their credentials (such as a lock pattern or PIN).
-     * Because device-encrypted data is available before user authentication,
-     * you should carefully consider what data you store using this Context.
+     * When a device is encrypted, data stored in this location is encrypted
+     * with a key tied to the physical device, and it can be accessed
+     * immediately after the device has booted successfully, both
+     * <em>before and after</em> the user has authenticated with their
+     * credentials (such as a lock pattern or PIN).
+     * <p>
+     * Because device-protected data is available without user authentication,
+     * you should carefully limit the data you store using this Context. For
+     * example, storing sensitive authentication tokens or passwords in the
+     * device-protected area is strongly discouraged.
      * <p>
      * If the underlying device does not have the ability to store
-     * device-encrypted and credential-encrypted data using different keys, then
-     * both storage areas will become available at the same time. They remain
-     * two distinct storage areas, and only the window of availability changes.
+     * device-protected and credential-protected data using different keys, then
+     * both storage areas will become available at the same time. They remain as
+     * two distinct storage locations on disk, and only the window of
+     * availability changes.
      * <p>
      * Each call to this method returns a new instance of a Context object;
      * Context objects are not shared, however common state (ClassLoader, other
      * Resources for the same configuration) may be so the Context itself can be
      * fairly lightweight.
      *
-     * @see #isDeviceEncryptedStorage()
+     * @see #isDeviceProtectedStorage()
      */
-    public abstract Context createDeviceEncryptedStorageContext();
+    public abstract Context createDeviceProtectedStorageContext();
+
+    /** @removed */
+    @Deprecated
+    public Context createDeviceEncryptedStorageContext() {
+        return createDeviceProtectedStorageContext();
+    }
 
     /**
      * Return a new Context object for the current Context but whose storage
-     * APIs are backed by credential-encrypted storage.
+     * APIs are backed by credential-protected storage. This is the default
+     * storage area for apps unless
+     * {@link android.R.attr#defaultToDeviceProtectedStorage} was requested.
      * <p>
-     * Data stored in credential-encrypted storage is typically encrypted with a
-     * key tied to user credentials, and they can be accessed
+     * When a device is encrypted, data stored in this location is encrypted
+     * with a key tied to user credentials, which can be accessed
      * <em>only after</em> the user has entered their credentials (such as a
      * lock pattern or PIN).
      * <p>
      * If the underlying device does not have the ability to store
-     * device-encrypted and credential-encrypted data using different keys, then
-     * both storage areas will become available at the same time. They remain
-     * two distinct storage areas, and only the window of availability changes.
+     * device-protected and credential-protected data using different keys, then
+     * both storage areas will become available at the same time. They remain as
+     * two distinct storage locations on disk, and only the window of
+     * availability changes.
      * <p>
      * Each call to this method returns a new instance of a Context object;
      * Context objects are not shared, however common state (ClassLoader, other
      * Resources for the same configuration) may be so the Context itself can be
      * fairly lightweight.
      *
-     * @see #isCredentialEncryptedStorage()
+     * @see #isCredentialProtectedStorage()
      * @hide
      */
     @SystemApi
-    public abstract Context createCredentialEncryptedStorageContext();
+    public abstract Context createCredentialProtectedStorageContext();
+
+    /** @removed */
+    @Deprecated
+    public Context createCredentialEncryptedStorageContext() {
+        return createCredentialProtectedStorageContext();
+    }
 
     /**
      * Gets the display adjustments holder for this context.  This information
@@ -4226,19 +4258,31 @@ public abstract class Context {
 
     /**
      * Indicates if the storage APIs of this Context are backed by
-     * device-encrypted storage.
+     * device-protected storage.
      *
-     * @see #createDeviceEncryptedStorageContext()
+     * @see #createDeviceProtectedStorageContext()
      */
-    public abstract boolean isDeviceEncryptedStorage();
+    public abstract boolean isDeviceProtectedStorage();
+
+    /** @removed */
+    @Deprecated
+    public boolean isDeviceEncryptedStorage() {
+        return isDeviceProtectedStorage();
+    }
 
     /**
      * Indicates if the storage APIs of this Context are backed by
-     * credential-encrypted storage.
+     * credential-protected storage.
      *
-     * @see #createCredentialEncryptedStorageContext()
+     * @see #createCredentialProtectedStorageContext()
      * @hide
      */
     @SystemApi
-    public abstract boolean isCredentialEncryptedStorage();
+    public abstract boolean isCredentialProtectedStorage();
+
+    /** @removed */
+    @Deprecated
+    public boolean isCredentialEncryptedStorage() {
+        return isCredentialProtectedStorage();
+    }
 }

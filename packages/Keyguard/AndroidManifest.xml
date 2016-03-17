@@ -46,8 +46,8 @@
         android:process="com.android.systemui"
         android:persistent="true"
         android:supportsRtl="true"
-        android:forceDeviceEncrypted="true"
-        android:encryptionAware="true">
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
 
     </application>
 </manifest>

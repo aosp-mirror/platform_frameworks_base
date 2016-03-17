@@ -18,7 +18,6 @@ package android.app.backup;
 
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
-import android.app.backup.IBackupManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
@@ -36,17 +35,16 @@ import android.system.StructStat;
 import android.util.ArraySet;
 import android.util.Log;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Provides the central interface between an
@@ -310,7 +308,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
         // System apps have control over where their default storage context
         // is pointed, so we're always explicit when building paths.
-        final Context ceContext = createCredentialEncryptedStorageContext();
+        final Context ceContext = createCredentialProtectedStorageContext();
         final String rootDir = ceContext.getDataDir().getCanonicalPath();
         final String filesDir = ceContext.getFilesDir().getCanonicalPath();
         final String noBackupDir = ceContext.getNoBackupFilesDir().getCanonicalPath();
@@ -321,7 +319,7 @@ public abstract class BackupAgent extends ContextWrapper {
         final String cacheDir = ceContext.getCacheDir().getCanonicalPath();
         final String codeCacheDir = ceContext.getCodeCacheDir().getCanonicalPath();
 
-        final Context deContext = createDeviceEncryptedStorageContext();
+        final Context deContext = createDeviceProtectedStorageContext();
         final String deviceRootDir = deContext.getDataDir().getCanonicalPath();
         final String deviceFilesDir = deContext.getFilesDir().getCanonicalPath();
         final String deviceNoBackupDir = deContext.getNoBackupFilesDir().getCanonicalPath();
@@ -516,7 +514,7 @@ public abstract class BackupAgent extends ContextWrapper {
         try {
             // System apps have control over where their default storage context
             // is pointed, so we're always explicit when building paths.
-            final Context ceContext = createCredentialEncryptedStorageContext();
+            final Context ceContext = createCredentialProtectedStorageContext();
             rootDir = ceContext.getDataDir().getCanonicalPath();
             filesDir = ceContext.getFilesDir().getCanonicalPath();
             nbFilesDir = ceContext.getNoBackupFilesDir().getCanonicalPath();
@@ -525,7 +523,7 @@ public abstract class BackupAgent extends ContextWrapper {
             cacheDir = ceContext.getCacheDir().getCanonicalPath();
             codeCacheDir = ceContext.getCodeCacheDir().getCanonicalPath();
 
-            final Context deContext = createDeviceEncryptedStorageContext();
+            final Context deContext = createDeviceProtectedStorageContext();
             deviceRootDir = deContext.getDataDir().getCanonicalPath();
             deviceFilesDir = deContext.getFilesDir().getCanonicalPath();
             deviceNbFilesDir = deContext.getNoBackupFilesDir().getCanonicalPath();
