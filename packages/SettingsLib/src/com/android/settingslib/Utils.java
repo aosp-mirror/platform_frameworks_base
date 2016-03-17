@@ -151,10 +151,17 @@ public class Utils {
         if (sSystemSignature == null) {
             sSystemSignature = new Signature[]{ getSystemSignature(pm) };
         }
-        return sSystemSignature[0] != null && sSystemSignature[0].equals(getFirstSignature(pkg));
+        if (sPermissionControllerPackageName == null) {
+            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
+        }
+        return (sSystemSignature[0] != null
+                        && sSystemSignature[0].equals(getFirstSignature(pkg)))
+                || (sPermissionControllerPackageName != null
+                        && sPermissionControllerPackageName.equals(pkg.packageName));
     }
 
     private static Signature[] sSystemSignature;
+    private static String sPermissionControllerPackageName;
 
     private static Signature getFirstSignature(PackageInfo pkg) {
         if (pkg != null && pkg.signatures != null && pkg.signatures.length > 0) {
