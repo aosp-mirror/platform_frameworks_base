@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.EXTRA_BENCHMARK;
 import static com.android.documentsui.State.MODE_GRID;
 
 import android.app.Activity;
@@ -30,6 +31,9 @@ import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.MessageQueue;
+import android.os.MessageQueue.IdleHandler;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.support.annotation.CallSuper;
@@ -59,6 +63,8 @@ import java.util.concurrent.Executor;
 
 public abstract class BaseActivity extends Activity
         implements SearchManagerListener, NavigationView.Environment {
+
+    private static final String BENCHMARK_TESTING_PACKAGE = "com.android.documentsui.appperftests";
 
     State mState;
     RootsCache mRoots;
@@ -92,11 +98,20 @@ public abstract class BaseActivity extends Activity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        final Intent intent = getIntent();
+
+        // If startup benchmark is requested by a whitelisted testing package, then close the
+        // activity once idle, and notify the testing activity.
+        if (intent.getBooleanExtra(EXTRA_BENCHMARK, false) &&
+                BENCHMARK_TESTING_PACKAGE.equals(getCallingPackage())) {
+            closeOnIdleForTesting();
+        }
+
         setContentView(mLayoutId);
 
         mDrawer = DrawerController.create(this);
         mState = getState(icicle);
-        Metrics.logActivityLaunch(this, mState, getIntent());
+        Metrics.logActivityLaunch(this, mState, intent);
 
         mRoots = DocumentsApplication.getRootsCache(this);
 
@@ -666,6 +681,33 @@ public abstract class BaseActivity extends Activity
                 mOwner.openContainerDocument(result);
             }
         }
+    }
+
+    /**
+     * Closes the activity when it's idle. Used only for tests.
+     */
+    private void closeOnIdleForTesting() {
+        addEventListener(new EventListener() {
+            @Override
+            public void onDirectoryNavigated(Uri uri) {
+            }
+
+            @Override
+            public void onDirectoryLoaded(Uri uri) {
+                getMainLooper().getQueue().addIdleHandler(new IdleHandler() {
+                    @Override
+                    public boolean queueIdle() {
+                        setResult(RESULT_OK);
+                        finish();
+                        return false;
+                    }
+                });
+                new Handler().post(new Runnable() {
+                    @Override public void run() {
+                    }
+                });
+            }
+        });
     }
 
     private static final class HandleRootsChangedTask
