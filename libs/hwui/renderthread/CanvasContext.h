@@ -24,6 +24,8 @@
 #include "IContextFactory.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
+#include "thread/Task.h"
+#include "thread/TaskProcessor.h"
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
@@ -41,6 +43,7 @@
 #include <utils/Functor.h>
 #include <gui/Surface.h>
 
+#include <functional>
 #include <set>
 #include <string>
 #include <vector>
@@ -159,6 +162,9 @@ public:
         }
     }
 
+    // Used to queue up work that needs to be completed before this frame completes
+    ANDROID_API void enqueueFrameWork(std::function<void()>&& func);
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -169,6 +175,8 @@ private:
     void requireSurface();
 
     void freePrefetechedLayers();
+
+    void waitOnFences();
 
     EGLint mLastFrameWidth = 0;
     EGLint mLastFrameHeight = 0;
@@ -213,6 +221,16 @@ private:
 
     // Stores the bounds of the main content.
     Rect mContentDrawBounds;
+
+    // TODO: This is really a Task<void> but that doesn't really work
+    // when Future<> expects to be able to get/set a value
+    struct FuncTask : public Task<bool> {
+        std::function<void()> func;
+    };
+    class FuncTaskProcessor;
+
+    std::vector< sp<FuncTask> > mFrameFences;
+    sp<TaskProcessor<bool> > mFrameWorkProcessor;
 };
 
 } /* namespace renderthread */
