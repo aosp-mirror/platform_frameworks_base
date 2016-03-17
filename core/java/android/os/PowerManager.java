@@ -318,6 +318,13 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_EVENT_TOUCH = 2;
 
     /**
+     * User activity event type: Accessibility taking action on behalf of user.
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3;
+
+    /**
      * User activity flag: If already dimmed, extend the dim timeout
      * but do not brighten.  This flag is useful for keeping the screen on
      * a little longer without causing a visible change such as when
