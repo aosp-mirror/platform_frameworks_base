@@ -127,7 +127,7 @@ installed the Android N Preview SDK, see <a href=
   multidex.
 </p>
 
-<p>Here is a comparison the two toolchains used to build Android DEX files:</p>
+<p>Here is a comparison of the two toolchains used to build Android DEX files:</p>
 <ul>
   <li>Legacy javac toolchain:<br>
   <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
@@ -181,9 +181,16 @@ examples of these tools are:</p>
   <li>Lint detectors that operate on class files
   </li>
 
-  <li>Tools and libraries that require the app’s class files (such as JaCoCo
-  and Mockito)</li>
+  <li>Tools and libraries that require the app’s class files (such as
+  instrumentation tests with JaCoCo)
+  </li>
 </ul>
+
+<p>
+  Calls to an interface's default method on a <a class="external-link" href=
+  "https://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Proxy.html"><code>
+  Proxy</code></a> instance fail with an exception.
+</p>
 
 <p>If you find other problems while using Jack, <a href=
 "http://tools.android.com/filing-bugs">please report bugs</a>.</p>
