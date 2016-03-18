@@ -27,29 +27,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingEnd="12dp"
-            android:background="@android:color/white"
-            android:textColor="#D9000000"
+            android:textColor="@color/ksh_keyword_color"
             android:textSize="16sp"
             android:maxLines="5"
             android:singleLine="false"
             android:scrollHorizontally="false"
-            android:layout_alignParentStart="true"
-            android:minWidth="100dp"
-            android:maxWidth="260dp"/>
-    <!--TODO: introduce and use a layout that allows wrapping and right align -->
-    <LinearLayout
+            android:layout_alignParentStart="true"/>
+    <com.android.systemui.statusbar.KeyboardShortcutKeysLayout
             android:id="@+id/keyboard_shortcuts_item_container"
             android:layout_toEndOf="@+id/keyboard_shortcuts_keyword"
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
             android:layout_alignParentEnd="true"
-            android:gravity="end"
             android:textSize="14sp"
-            android:paddingStart="0dp"
-            android:paddingEnd="0dp"
-            android:scrollHorizontally="false"
-            android:minWidth="100dp"
-            android:maxWidth="260dp"/>
+            android:scrollHorizontally="false"/>
 </RelativeLayout>
