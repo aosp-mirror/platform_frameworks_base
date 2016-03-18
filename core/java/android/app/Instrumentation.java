@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,6 +50,8 @@ import android.view.Window;
 import com.android.internal.content.ReferrerIntent;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +81,15 @@ public class Instrumentation {
     public static final String REPORT_KEY_STREAMRESULT = "stream";
 
     private static final String TAG = "Instrumentation";
-    
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES})
+    public @interface UiAutomationFlags {};
+
+
     private final Object mSync = new Object();
     private ActivityThread mThread = null;
     private MessageQueue mMessageQueue = null;
@@ -1876,7 +1887,7 @@ public class Instrumentation {
      *
      * @see UiAutomation
      */
-    public UiAutomation getUiAutomation(int flags) {
+    public UiAutomation getUiAutomation(@UiAutomationFlags int flags) {
         if (mUiAutomationConnection != null) {
             if ((mUiAutomation == null) || (mUiAutomation.isDestroyed())) {
                 mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
