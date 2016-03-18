@@ -1852,6 +1852,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPolicyAccess(String pkg) {
+            if (mAudioManagerInternal != null) {
+                final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
+                if (vcuid > 0 && Binder.getCallingUid() == vcuid) {
+                    return true;
+                }
+            }
             return checkPackagePolicyAccess(pkg) || mListeners.isComponentEnabledForPackage(pkg);
         }
 
