@@ -2151,7 +2151,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     MagnificationController getMagnificationController() {
         synchronized (mLock) {
             if (mMagnificationController == null) {
-                mMagnificationController = new MagnificationController(mContext, this);
+                mMagnificationController = new MagnificationController(mContext, this, mLock);
                 mMagnificationController.register();
                 mMagnificationController.setUserId(mCurrentUserId);
             }
