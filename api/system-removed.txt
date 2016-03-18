@@ -20,6 +20,8 @@ package android.content {
   public abstract class Context {
     method public deprecated android.content.Context createCredentialEncryptedStorageContext();
     method public deprecated android.content.Context createDeviceEncryptedStorageContext();
+    method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
     method public deprecated boolean isCredentialEncryptedStorage();
     method public deprecated boolean isDeviceEncryptedStorage();
     method public deprecated boolean migrateDatabaseFrom(android.content.Context, java.lang.String);

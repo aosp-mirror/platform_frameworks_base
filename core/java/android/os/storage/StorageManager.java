@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -1023,6 +1024,20 @@ public class StorageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Return if data stored at the given path will be encrypted while at rest.
+     * This can help apps avoid the overhead of double-encrypting data.
+     */
+    public boolean isEncrypted(File file) {
+        if (FileUtils.contains(Environment.getDataDirectory(), file)) {
+            return isEncrypted();
+        } else if (FileUtils.contains(Environment.getExpandDirectory(), file)) {
+            return true;
+        }
+        // TODO: extend to support shared storage
+        return false;
     }
 
     /** {@hide}
