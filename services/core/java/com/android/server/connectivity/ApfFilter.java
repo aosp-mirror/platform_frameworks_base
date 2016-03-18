@@ -509,8 +509,6 @@ public class ApfFilter {
         mLastInstalledProgram = program;
         if (VDBG) {
             hexDump("Installing filter: ", program, program.length);
-        } else {
-            Log.d(TAG, "Installing filter length=" + program.length);
         }
         mConnectivityService.pushApfProgramToNetwork(mNai, program);
     }
