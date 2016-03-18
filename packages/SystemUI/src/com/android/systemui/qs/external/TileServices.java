@@ -182,9 +182,25 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForComponent(componentName);
         if (customTile != null) {
             synchronized (mServices) {
-                mServices.get(customTile).setLastUpdate(System.currentTimeMillis());
+                final TileServiceManager tileServiceManager = mServices.get(customTile);
+                tileServiceManager.clearPendingBind();
+                tileServiceManager.setLastUpdate(System.currentTimeMillis());
             }
             customTile.updateState(tile);
+            customTile.refreshState();
+        }
+    }
+
+    @Override
+    public void onStartSuccessful(Tile tile) {
+        ComponentName componentName = tile.getComponentName();
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
+        if (customTile != null) {
+            synchronized (mServices) {
+                final TileServiceManager tileServiceManager = mServices.get(customTile);
+                tileServiceManager.clearPendingBind();
+            }
             customTile.refreshState();
         }
     }

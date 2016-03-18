@@ -17,6 +17,7 @@ package com.android.systemui.qs.customize;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
 import android.support.v7.widget.RecyclerView;
@@ -51,6 +52,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private final Context mContext;
 
+    private final Handler mHandler = new Handler();
     private final List<TileInfo> mTiles = new ArrayList<>();
     private final ItemTouchHelper mItemTouchHelper;
     private int mDividerIndex;
@@ -262,7 +264,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 mCurrentDrag = (Holder) viewHolder;
                 mCurrentDrag.startDrag();
             }
-            notifyItemChanged(mDividerIndex);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyItemChanged(mDividerIndex);
+                }
+            });
         }
 
         @Override
