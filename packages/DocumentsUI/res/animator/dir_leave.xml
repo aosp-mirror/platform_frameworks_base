@@ -21,7 +21,8 @@
         android:valueTo="0f"
         android:propertyName="alpha"
         android:valueType="floatType"
-        android:duration="@android:integer/config_mediumAnimTime"
+        android:duration="150"
+        android:startOffset="100"
         android:interpolator="@android:interpolator/decelerate_quad" />
 
     <!-- position property maps to AnimationView.setPosition -->
@@ -30,7 +31,7 @@
         android:valueTo="1"
         android:propertyName="position"
         android:valueType="floatType"
-        android:duration="@android:integer/config_mediumAnimTime"
+        android:duration="250"
         android:interpolator="@android:interpolator/accelerate_quad" />
 
 </set>
