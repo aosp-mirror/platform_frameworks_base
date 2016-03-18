@@ -23,7 +23,7 @@ import android.bluetooth.IBluetooth;
  *
  * {@hide}
  */
-interface IBluetoothManagerCallback {
+oneway interface IBluetoothManagerCallback {
     void onBluetoothServiceUp(in IBluetooth bluetoothService);
     void onBluetoothServiceDown();
     void onBrEdrDown();
