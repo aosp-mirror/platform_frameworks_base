@@ -433,8 +433,7 @@ public class ChooserActivity extends ResolverActivity {
 
                 final ChooserTargetServiceConnection conn =
                         new ChooserTargetServiceConnection(this, dri);
-                if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
-                        UserHandle.CURRENT)) {
+                if (bindService(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND)) {
                     if (DEBUG) {
                         Log.d(TAG, "Binding service connection for target " + dri
                                 + " intent " + serviceIntent);
