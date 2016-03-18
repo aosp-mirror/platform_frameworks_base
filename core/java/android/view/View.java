@@ -18091,6 +18091,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mBackgroundSizeChanged = true;
         invalidate(true);
+        invalidateOutline();
     }
 
     /**
