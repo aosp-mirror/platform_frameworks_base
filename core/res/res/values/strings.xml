@@ -2567,6 +2567,13 @@
     <!-- Title of intent resolver dialog when selecting a sharing application to run
          and a previously used application is known. -->
     <string name="whichSendApplicationNamed">Share with %1$s</string>
+    <!-- Title of intent resolver dialog when selecting an application to run to
+         send content to a specific recipient. Often used for email. -->
+    <string name="whichSendToApplication">Send using</string>
+    <!-- Title of intent resolver dialog when selecting an application to run to
+         send content to a specific recipient and a previously used application is known.
+         Often used for email. -->
+    <string name="whichSendToApplicationNamed">Send using %1$s</string>
     <!-- Title of intent resolver dialog when selecting a HOME application to run. -->
     <string name="whichHomeApplication">Select a Home app</string>
     <!-- Title of intent resolver dialog when selecting a HOME application to run

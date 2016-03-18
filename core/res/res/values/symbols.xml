@@ -2213,6 +2213,8 @@
   <java-symbol type="string" name="whichEditApplicationNamed" />
   <java-symbol type="string" name="whichSendApplication" />
   <java-symbol type="string" name="whichSendApplicationNamed" />
+  <java-symbol type="string" name="whichSendToApplication" />
+  <java-symbol type="string" name="whichSendToApplicationNamed" />
   <java-symbol type="attr" name="lightY" />
   <java-symbol type="attr" name="lightZ" />
   <java-symbol type="attr" name="lightRadius" />
