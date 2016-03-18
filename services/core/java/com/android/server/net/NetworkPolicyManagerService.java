@@ -688,7 +688,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // global background data policy
                 if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
                 synchronized (mRulesLock) {
-                    updateRulesForUidLocked(uid);
+                    updateRestrictDataRulesForUidLocked(uid);
                 }
             }
         }
@@ -706,7 +706,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (LOGV) Slog.v(TAG, "ACTION_UID_REMOVED for uid=" + uid);
             synchronized (mRulesLock) {
                 mUidPolicy.delete(uid);
-                updateRulesForUidLocked(uid);
+                updateRestrictDataRulesForUidLocked(uid);
                 writePolicyLocked();
             }
         }
@@ -1676,7 +1676,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mUidPolicy.put(uid, policy);
 
         // uid policy changed, recompute rules and persist policy.
-        updateRulesForUidLocked(uid);
+        updateRestrictDataRulesForUidLocked(uid);
         if (persist) {
             writePolicyLocked();
         }
@@ -1731,8 +1731,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             writePolicy = true;
         }
-        updateRulesForGlobalChangeLocked(true);
-
         // Remove associated UID policies
         int[] uids = new int[0];
         for (int i = 0; i < mUidPolicy.size(); i++) {
@@ -1745,10 +1743,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (uids.length > 0) {
             for (int uid : uids) {
                 mUidPolicy.delete(uid);
-                updateRulesForUidLocked(uid);
             }
             writePolicy = true;
         }
+
+        updateRulesForGlobalChangeLocked(true);
 
         if (writePolicy) {
             writePolicyLocked();
@@ -1896,7 +1895,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             maybeRefreshTrustedTime();
             synchronized (mRulesLock) {
                 mRestrictBackground = restrictBackground;
-                updateRulesForGlobalChangeLocked(true);
+                updateRulesForRestrictDataLocked();
                 updateNotificationsLocked();
                 writePolicyLocked();
             }
@@ -2303,7 +2302,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Process state of UID changed; if needed, will trigger
-     * {@link #updateRulesForUidLocked(int)}.
+     * {@link #updateRestrictDataRulesForUidLocked(int)}.
      */
     void updateUidStateLocked(int uid, int uidState) {
         final int oldUidState = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
@@ -2345,7 +2344,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean oldForeground = oldUidState <= ActivityManager.PROCESS_STATE_TOP;
         final boolean newForeground = newUidState <= ActivityManager.PROCESS_STATE_TOP;
         if (oldForeground != newForeground) {
-            updateRulesForUidLocked(uid);
+            updateRestrictDataRulesForUidLocked(uid);
         }
     }
 
@@ -2369,7 +2368,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = 0; i < size; i++) {
             if (mUidState.valueAt(i) <= ActivityManager.PROCESS_STATE_TOP) {
                 final int uid = mUidState.keyAt(i);
-                updateRulesForUidLocked(uid);
+                updateRestrictDataRulesForUidLocked(uid);
             }
         }
     }
@@ -2444,8 +2443,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 setUidFirewallRule(chain, uid, FIREWALL_RULE_DEFAULT);
             }
         }
-
-        updateRulesForUidLocked(uid);
     }
 
     void updateRulesForAppIdleLocked() {
@@ -2482,29 +2479,40 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } else {
             setUidFirewallRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
         }
-
-        updateRulesForUidLocked(uid);
     }
 
     void updateRulesForAppIdleParoleLocked() {
         boolean enableChain = !mUsageStats.isAppIdleParoleOn();
         enableFirewallChainLocked(FIREWALL_CHAIN_STANDBY, enableChain);
-        updateRulesForUidsLocked(mUidFirewallStandbyRules);
     }
 
     /**
      * Update rules that might be changed by {@link #mRestrictBackground},
      * {@link #mRestrictPower}, or {@link #mDeviceIdleMode} value.
      */
-    void updateRulesForGlobalChangeLocked(boolean restrictedNetworksChanged) {
+    private void updateRulesForGlobalChangeLocked(boolean restrictedNetworksChanged) {
         long start;
         if (LOGD) start = System.currentTimeMillis();
-
-        final PackageManager pm = mContext.getPackageManager();
 
         updateRulesForDeviceIdleLocked();
         updateRulesForAppIdleLocked();
         updateRulesForRestrictPowerLocked();
+        updateRulesForRestrictDataLocked();
+
+        // If the set of restricted networks may have changed, re-evaluate those.
+        if (restrictedNetworksChanged) {
+            normalizePoliciesLocked();
+            updateNetworkRulesLocked();
+        }
+        if (LOGD) {
+            final long delta = System.currentTimeMillis() - start;
+            Slog.d(TAG, "updateRulesForGlobalChangeLocked(" + restrictedNetworksChanged + ") took "
+                    + delta + "ms");
+        }
+    }
+
+    private void updateRulesForRestrictDataLocked() {
+        final PackageManager pm = mContext.getPackageManager();
 
         // update rules for all installed applications
         final List<UserInfo> users = mUserManager.getUsers();
@@ -2520,27 +2528,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int j = 0; j < appsSize; j++) {
                 final ApplicationInfo app = apps.get(j);
                 final int uid = UserHandle.getUid(user.id, app.uid);
-                updateRulesForUidLocked(uid);
+                updateRestrictDataRulesForUidLocked(uid);
             }
         }
 
         // limit data usage for some internal system services
-        updateRulesForUidLocked(android.os.Process.MEDIA_UID);
-        updateRulesForUidLocked(android.os.Process.DRM_UID);
-
-        // If the set of restricted networks may have changed, re-evaluate those.
-        if (restrictedNetworksChanged) {
-            normalizePoliciesLocked();
-            updateNetworkRulesLocked();
-        }
-        if (LOGD) {
-          final long delta = System.currentTimeMillis() - start;
-          Slog.d(TAG, "updateRulesForGlobalChangeLocked(" + restrictedNetworksChanged + ") took "
-                  + delta + "ms");
-        }
+        updateRestrictDataRulesForUidLocked(android.os.Process.MEDIA_UID);
+        updateRestrictDataRulesForUidLocked(android.os.Process.DRM_UID);
     }
 
-    void updateRulesForTempWhitelistChangeLocked() {
+    private void updateRulesForTempWhitelistChangeLocked() {
         final List<UserInfo> users = mUserManager.getUsers();
         for (int i = 0; i < users.size(); i++) {
             final UserInfo user = users.get(i);
@@ -2578,12 +2575,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return true;
     }
 
-    void updateRulesForUidsLocked(SparseIntArray uids) {
-        for (int i = 0; i < uids.size(); i++) {
-            updateRulesForUidLocked(uids.keyAt(i));
-        }
-    }
-
     /**
      * Checks if an uid has INTERNET permissions.
      * <p>
@@ -2601,72 +2592,45 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Applies network rules to bandwidth and firewall controllers based on uid policy.
+     * Applies network rules to bandwidth controllers based on uid policy.
+     *
      * @param uid The uid for which to apply the latest policy
      */
-    void updateRulesForUidLocked(int uid) {
+    private void updateRestrictDataRulesForUidLocked(int uid) {
         if (!isUidValidForRules(uid) || !hasInternetPermissions(uid)) return;
 
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final boolean uidForeground = isUidForegroundLocked(uid);
 
         // Derive active rules based on policy and active state
-        int appId = UserHandle.getAppId(uid);
-        int uidRules = RULE_ALLOW_ALL;
-        if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
-            // uid in background, and policy says to block metered data
-            uidRules = RULE_REJECT_METERED;
-        } else if (mRestrictBackground) {
-            if (!uidForeground) {
-                // uid in background, global background disabled, and this uid is not on the white
-                // list of those allowed background access while global background is disabled
-                if (!mRestrictBackgroundWhitelistUids.get(uid)) {
-                    uidRules = RULE_REJECT_METERED;
-                }
-            }
-        } else if (mRestrictPower) {
-            final boolean whitelisted = mPowerSaveWhitelistExceptIdleAppIds.get(appId)
-                    || mPowerSaveTempWhitelistAppIds.get(appId);
-            if (!whitelisted && !uidForeground
-                    && (uidPolicy & POLICY_ALLOW_BACKGROUND_BATTERY_SAVE) == 0) {
-                // uid is in background, restrict power use mode is on (so we want to
-                // restrict all background network access), and this uid is not on the
-                // white list of those allowed background access.
-                uidRules = RULE_REJECT_METERED;
+        int newRule = RULE_ALLOW_ALL;
+
+        if (!uidForeground) {
+            // If the app is not in foreground, reject access if:
+            // - app is blacklisted by policy or
+            // - data saver mode is and app is not whitelisted
+            if (((uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0)
+                || (mRestrictBackground && !mRestrictBackgroundWhitelistUids.get(uid))) {
+                newRule = RULE_REJECT_METERED;
             }
         }
 
-        // Check dozable state, which is whitelist
-        if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE)
-                && mUidFirewallDozableRules.get(uid, FIREWALL_RULE_DEFAULT) != FIREWALL_RULE_ALLOW) {
-            uidRules = RULE_REJECT_ALL;
-        }
+        final int oldRule = mUidRules.get(uid);
+        if (LOGV) Log.v(TAG, "updateBandwithControllerRulesForUidLocked(" + uid + "): oldRule = "
+                + oldRule + ", newRule = " + newRule);
 
-        // Check powersave state, which is whitelist
-        if (mFirewallChainStates.get(FIREWALL_CHAIN_POWERSAVE)
-                && mUidFirewallPowerSaveRules.get(uid, FIREWALL_RULE_DEFAULT) != FIREWALL_RULE_ALLOW) {
-            uidRules = RULE_REJECT_ALL;
-        }
-
-        // Check standby state, which is blacklist
-        if (mFirewallChainStates.get(FIREWALL_CHAIN_STANDBY)
-                && mUidFirewallStandbyRules.get(uid, FIREWALL_RULE_DEFAULT) == FIREWALL_RULE_DENY) {
-            uidRules = RULE_REJECT_ALL;
-        }
-
-        final int oldRules = mUidRules.get(uid);
-        if (uidRules == RULE_ALLOW_ALL) {
+        if (newRule == RULE_ALLOW_ALL) {
             mUidRules.delete(uid);
         } else {
-            mUidRules.put(uid, uidRules);
+            mUidRules.put(uid, newRule);
         }
 
-        final boolean rejectMetered = (uidRules == RULE_REJECT_METERED);
+        final boolean rejectMetered = (newRule == RULE_REJECT_METERED);
         setUidNetworkRules(uid, rejectMetered);
 
         // dispatch changed rule to existing listeners
-        if (oldRules != uidRules) {
-            mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
+        if (oldRule != newRule) {
+            mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newRule).sendToTarget();
         }
 
         try {
