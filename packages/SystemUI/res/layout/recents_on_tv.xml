@@ -28,12 +28,8 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:descendantFocusability="beforeDescendants"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:paddingStart="@dimen/recents_tv_grid_row_padding"
-        android:paddingEnd="@dimen/recents_tv_grid_row_padding"
+        android:layout_marginTop="@dimen/recents_tv_gird_row_top_margin"
         android:focusable="true" />
-
     <View
         android:id="@+id/pip_shade"
         android:layout_width="match_parent"

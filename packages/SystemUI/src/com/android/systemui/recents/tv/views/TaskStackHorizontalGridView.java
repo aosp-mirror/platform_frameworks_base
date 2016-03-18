@@ -41,7 +41,6 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
     private ArrayList<TaskCardView> mTaskViews = new ArrayList<>();
     private Task mFocusedTask;
 
-
     public TaskStackHorizontalGridView(Context context) {
         this(context, null);
     }
@@ -53,7 +52,7 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
     @Override
     protected void onAttachedToWindow() {
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
-        setItemMargin((int) getResources().getDimension(R.dimen.recents_tv_gird_card_spacing));
+        setWindowAlignment(WINDOW_ALIGN_NO_EDGE);
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         super.onAttachedToWindow();
     }
@@ -106,6 +105,13 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
             mFocusedTask = ((TaskCardView)findFocus()).getTask();
         }
         return mFocusedTask;
+    }
+
+    /**
+     * @return - The focused task card view.
+     */
+    public TaskCardView getFocusedTaskCardView() {
+        return ((TaskCardView)findFocus());
     }
 
     /**

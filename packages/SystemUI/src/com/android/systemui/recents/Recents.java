@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.app.ActivityManager;
+import android.app.UiModeManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -53,6 +54,7 @@ import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.systemui.recents.tv.RecentsTvImpl;
 
 import java.util.ArrayList;
 
@@ -182,7 +184,13 @@ public class Recents extends SystemUI
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         mHandler = new Handler();
-        mImpl = new RecentsImpl(mContext);
+        UiModeManager uiModeManager = (UiModeManager) mContext.
+                getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            mImpl = new RecentsTvImpl(mContext);
+        } else {
+            mImpl = new RecentsImpl(mContext);
+        }
 
         // Check if there is a recents override package
         if ("userdebug".equals(Build.TYPE) || "eng".equals(Build.TYPE)) {

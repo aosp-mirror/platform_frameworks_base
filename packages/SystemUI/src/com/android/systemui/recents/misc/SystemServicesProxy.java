@@ -47,7 +47,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -73,6 +72,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
+import com.android.systemui.recents.tv.RecentsTvImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -280,7 +280,7 @@ public class SystemServicesProxy {
             // Check if the front most activity is recents
             if ((topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE) &&
                     (topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY) ||
-                    topActivity.getClassName().equals(RecentsImpl.RECENTS_TV_ACTIVITY)))) {
+                    topActivity.getClassName().equals(RecentsTvImpl.RECENTS_TV_ACTIVITY)))) {
                 if (isHomeTopMost != null) {
                     isHomeTopMost.value = false;
                 }
