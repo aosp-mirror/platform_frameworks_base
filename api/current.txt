@@ -48341,6 +48341,7 @@ package java.lang {
     method public float floatValue();
     method public static int hashCode(double);
     method public int intValue();
+    method public static boolean isFinite(double);
     method public static boolean isInfinite(double);
     method public boolean isInfinite();
     method public static boolean isNaN(double);
@@ -48422,6 +48423,7 @@ package java.lang {
     method public float floatValue();
     method public static float intBitsToFloat(int);
     method public int intValue();
+    method public static boolean isFinite(float);
     method public static boolean isInfinite(float);
     method public boolean isInfinite();
     method public static boolean isNaN(float);
