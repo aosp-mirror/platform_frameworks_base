@@ -135,7 +135,7 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
 
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, AnimationProps animation) {
+            Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture) {
         getAdapter().notifyItemRemoved(stack.getStackTasks().indexOf(removedTask));
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
@@ -144,7 +144,9 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
         if (mStack.getStackTaskCount() == 0) {
             boolean shouldFinishActivity = (mStack.getStackTaskCount() == 0);
             if (shouldFinishActivity) {
-                EventBus.getDefault().send(new AllTaskViewsDismissedEvent());
+                EventBus.getDefault().send(new AllTaskViewsDismissedEvent(fromDockGesture
+                        ? R.string.recents_empty_message
+                        : R.string.recents_empty_message_dismissed_all));
             }
         }
     }

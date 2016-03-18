@@ -22,5 +22,10 @@ import com.android.systemui.recents.events.EventBus;
  * This is sent whenever all the task views in a stack have been dismissed.
  */
 public class AllTaskViewsDismissedEvent extends EventBus.Event {
-    // Simple event
+
+    public final int msgResId;
+
+    public AllTaskViewsDismissedEvent(int msgResId) {
+        this.msgResId = msgResId;
+    }
 }
