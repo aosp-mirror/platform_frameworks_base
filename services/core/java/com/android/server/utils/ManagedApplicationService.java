@@ -60,6 +60,8 @@ public class ManagedApplicationService {
     private ServiceConnection mPendingConnection;
     private ServiceConnection mConnection;
     private IInterface mBoundInterface;
+    private PendingEvent mPendingEvent;
+
 
 
     private ManagedApplicationService(final Context context, final ComponentName component,
@@ -79,6 +81,13 @@ public class ManagedApplicationService {
     public interface BinderChecker {
         IInterface asInterface(IBinder binder);
         boolean checkType(IInterface service);
+    }
+
+    /**
+     * Implement to call IInterface methods after service is connected.
+     */
+    public interface PendingEvent {
+         void runEvent(IInterface service) throws RemoteException;
     }
 
     /**
@@ -131,6 +140,30 @@ public class ManagedApplicationService {
         return true;
     }
 
+
+  /**
+   * Send an event to run as soon as the binder interface is available.
+   *
+   * @param event a {@link PendingEvent} to send.
+   */
+  public void sendEvent(@NonNull PendingEvent event) {
+        IInterface iface;
+        synchronized (mLock) {
+            iface = mBoundInterface;
+            if (iface == null) {
+                mPendingEvent = event;
+            }
+        }
+
+        if (iface != null) {
+            try {
+                event.runEvent(iface);
+            } catch (RuntimeException | RemoteException ex) {
+                Slog.e(TAG, "Received exception from user service: ", ex);
+            }
+        }
+    }
+
     /**
      * Asynchronously unbind from the application service if bound.
      */
@@ -168,6 +201,8 @@ public class ManagedApplicationService {
             final ServiceConnection serviceConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                    IInterface iface = null;
+                    PendingEvent pendingEvent = null;
                     synchronized (mLock) {
                         if (mPendingConnection == this) {
                             // No longer pending, remove from pending connection
@@ -186,10 +221,20 @@ public class ManagedApplicationService {
                                 mContext.unbindService(this);
                                 mBoundInterface = null;
                             }
+                            iface = mBoundInterface;
+                            pendingEvent = mPendingEvent;
+                            mPendingEvent = null;
                         } catch (RemoteException e) {
                             // DOA
                             Slog.w(TAG, "Unable to bind service: " + intent, e);
                             mBoundInterface = null;
+                        }
+                    }
+                    if (iface != null && pendingEvent != null) {
+                        try {
+                            pendingEvent.runEvent(iface);
+                        } catch (RuntimeException | RemoteException ex) {
+                            Slog.e(TAG, "Received exception from user service: ", ex);
                         }
                     }
                 }

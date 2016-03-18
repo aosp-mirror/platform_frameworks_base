@@ -19,14 +19,12 @@ import android.app.AppOpsManager;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
-import android.os.UserHandle;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.vr.IVrListener;
 import android.service.vr.VrListenerService;
@@ -35,11 +33,13 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.SystemService;
+import com.android.server.utils.ManagedApplicationService.PendingEvent;
 import com.android.server.vr.EnabledComponentsObserver.EnabledComponentChangeListener;
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -79,6 +79,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private EnabledComponentsObserver mComponentObserver;
     private ManagedApplicationService mCurrentVrService;
     private Context mContext;
+    private ComponentName mCurrentVrModeComponent;
+    private int mCurrentVrModeUser;
 
     private static final BinderChecker sBinderChecker = new BinderChecker() {
         @Override
@@ -105,7 +107,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
             // There is an active service, update it if needed
             updateCurrentVrServiceLocked(mVrModeEnabled, mCurrentVrService.getComponent(),
-                    mCurrentVrService.getUserId());
+                    mCurrentVrService.getUserId(), null);
         }
     }
 
@@ -119,8 +121,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
-        public void setVrMode(boolean enabled, ComponentName packageName, int userId) {
-            VrManagerService.this.setVrMode(enabled, packageName, userId);
+        public void setVrMode(boolean enabled, ComponentName packageName, int userId,
+                ComponentName callingPackage) {
+            VrManagerService.this.setVrMode(enabled, packageName, userId, callingPackage);
         }
 
         @Override
@@ -227,11 +230,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * @param enabled new state for VR mode.
      * @param component new component to be bound as a VR listener.
      * @param userId user owning the component to be bound.
+     * @param calling the component currently using VR mode, or null to leave unchanged.
      *
      * @return {@code true} if the component/user combination specified is valid.
      */
     private boolean updateCurrentVrServiceLocked(boolean enabled,
-            @NonNull ComponentName component, int userId) {
+            @NonNull ComponentName component, int userId, ComponentName calling) {
+
+        boolean sendUpdatedCaller = false;
 
         boolean validUserComponent = (mComponentObserver.isValid(component, userId) ==
                 EnabledComponentsObserver.NO_ERROR);
@@ -247,29 +253,47 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 mCurrentVrService.disconnect();
                 mCurrentVrService = null;
             }
-            return validUserComponent;
+        } else {
+            if (mCurrentVrService != null) {
+                // Unbind any running service that doesn't match the component/user selection
+                if (mCurrentVrService.disconnectIfNotMatching(component, userId)) {
+                    Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() + " for user " +
+                        mCurrentVrService.getUserId());
+                    createAndConnectService(component, userId);
+                    sendUpdatedCaller = true;
+                }
+                // The service with the correct component/user is bound
+            } else {
+                // Nothing was previously running, bind a new service
+                createAndConnectService(component, userId);
+                sendUpdatedCaller = true;
+            }
         }
 
-        if (mCurrentVrService != null) {
-            // Unbind any running service that doesn't match the component/user selection
-            if (mCurrentVrService.disconnectIfNotMatching(component, userId)) {
-                Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() + " for user " +
-                        mCurrentVrService.getUserId());
-                mCurrentVrService = VrManagerService.create(mContext, component, userId);
-                mCurrentVrService.connect();
-                Slog.i(TAG, "Connecting " + mCurrentVrService.getComponent() + " for user " +
-                        mCurrentVrService.getUserId());
-            }
-            // The service with the correct component/user is bound
-        } else {
-            // Nothing was previously running, bind a new service
-            mCurrentVrService = VrManagerService.create(mContext, component, userId);
-            mCurrentVrService.connect();
-            Slog.i(TAG, "Connecting " + mCurrentVrService.getComponent() + " for user " +
-                    mCurrentVrService.getUserId());
+        if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent))  {
+            mCurrentVrModeComponent = calling;
+            mCurrentVrModeUser = userId;
+            sendUpdatedCaller = true;
+        }
+
+        if (mCurrentVrService != null && sendUpdatedCaller) {
+            final ComponentName c = mCurrentVrModeComponent;
+            mCurrentVrService.sendEvent(new PendingEvent() {
+                @Override
+                public void runEvent(IInterface service) throws RemoteException {
+                    IVrListener l = (IVrListener) service;
+                    l.focusedActivityChanged(c);
+                }
+            });
         }
 
         return validUserComponent;
+    }
+
+    private void createAndConnectService(@NonNull ComponentName component, int userId) {
+        mCurrentVrService = VrManagerService.create(mContext, component, userId);
+        mCurrentVrService.connect();
+        Slog.i(TAG, "Connecting " + component + " for user " + userId);
     }
 
     /**
@@ -319,9 +343,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      */
 
     private boolean setVrMode(boolean enabled, @NonNull ComponentName targetPackageName,
-            int userId) {
+            int userId, @NonNull ComponentName callingPackage) {
         synchronized (mLock) {
-            return updateCurrentVrServiceLocked(enabled, targetPackageName, userId);
+            return updateCurrentVrServiceLocked(enabled, targetPackageName, userId, callingPackage);
         }
     }
 
