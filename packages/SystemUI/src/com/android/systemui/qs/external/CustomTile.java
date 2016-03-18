@@ -75,7 +75,8 @@ public class CustomTile extends QSTile<QSTile.State> {
         mUser = ActivityManager.getCurrentUser();
         try {
             PackageManager pm = mContext.getPackageManager();
-            ServiceInfo info = pm.getServiceInfo(mComponent, 0);
+            ServiceInfo info = pm.getServiceInfo(mComponent,
+                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
             mTile.setIcon(android.graphics.drawable.Icon
                     .createWithResource(mComponent.getPackageName(), info.icon));
             mTile.setLabel(info.loadLabel(pm));
@@ -85,6 +86,17 @@ public class CustomTile extends QSTile<QSTile.State> {
             mService.setQSTile(mTile);
         } catch (RemoteException e) {
             // Called through wrapper, won't happen here.
+        }
+    }
+
+    @Override
+    public boolean isAvailable() {
+        try {
+            ServiceInfo info = mContext.getPackageManager().getServiceInfo(mComponent,
+                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -211,11 +223,15 @@ public class CustomTile extends QSTile<QSTile.State> {
     @Override
     protected void handleUpdateState(State state, Object arg) {
         Drawable drawable = mTile.getIcon().loadDrawable(mContext);
-        int color = mContext.getColor(getColor(mTile.getState()));
+        int tileState = mTile.getState();
+        if (mServiceManager.hasPendingBind()) {
+            tileState = Tile.STATE_UNAVAILABLE;
+        }
+        int color = mContext.getColor(getColor(tileState));
         drawable.setTint(color);
         state.icon = new DrawableIcon(drawable);
         state.label = mTile.getLabel();
-        if (mTile.getState() == Tile.STATE_UNAVAILABLE) {
+        if (tileState == Tile.STATE_UNAVAILABLE) {
             state.label = new SpannableStringBuilder().append(state.label,
                     new ForegroundColorSpan(color),
                     SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);

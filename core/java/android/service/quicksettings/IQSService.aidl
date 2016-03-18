@@ -34,4 +34,5 @@ interface IQSService {
     void startUnlockAndRun(in Tile tile);
 
     void onDialogHidden(in Tile tile);
+    void onStartSuccessful(in Tile tile);
 }

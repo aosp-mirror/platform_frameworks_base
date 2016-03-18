@@ -249,6 +249,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiverAsUser(this, mUser, filter, null, mHandler);
+        filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
+        mContext.registerReceiverAsUser(this, mUser, filter, null, mHandler);
         mReceiverRegistered = true;
     }
 
@@ -261,10 +263,12 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Override
     public void onReceive(Context context, Intent intent) {
         if (DEBUG) Log.d(TAG, "onReceive: " + intent);
-        Uri data = intent.getData();
-        String pkgName = data.getEncodedSchemeSpecificPart();
-        if (!Objects.equal(pkgName, mIntent.getComponent().getPackageName())) {
-            return;
+        if (!Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+            Uri data = intent.getData();
+            String pkgName = data.getEncodedSchemeSpecificPart();
+            if (!Objects.equal(pkgName, mIntent.getComponent().getPackageName())) {
+                return;
+            }
         }
         stopPackageListening();
         if (mBound) {

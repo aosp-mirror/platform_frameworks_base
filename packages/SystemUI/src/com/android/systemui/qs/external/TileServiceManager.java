@@ -53,6 +53,9 @@ public class TileServiceManager {
     private long mLastUpdate;
     private int mType;
     private boolean mShowingDialog;
+    // Whether we have a pending bind going out to the service without a response yet.
+    // This defaults to true to ensure tiles start out unavailable.
+    private boolean mPendingBind = true;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component) {
         this(tileServices, handler, new TileLifecycleManager(handler,
@@ -132,11 +135,20 @@ public class TileServiceManager {
         }
     }
 
+    public boolean hasPendingBind() {
+        return mPendingBind;
+    }
+
+    public void clearPendingBind() {
+        mPendingBind = false;
+    }
+
     private void bindService() {
         if (mBound) {
             Log.e(TAG, "Service already bound");
             return;
         }
+        mPendingBind = true;
         mBound = true;
         mJustBound = true;
         mHandler.postDelayed(mJustBoundOver, MIN_BIND_TIME);

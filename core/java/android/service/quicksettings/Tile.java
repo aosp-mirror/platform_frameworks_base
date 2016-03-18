@@ -37,8 +37,6 @@ public final class Tile implements Parcelable {
     private static final String TAG = "Tile";
 
     /**
-     * This is the default state of any tile, until updated by the {@link TileService}.
-     * <p>
      * An unavailable state indicates that for some reason this tile is not currently
      * available to the user for some reason, and will have no click action.  The tile's
      * icon will be tinted differently to reflect this state.
@@ -57,7 +55,7 @@ public final class Tile implements Parcelable {
 
     /**
      * This represents a tile that is currently active. (e.g. wifi is connected, bluetooth is on,
-     * cast is casting).
+     * cast is casting).  This is the default state.
      */
     public static final int STATE_ACTIVE = 2;
 
