@@ -1852,6 +1852,10 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPolicyAccess(String pkg) {
+            if (PackageManager.PERMISSION_GRANTED == getContext().checkCallingPermission(
+                    android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
+                return true;
+            }
             if (mAudioManagerInternal != null) {
                 final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
                 if (vcuid > 0 && Binder.getCallingUid() == vcuid) {
@@ -1952,7 +1956,7 @@ public class NotificationManagerService extends SystemService {
         public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {;
             enforceSystemOrSystemUIOrSamePackage(pkg,
                     "request policy access status for another package");
-            return checkPackagePolicyAccess(pkg);
+            return checkPolicyAccess(pkg);
         }
 
         @Override
