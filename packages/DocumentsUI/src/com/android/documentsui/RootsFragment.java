@@ -317,7 +317,10 @@ public class RootsFragment extends Fragment {
 
             for (final RootInfo root : roots) {
                 final RootItem item = new RootItem(root);
-                if (root.isLibrary()) {
+
+                if (root.isHome() && isHomeRootHidden(context)) {
+                    continue;
+                } else if (root.isLibrary()) {
                     if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
                     libraries.add(item);
                 } else {
@@ -365,6 +368,13 @@ public class RootsFragment extends Fragment {
                 add(new SpacerItem());
                 addAll(apps);
             }
+        }
+
+        /*
+         * Indicates if the home directory should be hidden in the roots list.
+         */
+        private boolean isHomeRootHidden(Context context) {
+            return context.getResources().getBoolean(R.bool.home_root_hidden);
         }
 
         @Override
