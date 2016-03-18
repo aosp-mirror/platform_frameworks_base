@@ -35,14 +35,14 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.provider.Settings;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
+import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
-import android.webkit.WebViewFactory;
 
 import com.android.server.SystemService;
 
@@ -76,9 +76,11 @@ public class WebViewUpdateService extends SystemService {
     private WebViewProviderInfo[] mCurrentValidWebViewPackages = null;
 
     private BroadcastReceiver mWebViewUpdatedReceiver;
+    private WebViewUtilityInterface mWebViewUtility;
 
     public WebViewUpdateService(Context context) {
         super(context);
+        mWebViewUtility = new WebViewUtilityImpl();
     }
 
     @Override
@@ -114,7 +116,7 @@ public class WebViewUpdateService extends SystemService {
 
                     updateFallbackState(context, intent);
 
-                    for (WebViewProviderInfo provider : WebViewFactory.getWebViewPackages()) {
+                    for (WebViewProviderInfo provider : mWebViewUtility.getWebViewPackages()) {
                         String webviewPackage = "package:" + provider.packageName;
 
                         if (webviewPackage.equals(intent.getDataString())) {
@@ -153,11 +155,7 @@ public class WebViewUpdateService extends SystemService {
                                 // package that was not the previous provider then we must kill
                                 // packages dependent on the old package ourselves. The framework
                                 // only kills dependents of packages that are being removed.
-                                try {
-                                    ActivityManagerNative.getDefault().killPackageDependents(
-                                        oldProviderName, UserHandle.USER_ALL);
-                                } catch (RemoteException e) {
-                                }
+                                mWebViewUtility.killPackageDependents(oldProviderName);
                             }
                             return;
                         }
@@ -170,7 +168,7 @@ public class WebViewUpdateService extends SystemService {
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         // Make sure we only receive intents for WebView packages from our config file.
-        for (WebViewProviderInfo provider : WebViewFactory.getWebViewPackages()) {
+        for (WebViewProviderInfo provider : mWebViewUtility.getWebViewPackages()) {
             filter.addDataSchemeSpecificPart(provider.packageName, PatternMatcher.PATTERN_LITERAL);
         }
         getContext().registerReceiver(mWebViewUpdatedReceiver, filter);
@@ -210,7 +208,7 @@ public class WebViewUpdateService extends SystemService {
     void handleNewUser(int userId) {
         if (!isFallbackLogicEnabled()) return;
 
-        WebViewProviderInfo[] webviewProviders = WebViewFactory.getWebViewPackages();
+        WebViewProviderInfo[] webviewProviders = mWebViewUtility.getWebViewPackages();
         WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
         if (fallbackProvider == null) return;
         boolean existsValidNonFallbackProvider =
@@ -228,7 +226,7 @@ public class WebViewUpdateService extends SystemService {
     void updateFallbackState(final Context context, final Intent intent) {
         if (!isFallbackLogicEnabled()) return;
 
-        WebViewProviderInfo[] webviewProviders = WebViewFactory.getWebViewPackages();
+        WebViewProviderInfo[] webviewProviders = mWebViewUtility.getWebViewPackages();
 
         if (intent != null && (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)
                     || intent.getAction().equals(Intent.ACTION_PACKAGE_CHANGED))) {
@@ -319,10 +317,10 @@ public class WebViewUpdateService extends SystemService {
         return false;
     }
 
-    private static boolean isFallbackPackage(String packageName) {
+    private boolean isFallbackPackage(String packageName) {
         if (packageName == null || !isFallbackLogicEnabled()) return false;
 
-        WebViewProviderInfo[] webviewPackages = WebViewFactory.getWebViewPackages();
+        WebViewProviderInfo[] webviewPackages = mWebViewUtility.getWebViewPackages();
         WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewPackages);
         return (fallbackProvider != null
                 && packageName.equals(fallbackProvider.packageName));
@@ -359,13 +357,13 @@ public class WebViewUpdateService extends SystemService {
         PackageInfo newPackage = null;
         synchronized(this) {
             oldPackage = mCurrentWebViewPackage;
-            updateUserSetting(newProviderName);
+            mWebViewUtility.updateUserSetting(getContext(), newProviderName);
 
             try {
                 newPackage = findPreferredWebViewPackage();
                 if (oldPackage != null && newPackage.packageName.equals(oldPackage.packageName)) {
                     // If we don't perform the user change, revert the settings change.
-                    updateUserSetting(newPackage.packageName);
+                    mWebViewUtility.updateUserSetting(getContext(), newPackage.packageName);
                     return newPackage.packageName;
                 }
             } catch (WebViewFactory.MissingWebViewPackageException e) {
@@ -378,12 +376,8 @@ public class WebViewUpdateService extends SystemService {
             onWebViewProviderChanged(newPackage);
         }
         // Kill apps using the old provider
-        try {
-            if (oldPackage != null) {
-                ActivityManagerNative.getDefault().killPackageDependents(
-                        oldPackage.packageName, UserHandle.USER_ALL);
-            }
-        } catch (RemoteException e) {
+        if (oldPackage != null) {
+            mWebViewUtility.killPackageDependents(oldPackage.packageName);
         }
         return newPackage.packageName;
     }
@@ -397,14 +391,14 @@ public class WebViewUpdateService extends SystemService {
             mAnyWebViewInstalled = true;
             if (mNumRelroCreationsStarted == mNumRelroCreationsFinished) {
                 mCurrentWebViewPackage = newPackage;
-                updateUserSetting(newPackage.packageName);
+                mWebViewUtility.updateUserSetting(getContext(), newPackage.packageName);
 
                 // The relro creations might 'finish' (not start at all) before
                 // WebViewFactory.onWebViewProviderChanged which means we might not know the number
                 // of started creations before they finish.
                 mNumRelroCreationsStarted = NUMBER_OF_RELROS_UNKNOWN;
                 mNumRelroCreationsFinished = 0;
-                mNumRelroCreationsStarted = WebViewFactory.onWebViewProviderChanged(newPackage);
+                mNumRelroCreationsStarted = mWebViewUtility.onWebViewProviderChanged(newPackage);
                 // If the relro creations finish before we know the number of started creations we
                 // will have to do any cleanup/notifying here.
                 checkIfRelrosDoneLocked();
@@ -421,7 +415,7 @@ public class WebViewUpdateService extends SystemService {
      * */
     private void updateValidWebViewPackages() {
         List<WebViewProviderInfo> webViewProviders  =
-            new ArrayList<WebViewProviderInfo>(Arrays.asList(WebViewFactory.getWebViewPackages()));
+            new ArrayList<WebViewProviderInfo>(Arrays.asList(mWebViewUtility.getWebViewPackages()));
         Iterator<WebViewProviderInfo> it = webViewProviders.iterator();
         // remove non-valid packages
         while(it.hasNext()) {
@@ -435,17 +429,6 @@ public class WebViewUpdateService extends SystemService {
         }
     }
 
-    private static String getUserChosenWebViewProvider() {
-        return Settings.Global.getString(AppGlobals.getInitialApplication().getContentResolver(),
-                Settings.Global.WEBVIEW_PROVIDER);
-    }
-
-    private void updateUserSetting(String newProviderName) {
-        Settings.Global.putString(getContext().getContentResolver(),
-                Settings.Global.WEBVIEW_PROVIDER,
-                newProviderName == null ? "" : newProviderName);
-    }
-
     /**
      * Returns either the package info of the WebView provider determined in the following way:
      * If the user has chosen a provider then use that if it is valid,
@@ -456,7 +439,7 @@ public class WebViewUpdateService extends SystemService {
     private PackageInfo findPreferredWebViewPackage() {
         WebViewProviderInfo[] providers = mCurrentValidWebViewPackages;
 
-        String userChosenProvider = getUserChosenWebViewProvider();
+        String userChosenProvider = mWebViewUtility.getUserChosenWebViewProvider(getContext());
 
         // If the user has chosen provider, use that
         for (WebViewProviderInfo provider : providers) {
@@ -616,6 +599,11 @@ public class WebViewUpdateService extends SystemService {
         }
 
         @Override // Binder call
+        public WebViewProviderInfo[] getAllWebViewPackages() {
+            return WebViewUpdateService.this.mWebViewUtility.getWebViewPackages();
+        }
+
+        @Override // Binder call
         public String getCurrentWebViewPackageName() {
             synchronized(WebViewUpdateService.this) {
                 if (WebViewUpdateService.this.mCurrentWebViewPackage == null)
@@ -626,7 +614,7 @@ public class WebViewUpdateService extends SystemService {
 
         @Override // Binder call
         public boolean isFallbackPackage(String packageName) {
-            return WebViewUpdateService.isFallbackPackage(packageName);
+            return WebViewUpdateService.this.isFallbackPackage(packageName);
         }
 
         @Override // Binder call
