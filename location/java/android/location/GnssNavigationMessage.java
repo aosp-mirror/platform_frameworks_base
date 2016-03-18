@@ -33,7 +33,10 @@ public final class GnssNavigationMessage implements Parcelable {
 
     private static final byte[] EMPTY_ARRAY = new byte[0];
 
-    /** The type of the GPS Clock. */
+    /**
+     * The type of the GPS Clock.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_UNKNOWN, TYPE_GPS_L1CA, TYPE_GPS_L2CNAV, TYPE_GPS_L5CNAV, TYPE_GPS_CNAV2,
         TYPE_GLO_L1CA, TYPE_BDS_D1, TYPE_BDS_D2, TYPE_GAL_I, TYPE_GAL_F})

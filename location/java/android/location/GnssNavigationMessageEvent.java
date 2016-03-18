@@ -30,7 +30,10 @@ import java.security.InvalidParameterException;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssNavigationMessageEvent implements Parcelable {
-    /** The status of GPS measurements event. */
+    /**
+     * The status of GPS measurements event.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GNSS_LOCATION_DISABLED})
     public @interface GnssNavigationMessageStatus {}
