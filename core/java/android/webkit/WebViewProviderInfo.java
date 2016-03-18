@@ -150,6 +150,8 @@ public class WebViewProviderInfo implements Parcelable {
     private WebViewProviderInfo(Parcel in) {
         packageName = in.readString();
         description = in.readString();
+        availableByDefault = (in.readInt() > 0);
+        isFallback = (in.readInt() > 0);
         signatures = in.createStringArray();
         packageInfo = null;
     }
@@ -163,6 +165,8 @@ public class WebViewProviderInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(packageName);
         out.writeString(description);
+        out.writeInt(availableByDefault ? 1 : 0);
+        out.writeInt(isFallback ? 1 : 0);
         out.writeStringArray(signatures);
     }
 
