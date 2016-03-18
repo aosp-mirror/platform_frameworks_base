@@ -380,10 +380,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     mMoving = true;
                 }
                 if (mMoving && mDockSide != WindowManager.DOCKED_INVALID) {
-                    int position = calculatePosition(x, y);
-                    SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position,
-                            0 /* velocity */, false /* hardDismiss */);
-                    resizeStack(calculatePosition(x, y), snapTarget.position, snapTarget);
+                    SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(
+                            mStartPosition, 0 /* velocity */, false /* hardDismiss */);
+                    resizeStack(calculatePosition(x, y), mStartPosition, snapTarget);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -392,6 +391,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
                 x = (int) event.getRawX();
                 y = (int) event.getRawY();
+
+                if (mMoving && mDockSide != WindowManager.DOCKED_INVALID) {
+                    int position = calculatePosition(x, y);
+                    SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position,
+                            0 /* velocity */, false /* hardDismiss */);
+                    resizeStack(calculatePosition(x, y), snapTarget.position, snapTarget);
+                }
 
                 mVelocityTracker.computeCurrentVelocity(1000);
                 int position = calculatePosition(x, y);
