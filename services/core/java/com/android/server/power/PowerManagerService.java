@@ -17,6 +17,7 @@
 package com.android.server.power;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -74,6 +75,8 @@ import libcore.util.Objects;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -161,6 +164,14 @@ public final class PowerManagerService extends SystemService
 
     // Default setting for double tap to wake.
     private static final int DEFAULT_DOUBLE_TAP_TO_WAKE = 0;
+
+    /** Constants for {@link #shutdownOrRebootInternal} */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({HALT_MODE_SHUTDOWN, HALT_MODE_REBOOT, HALT_MODE_REBOOT_SAFE_MODE})
+    public @interface HaltMode {}
+    private static final int HALT_MODE_SHUTDOWN = 0;
+    private static final int HALT_MODE_REBOOT = 1;
+    private static final int HALT_MODE_REBOOT_SAFE_MODE = 2;
 
     private final Context mContext;
     private final ServiceThread mHandlerThread;
@@ -2393,7 +2404,7 @@ public final class PowerManagerService extends SystemService
         updatePowerStateLocked();
     }
 
-    private void shutdownOrRebootInternal(final boolean shutdown, final boolean confirm,
+    private void shutdownOrRebootInternal(final @HaltMode int haltMode, final boolean confirm,
             final String reason, boolean wait) {
         if (mHandler == null || !mSystemReady) {
             throw new IllegalStateException("Too early to call shutdown() or reboot()");
@@ -2403,10 +2414,12 @@ public final class PowerManagerService extends SystemService
             @Override
             public void run() {
                 synchronized (this) {
-                    if (shutdown) {
-                        ShutdownThread.shutdown(mContext, reason, confirm);
-                    } else {
+                    if (haltMode == HALT_MODE_REBOOT_SAFE_MODE) {
+                        ShutdownThread.rebootSafeMode(mContext, confirm);
+                    } else if (haltMode == HALT_MODE_REBOOT) {
                         ShutdownThread.reboot(mContext, reason, confirm);
+                    } else {
+                        ShutdownThread.shutdown(mContext, reason, confirm);
                     }
                 }
             }
@@ -3466,7 +3479,26 @@ public final class PowerManagerService extends SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                shutdownOrRebootInternal(false, confirm, reason, wait);
+                shutdownOrRebootInternal(HALT_MODE_REBOOT, confirm, reason, wait);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Reboots the device into safe mode
+         *
+         * @param confirm If true, shows a reboot confirmation dialog.
+         * @param wait If true, this call waits for the reboot to complete and does not return.
+         */
+        @Override // Binder call
+        public void rebootSafeMode(boolean confirm, boolean wait) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                shutdownOrRebootInternal(HALT_MODE_REBOOT_SAFE_MODE, confirm,
+                        PowerManager.REBOOT_SAFE_MODE, wait);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3484,7 +3516,7 @@ public final class PowerManagerService extends SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                shutdownOrRebootInternal(true, confirm, reason, wait);
+                shutdownOrRebootInternal(HALT_MODE_SHUTDOWN, confirm, reason, wait);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
