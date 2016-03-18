@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.BluetoothGattService;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 
@@ -48,30 +49,8 @@ public class BluetoothGattCallbackWrapper extends IBluetoothGattCallback.Stub {
     }
 
     @Override
-    public void onGetService(String address, int srvcType, int srvcInstId, ParcelUuid srvcUuid)
-            throws RemoteException {
-    }
-
-    @Override
-    public void onGetIncludedService(String address, int srvcType, int srvcInstId,
-            ParcelUuid srvcUuid, int inclSrvcType, int inclSrvcInstId, ParcelUuid inclSrvcUuid)
-            throws RemoteException {
-    }
-
-    @Override
-    public void onGetCharacteristic(String address, int srvcType, int srvcInstId,
-            ParcelUuid srvcUuid, int charInstId, ParcelUuid charUuid, int charProps)
-            throws RemoteException {
-    }
-
-    @Override
-    public void onGetDescriptor(String address, int srvcType, int srvcInstId, ParcelUuid srvcUuid,
-            int charInstId, ParcelUuid charUuid, int descrInstId, ParcelUuid descrUuid)
-            throws RemoteException {
-    }
-
-    @Override
-    public void onSearchComplete(String address, int status) throws RemoteException {
+    public void onSearchComplete(String address, List<BluetoothGattService> services,
+            int status) throws RemoteException {
     }
 
     @Override
