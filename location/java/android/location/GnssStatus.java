@@ -41,7 +41,10 @@ public final class GnssStatus {
     /** Constellation type constant for Galileo. */
     public static final int CONSTELLATION_GALILEO = 6;
 
-    /** Constellation type. */
+    /**
+     * Constellation type.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CONSTELLATION_UNKNOWN, CONSTELLATION_GPS, CONSTELLATION_SBAS, CONSTELLATION_GLONASS,
             CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO})
