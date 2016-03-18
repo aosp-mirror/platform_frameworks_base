@@ -39,7 +39,7 @@ public final class ContextHubManager {
 
     private final Looper mMainLooper;
     private IContextHubService mContextHubService;
-    private ContextHubCallback mCallback;
+    private Callback mCallback;
     private Handler mCallbackHandler;
 
     /**
@@ -62,8 +62,8 @@ public final class ContextHubManager {
     /**
      * An interface to receive asynchronous communication from the context hub.
      */
-    public abstract static class ContextHubCallback {
-        protected ContextHubCallback() {}
+    public abstract static class Callback {
+        protected Callback() {}
 
         /**
          * Callback function called on message receipt from context hub.
@@ -226,12 +226,12 @@ public final class ContextHubManager {
      *
      * @param callback Callback object
      *
-     * @see ContextHubCallback
+     * @see Callback
      *
      * @return int 0 on success, -1 otherwise
      */
-    public int registerContextHubCallback(ContextHubCallback callback) {
-        return registerContextHubCallback(callback, null);
+    public int registerCallback(Callback callback) {
+        return registerCallback(callback, null);
     }
 
     /**
@@ -240,11 +240,11 @@ public final class ContextHubManager {
      * @param callback Callback object
      * @param handler Handler object
      *
-     * @see ContextHubCallback
+     * @see Callback
      *
      * @return int 0 on success, -1 otherwise
      */
-    public int registerContextHubCallback(ContextHubCallback callback, Handler handler) {
+    public int registerCallback(Callback callback, Handler handler) {
         synchronized(this) {
             if (mCallback != null) {
                 Log.e(TAG, "Max number of callbacks reached!");
@@ -259,13 +259,13 @@ public final class ContextHubManager {
     /**
      * Unregister a callback for receive messages from the context hub.
      *
-     * @see ContextHubCallback
+     * @see Callback
      *
      * @param callback method to deregister
      *
      * @return int 0 on success, -1 otherwise
      */
-    public int unregisterContextHubCallback(ContextHubCallback callback) {
+    public int unregisterCallback(Callback callback) {
       synchronized(this) {
           if (callback != mCallback) {
               Log.e(TAG, "Cannot recognize callback!");
@@ -284,7 +284,7 @@ public final class ContextHubManager {
                 final ContextHubMessage message) {
             if (mCallback != null) {
                 synchronized(this) {
-                    final ContextHubCallback callback = mCallback;
+                    final Callback callback = mCallback;
                     Handler handler = mCallbackHandler == null ?
                             new Handler(mMainLooper) : mCallbackHandler;
                     handler.post(new Runnable() {
