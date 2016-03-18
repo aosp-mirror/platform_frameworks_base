@@ -443,10 +443,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             @Nullable List<PrinterId> printerIds) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
-            // No services - nothing to do.
-            if (mActiveServices.isEmpty()) {
-                return;
-            }
+
             // No session - nothing to do.
             if (mPrinterDiscoverySession == null) {
                 return;
@@ -460,10 +457,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     public void stopPrinterDiscovery(@NonNull IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
-            // No services - nothing to do.
-            if (mActiveServices.isEmpty()) {
-                return;
-            }
+
             // No session - nothing to do.
             if (mPrinterDiscoverySession == null) {
                 return;
