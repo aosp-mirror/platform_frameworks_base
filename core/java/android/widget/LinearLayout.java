@@ -869,10 +869,10 @@ public class LinearLayout extends ViewGroup {
         // Either expand children with weight to take up available space or
         // shrink them if they extend beyond our current bounds. If we skipped
         // measurement on any children, we need to measure them now.
-        final int delta = heightSize - mTotalLength
+        int remainingExcess = heightSize - mTotalLength
                 + (mAllowInconsistentMeasurement ? 0 : consumedExcessSpace);
-        if (skippedMeasure || delta != 0 && totalWeight > 0.0f) {
-            final float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
+        if (skippedMeasure || remainingExcess != 0 && totalWeight > 0.0f) {
+            float remainingWeightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
             mTotalLength = 0;
 
@@ -883,9 +883,12 @@ public class LinearLayout extends ViewGroup {
                 }
 
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                final float childExtra = lp.weight;
-                if (childExtra > 0) {
-                    final int share = (int) (childExtra * delta / weightSum);
+                final float childWeight = lp.weight;
+                if (childWeight > 0) {
+                    final int share = (int) (childWeight * remainingExcess / remainingWeightSum);
+                    remainingExcess -= share;
+                    remainingWeightSum -= childWeight;
+
                     final int childHeight;
                     if (lp.height == 0 && (!mAllowInconsistentMeasurement
                             || heightMode == MeasureSpec.EXACTLY)) {
@@ -1244,10 +1247,10 @@ public class LinearLayout extends ViewGroup {
         // Either expand children with weight to take up available space or
         // shrink them if they extend beyond our current bounds. If we skipped
         // measurement on any children, we need to measure them now.
-        final int delta = widthSize - mTotalLength
+        int remainingExcess = widthSize - mTotalLength
                 + (mAllowInconsistentMeasurement ? 0 : usedExcessSpace);
-        if (skippedMeasure || delta != 0 && totalWeight > 0.0f) {
-            final float weightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
+        if (skippedMeasure || remainingExcess != 0 && totalWeight > 0.0f) {
+            float remainingWeightSum = mWeightSum > 0.0f ? mWeightSum : totalWeight;
 
             maxAscent[0] = maxAscent[1] = maxAscent[2] = maxAscent[3] = -1;
             maxDescent[0] = maxDescent[1] = maxDescent[2] = maxDescent[3] = -1;
@@ -1262,9 +1265,12 @@ public class LinearLayout extends ViewGroup {
                 }
 
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                final float childExtra = lp.weight;
-                if (childExtra > 0) {
-                    final int share = (int) (childExtra * delta / weightSum);
+                final float childWeight = lp.weight;
+                if (childWeight > 0) {
+                    final int share = (int) (childWeight * remainingExcess / remainingWeightSum);
+                    remainingExcess -= share;
+                    remainingWeightSum -= childWeight;
+
                     final int childWidth;
                     if (lp.width == 0 && (!mAllowInconsistentMeasurement
                             || widthMode == MeasureSpec.EXACTLY)) {
