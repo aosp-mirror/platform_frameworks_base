@@ -1384,8 +1384,13 @@ public class AudioService extends IAudioService.Stub {
                         synchronized (mHdmiPlaybackClient) {
                             int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
                                     KeyEvent.KEYCODE_VOLUME_UP;
-                            mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
-                            mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
+                            final long ident = Binder.clearCallingIdentity();
+                            try {
+                                mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
+                                mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
                         }
                     }
                 }
