@@ -16,17 +16,20 @@
 
 package android.util.apk;
 
+import android.system.ErrnoException;
+import android.system.OsConstants;
+import android.util.ArrayMap;
 import android.util.Pair;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.DirectByteBuffer;
 import java.security.DigestException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -52,10 +55,12 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import libcore.io.Libcore;
+import libcore.io.Os;
 
 /**
  * APK Signature Scheme v2 verifier.
@@ -75,44 +80,17 @@ public class ApkSignatureSchemeV2Verifier {
     public static final int SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID = 2;
 
     /**
-     * Returns {@code true} if the provided APK contains an APK Signature Scheme V2
-     * signature. The signature will not be verified.
+     * Returns {@code true} if the provided APK contains an APK Signature Scheme V2 signature.
+     *
+     * <p><b>NOTE: This method does not verify the signature.</b>
      */
     public static boolean hasSignature(String apkFile) throws IOException {
         try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
-            long fileSize = apk.length();
-            if (fileSize > Integer.MAX_VALUE) {
-                return false;
-            }
-            MappedByteBuffer apkContents;
-            try {
-                apkContents = apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
-            } catch (IOException e) {
-                if (e.getCause() instanceof OutOfMemoryError) {
-                    // TODO: Remove this temporary workaround once verifying large APKs is
-                    // supported. Very large APKs cannot be memory-mapped. This verification code
-                    // needs to change to use a different approach for verifying such APKs.
-                    return false; // Pretend that this APK does not have a v2 signature.
-                } else {
-                    throw new IOException("Failed to memory-map APK", e);
-                }
-            }
-            // ZipUtils and APK Signature Scheme v2 verifier expect little-endian byte order.
-            apkContents.order(ByteOrder.LITTLE_ENDIAN);
-
-            final int centralDirOffset =
-                    (int) getCentralDirOffset(apkContents, getEocdOffset(apkContents));
-            // Find the APK Signing Block.
-            int apkSigningBlockOffset = findApkSigningBlock(apkContents, centralDirOffset);
-            ByteBuffer apkSigningBlock =
-                    sliceFromTo(apkContents, apkSigningBlockOffset, centralDirOffset);
-
-            // Find the APK Signature Scheme v2 Block inside the APK Signing Block.
-            findApkSignatureSchemeV2Block(apkSigningBlock);
+            findSignature(apk);
             return true;
         } catch (SignatureNotFoundException e) {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -135,90 +113,97 @@ public class ApkSignatureSchemeV2Verifier {
      * associated with each signer.
      *
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v2.
-     * @throws SecurityException if a APK Signature Scheme v2 signature of this APK does not verify.
+     * @throws SecurityException if an APK Signature Scheme v2 signature of this APK does not
+     *         verify.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    public static X509Certificate[][] verify(RandomAccessFile apk)
+    private static X509Certificate[][] verify(RandomAccessFile apk)
             throws SignatureNotFoundException, SecurityException, IOException {
-
-        long fileSize = apk.length();
-        if (fileSize > Integer.MAX_VALUE) {
-            throw new IOException("File too large: " + apk.length() + " bytes");
-        }
-        MappedByteBuffer apkContents;
-        try {
-            apkContents = apk.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
-            // Attempt to preload the contents into memory for faster overall verification (v2 and
-            // older) at the expense of somewhat increased latency for rejecting malformed APKs.
-            apkContents.load();
-        } catch (IOException e) {
-            if (e.getCause() instanceof OutOfMemoryError) {
-                // TODO: Remove this temporary workaround once verifying large APKs is supported.
-                // Very large APKs cannot be memory-mapped. This verification code needs to change
-                // to use a different approach for verifying such APKs.
-                // This workaround pretends that this APK does not have a v2 signature. This works
-                // fine provided the APK is not actually v2-signed. If the APK is v2 signed, v2
-                // signature stripping protection inside v1 signature verification code will reject
-                // this APK.
-                throw new SignatureNotFoundException("Failed to memory-map APK", e);
-            } else {
-                throw new IOException("Failed to memory-map APK", e);
-            }
-        }
-        return verify(apkContents);
+        SignatureInfo signatureInfo = findSignature(apk);
+        return verify(apk.getFD(), signatureInfo);
     }
 
     /**
-     * Verifies APK Signature Scheme v2 signatures of the provided APK and returns the certificates
-     * associated with each signer.
-     *
-     * @param apkContents contents of the APK. The contents start at the current position and end
-     *        at the limit of the buffer.
+     * APK Signature Scheme v2 block and additional information relevant to verifying the signatures
+     * contained in the block against the file.
+     */
+    private static class SignatureInfo {
+        /** Contents of APK Signature Scheme v2 block. */
+        private final ByteBuffer signatureBlock;
+
+        /** Position of the APK Signing Block in the file. */
+        private final long apkSigningBlockOffset;
+
+        /** Position of the ZIP Central Directory in the file. */
+        private final long centralDirOffset;
+
+        /** Position of the ZIP End of Central Directory (EoCD) in the file. */
+        private final long eocdOffset;
+
+        /** Contents of ZIP End of Central Directory (EoCD) of the file. */
+        private final ByteBuffer eocd;
+
+        private SignatureInfo(
+                ByteBuffer signatureBlock,
+                long apkSigningBlockOffset,
+                long centralDirOffset,
+                long eocdOffset,
+                ByteBuffer eocd) {
+            this.signatureBlock = signatureBlock;
+            this.apkSigningBlockOffset = apkSigningBlockOffset;
+            this.centralDirOffset = centralDirOffset;
+            this.eocdOffset = eocdOffset;
+            this.eocd = eocd;
+        }
+    }
+
+    /**
+     * Returns the APK Signature Scheme v2 block contained in the provided APK file and the
+     * additional information relevant for verifying the block against the file.
      *
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v2.
-     * @throws SecurityException if a APK Signature Scheme v2 signature of this APK does not verify.
+     * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    public static X509Certificate[][] verify(ByteBuffer apkContents)
-            throws SignatureNotFoundException, SecurityException {
-        // Avoid modifying byte order, position, limit, and mark of the original apkContents.
-        apkContents = apkContents.slice();
+    private static SignatureInfo findSignature(RandomAccessFile apk)
+            throws IOException, SignatureNotFoundException {
+        // Find the ZIP End of Central Directory (EoCD) record.
+        Pair<ByteBuffer, Long> eocdAndOffsetInFile = getEocd(apk);
+        ByteBuffer eocd = eocdAndOffsetInFile.first;
+        long eocdOffset = eocdAndOffsetInFile.second;
+        if (ZipUtils.isZip64EndOfCentralDirectoryLocatorPresent(apk, eocdOffset)) {
+            throw new SignatureNotFoundException("ZIP64 APK not supported");
+        }
 
-        // ZipUtils and APK Signature Scheme v2 verifier expect little-endian byte order.
-        apkContents.order(ByteOrder.LITTLE_ENDIAN);
-
-        final int eocdOffset = getEocdOffset(apkContents);
-        final int centralDirOffset = (int) getCentralDirOffset(apkContents, eocdOffset);
-
-        // Find the APK Signing Block.
-        int apkSigningBlockOffset = findApkSigningBlock(apkContents, centralDirOffset);
-        ByteBuffer apkSigningBlock =
-                sliceFromTo(apkContents, apkSigningBlockOffset, centralDirOffset);
+        // Find the APK Signing Block. The block immediately precedes the Central Directory.
+        long centralDirOffset = getCentralDirOffset(eocd, eocdOffset);
+        Pair<ByteBuffer, Long> apkSigningBlockAndOffsetInFile =
+                findApkSigningBlock(apk, centralDirOffset);
+        ByteBuffer apkSigningBlock = apkSigningBlockAndOffsetInFile.first;
+        long apkSigningBlockOffset = apkSigningBlockAndOffsetInFile.second;
 
         // Find the APK Signature Scheme v2 Block inside the APK Signing Block.
         ByteBuffer apkSignatureSchemeV2Block = findApkSignatureSchemeV2Block(apkSigningBlock);
 
-        // Verify the contents of the APK outside of the APK Signing Block using the APK Signature
-        // Scheme v2 Block.
-        return verify(
-                apkContents,
+        return new SignatureInfo(
                 apkSignatureSchemeV2Block,
                 apkSigningBlockOffset,
                 centralDirOffset,
-                eocdOffset);
+                eocdOffset,
+                eocd);
     }
 
     /**
-     * Verifies the contents outside of the APK Signing Block using the provided APK Signature
-     * Scheme v2 Block.
+     * Verifies the contents of the provided APK file against the provided APK Signature Scheme v2
+     * Block.
+     *
+     * @param signatureInfo APK Signature Scheme v2 Block and information relevant for verifying it
+     *        against the APK file.
      */
     private static X509Certificate[][] verify(
-            ByteBuffer apkContents,
-            ByteBuffer v2Block,
-            int apkSigningBlockOffset,
-            int centralDirOffset,
-            int eocdOffset) throws SecurityException {
+            FileDescriptor apkFileDescriptor,
+            SignatureInfo signatureInfo) throws SecurityException {
         int signerCount = 0;
-        Map<Integer, byte[]> contentDigests = new HashMap<>();
+        Map<Integer, byte[]> contentDigests = new ArrayMap<>();
         List<X509Certificate[]> signerCerts = new ArrayList<>();
         CertificateFactory certFactory;
         try {
@@ -228,7 +213,7 @@ public class ApkSignatureSchemeV2Verifier {
         }
         ByteBuffer signers;
         try {
-            signers = getLengthPrefixedSlice(v2Block);
+            signers = getLengthPrefixedSlice(signatureInfo.signatureBlock);
         } catch (IOException e) {
             throw new SecurityException("Failed to read list of signers", e);
         }
@@ -255,10 +240,11 @@ public class ApkSignatureSchemeV2Verifier {
 
         verifyIntegrity(
                 contentDigests,
-                apkContents,
-                apkSigningBlockOffset,
-                centralDirOffset,
-                eocdOffset);
+                apkFileDescriptor,
+                signatureInfo.apkSigningBlockOffset,
+                signatureInfo.centralDirOffset,
+                signatureInfo.eocdOffset,
+                signatureInfo.eocd);
 
         return signerCerts.toArray(new X509Certificate[signerCerts.size()][]);
     }
@@ -401,25 +387,38 @@ public class ApkSignatureSchemeV2Verifier {
 
     private static void verifyIntegrity(
             Map<Integer, byte[]> expectedDigests,
-            ByteBuffer apkContents,
-            int apkSigningBlockOffset,
-            int centralDirOffset,
-            int eocdOffset) throws SecurityException {
+            FileDescriptor apkFileDescriptor,
+            long apkSigningBlockOffset,
+            long centralDirOffset,
+            long eocdOffset,
+            ByteBuffer eocdBuf) throws SecurityException {
 
         if (expectedDigests.isEmpty()) {
             throw new SecurityException("No digests provided");
         }
 
-        ByteBuffer beforeApkSigningBlock = sliceFromTo(apkContents, 0, apkSigningBlockOffset);
-        ByteBuffer centralDir = sliceFromTo(apkContents, centralDirOffset, eocdOffset);
+        // We need to verify the integrity of the following three sections of the file:
+        // 1. Everything up to the start of the APK Signing Block.
+        // 2. ZIP Central Directory.
+        // 3. ZIP End of Central Directory (EoCD).
+        // Each of these sections is represented as a separate DataSource instance below.
+
+        // To handle large APKs, these sections are read in 1 MB chunks using memory-mapped I/O to
+        // avoid wasting physical memory. In most APK verification scenarios, the contents of the
+        // APK are already there in the OS's page cache and thus mmap does not use additional
+        // physical memory.
+        DataSource beforeApkSigningBlock =
+                new MemoryMappedFileDataSource(apkFileDescriptor, 0, apkSigningBlockOffset);
+        DataSource centralDir =
+                new MemoryMappedFileDataSource(
+                        apkFileDescriptor, centralDirOffset, eocdOffset - centralDirOffset);
+
         // For the purposes of integrity verification, ZIP End of Central Directory's field Start of
         // Central Directory must be considered to point to the offset of the APK Signing Block.
-        byte[] eocdBytes = new byte[apkContents.capacity() - eocdOffset];
-        apkContents.position(eocdOffset);
-        apkContents.get(eocdBytes);
-        ByteBuffer eocd = ByteBuffer.wrap(eocdBytes);
-        eocd.order(apkContents.order());
-        ZipUtils.setZipEocdCentralDirectoryOffset(eocd, apkSigningBlockOffset);
+        eocdBuf = eocdBuf.duplicate();
+        eocdBuf.order(ByteOrder.LITTLE_ENDIAN);
+        ZipUtils.setZipEocdCentralDirectoryOffset(eocdBuf, apkSigningBlockOffset);
+        DataSource eocd = new ByteBufferDataSource(eocdBuf);
 
         int[] digestAlgorithms = new int[expectedDigests.size()];
         int digestAlgorithmCount = 0;
@@ -427,30 +426,30 @@ public class ApkSignatureSchemeV2Verifier {
             digestAlgorithms[digestAlgorithmCount] = digestAlgorithm;
             digestAlgorithmCount++;
         }
-        Map<Integer, byte[]> actualDigests;
+        byte[][] actualDigests;
         try {
             actualDigests =
                     computeContentDigests(
                             digestAlgorithms,
-                            new ByteBuffer[] {beforeApkSigningBlock, centralDir, eocd});
+                            new DataSource[] {beforeApkSigningBlock, centralDir, eocd});
         } catch (DigestException e) {
             throw new SecurityException("Failed to compute digest(s) of contents", e);
         }
-        for (Map.Entry<Integer, byte[]> entry : expectedDigests.entrySet()) {
-            int digestAlgorithm = entry.getKey();
-            byte[] expectedDigest = entry.getValue();
-            byte[] actualDigest = actualDigests.get(digestAlgorithm);
+        for (int i = 0; i < digestAlgorithms.length; i++) {
+            int digestAlgorithm = digestAlgorithms[i];
+            byte[] expectedDigest = expectedDigests.get(digestAlgorithm);
+            byte[] actualDigest = actualDigests[i];
             if (!MessageDigest.isEqual(expectedDigest, actualDigest)) {
                 throw new SecurityException(
                         getContentDigestAlgorithmJcaDigestAlgorithm(digestAlgorithm)
-                        + " digest of contents did not verify");
+                                + " digest of contents did not verify");
             }
         }
     }
 
-    private static Map<Integer, byte[]> computeContentDigests(
+    private static byte[][] computeContentDigests(
             int[] digestAlgorithms,
-            ByteBuffer[] contents) throws DigestException {
+            DataSource[] contents) throws DigestException {
         // For each digest algorithm the result is computed as follows:
         // 1. Each segment of contents is split into consecutive chunks of 1 MB in size.
         //    The final chunk will be shorter iff the length of segment is not a multiple of 1 MB.
@@ -461,13 +460,18 @@ public class ApkSignatureSchemeV2Verifier {
         //    chunks (uint32 little-endian) and the concatenation of digests of chunks of all
         //    segments in-order.
 
-        int totalChunkCount = 0;
-        for (ByteBuffer input : contents) {
-            totalChunkCount += getChunkCount(input.remaining());
+        long totalChunkCountLong = 0;
+        for (DataSource input : contents) {
+            totalChunkCountLong += getChunkCount(input.size());
         }
+        if (totalChunkCountLong >= Integer.MAX_VALUE / 1024) {
+            throw new DigestException("Too many chunks: " + totalChunkCountLong);
+        }
+        int totalChunkCount = (int) totalChunkCountLong;
 
-        Map<Integer, byte[]> digestsOfChunks = new HashMap<>(totalChunkCount);
-        for (int digestAlgorithm : digestAlgorithms) {
+        byte[][] digestsOfChunks = new byte[digestAlgorithms.length][];
+        for (int i = 0; i < digestAlgorithms.length; i++) {
+            int digestAlgorithm = digestAlgorithms[i];
             int digestOutputSizeBytes = getContentDigestAlgorithmOutputSizeBytes(digestAlgorithm);
             byte[] concatenationOfChunkCountAndChunkDigests =
                     new byte[5 + totalChunkCount * digestOutputSizeBytes];
@@ -476,49 +480,71 @@ public class ApkSignatureSchemeV2Verifier {
                     totalChunkCount,
                     concatenationOfChunkCountAndChunkDigests,
                     1);
-            digestsOfChunks.put(digestAlgorithm, concatenationOfChunkCountAndChunkDigests);
+            digestsOfChunks[i] = concatenationOfChunkCountAndChunkDigests;
         }
 
         byte[] chunkContentPrefix = new byte[5];
         chunkContentPrefix[0] = (byte) 0xa5;
         int chunkIndex = 0;
-        for (ByteBuffer input : contents) {
-            while (input.hasRemaining()) {
-                int chunkSize = Math.min(input.remaining(), CHUNK_SIZE_BYTES);
-                ByteBuffer chunk = getByteBuffer(input, chunkSize);
-                for (int digestAlgorithm : digestAlgorithms) {
-                    String jcaAlgorithmName =
-                            getContentDigestAlgorithmJcaDigestAlgorithm(digestAlgorithm);
-                    MessageDigest md;
-                    try {
-                        md = MessageDigest.getInstance(jcaAlgorithmName);
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(jcaAlgorithmName + " digest not supported", e);
-                    }
-                    chunk.clear();
-                    setUnsignedInt32LittleEndian(chunk.remaining(), chunkContentPrefix, 1);
-                    md.update(chunkContentPrefix);
-                    md.update(chunk);
-                    byte[] concatenationOfChunkCountAndChunkDigests =
-                            digestsOfChunks.get(digestAlgorithm);
+        MessageDigest[] mds = new MessageDigest[digestAlgorithms.length];
+        for (int i = 0; i < digestAlgorithms.length; i++) {
+            String jcaAlgorithmName =
+                    getContentDigestAlgorithmJcaDigestAlgorithm(digestAlgorithms[i]);
+            try {
+                mds[i] = MessageDigest.getInstance(jcaAlgorithmName);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(jcaAlgorithmName + " digest not supported", e);
+            }
+        }
+        // TODO: Compute digests of chunks in parallel when beneficial. This requires some research
+        // into how to parallelize (if at all) based on the capabilities of the hardware on which
+        // this code is running and based on the size of input.
+        int dataSourceIndex = 0;
+        for (DataSource input : contents) {
+            long inputOffset = 0;
+            long inputRemaining = input.size();
+            while (inputRemaining > 0) {
+                int chunkSize = (int) Math.min(inputRemaining, CHUNK_SIZE_BYTES);
+                setUnsignedInt32LittleEndian(chunkSize, chunkContentPrefix, 1);
+                for (int i = 0; i < mds.length; i++) {
+                    mds[i].update(chunkContentPrefix);
+                }
+                try {
+                    input.feedIntoMessageDigests(mds, inputOffset, chunkSize);
+                } catch (IOException e) {
+                    throw new DigestException(
+                            "Failed to digest chunk #" + chunkIndex + " of section #"
+                                    + dataSourceIndex,
+                            e);
+                }
+                for (int i = 0; i < digestAlgorithms.length; i++) {
+                    int digestAlgorithm = digestAlgorithms[i];
+                    byte[] concatenationOfChunkCountAndChunkDigests = digestsOfChunks[i];
                     int expectedDigestSizeBytes =
                             getContentDigestAlgorithmOutputSizeBytes(digestAlgorithm);
-                    int actualDigestSizeBytes = md.digest(concatenationOfChunkCountAndChunkDigests,
-                            5 + chunkIndex * expectedDigestSizeBytes, expectedDigestSizeBytes);
+                    MessageDigest md = mds[i];
+                    int actualDigestSizeBytes =
+                            md.digest(
+                                    concatenationOfChunkCountAndChunkDigests,
+                                    5 + chunkIndex * expectedDigestSizeBytes,
+                                    expectedDigestSizeBytes);
                     if (actualDigestSizeBytes != expectedDigestSizeBytes) {
                         throw new RuntimeException(
                                 "Unexpected output size of " + md.getAlgorithm() + " digest: "
                                         + actualDigestSizeBytes);
                     }
                 }
+                inputOffset += chunkSize;
+                inputRemaining -= chunkSize;
                 chunkIndex++;
             }
+            dataSourceIndex++;
         }
 
-        Map<Integer, byte[]> result = new HashMap<>(digestAlgorithms.length);
-        for (Map.Entry<Integer, byte[]> entry : digestsOfChunks.entrySet()) {
-            int digestAlgorithm = entry.getKey();
-            byte[] input = entry.getValue();
+        byte[][] result = new byte[digestAlgorithms.length][];
+        for (int i = 0; i < digestAlgorithms.length; i++) {
+            int digestAlgorithm = digestAlgorithms[i];
+            byte[] input = digestsOfChunks[i];
             String jcaAlgorithmName = getContentDigestAlgorithmJcaDigestAlgorithm(digestAlgorithm);
             MessageDigest md;
             try {
@@ -527,49 +553,47 @@ public class ApkSignatureSchemeV2Verifier {
                 throw new RuntimeException(jcaAlgorithmName + " digest not supported", e);
             }
             byte[] output = md.digest(input);
-            result.put(digestAlgorithm, output);
+            result[i] = output;
         }
         return result;
     }
 
     /**
-     * Finds the offset of ZIP End of Central Directory (EoCD).
+     * Returns the ZIP End of Central Directory (EoCD) and its offset in the file.
      *
-     * @throws SignatureNotFoundException If the EoCD could not be found
+     * @throws IOException if an I/O error occurs while reading the file.
+     * @throws SignatureNotFoundException if the EoCD could not be found.
      */
-    private static int getEocdOffset(ByteBuffer apkContents) throws SignatureNotFoundException {
-        int eocdOffset = ZipUtils.findZipEndOfCentralDirectoryRecord(apkContents);
-        if (eocdOffset == -1) {
+    private static Pair<ByteBuffer, Long> getEocd(RandomAccessFile apk)
+            throws IOException, SignatureNotFoundException {
+        Pair<ByteBuffer, Long> eocdAndOffsetInFile =
+                ZipUtils.findZipEndOfCentralDirectoryRecord(apk);
+        if (eocdAndOffsetInFile == null) {
             throw new SignatureNotFoundException(
                     "Not an APK file: ZIP End of Central Directory record not found");
         }
-        return eocdOffset;
+        return eocdAndOffsetInFile;
     }
 
-    private static long getCentralDirOffset(ByteBuffer apkContents, int eocdOffset)
+    private static long getCentralDirOffset(ByteBuffer eocd, long eocdOffset)
             throws SignatureNotFoundException {
-        if (ZipUtils.isZip64EndOfCentralDirectoryLocatorPresent(apkContents, eocdOffset)) {
-            throw new SignatureNotFoundException("ZIP64 APK not supported");
-        }
-        ByteBuffer eocd = sliceFromTo(apkContents, eocdOffset, apkContents.capacity());
-
         // Look up the offset of ZIP Central Directory.
-        long centralDirOffsetLong = ZipUtils.getZipEocdCentralDirectoryOffset(eocd);
-        if (centralDirOffsetLong >= eocdOffset) {
+        long centralDirOffset = ZipUtils.getZipEocdCentralDirectoryOffset(eocd);
+        if (centralDirOffset >= eocdOffset) {
             throw new SignatureNotFoundException(
-                    "ZIP Central Directory offset out of range: " + centralDirOffsetLong
+                    "ZIP Central Directory offset out of range: " + centralDirOffset
                     + ". ZIP End of Central Directory offset: " + eocdOffset);
         }
-        long centralDirSizeLong = ZipUtils.getZipEocdCentralDirectorySizeBytes(eocd);
-        if (centralDirOffsetLong + centralDirSizeLong != eocdOffset) {
+        long centralDirSize = ZipUtils.getZipEocdCentralDirectorySizeBytes(eocd);
+        if (centralDirOffset + centralDirSize != eocdOffset) {
             throw new SignatureNotFoundException(
                     "ZIP Central Directory is not immediately followed by End of Central"
                     + " Directory");
         }
-        return centralDirOffsetLong;
+        return centralDirOffset;
     }
 
-    private static final int getChunkCount(int inputSizeBytes) {
+    private static final long getChunkCount(long inputSizeBytes) {
         return (inputSizeBytes + CHUNK_SIZE_BYTES - 1) / CHUNK_SIZE_BYTES;
     }
 
@@ -837,10 +861,9 @@ public class ApkSignatureSchemeV2Verifier {
 
     private static final int APK_SIGNATURE_SCHEME_V2_BLOCK_ID = 0x7109871a;
 
-    private static int findApkSigningBlock(ByteBuffer apkContents, int centralDirOffset)
-            throws SignatureNotFoundException {
-        checkByteOrderLittleEndian(apkContents);
-
+    private static Pair<ByteBuffer, Long> findApkSigningBlock(
+            RandomAccessFile apk, long centralDirOffset)
+                    throws IOException, SignatureNotFoundException {
         // FORMAT:
         // OFFSET       DATA TYPE  DESCRIPTION
         // * @+0  bytes uint64:    size in bytes (excluding this field)
@@ -853,32 +876,42 @@ public class ApkSignatureSchemeV2Verifier {
                     "APK too small for APK Signing Block. ZIP Central Directory offset: "
                             + centralDirOffset);
         }
-        // Check magic field present
-        if ((apkContents.getLong(centralDirOffset - 16) != APK_SIG_BLOCK_MAGIC_LO)
-                || (apkContents.getLong(centralDirOffset - 8) != APK_SIG_BLOCK_MAGIC_HI)) {
+        // Read the magic and offset in file from the footer section of the block:
+        // * uint64:   size of block
+        // * 16 bytes: magic
+        ByteBuffer footer = ByteBuffer.allocate(24);
+        footer.order(ByteOrder.LITTLE_ENDIAN);
+        apk.seek(centralDirOffset - footer.capacity());
+        apk.readFully(footer.array(), footer.arrayOffset(), footer.capacity());
+        if ((footer.getLong(8) != APK_SIG_BLOCK_MAGIC_LO)
+                || (footer.getLong(16) != APK_SIG_BLOCK_MAGIC_HI)) {
             throw new SignatureNotFoundException(
                     "No APK Signing Block before ZIP Central Directory");
         }
         // Read and compare size fields
-        long apkSigBlockSizeLong = apkContents.getLong(centralDirOffset - 24);
-        if ((apkSigBlockSizeLong < 24) || (apkSigBlockSizeLong > Integer.MAX_VALUE - 8)) {
+        long apkSigBlockSizeInFooter = footer.getLong(0);
+        if ((apkSigBlockSizeInFooter < footer.capacity())
+                || (apkSigBlockSizeInFooter > Integer.MAX_VALUE - 8)) {
             throw new SignatureNotFoundException(
-                    "APK Signing Block size out of range: " + apkSigBlockSizeLong);
+                    "APK Signing Block size out of range: " + apkSigBlockSizeInFooter);
         }
-        int apkSigBlockSizeFromFooter = (int) apkSigBlockSizeLong;
-        int totalSize = apkSigBlockSizeFromFooter + 8;
-        int apkSigBlockOffset = centralDirOffset - totalSize;
+        int totalSize = (int) (apkSigBlockSizeInFooter + 8);
+        long apkSigBlockOffset = centralDirOffset - totalSize;
         if (apkSigBlockOffset < 0) {
             throw new SignatureNotFoundException(
                     "APK Signing Block offset out of range: " + apkSigBlockOffset);
         }
-        long apkSigBlockSizeFromHeader = apkContents.getLong(apkSigBlockOffset);
-        if (apkSigBlockSizeFromHeader != apkSigBlockSizeFromFooter) {
+        ByteBuffer apkSigBlock = ByteBuffer.allocate(totalSize);
+        apkSigBlock.order(ByteOrder.LITTLE_ENDIAN);
+        apk.seek(apkSigBlockOffset);
+        apk.readFully(apkSigBlock.array(), apkSigBlock.arrayOffset(), apkSigBlock.capacity());
+        long apkSigBlockSizeInHeader = apkSigBlock.getLong(0);
+        if (apkSigBlockSizeInHeader != apkSigBlockSizeInFooter) {
             throw new SignatureNotFoundException(
                     "APK Signing Block sizes in header and footer do not match: "
-                            + apkSigBlockSizeFromHeader + " vs " + apkSigBlockSizeFromFooter);
+                            + apkSigBlockSizeInHeader + " vs " + apkSigBlockSizeInFooter);
         }
-        return apkSigBlockOffset;
+        return Pair.create(apkSigBlock, apkSigBlockOffset);
     }
 
     private static ByteBuffer findApkSignatureSchemeV2Block(ByteBuffer apkSigningBlock)
@@ -930,12 +963,167 @@ public class ApkSignatureSchemeV2Verifier {
     }
 
     public static class SignatureNotFoundException extends Exception {
+        private static final long serialVersionUID = 1L;
+
         public SignatureNotFoundException(String message) {
             super(message);
         }
 
         public SignatureNotFoundException(String message, Throwable cause) {
             super(message, cause);
+        }
+    }
+
+    /**
+     * Source of data to be digested.
+     */
+    private static interface DataSource {
+
+        /**
+         * Returns the size (in bytes) of the data offered by this source.
+         */
+        long size();
+
+        /**
+         * Feeds the specified region of this source's data into the provided digests. Each digest
+         * instance gets the same data.
+         *
+         * @param offset offset of the region inside this data source.
+         * @param size size (in bytes) of the region.
+         */
+        void feedIntoMessageDigests(MessageDigest[] mds, long offset, int size) throws IOException;
+    }
+
+    /**
+     * {@link DataSource} which provides data from a file descriptor by memory-mapping the sections
+     * of the file requested by
+     * {@link DataSource#feedIntoMessageDigests(MessageDigest[], long, int) feedIntoMessageDigests}.
+     */
+    private static final class MemoryMappedFileDataSource implements DataSource {
+        private static final Os OS = Libcore.os;
+        private static final long MEMORY_PAGE_SIZE_BYTES = OS.sysconf(OsConstants._SC_PAGESIZE);
+
+        private final FileDescriptor mFd;
+        private final long mFilePosition;
+        private final long mSize;
+
+        /**
+         * Constructs a new {@code MemoryMappedFileDataSource} for the specified region of the file.
+         *
+         * @param position start position of the region in the file.
+         * @param size size (in bytes) of the region.
+         */
+        public MemoryMappedFileDataSource(FileDescriptor fd, long position, long size) {
+            mFd = fd;
+            mFilePosition = position;
+            mSize = size;
+        }
+
+        @Override
+        public long size() {
+            return mSize;
+        }
+
+        @Override
+        public void feedIntoMessageDigests(
+                MessageDigest[] mds, long offset, int size) throws IOException {
+            // IMPLEMENTATION NOTE: After a lot of experimentation, the implementation of this
+            // method was settled on a straightforward mmap with prefaulting.
+            //
+            // This method is not using FileChannel.map API because that API does not offset a way
+            // to "prefault" the resulting memory pages. Without prefaulting, performance is about
+            // 10% slower on small to medium APKs, but is significantly worse for APKs in 500+ MB
+            // range. FileChannel.load (which currently uses madvise) doesn't help. Finally,
+            // invoking madvise (MADV_SEQUENTIAL) after mmap with prefaulting wastes quite a bit of
+            // time, which is not compensated for by faster reads.
+
+            // We mmap the smallest region of the file containing the requested data. mmap requires
+            // that the start offset in the file must be a multiple of memory page size. We thus may
+            // need to mmap from an offset less than the requested offset.
+            long filePosition = mFilePosition + offset;
+            long mmapFilePosition =
+                    (filePosition / MEMORY_PAGE_SIZE_BYTES) * MEMORY_PAGE_SIZE_BYTES;
+            int dataStartOffsetInMmapRegion = (int) (filePosition - mmapFilePosition);
+            long mmapRegionSize = size + dataStartOffsetInMmapRegion;
+            long mmapPtr = 0;
+            try {
+                mmapPtr = OS.mmap(
+                        0, // let the OS choose the start address of the region in memory
+                        mmapRegionSize,
+                        OsConstants.PROT_READ,
+                        OsConstants.MAP_SHARED | OsConstants.MAP_POPULATE, // "prefault" all pages
+                        mFd,
+                        mmapFilePosition);
+                // Feeding a memory region into MessageDigest requires the region to be represented
+                // as a direct ByteBuffer.
+                ByteBuffer buf = new DirectByteBuffer(
+                        size,
+                        mmapPtr + dataStartOffsetInMmapRegion,
+                        mFd,  // not really needed, but just in case
+                        null, // no need to clean up -- it's taken care of by the finally block
+                        true  // read only buffer
+                        );
+                for (MessageDigest md : mds) {
+                    buf.position(0);
+                    md.update(buf);
+                }
+            } catch (ErrnoException e) {
+                throw new IOException("Failed to mmap " + mmapRegionSize + " bytes", e);
+            } finally {
+                if (mmapPtr != 0) {
+                    try {
+                        OS.munmap(mmapPtr, mmapRegionSize);
+                    } catch (ErrnoException ignored) {}
+                }
+            }
+        }
+    }
+
+    /**
+     * {@link DataSource} which provides data from a {@link ByteBuffer}.
+     */
+    private static final class ByteBufferDataSource implements DataSource {
+        /**
+         * Underlying buffer. The data is stored between position 0 and the buffer's capacity.
+         * The buffer's position is 0 and limit is equal to capacity.
+         */
+        private final ByteBuffer mBuf;
+
+        public ByteBufferDataSource(ByteBuffer buf) {
+            // Defensive copy, to avoid changes to mBuf being visible in buf.
+            mBuf = buf.slice();
+        }
+
+        @Override
+        public long size() {
+            return mBuf.capacity();
+        }
+
+        @Override
+        public void feedIntoMessageDigests(
+                MessageDigest[] mds, long offset, int size) throws IOException {
+            // There's no way to tell MessageDigest to read data from ByteBuffer from a position
+            // other than the buffer's current position. We thus need to change the buffer's
+            // position to match the requested offset.
+            //
+            // In the future, it may be necessary to compute digests of multiple regions in
+            // parallel. Given that digest computation is a slow operation, we enable multiple
+            // such requests to be fulfilled by this instance. This is achieved by serially
+            // creating a new ByteBuffer corresponding to the requested data range and then,
+            // potentially concurrently, feeding these buffers into MessageDigest instances.
+            ByteBuffer region;
+            synchronized (mBuf) {
+                mBuf.position((int) offset);
+                mBuf.limit((int) offset + size);
+                region = mBuf.slice();
+            }
+
+            for (MessageDigest md : mds) {
+                // Need to reset position to 0 at the start of each iteration because
+                // MessageDigest.update below sets it to the buffer's limit.
+                region.position(0);
+                md.update(region);
+            }
         }
     }
 
