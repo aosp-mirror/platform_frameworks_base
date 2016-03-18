@@ -198,8 +198,9 @@ void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* pa
 
     LOG_ALWAYS_FATAL_IF(mRenderTarget.frameBufferId != 0, "decoration only supported for FBO 0");
     // TODO: Currently assume full FBO damage, due to FrameInfoVisualizer::unionDirty.
-    // Should should scissor safely.
+    // Should should scissor/set mHasDrawn safely.
     mRenderState.scissor().setEnabled(false);
+    mHasDrawn = true;
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setRoundRectClipState(nullptr)
