@@ -891,7 +891,7 @@ public class Location implements Parcelable {
             l.mSpeed = in.readFloat();
             l.mBearing = in.readFloat();
             l.mAccuracy = in.readFloat();
-            l.mExtras = in.readBundle();
+            l.mExtras = Bundle.setDefusable(in.readBundle(), true);
             return l;
         }
 

@@ -181,6 +181,14 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         }
     }
 
+    /** {@hide} */
+    public static Bundle setDefusable(Bundle bundle, boolean defusable) {
+        if (bundle != null) {
+            bundle.setDefusable(defusable);
+        }
+        return bundle;
+    }
+
     /**
      * Clones the current Bundle. The internal map is cloned, but the keys and
      * values to which it refers are copied by reference.
