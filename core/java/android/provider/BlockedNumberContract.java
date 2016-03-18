@@ -44,7 +44,8 @@ import android.os.Bundle;
  * Only the system, the default SMS application, and the default phone app
  * (See {@link android.telecom.TelecomManager#getDefaultDialerPackage()}), and carrier apps
  * (See {@link android.service.carrier.CarrierService}) can read, and write to the blockednumber
- * provider.
+ * provider. However, {@link #canCurrentUserBlockNumbers(Context)} can be accessed by any
+ * application.
  * </p>
  *
  * <h3> Data </h3>
