@@ -412,4 +412,20 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Informs Telecom of a connection level event.
+     *
+     * @param callId The unique ID of the call.
+     * @param event The event.
+     */
+    void onConnectionEvent(String callId, String event) {
+        Log.v(this, "onConnectionEvent: %s", event);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onConnectionEvent(callId, event);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }
