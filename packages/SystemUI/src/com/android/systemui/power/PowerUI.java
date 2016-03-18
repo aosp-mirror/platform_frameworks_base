@@ -183,14 +183,16 @@ public class PowerUI extends SystemUI {
                     return;
                 }
 
+                boolean isPowerSaver = mPowerManager.isPowerSaveMode();
                 if (!plugged
+                        && !isPowerSaver
                         && (bucket < oldBucket || oldPlugged)
                         && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                         && bucket < 0) {
                     // only play SFX when the dialog comes up or the bucket changes
                     final boolean playSound = bucket != oldBucket || oldPlugged;
                     mWarnings.showLowBatteryWarning(playSound);
-                } else if (plugged || (bucket > oldBucket && bucket > 0)) {
+                } else if (isPowerSaver || plugged || (bucket > oldBucket && bucket > 0)) {
                     mWarnings.dismissLowBatteryWarning();
                 } else {
                     mWarnings.updateLowBatteryWarning();
