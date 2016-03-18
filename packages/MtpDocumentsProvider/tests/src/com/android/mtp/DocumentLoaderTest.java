@@ -55,13 +55,6 @@ public class DocumentLoaderTest extends AndroidTestCase {
 
         mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
-        mLoader = new DocumentLoader(
-                new MtpDeviceRecord(
-                        0, "Device", "Key", true, new MtpRoot[0],
-                        TestUtil.OPERATIONS_SUPPORTED, new int[0]),
-                mManager,
-                mResolver,
-                mDatabase);
     }
 
     @Override
@@ -71,6 +64,8 @@ public class DocumentLoaderTest extends AndroidTestCase {
     }
 
     public void testBasic() throws Exception {
+        setUpLoader();
+
         final Uri uri = DocumentsContract.buildChildDocumentsUri(
                 MtpDocumentsProvider.AUTHORITY, mParentIdentifier.mDocumentId);
         setUpDocument(mManager, 40);
@@ -105,6 +100,55 @@ public class DocumentLoaderTest extends AndroidTestCase {
         }
 
         assertEquals(2, mResolver.getChangeCount(uri));
+    }
+
+    public void testError_GetObjectHandles() throws Exception {
+        mManager = new BlockableTestMtpManager(getContext()) {
+            @Override
+            int[] getObjectHandles(int deviceId, int storageId, int parentObjectHandle)
+                    throws IOException {
+                throw new IOException();
+            }
+        };
+        setUpLoader();
+        mManager.setObjectHandles(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, null);
+        try {
+            try (final Cursor cursor = mLoader.queryChildDocuments(
+                    MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {}
+            fail();
+        } catch (IOException exception) {
+            // Expect exception.
+        }
+    }
+
+    public void testError_GetObjectInfo() throws Exception {
+        mManager = new BlockableTestMtpManager(getContext()) {
+            @Override
+            MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
+                if (objectHandle == DocumentLoader.NUM_INITIAL_ENTRIES) {
+                    throw new IOException();
+                } else {
+                    return super.getObjectInfo(deviceId, objectHandle);
+                }
+            }
+        };
+        setUpLoader();
+        setUpDocument(mManager, DocumentLoader.NUM_INITIAL_ENTRIES);
+        try (final Cursor cursor = mLoader.queryChildDocuments(
+                MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION, mParentIdentifier)) {
+            // Even if MtpManager returns an error for a document, loading must complete.
+            assertFalse(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
+        }
+    }
+
+    private void setUpLoader() {
+        mLoader = new DocumentLoader(
+                new MtpDeviceRecord(
+                        0, "Device", "Key", true, new MtpRoot[0],
+                        TestUtil.OPERATIONS_SUPPORTED, new int[0]),
+                mManager,
+                mResolver,
+                mDatabase);
     }
 
     private void setUpDocument(TestMtpManager manager, int count) {

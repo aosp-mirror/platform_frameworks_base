@@ -419,20 +419,16 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         try {
             mProvider.queryChildDocuments("1", null, null);
             fail();
-        } catch (Throwable error) {
-            assertTrue(error instanceof FileNotFoundException);
-        }
+        } catch (FileNotFoundException error) {}
     }
 
     public void testQueryChildDocuments_documentError() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
-        try {
-            mProvider.queryChildDocuments("1", null, null);
-            fail();
-        } catch (Throwable error) {
-            assertTrue(error instanceof FileNotFoundException);
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {
+            assertEquals(0, cursor.getCount());
+            assertFalse(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
         }
     }
 

@@ -81,11 +81,9 @@ class DocumentLoader implements AutoCloseable {
             // 3. startAddingChildDocuemnts.
             // 4. stopAddingChildDocuments - It removes the new document added at the step 2,
             //     because it is not updated between start/stopAddingChildDocuments.
-            task = LoaderTask.create(mDatabase, mMtpManager, mDevice.operationsSupported, parent);
-            task.fillDocuments(loadDocuments(
-                    mMtpManager,
-                    parent.mDeviceId,
-                    task.getUnloadedObjectHandles(NUM_INITIAL_ENTRIES)));
+            task = new LoaderTask(mMtpManager, mDatabase, mDevice.operationsSupported, parent);
+            task.loadObjectHandles();
+            task.loadObjectInfoList(NUM_INITIAL_ENTRIES);
         } else {
             // Once remove the existing task in order to add it to the head of the list.
             mTaskList.remove(task);
@@ -130,15 +128,11 @@ class DocumentLoader implements AutoCloseable {
                 Preconditions.checkState(existingTask.getState() != LoaderTask.STATE_LOADING);
                 mTaskList.remove(existingTask);
             }
-            try {
-                final LoaderTask newTask = LoaderTask.create(
-                        mDatabase, mMtpManager, mDevice.operationsSupported, identifier);
-                mTaskList.addFirst(newTask);
-                return newTask;
-            } catch (IOException exception) {
-                Log.e(MtpDocumentsProvider.TAG, "Failed to create a task for mapping", exception);
-                // Continue to release the background thread.
-            }
+            final LoaderTask newTask = new LoaderTask(
+                    mMtpManager, mDatabase, mDevice.operationsSupported, identifier);
+            newTask.loadObjectHandles();
+            mTaskList.addFirst(newTask);
+            return newTask;
         }
 
         mBackgroundThread = null;
@@ -170,24 +164,6 @@ class DocumentLoader implements AutoCloseable {
     }
 
     /**
-     * Helper method to loads multiple object info.
-     */
-    private static MtpObjectInfo[] loadDocuments(MtpManager manager, int deviceId, int[] handles)
-            throws IOException {
-        final ArrayList<MtpObjectInfo> objects = new ArrayList<>();
-        for (int i = 0; i < handles.length; i++) {
-            final MtpObjectInfo info = manager.getObjectInfo(deviceId, handles[i]);
-            if (info == null) {
-                Log.e(MtpDocumentsProvider.TAG,
-                        "Failed to obtain object info handle=" + handles[i]);
-                continue;
-            }
-            objects.add(info);
-        }
-        return objects.toArray(new MtpObjectInfo[objects.size()]);
-    }
-
-    /**
      * Background thread to fetch object info.
      */
     private class BackgroundLoaderThread extends Thread {
@@ -203,21 +179,13 @@ class DocumentLoader implements AutoCloseable {
                 if (task == null) {
                     return;
                 }
-                try {
-                    final MtpObjectInfo[] objectInfos = loadDocuments(
-                            mMtpManager,
-                            task.mIdentifier.mDeviceId,
-                            task.getUnloadedObjectHandles(NUM_LOADING_ENTRIES));
-                    task.fillDocuments(objectInfos);
-                    final boolean shouldNotify =
-                            task.mLastNotified.getTime() <
-                            new Date().getTime() - NOTIFY_PERIOD_MS ||
-                            task.getState() != LoaderTask.STATE_LOADING;
-                    if (shouldNotify) {
-                        task.notify(mResolver);
-                    }
-                } catch (IOException exception) {
-                    task.setError(exception);
+                task.loadObjectInfoList(NUM_LOADING_ENTRIES);
+                final boolean shouldNotify =
+                        task.mLastNotified.getTime() <
+                        new Date().getTime() - NOTIFY_PERIOD_MS ||
+                        task.getState() != LoaderTask.STATE_LOADING;
+                if (shouldNotify) {
+                    task.notify(mResolver);
                 }
             }
         }
@@ -271,28 +239,50 @@ class DocumentLoader implements AutoCloseable {
      * Each task is responsible for fetching child documents for the given parent document.
      */
     private static class LoaderTask {
-        static final int STATE_LOADING = 0;
-        static final int STATE_COMPLETED = 1;
-        static final int STATE_ERROR = 2;
+        static final int STATE_START = 0;
+        static final int STATE_LOADING = 1;
+        static final int STATE_COMPLETED = 2;
+        static final int STATE_ERROR = 3;
 
+        final MtpManager mManager;
         final MtpDatabase mDatabase;
         final int[] mOperationsSupported;
         final Identifier mIdentifier;
-        final int[] mObjectHandles;
+        int[] mObjectHandles;
+        int mState;
         Date mLastNotified;
-        int mNumLoaded;
-        Exception mError;
+        int mPosition;
+        IOException mError;
 
-        LoaderTask(MtpDatabase database, int[] operationsSupported, Identifier identifier,
-                int[] objectHandles) {
+        LoaderTask(MtpManager manager, MtpDatabase database, int[] operationsSupported,
+                Identifier identifier) {
             Preconditions.checkNotNull(operationsSupported);
-            Preconditions.checkNotNull(objectHandles);
+            mManager = manager;
             mDatabase = database;
             mOperationsSupported = operationsSupported;
             mIdentifier = identifier;
-            mObjectHandles = objectHandles;
-            mNumLoaded = 0;
+            mObjectHandles = null;
+            mState = STATE_START;
+            mPosition = 0;
             mLastNotified = new Date();
+        }
+
+        synchronized void loadObjectHandles() {
+            assert mState == STATE_START;
+            int parentHandle = mIdentifier.mObjectHandle;
+            // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
+            // getObjectHandles if we would like to obtain children under the root.
+            if (mIdentifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
+                parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
+            }
+            try {
+                mObjectHandles = mManager.getObjectHandles(
+                        mIdentifier.mDeviceId, mIdentifier.mStorageId, parentHandle);
+                mState = STATE_LOADING;
+            } catch (IOException error) {
+                mError = error;
+                mState = STATE_ERROR;
+            }
         }
 
         /**
@@ -300,14 +290,15 @@ class DocumentLoader implements AutoCloseable {
          * task.
          * The returned task may have a EXTRA_LOADING flag.
          */
-        Cursor createCursor(ContentResolver resolver, String[] columnNames) throws IOException {
+        synchronized Cursor createCursor(ContentResolver resolver, String[] columnNames)
+                throws IOException {
             final Bundle extras = new Bundle();
             switch (getState()) {
                 case STATE_LOADING:
                     extras.putBoolean(DocumentsContract.EXTRA_LOADING, true);
                     break;
                 case STATE_ERROR:
-                    throw new IOException(mError);
+                    throw mError;
             }
 
             final Cursor cursor =
@@ -319,26 +310,67 @@ class DocumentLoader implements AutoCloseable {
         }
 
         /**
-         * Returns a state of the task.
+         * Stores object information into database.
          */
-        int getState() {
-            if (mError != null) {
-                return STATE_ERROR;
-            } else if (mNumLoaded == mObjectHandles.length) {
-                return STATE_COMPLETED;
-            } else {
-                return STATE_LOADING;
+        void loadObjectInfoList(int count) {
+            synchronized (this) {
+                if (mState != STATE_LOADING) {
+                    return;
+                }
+                if (mPosition == 0) {
+                    try{
+                        mDatabase.getMapper().startAddingDocuments(mIdentifier.mDocumentId);
+                    } catch (FileNotFoundException error) {
+                        mError = error;
+                        mState = STATE_ERROR;
+                        return;
+                    }
+                }
+            }
+            final ArrayList<MtpObjectInfo> infoList = new ArrayList<>();
+            for (int chunkEnd = mPosition + count;
+                    mPosition < mObjectHandles.length && mPosition < chunkEnd;
+                    mPosition++) {
+                try {
+                    infoList.add(mManager.getObjectInfo(
+                            mIdentifier.mDeviceId, mObjectHandles[mPosition]));
+                } catch (IOException error) {
+                    Log.e(MtpDocumentsProvider.TAG, "Failed to load object info", error);
+                }
+            }
+            synchronized (this) {
+                try {
+                    mDatabase.getMapper().putChildDocuments(
+                            mIdentifier.mDeviceId,
+                            mIdentifier.mDocumentId,
+                            mOperationsSupported,
+                            infoList.toArray(new MtpObjectInfo[infoList.size()]));
+                } catch (FileNotFoundException error) {
+                    // Looks like the parent document information is removed.
+                    // Adding documents has already cancelled in Mapper so we don't need to invoke
+                    // stopAddingDocuments.
+                    mError = error;
+                    mState = STATE_ERROR;
+                    return;
+                }
+                if (mPosition >= mObjectHandles.length) {
+                    try{
+                        mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
+                        mState = STATE_COMPLETED;
+                    } catch (FileNotFoundException error) {
+                        mError = error;
+                        mState = STATE_ERROR;
+                        return;
+                    }
+                }
             }
         }
 
         /**
-         * Obtains object handles that have not been loaded yet.
+         * Returns a state of the task.
          */
-        int[] getUnloadedObjectHandles(int count) {
-            return Arrays.copyOfRange(
-                    mObjectHandles,
-                    mNumLoaded,
-                    Math.min(mNumLoaded + count, mObjectHandles.length));
+        int getState() {
+            return mState;
         }
 
         /**
@@ -349,69 +381,9 @@ class DocumentLoader implements AutoCloseable {
             mLastNotified = new Date();
         }
 
-        /**
-         * Stores object information into database.
-         */
-        void fillDocuments(MtpObjectInfo[] objectInfoList) {
-            if (objectInfoList.length == 0 || getState() != STATE_LOADING) {
-                return;
-            }
-            try{
-                if (mNumLoaded == 0) {
-                    mDatabase.getMapper().startAddingDocuments(mIdentifier.mDocumentId);
-                }
-                mDatabase.getMapper().putChildDocuments(
-                        mIdentifier.mDeviceId, mIdentifier.mDocumentId, mOperationsSupported,
-                        objectInfoList);
-                mNumLoaded += objectInfoList.length;
-                if (getState() != STATE_LOADING) {
-                    mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
-                }
-            } catch (FileNotFoundException exception) {
-                setErrorInternal(exception);
-            }
-        }
-
-        /**
-         * Marks the loading task as error.
-         */
-        void setError(Exception error) {
-            final int lastState = getState();
-            setErrorInternal(error);
-            if (lastState == STATE_LOADING) {
-                try {
-                    mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
-                } catch (FileNotFoundException exception) {
-                    setErrorInternal(exception);
-                }
-            }
-        }
-
-        private void setErrorInternal(Exception error) {
-            Log.e(MtpDocumentsProvider.TAG, "Error in DocumentLoader thread", error);
-            mError = error;
-            mNumLoaded = 0;
-        }
-
         private Uri createUri() {
             return DocumentsContract.buildChildDocumentsUri(
                     MtpDocumentsProvider.AUTHORITY, mIdentifier.mDocumentId);
-        }
-
-        /**
-         * Creates a LoaderTask that loads children of the given document.
-         */
-        static LoaderTask create(MtpDatabase database, MtpManager manager,
-                int[] operationsSupported, Identifier parent)
-                throws IOException {
-            int parentHandle = parent.mObjectHandle;
-            // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
-            // getObjectHandles if we would like to obtain children under the root.
-            if (parent.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
-                parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
-            }
-            return new LoaderTask(database, operationsSupported, parent, manager.getObjectHandles(
-                    parent.mDeviceId, parent.mStorageId, parentHandle));
         }
     }
 }
