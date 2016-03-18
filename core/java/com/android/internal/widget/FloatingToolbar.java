@@ -308,9 +308,6 @@ public final class FloatingToolbar {
         private static final int MIN_OVERFLOW_SIZE = 2;
         private static final int MAX_OVERFLOW_SIZE = 4;
 
-        /* The duration of the overflow button vector animation duration. */
-        private static final int OVERFLOW_BUTTON_ANIMATION_DELAY = 400;
-
         private final Context mContext;
         private final View mParent;  // Parent for the popup window.
         private final PopupWindow mPopupWindow;
@@ -374,18 +371,6 @@ public final class FloatingToolbar {
                 setPanelsStatesAtRestingPosition();
                 setContentAreaAsTouchableSurface();
                 mContentContainer.setAlpha(1);
-            }
-        };
-
-        /* Runnable to reset the overflow button's drawable after an overflow transition. */
-        private final Runnable mResetOverflowButtonDrawable = new Runnable() {
-            @Override
-            public void run() {
-                if (mIsOverflowOpen) {
-                    mOverflowButton.setImageDrawable(mArrow);
-                } else {
-                    mOverflowButton.setImageDrawable(mOverflow);
-                }
             }
         };
 
@@ -902,7 +887,9 @@ public final class FloatingToolbar {
                 final Size containerSize = mOverflowPanelSize;
                 setSize(mContentContainer, containerSize);
                 mMainPanel.setAlpha(0);
+                mMainPanel.setVisibility(View.INVISIBLE);
                 mOverflowPanel.setAlpha(1);
+                mOverflowPanel.setVisibility(View.VISIBLE);
                 mOverflowButton.setImageDrawable(mArrow);
 
                 // Update x-coordinates depending on RTL state.
@@ -941,7 +928,9 @@ public final class FloatingToolbar {
                 final Size containerSize = mMainPanelSize;
                 setSize(mContentContainer, containerSize);
                 mMainPanel.setAlpha(1);
+                mMainPanel.setVisibility(View.VISIBLE);
                 mOverflowPanel.setAlpha(0);
+                mOverflowPanel.setVisibility(View.INVISIBLE);
                 mOverflowButton.setImageDrawable(mOverflow);
 
                 if (hasOverflow()) {
@@ -1327,8 +1316,6 @@ public final class FloatingToolbar {
                         mToArrow.start();
                         openOverflow();
                     }
-                    overflowButton.postDelayed(
-                            mResetOverflowButtonDrawable, OVERFLOW_BUTTON_ANIMATION_DELAY);
                 }
             });
             return overflowButton;
@@ -1389,6 +1376,10 @@ public final class FloatingToolbar {
                     // Disable the overflow button while it's animating.
                     // It will be re-enabled when the animation stops.
                     mOverflowButton.setEnabled(false);
+                    // Ensure both panels have visibility turned on when the overflow animation
+                    // starts.
+                    mMainPanel.setVisibility(View.VISIBLE);
+                    mOverflowPanel.setVisibility(View.VISIBLE);
                 }
 
                 @Override
