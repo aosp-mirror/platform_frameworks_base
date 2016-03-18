@@ -750,7 +750,12 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_SUMMARY);
         values.putNull(Document.COLUMN_LAST_MODIFIED);
         values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
-        values.put(Document.COLUMN_FLAGS, 0);
+        values.put(Document.COLUMN_FLAGS, getDocumentFlags(
+                device.operationsSupported,
+                Document.MIME_TYPE_DIR,
+                0,
+                MtpConstants.PROTECTION_STATUS_NONE,
+                DOCUMENT_TYPE_DEVICE));
         values.putNull(Document.COLUMN_SIZE);
 
         extraValues.clear();
@@ -765,7 +770,7 @@ class MtpDatabase {
      * @param values {@link ContentValues} that receives values.
      * @param extraValues {@link ContentValues} that receives extra values for roots.
      * @param parentDocumentId Parent document ID.
-     * @param supportedOperations Array of Operation code supported by the device.
+     * @param operationsSupported Array of Operation code supported by the device.
      * @param root Root to be converted {@link ContentValues}.
      */
     static void getStorageDocumentValues(
@@ -786,7 +791,12 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_SUMMARY);
         values.putNull(Document.COLUMN_LAST_MODIFIED);
         values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
-        values.put(Document.COLUMN_FLAGS, 0);
+        values.put(Document.COLUMN_FLAGS, getDocumentFlags(
+                operationsSupported,
+                Document.MIME_TYPE_DIR,
+                0,
+                MtpConstants.PROTECTION_STATUS_NONE,
+                DOCUMENT_TYPE_STORAGE));
         values.put(Document.COLUMN_SIZE, root.mMaxCapacity - root.mFreeSpace);
 
         extraValues.put(Root.COLUMN_FLAGS, getRootFlags(operationsSupported));
@@ -803,8 +813,8 @@ class MtpDatabase {
      * @param info MTP object info.
      */
     static void getObjectDocumentValues(
-            ContentValues values, int deviceId, String parentId, int[] operationsSupported,
-            MtpObjectInfo info) {
+            ContentValues values, int deviceId, String parentId,
+            int[] operationsSupported, MtpObjectInfo info) {
         values.clear();
         final String mimeType = getMimeType(info);
         values.put(COLUMN_DEVICE_ID, deviceId);
@@ -822,7 +832,7 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_ICON);
         values.put(Document.COLUMN_FLAGS, getDocumentFlags(
                 operationsSupported, mimeType, info.getThumbCompressedSizeLong(),
-                info.getProtectionStatus()));
+                info.getProtectionStatus(), DOCUMENT_TYPE_OBJECT));
         values.put(Document.COLUMN_SIZE, info.getCompressedSizeLong());
     }
 
@@ -861,16 +871,19 @@ class MtpDatabase {
     }
 
     private static int getDocumentFlags(
-            int[] operationsSupported, String mimeType, long thumbnailSize, int protectionState) {
+            @Nullable int[] operationsSupported, String mimeType, long thumbnailSize,
+            int protectionState, @DocumentType int documentType) {
         int flag = 0;
-        if (MtpDeviceRecord.isWritingSupported(operationsSupported) &&
+        if (!mimeType.equals(Document.MIME_TYPE_DIR) &&
+                MtpDeviceRecord.isWritingSupported(operationsSupported) &&
                 protectionState == MtpConstants.PROTECTION_STATUS_NONE) {
             flag |= Document.FLAG_SUPPORTS_WRITE;
         }
         if (MtpDeviceRecord.isSupported(
                 operationsSupported, MtpConstants.OPERATION_DELETE_OBJECT) &&
                 (protectionState == MtpConstants.PROTECTION_STATUS_NONE ||
-                 protectionState == MtpConstants.PROTECTION_STATUS_NON_TRANSFERABLE_DATA)) {
+                 protectionState == MtpConstants.PROTECTION_STATUS_NON_TRANSFERABLE_DATA) &&
+                documentType == DOCUMENT_TYPE_OBJECT) {
             flag |= Document.FLAG_SUPPORTS_DELETE;
         }
         if (mimeType.equals(Document.MIME_TYPE_DIR) &&
