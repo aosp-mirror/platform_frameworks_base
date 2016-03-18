@@ -282,6 +282,24 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
 
+    /**
+     * Connection event used to inform Telecom that it should play the on hold tone.  This is used
+     * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
+     * {@link #sendConnectionEvent(String)}.
+     * @hide
+     */
+    public static final String EVENT_ON_HOLD_TONE_START =
+            "android.telecom.event.ON_HOLD_TONE_START";
+
+    /**
+     * Connection event used to inform Telecom that it should stop the on hold tone.  This is used
+     * to stop a tone when the peer puts the current call on hold.  Sent to Telecom via
+     * {@link #sendConnectionEvent(String)}.
+     * @hide
+     */
+    public static final String EVENT_ON_HOLD_TONE_END =
+            "android.telecom.event.ON_HOLD_TONE_END";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
@@ -429,6 +447,8 @@ public abstract class Connection extends Conferenceable {
         public void onConferenceStarted() {}
         public void onConferenceMergeFailed(Connection c) {}
         public void onExtrasChanged(Connection c, Bundle extras) {}
+        /** @hide */
+        public void onConnectionEvent(Connection c, String event) {}
     }
 
     /**
@@ -1942,6 +1962,18 @@ public abstract class Connection extends Conferenceable {
     protected void notifyConferenceStarted() {
         for (Listener l : mListeners) {
             l.onConferenceStarted();
+        }
+    }
+
+    /**
+     * Sends a connection event to Telecom.
+     *
+     * @param event The connection event.
+     * @hide
+     */
+    protected void sendConnectionEvent(String event) {
+        for (Listener l : mListeners) {
+            l.onConnectionEvent(this, event);
         }
     }
 }

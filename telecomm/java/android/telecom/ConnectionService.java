@@ -611,6 +611,14 @@ public abstract class ConnectionService extends Service {
                 mAdapter.setExtras(id, extras);
             }
         }
+
+        @Override
+        public void onConnectionEvent(Connection connection, String event) {
+            String id = mIdByConnection.get(connection);
+            if (id != null) {
+                mAdapter.onConnectionEvent(id, event);
+            }
+        }
     };
 
     /** {@inheritDoc} */
