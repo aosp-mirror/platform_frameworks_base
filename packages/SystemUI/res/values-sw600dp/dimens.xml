@@ -104,4 +104,7 @@
 
     <!-- The side padding for the task stack. -->
     <dimen name="recents_stack_left_right_padding">64dp</dimen>
+
+    <!-- Keyboard shortcuts helper -->
+    <dimen name="ksh_layout_width">488dp</dimen>
 </resources>
