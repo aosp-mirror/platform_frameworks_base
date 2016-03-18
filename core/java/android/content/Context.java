@@ -691,6 +691,7 @@ public abstract class Context {
      *
      * @see #getSharedPreferencesPath(String)
      * @see #MODE_PRIVATE
+     * @removed
      */
     public abstract SharedPreferences getSharedPreferences(File file, int mode);
 
@@ -813,17 +814,16 @@ public abstract class Context {
      *            to get a path.
      * @return An absolute path to the given file.
      * @see #getSharedPreferences(String, int)
+     * @removed
      */
     public abstract File getSharedPreferencesPath(String name);
 
     /**
      * Returns the absolute path to the directory on the filesystem where all
-     * private files belonging to this app are stored. This is the top-level
-     * directory under which {@link #getFilesDir()}, {@link #getCacheDir()}, etc
-     * are contained. Apps should <em>not</em> create any files or directories
-     * as direct children of this directory, since it's a reserved namespace
-     * belonging to the platform. Instead, use {@link #getDir(String, int)} or
-     * other storage APIs.
+     * private files belonging to this app are stored. Apps should not use this
+     * path directly; they should instead use {@link #getFilesDir()},
+     * {@link #getCacheDir()}, {@link #getDir(String, int)}, or other storage
+     * APIs on this class.
      * <p>
      * The returned path may change over time if the calling app is moved to an
      * adopted storage device, so only relative paths should be persisted.
@@ -831,7 +831,7 @@ public abstract class Context {
      * No additional permissions are required for the calling app to read or
      * write files under the returned path.
      *
-     * @see #getDir(String, int)
+     * @see ApplicationInfo#dataDir
      */
     public abstract File getDataDir();
 
@@ -4168,7 +4168,7 @@ public abstract class Context {
      * Return a new Context object for the current Context but whose storage
      * APIs are backed by device-protected storage.
      * <p>
-     * When a device is encrypted, data stored in this location is encrypted
+     * On devices with direct boot, data stored in this location is encrypted
      * with a key tied to the physical device, and it can be accessed
      * immediately after the device has booted successfully, both
      * <em>before and after</em> the user has authenticated with their
@@ -4206,7 +4206,7 @@ public abstract class Context {
      * storage area for apps unless
      * {@link android.R.attr#defaultToDeviceProtectedStorage} was requested.
      * <p>
-     * When a device is encrypted, data stored in this location is encrypted
+     * On devices with direct boot, data stored in this location is encrypted
      * with a key tied to user credentials, which can be accessed
      * <em>only after</em> the user has entered their credentials (such as a
      * lock pattern or PIN).

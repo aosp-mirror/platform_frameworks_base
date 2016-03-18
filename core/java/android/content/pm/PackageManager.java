@@ -2593,12 +2593,15 @@ public abstract class PackageManager {
     public abstract Intent getLeanbackLaunchIntentForPackage(String packageName);
 
     /**
-     * Return an array of all of the secondary group-ids that have been assigned
-     * to a package.
+     * Return an array of all of the POSIX secondary group IDs that have been
+     * assigned to the given package.
+     * <p>
+     * Note that the same package may have different GIDs under different
+     * {@link UserHandle} on the same device.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
-     *         desired package.
-     * @return Returns an int array of the assigned gids, or null if there are
+     *            desired package.
+     * @return Returns an int array of the assigned GIDs, or null if there are
      *         none.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
@@ -2607,8 +2610,11 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
-     * Return an array of all of the secondary group-ids that have been assigned
-     * to a package.
+     * Return an array of all of the POSIX secondary group IDs that have been
+     * assigned to the given package.
+     * <p>
+     * Note that the same package may have different GIDs under different
+     * {@link UserHandle} on the same device.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
@@ -2622,6 +2628,9 @@ public abstract class PackageManager {
 
     /**
      * Return the UID associated with the given package name.
+     * <p>
+     * Note that the same package will have different UIDs under different
+     * {@link UserHandle} on the same device.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
@@ -2634,6 +2643,9 @@ public abstract class PackageManager {
 
     /**
      * Return the UID associated with the given package name.
+     * <p>
+     * Note that the same package will have different UIDs under different
+     * {@link UserHandle} on the same device.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
@@ -2648,6 +2660,9 @@ public abstract class PackageManager {
 
     /**
      * Return the UID associated with the given package name.
+     * <p>
+     * Note that the same package will have different UIDs under different
+     * {@link UserHandle} on the same device.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.

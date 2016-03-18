@@ -18,7 +18,7 @@ package android.os;
 
 /**
  * The core Android system has died and is going through a runtime restart. All
- * running apps will be promptly be killed.
+ * running apps will be promptly killed.
  */
 public class DeadSystemException extends DeadObjectException {
     public DeadSystemException() {
