@@ -33,7 +33,10 @@ import java.util.Collections;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssMeasurementsEvent implements Parcelable {
-    /** The status of GNSS measurements event. */
+    /**
+     * The status of the GNSS measurements event.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GNSS_LOCATION_DISABLED})
     public @interface GnssMeasurementsStatus {}

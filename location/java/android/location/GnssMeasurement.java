@@ -58,7 +58,10 @@ public final class GnssMeasurement implements Parcelable {
     private static final int HAS_CARRIER_PHASE = (1<<11);
     private static final int HAS_CARRIER_PHASE_UNCERTAINTY = (1<<12);
 
-    /** The status of multipath. */
+    /**
+     * The status of the multipath indicator.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MULTIPATH_INDICATOR_UNKNOWN, MULTIPATH_INDICATOR_DETECTED,
         MULTIPATH_INDICATOR_NOT_USED})
