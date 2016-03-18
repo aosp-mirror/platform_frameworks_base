@@ -202,7 +202,8 @@ device or emulator, click the <strong>Android</strong> tab in the lower left cor
 runtime window to launch the Android runtime window. Click the <strong>Memory</strong> or
 <strong>CPU</strong> tab. </p>
 
-<img src="{@docRoot}images/tools/studio-memory-monitor.png" srcset="{@docRoot}images/tools/studio-memory-monitor_2x.png 2x" width"635" height="171" alt="" />
+<img src="{@docRoot}images/tools/studio-memory-monitor.png" 
+srcset="{@docRoot}images/tools/studio-memory-monitor2x.png 2x" width"635" height="171" alt="" />
     <p class="img-caption"><strong>Figure 4.</strong> Monitor memory and CPU usage.</p>
 
 <h4 id="heap-dump">Heap dump </h4>
