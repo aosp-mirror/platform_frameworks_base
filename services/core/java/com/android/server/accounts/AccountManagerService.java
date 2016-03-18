@@ -797,6 +797,7 @@ public class AccountManagerService
 
     @Override
     public boolean addAccountExplicitly(Account account, String password, Bundle extras) {
+        Bundle.setDefusable(extras, true);
         final int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccountExplicitly: " + account
@@ -873,6 +874,7 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
+                    Bundle.setDefusable(result, true);
                     if (result != null
                             && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
                         // Create a Session for the target user and pass in the bundle
@@ -946,6 +948,7 @@ public class AccountManagerService
     private void completeCloningAccount(IAccountManagerResponse response,
             final Bundle accountCredentials, final Account account, final UserAccounts targetUser,
             final int parentUserId){
+        Bundle.setDefusable(accountCredentials, true);
         long id = clearCallingIdentity();
         try {
             new Session(targetUser, response, account.type, false,
@@ -975,6 +978,7 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
+                    Bundle.setDefusable(result, true);
                     // TODO: Anything to do if if succedded?
                     // TODO: If it failed: Show error notification? Should we remove the shadow
                     // account to avoid retries?
@@ -996,6 +1000,7 @@ public class AccountManagerService
 
     private boolean addAccountInternal(UserAccounts accounts, Account account, String password,
             Bundle extras, boolean restricted, int callingUid) {
+        Bundle.setDefusable(extras, true);
         if (account == null) {
             return false;
         }
@@ -1128,6 +1133,7 @@ public class AccountManagerService
 
         @Override
         public void onResult(Bundle result) {
+            Bundle.setDefusable(result, true);
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
                 try {
@@ -1429,6 +1435,7 @@ public class AccountManagerService
 
         @Override
         public void onResult(Bundle result) {
+            Bundle.setDefusable(result, true);
             if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)
                     && !result.containsKey(AccountManager.KEY_INTENT)) {
                 final boolean removalAllowed = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
@@ -1880,6 +1887,7 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
+                    Bundle.setDefusable(result, true);
                     if (result != null) {
                         String label = result.getString(AccountManager.KEY_AUTH_TOKEN_LABEL);
                         Bundle bundle = new Bundle();
@@ -1904,6 +1912,7 @@ public class AccountManagerService
             final boolean notifyOnAuthFailure,
             final boolean expectActivityLaunch,
             final Bundle loginOptions) {
+        Bundle.setDefusable(loginOptions, true);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAuthToken: " + account
                     + ", response " + response
@@ -2044,6 +2053,7 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
+                    Bundle.setDefusable(result, true);
                     if (result != null) {
                         if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
                             Intent intent = newGrantCredentialsPermissionIntent(
@@ -2206,6 +2216,7 @@ public class AccountManagerService
     public void addAccount(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle optionsIn) {
+        Bundle.setDefusable(optionsIn, true);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccount: accountType " + accountType
                     + ", response " + response
@@ -2280,6 +2291,7 @@ public class AccountManagerService
     public void addAccountAsUser(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle optionsIn, int userId) {
+        Bundle.setDefusable(optionsIn, true);
         int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccount: accountType " + accountType
@@ -2366,6 +2378,7 @@ public class AccountManagerService
             final String[] requiredFeatures,
             final boolean expectActivityLaunch,
             final Bundle optionsIn) {
+        Bundle.setDefusable(optionsIn, true);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG,
                     "startAddAccountSession: accountType " + accountType
@@ -2459,6 +2472,7 @@ public class AccountManagerService
 
         @Override
         public void onResult(Bundle result) {
+            Bundle.setDefusable(result, true);
             mNumResults++;
             Intent intent = null;
             if (result != null
@@ -2543,6 +2557,7 @@ public class AccountManagerService
             boolean expectActivityLaunch,
             Bundle appInfo,
             int userId) {
+        Bundle.setDefusable(sessionBundle, true);
         int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG,
@@ -2698,6 +2713,7 @@ public class AccountManagerService
             final Bundle options,
             final boolean expectActivityLaunch,
             int userId) {
+        Bundle.setDefusable(options, true);
         int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "confirmCredentials: " + account
@@ -2741,6 +2757,7 @@ public class AccountManagerService
     public void updateCredentials(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean expectActivityLaunch,
             final Bundle loginOptions) {
+        Bundle.setDefusable(loginOptions, true);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "updateCredentials: " + account
                     + ", response " + response
@@ -2784,6 +2801,7 @@ public class AccountManagerService
             final String authTokenType,
             final boolean expectActivityLaunch,
             final Bundle loginOptions) {
+        Bundle.setDefusable(loginOptions, true);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG,
                     "startUpdateCredentialsSession: " + account + ", response " + response
@@ -2891,6 +2909,7 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
+                    Bundle.setDefusable(result, true);
                     IAccountManagerResponse response = getResponseAndClose();
                     if (response == null) {
                         return;
@@ -3051,6 +3070,7 @@ public class AccountManagerService
 
         @Override
         public void onResult(Bundle result) {
+            Bundle.setDefusable(result, true);
             mNumResults++;
             if (result == null) {
                 onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
@@ -3685,6 +3705,7 @@ public class AccountManagerService
 
         @Override
         public void onResult(Bundle result) {
+            Bundle.setDefusable(result, true);
             mNumResults++;
             Intent intent = null;
             if (result != null) {

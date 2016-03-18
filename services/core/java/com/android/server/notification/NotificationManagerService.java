@@ -2247,11 +2247,6 @@ public class NotificationManagerService extends SystemService {
         // Sanitize inputs
         notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN,
                 Notification.PRIORITY_MAX);
-        if (notification.extras != null) {
-            // If the remote side sent us bad parcelables, they won't get the
-            // results they want, which is their loss.
-            notification.extras.setDefusable(true);
-        }
 
         // setup local book-keeping
         final StatusBarNotification n = new StatusBarNotification(

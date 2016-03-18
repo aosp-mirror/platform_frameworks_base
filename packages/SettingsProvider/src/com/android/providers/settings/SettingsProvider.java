@@ -207,10 +207,6 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public Bundle call(String method, String name, Bundle args) {
-        // If the remote side sent us bad parcelables, they won't get the
-        // results they want, which is their loss.
-        if (args != null) args.setDefusable(true);
-
         final int requestingUserId = getRequestingUserId(args);
         switch (method) {
             case Settings.CALL_METHOD_GET_GLOBAL: {
