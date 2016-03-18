@@ -88,6 +88,7 @@ public class TaskPersister {
     private final ActivityStackSupervisor mStackSupervisor;
     private final RecentTasks mRecentTasks;
     private final SparseArray<SparseBooleanArray> mTaskIdsInFile = new SparseArray<>();
+    private final File mTaskIdsDir;
 
     /**
      * Value determines write delay mode as follows: < 0 We are Flushing. No delays between writes
@@ -139,10 +140,20 @@ public class TaskPersister {
             }
         }
 
+        mTaskIdsDir = new File(Environment.getDataDirectory(), "system_de");
         mStackSupervisor = stackSupervisor;
         mService = service;
         mRecentTasks = recentTasks;
         mLazyTaskWriterThread = new LazyTaskWriterThread("LazyTaskWriterThread");
+    }
+
+    @VisibleForTesting
+    TaskPersister(File workingDir) {
+        mTaskIdsDir = workingDir;
+        mStackSupervisor = null;
+        mService = null;
+        mRecentTasks = null;
+        mLazyTaskWriterThread = new LazyTaskWriterThread("LazyTaskWriterThreadTest");
     }
 
     void startPersisting() {
@@ -207,8 +218,8 @@ public class TaskPersister {
         return persistedTaskIds.clone();
     }
 
-    private void maybeWritePersistedTaskIdsForUser(@NonNull SparseBooleanArray taskIds,
-            int userId) {
+    @VisibleForTesting
+    void maybeWritePersistedTaskIdsForUser(@NonNull SparseBooleanArray taskIds, int userId) {
         if (userId < 0) {
             return;
         }
@@ -565,8 +576,12 @@ public class TaskPersister {
         return BitmapFactory.decodeFile(filename);
     }
 
-    static File getUserPersistedTaskIdsFile(int userId) {
-        return new File(Environment.getDataSystemDeDirectory(userId), PERSISTED_TASK_IDS_FILENAME);
+    private File getUserPersistedTaskIdsFile(int userId) {
+        File userTaskIdsDir = new File(mTaskIdsDir, String.valueOf(userId));
+        if (!userTaskIdsDir.exists() && !userTaskIdsDir.mkdirs()) {
+            Slog.e(TAG, "Error while creating user directory: " + userTaskIdsDir);
+        }
+        return new File(userTaskIdsDir, PERSISTED_TASK_IDS_FILENAME);
     }
 
     static File getUserTasksDir(int userId) {
