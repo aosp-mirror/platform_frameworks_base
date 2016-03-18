@@ -279,10 +279,6 @@ LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunre
 #                        is not being compiled with that level. Remove once this has changed.
 LOCAL_CLANG_CFLAGS += -Wno-c++11-extensions
 
-# b/22414716: thread_local (android/graphics/Paint.cpp) and Clang don't like each other at the
-#             moment.
-LOCAL_CLANG := false
-
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
