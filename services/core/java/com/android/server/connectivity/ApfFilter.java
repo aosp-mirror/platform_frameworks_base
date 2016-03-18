@@ -90,7 +90,7 @@ public class ApfFilter {
     }
 
     private static final String TAG = "ApfFilter";
-    private static final boolean VDBG = true;
+    private static final boolean VDBG = false;
 
     private final ConnectivityService mConnectivityService;
     private final NetworkAgentInfo mNai;
