@@ -147,7 +147,7 @@ public class SyncRequest implements Parcelable {
     }
 
     private SyncRequest(Parcel in) {
-        mExtras = in.readBundle();
+        mExtras = Bundle.setDefusable(in.readBundle(), true);
         mSyncFlexTimeSecs = in.readLong();
         mSyncRunTimeSecs = in.readLong();
         mIsPeriodic = (in.readInt() != 0);

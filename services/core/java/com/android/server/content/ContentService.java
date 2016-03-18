@@ -286,6 +286,7 @@ public final class ContentService extends IContentService.Stub {
                 UserHandle.getCallingUserId());
     }
 
+    @Override
     public void unregisterContentObserver(IContentObserver observer) {
         if (observer == null) {
             throw new IllegalArgumentException("You must pass a valid observer");
@@ -409,7 +410,9 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public void requestSync(Account account, String authority, Bundle extras) {
+        Bundle.setDefusable(extras, true);
         ContentResolver.validateSyncExtrasBundle(extras);
         int userId = UserHandle.getCallingUserId();
         int uId = Binder.getCallingUid();
@@ -438,6 +441,7 @@ public final class ContentService extends IContentService.Stub {
      * Depending on the request, we enqueue to suit in the SyncManager.
      * @param request The request object. Validation of this object is done by its builder.
      */
+    @Override
     public void sync(SyncRequest request) {
         syncAsUser(request, UserHandle.getCallingUserId());
     }
@@ -446,6 +450,7 @@ public final class ContentService extends IContentService.Stub {
      * If the user id supplied is different to the calling user, the caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission.
      */
+    @Override
     public void syncAsUser(SyncRequest request, int userId) {
         enforceCrossUserPermission(userId, "no permission to request sync as user: " + userId);
         int callerUid = Binder.getCallingUid();
@@ -544,6 +549,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public void cancelRequest(SyncRequest request) {
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return;
@@ -678,6 +684,7 @@ public final class ContentService extends IContentService.Stub {
     @Override
     public void addPeriodicSync(Account account, String authority, Bundle extras,
                                 long pollFrequency) {
+        Bundle.setDefusable(extras, true);
         if (account == null) {
             throw new IllegalArgumentException("Account must not be null");
         }
@@ -706,7 +713,9 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public void removePeriodicSync(Account account, String authority, Bundle extras) {
+        Bundle.setDefusable(extras, true);
         if (account == null) {
             throw new IllegalArgumentException("Account must not be null");
         }
@@ -728,7 +737,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
-
+    @Override
     public List<PeriodicSync> getPeriodicSyncs(Account account, String providerName,
                                                ComponentName cname) {
         if (account == null) {
@@ -750,6 +759,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public int getIsSyncable(Account account, String providerName) {
         return getIsSyncableAsUser(account, providerName, UserHandle.getCallingUserId());
     }
@@ -758,6 +768,7 @@ public final class ContentService extends IContentService.Stub {
      * If the user id supplied is different to the calling user, the caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission.
      */
+    @Override
     public int getIsSyncableAsUser(Account account, String providerName, int userId) {
         enforceCrossUserPermission(userId,
                 "no permission to read the sync settings for user " + userId);
@@ -777,6 +788,7 @@ public final class ContentService extends IContentService.Stub {
         return -1;
     }
 
+    @Override
     public void setIsSyncable(Account account, String providerName, int syncable) {
         if (TextUtils.isEmpty(providerName)) {
             throw new IllegalArgumentException("Authority must not be empty");
@@ -848,11 +860,11 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public boolean isSyncActive(Account account, String authority, ComponentName cname) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
         int userId = UserHandle.getCallingUserId();
-        int callingUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -866,6 +878,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public List<SyncInfo> getCurrentSyncs() {
         return getCurrentSyncsAsUser(UserHandle.getCallingUserId());
     }
@@ -874,6 +887,7 @@ public final class ContentService extends IContentService.Stub {
      * If the user id supplied is different to the calling user, the caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission.
      */
+    @Override
     public List<SyncInfo> getCurrentSyncsAsUser(int userId) {
         enforceCrossUserPermission(userId,
                 "no permission to read the sync settings for user " + userId);
@@ -892,6 +906,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public SyncStatusInfo getSyncStatus(Account account, String authority, ComponentName cname) {
         return getSyncStatusAsUser(account, authority, cname, UserHandle.getCallingUserId());
     }
@@ -900,6 +915,7 @@ public final class ContentService extends IContentService.Stub {
      * If the user id supplied is different to the calling user, the caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission.
      */
+    @Override
     public SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
                                               ComponentName cname, int userId) {
         if (TextUtils.isEmpty(authority)) {
@@ -911,7 +927,6 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
 
-        int callerUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
@@ -930,6 +945,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public boolean isSyncPending(Account account, String authority, ComponentName cname) {
         return isSyncPendingAsUser(account, authority, cname, UserHandle.getCallingUserId());
     }
@@ -941,7 +957,6 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to read the sync stats");
         enforceCrossUserPermission(userId,
                 "no permission to retrieve the sync settings for user " + userId);
-        int callerUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         SyncManager syncManager = getSyncManager();
         if (syncManager == null) return false;
@@ -959,6 +974,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
         long identityToken = clearCallingIdentity();
         try {
@@ -971,6 +987,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public void removeStatusChangeListener(ISyncStatusObserver callback) {
         long identityToken = clearCallingIdentity();
         try {
@@ -1027,6 +1044,7 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void putCache(String packageName, Uri key, Bundle value, int userId) {
+        Bundle.setDefusable(value, true);
         enforceCrossUserPermission(userId, TAG);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CACHE_CONTENT, TAG);
         mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
@@ -1113,6 +1131,7 @@ public final class ContentService extends IContentService.Stub {
                 }
             }
 
+            @Override
             public void binderDied() {
                 synchronized (observersLock) {
                     removeObserverLocked(observer);

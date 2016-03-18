@@ -1412,7 +1412,9 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
         try {
-            return provider.call(mPackageName, method, arg, extras);
+            final Bundle res = provider.call(mPackageName, method, arg, extras);
+            Bundle.setDefusable(res, true);
+            return res;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.

@@ -957,7 +957,7 @@ public class Notification implements Parcelable
             if (in.readInt() == 1) {
                 actionIntent = PendingIntent.CREATOR.createFromParcel(in);
             }
-            mExtras = in.readBundle();
+            mExtras = Bundle.setDefusable(in.readBundle(), true);
             mRemoteInputs = in.createTypedArray(RemoteInput.CREATOR);
         }
 
@@ -1487,7 +1487,7 @@ public class Notification implements Parcelable
 
         mSortKey = parcel.readString();
 
-        extras = parcel.readBundle(); // may be null
+        extras = Bundle.setDefusable(parcel.readBundle(), true); // may be null
 
         actions = parcel.createTypedArray(Action.CREATOR); // may be null
 
