@@ -302,9 +302,6 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         return false;
     }
 
-    // Unmount storage provided by root namespace and mount requested view
-    UnmountTree("/storage");
-
     String8 storageSource;
     if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
         storageSource = "/mnt/runtime/default";
@@ -667,12 +664,24 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   return pid;
 }
 
+static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* env, jclass) {
+    // Zygote process unmount root storage space initially before every child processes are forked.
+    // Every forked child processes (include SystemServer) only mount their own root storage space
+    // And no need unmount storage operation in MountEmulatedStorage method.
+    // Zygote process does not utilize root storage spaces and unshared its mount namespace from the ART.
+
+    UnmountTree("/storage");
+    return;
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
-      (void *) com_android_internal_os_Zygote_nativeForkSystemServer }
+      (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
+    { "nativeUnmountStorageOnInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
