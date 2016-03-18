@@ -86,6 +86,11 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
+    public void rebootSafeMode(boolean confirm, boolean wait) {
+        // pass for now.
+    }
+
+    @Override
     public void shutdown(boolean confirm, String reason, boolean wait) {
         // pass for now.
     }
