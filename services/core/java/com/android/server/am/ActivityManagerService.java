@@ -6608,7 +6608,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         ArraySet<String> completedIsas = new ArraySet<String>();
         for (String abi : Build.SUPPORTED_ABIS) {
-            Process.establishZygoteConnectionForAbi(abi);
+            Process.zygoteProcess.establishZygoteConnectionForAbi(abi);
             final String instructionSet = VMRuntime.getInstructionSet(abi);
             if (!completedIsas.contains(instructionSet)) {
                 try {
