@@ -851,6 +851,7 @@ public abstract class AccessibilityService extends Service {
                     return connection.getMagnificationScale();
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain scale", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return 1.0f;
@@ -879,6 +880,7 @@ public abstract class AccessibilityService extends Service {
                     return connection.getMagnificationCenterX();
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain center X", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return 0.0f;
@@ -907,6 +909,7 @@ public abstract class AccessibilityService extends Service {
                     return connection.getMagnificationCenterY();
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain center Y", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return 0.0f;
@@ -933,6 +936,7 @@ public abstract class AccessibilityService extends Service {
                     return connection.getMagnifiedRegion();
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain magnified region", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return Region.obtain();
@@ -961,6 +965,7 @@ public abstract class AccessibilityService extends Service {
                     return connection.resetMagnification(animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to reset", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return false;
@@ -989,6 +994,7 @@ public abstract class AccessibilityService extends Service {
                             scale, Float.NaN, Float.NaN, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set scale", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return false;
@@ -1020,6 +1026,7 @@ public abstract class AccessibilityService extends Service {
                             Float.NaN, centerX, centerY, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set center", re);
+                    re.rethrowFromSystemServer();
                 }
             }
             return false;
@@ -1254,10 +1261,7 @@ public abstract class AccessibilityService extends Service {
                    Log.w(LOG_TAG, "Failed to set soft keyboard behavior", re);
                    re.rethrowFromSystemServer();
                }
-           } else {
-               throw new RuntimeException("AccessibilityServiceConnection is null");
            }
-
            return false;
         }
 
@@ -1301,6 +1305,7 @@ public abstract class AccessibilityService extends Service {
                 return connection.performGlobalAction(action);
             } catch (RemoteException re) {
                 Log.w(LOG_TAG, "Error while calling performGlobalAction", re);
+                re.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1349,6 +1354,7 @@ public abstract class AccessibilityService extends Service {
                 return connection.getServiceInfo();
             } catch (RemoteException re) {
                 Log.w(LOG_TAG, "Error while getting AccessibilityServiceInfo", re);
+                re.rethrowFromSystemServer();
             }
         }
         return null;
@@ -1382,6 +1388,7 @@ public abstract class AccessibilityService extends Service {
                 AccessibilityInteractionClient.getInstance().clearCache();
             } catch (RemoteException re) {
                 Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
+                re.rethrowFromSystemServer();
             }
         }
     }
