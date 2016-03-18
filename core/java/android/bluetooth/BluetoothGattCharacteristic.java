@@ -15,6 +15,9 @@
  */
 package android.bluetooth;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.ParcelUuid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +29,7 @@ import java.util.UUID;
  * {@link BluetoothGattService}. The characteristic contains a value as well as
  * additional information and optional GATT descriptors, {@link BluetoothGattDescriptor}.
  */
-public class BluetoothGattCharacteristic {
+public class BluetoothGattCharacteristic implements Parcelable {
 
     /**
      * Characteristic proprty: Characteristic is broadcastable.
@@ -242,6 +245,15 @@ public class BluetoothGattCharacteristic {
         initCharacteristic(service, uuid, instanceId, properties, permissions);
     }
 
+    /**
+     * Create a new BluetoothGattCharacteristic
+     * @hide
+     */
+    public BluetoothGattCharacteristic(UUID uuid, int instanceId,
+                                       int properties, int permissions) {
+        initCharacteristic(null, uuid, instanceId, properties, permissions);
+    }
+
     private void initCharacteristic(BluetoothGattService service,
                                     UUID uuid, int instanceId,
                                     int properties, int permissions) {
@@ -257,6 +269,50 @@ public class BluetoothGattCharacteristic {
             mWriteType = WRITE_TYPE_NO_RESPONSE;
         } else {
             mWriteType = WRITE_TYPE_DEFAULT;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeParcelable(new ParcelUuid(mUuid), 0);
+        out.writeInt(mInstance);
+        out.writeInt(mProperties);
+        out.writeInt(mPermissions);
+        out.writeTypedList(mDescriptors);
+    }
+
+    public static final Parcelable.Creator<BluetoothGattCharacteristic> CREATOR
+            = new Parcelable.Creator<BluetoothGattCharacteristic>() {
+        public BluetoothGattCharacteristic createFromParcel(Parcel in) {
+            return new BluetoothGattCharacteristic(in);
+        }
+
+        public BluetoothGattCharacteristic[] newArray(int size) {
+            return new BluetoothGattCharacteristic[size];
+        }
+    };
+
+    private BluetoothGattCharacteristic(Parcel in) {
+        mUuid = ((ParcelUuid)in.readParcelable(null)).getUuid();
+        mInstance = in.readInt();
+        mProperties = in.readInt();
+        mPermissions = in.readInt();
+
+        mDescriptors = new ArrayList<BluetoothGattDescriptor>();
+
+        ArrayList<BluetoothGattDescriptor> descs =
+                in.createTypedArrayList(BluetoothGattDescriptor.CREATOR);
+        if (descs != null) {
+            for (BluetoothGattDescriptor desc: descs) {
+                desc.setCharacteristic(this);
+                mDescriptors.add(desc);
+            }
         }
     }
 

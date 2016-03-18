@@ -16,6 +16,7 @@
 package android.bluetooth;
 
 import android.os.ParcelUuid;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.ScanResult;
 
@@ -29,20 +30,7 @@ oneway interface IBluetoothGattCallback {
                                  in boolean connected, in String address);
     void onScanResult(in ScanResult scanResult);
     void onBatchScanResults(in List<ScanResult> batchResults);
-    void onGetService(in String address, in int srvcType, in int srvcInstId,
-                      in ParcelUuid srvcUuid);
-    void onGetIncludedService(in String address, in int srvcType, in int srvcInstId,
-                              in ParcelUuid srvcUuid, in int inclSrvcType,
-                              in int inclSrvcInstId, in ParcelUuid inclSrvcUuid);
-    void onGetCharacteristic(in String address, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid,
-                             in int charProps);
-    void onGetDescriptor(in String address, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid,
-                             in int descrInstId, in ParcelUuid descrUuid);
-    void onSearchComplete(in String address, in int status);
+    void onSearchComplete(in String address, in List<BluetoothGattService> services, in int status);
     void onCharacteristicRead(in String address, in int status, in int srvcType,
                              in int srvcInstId, in ParcelUuid srvcUuid,
                              in int charInstId, in ParcelUuid charUuid,

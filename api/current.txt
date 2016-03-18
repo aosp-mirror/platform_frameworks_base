@@ -6756,9 +6756,10 @@ package android.bluetooth {
     method public void onServicesDiscovered(android.bluetooth.BluetoothGatt, int);
   }
 
-  public class BluetoothGattCharacteristic {
+  public class BluetoothGattCharacteristic implements android.os.Parcelable {
     ctor public BluetoothGattCharacteristic(java.util.UUID, int, int);
     method public boolean addDescriptor(android.bluetooth.BluetoothGattDescriptor);
+    method public int describeContents();
     method public android.bluetooth.BluetoothGattDescriptor getDescriptor(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattDescriptor> getDescriptors();
     method public java.lang.Float getFloatValue(int, int);
@@ -6776,6 +6777,8 @@ package android.bluetooth {
     method public boolean setValue(int, int, int, int);
     method public boolean setValue(java.lang.String);
     method public void setWriteType(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattCharacteristic> CREATOR;
     field public static final int FORMAT_FLOAT = 52; // 0x34
     field public static final int FORMAT_SFLOAT = 50; // 0x32
     field public static final int FORMAT_SINT16 = 34; // 0x22
@@ -6806,13 +6809,16 @@ package android.bluetooth {
     field protected java.util.List<android.bluetooth.BluetoothGattDescriptor> mDescriptors;
   }
 
-  public class BluetoothGattDescriptor {
+  public class BluetoothGattDescriptor implements android.os.Parcelable {
     ctor public BluetoothGattDescriptor(java.util.UUID, int);
+    method public int describeContents();
     method public android.bluetooth.BluetoothGattCharacteristic getCharacteristic();
     method public int getPermissions();
     method public java.util.UUID getUuid();
     method public byte[] getValue();
     method public boolean setValue(byte[]);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattDescriptor> CREATOR;
     field public static final byte[] DISABLE_NOTIFICATION_VALUE;
     field public static final byte[] ENABLE_INDICATION_VALUE;
     field public static final byte[] ENABLE_NOTIFICATION_VALUE;
@@ -6855,16 +6861,19 @@ package android.bluetooth {
     method public void onServiceAdded(int, android.bluetooth.BluetoothGattService);
   }
 
-  public class BluetoothGattService {
+  public class BluetoothGattService implements android.os.Parcelable {
     ctor public BluetoothGattService(java.util.UUID, int);
     method public boolean addCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
     method public boolean addService(android.bluetooth.BluetoothGattService);
+    method public int describeContents();
     method public android.bluetooth.BluetoothGattCharacteristic getCharacteristic(java.util.UUID);
     method public java.util.List<android.bluetooth.BluetoothGattCharacteristic> getCharacteristics();
     method public java.util.List<android.bluetooth.BluetoothGattService> getIncludedServices();
     method public int getInstanceId();
     method public int getType();
     method public java.util.UUID getUuid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothGattService> CREATOR;
     field public static final int SERVICE_TYPE_PRIMARY = 0; // 0x0
     field public static final int SERVICE_TYPE_SECONDARY = 1; // 0x1
     field protected java.util.List<android.bluetooth.BluetoothGattCharacteristic> mCharacteristics;
