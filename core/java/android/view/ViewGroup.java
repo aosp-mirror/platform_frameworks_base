@@ -4994,6 +4994,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child.hasFocus()) {
             requestChildFocus(child, child.findFocus());
         }
+        dispatchVisibilityAggregated(isAttachedToWindow() && getWindowVisibility() == VISIBLE
+                && isShown());
     }
 
     /**
