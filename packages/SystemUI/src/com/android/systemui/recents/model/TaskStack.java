@@ -219,7 +219,7 @@ public class TaskStack {
          * Notifies when a task has been removed from the stack.
          */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, AnimationProps animation);
+            Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture);
 
         /**
          * Notifies when a task has been removed from the history.
@@ -513,14 +513,15 @@ public class TaskStack {
      * Removes a task from the stack, with an additional {@param animation} hint to the callbacks on
      * how they should update themselves.
      */
-    public void removeTask(Task t, AnimationProps animation) {
+    public void removeTask(Task t, AnimationProps animation, boolean fromDockGesture) {
         if (mStackTaskList.contains(t)) {
             boolean wasFrontMostTask = (getStackFrontMostTask(false /* includeFreeform */) == t);
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask, animation);
+                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask, animation,
+                        fromDockGesture);
             }
         } else if (mHistoryTaskList.contains(t)) {
             removeTaskImpl(mHistoryTaskList, t);
@@ -558,9 +559,9 @@ public class TaskStack {
                 if (notifyStackChanges) {
                     // If we are notifying, then remove the task now, otherwise the raw task list
                     // will be reset at the end of this method
-                    removeTask(task, AnimationProps.IMMEDIATE);
+                    removeTask(task, AnimationProps.IMMEDIATE, false /* fromDockGesture */);
                     mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null,
-                            AnimationProps.IMMEDIATE);
+                            AnimationProps.IMMEDIATE, false /* fromDockGesture */);
                 }
             }
             task.setGroup(null);

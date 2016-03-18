@@ -245,7 +245,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             if (row.getViewType() == TASK_ROW_VIEW_TYPE) {
                 TaskRow taskRow = (TaskRow) row;
                 Task task = taskRow.task;
-                mStack.removeTask(task, AnimationProps.IMMEDIATE);
+                mStack.removeTask(task, AnimationProps.IMMEDIATE, false /* fromDockGesture */);
                 EventBus.getDefault().send(new DeleteTaskDataEvent(task));
                 i = removeTaskRow(i);
             }
@@ -326,7 +326,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     public void onTaskRemoved(Task task, int position) {
         // Since this is removed from the history, we need to update the stack as well to ensure
         // that the model is correct. Since the stack is hidden, we can update it immediately.
-        mStack.removeTask(task, AnimationProps.IMMEDIATE);
+        mStack.removeTask(task, AnimationProps.IMMEDIATE, false /* fromDockGesture */);
         removeTaskRow(position);
         if (mRows.isEmpty()) {
             dismissHistory();
