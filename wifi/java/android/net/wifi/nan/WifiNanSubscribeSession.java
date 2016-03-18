@@ -16,6 +16,8 @@
 
 package android.net.wifi.nan;
 
+import android.util.Log;
+
 /**
  * A representation of a NAN subscribe session. Created when
  * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} is
@@ -25,12 +27,13 @@ package android.net.wifi.nan;
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanSubscribeSession extends WifiNanSession {
+    private static final String TAG = "WifiNanSubscribeSession";
+
     /**
      * {@hide}
      */
-    public WifiNanSubscribeSession(WifiNanManager manager, int sessionId,
-            WifiNanSessionCallback callback) {
-        super(manager, sessionId, callback);
+    public WifiNanSubscribeSession(WifiNanManager manager, int sessionId) {
+        super(manager, sessionId);
     }
 
     /**
@@ -43,10 +46,16 @@ public class WifiNanSubscribeSession extends WifiNanSession {
      */
     public void updateSubscribe(SubscribeConfig subscribeConfig) {
         if (mTerminated) {
-            mCallback.onSessionConfigFail(WifiNanSessionCallback.FAIL_REASON_SESSION_TERMINATED);
+            Log.w(TAG, "updateSubscribe: called on terminated session");
             return;
         } else {
-            mManager.updateSubscribe(mSessionId, subscribeConfig);
+            WifiNanManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "updateSubscribe: called post GC on WifiNanManager");
+                return;
+            }
+
+            mgr.updateSubscribe(mSessionId, subscribeConfig);
         }
     }
 }

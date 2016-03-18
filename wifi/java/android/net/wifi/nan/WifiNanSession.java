@@ -18,6 +18,8 @@ package android.net.wifi.nan;
 
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
+
 /**
  * A representation of a single publish or subscribe NAN session. This object
  * will not be created directly - only its child classes are available:
@@ -30,22 +32,29 @@ public class WifiNanSession {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
-    protected WifiNanManager mManager;
-    protected final int mSessionId;
-    protected final WifiNanSessionCallback mCallback;
+    /**
+     * @hide
+     */
+    protected WeakReference<WifiNanManager> mMgr;
 
+    /**
+     * @hide
+     */
+    protected final int mSessionId;
+
+    /**
+     * @hide
+     */
     protected boolean mTerminated = false;
 
     /**
      * {@hide}
      */
-    public WifiNanSession(WifiNanManager manager, int sessionId,
-            WifiNanSessionCallback callback) {
+    public WifiNanSession(WifiNanManager manager, int sessionId) {
         if (VDBG) Log.v(TAG, "New client created: manager=" + manager + ", sessionId=" + sessionId);
 
-        mManager = manager;
+        mMgr = new WeakReference<>(manager);
         mSessionId = sessionId;
-        mCallback = callback;
     }
 
     /**
@@ -55,9 +64,29 @@ public class WifiNanSession {
      * additional operations are termination.
      */
     public void terminate() {
-        mManager.terminateSession(mSessionId);
+        WifiNanManager mgr = mMgr.get();
+        if (mgr == null) {
+            Log.w(TAG, "terminate: called post GC on WifiNanManager");
+            return;
+        }
+        mgr.terminateSession(mSessionId);
         mTerminated = true;
-        mManager = null;
+        mMgr.clear();
+    }
+
+    /**
+     * Sets the status of the session to terminated - i.e. an indication that
+     * already terminated rather than executing a termination.
+     *
+     * @hide
+     */
+    public void setTerminated() {
+        if (mTerminated) {
+            Log.w(TAG, "terminate: already terminated.");
+            return;
+        }
+        mTerminated = true;
+        mMgr.clear();
     }
 
     @Override
@@ -66,8 +95,8 @@ public class WifiNanSession {
             Log.w(TAG, "WifiNanSession mSessionId=" + mSessionId
                     + " was not explicitly terminated. The session may use resources until "
                     + "terminated so step should be done explicitly");
+            terminate();
         }
-        terminate();
     }
 
     /**
@@ -89,11 +118,16 @@ public class WifiNanSession {
      */
     public void sendMessage(int peerId, byte[] message, int messageLength, int messageId) {
         if (mTerminated) {
-            mCallback.onMessageSendFail(messageId,
-                    WifiNanSessionCallback.FAIL_REASON_SESSION_TERMINATED);
+            Log.w(TAG, "sendMessage: called on terminated session");
             return;
-        }
+        } else {
+            WifiNanManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "sendMessage: called post GC on WifiNanManager");
+                return;
+            }
 
-        mManager.sendMessage(mSessionId, peerId, message, messageLength, messageId);
+            mgr.sendMessage(mSessionId, peerId, message, messageLength, messageId);
+        }
     }
 }

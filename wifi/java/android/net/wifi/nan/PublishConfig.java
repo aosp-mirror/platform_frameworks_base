@@ -24,8 +24,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN publish session. Built using
  * {@link PublishConfig.Builder}. Publish is done using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback, int)} or
- * {@link WifiNanPublishSession#publish(PublishConfig)}.
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} or
+ * {@link WifiNanPublishSession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -265,6 +265,45 @@ public class PublishConfig implements Parcelable {
     }
 
     /**
+     * Validates that the contents of the PublishConfig are valid. Otherwise
+     * throws an IllegalArgumentException.
+     *
+     * @hide
+     */
+    public void validate() throws IllegalArgumentException {
+        if (mServiceSpecificInfoLength != 0 && (mServiceSpecificInfo == null
+                || mServiceSpecificInfo.length < mServiceSpecificInfoLength)) {
+            throw new IllegalArgumentException("Non-matching combination of "
+                    + "serviceSpecificInfo and serviceSpecificInfoLength");
+        }
+        if (mTxFilterLength != 0 && (mTxFilter == null || mTxFilter.length < mTxFilterLength)) {
+            throw new IllegalArgumentException(
+                    "Non-matching combination of txFilter and txFilterLength");
+        }
+        if (mRxFilterLength != 0 && (mRxFilter == null || mRxFilter.length < mRxFilterLength)) {
+            throw new IllegalArgumentException(
+                    "Non-matching combination of rxFilter and rxFilterLength");
+        }
+        if (mPublishType < PUBLISH_TYPE_UNSOLICITED || mPublishType > PUBLISH_TYPE_SOLICITED) {
+            throw new IllegalArgumentException("Invalid publishType - " + mPublishType);
+        }
+        if (mPublishCount < 0) {
+            throw new IllegalArgumentException("Invalid publishCount - must be non-negative");
+        }
+        if (mTtlSec < 0) {
+            throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
+        }
+        if (mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED && mRxFilterLength != 0) {
+            throw new IllegalArgumentException("Invalid publish config: UNSOLICITED "
+                    + "publishes (active) can't have an Rx filter");
+        }
+        if (mPublishType == PublishConfig.PUBLISH_TYPE_SOLICITED && mTxFilterLength != 0) {
+            throw new IllegalArgumentException("Invalid publish config: SOLICITED "
+                    + "publishes (passive) can't have a Tx filter");
+        }
+    }
+
+    /**
      * Builder used to build {@link PublishConfig} objects.
      */
     public static final class Builder {
@@ -417,7 +456,7 @@ public class PublishConfig implements Parcelable {
          * Sets the number of times a solicited (
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will transmit a packet. When the count is reached an event will be
-         * generated for {@link WifiNanSessionCallback#onPublishTerminated(int)}
+         * generated for {@link WifiNanSessionCallback#onSessionTerminated(int)}
          * with reason={@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param publishCount Number of publish packets to transmit.
@@ -437,7 +476,7 @@ public class PublishConfig implements Parcelable {
          * {@link PublishConfig.Builder#setPublishCount(int)}) publish session
          * will be alive - i.e. transmitting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanSessionCallback#onPublishTerminated(int)} with reason=
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with reason=
          * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
@@ -454,7 +493,7 @@ public class PublishConfig implements Parcelable {
 
         /**
          * Configure whether a publish terminate notification
-         * {@link WifiNanSessionCallback#onPublishTerminated(int)} is reported
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the

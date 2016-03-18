@@ -25,7 +25,7 @@ import java.util.Arrays;
  * Defines the configuration of a NAN subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
  * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} or
- * {@link WifiNanSubscribeSession#subscribe(SubscribeConfig)}.
+ * {@link WifiNanSubscribeSession#updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -287,6 +287,49 @@ public class SubscribeConfig implements Parcelable {
     }
 
     /**
+     * Validates that the contents of the SubscribeConfig are valid. Otherwise
+     * throws an IllegalArgumentException.
+     *
+     * @hide
+     */
+    public void validate() throws IllegalArgumentException {
+        if (mServiceSpecificInfoLength != 0 && (mServiceSpecificInfo == null
+                || mServiceSpecificInfo.length < mServiceSpecificInfoLength)) {
+            throw new IllegalArgumentException("Non-matching combination of "
+                    + "serviceSpecificInfo and serviceSpecificInfoLength");
+        }
+        if (mTxFilterLength != 0 && (mTxFilter == null || mTxFilter.length < mTxFilterLength)) {
+            throw new IllegalArgumentException(
+                    "Non-matching combination of txFilter and txFilterLength");
+        }
+        if (mRxFilterLength != 0 && (mRxFilter == null || mRxFilter.length < mRxFilterLength)) {
+            throw new IllegalArgumentException(
+                    "Non-matching combination of rxFilter and rxFilterLength");
+        }
+        if (mSubscribeType < SUBSCRIBE_TYPE_PASSIVE || mSubscribeType > SUBSCRIBE_TYPE_ACTIVE) {
+            throw new IllegalArgumentException("Invalid subscribeType - " + mSubscribeType);
+        }
+        if (mSubscribeCount < 0) {
+            throw new IllegalArgumentException("Invalid subscribeCount - must be non-negative");
+        }
+        if (mTtlSec < 0) {
+            throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
+        }
+        if (mMatchStyle != MATCH_STYLE_FIRST_ONLY && mMatchStyle != MATCH_STYLE_ALL) {
+            throw new IllegalArgumentException(
+                    "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
+        }
+        if (mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_ACTIVE && mRxFilterLength != 0) {
+            throw new IllegalArgumentException(
+                    "Invalid subscribe config: ACTIVE subscribes can't have an Rx filter");
+        }
+        if (mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE && mTxFilterLength != 0) {
+            throw new IllegalArgumentException(
+                    "Invalid subscribe config: PASSIVE subscribes can't have a Tx filter");
+        }
+    }
+
+    /**
      * Builder used to build {@link SubscribeConfig} objects.
      */
     public static final class Builder {
@@ -332,6 +375,11 @@ public class SubscribeConfig implements Parcelable {
          */
         public Builder setServiceSpecificInfo(byte[] serviceSpecificInfo,
                 int serviceSpecificInfoLength) {
+            if (serviceSpecificInfoLength != 0 && (serviceSpecificInfo == null
+                    || serviceSpecificInfo.length < serviceSpecificInfoLength)) {
+                throw new IllegalArgumentException("Non-matching combination of "
+                        + "serviceSpecificInfo and serviceSpecificInfoLength");
+            }
             mServiceSpecificInfoLength = serviceSpecificInfoLength;
             mServiceSpecificInfo = serviceSpecificInfo;
             return this;
@@ -374,6 +422,10 @@ public class SubscribeConfig implements Parcelable {
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
         public Builder setTxFilter(byte[] txFilter, int txFilterLength) {
+            if (txFilterLength != 0 && (txFilter == null || txFilter.length < txFilterLength)) {
+                throw new IllegalArgumentException(
+                        "Non-matching combination of txFilter and txFilterLength");
+            }
             mTxFilter = txFilter;
             mTxFilterLength = txFilterLength;
             return this;
@@ -397,6 +449,10 @@ public class SubscribeConfig implements Parcelable {
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
         public Builder setRxFilter(byte[] rxFilter, int rxFilterLength) {
+            if (rxFilterLength != 0 && (rxFilter == null || rxFilter.length < rxFilterLength)) {
+                throw new IllegalArgumentException(
+                        "Non-matching combination of rxFilter and rxFilterLength");
+            }
             mRxFilter = rxFilter;
             mRxFilterLength = rxFilterLength;
             return this;
@@ -427,8 +483,8 @@ public class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe
          * session will transmit a packet. When the count is reached an event
          * will be generated for
-         * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} with
-         * reason= {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with reason=
+         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param subscribeCount Number of subscribe packets to transmit.
          * @return The builder to facilitate chaining
@@ -447,8 +503,8 @@ public class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe
          * session will be alive - i.e. transmitting a packet. When the TTL is
          * reached an event will be generated for
-         * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} with
-         * reason= {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with reason=
+         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
          * @return The builder to facilitate chaining
@@ -486,7 +542,7 @@ public class SubscribeConfig implements Parcelable {
 
         /**
          * Configure whether a subscribe terminate notification
-         * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} is reported
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the

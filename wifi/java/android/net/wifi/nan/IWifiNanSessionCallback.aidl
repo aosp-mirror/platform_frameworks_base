@@ -24,6 +24,7 @@ package android.net.wifi.nan;
 oneway interface IWifiNanSessionCallback
 {
     void onSessionStarted(int sessionId);
+    void onSessionConfigSuccess();
     void onSessionConfigFail(int reason);
     void onSessionTerminated(int reason);
 
