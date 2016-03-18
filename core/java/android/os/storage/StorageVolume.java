@@ -306,8 +306,8 @@ public final class StorageVolume implements Parcelable {
     }
 
     /**
-     * Builds an intent to give access to a standard storage directory after obtaining the user's
-     * approval.
+     * Builds an intent to give access to a standard storage directory or entire volume after
+     * obtaining the user's approval.
      * <p>
      * When invoked, the system will ask the user to grant access to the requested directory (and
      * its descendants). The result of the request will be returned to the activity through the
@@ -322,12 +322,17 @@ public final class StorageVolume implements Parcelable {
      * {@link Context#getExternalCacheDirs()}, or
      * {@link Context#getExternalMediaDirs()}, which require no permissions to read or write.
      *
+     * <strong>NOTE: </strong>requesting access to the entire volume is not recommended and it will
+     * result in a stronger message displayed to the user, which may cause the user to reject
+     * the request.
+     *
      * @param directoryName must be one of
      * {@link Environment#DIRECTORY_MUSIC}, {@link Environment#DIRECTORY_PODCASTS},
      * {@link Environment#DIRECTORY_RINGTONES}, {@link Environment#DIRECTORY_ALARMS},
      * {@link Environment#DIRECTORY_NOTIFICATIONS}, {@link Environment#DIRECTORY_PICTURES},
      * {@link Environment#DIRECTORY_MOVIES}, {@link Environment#DIRECTORY_DOWNLOADS},
-     * {@link Environment#DIRECTORY_DCIM}, or {@link Environment#DIRECTORY_DOCUMENTS}
+     * {@link Environment#DIRECTORY_DCIM}, or {@link Environment#DIRECTORY_DOCUMENTS}, or
+     * {code null} to request access to the entire volume.
      *
      * @see DocumentsContract
      */
