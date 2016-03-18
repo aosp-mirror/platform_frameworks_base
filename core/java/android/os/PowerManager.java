@@ -426,6 +426,12 @@ public final class PowerManager {
     public static final String REBOOT_REQUESTED_BY_DEVICE_OWNER = "deviceowner";
 
     /**
+     * The 'reason' value used when rebooting in safe mode
+     * @hide
+     */
+    public static final String REBOOT_SAFE_MODE = "safemode";
+
+    /**
      * The value to pass as the 'reason' argument to android_reboot().
      * @hide
      */
@@ -897,6 +903,21 @@ public final class PowerManager {
     public void reboot(String reason) {
         try {
             mService.reboot(false, reason, true);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reboot the device. Will not return if the reboot is successful.
+     * <p>
+     * Requires the {@link android.Manifest.permission#REBOOT} permission.
+     * </p>
+     * @hide
+     */
+    public void rebootSafeMode() {
+        try {
+            mService.rebootSafeMode(false, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
