@@ -870,39 +870,56 @@ public final class RemotePrintDocument {
                 // AsyncCommand.AsyncCommandHandler#handleMessage
                 if (isFailed()) {
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "[CALLBACK] on canceled layout command");
+                        Log.i(LOG_TAG, "[CALLBACK] on failed layout command");
                     }
 
                     return;
-                } else {
-                    if (message.what != MSG_ON_LAYOUT_STARTED) {
-                        // No need to force cancel anymore if layout finished
-                        removeForceCancel();
-                    }
                 }
 
-                switch (message.what) {
+                int sequence;
+                int what = message.what;
+                switch (what) {
+                    case MSG_ON_LAYOUT_FINISHED:
+                        removeForceCancel();
+                        sequence = message.arg2;
+                        break;
+                    case MSG_ON_LAYOUT_FAILED:
+                    case MSG_ON_LAYOUT_CANCELED:
+                        removeForceCancel();
+                        // $FALL-THROUGH - message uses the same format as "started"
+                    case MSG_ON_LAYOUT_STARTED:
+                        // Don't remote force-cancel as command is still running and might need to
+                        // be canceled later
+                        sequence = message.arg1;
+                        break;
+                    default:
+                        // not reached
+                        sequence = -1;
+                }
+
+                // If we are canceling any result is treated as a cancel
+                if (isCanceling() && what != MSG_ON_LAYOUT_STARTED) {
+                    what = MSG_ON_LAYOUT_CANCELED;
+                }
+
+                switch (what) {
                     case MSG_ON_LAYOUT_STARTED: {
                         ICancellationSignal cancellation = (ICancellationSignal) message.obj;
-                        final int sequence = message.arg1;
                         handleOnLayoutStarted(cancellation, sequence);
                     } break;
 
                     case MSG_ON_LAYOUT_FINISHED: {
                         PrintDocumentInfo info = (PrintDocumentInfo) message.obj;
                         final boolean changed = (message.arg1 == 1);
-                        final int sequence = message.arg2;
                         handleOnLayoutFinished(info, changed, sequence);
                     } break;
 
                     case MSG_ON_LAYOUT_FAILED: {
                         CharSequence error = (CharSequence) message.obj;
-                        final int sequence = message.arg1;
                         handleOnLayoutFailed(error, sequence);
                     } break;
 
                     case MSG_ON_LAYOUT_CANCELED: {
-                        final int sequence = message.arg1;
                         handleOnLayoutCanceled(sequence);
                     } break;
                 }
@@ -1142,18 +1159,30 @@ public final class RemotePrintDocument {
                 // AsyncCommand.AsyncCommandHandler#handleMessage
                 if (isFailed()) {
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "[CALLBACK] on canceled write command");
+                        Log.i(LOG_TAG, "[CALLBACK] on failed write command");
                     }
 
                     return;
-                } else {
-                    if (message.what != MSG_ON_WRITE_STARTED) {
-                        // No need to force cancel anymore if write finished
-                        removeForceCancel();
-                    }
                 }
 
-                switch (message.what) {
+                int what = message.what;
+                switch (what) {
+                    case MSG_ON_WRITE_FINISHED:
+                    case MSG_ON_WRITE_FAILED:
+                    case MSG_ON_WRITE_CANCELED:
+                        removeForceCancel();
+                    case MSG_ON_WRITE_STARTED:
+                        // Don't remote force-cancel as command is still running and might need to
+                        // be canceled later
+                        break;
+                }
+
+                // If we are canceling any result is treated as a cancel
+                if (isCanceling() && what != MSG_ON_WRITE_STARTED) {
+                    what = MSG_ON_WRITE_CANCELED;
+                }
+
+                switch (what) {
                     case MSG_ON_WRITE_STARTED: {
                         ICancellationSignal cancellation = (ICancellationSignal) message.obj;
                         final int sequence = message.arg1;
