@@ -643,6 +643,9 @@ public class ZygoteInit {
             // Zygote.
             Trace.setTracingEnabled(false);
 
+            // Zygote process unmounts root storage spaces.
+            Zygote.nativeUnmountStorageOnInit();
+
             if (startSystemServer) {
                 startSystemServer(abiList, socketName);
             }
