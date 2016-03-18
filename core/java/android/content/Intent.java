@@ -23,12 +23,14 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -1946,31 +1948,48 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_ALARM_CHANGED = "android.intent.action.ALARM_CHANGED";
 
     /**
-     * Broadcast Action: This is broadcast once, after the system has finished
-     * booting and the user is in a "locked" state. A user is locked when their
-     * credential-encrypted private app data storage is unavailable. Once the
-     * user has entered their credentials (such as a lock pattern or PIN) for
-     * the first time, the {@link #ACTION_BOOT_COMPLETED} broadcast will be
-     * sent.
+     * Broadcast Action: This is broadcast once, after the user has finished
+     * booting, but while still in the "locked" state. It can be used to perform
+     * application-specific initialization, such as installing alarms. You must
+     * hold the {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED}
+     * permission in order to receive this broadcast.
      * <p>
-     * You must hold the
-     * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission in
-     * order to receive this broadcast.
+     * This broadcast is sent immediately at boot by all devices (regardless of
+     * direct boot support) running {@link android.os.Build.VERSION_CODES#N} or
+     * higher. Upon receipt of this broadcast, the user is still locked and only
+     * device-protected storage can be accessed safely. If you want to access
+     * credential-protected storage, you need to wait for the user to be
+     * unlocked (typically by entering their lock pattern or PIN for the first
+     * time), after which the {@link #ACTION_USER_UNLOCKED} and
+     * {@link #ACTION_BOOT_COMPLETED} broadcasts are sent.
+     * <p>
+     * To receive this broadcast, your receiver component must be marked as
+     * being {@link ComponentInfo#directBootAware}.
      * <p class="note">
      * This is a protected intent that can only be sent by the system.
+     *
+     * @see Context#createDeviceProtectedStorageContext()
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCKED_BOOT_COMPLETED = "android.intent.action.LOCKED_BOOT_COMPLETED";
 
     /**
-     * Broadcast Action: This is broadcast once, after the system has finished
-     * booting.  It can be used to perform application-specific initialization,
-     * such as installing alarms.  You must hold the
-     * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission
-     * in order to receive this broadcast.
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
+     * Broadcast Action: This is broadcast once, after the user has finished
+     * booting. It can be used to perform application-specific initialization,
+     * such as installing alarms. You must hold the
+     * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission in
+     * order to receive this broadcast.
+     * <p>
+     * This broadcast is sent at boot by all devices (both with and without
+     * direct boot support). Upon receipt of this broadcast, the user is
+     * unlocked and both device-protected and credential-protected storage can
+     * accessed safely.
+     * <p>
+     * If you need to run while the user is still locked (before they've entered
+     * their lock pattern or PIN for the first time), you can listen for the
+     * {@link #ACTION_LOCKED_BOOT_COMPLETED} broadcast.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
