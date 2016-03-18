@@ -16,6 +16,8 @@
 
 package android.net.wifi.nan;
 
+import android.util.Log;
+
 /**
  * A representation of a NAN publish session. Created when
  * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} is
@@ -25,12 +27,13 @@ package android.net.wifi.nan;
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanPublishSession extends WifiNanSession {
+    private static final String TAG = "WifiNanPublishSession";
+
     /**
      * {@hide}
      */
-    public WifiNanPublishSession(WifiNanManager manager, int sessionId,
-            WifiNanSessionCallback callback) {
-        super(manager, sessionId, callback);
+    public WifiNanPublishSession(WifiNanManager manager, int sessionId) {
+        super(manager, sessionId);
     }
 
     /**
@@ -43,10 +46,16 @@ public class WifiNanPublishSession extends WifiNanSession {
      */
     public void updatePublish(PublishConfig publishConfig) {
         if (mTerminated) {
-            mCallback.onSessionConfigFail(WifiNanSessionCallback.FAIL_REASON_SESSION_TERMINATED);
+            Log.w(TAG, "updatePublish: called on terminated session");
             return;
         } else {
-            mManager.updatePublish(mSessionId, publishConfig);
+            WifiNanManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "updatePublish: called post GC on WifiNanManager");
+                return;
+            }
+
+            mgr.updatePublish(mSessionId, publishConfig);
         }
     }
 }

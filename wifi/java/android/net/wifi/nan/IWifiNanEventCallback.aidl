@@ -25,8 +25,8 @@ import android.net.wifi.nan.ConfigRequest;
  */
 oneway interface IWifiNanEventCallback
 {
-    void onConfigCompleted(in ConfigRequest completedConfig);
-    void onConfigFailed(in ConfigRequest failedConfig, int reason);
+    void onConnectSuccess();
+    void onConnectFail(int reason);
     void onNanDown(int reason);
     void onIdentityChanged();
 }
