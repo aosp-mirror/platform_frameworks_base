@@ -605,8 +605,9 @@ public class ExifInterface {
     // not only getting information from EXIF but also from some JPEG special segments such as
     // MARKER_COM for user comment and MARKER_SOFx for image width and height.
 
-    // Identifier for APP1 segment in JPEG
-    private static final byte[] IDENTIFIER_APP1 = "Exif\0\0".getBytes(Charset.forName("US-ASCII"));
+    // Identifier for EXIF APP1 segment in JPEG
+    private static final byte[] IDENTIFIER_EXIF_APP1 =
+            "Exif\0\0".getBytes(Charset.forName("US-ASCII"));
     // JPEG segment markers, that each marker consumes two bytes beginning with 0xff and ending with
     // the indicator. There is no SOF4, SOF8, SOF16 markers in JPEG and SOFx markers indicates start
     // of frame(baseline DCT) and the image size info exists in its beginning part.
@@ -1125,7 +1126,9 @@ public class ExifInterface {
         String time = getAttribute(TAG_GPS_TIMESTAMP);
         if (date == null || time == null
                 || (!sNonZeroTimePattern.matcher(date).matches()
-                && !sNonZeroTimePattern.matcher(time).matches())) return -1;
+                && !sNonZeroTimePattern.matcher(time).matches())) {
+            return -1;
+        }
 
         String dateTimeString = date + ' ' + time;
 
@@ -1176,7 +1179,6 @@ public class ExifInterface {
         DataInputStream dataInputStream = new DataInputStream(inputStream);
         byte marker;
         int bytesRead = 0;
-        ++bytesRead;
         if ((marker = dataInputStream.readByte()) != MARKER) {
             throw new IOException("Invalid marker: " + Integer.toHexString(marker & 0xff));
         }
@@ -1184,8 +1186,8 @@ public class ExifInterface {
         if (dataInputStream.readByte() != MARKER_SOI) {
             throw new IOException("Invalid marker: " + Integer.toHexString(marker & 0xff));
         }
+        ++bytesRead;
         while (true) {
-            ++bytesRead;
             marker = dataInputStream.readByte();
             if (marker != MARKER) {
                 throw new IOException("Invalid marker:" + Integer.toHexString(marker & 0xff));
@@ -1195,36 +1197,40 @@ public class ExifInterface {
             if (DEBUG) {
                 Log.d(TAG, "Found JPEG segment indicator: " + Integer.toHexString(marker & 0xff));
             }
+            ++bytesRead;
 
             // EOI indicates the end of an image and in case of SOS, JPEG image stream starts and
             // the image data will terminate right after.
             if (marker == MARKER_EOI || marker == MARKER_SOS) {
                 break;
             }
-            bytesRead += 2;
             int length = dataInputStream.readUnsignedShort() - 2;
+            bytesRead += 2;
+            if (DEBUG) {
+                Log.d(TAG, "JPEG segment: " + marker + " (length: " + (length + 2) + ")");
+            }
             if (length < 0) {
                 throw new IOException("Invalid length");
             }
-            bytesRead += length;
             switch (marker) {
                 case MARKER_APP1: {
                     if (DEBUG) {
                         Log.d(TAG, "MARKER_APP1");
                     }
-                    bytesRead -= length;
                     if (length < 6) {
-                        throw new IOException("Invalid exif");
+                        // Skip if it's not an EXIF APP1 segment.
+                        break;
                     }
                     byte[] identifier = new byte[6];
                     if (inputStream.read(identifier) != 6) {
                         throw new IOException("Invalid exif");
                     }
-                    if (!Arrays.equals(identifier, IDENTIFIER_APP1)) {
-                        throw new IOException("Invalid app1 identifier");
-                    }
                     bytesRead += 6;
                     length -= 6;
+                    if (!Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
+                        // Skip if it's not an EXIF APP1 segment.
+                        break;
+                    }
                     if (length <= 0) {
                         throw new IOException("Invalid exif");
                     }
@@ -1246,6 +1252,7 @@ public class ExifInterface {
                     if (dataInputStream.read(bytes) != length) {
                         throw new IOException("Invalid exif");
                     }
+                    length = 0;
                     setAttribute("UserComment", new String(bytes, Charset.forName("US-ASCII")));
                     break;
                 }
@@ -1279,6 +1286,7 @@ public class ExifInterface {
                 throw new IOException("Invalid length");
             }
             dataInputStream.skipBytes(length);
+            bytesRead += length;
         }
     }
 
@@ -1292,68 +1300,84 @@ public class ExifInterface {
         }
         DataInputStream dataInputStream = new DataInputStream(inputStream);
         ExifDataOutputStream dataOutputStream = new ExifDataOutputStream(outputStream);
-        int bytesRead = 0;
-        ++bytesRead;
         if (dataInputStream.readByte() != MARKER) {
             throw new IOException("Invalid marker");
         }
         dataOutputStream.writeByte(MARKER);
-        ++bytesRead;
         if (dataInputStream.readByte() != MARKER_SOI) {
             throw new IOException("Invalid marker");
         }
         dataOutputStream.writeByte(MARKER_SOI);
 
+        // Write EXIF APP1 segment
+        dataOutputStream.writeByte(MARKER);
+        dataOutputStream.writeByte(MARKER_APP1);
+        writeExifSegment(dataOutputStream, 6);
+
         byte[] bytes = new byte[4096];
 
         while (true) {
-            ++bytesRead;
             if (dataInputStream.readByte() != MARKER) {
                 throw new IOException("Invalid marker");
             }
-            dataOutputStream.writeByte(MARKER);
-            ++bytesRead;
             byte marker = dataInputStream.readByte();
-            dataOutputStream.writeByte(marker);
             switch (marker) {
                 case MARKER_APP1: {
-                    // Rewrite EXIF segment
                     int length = dataInputStream.readUnsignedShort() - 2;
                     if (length < 0) {
                         throw new IOException("Invalid length");
                     }
-                    bytesRead += 2;
+                    byte[] identifier = new byte[6];
+                    if (length >= 6) {
+                        if (dataInputStream.read(identifier) != 6) {
+                            throw new IOException("Invalid exif");
+                        }
+                        if (Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
+                            // Skip the original EXIF APP1 segment.
+                            if (dataInputStream.skip(length - 6) != length - 6) {
+                                throw new IOException("Invalid length");
+                            }
+                            break;
+                        }
+                    }
+                    // Copy non-EXIF APP1 segment.
+                    dataOutputStream.writeUnsignedShort(length + 2);
+                    if (length >= 6) {
+                        length -= 6;
+                        dataOutputStream.write(identifier);
+                    }
                     int read;
-                    while ((read = dataInputStream.read(
-                            bytes, 0, Math.min(length, bytes.length))) > 0) {
+                    while (length > 0 && (read = dataInputStream.read(
+                            bytes, 0, Math.min(length, bytes.length))) >= 0) {
+                        dataOutputStream.write(bytes, 0, read);
                         length -= read;
                     }
-                    bytesRead += length;
-                    writeExifSegment(dataOutputStream, bytesRead);
                     break;
                 }
                 case MARKER_EOI:
                 case MARKER_SOS: {
+                    dataOutputStream.writeByte(MARKER);
+                    dataOutputStream.writeByte(marker);
                     // Copy all the remaining data
                     Streams.copy(dataInputStream, dataOutputStream);
                     return;
                 }
                 default: {
                     // Copy JPEG segment
+                    dataOutputStream.writeByte(MARKER);
+                    dataOutputStream.writeByte(marker);
                     int length = dataInputStream.readUnsignedShort();
                     dataOutputStream.writeUnsignedShort(length);
+                    length -= 2;
                     if (length < 0) {
                         throw new IOException("Invalid length");
                     }
-                    length -= 2;
-                    bytesRead += 2;
                     int read;
-                    while ((read = dataInputStream.read(
-                            bytes, 0, Math.min(length, bytes.length))) > 0) {
+                    while (length > 0 && (read = dataInputStream.read(
+                            bytes, 0, Math.min(length, bytes.length))) >= 0) {
                         dataOutputStream.write(bytes, 0, read);
                         length -= read;
                     }
-                    bytesRead += length;
                     break;
                 }
             }
@@ -1924,7 +1948,7 @@ public class ExifInterface {
 
         // Write TIFF Headers. See JEITA CP-3451C Table 1. page 10.
         dataOutputStream.writeUnsignedShort(totalSize);
-        dataOutputStream.write(IDENTIFIER_APP1);
+        dataOutputStream.write(IDENTIFIER_EXIF_APP1);
         dataOutputStream.writeShort(BYTE_ALIGN_MM);
         dataOutputStream.writeUnsignedShort(0x2a);
         dataOutputStream.writeUnsignedInt(8);
