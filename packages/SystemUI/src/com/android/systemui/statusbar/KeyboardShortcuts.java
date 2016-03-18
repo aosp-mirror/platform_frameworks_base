@@ -29,6 +29,7 @@ import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.widget.LinearLayout;
@@ -153,7 +154,7 @@ public class KeyboardShortcuts {
                         .findViewById(R.id.keyboard_shortcuts_keyword);
                 textView.setText(info.getLabel());
 
-                LinearLayout shortcutItemsContainer = (LinearLayout) shortcutView
+                ViewGroup shortcutItemsContainer = (ViewGroup) shortcutView
                         .findViewById(R.id.keyboard_shortcuts_item_container);
                 List<String> shortcutKeys = getHumanReadableShortcutKeys(info);
                 final int shortcutKeysSize = shortcutKeys.size();
