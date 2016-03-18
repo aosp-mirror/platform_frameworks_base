@@ -203,8 +203,8 @@ public class DocumentsActivity extends BaseActivity {
                        mState.action == ACTION_PICK_COPY_DESTINATION) {
                 title = getResources().getString(R.string.title_save);
             } else {
-                // If all else fails, just call it "Files".
-                title = getResources().getString(R.string.files_label);
+                // If all else fails, just call it "Downloads".
+                title = getResources().getString(R.string.downloads_label);
             }
         }
 

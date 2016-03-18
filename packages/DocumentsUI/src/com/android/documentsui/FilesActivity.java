@@ -182,7 +182,7 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     public String getDrawerTitle() {
-        return getResources().getString(R.string.files_label);
+        return getResources().getString(R.string.downloads_label);
     }
 
     @Override
