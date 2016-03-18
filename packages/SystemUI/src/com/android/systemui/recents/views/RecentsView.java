@@ -632,7 +632,8 @@ public class RecentsView extends FrameLayout {
                                     AnimationProps stackAnim = new AnimationProps(
                                             TaskStackView.DEFAULT_SYNC_STACK_DURATION,
                                             Interpolators.FAST_OUT_SLOW_IN);
-                                    mTaskStackView.getStack().removeTask(event.task, stackAnim);
+                                    mTaskStackView.getStack().removeTask(event.task, stackAnim,
+                                            true /* fromDockGesture */);
                                 }
                             }));
 

@@ -749,7 +749,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.hasDockedTask()) {
-            mRecentsView.showEmptyView(R.string.recents_empty_message_dismissed_all);
+            mRecentsView.showEmptyView(event.msgResId);
         } else {
             // Just go straight home (no animation necessary because there are no more task views)
             dismissRecentsToHome(false /* animateTaskViews */);
