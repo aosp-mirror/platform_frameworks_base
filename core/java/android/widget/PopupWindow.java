@@ -16,12 +16,10 @@
 
 package android.widget;
 
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
-
 import com.android.internal.R;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -54,10 +52,46 @@ import android.view.WindowManager.LayoutParams;
 
 import java.lang.ref.WeakReference;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
+
 /**
- * <p>A popup window that can be used to display an arbitrary view. The popup
- * window is a floating container that appears on top of the current
- * activity.</p>
+ * <p>
+ * This class represents a popup window that can be used to display an
+ * arbitrary view. The popup window is a floating container that appears on top
+ * of the current activity.
+ * </p>
+ * <a name="Animation"></a>
+ * <h3>Animation</h3>
+ * <p>
+ * On all versions of Android, popup window enter and exit animations may be
+ * specified by calling {@link #setAnimationStyle(int)} and passing the
+ * resource ID for an animation style that defines {@code windowEnterAnimation}
+ * and {@code windowExitAnimation}. For example, passing
+ * {@link android.R.style#Animation_Dialog} will give a scale and alpha
+ * animation.
+ * </br>
+ * A window animation style may also be specified in the popup window's style
+ * XML via the {@link android.R.styleable#PopupWindow_popupAnimationStyle popupAnimationStyle}
+ * attribute.
+ * </p>
+ * <p>
+ * Starting with API 23, more complex popup window enter and exit transitions
+ * may be specified by calling either {@link #setEnterTransition(Transition)}
+ * or {@link #setExitTransition(Transition)} and passing a  {@link Transition}.
+ * </br>
+ * Popup enter and exit transitions may also be specified in the popup window's
+ * style XML via the {@link android.R.styleable#PopupWindow_popupEnterTransition popupEnterTransition}
+ * and {@link android.R.styleable#PopupWindow_popupExitTransition popupExitTransition}
+ * attributes, respectively.
+ * </p>
+ *
+ * @attr ref android.R.styleable#PopupWindow_overlapAnchor
+ * @attr ref android.R.styleable#PopupWindow_popupAnimationStyle
+ * @attr ref android.R.styleable#PopupWindow_popupBackground
+ * @attr ref android.R.styleable#PopupWindow_popupElevation
+ * @attr ref android.R.styleable#PopupWindow_popupEnterTransition
+ * @attr ref android.R.styleable#PopupWindow_popupExitTransition
  *
  * @see android.widget.AutoCompleteTextView
  * @see android.widget.Spinner
@@ -351,12 +385,51 @@ public class PopupWindow {
         setFocusable(focusable);
     }
 
-    public void setEnterTransition(Transition enterTransition) {
+    /**
+     * Sets the enter transition to be used when the popup window is shown.
+     *
+     * @param enterTransition the enter transition, or {@code null} to clear
+     * @see #getEnterTransition()
+     * @attr ref android.R.styleable#PopupWindow_popupEnterTransition
+     */
+    public void setEnterTransition(@Nullable Transition enterTransition) {
         mEnterTransition = enterTransition;
     }
 
-    public void setExitTransition(Transition exitTransition) {
+    /**
+     * Returns the enter transition to be used when the popup window is shown.
+     *
+     * @return the enter transition, or {@code null} if not set
+     * @see #setEnterTransition(Transition)
+     * @attr ref android.R.styleable#PopupWindow_popupEnterTransition
+     */
+    @Nullable
+    public Transition getEnterTransition() {
+        return mEnterTransition;
+    }
+
+    /**
+     * Sets the exit transition to be used when the popup window is dismissed.
+     *
+     * @param exitTransition the exit transition, or {@code null} to clear
+     * @see #getExitTransition()
+     * @attr ref android.R.styleable#PopupWindow_popupExitTransition
+     */
+    public void setExitTransition(@Nullable Transition exitTransition) {
         mExitTransition = exitTransition;
+    }
+
+    /**
+     * Returns the exit transition to be used when the popup window is
+     * dismissed.
+     *
+     * @return the exit transition, or {@code null} if not set
+     * @see #setExitTransition(Transition)
+     * @attr ref android.R.styleable#PopupWindow_popupExitTransition
+     */
+    @Nullable
+    public Transition getExitTransition() {
+        return mExitTransition;
     }
 
     /**
