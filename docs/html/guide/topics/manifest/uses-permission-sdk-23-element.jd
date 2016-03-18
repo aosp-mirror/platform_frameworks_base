@@ -19,14 +19,16 @@ parent.link=manifest-intro.html
 
 <dd itemprop="description">
   Specifies that an app wants a particular permission, but <em>only</em> if
-  the app is running on a device with SDK version 23 or higher. If the device
-  is running SDK version 22 or lower, the app does not have the specified
+  the app is running on a device with <a
+  href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API
+  level</a> 23 or higher. If the device
+  is running API level 22 or lower, the app does not have the specified
   permission.
 
 <p>
   This element is useful when you update an app to include a new
   feature that requires an additional permission. If a user updates an app on a
-  device that is running SDK version 22 or lower, the system prompts the user
+  device that is running API level 22 or lower, the system prompts the user
   at install time to grant all new permissions that are declared in that
   update. If a new feature is minor enough, you may prefer to disable
   the feature altogether on those devices, so the user does not have to grant
@@ -34,7 +36,9 @@ parent.link=manifest-intro.html
   <code>&lt;uses-permission-sdk-23&gt;</code> element instead of <a href=
   "uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a>,
   you can request the permission <em>only</em> if the app is running on
-  platforms that support the runtime permissions model, in which the user
+  platforms that support the <a
+  href="{@docRoot}training/permissions/requesting.html">runtime permissions</a>
+  model, in which the user
   grants permissions to the app while it is running.
 </p>
 
