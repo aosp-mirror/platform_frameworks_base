@@ -918,11 +918,15 @@ public class UserManager {
     }
 
     /**
-     * Return whether the calling user is running in an "unlocked" state. A user
-     * is unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-encrypted private app data storage is
-     * available. When a user is locked, only device-protected data storage is
-     * available.
+     * Return whether the calling user is running in an "unlocked" state.
+     * <p>
+     * On devices with direct boot, a user is unlocked only after they've
+     * entered their credentials (such as a lock pattern or PIN). On devices
+     * without direct boot, a user is unlocked as soon as it starts.
+     * <p>
+     * When a user is locked, only device-protected data storage is available.
+     * When a user is unlocked, both device-protected and credential-protected
+     * private app data storage is available.
      *
      * @see Intent#ACTION_USER_UNLOCKED
      * @see Context#createDeviceProtectedStorageContext()
@@ -932,11 +936,15 @@ public class UserManager {
     }
 
     /**
-     * Return whether the given user is running in an "unlocked" state. A user
-     * is unlocked only after they've entered their credentials (such as a lock
-     * pattern or PIN), and credential-protected private app data storage is
-     * available. When a user is locked, only device-protected data storage is
-     * available.
+     * Return whether the given user is running in an "unlocked" state.
+     * <p>
+     * On devices with direct boot, a user is unlocked only after they've
+     * entered their credentials (such as a lock pattern or PIN). On devices
+     * without direct boot, a user is unlocked as soon as it starts.
+     * <p>
+     * When a user is locked, only device-protected data storage is available.
+     * When a user is unlocked, both device-protected and credential-protected
+     * private app data storage is available.
      *
      * @param user to retrieve the unlocked state for.
      * @see Intent#ACTION_USER_UNLOCKED

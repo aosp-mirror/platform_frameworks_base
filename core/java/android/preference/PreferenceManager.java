@@ -362,8 +362,7 @@ public class PreferenceManager {
      * Explicitly set the storage location used internally by this class to be
      * device-protected storage.
      * <p>
-     * <p>
-     * When a device is encrypted, data stored in this location is encrypted
+     * On devices with direct boot, data stored in this location is encrypted
      * with a key tied to the physical device, and it can be accessed
      * immediately after the device has booted successfully, both
      * <em>before and after</em> the user has authenticated with their
@@ -392,7 +391,7 @@ public class PreferenceManager {
      * credential-protected storage. This is the default storage area for apps
      * unless {@code forceDeviceProtectedStorage} was requested.
      * <p>
-     * When a device is encrypted, data stored in this location is encrypted
+     * On devices with direct boot, data stored in this location is encrypted
      * with a key tied to user credentials, which can be accessed
      * <em>only after</em> the user has entered their credentials (such as a
      * lock pattern or PIN).

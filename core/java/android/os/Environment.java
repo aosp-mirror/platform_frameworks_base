@@ -34,6 +34,7 @@ public class Environment {
     private static final String ENV_EXTERNAL_STORAGE = "EXTERNAL_STORAGE";
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
     private static final String ENV_ANDROID_DATA = "ANDROID_DATA";
+    private static final String ENV_ANDROID_EXPAND = "ANDROID_EXPAND";
     private static final String ENV_ANDROID_STORAGE = "ANDROID_STORAGE";
     private static final String ENV_DOWNLOAD_CACHE = "DOWNLOAD_CACHE";
     private static final String ENV_OEM_ROOT = "OEM_ROOT";
@@ -54,6 +55,7 @@ public class Environment {
 
     private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
     private static final File DIR_ANDROID_DATA = getDirectory(ENV_ANDROID_DATA, "/data");
+    private static final File DIR_ANDROID_EXPAND = getDirectory(ENV_ANDROID_EXPAND, "/mnt/expand");
     private static final File DIR_ANDROID_STORAGE = getDirectory(ENV_ANDROID_STORAGE, "/storage");
     private static final File DIR_DOWNLOAD_CACHE = getDirectory(ENV_DOWNLOAD_CACHE, "/cache");
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
@@ -226,6 +228,11 @@ public class Environment {
         } else {
             return new File("/mnt/expand/" + volumeUuid);
         }
+    }
+
+    /** {@hide} */
+    public static File getExpandDirectory() {
+        return DIR_ANDROID_EXPAND;
     }
 
     /** {@hide} */
