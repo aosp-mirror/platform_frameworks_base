@@ -69,7 +69,7 @@ public class RootsListBot extends BaseBot {
         mDevice.waitForIdle();
     }
 
-    public void assertHasRoots(String... labels) throws UiObjectNotFoundException {
+    public void assertRootsPresent(String... labels) throws UiObjectNotFoundException {
         List<String> missing = new ArrayList<>();
         for (String label : labels) {
             if (!findRoot(label).exists()) {
@@ -79,6 +79,18 @@ public class RootsListBot extends BaseBot {
         if (!missing.isEmpty()) {
             Assert.fail(
                     "Expected roots " + Arrays.asList(labels) + ", but missing " + missing);
+        }
+    }
+
+    public void assertRootsAbsent(String... labels) throws UiObjectNotFoundException {
+        List<String> unexpected = new ArrayList<>();
+        for (String label : labels) {
+            if (findRoot(label).exists()) {
+                unexpected.add(label);
+            }
+        }
+        if (!unexpected.isEmpty()) {
+            Assert.fail("Unexpected roots " + unexpected);
         }
     }
 

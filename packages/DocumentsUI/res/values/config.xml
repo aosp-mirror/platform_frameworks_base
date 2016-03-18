@@ -21,4 +21,8 @@
     <!-- Intentionally unset. Vendors should set this in an overlay. -->
     <string name="trusted_quick_viewer_package" translatable="false"></string>
     <bool name="list_divider_inset_left">true</bool>
+    <!-- Indicates if the home directory should be hidden in the roots list, that is presented
+         in the drawer/left side panel ) -->
+    <bool name="home_root_hidden">true</bool>
+
 </resources>
