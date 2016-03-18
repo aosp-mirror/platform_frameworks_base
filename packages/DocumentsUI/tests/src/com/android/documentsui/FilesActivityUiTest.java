@@ -58,18 +58,23 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
     public void testRootsListed() throws Exception {
         initTestFiles();
 
-        bots.roots.openRoot(ROOT_0_ID);
-
         // Should also have Drive, but that requires pre-configuration of devices
         // We omit for now.
-        bots.roots.assertHasRoots(
+        bots.roots.assertRootsPresent(
                 "Images",
                 "Videos",
                 "Audio",
                 "Downloads",
-                "Documents",
                 ROOT_0_ID,
                 ROOT_1_ID);
+
+        // Separate logic for "Documents" root, which presence depends on the config setting
+        boolean homeRootHidden = context.getResources().getBoolean(R.bool.home_root_hidden);
+        if (homeRootHidden) {
+            bots.roots.assertRootsAbsent("Documents");
+        } else {
+            bots.roots.assertRootsPresent("Documents");
+        }
     }
 
     public void testFilesListed() throws Exception {
