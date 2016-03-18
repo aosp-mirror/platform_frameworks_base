@@ -623,6 +623,13 @@ class WindowSurfaceController {
             }
         }
 
+        @Override
+        public void setTransparentRegionHint(Region region) {
+            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setTransparentRegionHint(" + region
+                    + "): OLD: " + this + " . Called by " + Debug.getCallers(3));
+            super.setTransparentRegionHint(region);
+        }
+
         static void dumpAllSurfaces(PrintWriter pw, String header) {
             synchronized (sSurfaces) {
                 final int N = sSurfaces.size();
