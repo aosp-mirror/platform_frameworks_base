@@ -3444,7 +3444,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteDeviceIdleModeLocked(int mode, String activeReason, int activeUid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
-        boolean nowIdling = mode == DEVICE_IDLE_MODE_FULL;
+        boolean nowIdling = mode == DEVICE_IDLE_MODE_DEEP;
         if (mDeviceIdling && !nowIdling && activeReason == null) {
             // We don't go out of general idling mode until explicitly taken out of
             // device idle through going active or significant motion.
@@ -3492,7 +3492,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mLongestLightIdleTime = lastDuration;
                 }
                 mDeviceIdleModeLightTimer.stopRunningLocked(elapsedRealtime);
-            } else if (mDeviceIdleMode == DEVICE_IDLE_MODE_FULL) {
+            } else if (mDeviceIdleMode == DEVICE_IDLE_MODE_DEEP) {
                 if (lastDuration > mLongestFullIdleTime) {
                     mLongestFullIdleTime = lastDuration;
                 }
@@ -3500,7 +3500,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (mode == DEVICE_IDLE_MODE_LIGHT) {
                 mDeviceIdleModeLightTimer.startRunningLocked(elapsedRealtime);
-            } else if (mode == DEVICE_IDLE_MODE_FULL) {
+            } else if (mode == DEVICE_IDLE_MODE_DEEP) {
                 mDeviceIdleModeFullTimer.startRunningLocked(elapsedRealtime);
             }
             mDeviceIdleMode = mode;
@@ -4452,7 +4452,7 @@ public class BatteryStatsImpl extends BatteryStats {
         switch (mode) {
             case DEVICE_IDLE_MODE_LIGHT:
                 return mDeviceIdleModeLightTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
-            case DEVICE_IDLE_MODE_FULL:
+            case DEVICE_IDLE_MODE_DEEP:
                 return mDeviceIdleModeFullTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
         return 0;
@@ -4462,7 +4462,7 @@ public class BatteryStatsImpl extends BatteryStats {
         switch (mode) {
             case DEVICE_IDLE_MODE_LIGHT:
                 return mDeviceIdleModeLightTimer.getCountLocked(which);
-            case DEVICE_IDLE_MODE_FULL:
+            case DEVICE_IDLE_MODE_DEEP:
                 return mDeviceIdleModeFullTimer.getCountLocked(which);
         }
         return 0;
@@ -4472,7 +4472,7 @@ public class BatteryStatsImpl extends BatteryStats {
         switch (mode) {
             case DEVICE_IDLE_MODE_LIGHT:
                 return mLongestLightIdleTime;
-            case DEVICE_IDLE_MODE_FULL:
+            case DEVICE_IDLE_MODE_DEEP:
                 return mLongestFullIdleTime;
         }
         return 0;
@@ -4482,7 +4482,7 @@ public class BatteryStatsImpl extends BatteryStats {
         switch (mode) {
             case DEVICE_IDLE_MODE_LIGHT:
                 return mDeviceLightIdlingTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
-            case DEVICE_IDLE_MODE_FULL:
+            case DEVICE_IDLE_MODE_DEEP:
                 return mDeviceIdlingTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
         }
         return 0;
@@ -4492,7 +4492,7 @@ public class BatteryStatsImpl extends BatteryStats {
         switch (mode) {
             case DEVICE_IDLE_MODE_LIGHT:
                 return mDeviceLightIdlingTimer.getCountLocked(which);
-            case DEVICE_IDLE_MODE_FULL:
+            case DEVICE_IDLE_MODE_DEEP:
                 return mDeviceIdlingTimer.getCountLocked(which);
         }
         return 0;

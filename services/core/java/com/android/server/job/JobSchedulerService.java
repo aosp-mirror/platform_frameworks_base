@@ -209,7 +209,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Slog.d(TAG, "Receieved: " + intent.getAction());
+            if (DEBUG) {
+                Slog.d(TAG, "Receieved: " + intent.getAction());
+            }
             if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                 // If this is an outright uninstall rather than the first half of an
                 // app update sequence, cancel the jobs associated with the app.

@@ -2297,7 +2297,7 @@ class AlarmManagerService extends SystemService {
             if (operation != null) {
                 sb.append(operation.getTargetPackage());
             } else {
-                sb.append(listener.asBinder().toString());
+                sb.append(packageName);
             }
             sb.append('}');
             return sb.toString();
