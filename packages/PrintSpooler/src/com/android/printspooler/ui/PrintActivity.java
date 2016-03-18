@@ -2029,7 +2029,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void doFinish() {
-        if (mPrintedDocument.isUpdating()) {
+        if (mPrintedDocument != null && mPrintedDocument.isUpdating()) {
             // The printedDocument will call doFinish() when the current command finishes
             return;
         }
