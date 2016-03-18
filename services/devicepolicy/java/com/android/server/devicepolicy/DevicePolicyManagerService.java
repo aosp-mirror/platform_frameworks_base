@@ -3978,6 +3978,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         && timeMs > admin.maximumTimeToUnlock) {
                     timeMs = admin.maximumTimeToUnlock;
                 }
+                // If userInfo.id is a managed profile, we also need to look at
+                // the policies set on the parent.
+                if (admin.hasParentActiveAdmin()) {
+                    final ActiveAdmin parentAdmin = admin.getParentActiveAdmin();
+                    if (parentAdmin.maximumTimeToUnlock > 0
+                            && timeMs > parentAdmin.maximumTimeToUnlock) {
+                        timeMs = parentAdmin.maximumTimeToUnlock;
+                    }
+                }
             }
         }
 
@@ -4011,28 +4020,55 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
-            long time = 0;
-
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.maximumTimeToUnlock : time;
+                return admin != null ? admin.maximumTimeToUnlock : 0;
             }
-
             // Return the strictest policy across all participating admins.
             List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
                     userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (time == 0) {
-                    time = admin.maximumTimeToUnlock;
-                } else if (admin.maximumTimeToUnlock != 0
-                        && time > admin.maximumTimeToUnlock) {
-                    time = admin.maximumTimeToUnlock;
+            return getMaximumTimeToLockPolicyFromAdmins(admins);
+        }
+    }
+
+    @Override
+    public long getMaximumTimeToLockForUserAndProfiles(int userHandle) {
+        if (!mHasFeature) {
+            return 0;
+        }
+        enforceFullCrossUsersPermission(userHandle);
+        synchronized (this) {
+            // All admins for this user.
+            ArrayList<ActiveAdmin> admins = new ArrayList<ActiveAdmin>();
+            for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
+                DevicePolicyData policy = getUserData(userInfo.id);
+                admins.addAll(policy.mAdminList);
+                // If it is a managed profile, it may have parent active admins
+                if (userInfo.isManagedProfile()) {
+                    for (ActiveAdmin admin : policy.mAdminList) {
+                        if (admin.hasParentActiveAdmin()) {
+                            admins.add(admin.getParentActiveAdmin());
+                        }
+                    }
                 }
             }
-            return time;
+            return getMaximumTimeToLockPolicyFromAdmins(admins);
         }
+    }
+
+    private long getMaximumTimeToLockPolicyFromAdmins(List<ActiveAdmin> admins) {
+        long time = 0;
+        final int N = admins.size();
+        for (int i = 0; i < N; i++) {
+            ActiveAdmin admin = admins.get(i);
+            if (time == 0) {
+                time = admin.maximumTimeToUnlock;
+            } else if (admin.maximumTimeToUnlock != 0
+                    && time > admin.maximumTimeToUnlock) {
+                time = admin.maximumTimeToUnlock;
+            }
+        }
+        return time;
     }
 
     @Override

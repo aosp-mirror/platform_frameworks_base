@@ -80,6 +80,7 @@ interface IDevicePolicyManager {
 
     void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
     long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
+    long getMaximumTimeToLockForUserAndProfiles(int userHandle);
 
     void lockNow(boolean parent);
 
