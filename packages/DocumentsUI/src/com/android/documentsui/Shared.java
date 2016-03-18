@@ -151,6 +151,14 @@ public final class Shared {
         return sCollator.compare(lhs, rhs);
     }
 
+    /**
+     * Compare two strings against each other using system default collator in a
+     * case-insensitive mode.
+     */
+    public static int compareToIgnoreCase(String lhs, String rhs) {
+        return sCollator.compare(lhs, rhs);
+    }
+
     public static boolean isHardwareKeyboardAvailable(Context context) {
         return context.getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS;
     }
