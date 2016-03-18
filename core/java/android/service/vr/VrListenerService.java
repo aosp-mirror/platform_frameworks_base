@@ -23,7 +23,10 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 
 /**
  * A service that is bound from the system while running in virtual reality (VR) mode.
@@ -55,17 +58,51 @@ public abstract class VrListenerService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.service.vr.VrListenerService";
 
-    /**
-     * @hide
-     */
-    public static class VrListenerBinder extends IVrListener.Stub {
-    }
+    private final Handler mHandler;
 
-    private final VrListenerBinder mBinder = new VrListenerBinder();
+    private static final int MSG_ON_CURRENT_VR_ACTIVITY_CHANGED = 1;
+
+    private final IVrListener.Stub mBinder = new IVrListener.Stub() {
+        @Override
+        public void focusedActivityChanged(ComponentName component) {
+            mHandler.obtainMessage(MSG_ON_CURRENT_VR_ACTIVITY_CHANGED, component).sendToTarget();
+        }
+    };
+
+    private final class VrListenerHandler extends Handler {
+        public VrListenerHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ON_CURRENT_VR_ACTIVITY_CHANGED: {
+                    VrListenerService.this.onCurrentVrActivityChanged((ComponentName) msg.obj);
+                } break;
+            }
+        }
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    public VrListenerService() {
+        mHandler = new VrListenerHandler(Looper.getMainLooper());
+    }
+
+    /**
+     * Called when the current activity using VR mode is changed.
+     * <p/>
+     * This will be called immediately when this service is initially bound, but is
+     * not guaranteed to be called before onUnbind.
+     *
+     * @param component the {@link ComponentName} of the new current VR activity.
+     */
+    public void onCurrentVrActivityChanged(ComponentName component) {
+        // Override to implement
     }
 
     /**
