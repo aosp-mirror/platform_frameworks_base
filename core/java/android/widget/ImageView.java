@@ -913,7 +913,9 @@ public class ImageView extends View {
         if (mDrawable != null) {
             mDrawable.setCallback(null);
             unscheduleDrawable(mDrawable);
-            mDrawable.setVisible(false, false);
+            if (isAttachedToWindow()) {
+                mDrawable.setVisible(false, false);
+            }
         }
 
         mDrawable = d;
@@ -924,8 +926,9 @@ public class ImageView extends View {
             if (d.isStateful()) {
                 d.setState(getDrawableState());
             }
-            d.setVisible(isAttachedToWindow() && getWindowVisibility() == VISIBLE && isShown(),
-                    true);
+            if (isAttachedToWindow()) {
+                d.setVisible(getWindowVisibility() == VISIBLE && isShown(), true);
+            }
             d.setLevel(mLevel);
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
