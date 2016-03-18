@@ -43,145 +43,38 @@ import java.util.List;
  */
 public final class GestureDescription {
     /** Gestures may contain no more than this many strokes */
-    public static final int MAX_STROKE_COUNT = 10;
+    private static final int MAX_STROKE_COUNT = 10;
 
     /**
      * Upper bound on total gesture duration. Nearly all gestures will be much shorter.
      */
-    public static final long MAX_GESTURE_DURATION_MS = 60 * 1000;
+    private static final long MAX_GESTURE_DURATION_MS = 60 * 1000;
 
     private final List<StrokeDescription> mStrokes = new ArrayList<>();
     private final float[] mTempPos = new float[2];
 
     /**
-     * Create a description of a click gesture
+     * Get the upper limit for the number of strokes a gesture may contain.
      *
-     * @param x The x coordinate to click. Must not be negative.
-     * @param y The y coordinate to click. Must not be negative.
-     *
-     * @return A description of a click at (x, y)
+     * @return The maximum number of strokes.
      */
-    public static GestureDescription createClick(@IntRange(from = 0) int x,
-            @IntRange(from = 0) int y) {
-        Path clickPath = new Path();
-        clickPath.moveTo(x, y);
-        clickPath.lineTo(x + 1, y);
-        return new GestureDescription(
-                new StrokeDescription(clickPath, 0, ViewConfiguration.getTapTimeout()));
+    public static int getMaxStrokeCount() {
+        return MAX_STROKE_COUNT;
     }
 
     /**
-     * Create a description of a long click gesture
+     * Get the upper limit on a gesture's duration.
      *
-     * @param x The x coordinate to click. Must not be negative.
-     * @param y The y coordinate to click. Must not be negative.
-     *
-     * @return A description of a click at (x, y)
+     * @return The maximum duration in milliseconds.
      */
-    public static GestureDescription createLongClick(@IntRange(from = 0) int x,
-            @IntRange(from = 0) int y) {
-        Path clickPath = new Path();
-        clickPath.moveTo(x, y);
-        clickPath.lineTo(x + 1, y);
-        int longPressTime = ViewConfiguration.getLongPressTimeout();
-        return new GestureDescription(
-                new StrokeDescription(clickPath, 0, longPressTime + (longPressTime / 2)));
-    }
-
-    /**
-     * Create a description of a swipe gesture
-     *
-     * @param startX The x coordinate of the starting point. Must not be negative.
-     * @param startY The y coordinate of the starting point. Must not be negative.
-     * @param endX The x coordinate of the ending point. Must not be negative.
-     * @param endY The y coordinate of the ending point. Must not be negative.
-     * @param duration The time, in milliseconds, to complete the gesture. Must not be negative.
-     *
-     * @return A description of a swipe from ({@code startX}, {@code startY}) to
-     * ({@code endX}, {@code endY}) that takes {@code duration} milliseconds. Returns {@code null}
-     * if the path specified for the swipe is invalid.
-     */
-    public static GestureDescription createSwipe(@IntRange(from = 0) int startX,
-            @IntRange(from = 0) int startY,
-            @IntRange(from = 0) int endX,
-            @IntRange(from = 0) int endY,
-            @IntRange(from = 0, to = MAX_GESTURE_DURATION_MS) long duration) {
-        Path swipePath = new Path();
-        swipePath.moveTo(startX, startY);
-        swipePath.lineTo(endX, endY);
-        return new GestureDescription(new StrokeDescription(swipePath, 0, duration));
-    }
-
-    /**
-     * Create a description for a pinch (or zoom) gesture.
-     *
-     * @param centerX The x coordinate of the center of the pinch. Must not be negative.
-     * @param centerY The y coordinate of the center of the pinch. Must not be negative.
-     * @param startSpacing The spacing of the touch points at the beginning of the gesture. Must not
-     * be negative.
-     * @param endSpacing The spacing of the touch points at the end of the gesture. Must not be
-     * negative.
-     * @param orientation The angle, in degrees, of the gesture. 0 represents a horizontal pinch
-     * @param duration The time, in milliseconds, to complete the gesture. Must not be negative.
-     *
-     * @return A description of a pinch centered at ({code centerX}, {@code centerY}) that starts
-     * with the touch points spaced by {@code startSpacing} and ends with them spaced by
-     * {@code endSpacing} that lasts {@code duration} ms. Returns {@code null} if either path
-     * specified for the pinch is invalid.
-     */
-    public static GestureDescription createPinch(@IntRange(from = 0) int centerX,
-            @IntRange(from = 0) int centerY,
-            @IntRange(from = 0) int startSpacing,
-            @IntRange(from = 0) int endSpacing,
-            float orientation,
-            @IntRange(from = 0, to = MAX_GESTURE_DURATION_MS) long duration) {
-        if ((startSpacing < 0) || (endSpacing < 0)) {
-            throw new IllegalArgumentException("Pinch spacing cannot be negative");
-        }
-        float[] startPoint1 = new float[2];
-        float[] endPoint1 = new float[2];
-        float[] startPoint2 = new float[2];
-        float[] endPoint2 = new float[2];
-
-        /* Build points for a horizontal gesture centered at the origin */
-        startPoint1[0] = startSpacing / 2;
-        startPoint1[1] = 0;
-        endPoint1[0] = endSpacing / 2;
-        endPoint1[1] = 0;
-        startPoint2[0] = -startSpacing / 2;
-        startPoint2[1] = 0;
-        endPoint2[0] = -endSpacing / 2;
-        endPoint2[1] = 0;
-
-        /* Rotate and translate the points */
-        Matrix matrix = new Matrix();
-        matrix.setRotate(orientation);
-        matrix.postTranslate(centerX, centerY);
-        matrix.mapPoints(startPoint1);
-        matrix.mapPoints(endPoint1);
-        matrix.mapPoints(startPoint2);
-        matrix.mapPoints(endPoint2);
-
-        Path path1 = new Path();
-        path1.moveTo(startPoint1[0], startPoint1[1]);
-        path1.lineTo(endPoint1[0], endPoint1[1]);
-        Path path2 = new Path();
-        path2.moveTo(startPoint2[0], startPoint2[1]);
-        path2.lineTo(endPoint2[0], endPoint2[1]);
-
-        return new GestureDescription(Arrays.asList(
-                new StrokeDescription(path1, 0, duration),
-                new StrokeDescription(path2, 0, duration)));
+    public static long getMaxGestureDuration() {
+        return MAX_GESTURE_DURATION_MS;
     }
 
     private GestureDescription() {}
 
     private GestureDescription(List<StrokeDescription> strokes) {
         mStrokes.addAll(strokes);
-    }
-
-    private GestureDescription(StrokeDescription stroke) {
-        mStrokes.add(stroke);
     }
 
     /**
@@ -278,21 +171,23 @@ public final class GestureDescription {
          */
         public Builder addStroke(@NonNull StrokeDescription strokeDescription) {
             if (mStrokes.size() >= MAX_STROKE_COUNT) {
-                throw new RuntimeException("Attempting to add too many strokes to a gesture");
+                throw new IllegalStateException(
+                        "Attempting to add too many strokes to a gesture");
             }
 
             mStrokes.add(strokeDescription);
 
             if (getTotalDuration(mStrokes) > MAX_GESTURE_DURATION_MS) {
                 mStrokes.remove(strokeDescription);
-                throw new RuntimeException("Gesture would exceed maximum duration with new stroke");
+                throw new IllegalStateException(
+                        "Gesture would exceed maximum duration with new stroke");
             }
             return this;
         }
 
         public GestureDescription build() {
             if (mStrokes.size() == 0) {
-                throw new RuntimeException("Gestures must have at least one stroke");
+                throw new IllegalStateException("Gestures must have at least one stroke");
             }
             return new GestureDescription(mStrokes);
         }
@@ -317,8 +212,8 @@ public final class GestureDescription {
          * Must not be negative.
          */
         public StrokeDescription(@NonNull Path path,
-                @IntRange(from = 0, to = MAX_GESTURE_DURATION_MS) long startTime,
-                @IntRange(from = 0, to = MAX_GESTURE_DURATION_MS) long duration) {
+                @IntRange(from = 0) long startTime,
+                @IntRange(from = 0) long duration) {
             if (duration <= 0) {
                 throw new IllegalArgumentException("Duration must be positive");
             }
