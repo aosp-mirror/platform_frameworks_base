@@ -1,6 +1,8 @@
-package com.android.hotspot2.osu;
+package com.android.hotspot2.flow;
 
 import android.net.wifi.ScanResult;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.android.anqp.HSIconFileElement;
@@ -8,15 +10,18 @@ import com.android.anqp.I18Name;
 import com.android.anqp.IconInfo;
 import com.android.anqp.OSUProvider;
 import com.android.hotspot2.Utils;
+import com.android.hotspot2.osu.OSUManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Set;
 
-public class OSUInfo {
+public class OSUInfo implements Parcelable {
     public static final String GenericLocale = "zxx";
 
     public enum IconStatus {
@@ -29,7 +34,6 @@ public class OSUInfo {
     private final long mBSSID;
     private final long mHESSID;
     private final int mAnqpDomID;
-    private final String mOsuSsid;
     private final String mAdvertisingSSID;
     private final OSUProvider mOSUProvider;
     private final int mOsuID;
@@ -39,13 +43,12 @@ public class OSUInfo {
     private String mIconFileName;
     private IconInfo mIconInfo;
 
-    public OSUInfo(ScanResult scanResult, String ssid, OSUProvider osuProvider, int osuID) {
+    public OSUInfo(ScanResult scanResult, OSUProvider osuProvider, int osuID) {
         mOsuID = osuID;
         mBSSID = Utils.parseMac(scanResult.BSSID);
         mHESSID = scanResult.hessid;
         mAnqpDomID = scanResult.anqpDomainId;
         mAdvertisingSSID = scanResult.SSID;
-        mOsuSsid = ssid;
         mOSUProvider = osuProvider;
     }
 
@@ -99,11 +102,11 @@ public class OSUInfo {
             if (locale == null || name.getLocale().equals(locale)) {
                 return name.getText();
             }
-            scoreList.add(new ScoreEntry<String>(name.getText(),
+            scoreList.add(new ScoreEntry<>(name.getText(),
                     languageScore(name.getLanguage(), locale)));
         }
         Collections.sort(scoreList);
-        return scoreList.isEmpty() ? null : scoreList.iterator().next().getData();
+        return scoreList.isEmpty() ? null : scoreList.get(scoreList.size() - 1).getData();
     }
 
     public String getServiceDescription(Locale locale) {
@@ -116,7 +119,7 @@ public class OSUInfo {
                     languageScore(service.getLanguage(), locale)));
         }
         Collections.sort(scoreList);
-        return scoreList.isEmpty() ? null : scoreList.iterator().next().getData();
+        return scoreList.isEmpty() ? null : scoreList.get(scoreList.size() - 1).getData();
     }
 
     public int getOsuID() {
@@ -182,6 +185,11 @@ public class OSUInfo {
         public int compareTo(ScoreEntry other) {
             return Integer.compare(mScore, other.mScore);
         }
+
+        @Override
+        public String toString() {
+            return String.format("%d for '%s'", mScore, mData);
+        }
     }
 
     public List<IconInfo> getIconInfo(Locale locale, Set<String> types, int width, int height) {
@@ -219,8 +227,9 @@ public class OSUInfo {
         }
         Collections.sort(matches);
         List<IconInfo> icons = new ArrayList<>(matches.size());
-        for (ScoreEntry<IconInfo> scoredIcon : matches) {
-            icons.add(scoredIcon.getData());
+        ListIterator<ScoreEntry<IconInfo>> matchIterator = matches.listIterator(matches.size());
+        while (matchIterator.hasPrevious()) {
+            icons.add(matchIterator.previous().getData());
         }
         return icons;
     }
@@ -243,7 +252,7 @@ public class OSUInfo {
     }
 
     public String getOsuSsid() {
-        return mOsuSsid;
+        return mOSUProvider.getSSID();
     }
 
     public OSUProvider getOSUProvider() {
@@ -253,6 +262,60 @@ public class OSUInfo {
     @Override
     public String toString() {
         return String.format("OSU Info '%s' %012x -> %s, icon %s",
-                mOsuSsid, mBSSID, getServiceDescription(null), mIconStatus);
+                getOsuSsid(), mBSSID, getServiceDescription(null), mIconStatus);
+    }
+
+    private OSUInfo(Parcel in) {
+        mBSSID = in.readLong();
+        mHESSID = in.readLong();
+        mAnqpDomID = in.readInt();
+        mAdvertisingSSID = in.readString();
+        mOsuID = in.readInt();
+        mOSUBssid = in.readLong();
+        mIconFileName = in.readString();
+        mIconStatus = Utils.mapEnum(in.readInt(), IconStatus.class);
+        OSUProvider osuProvider;
+        try {
+            osuProvider = new OSUProvider(in);
+        } catch (IOException ioe) {
+            osuProvider = null;
+        }
+        mOSUProvider = osuProvider;
+        if (osuProvider == null) {
+            return;
+        }
+        mIconFileElement = new HSIconFileElement(in);
+        int iconIndex = in.readInt();
+        mIconInfo = iconIndex >= 0 && iconIndex < mOSUProvider.getIcons().size()
+                ? mOSUProvider.getIcons().get(iconIndex) : null;
+    }
+
+    public static final Parcelable.Creator<OSUInfo> CREATOR = new Parcelable.Creator<OSUInfo>() {
+        public OSUInfo createFromParcel(Parcel in) {
+            return new OSUInfo(in);
+        }
+
+        public OSUInfo[] newArray(int size) {
+            return new OSUInfo[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mBSSID);
+        dest.writeLong(mHESSID);
+        dest.writeInt(mAnqpDomID);
+        dest.writeString(mAdvertisingSSID);
+        dest.writeInt(mOsuID);
+        dest.writeLong(mOSUBssid);
+        dest.writeString(mIconFileName);
+        dest.writeInt(mIconStatus.ordinal());
+        mOSUProvider.writeParcel(dest);
+        mIconFileElement.writeParcel(dest);
     }
 }

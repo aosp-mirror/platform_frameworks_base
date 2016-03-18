@@ -3,6 +3,9 @@ package com.android.hotspot2;
 import com.android.anqp.Constants;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -92,6 +95,14 @@ public abstract class Utils {
             }
         }
         return prefix;
+    }
+
+    public static String toIpString(int leIp) {
+        return String.format("%d.%d.%d.%d",
+                leIp & BYTE_MASK,
+                (leIp >> 8) & BYTE_MASK,
+                (leIp >> 16) & BYTE_MASK,
+                (leIp >> 24) & BYTE_MASK);
     }
 
     public static String bssidsToString(Collection<Long> bssids) {
@@ -274,16 +285,107 @@ public abstract class Utils {
                 c.get(Calendar.SECOND));
     }
 
-    public static String unquote(String s) {
-        if (s == null) {
-            return null;
-        } else if (s.length() > 1 && s.startsWith("\"") && s.endsWith("\"")) {
-            return s.substring(1, s.length() - 1);
-        } else {
-            return s;
+    /**
+     * Decode a wpa_supplicant SSID. wpa_supplicant uses double quotes around plain strings, or
+     * expects a hex-string if no quotes appear.
+     * For Ascii encoded string, any octet < 32 or > 127 is encoded as
+     * a "\x" followed by the hex representation of the octet.
+     * Exception chars are ", \, \e, \n, \r, \t which are escaped by a \
+     * See src/utils/common.c for the implementation in the supplicant.
+     *
+     * @param ssid The SSID from the config.
+     * @return The actual string content of the SSID
+     */
+    public static String decodeSsid(String ssid) {
+        if (ssid.length() <= 1) {
+            return ssid;
+        } else if (ssid.startsWith("\"") && ssid.endsWith("\"")) {
+            return unescapeSsid(ssid.substring(1, ssid.length() - 1));
+        } else if ((ssid.length() & 1) == 1) {
+            return ssid;
+        }
+
+        byte[] codepoints;
+        try {
+            codepoints = new byte[ssid.length() / 2];
+            for (int n = 0; n < ssid.length(); n += 2) {
+                codepoints[n / 2] = (byte) decodeHexPair(ssid, n);
+            }
+        } catch (NumberFormatException nfe) {
+            return ssid;
+        }
+
+        try {
+            CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+            return decoder.decode(ByteBuffer.wrap(codepoints)).toString();
+        } catch (CharacterCodingException cce) {
+            /* Do nothing, try LATIN-1 */
+        }
+        try {
+            CharsetDecoder decoder = StandardCharsets.ISO_8859_1.newDecoder();
+            return decoder.decode(ByteBuffer.wrap(codepoints)).toString();
+        } catch (CharacterCodingException cce) {    // Should not be possible.
+            return ssid;
         }
     }
 
+    private static String unescapeSsid(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (int n = 0; n < s.length(); n++) {
+            char ch = s.charAt(n);
+            if (ch != '\\' || n >= s.length() - 1) {
+                sb.append(ch);
+            } else {
+                n++;
+                ch = s.charAt(n);
+                switch (ch) {
+                    case '"':
+                    case '\\':
+                    default:
+                        sb.append(ch);
+                        break;
+                    case 'e':
+                        sb.append((char) 27);    // Escape char
+                        break;
+                    case 'n':
+                        sb.append('\n');
+                        break;
+                    case 'r':
+                        sb.append('\r');
+                        break;
+                    case 't':
+                        sb.append('\t');
+                        break;
+                    case 'x':
+                        if (s.length() - n < 3) {
+                            sb.append('\\').append(ch);
+                        } else {
+                            n++;
+                            sb.append((char) decodeHexPair(s, n));
+                            n++;
+                        }
+                        break;
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private static int decodeHexPair(String s, int position) {
+        return fromHex(s.charAt(position)) << 4 | fromHex(s.charAt(position + 1));
+    }
+
+    private static int fromHex(char ch) {
+        if (ch >= '0' && ch <= '9') {
+            return ch - '0';
+        } else if (ch >= 'A' && ch <= 'F') {
+            return ch - 'A' + 10;
+        } else if (ch >= 'a' && ch <= 'f') {
+            return ch - 'a' + 10;
+        } else {
+            throw new NumberFormatException(String.format("Not hex: '%c'", ch));
+        }
+    }
 
     public static void delay(long ms) {
         long until = System.currentTimeMillis() + ms;
@@ -296,5 +398,10 @@ public abstract class Utils {
                 Thread.sleep(remainder);
             } catch (InterruptedException ie) { /**/ }
         }
+    }
+
+    public static <T extends Enum<T>> T mapEnum(int ordinal, Class<T> enumClass) {
+        T[] constants = enumClass.getEnumConstants();
+        return ordinal >= 0 && ordinal < constants.length ? constants[ordinal]: null;
     }
 }
