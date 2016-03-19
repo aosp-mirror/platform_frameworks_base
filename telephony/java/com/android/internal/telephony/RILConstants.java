@@ -81,8 +81,7 @@ public interface RILConstants {
     int INTERNAL_ERR = 38;                    /* Hit unexpected vendor internal error scenario */
     int SYSTEM_ERR = 39;                      /* Hit platform or system error */
     int MODEM_ERR = 40;                       /* Hit unexpected modem error */
-    int INVALID_STATE = 41;                   /* Can not process the request as vendor RIL is in
-                                                   invalid state. */
+    int INVALID_STATE = 41;                   /* Unexpected request for the current state */
     int NO_RESOURCES = 42;                    /* Not sufficient resource to process the request */
     int SIM_ERR = 43;                         /* Received error from SIM card */
     int INVALID_ARGUMENTS = 44;               /* Received invalid arguments in request */
@@ -103,6 +102,11 @@ public interface RILConstants {
     int NO_SUCH_ENTRY = 59;                   /* No such entry present to perform the request */
     int NETWORK_NOT_READY = 60;               /* Network is not ready to perform the request */
     int NOT_PROVISIONED = 61;                 /* Device doesnot have this value provisioned */
+    int NO_SUBSCRIPTION = 62;                 /* Device doesnot have subscription */
+    int NO_NETWORK_FOUND = 63;                /* Network cannot be found */
+    int DEVICE_IN_USE = 64;                   /* Operation cannot be performed because the device
+                                                 is currently in use */
+    int ABORTED = 65;                         /* Operation aborted */
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
     int OEM_ERROR_1 = 501;
