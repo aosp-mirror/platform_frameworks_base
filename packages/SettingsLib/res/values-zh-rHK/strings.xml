@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"顯示所有 ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"顯示背景應用程式的「應用程式無回應」對話框"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許應用程式寫入到外部儲存空間"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"在任何資訊清單值下，允許將所有符合資格的應用程式寫入到外部儲存完間"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"強制可變更活動尺寸"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"在任何資訊清單值下，允許系統配合多重視窗環境調整所有活動的尺寸。"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"啟用自由形態視窗"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"在獨立的處理程序中執行 WebView 轉譯器。"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 設置"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"設定 WebView 設置"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"WebView 的設定選項清單已過時，因此您所選的 WebView 設定無效。請立即更新這份清單。"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"轉換為檔案加密"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"轉換…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"已加密檔案"</string>

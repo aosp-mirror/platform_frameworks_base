@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Ipakita ang lahat ng ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"App Not Responding dialog para sa background apps"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Pwersahang payagan ang mga app sa external"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Sapilitang gawing resizable ang mga aktibidad"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gawing nare-resize ang lahat ng aktibidad para sa multi-window, anuman ang mga value ng manifest."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"I-enable ang mga freeform window"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Tagapag-render ng WebView, patakbuhin sa hiwalay na proseso."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Pagpapatupad sa WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Itakda ang pagpapatupad sa WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Di-wasto ang piniling pag-implement ng WebView dahil luma na ang mga pagpipian ng pag-implement. Dapat na na-update na ngayon ang listahan."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"I-convert at gawing pag-encrypt ng file"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"I-convert..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Na-encrypt na ang file"</string>

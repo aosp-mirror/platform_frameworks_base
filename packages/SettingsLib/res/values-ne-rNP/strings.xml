@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"एउटा पृथक प्रक्रियामा वेबभ्यु रेन्डररहरू चलाउनुहोस्।"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView कार्यान्वयन सेट गर्नुहोस्"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"कार्यान्वयनको सूची पुरानो भइसकेको हुनाले छनोट गरिएको WebView को कार्यान्वयन अमान्य छ। सूची अब अद्यावधिक हुनुपर्छ।"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फाइल इन्क्रिप्सनमा रूपान्तरण गर्नुहोस्"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रुपान्तरण गर्नुहोस्…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"पहिल्यै फाइल इन्क्रिप्ट गरिएको छ"</string>

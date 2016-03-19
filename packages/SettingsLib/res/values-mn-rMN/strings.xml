@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Бүх ANRs харуулах"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Далд апп-уудад Апп Хариу Өгөхгүй байна гэснийг харуулах"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Апп-ыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааны хэмжээг олон цонхонд өөрчилж болохуйц болгоно уу."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Чөлөөт хэлбэрийн цонхыг идэвхжүүлэх"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView хөрвүүлэгчийг тусдаа боловсруулалтаар ажиллуулна уу."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView хэрэгжилт"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView хэрэгжилтийг тохируулах"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Хэрэгжүүлэлтийн сонголтын жагсаалт хуучирсан тул сонгосон WebView хэрэгжүүлэлт хүчингүй байна. Жагсаалтыг одоо шинэчлэх болно."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Файлын шифрлэлт болгон хөрвүүлэх"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Хөрвүүлэх..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Аль хэдийнэ файл шифрлэгдсэн"</string>

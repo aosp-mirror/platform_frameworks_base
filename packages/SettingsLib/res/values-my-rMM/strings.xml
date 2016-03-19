@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"ANRsအားလုံးအား ပြသရန်"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"နောက်ခံအပ်ပလီကေးရှင်းအတွက်တုံ့ပြန်မှုမရှိပြရန်"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"အပြင်မှာ အတင်း ခွင့်ပြုရန်"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"တိကျစွာ သတ်မှတ်ထားသည့်တန်ဖိုးများရှိသော်လည်း၊ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို သိမ်းဆည်းခွင့်ပြုပါ"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"တိကျစွာ သတ်မှတ်ထားသည့်တန်ဖိုးများရှိသော်လည်း၊ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို ဝင်ရောက်ခွင့်ပြုပါ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"လုပ်ဆောင်ချက်များ ဆိုက်ညှိရနိုင်ရန် လုပ်ခိုင်းပါ"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"မန်နီးဖက်စ်တန်ဖိုးများ မည်မျှပင်ရှိစေကာမူ၊ ဝင်းဒိုးများအတွက် လှုပ်ရှားမှုများအားလုံးကို အရွယ်အစားချိန်ခြင်း ပြုလုပ်ပါ။"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"အခမဲ့ပုံစံ ဝင်းဒိုးကို ဖွင့်ပါ"</string>
@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"လုပ်ငန်းဖြစ်စဉ်တစ်ခုတည်းအတွက် ဝဘ်မြင်ကွင်း အဖြစ်ပြုလုပ်ခြင်းကို ဖွင့်ပါ။"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"ရွေးချယ်ထားသည့် ဝဘ်မြင်ကွင်းထည့်သွင်းမှု မမှန်ကန်ပါ၊ အဘယ့်ကြောင့်ဆိုသော် ရွေးချယ်ရန် ထည့်သွင်းမှုစာရင်းသည် အသစ်မဖြစ်တော့သောကြောင့်ဖြစ်သည်။ စာရင်းကို ယခုအပ်ဒိတ် ဖြစ်နေလောက်ပါပြီ။"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ဖိုင်လုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းပါ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ပြောင်းရန်…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ဖိုင်ကို လုံခြုံအောင်ပြုလုပ်ပြီးပါပြီ"</string>

@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"‏WebView رینڈررز کو ایک علیحدہ پراسیس میں چلائیں۔"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏WebView کا نفاذ سیٹ کریں"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"‏WebView کا منتخب کردہ نفاذ غلط ہے کیونکہ نفاذ کے انتخابات کی فہرست باسی ہو گئی ہے۔ اب فہرست کو اپ ڈیٹ ہونا چاہئیے۔"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"فائل مرموز کاری میں بدلیں"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"بدلیں…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"فائل پہلے ہی مرموز شدہ ہے"</string>

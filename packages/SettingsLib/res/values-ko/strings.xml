@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"모든 ANR 보기"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"백그라운드 앱에 대해 앱 응답 없음 대화상자 표시"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"외부에서 앱 강제 허용"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"매니페스트 값과 관계없이 모든 앱이 외부 저장소에 작성되도록 허용"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"활동의 크기가 조정 가능하도록 설정"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"모든 활동을 매니페스트 값에 관계없이 멀티 윈도우용으로 크기 조정 가능하도록 설정"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"자유 형식 창 사용"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"단독 프로세스 내에서 WebView 렌더러를 실행합니다."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 구현"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView 구현 설정"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"구현 선택 목록이 비활성화되어 선택한 WebView 구현이 잘못되었습니다. 목록을 지금 업데이트해야 합니다."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"파일 암호화로 변환"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"변환..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"파일이 이미 암호화됨"</string>

@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Прикажи ги сите ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Прикажи „Апл. не реагира“ за. апл. во заднина"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Принуд. дозволете апликации на надворешна меморија"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Прави секоја апликација да биде подобна за запишување на надворешна меморија, независно од вредностите на манифестот"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Принуди ги активностите да ја менуваат големината"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Направете сите активности да бидат со променлива големина за повеќе прозорци, без разлика на вредностите на манифестот."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Овозможи прозорци со слободна форма"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Активирајте ги WebView-прикажувачите во изолиран процес."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Воведување WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Поставете воведување WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Избраната WebView имплементација е неважечка поради неажуриран список со избори за имплементација. Списокот ќе се ажурира сега."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Конвертирајте до шифрирање датотеки"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертирај..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Датотеката е веќе шифрирана"</string>
