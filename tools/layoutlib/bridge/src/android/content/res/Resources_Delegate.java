@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.ArrayResourceValue;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
+import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
@@ -84,7 +85,7 @@ public class Resources_Delegate {
         return new BridgeTypedArray(resources, resources.mContext, numEntries, platformFile);
     }
 
-    private static Pair<String, ResourceValue> getResourceValue(Resources resources, int id,
+    private static Pair<ResourceType, String> getResourceInfo(Resources resources, int id,
             boolean[] platformResFlag_out) {
         // first get the String related to this id in the framework
         Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
@@ -97,11 +98,7 @@ public class Resources_Delegate {
 
         if (resourceInfo != null) {
             platformResFlag_out[0] = true;
-            String attributeName = resourceInfo.getSecond();
-
-            return Pair.of(attributeName,
-                    resources.mContext.getRenderResources().getFrameworkResource(
-                            resourceInfo.getFirst(), attributeName));
+            return resourceInfo;
         }
 
         // didn't find a match in the framework? look in the project.
@@ -110,12 +107,23 @@ public class Resources_Delegate {
 
             if (resourceInfo != null) {
                 platformResFlag_out[0] = false;
-                String attributeName = resourceInfo.getSecond();
-
-                return Pair.of(attributeName,
-                        resources.mContext.getRenderResources().getProjectResource(
-                                resourceInfo.getFirst(), attributeName));
+                return resourceInfo;
             }
+        }
+        return null;
+    }
+
+    private static Pair<String, ResourceValue> getResourceValue(Resources resources, int id,
+            boolean[] platformResFlag_out) {
+        Pair<ResourceType, String> resourceInfo =
+                getResourceInfo(resources, id, platformResFlag_out);
+
+        if (resourceInfo != null) {
+            String attributeName = resourceInfo.getSecond();
+            RenderResources renderResources = resources.mContext.getRenderResources();
+            return Pair.of(attributeName, platformResFlag_out[0] ?
+                    renderResources.getFrameworkResource(resourceInfo.getFirst(), attributeName) :
+                    renderResources.getProjectResource(resourceInfo.getFirst(), attributeName));
         }
 
         return null;
@@ -626,17 +634,57 @@ public class Resources_Delegate {
 
     @LayoutlibDelegate
     static String getResourceEntryName(Resources resources, int resid) throws NotFoundException {
-        throw new UnsupportedOperationException();
+        Pair<ResourceType, String> resourceInfo = getResourceInfo(resources, resid, new boolean[1]);
+        if (resourceInfo != null) {
+            return resourceInfo.getSecond();
+        }
+        throwException(resid, null);
+        return null;
+
     }
 
     @LayoutlibDelegate
     static String getResourceName(Resources resources, int resid) throws NotFoundException {
-        throw new UnsupportedOperationException();
+        boolean[] platformOut = new boolean[1];
+        Pair<ResourceType, String> resourceInfo = getResourceInfo(resources, resid, platformOut);
+        String namespace;
+        if (resourceInfo != null) {
+            if (platformOut[0]) {
+                namespace = SdkConstants.ANDROID_NS_NAME;
+            } else {
+                namespace = resources.mContext.getPackageName();
+                namespace = namespace == null ? SdkConstants.APP_PREFIX : namespace;
+            }
+            return namespace + ':' + resourceInfo.getFirst().getName() + '/' +
+                    resourceInfo.getSecond();
+        }
+        throwException(resid, null);
+        return null;
+    }
+
+    @LayoutlibDelegate
+    static String getResourcePackageName(Resources resources, int resid) throws NotFoundException {
+        boolean[] platformOut = new boolean[1];
+        Pair<ResourceType, String> resourceInfo = getResourceInfo(resources, resid, platformOut);
+        if (resourceInfo != null) {
+            if (platformOut[0]) {
+                return SdkConstants.ANDROID_NS_NAME;
+            }
+            String packageName = resources.mContext.getPackageName();
+            return packageName == null ? SdkConstants.APP_PREFIX : packageName;
+        }
+        throwException(resid, null);
+        return null;
     }
 
     @LayoutlibDelegate
     static String getResourceTypeName(Resources resources, int resid) throws NotFoundException {
-        throw new UnsupportedOperationException();
+        Pair<ResourceType, String> resourceInfo = getResourceInfo(resources, resid, new boolean[1]);
+        if (resourceInfo != null) {
+            return resourceInfo.getFirst().getName();
+        }
+        throwException(resid, null);
+        return null;
     }
 
     @LayoutlibDelegate
@@ -849,22 +897,17 @@ public class Resources_Delegate {
      * @throws NotFoundException
      */
     private static void throwException(Resources resources, int id) throws NotFoundException {
-        // first get the String related to this id in the framework
-        Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
+        throwException(id, getResourceInfo(resources, id, new boolean[1]));
+    }
 
-        // if the name is unknown in the framework, get it from the custom view loader.
-        if (resourceInfo == null && resources.mLayoutlibCallback != null) {
-            resourceInfo = resources.mLayoutlibCallback.resolveResourceId(id);
-        }
-
+    private static void throwException(int id, @Nullable Pair<ResourceType, String> resourceInfo) {
         String message;
         if (resourceInfo != null) {
             message = String.format(
                     "Could not find %1$s resource matching value 0x%2$X (resolved name: %3$s) in current configuration.",
                     resourceInfo.getFirst(), id, resourceInfo.getSecond());
         } else {
-            message = String.format(
-                    "Could not resolve resource value: 0x%1$X.", id);
+            message = String.format("Could not resolve resource value: 0x%1$X.", id);
         }
 
         throw new NotFoundException(message);
