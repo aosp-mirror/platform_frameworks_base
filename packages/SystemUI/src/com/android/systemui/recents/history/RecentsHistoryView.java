@@ -200,8 +200,7 @@ public class RecentsHistoryView extends LinearLayout
         // Pad the view to align the history with the stack layout
         Rect taskStackBounds = new Rect();
         mLayoutAlgorithm.getTaskStackBounds(new Rect(0, 0, width, height),
-                mSystemInsets.top, mSystemInsets.right, new Rect() /* searchBarSpaceBounds */,
-                taskStackBounds);
+                mSystemInsets.top, mSystemInsets.right, taskStackBounds);
         int stackTopPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(
                 getResources(),
                 R.dimen.recents_layout_top_margin_phone,

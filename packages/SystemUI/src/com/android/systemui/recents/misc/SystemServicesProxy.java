@@ -28,9 +28,6 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
-import android.appwidget.AppWidgetHost;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -54,7 +51,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -67,7 +63,6 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MutableBoolean;
-import android.util.Pair;
 import android.view.Display;
 import android.view.IDockedStackListener;
 import android.view.Surface;
@@ -79,7 +74,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
@@ -116,7 +110,6 @@ public class SystemServicesProxy {
     AccessibilityManager mAccm;
     ActivityManager mAm;
     IActivityManager mIam;
-    AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
     AssistUtils mAssistUtils;
@@ -190,7 +183,6 @@ public class SystemServicesProxy {
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManagerNative.getDefault();
-        mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
@@ -853,89 +845,6 @@ public class SystemServicesProxy {
     public int getProcessUser() {
         if (mUm == null) return 0;
         return mUm.getUserHandle();
-    }
-
-    /**
-     * Returns the current search widget id.
-     */
-    public int getSearchAppWidgetId(Context context) {
-        return Prefs.getInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, -1);
-    }
-
-    /**
-     * Returns the current search widget info, binding a new one if necessary.
-     */
-    public AppWidgetProviderInfo getOrBindSearchAppWidget(Context context, AppWidgetHost host) {
-        int searchWidgetId = Prefs.getInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, -1);
-        AppWidgetProviderInfo searchWidgetInfo = mAwm.getAppWidgetInfo(searchWidgetId);
-        AppWidgetProviderInfo resolvedSearchWidgetInfo = resolveSearchAppWidget();
-
-        // Return the search widget info if it hasn't changed
-        if (searchWidgetInfo != null && resolvedSearchWidgetInfo != null &&
-                searchWidgetInfo.provider.equals(resolvedSearchWidgetInfo.provider)) {
-            if (Prefs.getString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null) == null) {
-                Prefs.putString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
-                        searchWidgetInfo.provider.getPackageName());
-            }
-            return searchWidgetInfo;
-        }
-
-        // Delete the old widget
-        if (searchWidgetId != -1) {
-            host.deleteAppWidgetId(searchWidgetId);
-        }
-
-        // And rebind a new search widget
-        if (resolvedSearchWidgetInfo != null) {
-            Pair<Integer, AppWidgetProviderInfo> widgetInfo = bindSearchAppWidget(host,
-                    resolvedSearchWidgetInfo);
-            if (widgetInfo != null) {
-                Prefs.putInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, widgetInfo.first);
-                Prefs.putString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
-                        widgetInfo.second.provider.getPackageName());
-                return widgetInfo.second;
-            }
-        }
-
-        // If we fall through here, then there is no resolved search widget, so clear the state
-        Prefs.remove(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID);
-        Prefs.remove(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE);
-        return null;
-    }
-
-    /**
-     * Returns the first Recents widget from the same package as the global assist activity.
-     */
-    public AppWidgetProviderInfo resolveSearchAppWidget() {
-        if (mAssistComponent == null) return null;
-        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
-                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-        for (AppWidgetProviderInfo info : widgets) {
-            if (info.provider.getPackageName().equals(mAssistComponent.getPackageName())) {
-                return info;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Resolves and binds the search app widget that is to appear in the recents.
-     */
-    private Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host,
-            AppWidgetProviderInfo resolvedSearchWidgetInfo) {
-        if (mAwm == null) return null;
-        if (mAssistComponent == null) return null;
-
-        // Allocate a new widget id and try and bind the app widget (if that fails, then just skip)
-        int searchWidgetId = host.allocateAppWidgetId();
-        Bundle opts = new Bundle();
-        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, resolvedSearchWidgetInfo.provider, opts)) {
-            host.deleteAppWidgetId(searchWidgetId);
-            return null;
-        }
-        return new Pair<>(searchWidgetId, resolvedSearchWidgetInfo);
     }
 
     /**

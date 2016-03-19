@@ -1199,8 +1199,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // bounds have changed.  This is because we may get spurious measures while dragging where
         // our current stack bounds reflect the target drop region.
         mLayoutAlgorithm.getTaskStackBounds(new Rect(0, 0, width, height),
-                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.right,
-                Utilities.EMPTY_RECT, mTmpRect);
+                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
         if (!mTmpRect.equals(mStableStackBounds)) {
             mStableStackBounds.set(mTmpRect);
             mStackBounds.set(mTmpRect);
@@ -1257,11 +1256,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         MeasureSpec.EXACTLY));
     }
 
-    /**
-     * This is called with the size of the space not including the top or right insets, or the
-     * search bar height in portrait (but including the search bar width in landscape, since we want
-     * to draw under it.
-     */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         // Layout each of the TaskViews

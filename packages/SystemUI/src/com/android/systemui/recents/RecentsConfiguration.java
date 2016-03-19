@@ -50,7 +50,6 @@ public class RecentsConfiguration {
     // TODO: Values determined by the current context, needs to be refactored into something that is
     //       agnostic of the activity context, but still calculable from the Recents component for
     //       the transition into recents
-    public boolean hasTransposedSearchBar;
     public boolean hasTransposedNavBar;
 
     // Since the positions in Recents has to be calculated globally (before the RecentsActivity
@@ -84,7 +83,6 @@ public class RecentsConfiguration {
      */
     void update(Rect systemInsets) {
         hasTransposedNavBar = systemInsets.right > 0;
-        hasTransposedSearchBar = systemInsets.right > 0;
     }
 
     /**

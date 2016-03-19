@@ -31,8 +31,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public static class Static {
         // Enables debug drawing for the transition thumbnail
         public static final boolean EnableTransitionThumbnailDebugMode = false;
-        // This enables the search bar integration
-        public static final boolean EnableSearchBar = false;
         // This disables the bitmap and icon caches
         public static final boolean DisableBackgroundCache = false;
         // Enables the task affiliations

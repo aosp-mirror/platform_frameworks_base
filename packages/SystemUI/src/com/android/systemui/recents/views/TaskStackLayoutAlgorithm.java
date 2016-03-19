@@ -227,11 +227,10 @@ public class TaskStackLayoutAlgorithm {
     // The task bounds (untransformed) for layout.  This rect is anchored at mTaskRoot.
     @ViewDebug.ExportedProperty(category="recents")
     public Rect mTaskRect = new Rect();
-    // The freeform workspace bounds, inset from the top by the search bar, and is a fixed height
+    // The freeform workspace bounds, inset by the top system insets and is a fixed height
     @ViewDebug.ExportedProperty(category="recents")
     public Rect mFreeformRect = new Rect();
-    // The stack bounds, inset from the top by the search bar, and runs to
-    // the bottom of the screen
+    // The stack bounds, inset from the top system insets, and runs to the bottom of the screen
     @ViewDebug.ExportedProperty(category="recents")
     public Rect mStackRect = new Rect();
     // This is the current system insets
@@ -255,9 +254,7 @@ public class TaskStackLayoutAlgorithm {
     @ViewDebug.ExportedProperty(category="recents")
     private int mBaseBottomMargin;
     private int mMinMargin;
-    // The height of the search bar
-    @ViewDebug.ExportedProperty(category="recents")
-    private int mSearchBarHeight;
+
     // The gap between the freeform and stack layouts
     @ViewDebug.ExportedProperty(category="recents")
     private int mFreeformStackGap;
@@ -356,10 +353,6 @@ public class TaskStackLayoutAlgorithm {
                 R.dimen.recents_layout_side_margin_tablet,
                 R.dimen.recents_layout_side_margin_tablet_xlarge);
         mBaseBottomMargin = res.getDimensionPixelSize(R.dimen.recents_layout_bottom_margin);
-        mSearchBarHeight = getDimensionForDevice(res,
-                R.dimen.recents_layout_search_bar_height_phone,
-                R.dimen.recents_layout_search_bar_height_tablet,
-                R.dimen.recents_layout_search_bar_height_tablet);
         mFreeformStackGap =
                 res.getDimensionPixelSize(R.dimen.recents_freeform_layout_bottom_margin);
 
@@ -959,15 +952,13 @@ public class TaskStackLayoutAlgorithm {
      * the top/bottom padding or insets.
      */
     public void getTaskStackBounds(Rect windowRect, int topInset, int rightInset,
-            Rect searchBarBounds, Rect taskStackBounds) {
+            Rect taskStackBounds) {
         RecentsConfiguration config = Recents.getConfiguration();
         if (config.hasTransposedNavBar) {
             taskStackBounds.set(windowRect.left, windowRect.top + topInset,
                     windowRect.right - rightInset, windowRect.bottom);
         } else {
-            // In portrait, the search bar appears on the top (which already has the inset)
-            int top = searchBarBounds.isEmpty() ? topInset : 0;
-            taskStackBounds.set(windowRect.left, windowRect.top + searchBarBounds.bottom + top,
+            taskStackBounds.set(windowRect.left, windowRect.top + topInset,
                     windowRect.right - rightInset, windowRect.bottom);
         }
 
@@ -978,23 +969,6 @@ public class TaskStackLayoutAlgorithm {
         int targetStackWidth = Math.min(taskStackBounds.width() - 2 * sideMargin,
                 Math.min(displayRect.width(), displayRect.height()));
         taskStackBounds.inset((taskStackBounds.width() - targetStackWidth) / 2, 0);
-    }
-
-    /**
-     * Returns the search bar bounds in the current orientation.  These bounds do not account for
-     * the system insets.
-     */
-    public void getSearchBarBounds(Rect windowBounds, int topInset, Rect searchBarSpaceBounds) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        if (config.hasTransposedSearchBar) {
-            // In landscape phones, the search bar appears on the left
-            searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
-                    windowBounds.left + mSearchBarHeight, windowBounds.bottom);
-        } else {
-            // In portrait, the search bar appears on the top
-            searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
-                    windowBounds.right, windowBounds.top + topInset + mSearchBarHeight);
-        }
     }
 
     /**

@@ -20,7 +20,8 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.appwidget.AppWidgetProviderInfo;
+import android.app.ITaskStackListener;
+import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -40,7 +41,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
@@ -132,13 +132,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     protected Context mContext;
     protected Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
-    RecentsAppWidgetHost mAppWidgetHost;
     protected boolean mCanReuseTaskStackViews = true;
     boolean mDraggingInRecents;
     boolean mLaunchedWhileDocking;
 
     // Task launching
-    Rect mSearchBarBounds = new Rect();
     Rect mTaskStackBounds = new Rect();
     Rect mLastTaskViewBounds = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
@@ -171,7 +169,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public RecentsImpl(Context context) {
         mContext = context;
         mHandler = new Handler();
-        mAppWidgetHost = new RecentsAppWidgetHost(mContext, RecentsAppWidgetHost.HOST_ID);
 
         // Initialize the static foreground thread
         ForegroundThread.get();
@@ -183,7 +180,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         // Initialize the static configuration resources
         reloadHeaderBarLayout();
-        updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
+        updateHeaderBarLayout(null /* stack */);
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
@@ -198,12 +195,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void onBootCompleted() {
-        updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
+        updateHeaderBarLayout(null /* stack */);
     }
 
     public void onConfigurationChanged() {
         reloadHeaderBarLayout();
-        updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
+        updateHeaderBarLayout(null /* stack */);
         // Don't reuse task stack views if the configuration changes
         mCanReuseTaskStackViews = false;
         Recents.getConfiguration().updateOnConfigurationChange();
@@ -572,11 +569,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Prepares the header bar layout for the next transition, if the task view bounds has changed
      * since the last call, it will attempt to re-measure and layout the header bar to the new size.
      *
-     * @param tryAndBindSearchWidget if set, will attempt to fetch and bind the search widget if one
-     *                               is not already bound (can be expensive)
      * @param stack the stack to initialize the stack layout with
      */
-    private void updateHeaderBarLayout(boolean tryAndBindSearchWidget, TaskStack stack) {
+    private void updateHeaderBarLayout(TaskStack stack) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect systemInsets = new Rect();
         ssp.getStableInsets(systemInsets);
@@ -588,16 +583,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Recents.getConfiguration().update(systemInsets);
 
         TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
-        if (RecentsDebugFlags.Static.EnableSearchBar && tryAndBindSearchWidget) {
-            // Try and pre-emptively bind the search widget on startup to ensure that we
-            // have the right thumbnail bounds to animate to.
-            // Note: We have to reload the widget id before we get the task stack bounds below
-            if (ssp.getOrBindSearchAppWidget(mContext, mAppWidgetHost) != null) {
-                stackLayout.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
-            }
-        }
         stackLayout.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
-                mSearchBarBounds, mTaskStackBounds);
+                mTaskStackBounds);
 
         // Rebind the header bar and draw it for the transition
         Rect taskStackBounds = new Rect(mTaskStackBounds);
@@ -663,7 +650,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         preloadIcon(topTask);
 
         // Update the header bar if necessary
-        updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
+        updateHeaderBarLayout(stack);
 
         // Update the destination rect
         final Task toTask = new Task();
@@ -696,13 +683,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Creates the activity options for a home->recents transition.
      */
-    protected ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
-        if (fromSearchHome) {
-            return ActivityOptions.makeCustomAnimation(mContext,
-                    R.anim.recents_from_search_launcher_enter,
-                    R.anim.recents_from_search_launcher_exit,
-                    mHandler, null);
-        }
+    protected ActivityOptions getHomeTransitionActivityOptions() {
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
                 R.anim.recents_from_launcher_exit,
@@ -846,7 +827,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
         // Update the header bar if necessary
-        updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
+        updateHeaderBarLayout(stack);
 
         // Prepare the dummy stack for the transition
         TaskStackLayoutAlgorithm.VisibilityReport stackVr =
@@ -854,8 +835,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         if (!animate) {
             ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext, -1, -1);
-            startRecentsActivity(topTask, opts, false /* fromHome */,
-                    false /* fromSearchHome */, false /* fromThumbnail*/, stackVr);
+            startRecentsActivity(topTask, opts, false /* fromHome */, false /* fromThumbnail*/,
+                    stackVr);
             return;
         }
 
@@ -866,8 +847,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // Try starting with a thumbnail transition
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, mDummyStackView);
             if (opts != null) {
-                startRecentsActivity(topTask, opts, false /* fromHome */,
-                        false /* fromSearchHome */, true /* fromThumbnail */, stackVr);
+                startRecentsActivity(topTask, opts, false /* fromHome */, true /* fromThumbnail */,
+                        stackVr);
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -876,33 +857,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         if (!useThumbnailTransition) {
             // If there is no thumbnail transition, but is launching from home into recents, then
-            // use a quick home transition and do the animation from home
-            if (hasRecentTasks) {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                String homeActivityPackage = ssp.getHomeActivityPackageName();
-                String searchWidgetPackage = null;
-                if (RecentsDebugFlags.Static.EnableSearchBar) {
-                    searchWidgetPackage = Prefs.getString(mContext,
-                            Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null);
-                } else {
-                    AppWidgetProviderInfo searchWidgetInfo = ssp.resolveSearchAppWidget();
-                    if (searchWidgetInfo != null) {
-                        searchWidgetPackage = searchWidgetInfo.provider.getPackageName();
-                    }
-                }
-
-                // Determine whether we are coming from a search owned home activity
-                boolean fromSearchHome = (homeActivityPackage != null) &&
-                        homeActivityPackage.equals(searchWidgetPackage);
-                ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
-                startRecentsActivity(topTask, opts, true /* fromHome */, fromSearchHome,
-                        false /* fromThumbnail */, stackVr);
-            } else {
-                // Otherwise we do the normal fade from an unknown source
-                ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startRecentsActivity(topTask, opts, true /* fromHome */,
-                        false /* fromSearchHome */, false /* fromThumbnail */, stackVr);
-            }
+            // use a quick home transition
+            ActivityOptions opts = hasRecentTasks
+                    ? getHomeTransitionActivityOptions()
+                    : getUnknownTransitionActivityOptions();
+            startRecentsActivity(topTask, opts, true /* fromHome */, false /* fromThumbnail */,
+                    stackVr);
         }
         mLastToggleTime = SystemClock.elapsedRealtime();
     }
@@ -911,13 +871,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Starts the recents activity.
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-                ActivityOptions opts, boolean fromHome, boolean fromSearchHome,
-                boolean fromThumbnail, TaskStackLayoutAlgorithm.VisibilityReport vr) {
+                ActivityOptions opts, boolean fromHome, boolean fromThumbnail,
+                TaskStackLayoutAlgorithm.VisibilityReport vr) {
         // Update the configuration based on the launch options
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        launchState.launchedFromHome = fromSearchHome || fromHome;
-        launchState.launchedFromSearchHome = fromSearchHome;
+        launchState.launchedFromHome = fromHome;
         launchState.launchedFromApp = fromThumbnail || mLaunchedWhileDocking;
         launchState.launchedFromAppDocked = mLaunchedWhileDocking;
         launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;

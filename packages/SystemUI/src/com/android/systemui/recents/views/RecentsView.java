@@ -48,7 +48,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
-import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
@@ -94,7 +93,6 @@ public class RecentsView extends FrameLayout {
 
     private TaskStack mStack;
     private TaskStackView mTaskStackView;
-    private RecentsAppWidgetHostView mSearchBar;
     private TextView mHistoryButton;
     private TextView mHistoryClearAllButton;
     private TextView mEmptyView;
@@ -227,36 +225,6 @@ public class RecentsView extends FrameLayout {
         return mHistoryView != null && mHistoryView.isVisible();
     }
 
-    /**
-     * Returns the currently set task stack.
-     */
-    public TaskStack getTaskStack() {
-        return mStack;
-    }
-
-    /** Gets the next task in the stack - or if the last - the top task */
-    public Task getNextTaskOrTopTask(Task taskToSearch) {
-        Task returnTask = null;
-        boolean found = false;
-        if (mTaskStackView != null) {
-            TaskStack stack = mTaskStackView.getStack();
-            ArrayList<Task> taskList = stack.getStackTasks();
-            // Iterate the stack views and try and find the focused task
-            for (int j = taskList.size() - 1; j >= 0; --j) {
-                Task task = taskList.get(j);
-                // Return the next task in the line.
-                if (found)
-                    return task;
-                // Remember the first possible task as the top task.
-                if (returnTask == null)
-                    returnTask = task;
-                if (task == taskToSearch)
-                    found = true;
-            }
-        }
-        return returnTask;
-    }
-
     /** Launches the focused task from the first stack if possible */
     public boolean launchFocusedTask(int logEvent) {
         if (mTaskStackView != null) {
@@ -309,31 +277,10 @@ public class RecentsView extends FrameLayout {
         return false;
     }
 
-    /** Adds the search bar */
-    public void setSearchBar(RecentsAppWidgetHostView searchBar) {
-        // Remove the previous search bar if one exists
-        if (mSearchBar != null && indexOfChild(mSearchBar) > -1) {
-            removeView(mSearchBar);
-        }
-        // Add the new search bar
-        if (searchBar != null) {
-            mSearchBar = searchBar;
-            addView(mSearchBar);
-        }
-    }
-
-    /** Returns whether there is currently a search bar */
-    public boolean hasValidSearchBar() {
-        return mSearchBar != null && !mSearchBar.isReinflateRequired();
-    }
-
     /**
      * Hides the task stack and shows the empty view.
      */
     public void showEmptyView(int msgResId) {
-        if (RecentsDebugFlags.Static.EnableSearchBar && (mSearchBar != null)) {
-            mSearchBar.setVisibility(View.INVISIBLE);
-        }
         mTaskStackView.setVisibility(View.INVISIBLE);
         mEmptyView.setText(msgResId);
         mEmptyView.setVisibility(View.VISIBLE);
@@ -349,13 +296,7 @@ public class RecentsView extends FrameLayout {
     public void hideEmptyView() {
         mEmptyView.setVisibility(View.INVISIBLE);
         mTaskStackView.setVisibility(View.VISIBLE);
-        if (RecentsDebugFlags.Static.EnableSearchBar && (mSearchBar != null)) {
-            mSearchBar.setVisibility(View.VISIBLE);
-        }
         mTaskStackView.bringToFront();
-        if (mSearchBar != null) {
-            mSearchBar.bringToFront();
-        }
         if (RecentsDebugFlags.Static.EnableHistory) {
             mHistoryButton.bringToFront();
         }
@@ -382,16 +323,6 @@ public class RecentsView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-
-        // Get the search bar bounds and measure the search bar layout
-        if (mSearchBar != null) {
-            Rect searchBarSpaceBounds = new Rect();
-            mTaskStackView.getStackAlgorithm().getSearchBarBounds(new Rect(0, 0, width, height),
-                    mSystemInsets.top, searchBarSpaceBounds);
-            mSearchBar.measure(
-                    MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.height(), MeasureSpec.EXACTLY));
-        }
 
         if (mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
@@ -430,16 +361,6 @@ public class RecentsView extends FrameLayout {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        // Get the search bar bounds so that we lay it out
-        Rect measuredRect = new Rect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-        Rect searchBarSpaceBounds = new Rect();
-        if (mSearchBar != null) {
-            mTaskStackView.getStackAlgorithm().getSearchBarBounds(measuredRect, mSystemInsets.top,
-                    searchBarSpaceBounds);
-            mSearchBar.layout(searchBarSpaceBounds.left, searchBarSpaceBounds.top,
-                    searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);
-        }
-
         if (mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.layout(left, top, left + getMeasuredWidth(), top + getMeasuredHeight());
         }

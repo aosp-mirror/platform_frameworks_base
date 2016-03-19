@@ -126,15 +126,8 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         @Override
         public void run() {
             try {
-                RecentsActivityLaunchState launchState =
-                        Recents.getConfiguration().getLaunchState();
                 ActivityOptions opts = ActivityOptions.makeCustomAnimation(RecentsTvActivity.this,
-                        launchState.launchedFromSearchHome ?
-                                R.anim.recents_to_search_launcher_enter :
-                                R.anim.recents_to_launcher_enter,
-                        launchState.launchedFromSearchHome ?
-                                R.anim.recents_to_search_launcher_exit :
-                                R.anim.recents_to_launcher_exit);
+                        R.anim.recents_to_launcher_enter, R.anim.recents_to_launcher_exit);
                 startActivityAsUser(mLaunchIntent, opts.toBundle(), UserHandle.CURRENT);
             } catch (Exception e) {
                 Log.e(TAG, getString(R.string.recents_launch_error_message, "Home"), e);

@@ -18,10 +18,7 @@ package com.android.systemui.recents;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.SearchManager;
 import android.app.TaskStackBuilder;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +39,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
@@ -104,11 +100,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private RecentsView mRecentsView;
     private SystemBarScrimViews mScrimViews;
 
-    // Search AppWidget
-    private AppWidgetProviderInfo mSearchWidgetInfo;
-    private RecentsAppWidgetHost mAppWidgetHost;
-    private RecentsAppWidgetHostView mSearchWidgetHostView;
-
     // Runnables to finish the Recents activity
     private Intent mHomeIntent;
 
@@ -138,17 +129,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         @Override
         public void run() {
             try {
-                RecentsActivityLaunchState launchState =
-                        Recents.getConfiguration().getLaunchState();
                 ActivityOptions opts = mOpts;
                 if (opts == null) {
                     opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
-                            launchState.launchedFromSearchHome ?
-                                    R.anim.recents_to_search_launcher_enter :
-                                    R.anim.recents_to_launcher_enter,
-                            launchState.launchedFromSearchHome ?
-                                    R.anim.recents_to_search_launcher_exit :
-                                    R.anim.recents_to_launcher_exit);
+                            R.anim.recents_to_launcher_enter, R.anim.recents_to_launcher_exit);
                 }
                 startActivityAsUser(mLaunchIntent, opts.toBundle(), UserHandle.CURRENT);
             } catch (Exception e) {
@@ -167,11 +151,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHomeIfVisible(false);
-            } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
-                // When the search activity changes, update the search widget view
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(context, mAppWidgetHost);
-                refreshSearchWidgetView();
             }
         }
     };
@@ -285,10 +264,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Register this activity with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
 
-        // Initialize the widget host (the host id is static and does not change)
-        if (RecentsDebugFlags.Static.EnableSearchBar) {
-            mAppWidgetHost = new RecentsAppWidgetHost(this, RecentsAppWidgetHost.HOST_ID);
-        }
+        // Initialize the package monitor
         mPackageMonitor = new RecentsPackageMonitor();
         mPackageMonitor.register(this);
 
@@ -317,17 +293,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
-        // Bind the search app widget when we first start up
-        if (RecentsDebugFlags.Static.EnableSearchBar) {
-            mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
-        }
-
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        if (RecentsDebugFlags.Static.EnableSearchBar) {
-            filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
-        }
         registerReceiver(mSystemBroadcastReceiver, filter);
     }
 
@@ -478,11 +446,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Unregister any broadcast receivers for the task loader
         mPackageMonitor.unregister();
-
-        // Stop listening for widget package changes if there was one bound
-        if (RecentsDebugFlags.Static.EnableSearchBar) {
-            mAppWidgetHost.stopListening();
-        }
 
         EventBus.getDefault().unregister(this);
     }
@@ -677,23 +640,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         }
     }
 
-    public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
-        // Try and start the enter animation (or restart it on configuration changed)
-        if (RecentsDebugFlags.Static.EnableSearchBar) {
-            if (mSearchWidgetInfo != null) {
-                event.addPostAnimationCallback(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Start listening for widget package changes if there is one bound
-                        if (mAppWidgetHost != null) {
-                            mAppWidgetHost.startListening();
-                        }
-                    }
-                });
-            }
-        }
-    }
-
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
         EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(true));
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
@@ -717,10 +663,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             ssp.cancelWindowTransition(launchState.launchedToTaskId);
             ssp.cancelThumbnailTransition(getTaskId());
         }
-    }
-
-    public final void onBusEvent(AppWidgetProviderChangedEvent event) {
-        refreshSearchWidgetView();
     }
 
     public final void onBusEvent(ShowApplicationInfoEvent event) {
@@ -783,24 +725,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Once the user has scrolled while holding alt-tab, then we should ignore the release of
         // the key
         mIgnoreAltTabRelease = true;
-    }
-
-    private void refreshSearchWidgetView() {
-        if (mSearchWidgetInfo != null) {
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            int searchWidgetId = ssp.getSearchAppWidgetId(this);
-            mSearchWidgetHostView = (RecentsAppWidgetHostView) mAppWidgetHost.createView(
-                    this, searchWidgetId, mSearchWidgetInfo);
-            Bundle opts = new Bundle();
-            opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                    AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-            mSearchWidgetHostView.updateAppWidgetOptions(opts);
-            // Set the padding to 0 for this search widget
-            mSearchWidgetHostView.setPadding(0, 0, 0, 0);
-            mRecentsView.setSearchBar(mSearchWidgetHostView);
-        } else {
-            mRecentsView.setSearchBar(null);
-        }
     }
 
     @Override

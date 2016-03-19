@@ -81,8 +81,7 @@ public class RecentsTvImpl extends RecentsImpl{
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
             if (hasRecentTasks) {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                ActivityOptions opts = getHomeTransitionActivityOptions(false);
+                ActivityOptions opts = getHomeTransitionActivityOptions();
                 startRecentsActivity(topTask, opts, true /* fromHome */, false /* fromThumbnail */);
             } else {
                 // Otherwise we do the normal fade from an unknown source
@@ -99,7 +98,6 @@ public class RecentsTvImpl extends RecentsImpl{
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.launchedFromHome = fromHome;
-        launchState.launchedFromSearchHome = false;
         launchState.launchedFromApp = fromThumbnail;
         launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
