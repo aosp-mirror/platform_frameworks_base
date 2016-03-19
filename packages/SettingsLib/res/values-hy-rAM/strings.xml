@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Գործարկել WebView-ի մշակիչները առանձնացված գործընթացում:"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-ի իրականացում"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ընտրեք WebView-ի իրականացումը"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"WebView-ի իրագործման ընտրված եղանակն անվավեր է, քանի որ իրագործման ընտրանքների ցանկը արդի չէ: Այն այժմ կթարմացվի:"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Վերածել ֆայլային գաղտնագրման"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Փոխարկել…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Ֆայլային գաղտնագրումն արդեն կատարվել է"</string>

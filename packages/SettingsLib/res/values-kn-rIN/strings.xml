@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ಪ್ರತ್ಯೇಕಗೊಳಿಸಿದ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ WebView ರೆಂಡರರ್‌‌ ರನ್‌ ಮಾಡಿ."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"ಅನುಷ್ಠಾನ ಆಯ್ಕೆಗಳ ಪಟ್ಟಿ ಸ್ಥಬ್ದವಾಗಿರುವ ಕಾರಣ ಆಯ್ಕೆಮಾಡಿದ WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯು ಅಮಾನ್ಯವಾಗಿದೆ. ಈಗ ಪಟ್ಟಿಯನ್ನು ಅಪ್‌‌ಡೇಟ್‌ ಮಾಡಬೇಕಾಗಿದೆ."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ಫೈಲ್ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸು"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ಪರಿವರ್ತಿಸು…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ಫೈಲ್ ಈಗಾಗಲೇ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>

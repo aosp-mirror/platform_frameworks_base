@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Vis alle ANR-er"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tving frem tillatelse for ekstern lagring av apper"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Dette gjør at alle apper kan lagres på ekstern lagring – uavhengig av manifestverdier"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til å kunne endre størrelse"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gjør at alle aktivitetene kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Slå på vinduer i fritt format"</string>
@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Kjør WebView-gjengivelser i en isolert prosess."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Angi WebView-implementering"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Den valgte WebView-implementeringen er ugyldig fordi listen over implementeringsvalg er foreldet. Listen er nå oppdatert."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konvertér til kryptert fil"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertér …"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Allerede kryptert og lagret som fil"</string>

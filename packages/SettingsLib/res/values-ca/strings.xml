@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Tots els errors sense resposta"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Informa que una aplicació en segon pla no respon"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Força permís d\'aplicacions a l\'emmagatzem. extern"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Permet que les aplicacions es puguin escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Força l\'ajust de la mida de les activitats"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activa les finestres de format lliure"</string>
@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Executa els renderitzadors de WebView en un procés aïllat."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configura la implementació de WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"La implementació de WebView que s\'ha triat no és vàlida perquè la llista d\'opcions d\'implementació ha quedat inactiva. Ara la llista ja hauria d\'estar actualitzada."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converteix en l\'encriptació de fitxers"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converteix…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"El fitxer ja està encriptat"</string>

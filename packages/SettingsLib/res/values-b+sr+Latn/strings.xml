@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Pokrećite WebView prikazivače u okviru izolovanog procesa."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Primena WebView-a"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Podesite primenu WebView-a"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Izabrana primena WebView-a je nevažeća zato što je lista mogućnosti za primenu zastarela. Sada bi trebalo da ažurirate listu."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konvertuj u šifrovanje datoteka"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertuj..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Već se koristi šifrovanje datoteka"</string>

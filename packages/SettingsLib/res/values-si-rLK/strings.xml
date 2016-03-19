@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"සියලුම ANR පෙන්වන්න"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"පසුබිම් යෙදුම් වලට යෙදුම ප්‍රතිචාර නොදක්වයි කවුළුව පෙන්වන්න"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"බාහිර මත යෙදුම් ඉඩ දීම බල කරන්න"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"මැනිෆෙස්ට් අගයන් නොසලකා, ඕනෑම යෙදුමක් බාහිර ගබඩාවට ලිවීමට සුදුසුකම් ලබා දෙයි"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ක්‍රියාකාරකම් ප්‍රතිප්‍රමාණ කළ හැකි බවට බල කරන්න"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"මැනිෆෙස්ට් අගයන් නොසලකා, සියලු ක්‍රියාකාරකම් බහු-කවුළුව සඳහා ප්‍රතිප්‍රමාණ කළ හැකි බවට පත් කරන්න."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"අනියම් හැඩැති කවුළු සබල කරන්න"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"හුදකලා වූ ක්‍රියාවලියක WebView විදහා දැක්වීම් ධාවනය කරන්න."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ක්‍රියාත්මක කිරීම"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ක්‍රියාත්මක කිරීම සකසන්න"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"තෝරන ලද WebView ක්‍රියාත්මක කිරීම ක්‍රියාත්මක කිරීම් තේරීම් ලැයිස්තු යල් පැන ඇති නිසා වලංගු නැත. ලැයිස්තුව දැන් යාවත්කාලීන කළ යුතුය."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ගොනු සංකේතනයට පරිවර්තනය කරන්න"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"පරිවර්තනය කරන්න..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"දැනටමත් ගොනුව සංකේතනය කර ඇත"</string>
