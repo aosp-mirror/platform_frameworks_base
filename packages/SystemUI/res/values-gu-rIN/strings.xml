@@ -73,7 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"સ્ક્રીનશોટ કેપ્ચર કર્યો."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"તમારો સ્ક્રીનશોટ જોવા માટે ટચ કરો."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"સ્ક્રીનશોટ કેપ્ચર કરી શકાયો નથી."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"સ્ક્રીનશૉટ સાચવવામાં સમયા આવી."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"સ્ક્રીનશૉટ સાચવવામાં સમસ્યા આવી."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"મર્યાદિત સંગ્રહ સ્થાનને કારણે સ્ક્રીનશોટ સાચવી શકાતો નથી."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશોટ્સ લેવાની મંજૂરી નથી."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>
@@ -221,10 +221,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"કાર્ય મોડ ચાલુ."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"કાર્ય મોડ બંધ કર્યો."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"કાર્ય મોડ ચાલુ કર્યો."</string>
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
-    <skip />
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"ડેટા સેવર બંધ કર્યું."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ડેટા સેવર ચાલુ કર્યું."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"પ્રદર્શન તેજ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ડેટા થોભાવ્યો છે"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ડેટા થોભાવ્યો છે"</string>
@@ -303,7 +301,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> મર્યાદા"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ચેતવણી"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"કાર્ય મોડ"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"તમારી તાજેતરની સ્ક્રીન્સ અહીં દેખાય છે"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"કોઇ તાજેતરની આઇટમ્સ નથી"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"તમે બધું સાફ કર્યું"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"એપ્લિકેશન માહિતી"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"સ્ક્રીન પિનિંગ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"શોધ"</string>
@@ -537,6 +536,8 @@
     <string name="select_keycode" msgid="7413765103381924584">"કીબોર્ડ બટન પસંદ કરો"</string>
     <string name="preview" msgid="9077832302472282938">"પૂર્વાવલોકન કરો"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ટાઇલ્સ ઉમેરવા માટે ખેંચો"</string>
+    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"સંપાદિત કરો"</string>
     <string name="tuner_time" msgid="6572217313285536011">"સમય"</string>
   <string-array name="clock_options">

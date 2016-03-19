@@ -223,10 +223,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Рабочий режим включен."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Рабочий режим отключен."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Рабочий режим включен."</string>
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
-    <skip />
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Режим экономии трафика отключен."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Режим экономии трафика включен."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Яркость экрана"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Передача данных 2G и 3G приостановлена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Передача данных 4G приостановлена"</string>
@@ -305,7 +303,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ограничение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Рабочий режим"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"Здесь будут показаны недавние приложения"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Недавних приложений нет"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Вы очистили всё"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Сведения о приложении"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"Заблокировать в приложении"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"поиск"</string>
@@ -539,6 +538,8 @@
     <string name="select_keycode" msgid="7413765103381924584">"Выберите клавишу"</string>
     <string name="preview" msgid="9077832302472282938">"Просмотр"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Перетащите нужные элементы"</string>
+    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"Изменить"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Время"</string>
   <string-array name="clock_options">
