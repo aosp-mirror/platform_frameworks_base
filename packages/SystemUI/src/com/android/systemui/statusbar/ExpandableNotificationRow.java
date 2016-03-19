@@ -43,6 +43,7 @@ import android.widget.RemoteViews;
 
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -227,6 +228,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         updateClearability();
         if (mIsSummaryWithChildren) {
             recreateNotificationHeader();
+            mChildrenContainer.onNotificationUpdated();
         }
         if (mIconAnimationRunning) {
             setIconAnimationRunning(true);
@@ -584,6 +586,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPublicLayout.closeRemoteInput();
     }
 
+    /**
+     * Set by how much the single line view should be indented.
+     */
+    public void setSingleLineWidthIndention(int indention) {
+        mPrivateLayout.setSingleLineWidthIndention(indention);
+    }
+
+    public int getNotificationColor() {
+        int color = getStatusBarNotification().getNotification().color;
+        if (color == Notification.COLOR_DEFAULT) {
+            return mContext.getColor(com.android.internal.R.color.notification_icon_default_color);
+        }
+        return color;
+    }
+
+    public HybridNotificationView getSingleLineView() {
+        return mPrivateLayout.getSingleLineView();
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -677,6 +698,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             public void onInflate(ViewStub stub, View inflated) {
                 mChildrenContainer = (NotificationChildrenContainer) inflated;
                 mChildrenContainer.setNotificationParent(ExpandableNotificationRow.this);
+                mChildrenContainer.onNotificationUpdated();
                 mTranslateableViews.add(mChildrenContainer);
             }
         });
@@ -858,6 +880,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             showing.setDark(dark, fade, delay);
         }
         if (mIsSummaryWithChildren) {
+            mChildrenContainer.setDark(dark, fade, delay);
             mNotificationHeaderWrapper.setDark(dark, fade, delay);
         }
     }
@@ -954,6 +977,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mIsSystemExpanded = expand;
             notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
+            if (mChildrenContainer != null) {
+                mChildrenContainer.updateGroupOverflow();
+            }
         }
     }
 
@@ -966,6 +992,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mOnKeyguard = onKeyguard;
             logExpansionEvent(false, wasExpanded);
             if (wasExpanded != isExpanded()) {
+                if (mIsSummaryWithChildren) {
+                    mChildrenContainer.updateGroupOverflow();
+                }
                 notifyHeightChanged(false /* needsAnimation */);
             }
         }
