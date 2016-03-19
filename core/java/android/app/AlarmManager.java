@@ -559,9 +559,10 @@ public class AlarmManager {
      * the given time.
      * @hide
      */
-    public void setIdleUntil(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, operation,
-                null, null, null, null, null);
+    public void setIdleUntil(int type, long triggerAtMillis, String tag, OnAlarmListener listener,
+            Handler targetHandler) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, null,
+                listener, tag, targetHandler, null, null);
     }
 
     /**

@@ -1679,7 +1679,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Constant for device idle mode: active in full mode.
      */
-    public static final int DEVICE_IDLE_MODE_FULL = 2;
+    public static final int DEVICE_IDLE_MODE_DEEP = 2;
 
     /**
      * Returns the time in microseconds that device has been in idle mode while
@@ -2754,11 +2754,11 @@ public abstract class BatteryStats implements Parcelable {
         final long powerSaveModeEnabledTime = getPowerSaveModeEnabledTime(rawRealtime, which);
         final long deviceIdleModeLightTime = getDeviceIdleModeTime(DEVICE_IDLE_MODE_LIGHT,
                 rawRealtime, which);
-        final long deviceIdleModeFullTime = getDeviceIdleModeTime(DEVICE_IDLE_MODE_FULL,
+        final long deviceIdleModeFullTime = getDeviceIdleModeTime(DEVICE_IDLE_MODE_DEEP,
                 rawRealtime, which);
         final long deviceLightIdlingTime = getDeviceIdlingTime(DEVICE_IDLE_MODE_LIGHT,
                 rawRealtime, which);
-        final long deviceIdlingTime = getDeviceIdlingTime(DEVICE_IDLE_MODE_FULL,
+        final long deviceIdlingTime = getDeviceIdlingTime(DEVICE_IDLE_MODE_DEEP,
                 rawRealtime, which);
         final int connChanges = getNumConnectivityChange(which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
@@ -2844,14 +2844,14 @@ public abstract class BatteryStats implements Parcelable {
                 getMobileRadioActiveTime(rawRealtime, which) / 1000,
                 getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
                 powerSaveModeEnabledTime / 1000, connChanges, deviceIdleModeFullTime / 1000,
-                getDeviceIdleModeCount(DEVICE_IDLE_MODE_FULL, which), deviceIdlingTime / 1000,
-                getDeviceIdlingCount(DEVICE_IDLE_MODE_FULL, which),
+                getDeviceIdleModeCount(DEVICE_IDLE_MODE_DEEP, which), deviceIdlingTime / 1000,
+                getDeviceIdlingCount(DEVICE_IDLE_MODE_DEEP, which),
                 getMobileRadioActiveCount(which),
                 getMobileRadioActiveUnknownTime(which) / 1000, deviceIdleModeLightTime / 1000,
                 getDeviceIdleModeCount(DEVICE_IDLE_MODE_LIGHT, which), deviceLightIdlingTime / 1000,
                 getDeviceIdlingCount(DEVICE_IDLE_MODE_LIGHT, which),
                 getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_LIGHT),
-                getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_FULL));
+                getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_DEEP));
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -3330,11 +3330,11 @@ public abstract class BatteryStats implements Parcelable {
         final long powerSaveModeEnabledTime = getPowerSaveModeEnabledTime(rawRealtime, which);
         final long deviceIdleModeLightTime = getDeviceIdleModeTime(DEVICE_IDLE_MODE_LIGHT,
                 rawRealtime, which);
-        final long deviceIdleModeFullTime = getDeviceIdleModeTime(DEVICE_IDLE_MODE_FULL,
+        final long deviceIdleModeFullTime = getDeviceIdleModeTime(DEVICE_IDLE_MODE_DEEP,
                 rawRealtime, which);
         final long deviceLightIdlingTime = getDeviceIdlingTime(DEVICE_IDLE_MODE_LIGHT,
                 rawRealtime, which);
-        final long deviceIdlingTime = getDeviceIdlingTime(DEVICE_IDLE_MODE_FULL,
+        final long deviceIdlingTime = getDeviceIdlingTime(DEVICE_IDLE_MODE_DEEP,
                 rawRealtime, which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
@@ -3411,7 +3411,7 @@ public abstract class BatteryStats implements Parcelable {
                     formatTimeMs(sb, deviceIdlingTime / 1000);
                     sb.append("(");
                     sb.append(formatRatioLocked(deviceIdlingTime, whichBatteryRealtime));
-                    sb.append(") "); sb.append(getDeviceIdlingCount(DEVICE_IDLE_MODE_FULL, which));
+                    sb.append(") "); sb.append(getDeviceIdlingCount(DEVICE_IDLE_MODE_DEEP, which));
                     sb.append("x");
             pw.println(sb.toString());
         }
@@ -3423,10 +3423,10 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append("(");
                     sb.append(formatRatioLocked(deviceIdleModeFullTime, whichBatteryRealtime));
                     sb.append(") ");
-                    sb.append(getDeviceIdleModeCount(DEVICE_IDLE_MODE_FULL, which));
+                    sb.append(getDeviceIdleModeCount(DEVICE_IDLE_MODE_DEEP, which));
                     sb.append("x");
                     sb.append(" -- longest ");
-                    formatTimeMs(sb, getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_FULL));
+                    formatTimeMs(sb, getLongestDeviceIdleModeTime(DEVICE_IDLE_MODE_DEEP));
             pw.println(sb.toString());
         }
         if (phoneOnTime != 0) {
