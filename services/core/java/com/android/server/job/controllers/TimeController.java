@@ -39,9 +39,9 @@ public class TimeController extends StateController {
     private static final String TAG = "JobScheduler.Time";
 
     /** Deadline alarm tag for logging purposes */
-    private final String DEADLINE_TAG = "deadline";
+    private final String DEADLINE_TAG = "JobScheduler.deadline";
     /** Delay alarm tag for logging purposes */
-    private final String DELAY_TAG = "delay";
+    private final String DELAY_TAG = "JobScheduler.delay";
 
     private long mNextJobExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;

@@ -19,7 +19,6 @@ package com.android.server;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -111,12 +110,6 @@ public class DeviceIdleController extends SystemService
 
     private static final int EVENT_BUFFER_SIZE = 40;
 
-    private static final String ACTION_STEP_IDLE_STATE =
-            "com.android.server.device_idle.STEP_IDLE_STATE";
-
-    private static final String ACTION_STEP_LIGHT_IDLE_STATE =
-            "com.android.server.device_idle.STEP_LIGHT_IDLE_STATE";
-
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
     private PowerManagerInternal mLocalPowerManager;
@@ -127,8 +120,6 @@ public class DeviceIdleController extends SystemService
     private Sensor mMotionSensor;
     private LocationManager mLocationManager;
     private LocationRequest mLocationRequest;
-    private PendingIntent mAlarmIntent;
-    private PendingIntent mLightAlarmIntent;
     private Intent mIdleIntent;
     private Intent mLightIdleIntent;
     private Display mCurDisplay;
@@ -329,14 +320,36 @@ public class DeviceIdleController extends SystemService
                         removePowerSaveWhitelistAppInternal(ssp);
                     }
                 }
-            } else if (ACTION_STEP_LIGHT_IDLE_STATE.equals(intent.getAction())) {
-                synchronized (DeviceIdleController.this) {
-                    stepLightIdleStateLocked("s:alarm");
-                }
-            } else if (ACTION_STEP_IDLE_STATE.equals(intent.getAction())) {
-                synchronized (DeviceIdleController.this) {
-                    stepIdleStateLocked("s:alarm");
-                }
+            }
+        }
+    };
+
+    private final AlarmManager.OnAlarmListener mLightAlarmListener
+            = new AlarmManager.OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            synchronized (DeviceIdleController.this) {
+                stepLightIdleStateLocked("s:alarm");
+            }
+        }
+    };
+
+    private final AlarmManager.OnAlarmListener mDeepAlarmListener
+            = new AlarmManager.OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            synchronized (DeviceIdleController.this) {
+                stepIdleStateLocked("s:alarm");
+            }
+        }
+    };
+
+    private final AlarmManager.OnAlarmListener mMaintenanceMinCheckListener
+            = new AlarmManager.OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            synchronized (DeviceIdleController.this) {
+                exitMaintenanceEarlyIfNeededLocked();
             }
         }
     };
@@ -470,6 +483,8 @@ public class DeviceIdleController extends SystemService
                 = "light_idle_maintenance_min_budget";
         private static final String KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET
                 = "light_idle_maintenance_max_budget";
+        private static final String KEY_MIN_LIGHT_MAINTENANCE_TIME = "min_light_maintenance_time";
+        private static final String KEY_MIN_DEEP_MAINTENANCE_TIME = "min_deep_maintenance_time";
         private static final String KEY_INACTIVE_TIMEOUT = "inactive_to";
         private static final String KEY_SENSING_TIMEOUT = "sensing_to";
         private static final String KEY_LOCATING_TIMEOUT = "locating_to";
@@ -517,6 +532,28 @@ public class DeviceIdleController extends SystemService
          * @see #KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET
          */
         public long LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
+
+        /**
+         * This is the minimum amount of time that we will stay in maintenance mode after
+         * a light doze.  We have this minimum to allow various things to respond to switching
+         * in to maintenance mode and scheduling their work -- otherwise we may
+         * see there is nothing to do (no jobs or downloads pending) and go out of maintenance
+         * mode immediately.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MIN_LIGHT_MAINTENANCE_TIME
+         */
+        public long MIN_LIGHT_MAINTENANCE_TIME;
+
+        /**
+         * This is the minimum amount of time that we will stay in maintenance mode after
+         * a full doze.  We have this minimum to allow various things to respond to switching
+         * in to maintenance mode and scheduling their work -- otherwise we may
+         * see there is nothing to do (no jobs or downloads pending) and go out of maintenance
+         * mode immediately.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_MIN_DEEP_MAINTENANCE_TIME
+         */
+        public long MIN_DEEP_MAINTENANCE_TIME;
 
         /**
          * This is the time, after becoming inactive, at which we start looking at the
@@ -682,6 +719,12 @@ public class DeviceIdleController extends SystemService
                 LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = mParser.getLong(
                         KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET,
                         !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L);
+                MIN_LIGHT_MAINTENANCE_TIME = mParser.getLong(
+                        KEY_MIN_LIGHT_MAINTENANCE_TIME,
+                        !COMPRESS_TIME ? 5 * 1000L : 1 * 1000L);
+                MIN_DEEP_MAINTENANCE_TIME = mParser.getLong(
+                        KEY_MIN_DEEP_MAINTENANCE_TIME,
+                        !COMPRESS_TIME ? 30 * 1000L : 5 * 1000L);
                 INACTIVE_TIMEOUT = mParser.getLong(KEY_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? 30 * 60 * 1000L : 3 * 60 * 1000L);
                 SENSING_TIMEOUT = mParser.getLong(KEY_SENSING_TIMEOUT,
@@ -729,6 +772,14 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET); pw.print("=");
             TimeUtils.formatDuration(LIGHT_IDLE_MAINTENANCE_MAX_BUDGET, pw);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_LIGHT_MAINTENANCE_TIME); pw.print("=");
+            TimeUtils.formatDuration(MIN_LIGHT_MAINTENANCE_TIME, pw);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_DEEP_MAINTENANCE_TIME); pw.print("=");
+            TimeUtils.formatDuration(MIN_DEEP_MAINTENANCE_TIME, pw);
             pw.println();
 
             pw.print("    "); pw.print(KEY_INACTIVE_TIMEOUT); pw.print("=");
@@ -860,7 +911,7 @@ public class DeviceIdleController extends SystemService
                     try {
                         mNetworkPolicyManager.setDeviceIdleMode(true);
                         mBatteryStats.noteDeviceIdleMode(msg.what == MSG_REPORT_IDLE_ON
-                                ? BatteryStats.DEVICE_IDLE_MODE_FULL
+                                ? BatteryStats.DEVICE_IDLE_MODE_DEEP
                                 : BatteryStats.DEVICE_IDLE_MODE_LIGHT, null, Process.myUid());
                     } catch (RemoteException e) {
                     }
@@ -1220,16 +1271,6 @@ public class DeviceIdleController extends SystemService
                         (PowerManager) getContext().getSystemService(Context.POWER_SERVICE),
                         mHandler, mSensorManager, this, angleThreshold);
 
-                Intent intent = new Intent(ACTION_STEP_IDLE_STATE)
-                        .setPackage("android")
-                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                mAlarmIntent = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
-
-                Intent intentLight = new Intent(ACTION_STEP_LIGHT_IDLE_STATE)
-                        .setPackage("android")
-                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                mLightAlarmIntent = PendingIntent.getBroadcast(getContext(), 0, intentLight, 0);
-
                 mIdleIntent = new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
                 mIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
@@ -1239,8 +1280,6 @@ public class DeviceIdleController extends SystemService
 
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-                filter.addAction(ACTION_STEP_IDLE_STATE);
-                filter.addAction(ACTION_STEP_LIGHT_IDLE_STATE);
                 getContext().registerReceiver(mReceiver, filter);
                 filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -1582,6 +1621,7 @@ public class DeviceIdleController extends SystemService
             mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
             mCurIdleBudget = 0;
             mMaintenanceStartTime = 0;
+            mAlarmManager.cancel(mMaintenanceMinCheckListener);
             resetIdleManagementLocked();
             resetLightIdleManagementLocked();
             addEvent(EVENT_NORMAL);
@@ -1664,6 +1704,7 @@ public class DeviceIdleController extends SystemService
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 addEvent(EVENT_LIGHT_IDLE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
+                mAlarmManager.cancel(mMaintenanceMinCheckListener);
                 break;
             case LIGHT_STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
@@ -1674,7 +1715,6 @@ public class DeviceIdleController extends SystemService
                 } else if (mCurIdleBudget > mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET) {
                     mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
                 }
-                mMaintenanceStartTime = SystemClock.elapsedRealtime();
                 scheduleLightAlarmLocked(mCurIdleBudget);
                 if (DEBUG) Slog.d(TAG,
                         "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
@@ -1682,6 +1722,9 @@ public class DeviceIdleController extends SystemService
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 addEvent(EVENT_LIGHT_MAINTENANCE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
+                mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
+                        mMaintenanceStartTime + mConstants.MIN_LIGHT_MAINTENANCE_TIME,
+                        "DeviceIdleController.maint-check", mMaintenanceMinCheckListener, mHandler);
                 break;
         }
     }
@@ -1773,6 +1816,7 @@ public class DeviceIdleController extends SystemService
                 EventLogTags.writeDeviceIdle(mState, reason);
                 addEvent(EVENT_DEEP_IDLE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
+                mAlarmManager.cancel(mMaintenanceMinCheckListener);
                 break;
             case STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
@@ -1780,12 +1824,16 @@ public class DeviceIdleController extends SystemService
                 scheduleAlarmLocked(mNextIdlePendingDelay, false);
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE to STATE_IDLE_MAINTENANCE. " +
                         "Next alarm in " + mNextIdlePendingDelay + " ms.");
+                mMaintenanceStartTime = SystemClock.elapsedRealtime();
                 mNextIdlePendingDelay = Math.min(mConstants.MAX_IDLE_PENDING_TIMEOUT,
                         (long)(mNextIdlePendingDelay * mConstants.IDLE_PENDING_FACTOR));
                 mState = STATE_IDLE_MAINTENANCE;
                 EventLogTags.writeDeviceIdle(mState, reason);
                 addEvent(EVENT_DEEP_MAINTENANCE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
+                mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
+                        mMaintenanceStartTime + mConstants.MIN_DEEP_MAINTENANCE_TIME,
+                        "DeviceIdleController.maint-check", mMaintenanceMinCheckListener, mHandler);
                 break;
         }
     }
@@ -1886,10 +1934,23 @@ public class DeviceIdleController extends SystemService
         if (mState == STATE_IDLE_MAINTENANCE || mLightState == LIGHT_STATE_IDLE_MAINTENANCE) {
             if (mActiveIdleOpCount <= 0 && mDownloadServiceActive == null
                     && !mSyncActive && !mJobsActive && !mAlarmsActive) {
+                final long now = SystemClock.elapsedRealtime();
+                if (DEBUG) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Exit: start=");
+                    TimeUtils.formatDuration(mMaintenanceStartTime, sb);
+                    sb.append(" now=");
+                    TimeUtils.formatDuration(now, sb);
+                    Slog.d(TAG, sb.toString());
+                }
                 if (mState == STATE_IDLE_MAINTENANCE) {
-                    stepIdleStateLocked("s:early");
+                    if (now >= (mMaintenanceStartTime + mConstants.MIN_DEEP_MAINTENANCE_TIME)) {
+                        stepIdleStateLocked("s:early");
+                    }
                 } else {
-                    stepLightIdleStateLocked("s:early");
+                    if (now >= (mMaintenanceStartTime + mConstants.MIN_LIGHT_MAINTENANCE_TIME)) {
+                        stepLightIdleStateLocked("s:early");
+                    }
                 }
             }
         }
@@ -1977,14 +2038,14 @@ public class DeviceIdleController extends SystemService
     void cancelAlarmLocked() {
         if (mNextAlarmTime != 0) {
             mNextAlarmTime = 0;
-            mAlarmManager.cancel(mAlarmIntent);
+            mAlarmManager.cancel(mDeepAlarmListener);
         }
     }
 
     void cancelLightAlarmLocked() {
         if (mNextLightAlarmTime != 0) {
             mNextLightAlarmTime = 0;
-            mAlarmManager.cancel(mLightAlarmIntent);
+            mAlarmManager.cancel(mLightAlarmListener);
         }
     }
 
@@ -2008,10 +2069,10 @@ public class DeviceIdleController extends SystemService
         mNextAlarmTime = SystemClock.elapsedRealtime() + delay;
         if (idleUntil) {
             mAlarmManager.setIdleUntil(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    mNextAlarmTime, mAlarmIntent);
+                    mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         } else {
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    mNextAlarmTime, mAlarmIntent);
+                    mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         }
     }
 
@@ -2026,7 +2087,7 @@ public class DeviceIdleController extends SystemService
         }
         mNextLightAlarmTime = SystemClock.elapsedRealtime() + delay;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                mNextLightAlarmTime, mLightAlarmIntent);
+                mNextLightAlarmTime, "DeviceIdleController.light", mLightAlarmListener, mHandler);
     }
 
     private static int[] buildAppIdArray(ArrayMap<String, Integer> systemApps,
@@ -2229,10 +2290,8 @@ public class DeviceIdleController extends SystemService
         pw.println("Device idle controller (deviceidle) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  step");
+        pw.println("  step [light|deep]");
         pw.println("    Immediately step to next state, without waiting for alarm.");
-        pw.println("  light-step");
-        pw.println("    Immediately step to next light idle state, without waiting for alarm.");
         pw.println("  force-idle");
         pw.println("    Force directly into idle mode, regardless of other device state.");
         pw.println("    Use \"step\" to get out.");
@@ -2272,24 +2331,20 @@ public class DeviceIdleController extends SystemService
                     null);
             synchronized (this) {
                 long token = Binder.clearCallingIdentity();
+                String arg = shell.getNextArg();
                 try {
-                    exitForceIdleLocked();
-                    stepIdleStateLocked("s:shell");
-                    pw.print("Stepped to: ");
-                    pw.println(stateToString(mState));
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else if ("light-step".equals(cmd)) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
-                    null);
-            synchronized (this) {
-                long token = Binder.clearCallingIdentity();
-                try {
-                    exitForceIdleLocked();
-                    stepLightIdleStateLocked("s:shell");
-                    pw.print("Stepped to: "); pw.println(lightStateToString(mLightState));
+                    if (arg == null || "deep".equals(arg)) {
+                        exitForceIdleLocked();
+                        stepIdleStateLocked("s:shell");
+                        pw.print("Stepped to deep: ");
+                        pw.println(stateToString(mState));
+                    } else if ("light".equals(arg)) {
+                        exitForceIdleLocked();
+                        stepLightIdleStateLocked("s:shell");
+                        pw.print("Stepped to light: "); pw.println(lightStateToString(mLightState));
+                    } else {
+                        pw.println("Unknown idle mode: " + arg);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
