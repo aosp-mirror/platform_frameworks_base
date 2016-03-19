@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏ویرایش با %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"اشتراک‌گذاری با"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏اشتراک‌گذاری با %1$s"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"انتخاب یک برنامه صفحه اصلی"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"‏استفاده از %1$s به عنوان برنامه صفحه اصلی"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"استفاده به صورت پیش‌فرض برای این عملکرد."</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"اشتراک‌گذاری"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"نپذیرفتن"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغییر صفحه‌کلید"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"انتخاب صفحه‌کلیدها"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"وقتی صفحه‌کلید فیزیکی فعال است این ویرایشگر را روی صفحه نگه‌می‌دارد"</string>
     <string name="hardware" msgid="194658061510127999">"نمایش صفحه‌کلید مجازی"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"انتخاب طرح‌بندی صفحه‌کلید"</string>
@@ -1562,7 +1567,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"برداشتن پین"</string>
     <string name="app_info" msgid="6856026610594615344">"اطلاعات برنامه"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"برای استفاده بدون محدودیت از این دستگاه، بازنشانی کارخانه‌ای انجام دهید"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"برای یادگیری بیشتر لمس کنید."</string>
 </resources>

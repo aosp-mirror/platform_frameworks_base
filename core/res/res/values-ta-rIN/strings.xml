@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s மூலம் திருத்து"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"இதன் மூலம் பகிர்"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s மூலம் பகிர்"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"முகப்புப் பயன்பாட்டைத் தேர்வுசெய்க"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$sஐ முகப்பாகப் பயன்படுத்து"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"இந்தச் செயலுக்கு இயல்பாகப் பயன்படுத்து."</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"பகிர்"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"வேண்டாம்"</string>
     <string name="select_input_method" msgid="8547250819326693584">"விசைப்பலகையை மாற்று"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"விசைப்பலகைகளைத் தேர்வுசெய்க"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"கைமுறை விசைப்பலகை இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
     <string name="hardware" msgid="194658061510127999">"விர்ச்சுவல் விசைப்பலகையை காட்டு"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"விசைப்பலகைத் தளவமைப்பைத் தேர்ந்தெடுக்கவும்"</string>
@@ -1562,7 +1567,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"பின்னை அகற்று"</string>
     <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"இந்தச் சாதனத்தைக் கட்டுப்பாடுகளின்றிப் பயன்படுத்த, ஆரம்ப நிலைக்கு மீட்டமைக்கவும்"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"மேலும் அறிய தொடவும்."</string>
 </resources>

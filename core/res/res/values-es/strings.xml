@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Compartir con"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"Selecciona una aplicación de inicio"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como aplicación de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECHAZAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Elegir teclados"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"Debe seguir en pantalla mientras el teclado físico esté activo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona un diseño de teclado"</string>
@@ -1506,7 +1511,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Hasta apagar el dispositivo"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Hasta desactivar esta opción"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hasta que desactives la opción No molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
@@ -1562,7 +1567,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"No fijar"</string>
     <string name="app_info" msgid="6856026610594615344">"Información de la aplicación"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"Restablece los datos de fábrica para usar este dispositivo sin restricciones"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca para obtener más información."</string>
 </resources>

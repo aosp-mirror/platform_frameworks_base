@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s સાથે સંપાદિત કરો"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"આની સાથે શેર કરો"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s સાથે શેર કરો"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"હોમ એપ્લિકેશન પસંદ કરો"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"હોમ તરીકે %1$s નો ઉપયોગ કરો"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"આ ક્રિયા માટે ડિફોલ્ટ તરીકે ઉપયોગમાં લો."</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"શેર કરો"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"નકારો"</string>
     <string name="select_input_method" msgid="8547250819326693584">"કીબોર્ડ બદલો"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"કીબોર્ડ્સ પસંદ કરો"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"જ્યારે ભૌતિક કીબોર્ડ સક્રિય હોય ત્યારે તેને સ્ક્રીન પર રાખો"</string>
     <string name="hardware" msgid="194658061510127999">"વર્ચ્યુઅલ કીબોર્ડ બતાવો"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"કીબોર્ડ લેઆઉટ પસંદ કરો."</string>
@@ -1562,7 +1567,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"અનપિન કરો"</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"આ ઉપકરણનો પ્રતિબંધો વિના ઉપયોગ કરવા માટે ફેક્ટરી રીસેટ કરો"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"વધુ જાણવા માટે ટચ કરો."</string>
 </resources>
