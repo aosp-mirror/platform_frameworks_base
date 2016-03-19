@@ -964,7 +964,8 @@ public class TvView extends ViewGroup {
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY}
          * </ul>
          */
-        public void onVideoUnavailable(String inputId, int reason) {
+        public void onVideoUnavailable(
+                String inputId, @TvInputManager.VideoUnavailableReason int reason) {
         }
 
         /**
@@ -1009,7 +1010,8 @@ public class TvView extends ViewGroup {
          * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
          * </ul>
          */
-        public void onTimeShiftStatusChanged(String inputId, int status) {
+        public void onTimeShiftStatusChanged(
+                String inputId, @TvInputManager.TimeShiftStatus int status) {
         }
     }
 
