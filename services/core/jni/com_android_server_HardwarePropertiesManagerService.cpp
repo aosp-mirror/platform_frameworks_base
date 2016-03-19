@@ -21,11 +21,9 @@
 
 #include <stdlib.h>
 
-#include <hardware/hardware_properties.h>
+#include <hardware/thermal.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
-
-#include <hardware_properties/HardwarePropertiesManager.h>
 
 #include "core_jni_helpers.h"
 
@@ -38,99 +36,102 @@ static struct {
     jmethodID initMethod;
 } gCpuUsageInfoClassInfo;
 
-static struct hardware_properties_module* gHardwarePropertiesModule;
+static struct thermal_module* gThermalModule;
 
 // ----------------------------------------------------------------------------
 
 static void nativeInit(JNIEnv* env, jobject obj) {
-    status_t err = hw_get_module(HARDWARE_PROPERTIES_HARDWARE_MODULE_ID,
-            (hw_module_t const**)&gHardwarePropertiesModule);
+    status_t err = hw_get_module(THERMAL_HARDWARE_MODULE_ID, (hw_module_t const**)&gThermalModule);
     if (err) {
-        ALOGE("Couldn't load %s module (%s)", HARDWARE_PROPERTIES_HARDWARE_MODULE_ID,
-              strerror(-err));
+        ALOGE("Couldn't load %s module (%s)", THERMAL_HARDWARE_MODULE_ID, strerror(-err));
     }
 }
 
 static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
-    if (gHardwarePropertiesModule && gHardwarePropertiesModule->getFanSpeeds) {
-        float *speeds = nullptr;
-        ssize_t size = gHardwarePropertiesModule->getFanSpeeds(gHardwarePropertiesModule, &speeds);
+    if (gThermalModule && gThermalModule->getCoolingDevices) {
+        ssize_t list_size = gThermalModule->getCoolingDevices(gThermalModule, nullptr, 0);
 
-        if (speeds && size > 0) {
-            jfloatArray fanSpeeds = env->NewFloatArray(size);
-            env->SetFloatArrayRegion(fanSpeeds, 0, size, speeds);
-            free(speeds);
-            return fanSpeeds;
+        if (list_size >= 0) {
+            cooling_device_t *list = (cooling_device_t *)
+                    malloc(list_size * sizeof(cooling_device_t));
+            ssize_t size = gThermalModule->getCoolingDevices(gThermalModule, list, list_size);
+            if (size >= 0) {
+                if (list_size > size) {
+                    list_size = size;
+                }
+                jfloat values[list_size];
+                for (ssize_t i = 0; i < list_size; ++i) {
+                    values[i] = list[i].current_value;
+                }
+
+                jfloatArray fanSpeeds = env->NewFloatArray(list_size);
+                env->SetFloatArrayRegion(fanSpeeds, 0, list_size, values);
+                free(list);
+                return fanSpeeds;
+            }
+
+            free(list);
         }
 
-        if (size < 0) {
-            ALOGE("Cloudn't get fan speeds because of HAL error");
-        }
+        ALOGE("Cloudn't get fan speeds because of HAL error");
     }
     return env->NewFloatArray(0);
 }
 
 static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type) {
-    if (gHardwarePropertiesModule) {
-        ssize_t size = 0;
-        float *temps = nullptr;
-        switch (type) {
-        case DEVICE_TEMPERATURE_CPU:
-            if (gHardwarePropertiesModule->getCpuTemperatures) {
-                size = gHardwarePropertiesModule->getCpuTemperatures(gHardwarePropertiesModule,
-                                                                     &temps);
+    if (gThermalModule && gThermalModule->getTemperatures) {
+        ssize_t list_size = gThermalModule->getTemperatures(gThermalModule, nullptr, 0);
+        if (list_size >= 0) {
+            temperature_t *list = (temperature_t *) malloc(list_size * sizeof(temperature_t));
+            ssize_t size = gThermalModule->getTemperatures(gThermalModule, list, list_size);
+            if (size >= 0) {
+                if (list_size > size) {
+                    list_size = size;
+                }
+
+                jfloat values[list_size];
+                size_t length = 0;
+
+                for (ssize_t i = 0; i < list_size; ++i) {
+                    if (list[i].type == type) {
+                        values[length++] = list[i].current_value;
+                    }
+                }
+                jfloatArray deviceTemps = env->NewFloatArray(length);
+                env->SetFloatArrayRegion(deviceTemps, 0, length, values);
+                free(list);
+                return deviceTemps;
             }
-            break;
-        case DEVICE_TEMPERATURE_GPU:
-            if (gHardwarePropertiesModule->getGpuTemperatures) {
-                size = gHardwarePropertiesModule->getGpuTemperatures(gHardwarePropertiesModule,
-                                                                    &temps);
-            }
-            break;
-        case DEVICE_TEMPERATURE_BATTERY:
-            if (gHardwarePropertiesModule->getBatteryTemperatures) {
-                size = gHardwarePropertiesModule->getBatteryTemperatures(gHardwarePropertiesModule,
-                                                                        &temps);
-            }
-            break;
+            free(list);
         }
-        if (temps && size > 0) {
-            jfloatArray deviceTemps = env->NewFloatArray(size);
-            env->SetFloatArrayRegion(deviceTemps, 0, size, temps);
-            free(temps);
-            return deviceTemps;
-        }
-        if (size < 0) {
-            ALOGE("Couldn't get device temperatures type=%d because of HAL error", type);
-        }
+        ALOGE("Couldn't get device temperatures because of HAL error");
     }
     return env->NewFloatArray(0);
 }
 
 static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
-    if (gHardwarePropertiesModule && gHardwarePropertiesModule->getCpuUsages
-        && gCpuUsageInfoClassInfo.initMethod) {
-        int64_t *active_times = nullptr;
-        int64_t *total_times = nullptr;
-        ssize_t size = gHardwarePropertiesModule->getCpuUsages(gHardwarePropertiesModule,
-                                                               &active_times, &total_times);
-        if (active_times && total_times && size > 0) {
-            jobjectArray cpuUsages = env->NewObjectArray(size, gCpuUsageInfoClassInfo.clazz,
-                                                         nullptr);
-            for (ssize_t i = 0; i < size; ++i) {
-                jobject cpuUsage = env->NewObject(gCpuUsageInfoClassInfo.clazz,
-                                                  gCpuUsageInfoClassInfo.initMethod,
-                                                  active_times[i], total_times[i]);
-                env->SetObjectArrayElement(cpuUsages, i, cpuUsage);
+    if (gThermalModule && gThermalModule->getCpuUsages
+            && gCpuUsageInfoClassInfo.initMethod) {
+        ssize_t size = gThermalModule->getCpuUsages(gThermalModule, nullptr);
+        if (size >= 0) {
+            cpu_usage_t *list = (cpu_usage_t *) malloc(size * sizeof(cpu_usage_t));
+            size = gThermalModule->getCpuUsages(gThermalModule, list);
+            if (size >= 0) {
+                jobjectArray cpuUsages = env->NewObjectArray(size, gCpuUsageInfoClassInfo.clazz,
+                        nullptr);
+                for (ssize_t i = 0; i < size; ++i) {
+                    if (list[i].is_online) {
+                        jobject cpuUsage = env->NewObject(gCpuUsageInfoClassInfo.clazz,
+                                gCpuUsageInfoClassInfo.initMethod, list[i].active, list[i].total);
+                        env->SetObjectArrayElement(cpuUsages, i, cpuUsage);
+                    }
+                }
+                free(list);
+                return cpuUsages;
             }
-            free(active_times);
-            free(total_times);
-            return cpuUsages;
+            free(list);
         }
-
-        if (size < 0) {
-            ALOGE("Couldn't get CPU usages because of HAL error");
-        }
+        ALOGE("Couldn't get CPU usages because of HAL error");
     }
     return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
 }
@@ -150,7 +151,7 @@ static const JNINativeMethod gHardwarePropertiesManagerServiceMethods[] = {
 };
 
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env) {
-    gHardwarePropertiesModule = nullptr;
+    gThermalModule = nullptr;
     int res = jniRegisterNativeMethods(env, "com/android/server/HardwarePropertiesManagerService",
                                        gHardwarePropertiesManagerServiceMethods,
                                        NELEM(gHardwarePropertiesManagerServiceMethods));
