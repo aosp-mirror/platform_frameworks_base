@@ -398,6 +398,12 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/ims/internal/IImsUtListener.aidl \
 	telephony/java/com/android/ims/internal/IImsVideoCallCallback.aidl \
 	telephony/java/com/android/ims/internal/IImsVideoCallProvider.aidl \
+        telephony/java/com/android/ims/internal/uce/uceservice/IUceService.aidl \
+        telephony/java/com/android/ims/internal/uce/uceservice/IUceListener.aidl \
+        telephony/java/com/android/ims/internal/uce/options/IOptionsService.aidl \
+        telephony/java/com/android/ims/internal/uce/options/IOptionsListener.aidl \
+        telephony/java/com/android/ims/internal/uce/presence/IPresenceService.aidl \
+        telephony/java/com/android/ims/internal/uce/presence/IPresenceListener.aidl \
 	telephony/java/com/android/ims/ImsConfigListener.aidl \
 	telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl \
 	telephony/java/com/android/internal/telephony/IMms.aidl \
