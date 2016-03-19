@@ -301,7 +301,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> limit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> warning"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Work mode"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"Your recent screens appear here"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"No recent items"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"You\'ve cleared everything"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Application Info"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
@@ -535,6 +536,8 @@
     <string name="select_keycode" msgid="7413765103381924584">"Select Keyboard Button"</string>
     <string name="preview" msgid="9077832302472282938">"Preview"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Drag to add tiles"</string>
+    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"(edit)"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Time"</string>
   <string-array name="clock_options">
