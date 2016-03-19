@@ -110,14 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"Qayta nomlash"</string>
     <string name="rename_error" msgid="4203041674883412606">"Hujjatni qayta nomlab bo‘lmadi"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Bir nechta fayllar o‘girildi"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ilovasining <xliff:g id="STORAGE"><i>^3</i></xliff:g> xotirasidagi “<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>” jildiga kirishiga ruxsat berilsinmi?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"Boshqa so‘ralmasin"</string>
     <string name="allow" msgid="7225948811296386551">"Ruxsat berish"</string>
     <string name="deny" msgid="2081879885755434506">"Rad qilish"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta fayl o‘chirilsinmi?</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta fayl o‘chirilsinmi?</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta tanlandi</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta belgilandi</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta belgilandi</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>
