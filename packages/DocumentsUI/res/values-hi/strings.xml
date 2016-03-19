@@ -110,14 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"नाम बदलें"</string>
     <string name="rename_error" msgid="4203041674883412606">"दस्‍तावेज़ का नाम बदलना विफल रहा"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"कुछ फ़ाइलें रूपांतरित हो गई थीं"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> को <xliff:g id="STORAGE"><i>^3</i></xliff:g> पर <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> निर्देशिका का एक्सेस दें?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"फिर से ना पूछें"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दें"</string>
     <string name="deny" msgid="2081879885755434506">"अस्वीकारें"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें हटाएं?</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें हटाएं?</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>

@@ -110,14 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"เปลี่ยนชื่อ"</string>
     <string name="rename_error" msgid="4203041674883412606">"ไม่สามารถเปลี่ยนชื่อเอกสาร"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"แปลงบางไฟล์แล้ว"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"ให้สิทธิ์ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ในการเข้าถึงไดเรกทอรี <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> ใน <xliff:g id="STORAGE"><i>^3</i></xliff:g> ไหม"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"ไม่ต้องถามอีก"</string>
     <string name="allow" msgid="7225948811296386551">"อนุญาต"</string>
     <string name="deny" msgid="2081879885755434506">"ปฏิเสธ"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="other">ลบ <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์ใช่ไหม</item>
-      <item quantity="one">ลบ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์ใช่ไหม</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other">เลือกไว้ <xliff:g id="COUNT_1">%1$d</xliff:g> รายการ</item>
       <item quantity="one">เลือกไว้ <xliff:g id="COUNT_0">%1$d</xliff:g> รายการ</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>

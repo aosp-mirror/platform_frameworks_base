@@ -110,14 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"Վերանվանել"</string>
     <string name="rename_error" msgid="4203041674883412606">"Չհաջողվեց վերանվանել փաստաթուղթը"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Որոշ ֆայլեր փոխարկվել են"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> հավելվածին տրամադրե՞լ <xliff:g id="STORAGE"><i>^3</i></xliff:g>-ի <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> գրացուցակն օգտագործելու թույլտվություն:"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"Այլևս չհարցնել"</string>
     <string name="allow" msgid="7225948811296386551">"Թույլատրել"</string>
     <string name="deny" msgid="2081879885755434506">"Մերժել"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="one">Ջնջե՞լ <xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ:</item>
-      <item quantity="other">Ջնջե՞լ <xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ:</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="one">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>
