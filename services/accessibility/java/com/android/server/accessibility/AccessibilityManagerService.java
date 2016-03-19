@@ -1812,6 +1812,87 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return mKeyEventDispatcher;
     }
 
+    /**
+     * Enables accessibility service specified by {@param componentName} for the {@param userId}.
+     */
+    public void enableAccessibilityService(ComponentName componentName, int userId) {
+        synchronized(mLock) {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("only SYSTEM can call enableAccessibilityService.");
+            }
+
+            SettingsStringHelper settingsHelper = new SettingsStringHelper(
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
+            settingsHelper.addService(componentName);
+            settingsHelper.writeToSettings();
+
+            UserState userState = getUserStateLocked(userId);
+            if (userState.mEnabledServices.add(componentName)) {
+                onUserStateChangedLocked(userState);
+            }
+        }
+    }
+
+    /**
+     * Disables accessibility service specified by {@param componentName} for the {@param userId}.
+     */
+    public void disableAccessibilityService(ComponentName componentName, int userId) {
+        synchronized(mLock) {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("only SYSTEM can call disableAccessibility");
+            }
+
+            SettingsStringHelper settingsHelper = new SettingsStringHelper(
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
+            settingsHelper.deleteService(componentName);
+            settingsHelper.writeToSettings();
+
+            UserState userState = getUserStateLocked(userId);
+            if (userState.mEnabledServices.remove(componentName)) {
+                onUserStateChangedLocked(userState);
+            }
+        }
+    }
+
+    private class SettingsStringHelper {
+        private static final String SETTINGS_DELIMITER = ":";
+        private ContentResolver mContentResolver;
+        private final String mSettingsName;
+        private Set<String> mServices;
+        private final int mUserId;
+
+        public SettingsStringHelper(String name, int userId) {
+            mUserId = userId;
+            mSettingsName = name;
+            mContentResolver = mContext.getContentResolver();
+            String servicesString = Settings.Secure.getStringForUser(
+                    mContentResolver, mSettingsName, userId);
+            mServices = new HashSet();
+            if (!TextUtils.isEmpty(servicesString)) {
+                final TextUtils.SimpleStringSplitter colonSplitter =
+                        new TextUtils.SimpleStringSplitter(SETTINGS_DELIMITER.charAt(0));
+                colonSplitter.setString(servicesString);
+                while (colonSplitter.hasNext()) {
+                    final String serviceName = colonSplitter.next();
+                    mServices.add(serviceName);
+                }
+            }
+        }
+
+        public void addService(ComponentName component) {
+            mServices.add(component.flattenToString());
+        }
+
+        public void deleteService(ComponentName component) {
+            mServices.remove(component.flattenToString());
+        }
+
+        public void writeToSettings() {
+            Settings.Secure.putStringForUser(mContentResolver, mSettingsName,
+                    TextUtils.join(SETTINGS_DELIMITER, mServices), mUserId);
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);

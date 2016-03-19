@@ -59,4 +59,8 @@ interface IAccessibilityManager {
             boolean touchExplorationEnabled);
 
     IBinder getWindowToken(int windowId, int userId);
+
+    void enableAccessibilityService(in ComponentName service, int userId);
+
+    void disableAccessibilityService(in ComponentName service, int userId);
 }

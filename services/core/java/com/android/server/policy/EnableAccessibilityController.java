@@ -16,7 +16,9 @@
 
 package com.android.server.policy;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -32,19 +34,25 @@ import android.os.ServiceManager;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
+import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
+import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 
 import com.android.internal.R;
+import com.android.server.LocalServices;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class EnableAccessibilityController {
+    private static final String TAG = "EnableAccessibilityController";
 
     private static final int SPEAK_WARNING_DELAY_MILLIS = 2000;
     private static final int ENABLE_ACCESSIBILITY_DELAY_MILLIS = 6000;
@@ -74,9 +82,6 @@ public class EnableAccessibilityController {
             }
         }
     };
-
-    private final IWindowManager mWindowManager = IWindowManager.Stub.asInterface(
-            ServiceManager.getService("window"));
 
     private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager
             .Stub.asInterface(ServiceManager.getService("accessibility"));
@@ -132,7 +137,7 @@ public class EnableAccessibilityController {
                 && !getInstalledSpeakingAccessibilityServices(context).isEmpty();
     }
 
-    private static List<AccessibilityServiceInfo> getInstalledSpeakingAccessibilityServices(
+    public static List<AccessibilityServiceInfo> getInstalledSpeakingAccessibilityServices(
             Context context) {
         List<AccessibilityServiceInfo> services = new ArrayList<AccessibilityServiceInfo>();
         services.addAll(AccessibilityManager.getInstance(context)
@@ -213,71 +218,74 @@ public class EnableAccessibilityController {
     }
 
     private void enableAccessibility() {
-        List<AccessibilityServiceInfo> services = getInstalledSpeakingAccessibilityServices(
-                mContext);
-        if (services.isEmpty()) {
+        if (enableAccessibility(mContext)) {
+            mOnAccessibilityEnabledCallback.run();
+        }
+    }
+
+    public static boolean enableAccessibility(Context context) {
+        final IAccessibilityManager accessibilityManager = IAccessibilityManager
+                .Stub.asInterface(ServiceManager.getService("accessibility"));
+        final WindowManagerInternal windowManager = LocalServices.getService(
+                WindowManagerInternal.class);
+        final UserManager userManager = (UserManager) context.getSystemService(
+                Context.USER_SERVICE);
+        ComponentName componentName = getInstalledSpeakingAccessibilityServiceComponent(context);
+        if (componentName == null) {
+            return false;
+        }
+
+        boolean keyguardLocked = windowManager.isKeyguardLocked();
+        final boolean hasMoreThanOneUser = userManager.getUsers().size() > 1;
+        try {
+            if (!keyguardLocked || !hasMoreThanOneUser) {
+                final int userId = ActivityManager.getCurrentUser();
+                accessibilityManager.enableAccessibilityService(componentName, userId);
+            } else if (keyguardLocked) {
+                accessibilityManager.temporaryEnableAccessibilityStateUntilKeyguardRemoved(
+                        componentName, true /* enableTouchExploration */);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "cannot enable accessibilty: " + e);
+        }
+
+        return true;
+    }
+
+    public static void disableAccessibility(Context context) {
+        final IAccessibilityManager accessibilityManager = IAccessibilityManager
+                .Stub.asInterface(ServiceManager.getService("accessibility"));
+        ComponentName componentName = getInstalledSpeakingAccessibilityServiceComponent(context);
+        if (componentName == null) {
             return;
         }
-        boolean keyguardLocked = false;
+
+        final int userId = ActivityManager.getCurrentUser();
         try {
-            keyguardLocked = mWindowManager.isKeyguardLocked();
-        } catch (RemoteException re) {
-            /* ignore */
+            accessibilityManager.disableAccessibilityService(componentName, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "cannot disable accessibility " + e);
+        }
+    }
+
+    public static boolean isAccessibilityEnabled(Context context) {
+        final AccessibilityManager accessibilityManager =
+                context.getSystemService(AccessibilityManager.class);
+        List enabledServices = accessibilityManager.getEnabledAccessibilityServiceList(
+                AccessibilityServiceInfo.FEEDBACK_SPOKEN);
+        return enabledServices != null && !enabledServices.isEmpty();
+    }
+
+    @Nullable
+    public static ComponentName getInstalledSpeakingAccessibilityServiceComponent(
+            Context context) {
+        List<AccessibilityServiceInfo> services =
+                getInstalledSpeakingAccessibilityServices(context);
+        if (services.isEmpty()) {
+            return null;
         }
 
-        final boolean hasMoreThanOneUser = mUserManager.getUsers().size() > 1;
-
-        AccessibilityServiceInfo service = services.get(0);
-        boolean enableTouchExploration = (service.flags
-                & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
-        // Try to find a service supporting explore by touch.
-        if (!enableTouchExploration) {
-            final int serviceCount = services.size();
-            for (int i = 1; i < serviceCount; i++) {
-                AccessibilityServiceInfo candidate = services.get(i);
-                if ((candidate.flags & AccessibilityServiceInfo
-                        .FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0) {
-                    enableTouchExploration = true;
-                    service = candidate;
-                    break;
-                }
-            }
-        }
-
-        ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
-        ComponentName componentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
-        if (!keyguardLocked || !hasMoreThanOneUser) {
-            final int userId = ActivityManager.getCurrentUser();
-            String enabledServiceString = componentName.flattenToString();
-            ContentResolver resolver = mContext.getContentResolver();
-            // Enable one speaking accessibility service.
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                    enabledServiceString, userId);
-            // Allow the services we just enabled to toggle touch exploration.
-            Settings.Secure.putStringForUser(resolver,
-                    Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                    enabledServiceString, userId);
-            // Enable touch exploration.
-            if (enableTouchExploration) {
-                Settings.Secure.putIntForUser(resolver, Settings.Secure.TOUCH_EXPLORATION_ENABLED,
-                        1, userId);
-            }
-            // Enable accessibility script injection (AndroidVox) for web content.
-            Settings.Secure.putIntForUser(resolver, Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION,
-                    1, userId);
-            // Turn on accessibility mode last.
-            Settings.Secure.putIntForUser(resolver, Settings.Secure.ACCESSIBILITY_ENABLED,
-                    1, userId);
-        } else if (keyguardLocked) {
-            try {
-                mAccessibilityManager.temporaryEnableAccessibilityStateUntilKeyguardRemoved(
-                        componentName, enableTouchExploration);
-            } catch (RemoteException re) {
-                /* ignore */
-            }
-        }
-
-        mOnAccessibilityEnabledCallback.run();
+        ServiceInfo serviceInfo = services.get(0).getResolveInfo().serviceInfo;
+        return new ComponentName(serviceInfo.packageName, serviceInfo.name);
     }
 }
