@@ -110,18 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"Gi nytt navn"</string>
     <string name="rename_error" msgid="4203041674883412606">"Kunne ikke gi dokumentet nytt navn"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Noen filer er konvertert"</string>
-    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
-    <skip />
-    <!-- no translation found for never_ask_again (4295278542972859268) -->
-    <skip />
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"Vil du gi <xliff:g id="APPNAME"><b>^1</b></xliff:g> tilgang til <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>-katalogen på <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"Ikke spør igjen"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
     <string name="deny" msgid="2081879885755434506">"Avslå"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="other">Vil du slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
-      <item quantity="one">Vil du slette <xliff:g id="COUNT_0">%1$d</xliff:g> fil?</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> er valgt</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> er valgt</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>

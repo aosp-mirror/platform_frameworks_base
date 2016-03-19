@@ -124,22 +124,21 @@
     <string name="menu_rename" msgid="7678802479104285353">"Přejmenovat"</string>
     <string name="rename_error" msgid="4203041674883412606">"Dokument se nepodařilo přejmenovat."</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Některé soubory byly převedeny"</string>
-    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
-    <skip />
-    <!-- no translation found for never_ask_again (4295278542972859268) -->
-    <skip />
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"Chcete aplikaci <xliff:g id="APPNAME"><b>^1</b></xliff:g> udělit přístup k adresáři <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> v úložišti <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"Příště se neptat"</string>
     <string name="allow" msgid="7225948811296386551">"Povolit"</string>
     <string name="deny" msgid="2081879885755434506">"Odepřít"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="few">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory?</item>
-      <item quantity="many">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru?</item>
-      <item quantity="other">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů?</item>
-      <item quantity="one">Smazat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor?</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="few">Vybrány <xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
       <item quantity="many">Vybráno <xliff:g id="COUNT_1">%1$d</xliff:g> položky</item>
       <item quantity="other">Vybráno <xliff:g id="COUNT_1">%1$d</xliff:g> položek</item>
       <item quantity="one">Vybrána <xliff:g id="COUNT_0">%1$d</xliff:g> položka</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>

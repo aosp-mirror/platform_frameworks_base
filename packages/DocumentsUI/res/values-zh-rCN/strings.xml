@@ -110,18 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"重命名"</string>
     <string name="rename_error" msgid="4203041674883412606">"无法重命名文档"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"部分文件已转换成其他格式"</string>
-    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
-    <skip />
-    <!-- no translation found for never_ask_again (4295278542972859268) -->
-    <skip />
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"要授权<xliff:g id="APPNAME"><b>^1</b></xliff:g>访问 <xliff:g id="STORAGE"><i>^3</i></xliff:g>上的“<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>”目录吗？"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"不再询问"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="other">删除 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件？</item>
-      <item quantity="one">删除 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件？</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>
