@@ -31,10 +31,20 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+// These values must be kept in sync with the temperature source constants in
+// HardwarePropertiesManager.java
+enum {
+    TEMPERATURE_CURRENT = 0,
+    TEMPERATURE_THROTTLING = 1,
+    TEMPERATURE_SHUTDOWN = 2
+};
+
 static struct {
     jclass clazz;
     jmethodID initMethod;
 } gCpuUsageInfoClassInfo;
+
+jfloat gUndefinedTemperature;
 
 static struct thermal_module* gThermalModule;
 
@@ -78,7 +88,8 @@ static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
     return env->NewFloatArray(0);
 }
 
-static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type) {
+static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type,
+                                               int source) {
     if (gThermalModule && gThermalModule->getTemperatures) {
         ssize_t list_size = gThermalModule->getTemperatures(gThermalModule, nullptr, 0);
         if (list_size >= 0) {
@@ -94,7 +105,29 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
 
                 for (ssize_t i = 0; i < list_size; ++i) {
                     if (list[i].type == type) {
-                        values[length++] = list[i].current_value;
+                        switch (source) {
+                            case TEMPERATURE_CURRENT:
+                                if (list[i].current_value == UNKNOWN_TEMPERATURE) {
+                                    values[length++] = gUndefinedTemperature;
+                                } else {
+                                    values[length++] = list[i].current_value;
+                                }
+                                break;
+                            case TEMPERATURE_THROTTLING:
+                                if (list[i].throttling_threshold == UNKNOWN_TEMPERATURE) {
+                                    values[length++] = gUndefinedTemperature;
+                                } else {
+                                    values[length++] = list[i].throttling_threshold;
+                                }
+                                break;
+                            case TEMPERATURE_SHUTDOWN:
+                                if (list[i].shutdown_threshold == UNKNOWN_TEMPERATURE) {
+                                    values[length++] = gUndefinedTemperature;
+                                } else {
+                                    values[length++] = list[i].shutdown_threshold;
+                                }
+                                break;
+                        }
                     }
                 }
                 jfloatArray deviceTemps = env->NewFloatArray(length);
@@ -144,7 +177,7 @@ static const JNINativeMethod gHardwarePropertiesManagerServiceMethods[] = {
             (void*) nativeInit },
     { "nativeGetFanSpeeds", "()[F",
             (void*) nativeGetFanSpeeds },
-    { "nativeGetDeviceTemperatures", "(I)[F",
+    { "nativeGetDeviceTemperatures", "(II)[F",
             (void*) nativeGetDeviceTemperatures },
     { "nativeGetCpuUsages", "()[Landroid/os/CpuUsageInfo;",
             (void*) nativeGetCpuUsages }
@@ -159,6 +192,12 @@ int register_android_server_HardwarePropertiesManagerService(JNIEnv* env) {
     gCpuUsageInfoClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gCpuUsageInfoClassInfo.initMethod = GetMethodIDOrDie(env, gCpuUsageInfoClassInfo.clazz,
                                                          "<init>", "(JJ)V");
+
+    clazz = env->FindClass("android/os/HardwarePropertiesManager");
+    jfieldID undefined_temperature_field = GetStaticFieldIDOrDie(env, clazz,
+                                                                 "UNDEFINED_TEMPERATURE", "F");
+    gUndefinedTemperature = env->GetStaticFloatField(clazz, undefined_temperature_field);
+
     return res;
 }
 
