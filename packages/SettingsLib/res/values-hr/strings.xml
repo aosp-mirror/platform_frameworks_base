@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Pokreni ispunjivače WebViewa u izoliranim procesima."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacija WebViewa"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Postavi implementaciju WebViewa"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Odabrana implementacija WebViewa nije važeća jer je popis odabira za implementaciju zastario. Popis se treba ažurirati."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Pretvori u enkripciju datoteka"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Pretvori…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Enkripcija datoteka već je izvršena"</string>

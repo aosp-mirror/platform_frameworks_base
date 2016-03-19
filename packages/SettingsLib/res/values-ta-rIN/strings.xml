@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"எல்லா ANRகளையும் காட்டு"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"பின்புலப் பயன்பாடுகளுக்குப் பயன்பாடு பதிலளிக்கவில்லை என்ற உரையாடலைக் காட்டு"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"பயன்பாடுகளை வெளிப்புறச் சேமிப்பிடத்தில் அனுமதி"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா பயன்பாட்டையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், பல சாளரத்திற்கு எல்லா செயல்பாடுகளையும் அளவுமாறக்கூடியதாக அமை."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"குறிப்பிட்ட வடிவமில்லாத சாளரங்களை இயக்கு"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"தனிப்படுத்தப்பட்ட செயல்முறையில் WebView ரெண்டரர்களை இயக்கு."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView செயல்படுத்தலை அமை"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"தேர்வுசெய்த WebView செயல்படுத்தல் தவறானது. ஏனெனில் செயல்படுத்தல் விருப்பங்கள் பட்டியல் காலாவதியாகியுள்ளது. பட்டியலை இப்போது புதுப்பிக்க வேண்டும்."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"கோப்பு முறைமையாக்கத்திற்கு மாற்று"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"மாற்று…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ஏற்கனவே கோப்பு முறைமையாக்கப்பட்டது"</string>

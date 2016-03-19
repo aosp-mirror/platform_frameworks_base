@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"एक वेगळ्या प्रक्रियेत WebView प्रस्तुतकर्ते चालवा."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबदृश्य अंमलबजावणी सेट करा"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"अंमलबजावणीची निवडींची सूची जुनी झाली असल्याने निवडलेली WebView अंमलबजावणी अवैध आहे."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फाईल कूटबद्धीकरणावर रूपांतरित करा"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करा..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"फाईल आधीपासून कूटबद्ध केली"</string>

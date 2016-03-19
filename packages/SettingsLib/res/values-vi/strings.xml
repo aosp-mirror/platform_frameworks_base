@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"Hiển thị tất cả ANR"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Hiện hộp thoại Ứng dụng ko đáp ứng cho ứng dụng nền"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Buộc cho phép các ứng dụng trên bộ nhớ ngoài"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Giúp mọi ứng dụng đủ điều kiện để được ghi vào bộ nhớ ngoài, bất kể giá trị tệp kê khai là gì"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Buộc các hoạt động có thể thay đổi kích thước"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Giúp tất cả hoạt động có thể thay đổi kích thước cho nhiều cửa sổ bất kể giá trị tệp kê khai là gì."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Bật cửa sổ dạng tự do"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Chạy kết xuất đồ họa WebView trong quy trình tách biệt."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Triển khai WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Đặt triển khai WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Triển khai WebView đã chọn không hợp lệ vì danh sách lựa chọn triển khai đã cũ. Phải cập nhật danh sách ngay bây giờ."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Chuyển đổi sang mã hóa tệp"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Chuyển đổi..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Đã mã hóa tệp"</string>

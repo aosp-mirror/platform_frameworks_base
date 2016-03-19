@@ -248,7 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"सभी ANR दिखाएं"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"पृष्ठभूमि ऐप्स के लिए ऐप्स प्रतिसाद नहीं दे रहा डॉयलॉग दिखाएं"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ऐप्स को बाहरी मेमोरी पर बाध्‍य करें"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"इससे कोई भी ऐप्लिकेशन, मेनिफेस्ट मानों को अनदेखा करके बाहरी मेमोरी पर लिखने योग्य बन जाता है"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"इससे कोई भी ऐप्लिकेशन, मेनिफेस्ट मानों को अनदेखा करके, बाहरी मेमोरी पर लिखने योग्य बन जाता है"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"आकार बदले जाने के लिए गतिविधियों को बाध्य करें"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"सभी गतिविधियों को एकाधिक विंडो के लिए आकार बदलने योग्य बनाएं, चाहे मेनिफेस्ट मान कुछ भी हों."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"फ़्रीफ़ॉर्म विंडो सक्षम करें"</string>
@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"किसी अलग प्रक्रिया में WebView रेंडरर चलाएं."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView कार्यान्वयन सेट करें"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"चुना गया WebView कार्यान्वयन अमान्य है क्योंकि कार्यान्वयन विकल्पों की सूची पुरानी हो चुकी है. सूची को अब अपडेट किया जाना चाहिए."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फ़ाइल एन्क्रिप्शन में रूपांतरित करें"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करें..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"फ़ाइल पहले से एन्क्रिप्ट की हुई है"</string>

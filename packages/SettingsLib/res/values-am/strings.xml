@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"የWebView ምስል ሰሪዎችን በተገለለ ሂደት ውስጥ አሂድ።"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"የWebView ትግበራ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"የWebView ትግበራን ያዘጋጁ"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"የትግበራ ምርጫዎች ዝርዝር እድገት ስላላሳየ የተመረጠው የWebView ትግበራ አይሠራም። ዝርዝሩ አሁን መዘመን አለበት።"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ወደ ፋይል ምሥጠራ ቀይር"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ለውጥ…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ፋይል አስቀድሞ ተመስጥሯል"</string>

@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView renderlovchilarini alohida jarayonda ishga tushirish."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ta’minotchisi"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ta’minotchisini sozlash"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Tanlangan WebView xizmati qo‘llab-quvvatlanmaydi. Xizmatlar ro‘yxati eskirgan va hozir ular yangilanadi."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Faylli shifrga o‘girish"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"O‘girish…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Fayl allaqachon shifrlangan"</string>

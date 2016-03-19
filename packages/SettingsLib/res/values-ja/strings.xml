@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"すべてのANRを表示"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"バックグラウンドアプリが応答しない場合に通知する"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"外部ストレージへのアプリの書き込みを許可"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"アクティビティをサイズ変更可能にする"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようにします。"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"フリーフォーム ウィンドウの有効化"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"別個のプロセスで WebView レンダラを実行します。"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView の実装の設定"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"選択した WebView の実装は無効です。これは実装の選択に使用するリストが古くなっているためです。リストを更新する必要があります。"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ファイル暗号化に変換する"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"変換…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ファイルは既に暗号化済みです"</string>

@@ -248,8 +248,7 @@
     <string name="show_all_anrs" msgid="28462979638729082">"എല്ലാ ANR-കളും ദൃശ്യമാക്കുക"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"പ‌ശ്ചാത്തല അപ്ലിക്കേഷനുകൾക്ക് അപ്ലിക്കേഷൻ പ്രതികരിക്കുന്നില്ല എന്ന ഡയലോഗ് കാണിക്കുക"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
-    <!-- no translation found for force_allow_on_external_summary (3640752408258034689) -->
-    <skip />
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"വലിപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, എല്ലാ ആക്ടിവിറ്റികളെയും മൾട്ടി-വിൻഡോയ്ക്കായി വലിപ്പം മാറ്റുക."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"ഫ്രീഫോം വിൻഡോകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -279,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ഒറ്റപ്പെട്ടൊരു പ്രോസസ്സിൽ WebView റെൻഡററുകൾ റൺ ചെയ്യുക."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"തിരഞ്ഞെടുത്ത WebView നടപ്പാക്കൽ അസാധുവാണ്, കാരണം നടപ്പാക്കൽ തിരഞ്ഞെടുപ്പുകളുടെ ലിസ്റ്റ് പഴകിപ്പോയി. ഈ ലിസ്റ്റിപ്പോൾ അപ്‌ഡേറ്റ് ചെയ്യേണ്ടതുണ്ട്."</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ഫയൽ എൻക്രിപ്ഷനിലേക്ക് പരിവർത്തിപ്പിക്കുക"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"പരിവർത്തിപ്പിക്കുക…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ഇതിനകം തന്നെ ഫയൽ എൻക്രിപ്റ്റ് ചെയ്തു"</string>

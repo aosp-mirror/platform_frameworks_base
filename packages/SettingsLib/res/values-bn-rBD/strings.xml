@@ -278,7 +278,8 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"একটি বিচ্ছিন্ন প্রক্রিয়ায় ওয়েবভিউ রেন্ডারারগুলি চালান৷"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ওয়েবভিউ প্রয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"প্রয়োগ করার জন্য বেছে নেওয়া ওয়েবভিউটি অবৈধ, কারণ প্রয়োগের চয়নগুলি পুরানো হয়ে গেছে৷ এই তালিকাটিকে এখনই আপডেট করা উচিৎ৷"</string>
+    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ফাইল এনক্রিপশান রূপান্তর করুন"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"রূপান্তর করুন..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ফাইল ইতিমধ্যেই এনক্রিপ্ট করা রয়েছে"</string>
