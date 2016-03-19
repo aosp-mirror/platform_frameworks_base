@@ -301,7 +301,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"工作模式"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"您最近的螢幕顯示在這裡"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"沒有最近項目"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"您已清除所有項目"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"螢幕固定"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
@@ -535,6 +536,8 @@
     <string name="select_keycode" msgid="7413765103381924584">"選取鍵盤按鈕"</string>
     <string name="preview" msgid="9077832302472282938">"預覽"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖曳即可新增圖塊"</string>
+    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"編輯"</string>
     <string name="tuner_time" msgid="6572217313285536011">"時間"</string>
   <string-array name="clock_options">
