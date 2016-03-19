@@ -748,7 +748,14 @@ public class NinePatchDrawable extends Drawable {
             setDither(state.mDither);
         }
 
-        mTargetDensity = Drawable.resolveDensity(res, mTargetDensity);
+        // The nine-patch may have been created without a Resources object, in
+        // which case we should try to match the density of the nine patch (if
+        // available).
+        if (res == null && state.mNinePatch != null) {
+            mTargetDensity = state.mNinePatch.getDensity();
+        } else {
+            mTargetDensity = Drawable.resolveDensity(res, mTargetDensity);
+        }
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
         computeBitmapSize();
     }
