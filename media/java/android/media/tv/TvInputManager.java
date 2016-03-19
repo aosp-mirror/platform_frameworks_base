@@ -114,6 +114,13 @@ public final class TvInputManager {
      */
     public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = VIDEO_UNAVAILABLE_REASON_END;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({VIDEO_UNAVAILABLE_REASON_UNKNOWN, VIDEO_UNAVAILABLE_REASON_TUNING,
+            VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL, VIDEO_UNAVAILABLE_REASON_BUFFERING,
+            VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY})
+    public @interface VideoUnavailableReason {}
+
     /**
      * Status for {@link TvInputService.Session#notifyTimeShiftStatusChanged(int)} and
      * {@link TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)}: Unknown status. Also
@@ -142,6 +149,12 @@ public final class TvInputManager {
      * seek to a specified time position and set playback rate and audio mode.
      */
     public static final int TIME_SHIFT_STATUS_AVAILABLE = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TIME_SHIFT_STATUS_UNKNOWN, TIME_SHIFT_STATUS_UNSUPPORTED,
+            TIME_SHIFT_STATUS_UNAVAILABLE, TIME_SHIFT_STATUS_AVAILABLE})
+    public @interface TimeShiftStatus {}
 
     /**
      * Value returned by {@link TvInputService.Session#onTimeShiftGetCurrentPosition()} and
@@ -207,6 +220,11 @@ public final class TvInputManager {
      *
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({INPUT_STATE_CONNECTED, INPUT_STATE_CONNECTED_STANDBY, INPUT_STATE_DISCONNECTED})
+    public @interface InputState {}
 
     /**
      * Broadcast intent action when the user blocked content ratings change. For use with the
@@ -696,7 +714,7 @@ public final class TvInputManager {
          * <li>{@link TvInputManager#INPUT_STATE_DISCONNECTED}
          * </ul>
          */
-        public void onInputStateChanged(String inputId, int state) {
+        public void onInputStateChanged(String inputId, @InputState int state) {
         }
 
         /**
@@ -1170,6 +1188,7 @@ public final class TvInputManager {
      * @param inputId The ID of the TV input.
      * @throws IllegalArgumentException if the argument is {@code null}.
      */
+    @InputState
     public int getInputState(@NonNull String inputId) {
         Preconditions.checkNotNull(inputId);
         synchronized (mLock) {

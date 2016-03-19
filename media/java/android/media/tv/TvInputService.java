@@ -528,7 +528,8 @@ public abstract class TvInputService extends Service {
          *            </ul>
          * @see #notifyVideoAvailable
          */
-        public void notifyVideoUnavailable(final int reason) {
+        public void notifyVideoUnavailable(
+                @TvInputManager.VideoUnavailableReason final int reason) {
             if (reason < TvInputManager.VIDEO_UNAVAILABLE_REASON_START
                     || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
                 Log.e(TAG, "notifyVideoUnavailable - unknown reason: " + reason);
@@ -660,7 +661,7 @@ public abstract class TvInputService extends Service {
          * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
          * </ul>
          */
-        public void notifyTimeShiftStatusChanged(final int status) {
+        public void notifyTimeShiftStatusChanged(@TvInputManager.TimeShiftStatus final int status) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
