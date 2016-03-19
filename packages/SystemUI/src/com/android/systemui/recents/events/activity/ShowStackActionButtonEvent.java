@@ -19,10 +19,14 @@ package com.android.systemui.recents.events.activity;
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent when the history view button is clicked.
+ * This is sent when the stack action view button should be shown.
  */
-public class ShowHistoryEvent extends EventBus.Event {
+public class ShowStackActionButtonEvent extends EventBus.Event {
 
-    // Simple event
+    // Whether or not to translate the stack action button when showing it
+    public final boolean translate;
 
+    public ShowStackActionButtonEvent(boolean translate) {
+        this.translate = translate;
+    }
 }

@@ -19,8 +19,8 @@ package com.android.systemui.recents.events.activity;
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent when the history view button should be hidden.
+ * This is sent when the stack action button should be hidden.
  */
-public class HideHistoryButtonEvent extends EventBus.Event {
+public class HideStackActionButtonEvent extends EventBus.Event {
     // Simple event
 }

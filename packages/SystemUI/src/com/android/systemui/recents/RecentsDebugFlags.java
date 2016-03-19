@@ -35,8 +35,8 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean DisableBackgroundCache = false;
         // Enables the task affiliations
         public static final boolean EnableAffiliatedTaskGroups = true;
-        // Enables the history
-        public static final boolean EnableHistory = false;
+        // TODO: To be repurposed
+        public static final boolean EnableStackActionButton = false;
         // Overrides the Tuner flags and enables the timeout
         private static final boolean EnableFastToggleTimeout = false;
         // Overrides the Tuner flags and enables the paging via the Recents button

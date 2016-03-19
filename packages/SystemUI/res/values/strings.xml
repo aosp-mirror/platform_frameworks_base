@@ -731,10 +731,8 @@
     <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
     <!-- Recents: Launch disabled string. [CHAR LIMIT=NONE] -->
     <string name="recents_launch_disabled_message"><xliff:g id="app" example="Calendar">%s</xliff:g> is disabled in safe-mode.</string>
-    <!-- Recents: Show history string. [CHAR LIMIT=NONE] -->
-    <string name="recents_history_button_label">History</string>
-    <!-- Recents: History clear all string. [CHAR LIMIT=NONE] -->
-    <string name="recents_history_clear_all_button_label">Clear</string>
+    <!-- Recents: Stack action button string. [CHAR LIMIT=NONE] -->
+    <string name="recents_stack_action_button_label">Clear all</string>
     <!-- Recents: Non-dockable task drag message. [CHAR LIMIT=NONE] -->
     <string name="recents_drag_non_dockable_task_message">This app does not support multi-window</string>
     <!-- Recents: Non-dockable task launch sub header. [CHAR LIMIT=NONE] -->

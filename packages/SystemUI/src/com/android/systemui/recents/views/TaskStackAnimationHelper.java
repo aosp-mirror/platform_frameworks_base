@@ -410,62 +410,6 @@ public class TaskStackAnimationHelper {
     }
 
     /**
-     * Starts the animation to hide the {@link TaskView}s when the history is shown.
-     */
-    public void startShowHistoryAnimation(ReferenceCountedTrigger postAnimationTrigger) {
-        Resources res = mStackView.getResources();
-        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
-        TaskStackViewScroller stackScroller = mStackView.getScroller();
-
-        int offscreenY = stackLayout.mStackRect.bottom;
-        int historyTransitionDuration = res.getInteger(
-                R.integer.recents_history_transition_duration);
-        int startDelayIncr = 16;
-
-        List<TaskView> taskViews = mStackView.getTaskViews();
-        int taskViewCount = taskViews.size();
-        for (int i = taskViewCount - 1; i >= 0; i--) {
-            TaskView tv = taskViews.get(i);
-            Task task = tv.getTask();
-            AnimationProps taskAnimation = new AnimationProps(startDelayIncr * i,
-                    historyTransitionDuration, Interpolators.FAST_OUT_SLOW_IN,
-                    postAnimationTrigger.decrementOnAnimationEnd());
-            postAnimationTrigger.increment();
-
-            stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
-                    null);
-            mTmpTransform.alpha = 0f;
-            mTmpTransform.rect.offsetTo(mTmpTransform.rect.left, offscreenY);
-            mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
-        }
-    }
-
-    /**
-     * Starts the animation to show the {@link TaskView}s when the history is hidden.
-     */
-    public void startHideHistoryAnimation() {
-        Resources res = mStackView.getResources();
-        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
-        TaskStackViewScroller stackScroller = mStackView.getScroller();
-
-        int historyTransitionDuration = res.getInteger(
-                R.integer.recents_history_transition_duration);
-        int startDelayIncr = 16;
-
-        List<TaskView> taskViews = mStackView.getTaskViews();
-        int taskViewCount = taskViews.size();
-        for (int i = taskViewCount - 1; i >= 0; i--) {
-            TaskView tv = taskViews.get(i);
-            AnimationProps taskAnimation = new AnimationProps(startDelayIncr * i,
-                    historyTransitionDuration, Interpolators.FAST_OUT_SLOW_IN);
-            stackLayout.getStackTransform(tv.getTask(), stackScroller.getStackScroll(),
-                    mTmpTransform, null);
-            mTmpTransform.alpha = 1f;
-            mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
-        }
-    }
-
-    /**
      * Starts the animation to focus the next {@link TaskView} when paging through recents.
      *
      * @return whether or not this will trigger a scroll in the stack

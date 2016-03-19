@@ -161,7 +161,7 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public boolean isLaunchTarget;
     @ViewDebug.ExportedProperty(category="recents")
-    public boolean isHistorical;
+    public boolean isStackTask;
     @ViewDebug.ExportedProperty(category="recents")
     public boolean isSystemApp;
     @ViewDebug.ExportedProperty(category="recents")
@@ -176,7 +176,7 @@ public class Task {
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
                 Bitmap thumbnail, String title, String contentDescription,
                 String dismissDescription, int colorPrimary, int colorBackground,
-                boolean isHistorical, boolean isLaunchTarget, boolean isSystemApp,
+                boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
                 boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
@@ -195,7 +195,7 @@ public class Task {
         this.bounds = bounds;
         this.taskDescription = taskDescription;
         this.isLaunchTarget = isLaunchTarget;
-        this.isHistorical = isHistorical;
+        this.isStackTask = isStackTask;
         this.isSystemApp = isSystemApp;
         this.isDockable = isDockable;
     }
@@ -218,7 +218,7 @@ public class Task {
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
         this.bounds = o.bounds;
         this.isLaunchTarget = o.isLaunchTarget;
-        this.isHistorical = o.isHistorical;
+        this.isStackTask = o.isStackTask;
         this.isSystemApp = o.isSystemApp;
         this.isDockable = o.isDockable;
     }

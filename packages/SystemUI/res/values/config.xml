@@ -86,9 +86,6 @@
 
     <bool name="config_dead_zone_flash">false</bool>
 
-    <!-- Min alpha % that recent items will fade to while being dismissed -->
-    <integer name="config_recent_item_min_alpha">3</integer>
-
     <!-- Whether QuickSettings is in a phone landscape -->
     <bool name="quick_settings_wide">false</bool>
 
@@ -164,9 +161,6 @@
 
     <!-- The animation duration for subsequent scrolling the stack to a particular item. -->
     <integer name="recents_subsequent_auto_advance_duration">1000</integer>
-
-    <!-- The animation duration for entering and exiting the history. -->
-    <integer name="recents_history_transition_duration">250</integer>
 
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>

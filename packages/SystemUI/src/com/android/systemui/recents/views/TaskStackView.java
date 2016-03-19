@@ -59,8 +59,7 @@ import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
-import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
-import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
@@ -68,8 +67,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
-import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
-import com.android.systemui.recents.events.activity.ShowHistoryEvent;
+import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
@@ -84,7 +82,6 @@ import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -106,9 +103,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private final static String KEY_SAVED_STATE_LAYOUT_STACK_SCROLL =
             "saved_instance_state_layout_stack_scroll";
 
-    // The thresholds at which to show/hide the history button.
-    private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
-    private static final float HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
+    // The thresholds at which to show/hide the stack action button.
+    private static final float SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
+    private static final float HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
     public static final int DEFAULT_SYNC_STACK_DURATION = 200;
     private static final int DRAG_SCALE_DURATION = 175;
@@ -1317,12 +1314,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     false /* requestViewFocus */);
         }
 
-        // Update the history button visibility
-        if (shouldShowHistoryButton() &&
-                mStackScroller.getStackScroll() < SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-            EventBus.getDefault().send(new ShowHistoryButtonEvent(false /* translate */));
+        // Update the stack action button visibility
+        if (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+            EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
         } else {
-            EventBus.getDefault().send(new HideHistoryButtonEvent());
+            EventBus.getDefault().send(new HideStackActionButtonEvent());
         }
     }
 
@@ -1441,12 +1437,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     ? R.string.recents_empty_message
                     : R.string.recents_empty_message_dismissed_all));
         }
-    }
-
-    @Override
-    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask,
-            AnimationProps animation) {
-        // To be implemented
     }
 
     /**** ViewPoolConsumer Implementation ****/
@@ -1583,13 +1573,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm.updateFocusStateOnScroll(curScroll, curScroll - prevScroll);
 
         if (mEnterAnimationComplete) {
-            if (shouldShowHistoryButton() &&
-                    prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
-                    curScroll <= SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-                EventBus.getDefault().send(new ShowHistoryButtonEvent(true /* translate */));
-            } else if (prevScroll < HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD &&
-                    curScroll >= HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-                EventBus.getDefault().send(new HideHistoryButtonEvent());
+            if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                    curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+                EventBus.getDefault().send(new ShowStackActionButtonEvent(true /* translate */));
+            } else if (prevScroll < HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                    curScroll >= HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+                EventBus.getDefault().send(new HideStackActionButtonEvent());
             }
         }
     }
@@ -1905,22 +1894,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    public final void onBusEvent(ShowHistoryEvent event) {
-        ReferenceCountedTrigger postAnimTrigger = new ReferenceCountedTrigger();
-        postAnimTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                setVisibility(View.INVISIBLE);
-            }
-        });
-        mAnimationHelper.startShowHistoryAnimation(postAnimTrigger);
-    }
-
-    public final void onBusEvent(HideHistoryEvent event) {
-        setVisibility(View.VISIBLE);
-        mAnimationHelper.startHideHistoryAnimation();
-    }
-
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         if (!event.inMultiWindow) {
             // Scroll the stack to the front to see the undocked task
@@ -2007,13 +1980,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         return -1;
-    }
-
-    /**
-     * @return whether the history button should be visible
-     */
-    private boolean shouldShowHistoryButton() {
-        return !mStack.getHistoricalTasks().isEmpty();
     }
 
     /**

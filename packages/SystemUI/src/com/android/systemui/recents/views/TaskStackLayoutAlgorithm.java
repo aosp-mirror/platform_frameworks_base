@@ -236,9 +236,9 @@ public class TaskStackLayoutAlgorithm {
     // This is the current system insets
     @ViewDebug.ExportedProperty(category="recents")
     public Rect mSystemInsets = new Rect();
-    // This is the bounds of the history button above the stack rect
+    // This is the bounds of the stack action above the stack rect
     @ViewDebug.ExportedProperty(category="recents")
-    public Rect mHistoryButtonRect = new Rect();
+    public Rect mStackActionButtonRect = new Rect();
 
     // The visible ranges when the stack is focused and unfocused
     private Range mUnfocusedRange;
@@ -447,8 +447,8 @@ public class TaskStackLayoutAlgorithm {
         state.computeRects(mFreeformRect, mStackRect, taskStackBounds, topMargin,
                 mFreeformStackGap, mStackBottomOffset);
 
-        // The history button will take the full un-padded header space above the stack
-        mHistoryButtonRect.set(mStackRect.left, mStackRect.top - topMargin,
+        // The stack action button will take the full un-padded header space above the stack
+        mStackActionButtonRect.set(mStackRect.left, mStackRect.top - topMargin,
                 mStackRect.right, mStackRect.top + mFocusedTopPeekHeight);
 
         // Anchor the task rect top aligned to the non-freeform stack rect
