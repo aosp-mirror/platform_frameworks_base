@@ -819,7 +819,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             final boolean allowResizeInDockedMode = data.readInt() == 1;
             final boolean preserveWindows = data.readInt() == 1;
             final boolean animate = data.readInt() == 1;
-            resizeStack(stackId, r, allowResizeInDockedMode, preserveWindows, animate);
+            final int animationDuration = data.readInt();
+            resizeStack(stackId,
+                    r, allowResizeInDockedMode, preserveWindows, animate, animationDuration);
             reply.writeNoException();
             return true;
         }
@@ -3881,7 +3883,8 @@ class ActivityManagerProxy implements IActivityManager
     }
     @Override
     public void resizeStack(int stackId, Rect r, boolean allowResizeInDockedMode,
-            boolean preserveWindows, boolean animate) throws RemoteException {
+            boolean preserveWindows, boolean animate, int animationDuration)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -3895,6 +3898,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(allowResizeInDockedMode ? 1 : 0);
         data.writeInt(preserveWindows ? 1 : 0);
         data.writeInt(animate ? 1 : 0);
+        data.writeInt(animationDuration);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

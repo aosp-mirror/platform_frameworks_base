@@ -9670,14 +9670,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode,
-            boolean preserveWindows, boolean animate) {
+            boolean preserveWindows, boolean animate, int animationDuration) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 if (animate) {
                     if (stackId == PINNED_STACK_ID) {
-                        mWindowManager.animateResizePinnedStack(bounds);
+                        mWindowManager.animateResizePinnedStack(bounds, animationDuration);
                     } else {
                         throw new IllegalArgumentException("Stack: " + stackId
                                 + " doesn't support animated resize.");

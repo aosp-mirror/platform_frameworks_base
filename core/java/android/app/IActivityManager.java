@@ -147,8 +147,23 @@ public interface IActivityManager extends IInterface {
     public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) throws RemoteException;
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) throws RemoteException;
+
+    /**
+     * Resizes the input stack id to the given bounds.
+     *
+     * @param stackId Id of the stack to resize.
+     * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
+     * @param allowResizeInDockedMode True if the resize should be allowed when the docked stack is
+     *                                active.
+     * @param preserveWindows True if the windows of activities contained in the stack should be
+     *                        preserved.
+     * @param animate True if the stack resize should be animated.
+     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
+     *                          default animation duration should be used.
+     * @throws RemoteException
+     */
     public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode,
-            boolean preserveWindows, boolean animate) throws RemoteException;
+            boolean preserveWindows, boolean animate, int animationDuration) throws RemoteException;
 
     /**
      * Moves all tasks from the docked stack in the fullscreen stack and puts the top task of the

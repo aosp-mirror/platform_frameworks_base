@@ -2408,7 +2408,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        mWindowManager.animateResizePinnedStack(bounds);
+        mWindowManager.animateResizePinnedStack(bounds, -1);
         mService.notifyActivityPinnedLocked();
     }
 

@@ -214,7 +214,7 @@ public class BoundsAnimationController {
         void getFullScreenBounds(Rect bounds);
     }
 
-    void animateBounds(final AnimateBoundsUser target, Rect from, Rect to) {
+    void animateBounds(final AnimateBoundsUser target, Rect from, Rect to, int animationDuration) {
         boolean moveToFullscreen = false;
         if (to == null) {
             to = new Rect();
@@ -242,7 +242,8 @@ public class BoundsAnimationController {
                 new BoundsAnimator(target, from, to, moveToFullscreen, replacing);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
-        animator.setDuration(DEFAULT_APP_TRANSITION_DURATION * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
+        animator.setDuration((animationDuration != -1 ? animationDuration
+                : DEFAULT_APP_TRANSITION_DURATION) * DEBUG_ANIMATION_SLOW_DOWN_FACTOR);
         animator.setInterpolator(new LinearInterpolator());
         animator.start();
     }
