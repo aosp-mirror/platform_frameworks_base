@@ -110,18 +110,19 @@
     <string name="menu_rename" msgid="7678802479104285353">"പേരുമാറ്റുക"</string>
     <string name="rename_error" msgid="4203041674883412606">"ഡോക്യുമെന്റിന്റെ പേരുമാറ്റുന്നത് പരാജയപ്പെട്ടു"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ചില ഫയലുകൾ പരിവർത്തനം ചെയ്യപ്പെട്ടു"</string>
-    <!-- no translation found for open_external_dialog_request (5789329484285817629) -->
-    <skip />
-    <!-- no translation found for never_ask_again (4295278542972859268) -->
-    <skip />
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="STORAGE"><i>^3</i></xliff:g> സ്റ്റോറേജിലെ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> എന്ന ഡയറക്റ്ററിയിലേക്ക് <xliff:g id="APPNAME"><b>^1</b></xliff:g> ആപ്പിന് ആക്സസ് അനുവദിക്കണോ?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"വീണ്ടും ആവശ്യപ്പെടരുത്"</string>
     <string name="allow" msgid="7225948811296386551">"അനുവദിക്കുക"</string>
     <string name="deny" msgid="2081879885755434506">"നിരസിക്കുക"</string>
-    <plurals name="delete_confirmation_message" formatted="false" msgid="3519107568984207772">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഫയലുകൾ ഇല്ലാതാക്കണോ?</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഫയൽ ഇല്ലാതാക്കണോ?</item>
-    </plurals>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
     </plurals>
+    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
+    <skip />
+    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
+    <skip />
+    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
+    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
+    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
 </resources>
