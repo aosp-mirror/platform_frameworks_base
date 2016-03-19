@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edita amb %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Comparteix amb"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Comparteix amb %1$s"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"Seleccionar una aplicació Inici"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilitzar %1$s com a Inici"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTEIX"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REBUTJA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Tria els teclats"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"El deixa a la pantalla mentre el teclat físic està actiu"</string>
     <string name="hardware" msgid="194658061510127999">"Mostra el teclat virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona una disposició de teclat"</string>
@@ -1562,7 +1567,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"No fixis"</string>
     <string name="app_info" msgid="6856026610594615344">"Informació de l\'aplicació"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"Restableix les dades de fàbrica del dispositiu per utilitzar-lo sense restriccions"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca per obtenir més informació."</string>
 </resources>

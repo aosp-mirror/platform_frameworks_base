@@ -905,6 +905,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editați cu %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Trimiteți prin"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Distribuiți cu %1$s"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"Selectați o aplicație de pe ecranul de pornire"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utilizați %1$s ca ecran de pornire"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Se utilizează în mod prestabilit pentru această acțiune."</string>
@@ -1066,7 +1070,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"TRIMITEȚI"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUZAȚI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Schimbați tastatura"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Alegeți tastaturi"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"Se păstrează pe ecran cât timp este activată tastatura fizică"</string>
     <string name="hardware" msgid="194658061510127999">"Afișați tastatura virtuală"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selectați aspectul tastaturii"</string>
@@ -1581,7 +1586,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"Anulați fixarea"</string>
     <string name="app_info" msgid="6856026610594615344">"Informații despre aplicație"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"Reveniți la setările din fabrică pentru a folosi acest dispozitiv fără restricții"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Atingeți pentru a afla mai multe."</string>
 </resources>

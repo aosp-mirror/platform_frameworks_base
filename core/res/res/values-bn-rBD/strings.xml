@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s দিয়ে সম্পাদনা করুন"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"এর সাথে শেয়ার করুন"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s এর সাথে শেয়ার করুন"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"একটি হোম অ্যাপ্লিকেশন নির্বাচন করুন"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"হোম হিসাবে %1$s ব্যবহার করুন"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"এই ক্রিয়াটির জন্য এটিকে ডিফল্টরুপে ব্যবহার করুন৷"</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"শেয়ার করুন"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"অস্বীকার করুন"</string>
     <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"কীবোর্ড চয়ন করুন"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>
     <string name="hardware" msgid="194658061510127999">"ভার্চুয়াল কীবোর্ড দেখান"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"কীবোর্ডের লেআউট নির্বাচন করুন"</string>
@@ -1562,7 +1567,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"আনপিন করুন"</string>
     <string name="app_info" msgid="6856026610594615344">"অ্যাপ্লিকেশানের তথ্য"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"কোনো বিধিনিষেধ ছাড়াই এই ডিভাইসটিকে ব্যবহার করতে ফ্যাক্টরি রিসেট করুন"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"আরো জানতে স্পর্শ করুন৷"</string>
 </resources>

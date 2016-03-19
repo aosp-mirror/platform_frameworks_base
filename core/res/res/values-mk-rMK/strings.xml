@@ -899,6 +899,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Уреди со %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Сподели со"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Сподели со %1$s"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"Изберете ја апликацијата Почетен"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Користете ја %1$s како Почетен"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Користи ја стандардно за ова дејство."</string>
@@ -1058,7 +1062,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"СПОДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Избери тастатури"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"Прикажувај го на екранот додека е активна физичката тастатура"</string>
     <string name="hardware" msgid="194658061510127999">"Прикажи виртуелна тастатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Избери изглед на тастатура"</string>
@@ -1564,7 +1569,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"Откачете"</string>
     <string name="app_info" msgid="6856026610594615344">"Информации за апликација"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"Ресетирајте до фабричките поставки за уредов да го користите без ограничувања"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Допрете за да дознаете повеќе."</string>
 </resources>

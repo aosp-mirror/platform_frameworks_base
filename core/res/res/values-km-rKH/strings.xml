@@ -901,6 +901,10 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ចែករំលែក​ជាមួយ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ"</string>
+    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
+    <skip />
+    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
+    <skip />
     <string name="whichHomeApplication" msgid="4307587691506919691">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ប្រើ %1$s ជា​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
@@ -1060,7 +1064,8 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ចែករំលែក"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"បដិសេធ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"ជ្រើស​ក្ដារចុច"</string>
+    <!-- no translation found for configure_input_methods (5673193194563164021) -->
+    <skip />
     <string name="show_ime" msgid="2506087537466597099">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
     <string name="hardware" msgid="194658061510127999">"បង្ហាញក្ដារចុចនិម្មិត"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ជ្រើស​ប្លង់​ក្ដារ​ចុច"</string>
@@ -1564,7 +1569,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"មិនខ្ទាស់"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for audit_safemode_notification (6416076898350685856) -->
-    <skip />
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"កំណត់ដូចចេញពីរោងចក្រឡើងវិញដើម្បីប្រើឧបករណ៍នេះដោយគ្មានការរឹតបន្តឹង"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ប៉ះ​ ដើម្បី​​ស្វែងយល់​បន្ថែម។"</string>
 </resources>
