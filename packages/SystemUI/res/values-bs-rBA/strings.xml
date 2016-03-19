@@ -222,10 +222,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Poslovni režim uključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Poslovni režim je isključen."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Poslovni režim je uključen."</string>
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_off (650231949881093289) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_data_saver_changed_on (4218725402373934151) -->
-    <skip />
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Ušteda podataka je isključena."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Ušteda podataka je uključena."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Osvjetljenje ekrana"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G prijenos podataka je pauzirano"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G prijenos podataka je pauzirano"</string>
@@ -304,7 +302,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ograničenje <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Upozorenje <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Poslovni režim"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"Ovdje se pojavljuju nedavno korišteni ekrani"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Nema nedavnih stavki"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Sve ste obrisali"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informacije o aplikaciji"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"kačenje ekrana"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pretraga"</string>
@@ -538,6 +537,8 @@
     <string name="select_keycode" msgid="7413765103381924584">"Odaberite dugme na tastaturi"</string>
     <string name="preview" msgid="9077832302472282938">"Pregledaj"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Povucite da biste dodali polja"</string>
+    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"Uredi"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vrijeme"</string>
   <string-array name="clock_options">
