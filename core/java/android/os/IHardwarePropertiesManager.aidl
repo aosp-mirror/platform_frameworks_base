@@ -22,7 +22,7 @@ import android.os.CpuUsageInfo;
 /** @hide */
 
 interface IHardwarePropertiesManager {
-    float[] getDeviceTemperatures(String callingPackage, int type);
+    float[] getDeviceTemperatures(String callingPackage, int type, int source);
     CpuUsageInfo[] getCpuUsages(String callingPackage);
     float[] getFanSpeeds(String callingPackage);
 }
