@@ -50,6 +50,8 @@ import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
 import com.android.internal.util.SizedInputStream;
 
+import dalvik.system.DexFile;
+
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -249,11 +251,38 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runCompile() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         boolean useJitProfiles = false;
-        boolean extractOnly = false;
         boolean forceCompilation = false;
         boolean allPackages = false;
         boolean clearProfileData = false;
-        String compilationMode = "default";
+        String compilerFilter = null;
+        String compilationReason = null;
+
+        if (peekNextArg() == null) {
+            // No arguments, show help.
+            pw.println("Usage: cmd package compile [-c] [-f] [--reset] [-m mode] " +
+                    "[-r reason] [-a|pkg]");
+            pw.println();
+            pw.println("  -c         Clear profile data");
+            pw.println("  -f         Force compilation");
+            pw.println("  --reset    Reset package");
+            pw.println("  -m mode    Compilation mode, one of the dex2oat compiler filters");
+            pw.println("               verify-none");
+            pw.println("               verify-at-runtime");
+            pw.println("               verify-profile");
+            pw.println("               interpret-only");
+            pw.println("               space-profile");
+            pw.println("               space");
+            pw.println("               speed-profile");
+            pw.println("               speed");
+            pw.println("               everything");
+            pw.println("  -r reason  Compiler reason, one of the package manager reasons");
+            for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
+                pw.println("               " +
+                        PackageManagerServiceCompilerMapping.REASON_STRINGS[i]);
+            }
+            pw.println("  -a         Apply to all packages");
+            return 1;
+        }
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -268,12 +297,15 @@ class PackageManagerShellCommand extends ShellCommand {
                     forceCompilation = true;
                     break;
                 case "-m":
-                    compilationMode = getNextArgRequired();
+                    compilerFilter = getNextArgRequired();
+                    break;
+                case "-r":
+                    compilationReason = getNextArgRequired();
                     break;
                 case "--reset":
                     forceCompilation = true;
                     clearProfileData = true;
-                    compilationMode = "extract";
+                    compilerFilter = "reset";
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -281,27 +313,55 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        switch (compilationMode) {
-            case "default":
-                useJitProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
-                extractOnly = false;
-                break;
-            case "full":
-                useJitProfiles = false;
-                extractOnly = false;
-                break;
-            case "profile":
-                useJitProfiles = true;
-                extractOnly = false;
-                break;
-            case "extract":
-                useJitProfiles = false;
-                extractOnly = true;
-                break;
-            default:
-                pw.println("Error: Unknown compilation mode: " + compilationMode);
-                return 1;
+        if (compilerFilter != null && compilationReason != null) {
+            pw.println("Cannot use compilation filter (\"-m\") and compilation reason (\"-r\") " +
+                    "at the same time");
+            return 1;
         }
+        if (compilerFilter == null && compilationReason == null) {
+            pw.println("Cannot run without any of compilation filter (\"-m\") and compilation " +
+                    "reason (\"-r\") at the same time");
+            return 1;
+        }
+
+        String targetCompilerFilter;
+        if (compilerFilter != null) {
+            // Specially recognize default and reset. Otherwise, only accept valid modes.
+            if ("default".equals(compilerFilter)) {
+                // Use the default mode for background dexopt.
+                targetCompilerFilter =
+                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                PackageManagerServiceCompilerMapping.REASON_BACKGROUND_DEXOPT);
+            } else if ("reset".equals(compilerFilter)) {
+                // Use the default mode for install.
+                targetCompilerFilter =
+                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                                PackageManagerServiceCompilerMapping.REASON_INSTALL);
+            } else {
+                if (!DexFile.isValidCompilerFilter(compilerFilter)) {
+                    pw.println("Error: \"" + compilerFilter +
+                            "\" is not a valid compilation filter.");
+                    return 1;
+                }
+                targetCompilerFilter = compilerFilter;
+            }
+        } else {
+            int reason = -1;
+            for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
+                if (PackageManagerServiceCompilerMapping.REASON_STRINGS[i].equals(
+                        compilationReason)) {
+                    reason = i;
+                    break;
+                }
+            }
+            if (reason == -1) {
+                pw.println("Error: Unknown compilation reason: " + compilationReason);
+                return 1;
+            }
+            targetCompilerFilter =
+                    PackageManagerServiceCompilerMapping.getCompilerFilterForReason(reason);
+        }
+
 
         List<String> packageNames = null;
         if (allPackages) {
@@ -321,8 +381,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 mInterface.clearApplicationProfileData(packageName);
             }
 
-            boolean result = mInterface.performDexOpt(packageName, null /* instructionSet */,
-                        useJitProfiles, extractOnly, forceCompilation);
+            boolean result = mInterface.performDexOptMode(packageName, null /* instructionSet */,
+                    useJitProfiles, targetCompilerFilter, forceCompilation);
             if (!result) {
                 failedPackages.add(packageName);
             }

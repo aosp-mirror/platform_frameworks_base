@@ -19,11 +19,12 @@ package com.android.server.pm;
 import static com.android.server.pm.Installer.DEXOPT_OTA;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_AB_OTA;
 
 import android.content.Context;
 import android.content.pm.IOtaDexopt;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.Package;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -130,6 +131,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         // TODO: If apps are not installed in the internal /data partition, we should compare
         //       against that storage's free capacity.
         File dataDir = Environment.getDataDirectory();
+        @SuppressWarnings("deprecation")
         long lowThreshold = StorageManager.from(mContext).getStorageLowBytes(dataDir);
         if (lowThreshold == 0) {
             throw new IllegalStateException("Invalid low memory threshold");
@@ -142,7 +144,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
 
         mPackageDexOptimizer.performDexOpt(nextPackage, null /* ISAs */, false /* useProfiles */,
-                false /* extractOnly */);
+                getCompilerFilterForReason(REASON_AB_OTA));
     }
 
     private void moveAbArtifacts(Installer installer) {
