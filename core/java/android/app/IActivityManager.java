@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
@@ -628,6 +629,8 @@ public interface IActivityManager extends IInterface {
 
     public void removeStack(int stackId) throws RemoteException;
 
+    public void notifyLockedProfile(@UserIdInt int userId) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -1010,4 +1013,5 @@ public interface IActivityManager extends IInterface {
     int RESIZE_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 370;
     int IS_VR_PACKAGE_ENABLED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 371;
     int SWAP_DOCKED_AND_FULLSCREEN_STACK = IBinder.FIRST_CALL_TRANSACTION + 372;
+    int NOTIFY_LOCKED_PROFILE = IBinder.FIRST_CALL_TRANSACTION + 373;
 }
