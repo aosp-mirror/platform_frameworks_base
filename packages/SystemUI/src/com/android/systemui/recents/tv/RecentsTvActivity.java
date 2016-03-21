@@ -85,9 +85,13 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     private PipManager mPipManager;
     private PipManager.Listener mPipListener = new PipManager.Listener() {
         @Override
+        public void onPipEntered() {
+            updatePipUI();
+        }
+
+        @Override
         public void onPipActivityClosed() {
-            mPipView.setVisibility(View.GONE);
-            mPipShadeView.setVisibility(View.GONE);
+            updatePipUI();
         }
 
         @Override
@@ -102,6 +106,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         @Override
         public void onMediaControllerChanged() { }
     };
+    private boolean mHasPip;
 
     /**
      * A common Runnable to finish Recents by launching Home with an animation depending on the
@@ -266,6 +271,10 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
+
+        mHasPip = false;
+        updatePipUI();
+        mPipManager.addListener(mPipListener);
     }
 
     @Override
@@ -296,34 +305,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
 
-        if (mPipManager.isPipShown()) {
-            // Place mPipView at the PIP bounds for fine tuned focus handling.
-            Rect pipBounds = mPipManager.getPipBounds();
-            LayoutParams lp = (LayoutParams) mPipView.getLayoutParams();
-            lp.width = pipBounds.width();
-            lp.height = pipBounds.height();
-            lp.leftMargin = pipBounds.left;
-            lp.topMargin = pipBounds.top;
-            mPipView.setLayoutParams(lp);
-
-            mPipView.setVisibility(View.VISIBLE);
-            mPipView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mPipManager.resizePinnedStack(PipManager.STATE_PIP_MENU);
-                }
-            });
-            mPipView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    mPipManager.onPipViewFocusChangedInRecents(hasFocus);
-                    mPipShadeView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
-                }
-            });
-            mPipManager.addListener(mPipListener);
-        } else {
-            mPipView.setVisibility(View.GONE);
-        }
         mPipManager.onRecentsStarted();
         // Give focus to the recents row whenever its visible to an user.
         mRecentsView.requestFocus();
@@ -340,7 +321,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         super.onStop();
 
         mPipManager.onRecentsStopped();
-        mPipManager.removeListener(mPipListener);
         mIgnoreAltTabRelease = false;
         // Notify that recents is now hidden
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
@@ -357,6 +337,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     protected void onDestroy() {
         super.onDestroy();
 
+        mPipManager.removeListener(mPipListener);
         // In the case that the activity finished on startup, just skip the unregistration below
         if (mFinishedOnStartup) {
             return;
@@ -479,5 +460,41 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
             }
         });
         return true;
+    }
+
+    private void updatePipUI() {
+        if (mHasPip == mPipManager.isPipShown()) {
+            return;
+        }
+        mHasPip = mPipManager.isPipShown();
+        if (mHasPip) {
+            // Place mPipView at the PIP bounds for fine tuned focus handling.
+            Rect pipBounds = mPipManager.getPipBounds();
+            LayoutParams lp = (LayoutParams) mPipView.getLayoutParams();
+            lp.width = pipBounds.width();
+            lp.height = pipBounds.height();
+            lp.leftMargin = pipBounds.left;
+            lp.topMargin = pipBounds.top;
+            mPipView.setLayoutParams(lp);
+
+            mPipView.setVisibility(View.VISIBLE);
+            mPipView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPipManager.resizePinnedStack(PipManager.STATE_PIP_MENU);
+                }
+            });
+            mPipView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    mPipManager.onPipViewFocusChangedInRecents(hasFocus);
+                    mPipShadeView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
+                }
+            });
+            mPipShadeView.setVisibility(View.GONE);
+        } else {
+            mPipView.setVisibility(View.GONE);
+            mPipShadeView.setVisibility(View.GONE);
+        }
     }
 }
