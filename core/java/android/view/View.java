@@ -5020,8 +5020,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (scrollabilityCache.scrollBar == null) {
             scrollabilityCache.scrollBar = new ScrollBarDrawable();
-            scrollabilityCache.scrollBar.setCallback(this);
             scrollabilityCache.scrollBar.setState(getDrawableState());
+            scrollabilityCache.scrollBar.setCallback(this);
         }
 
         final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, true);
@@ -13295,8 +13295,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (scrollCache.scrollBar == null) {
             scrollCache.scrollBar = new ScrollBarDrawable();
-            scrollCache.scrollBar.setCallback(this);
             scrollCache.scrollBar.setState(getDrawableState());
+            scrollCache.scrollBar.setCallback(this);
         }
 
         if (isHorizontalScrollBarEnabled() || isVerticalScrollBarEnabled()) {
@@ -18049,7 +18049,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // which requires the view set as the callback (us) to recognize the drawable as
             // belonging to it as per verifyDrawable.
             mBackground = background;
-            background.setCallback(this);
             if (background.isStateful()) {
                 background.setState(getDrawableState());
             }
@@ -18058,6 +18057,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             applyBackgroundTint();
+
+            // Set callback last, since the view may still be initializing.
+            background.setCallback(this);
 
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) != 0) {
                 mPrivateFlags &= ~PFLAG_SKIP_DRAW;
@@ -18248,7 +18250,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) != 0) {
                 mPrivateFlags &= ~PFLAG_SKIP_DRAW;
             }
-            foreground.setCallback(this);
             foreground.setLayoutDirection(getLayoutDirection());
             if (foreground.isStateful()) {
                 foreground.setState(getDrawableState());
@@ -18257,6 +18258,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (isAttachedToWindow()) {
                 foreground.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             }
+            // Set callback last, since the view may still be initializing.
+            foreground.setCallback(this);
         } else if ((mViewFlags & WILL_NOT_DRAW) != 0 && mBackground == null) {
             mPrivateFlags |= PFLAG_SKIP_DRAW;
         }
