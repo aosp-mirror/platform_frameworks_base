@@ -39,6 +39,7 @@ import static com.android.server.am.ActivityManagerService.SYSTEM_USER_UNLOCK_MS
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.Dialog;
@@ -1338,6 +1339,10 @@ final class UserController {
         final KeyguardManager km = (KeyguardManager) mService.mContext
                 .getSystemService(KEYGUARD_SERVICE);
         return km.isDeviceLocked(userId);
+    }
+
+    boolean isLockScreenDisabled(@UserIdInt int userId) {
+        return mLockPatternUtils.isLockScreenDisabled(userId);
     }
 
     void dump(PrintWriter pw, boolean dumpAll) {
