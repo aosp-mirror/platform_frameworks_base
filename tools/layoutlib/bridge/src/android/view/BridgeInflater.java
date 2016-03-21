@@ -265,12 +265,15 @@ public final class BridgeInflater extends LayoutInflater {
             if (viewKey != null) {
                 bc.addViewKey(view, viewKey);
             }
-            String scrollPos = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES, "scrollY");
-            if (scrollPos != null) {
-                if (scrollPos.endsWith("px")) {
-                    int value = Integer.parseInt(scrollPos.substring(0, scrollPos.length() - 2));
-                    bc.setScrollYPos(view, value);
-                }
+            String scrollPosX = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES, "scrollX");
+            if (scrollPosX != null && scrollPosX.endsWith("px")) {
+                int value = Integer.parseInt(scrollPosX.substring(0, scrollPosX.length() - 2));
+                bc.setScrollXPos(view, value);
+            }
+            String scrollPosY = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES, "scrollY");
+            if (scrollPosY != null && scrollPosY.endsWith("px")) {
+                int value = Integer.parseInt(scrollPosY.substring(0, scrollPosY.length() - 2));
+                bc.setScrollYPos(view, value);
             }
             if (ReflectionUtils.isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
                 Integer resourceId = null;
