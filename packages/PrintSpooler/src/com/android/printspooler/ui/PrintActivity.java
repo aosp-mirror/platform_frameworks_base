@@ -159,7 +159,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int STATE_PRINTER_UNAVAILABLE = 6;
     private static final int STATE_UPDATE_SLOW = 7;
     private static final int STATE_PRINT_COMPLETED = 8;
-    private static final int STATE_FINISHING = 9;
 
     private static final int UI_STATE_PREVIEW = 0;
     private static final int UI_STATE_ERROR = 1;
@@ -254,6 +253,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     /** Whether at least one print services is enabled or not */
     private boolean mArePrintServicesEnabled;
+
+    /** Is doFinish() already in progress */
+    private boolean mIsFinishing;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -2035,11 +2037,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return;
         }
 
-        if (mState == STATE_FINISHING) {
+        if (mIsFinishing) {
             return;
         }
 
-        mState = STATE_FINISHING;
+        mIsFinishing = true;
 
         if (mPrinterRegistry != null) {
             mPrinterRegistry.setTrackedPrinter(null);
