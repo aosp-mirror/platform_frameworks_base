@@ -274,8 +274,8 @@ TEST(FrameBuilder, textMerging) {
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setAntiAlias(true);
         paint.setTextSize(50);
-        TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 0); // will be top clipped
-        TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 100); // not clipped
+        TestUtils::drawUtf8ToCanvas(&canvas, "Test string1", paint, 100, 0); // will be top clipped
+        TestUtils::drawUtf8ToCanvas(&canvas, "Test string1", paint, 100, 100); // not clipped
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
             TestUtils::createSyncedNodeList(node), sLightGeometry, nullptr);
@@ -305,7 +305,7 @@ TEST(FrameBuilder, textStrikethrough) {
         textPaint.setStrikeThruText(true);
         textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < LOOPS; i++) {
-            TestUtils::drawTextToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
+            TestUtils::drawUtf8ToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
         }
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 2000), 200, 2000,

@@ -11,8 +11,8 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
-#include <Canvas.h>
 #include <jni.h>
+#include <hwui/Canvas.h>
 
 class SkBitmapRegionDecoder;
 class SkCanvas;

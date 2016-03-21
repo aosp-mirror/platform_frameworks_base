@@ -32,10 +32,12 @@
 
 #include "SkPaint.h"
 #include "SkTypeface.h"
-#include "MinikinSkia.h"
-#include "MinikinUtils.h"
-#include "Paint.h"
-#include "minikin/LineBreaker.h"
+#include <hwui/MinikinSkia.h>
+#include <hwui/MinikinUtils.h>
+#include <hwui/Paint.h>
+#include <minikin/FontCollection.h>
+#include <minikin/LineBreaker.h>
+#include <minikin/MinikinFont.h>
 
 namespace android {
 

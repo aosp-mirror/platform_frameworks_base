@@ -59,6 +59,9 @@ class Tree;
 };
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
+class Paint;
+struct TypefaceImpl;
+
 class ANDROID_API Canvas {
 public:
     virtual ~Canvas() {};
@@ -207,12 +210,12 @@ public:
      * drawText: count is of glyphs
      * totalAdvance: used to define width of text decorations (underlines, strikethroughs).
      */
-    virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
+    virtual void drawGlyphs(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y,
             float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) = 0;
     /** drawTextOnPath: count is of glyphs */
-    virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) = 0;
 
     /**
@@ -228,6 +231,17 @@ public:
      * Draws a VectorDrawable onto the canvas.
      */
     virtual void drawVectorDrawable(VectorDrawableRoot* tree);
+
+    /**
+     * Converts utf16 text to glyphs, calculating position and boundary,
+     * and delegating the final draw to virtual drawGlyphs method.
+     */
+    void drawText(const uint16_t* text, int start, int count, int contextCount,
+                 float x, float y, int bidiFlags, const Paint& origPaint, TypefaceImpl* typeface);
+
+    void drawTextOnPath(const uint16_t* text, int count, int bidiFlags,
+                               const SkPath& path, float hOffset, float vOffset,
+                               const Paint& paint, TypefaceImpl* typeface);
 
 protected:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);

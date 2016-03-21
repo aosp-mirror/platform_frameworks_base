@@ -17,6 +17,8 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H_
 #define ANDROID_GRAPHICS_PAINT_H_
 
+#include <cutils/compiler.h>
+
 #include <SkPaint.h>
 #include <string>
 
@@ -24,7 +26,7 @@
 
 namespace android {
 
-class Paint : public SkPaint {
+class ANDROID_API Paint : public SkPaint {
 public:
     Paint();
     Paint(const Paint& paint);
@@ -45,7 +47,7 @@ public:
         return mLetterSpacing;
     }
 
-    void setFontFeatureSettings(const std::string &fontFeatureSettings) {
+    void setFontFeatureSettings(const std::string& fontFeatureSettings) {
         mFontFeatureSettings = fontFeatureSettings;
     }
 

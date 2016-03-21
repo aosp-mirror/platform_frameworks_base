@@ -20,21 +20,16 @@
  * being, that choice is hidden under the USE_MINIKIN compile-time flag.
  */
 
-#define LOG_TAG "TypefaceImpl"
+#include "TypefaceImpl.h"
 
-#include "jni.h"  // for jlong, remove when being passed proper type
-
+#include "MinikinSkia.h"
 #include "SkTypeface.h"
+#include "SkPaint.h"
 
-#include <vector>
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/Layout.h>
-#include "SkPaint.h"
-#include "MinikinSkia.h"
-
-#include "TypefaceImpl.h"
-#include "Utils.h"
+#include <utils/Log.h>
 
 namespace android {
 
@@ -133,15 +128,10 @@ TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int weight) {
     return result;
 }
 
-TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size) {
-    std::vector<FontFamily *>familyVec;
-    for (size_t i = 0; i < size; i++) {
-        FontFamily* family = reinterpret_cast<FontFamily*>(families[i]);
-        familyVec.push_back(family);
-    }
+TypefaceImpl* TypefaceImpl_createFromFamilies(const std::vector<FontFamily*>& families) {
     TypefaceImpl* result = new TypefaceImpl;
-    result->fFontCollection = new FontCollection(familyVec);
-    if (size == 0) {
+    result->fFontCollection = new FontCollection(families);
+    if (families.empty()) {
         ALOGW("createFromFamilies creating empty collection");
         result->fSkiaStyle = SkTypeface::kNormal;
     } else {

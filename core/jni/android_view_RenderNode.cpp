@@ -30,7 +30,7 @@
 #include <RenderNode.h>
 #include <renderthread/CanvasContext.h>
 #include <TreeInfo.h>
-#include <Paint.h>
+#include <hwui/Paint.h>
 
 #include "core_jni_helpers.h"
 

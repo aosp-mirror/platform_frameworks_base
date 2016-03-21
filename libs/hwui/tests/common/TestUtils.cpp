@@ -87,7 +87,7 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
     *outTotalAdvance = totalAdvance;
 }
 
-void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
+void TestUtils::drawUtf8ToCanvas(TestCanvas* canvas, const char* text,
         const SkPaint& paint, float x, float y) {
     // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
     LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
@@ -113,11 +113,11 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
     // Force left alignment, since alignment offset is already baked in
     SkPaint alignPaintCopy(paint);
     alignPaintCopy.setTextAlign(SkPaint::kLeft_Align);
-    canvas->drawText(glyphs.data(), positions.data(), glyphs.size(), alignPaintCopy, x, y,
+    canvas->drawGlyphs(glyphs.data(), positions.data(), glyphs.size(), alignPaintCopy, x, y,
                 bounds.left, bounds.top, bounds.right, bounds.bottom, totalAdvance);
 }
 
-void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
+void TestUtils::drawUtf8ToCanvas(TestCanvas* canvas, const char* text,
         const SkPaint& paint, const SkPath& path) {
     // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
     LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
@@ -130,7 +130,7 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
         SkUnichar unichar = SkUTF8_NextUnichar(&text);
         glyphs.push_back(autoCache.getCache()->unicharToGlyph(unichar));
     }
-    canvas->drawTextOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
+    canvas->drawGlyphsOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
 }
 
 void TestUtils::TestTask::run() {
@@ -141,6 +141,14 @@ void TestUtils::TestTask::run() {
     rtCallback(renderthread::RenderThread::getInstance());
     renderState.flush(Caches::FlushMode::Full);
     renderState.onGLContextDestroyed();
+}
+
+std::unique_ptr<uint16_t[]> TestUtils::utf8ToUtf16(const char* str) {
+    const size_t strLen = strlen(str);
+    const ssize_t utf16Len = utf8_to_utf16_length((uint8_t*) str, strLen);
+    std::unique_ptr<uint16_t[]> dst(new uint16_t[utf16Len + 1]);
+    utf8_to_utf16((uint8_t*) str, strLen, (char16_t*) dst.get());
+    return dst;
 }
 
 } /* namespace uirenderer */
