@@ -58,8 +58,8 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.app.ProcessStats;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobStatusFunctor;

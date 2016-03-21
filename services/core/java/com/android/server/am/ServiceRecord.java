@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
@@ -88,8 +88,8 @@ final class ServiceRecord extends Binder {
 
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
-    ProcessStats.ServiceState tracker; // tracking service execution, may be null
-    ProcessStats.ServiceState restartTracker; // tracking service restart
+    ServiceState tracker; // tracking service execution, may be null
+    ServiceState restartTracker; // tracking service restart
     boolean delayed;        // are we waiting to start this service in the background?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
@@ -326,7 +326,7 @@ final class ServiceRecord extends Binder {
         createdFromFg = callerIsFg;
     }
 
-    public ProcessStats.ServiceState getTracker() {
+    public ServiceState getTracker() {
         if (tracker != null) {
             return tracker;
         }

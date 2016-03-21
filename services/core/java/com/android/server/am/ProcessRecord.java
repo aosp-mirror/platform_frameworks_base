@@ -24,7 +24,8 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.Slog;
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.app.ActivityManager;
@@ -69,7 +70,7 @@ final class ProcessRecord {
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
-    ProcessStats.ProcessState baseProcessTracker;
+    ProcessState baseProcessTracker;
     BatteryStatsImpl.Uid.Proc curProcBatteryStats;
     int pid;                    // The process of this application; 0 if none
     int[] gids;                 // The gids this process was launched with
@@ -443,7 +444,7 @@ final class ProcessRecord {
 
     public void makeActive(IApplicationThread _thread, ProcessStatsService tracker) {
         if (thread == null) {
-            final ProcessStats.ProcessState origBase = baseProcessTracker;
+            final ProcessState origBase = baseProcessTracker;
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
@@ -469,7 +470,7 @@ final class ProcessRecord {
 
     public void makeInactive(ProcessStatsService tracker) {
         thread = null;
-        final ProcessStats.ProcessState origBase = baseProcessTracker;
+        final ProcessState origBase = baseProcessTracker;
         if (origBase != null) {
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
@@ -695,7 +696,7 @@ final class ProcessRecord {
 
                 }
                 pkgList.clear();
-                ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
+                ProcessState ps = tracker.getProcessStateLocked(
                         info.packageName, uid, info.versionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.versionCode);
