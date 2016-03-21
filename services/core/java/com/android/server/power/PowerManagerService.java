@@ -71,6 +71,8 @@ import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.vr.VrManagerInternal;
+import com.android.server.vr.VrStateListener;
 import libcore.util.Objects;
 
 import java.io.FileDescriptor;
@@ -158,6 +160,7 @@ public final class PowerManagerService extends SystemService
     // Power hints defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_HINT_LOW_POWER = 5;
     private static final int POWER_HINT_SUSTAINED_PERFORMANCE = 6;
+    private static final int POWER_HINT_VR_MODE = 7;
 
     // Power features defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_FEATURE_DOUBLE_TAP_TO_WAKE = 1;
@@ -654,6 +657,7 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Secure.BRIGHTNESS_USE_TWILIGHT),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            getLocalService(VrManagerInternal.class).registerListener(mVrStateListener);
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -3001,6 +3005,13 @@ public final class PowerManagerService extends SystemService
             }
         }
     }
+
+    private final VrStateListener mVrStateListener = new VrStateListener() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            powerHintInternal(POWER_HINT_VR_MODE, enabled ? 1 : 0);
+        }
+    };
 
     /**
      * Handler for asynchronous operations performed by the power manager.
