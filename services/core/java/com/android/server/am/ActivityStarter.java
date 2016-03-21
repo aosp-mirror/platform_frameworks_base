@@ -1483,7 +1483,8 @@ class ActivityStarter {
             if (mLaunchBounds != null) {
                 final int stackId = mTargetStack.mStackId;
                 if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                    mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE);
+                    mService.resizeStack(
+                            stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
                 } else {
                     mStartActivity.task.updateOverrideConfiguration(mLaunchBounds);
                 }
@@ -1571,7 +1572,7 @@ class ActivityStarter {
                 stackId = stack.mStackId;
             }
             if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE);
+                mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
             }
         }
         mTargetStack = mInTask.stack;
