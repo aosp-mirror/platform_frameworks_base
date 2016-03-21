@@ -1117,9 +1117,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             dpm.setApplicationRestrictionsManagingPackage(admin1,
                     nonExistAppRestrictionsManagerPackage);
             fail("Non-existent app set as app restriction manager.");
-        } catch (IllegalArgumentException expected) {
+        } catch (PackageManager.NameNotFoundException expected) {
             MoreAsserts.assertContainsRegex(
-                    "is not installed on the current user", expected.getMessage());
+                    nonExistAppRestrictionsManagerPackage, expected.getMessage());
         }
 
         // Let appRestrictionsManagerPackage manage app restrictions
