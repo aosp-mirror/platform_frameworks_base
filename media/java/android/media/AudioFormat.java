@@ -256,6 +256,11 @@ public final class AudioFormat implements Parcelable {
     public static final int ENCODING_AAC_HE_V2 = 12;
     /** Audio data format: compressed audio wrapped in PCM for HDMI
      * or S/PDIF passthrough.
+     * IEC61937 uses a stereo stream of 16-bit samples as the wrapper.
+     * So the channel mask for the track must be {@link #CHANNEL_OUT_STEREO}.
+     * Data should be written to the stream in a short[] array.
+     * If the data is written in a byte[] array then there may be endian problems
+     * on some platforms when converting to short internally.
      */
     public static final int ENCODING_IEC61937 = 13;
 
