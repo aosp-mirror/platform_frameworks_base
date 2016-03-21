@@ -811,10 +811,8 @@ public final class ActiveServices {
             // Hacky kind of thing -- allow system stuff to tell us
             // what they are, so we can report this elsewhere for
             // others to know why certain services are running.
-            try {
-                clientIntent = service.getParcelableExtra(Intent.EXTRA_CLIENT_INTENT);
-            } catch (RuntimeException e) {
-            }
+            service.setDefusable(true);
+            clientIntent = service.getParcelableExtra(Intent.EXTRA_CLIENT_INTENT);
             if (clientIntent != null) {
                 clientLabel = service.getIntExtra(Intent.EXTRA_CLIENT_LABEL, 0);
                 if (clientLabel != 0) {
