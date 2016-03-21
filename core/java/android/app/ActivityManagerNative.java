@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager.StackInfo;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -2939,6 +2940,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             final int stackId = data.readInt();
             removeStack(stackId);
+            reply.writeNoException();
+            return true;
+        }
+        case NOTIFY_LOCKED_PROFILE: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int userId = data.readInt();
+            notifyLockedProfile(userId);
             reply.writeNoException();
             return true;
         }
@@ -6889,6 +6897,18 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(stackId);
         mRemote.transact(REMOVE_STACK, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void notifyLockedProfile(@UserIdInt int userId) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(userId);
+        mRemote.transact(NOTIFY_LOCKED_PROFILE, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
