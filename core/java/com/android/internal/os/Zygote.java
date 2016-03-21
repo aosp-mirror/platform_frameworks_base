@@ -149,6 +149,12 @@ public final class Zygote {
     native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int debugFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
+    /**
+     * Zygote unmount storage space on initializing.
+     * This method is called once.
+     */
+    native protected static void nativeUnmountStorageOnInit();
+
     private static void callPostForkChildHooks(int debugFlags, boolean isSystemServer,
             String instructionSet) {
         VM_HOOKS.postForkChild(debugFlags, isSystemServer, instructionSet);
