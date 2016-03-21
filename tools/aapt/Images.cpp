@@ -1134,10 +1134,9 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
     }
 }
 
-
 static void write_png(const char* imageName,
                       png_structp write_ptr, png_infop write_info,
-                      image_info& imageInfo, int grayscaleTolerance)
+                      image_info& imageInfo, const Bundle* bundle)
 {
     png_uint_32 width, height;
     int color_type;
@@ -1174,8 +1173,25 @@ static void write_png(const char* imageName,
     bool hasTransparency;
     int paletteEntries, alphaPaletteEntries;
 
+    int grayscaleTolerance = bundle->getGrayscaleTolerance();
     analyze_image(imageName, imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
                   &paletteEntries, &alphaPaletteEntries, &hasTransparency, &color_type, outRows);
+
+    // Legacy versions of aapt would always encode 9patch PNGs as RGBA.  This had the unintended
+    // benefit of working around a bug decoding paletted images in Android 4.1.
+    // https://code.google.com/p/android/issues/detail?id=34619
+    //
+    // If SDK_JELLY_BEAN is supported, we need to avoid a paletted encoding in order to not expose
+    // this bug.
+    if (!bundle->isMinSdkAtLeast(SDK_JELLY_BEAN_MR1)) {
+        if (imageInfo.is9Patch && PNG_COLOR_TYPE_PALETTE == color_type) {
+            if (hasTransparency) {
+                color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+            } else {
+                color_type = PNG_COLOR_TYPE_RGB;
+            }
+        }
+    }
 
     if (kIsDebug) {
         switch (color_type) {
@@ -1332,8 +1348,7 @@ static bool write_png_protected(png_structp write_ptr, String8& printableName, p
         return false;
     }
 
-    write_png(printableName.string(), write_ptr, write_info, *imageInfo,
-              bundle->getGrayscaleTolerance());
+    write_png(printableName.string(), write_ptr, write_info, *imageInfo, bundle);
 
     return true;
 }
@@ -1543,8 +1558,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     }
 
     // Actually write out to the new png
-    write_png(dest.string(), write_ptr, write_info, imageInfo,
-              bundle->getGrayscaleTolerance());
+    write_png(dest.string(), write_ptr, write_info, imageInfo, bundle);
 
     if (bundle->getVerbose()) {
         // Find the size of our new file
