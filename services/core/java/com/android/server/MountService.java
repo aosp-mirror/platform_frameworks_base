@@ -1946,6 +1946,10 @@ class MountService extends IMountService.Stub
                 throw new IllegalStateException(
                         "Emulation not available on device with native FBE");
             }
+            if (mLockPatternUtils.isCredentialRequiredToDecrypt(false)) {
+                throw new IllegalStateException(
+                        "Emulation requires disabling 'Secure start-up' in Settings > Security");
+            }
 
             final long token = Binder.clearCallingIdentity();
             try {
