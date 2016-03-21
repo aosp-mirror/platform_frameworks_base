@@ -7,13 +7,13 @@
 #include "JNIHelp.h"
 #include "GraphicsJNI.h"
 
+#include "Canvas.h"
 #include "SkCanvas.h"
 #include "SkDevice.h"
 #include "SkMath.h"
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <cutils/ashmem.h>
-#include <hwui/Canvas.h>
 
 #include <Caches.h>
 #include <TextureCache.h>

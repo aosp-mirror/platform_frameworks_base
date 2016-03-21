@@ -17,12 +17,12 @@
 #ifndef ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 #define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
+#include "Canvas.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
 #include "RenderNode.h"
 #include "ResourceCache.h"
 #include "SkiaCanvasProxy.h"
-#include "hwui/Canvas.h"
 #include "utils/Macros.h"
 
 #include <SkDrawFilter.h>
@@ -209,10 +209,10 @@ public:
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
 
     // Text
-    virtual void drawGlyphs(const uint16_t* glyphs, const float* positions, int count,
+    virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) override;
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+    virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
     virtual bool drawTextAbsolutePos() const override { return false; }
 

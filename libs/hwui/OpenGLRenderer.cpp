@@ -17,6 +17,7 @@
 #include <GpuMemoryTracker.h>
 #include "OpenGLRenderer.h"
 
+#include "Canvas.h"
 #include "DeferredDisplayList.h"
 #include "GammaFontRenderer.h"
 #include "Glop.h"
@@ -31,7 +32,6 @@
 #include "SkiaShader.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
-#include "hwui/Canvas.h"
 #include "utils/GLUtils.h"
 #include "utils/PaintUtils.h"
 #include "utils/TraceUtils.h"

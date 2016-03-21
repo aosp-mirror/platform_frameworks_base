@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#include "Canvas.h"
 #include "Picture.h"
 #include "SkStream.h"
 
 #include <memory>
-#include <hwui/Canvas.h>
 
 namespace android {
 

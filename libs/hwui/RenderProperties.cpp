@@ -23,9 +23,9 @@
 #include <SkPath.h>
 #include <SkPathOps.h>
 
+#include "Canvas.h"
 #include "Matrix.h"
 #include "OpenGLRenderer.h"
-#include "hwui/Canvas.h"
 #include "utils/MathUtils.h"
 
 namespace android {

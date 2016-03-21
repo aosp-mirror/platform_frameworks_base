@@ -21,10 +21,7 @@ LOCAL_SHARED_LIBRARIES += \
     libskia \
     libui \
     libgui \
-    libprotobuf-cpp-lite \
-    libharfbuzz_ng \
-    libft2 \
-    libminikin
+    libprotobuf-cpp-lite
 
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
     LOCAL_SHARED_LIBRARIES += libRS libRScpp

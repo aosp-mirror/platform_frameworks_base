@@ -20,9 +20,9 @@
 #include "GraphicsJNI.h"
 #include "ScopedPrimitiveArray.h"
 #include "SkTypeface.h"
+#include "TypefaceImpl.h"
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
-#include <hwui/TypefaceImpl.h>
 
 using namespace android;
 
@@ -58,12 +58,7 @@ static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray) {
     ScopedLongArrayRO families(env, familyArray);
-    std::vector<FontFamily*> familyVec;
-    for (size_t i = 0; i < families.size(); i++) {
-        FontFamily* family = reinterpret_cast<FontFamily*>(families[i]);
-        familyVec.push_back(family);
-    }
-    return reinterpret_cast<jlong>(TypefaceImpl_createFromFamilies(familyVec));
+    return reinterpret_cast<jlong>(TypefaceImpl_createFromFamilies(families.get(), families.size()));
 }
 
 static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
