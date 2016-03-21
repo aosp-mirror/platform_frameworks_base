@@ -68,6 +68,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * Also note if any color "item" element is defined, then startColor, centerColor and endColor will
  * be ignored.
+ * @hide
  */
 public class GradientColor extends ComplexColor {
     private static final String TAG = "GradientColor";
