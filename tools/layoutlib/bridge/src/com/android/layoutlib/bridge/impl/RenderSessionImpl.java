@@ -1057,25 +1057,30 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
-     * Set the vertical scroll position on all the components with the "scrollY" attribute. If the
-     * component supports nested scrolling attempt that first, then use the unconsumed scroll part
-     * to scroll the content in the component.
+     * Set the scroll position on all the components with the "scrollX" and "scrollY" attribute. If
+     * the component supports nested scrolling attempt that first, then use the unconsumed scroll
+     * part to scroll the content in the component.
      */
     private void handleScrolling(View view) {
         BridgeContext context = getContext();
-        int scrollPos = context.getScrollYPos(view);
-        if (scrollPos != 0) {
+        int scrollPosX = context.getScrollXPos(view);
+        int scrollPosY = context.getScrollYPos(view);
+        if (scrollPosX != 0 || scrollPosY != 0) {
             if (view.isNestedScrollingEnabled()) {
                 int[] consumed = new int[2];
-                if (view.startNestedScroll(DesignLibUtil.SCROLL_AXIS_VERTICAL)) {
-                    view.dispatchNestedPreScroll(0, scrollPos, consumed, null);
-                    view.dispatchNestedScroll(consumed[0], consumed[1], 0, scrollPos, null);
+                int axis = scrollPosX != 0 ? View.SCROLL_AXIS_HORIZONTAL : 0;
+                axis |= scrollPosY != 0 ? View.SCROLL_AXIS_VERTICAL : 0;
+                if (view.startNestedScroll(axis)) {
+                    view.dispatchNestedPreScroll(scrollPosX, scrollPosY, consumed, null);
+                    view.dispatchNestedScroll(consumed[0], consumed[1], scrollPosX, scrollPosY,
+                            null);
                     view.stopNestedScroll();
-                    scrollPos -= consumed[1];
+                    scrollPosX -= consumed[0];
+                    scrollPosY -= consumed[1];
                 }
             }
-            if (scrollPos != 0) {
-                view.scrollBy(0, scrollPos);
+            if (scrollPosX != 0 || scrollPosY != 0) {
+                view.scrollBy(scrollPosX, scrollPosY);
             }
         }
 
@@ -1276,14 +1281,20 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             return null;
         }
 
+        ViewParent parent = view.getParent();
         ViewInfo result;
         if (isContentFrame) {
+            // Account for parent scroll values when calculating the bounding box
+            int scrollX = parent != null ? ((View)parent).getScrollX() : 0;
+            int scrollY = parent != null ? ((View)parent).getScrollY() : 0;
+
             // The view is part of the layout added by the user. Hence,
             // the ViewCookie may be obtained only through the Context.
             result = new ViewInfo(view.getClass().getName(),
                     getContext().getViewKey(view),
-                    view.getLeft(), view.getTop() + offset, view.getRight(),
-                    view.getBottom() + offset, view, view.getLayoutParams());
+                    -scrollX + view.getLeft(), -scrollY + view.getTop() + offset,
+                    -scrollX + view.getRight(), -scrollY + view.getBottom() + offset,
+                    view, view.getLayoutParams());
         } else {
             // We are part of the system decor.
             SystemViewInfo r = new SystemViewInfo(view.getClass().getName(),
@@ -1311,7 +1322,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // its parent is of type ActionMenuView. We can also check if the view is
                     // instanceof ActionMenuItemView but that will fail for menus using
                     // actionProviderClass.
-                    ViewParent parent = view.getParent();
                     while (parent != mViewRoot && parent instanceof ViewGroup) {
                         if (parent instanceof ActionMenuView) {
                             r.setViewType(ViewType.ACTION_BAR_MENU);
