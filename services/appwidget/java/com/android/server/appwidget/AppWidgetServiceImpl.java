@@ -332,7 +332,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 for (int i = N - 1; i >= 0; i--) {
                     Provider provider = installedProviders.get(i);
 
-                    ensureGroupStateLoadedLocked(provider.getUserId());
+                    final int userId = provider.getUserId();
+                    if (!mUserManager.isUserUnlocked(userId) ||
+                            isProfileWithLockedParent(userId)) {
+                        continue;
+                    }
+                    ensureGroupStateLoadedLocked(userId);
 
                     if (!removedProviders.contains(provider.id)) {
                         final boolean changed = updateProvidersForPackageLocked(
