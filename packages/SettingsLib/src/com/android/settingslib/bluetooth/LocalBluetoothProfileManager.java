@@ -24,12 +24,14 @@ import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothMap;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothPbapClient;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
 import android.util.Log;
+import com.android.settingslib.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -82,7 +84,9 @@ public final class LocalBluetoothProfileManager {
     private final HidProfile mHidProfile;
     private OppProfile mOppProfile;
     private final PanProfile mPanProfile;
+    private PbapClientProfile mPbapClientProfile;
     private final PbapServerProfile mPbapProfile;
+    private final boolean mUsePbapPce;
 
     /**
      * Mapping from profile name, e.g. "HEADSET" to profile object.
@@ -99,6 +103,7 @@ public final class LocalBluetoothProfileManager {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mEventManager = eventManager;
+        mUsePbapPce = mContext.getResources().getBoolean(R.bool.enable_pbap_pce_profile);
         // pass this reference to adapter and event manager (circular dependency)
         mLocalAdapter.setProfileManager(this);
         mEventManager.setProfileManager(this);
@@ -205,9 +210,24 @@ public final class LocalBluetoothProfileManager {
         } else if (mOppProfile != null) {
             Log.w(TAG, "Warning: OPP profile was previously added but the UUID is now missing.");
         }
+
+        //PBAP Client
+        if (mUsePbapPce) {
+            if (mPbapClientProfile == null) {
+                if(DEBUG) Log.d(TAG, "Adding local PBAP Client profile");
+                mPbapClientProfile = new PbapClientProfile(mContext, mLocalAdapter, mDeviceManager,
+                        this);
+                addProfile(mPbapClientProfile, PbapClientProfile.NAME,
+                        BluetoothPbapClient.ACTION_CONNECTION_STATE_CHANGED);
+            }
+        } else if (mPbapClientProfile != null) {
+            Log.w(TAG,
+                "Warning: PBAP Client profile was previously added but the UUID is now missing.");
+        }
+
         mEventManager.registerProfileIntentReceiver();
 
-        // There is no local SDP record for HID and Settings app doesn't control PBAP
+        // There is no local SDP record for HID and Settings app doesn't control PBAP Server.
     }
 
     private final Collection<ServiceListener> mServiceListeners =
@@ -351,6 +371,10 @@ public final class LocalBluetoothProfileManager {
         }
     }
 
+    public PbapClientProfile getPbapClientProfile() {
+        return mPbapClientProfile;
+    }
+
     public PbapServerProfile getPbapProfile(){
         return mPbapProfile;
     }
@@ -430,6 +454,12 @@ public final class LocalBluetoothProfileManager {
             removedProfiles.remove(mMapProfile);
             mMapProfile.setPreferred(device, true);
         }
-    }
 
+        if (mUsePbapPce) {
+            profiles.add(mPbapClientProfile);
+            removedProfiles.remove(mPbapClientProfile);
+            profiles.remove(mPbapProfile);
+            removedProfiles.add(mPbapProfile);
+        }
+    }
 }
