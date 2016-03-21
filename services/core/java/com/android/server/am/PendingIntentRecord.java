@@ -208,7 +208,10 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues, Bundle options, IActivityContainer container)
             throws TransactionTooLargeException {
-        synchronized(owner) {
+        if (intent != null) intent.setDefusable(true);
+        if (options != null) options.setDefusable(true);
+
+        synchronized (owner) {
             final ActivityContainer activityContainer = (ActivityContainer)container;
             if (activityContainer != null && activityContainer.mParentActivity != null &&
                     activityContainer.mParentActivity.state

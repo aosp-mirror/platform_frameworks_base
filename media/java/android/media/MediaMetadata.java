@@ -365,7 +365,7 @@ public final class MediaMetadata implements Parcelable {
     }
 
     private MediaMetadata(Parcel in) {
-        mBundle = in.readBundle();
+        mBundle = Bundle.setDefusable(in.readBundle(), true);
     }
 
     /**
