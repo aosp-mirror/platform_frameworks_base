@@ -6923,6 +6923,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 intents[i].setDefusable(true);
             }
         }
+        Bundle.setDefusable(bOptions, true);
 
         final boolean noCreate = (flags&PendingIntent.FLAG_NO_CREATE) != 0;
         final boolean cancelCurrent = (flags&PendingIntent.FLAG_CANCEL_CURRENT) != 0;
