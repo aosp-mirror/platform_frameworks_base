@@ -134,10 +134,8 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> izbrani</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> izbranih</item>
     </plurals>
-    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
-    <skip />
-    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
-    <skip />
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Ali želite izbrisati »<xliff:g id="NAME">%1$s</xliff:g>«?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Ali želite izbrisati mapo »<xliff:g id="NAME">%1$s</xliff:g>« in njeno vsebino?"</string>
     <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
     <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
     <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
