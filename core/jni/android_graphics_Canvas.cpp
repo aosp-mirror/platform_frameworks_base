@@ -19,14 +19,15 @@
 #include "core_jni_helpers.h"
 
 #include <androidfw/ResourceTypes.h>
-#include <hwui/Canvas.h>
-#include <hwui/Paint.h>
-#include <hwui/TypefaceImpl.h>
-#include <minikin/Layout.h>
+#include <Canvas.h>
 
 #include "Bitmap.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
+#include "Paint.h"
+#include "TypefaceImpl.h"
+
+#include "MinikinUtils.h"
 
 namespace android {
 
@@ -474,13 +475,111 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
                                              vertA.ptr(), colorA.ptr(), paint);
 }
 
+static void simplifyPaint(int color, SkPaint* paint) {
+    paint->setColor(color);
+    paint->setShader(nullptr);
+    paint->setColorFilter(nullptr);
+    paint->setLooper(nullptr);
+    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
+    paint->setStrokeJoin(SkPaint::kRound_Join);
+    paint->setLooper(nullptr);
+}
+
+class DrawTextFunctor {
+public:
+    DrawTextFunctor(const Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
+                    const SkPaint& paint, float x, float y, MinikinRect& bounds,
+                    float totalAdvance)
+            : layout(layout), canvas(canvas), glyphs(glyphs), pos(pos), paint(paint),
+              x(x), y(y), bounds(bounds), totalAdvance(totalAdvance) { }
+
+    void operator()(size_t start, size_t end) {
+        if (canvas->drawTextAbsolutePos()) {
+            for (size_t i = start; i < end; i++) {
+                glyphs[i] = layout.getGlyphId(i);
+                pos[2 * i] = x + layout.getX(i);
+                pos[2 * i + 1] = y + layout.getY(i);
+            }
+        } else {
+            for (size_t i = start; i < end; i++) {
+                glyphs[i] = layout.getGlyphId(i);
+                pos[2 * i] = layout.getX(i);
+                pos[2 * i + 1] = layout.getY(i);
+            }
+        }
+
+        size_t glyphCount = end - start;
+
+        if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
+            // high contrast draw path
+            int color = paint.getColor();
+            int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
+            bool darken = channelSum < (128 * 3);
+
+            // outline
+            SkPaint outlinePaint(paint);
+            simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
+            outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
+            canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, outlinePaint, x, y,
+                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
+
+            // inner
+            SkPaint innerPaint(paint);
+            simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
+            innerPaint.setStyle(SkPaint::kFill_Style);
+            canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, innerPaint, x, y,
+                    bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom, totalAdvance);
+        } else {
+            // standard draw path
+            canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
+                             bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom,
+                             totalAdvance);
+        }
+    }
+private:
+    const Layout& layout;
+    Canvas* canvas;
+    uint16_t* glyphs;
+    float* pos;
+    const SkPaint& paint;
+    float x;
+    float y;
+    MinikinRect& bounds;
+    float totalAdvance;
+};
+
+void drawText(Canvas* canvas, const uint16_t* text, int start, int count, int contextCount,
+             float x, float y, int bidiFlags, const Paint& origPaint, TypefaceImpl* typeface) {
+    // minikin may modify the original paint
+    Paint paint(origPaint);
+
+    Layout layout;
+    MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, start, count, contextCount);
+
+    size_t nGlyphs = layout.nGlyphs();
+    std::unique_ptr<uint16_t[]> glyphs(new uint16_t[nGlyphs]);
+    std::unique_ptr<float[]> pos(new float[nGlyphs * 2]);
+
+    x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
+
+    MinikinRect bounds;
+    layout.getBounds(&bounds);
+    if (!canvas->drawTextAbsolutePos()) {
+        bounds.offset(x, y);
+    }
+
+    DrawTextFunctor f(layout, canvas, glyphs.get(), pos.get(),
+            paint, x, y, bounds, layout.getAdvance());
+    MinikinUtils::forFontRun(layout, &paint, f);
+}
+
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
                           jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     jchar* jchars = env->GetCharArrayElements(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
+    drawText(get_canvas(canvasHandle), jchars + index, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
@@ -492,7 +591,7 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring tex
     TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
+    drawText(get_canvas(canvasHandle), jchars + start, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
     env->ReleaseStringChars(text, jchars);
 }
@@ -505,7 +604,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
 
     const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
+    drawText(get_canvas(canvasHandle), jchars + contextIndex, index - contextIndex, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
@@ -521,9 +620,51 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
-    get_canvas(canvasHandle)->drawText(jchars + contextStart, start - contextStart, count,
+    drawText(get_canvas(canvasHandle), jchars + contextStart, start - contextStart, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
     env->ReleaseStringChars(text, jchars);
+}
+
+class DrawTextOnPathFunctor {
+public:
+    DrawTextOnPathFunctor(const Layout& layout, Canvas* canvas, float hOffset,
+                float vOffset, const Paint& paint, const SkPath& path)
+            : layout(layout), canvas(canvas), hOffset(hOffset), vOffset(vOffset),
+                paint(paint), path(path) {
+    }
+    void operator()(size_t start, size_t end) {
+        uint16_t glyphs[1];
+        for (size_t i = start; i < end; i++) {
+            glyphs[0] = layout.getGlyphId(i);
+            float x = hOffset + layout.getX(i);
+            float y = vOffset + layout.getY(i);
+            canvas->drawTextOnPath(glyphs, 1, path, x, y, paint);
+        }
+    }
+private:
+    const Layout& layout;
+    Canvas* canvas;
+    float hOffset;
+    float vOffset;
+    const Paint& paint;
+    const SkPath& path;
+};
+
+static void drawTextOnPath(Canvas* canvas, const uint16_t* text, int count, int bidiFlags,
+                           const SkPath& path, float hOffset, float vOffset,
+                           const Paint& paint, TypefaceImpl* typeface) {
+    Paint paintCopy(paint);
+    Layout layout;
+    MinikinUtils::doLayout(&layout, &paintCopy, bidiFlags, typeface, text, 0, count, count);
+    hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
+
+    // Set align to left for drawing, as we don't want individual
+    // glyphs centered or right-aligned; the offset above takes
+    // care of all alignment.
+    paintCopy.setTextAlign(Paint::kLeft_Align);
+
+    DrawTextOnPathFunctor f(layout, canvas, hOffset, vOffset, paintCopy, path);
+    MinikinUtils::forFontRun(layout, &paintCopy, f);
 }
 
 static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
@@ -536,7 +677,7 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
-    get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count, bidiFlags, *path,
+    drawTextOnPath(get_canvas(canvasHandle), jchars + index, count, bidiFlags, *path,
                    hOffset, vOffset, *paint, typeface);
 
     env->ReleaseCharArrayElements(text, jchars, 0);
@@ -552,7 +693,7 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
 
-    get_canvas(canvasHandle)->drawTextOnPath(jchars, count, bidiFlags, *path,
+    drawTextOnPath(get_canvas(canvasHandle), jchars, count, bidiFlags, *path,
                    hOffset, vOffset, *paint, typeface);
 
     env->ReleaseStringChars(text, jchars);

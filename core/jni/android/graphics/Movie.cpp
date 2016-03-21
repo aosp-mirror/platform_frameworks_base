@@ -1,5 +1,7 @@
+#include "Canvas.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
+#include "Paint.h"
 #include "ScopedLocalRef.h"
 #include "SkFrontBufferedStream.h"
 #include "SkMovie.h"
@@ -10,8 +12,6 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
-#include <hwui/Canvas.h>
-#include <hwui/Paint.h>
 #include <jni.h>
 #include <netinet/in.h>
 

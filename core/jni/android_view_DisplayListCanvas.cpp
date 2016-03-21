@@ -28,11 +28,11 @@
 #include <SkRegion.h>
 
 
+#include <Canvas.h>
 #include <Rect.h>
 #include <RenderNode.h>
 #include <CanvasProperty.h>
-#include <hwui/Canvas.h>
-#include <hwui/Paint.h>
+#include <Paint.h>
 #include <renderthread/RenderProxy.h>
 
 #include "core_jni_helpers.h"

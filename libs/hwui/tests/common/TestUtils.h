@@ -207,13 +207,11 @@ public:
             std::vector<glyph_t>* outGlyphs, std::vector<float>* outPositions,
             float* outTotalAdvance, Rect* outBounds);
 
-    static void drawUtf8ToCanvas(TestCanvas* canvas, const char* text,
+    static void drawTextToCanvas(TestCanvas* canvas, const char* text,
             const SkPaint& paint, float x, float y);
 
-    static void drawUtf8ToCanvas(TestCanvas* canvas, const char* text,
+    static void drawTextToCanvas(TestCanvas* canvas, const char* text,
             const SkPaint& paint, const SkPath& path);
-
-    static std::unique_ptr<uint16_t[]> utf8ToUtf16(const char* str);
 
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {

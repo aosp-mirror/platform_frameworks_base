@@ -24,8 +24,8 @@
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 #include <gui/GLConsumer.h>
-#include <hwui/Paint.h>
 
+#include <Paint.h>
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>

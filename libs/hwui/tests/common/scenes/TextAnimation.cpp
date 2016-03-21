@@ -39,14 +39,14 @@ public:
 
             paint.setColor(Color::Black);
             for (int i = 0; i < 10; i++) {
-                TestUtils::drawUtf8ToCanvas(&canvas, "Test string", paint, 400, i * 100);
+                TestUtils::drawTextToCanvas(&canvas, "Test string", paint, 400, i * 100);
             }
 
             SkPath path;
             path.addOval(SkRect::MakeLTRB(100, 100, 300, 300));
 
             paint.setColor(Color::Blue_500);
-            TestUtils::drawUtf8ToCanvas(&canvas, "This is a neat circle of text!", paint, path);
+            TestUtils::drawTextToCanvas(&canvas, "This is a neat circle of text!", paint, path);
         });
         canvas.drawRenderNode(card.get());
     }

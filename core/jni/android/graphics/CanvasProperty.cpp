@@ -16,9 +16,9 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
+#include "Paint.h"
 #include <core_jni_helpers.h>
 
-#include <hwui/Paint.h>
 #include <utils/RefBase.h>
 #include <CanvasProperty.h>
 

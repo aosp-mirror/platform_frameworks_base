@@ -117,10 +117,13 @@ LOCAL_SRC_FILES:= \
     android/graphics/Interpolator.cpp \
     android/graphics/MaskFilter.cpp \
     android/graphics/Matrix.cpp \
+    android/graphics/MinikinSkia.cpp \
+    android/graphics/MinikinUtils.cpp \
     android/graphics/Movie.cpp \
     android/graphics/NinePatch.cpp \
     android/graphics/NinePatchPeeker.cpp \
     android/graphics/Paint.cpp \
+    android/graphics/PaintImpl.cpp \
     android/graphics/Path.cpp \
     android/graphics/PathMeasure.cpp \
     android/graphics/PathEffect.cpp \
@@ -132,6 +135,7 @@ LOCAL_SRC_FILES:= \
     android/graphics/Shader.cpp \
     android/graphics/SurfaceTexture.cpp \
     android/graphics/Typeface.cpp \
+    android/graphics/TypefaceImpl.cpp \
     android/graphics/Utils.cpp \
     android/graphics/Xfermode.cpp \
     android/graphics/YuvToJpegEncoder.cpp \

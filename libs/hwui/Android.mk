@@ -12,11 +12,6 @@ HWUI_ENABLE_OPENGL_VALIDATION := true
 hwui_src_files := \
     font/CacheTexture.cpp \
     font/Font.cpp \
-    hwui/Canvas.cpp \
-    hwui/MinikinSkia.cpp \
-    hwui/MinikinUtils.cpp \
-    hwui/PaintImpl.cpp \
-    hwui/TypefaceImpl.cpp \
     renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
     renderstate/OffscreenBufferPool.cpp \
@@ -46,6 +41,7 @@ hwui_src_files := \
     AnimatorManager.cpp \
     AssetAtlas.cpp \
     Caches.cpp \
+    Canvas.cpp \
     CanvasState.cpp \
     ClipArea.cpp \
     DamageAccumulator.cpp \
@@ -147,9 +143,7 @@ endef
 
 hwui_c_includes += \
     external/skia/include/private \
-    external/skia/src/core \
-    external/harfbuzz_ng/src \
-    external/freetype/include
+    external/skia/src/core
 
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
     hwui_cflags += -DANDROID_ENABLE_RENDERSCRIPT
