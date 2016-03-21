@@ -793,4 +793,23 @@
     <!-- Label for length of time until battery is charged [CHAR LIMIT=20] -->
     <string name="remaining_length_format"><xliff:g name="time" example="3 hours">%1$s</xliff:g> left</string>
 
+    <!-- Hint text for the IP address -->
+    <string name="wifi_ip_address_hint" translatable="false">192.168.1.128</string>
+    <!-- Hint text for DNS -->
+    <string name="wifi_dns1_hint" translatable="false">8.8.8.8</string>
+    <!-- Hint text for DNS -->
+    <string name="wifi_dns2_hint" translatable="false">8.8.4.4</string>
+    <!-- Hint text for the gateway -->
+    <string name="wifi_gateway_hint" translatable="false">192.168.1.1</string>
+    <!-- Hint text for network prefix length -->
+    <string name="wifi_network_prefix_length_hint" translatable="false">24</string>
+    <!-- HTTP proxy settings. The hint text field for port. -->
+    <string name="proxy_port_hint" translatable="false">8080</string>
+    <!-- HTTP proxy settings. Hint for Proxy-Auto Config URL. -->
+    <string name="proxy_url_hint" translatable="false">https://www.example.com/proxy.pac</string>
+    <!-- HTTP proxy settings. The hint text for proxy exclusion list. -->
+    <string name="proxy_exclusionlist_hint" translatable="false">example.com,mycomp.test.com,localhost</string>
+    <!-- HTTP proxy settings. The hint text field for the hostname. -->
+    <string name="proxy_hostname_hint" translatable="false">proxy.example.com</string>
+
 </resources>
