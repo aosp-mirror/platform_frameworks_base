@@ -126,11 +126,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
     private boolean mDestroyed;
 
-    public UserState(Context context, int userId, Object lock) {
+    public UserState(Context context, int userId, Object lock, boolean lowPriority) {
         mContext = context;
         mUserId = userId;
         mLock = lock;
-        mSpooler = new RemotePrintSpooler(context, userId, this);
+        mSpooler = new RemotePrintSpooler(context, userId, lowPriority, this);
         mHandler = new UserStateHandler(context.getMainLooper());
 
         synchronized (mLock) {
@@ -143,6 +143,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
             onConfigurationChangedLocked();
         }
+    }
+
+    public void increasePriority() {
+        mSpooler.increasePriority();
     }
 
     @Override
