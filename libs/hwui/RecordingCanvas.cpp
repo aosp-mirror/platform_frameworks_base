@@ -514,7 +514,7 @@ void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_p
 }
 
 // Text
-void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, int glyphCount,
+void RecordingCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions, int glyphCount,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) {
     if (!glyphs || !positions || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
@@ -530,7 +530,7 @@ void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, i
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 
-void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
+void RecordingCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) {
     if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
     glyphs = refBuffer<glyph_t>(glyphs, glyphCount);

@@ -37,13 +37,13 @@
 #include "unicode/ushape.h"
 #include "utils/Blur.h"
 
+#include <hwui/MinikinSkia.h>
+#include <hwui/MinikinUtils.h>
+#include <hwui/Paint.h>
+#include <hwui/TypefaceImpl.h>
 #include <minikin/GraphemeBreak.h>
 #include <minikin/Measurement.h>
 #include <unicode/utf16.h>
-#include "MinikinSkia.h"
-#include "MinikinUtils.h"
-#include "Paint.h"
-#include "TypefaceImpl.h"
 
 #include <cassert>
 #include <cstring>
