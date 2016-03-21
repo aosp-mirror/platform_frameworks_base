@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include "Canvas.h"
 #include "CanvasProperty.h"
 #include "Layer.h"
 #include "RenderNode.h"
-#include "hwui/Canvas.h"
 
 #include <SkCanvas.h>
 #include <SkClipStack.h>
@@ -147,11 +147,11 @@ public:
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) override;
 
-    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
+    virtual void drawText(const uint16_t* text, const float* positions, int count,
             const SkPaint& paint, float x, float y,
             float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) override;
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+    virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
 
     virtual bool drawTextAbsolutePos() const  override { return true; }
@@ -757,7 +757,7 @@ void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
 // Canvas draw operations: Text
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int count,
+void SkiaCanvas::drawText(const uint16_t* text, const float* positions, int count,
         const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
         float totalAdvance) {
@@ -772,7 +772,7 @@ void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int co
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 
-void SkiaCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+void SkiaCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
         float hOffset, float vOffset, const SkPaint& paint) {
     mCanvas->drawTextOnPathHV(glyphs, count << 1, path, hOffset, vOffset, paint);
 }

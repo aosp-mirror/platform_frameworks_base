@@ -17,15 +17,11 @@
 #ifndef _ANDROID_GRAPHICS_MINIKIN_SKIA_H_
 #define _ANDROID_GRAPHICS_MINIKIN_SKIA_H_
 
-#include <cutils/compiler.h>
 #include <minikin/MinikinFont.h>
-
-class SkPaint;
-class SkTypeface;
 
 namespace android {
 
-class ANDROID_API MinikinFontSkia : public MinikinFont {
+class MinikinFontSkia : public MinikinFont {
 public:
     // Note: this takes ownership of the reference (will unref on dtor)
     explicit MinikinFontSkia(SkTypeface *typeface);

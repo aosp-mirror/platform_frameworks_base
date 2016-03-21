@@ -18,15 +18,15 @@
 #ifndef _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_
 #define _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_
 
+#include "jni.h"  // for jlong, eventually remove
 #include "SkTypeface.h"
+#include <androidfw/AssetManager.h>
 
-#include <cutils/compiler.h>
 #include <minikin/FontCollection.h>
-#include <vector>
 
 namespace android {
 
-struct ANDROID_API TypefaceImpl {
+struct TypefaceImpl {
     FontCollection *fFontCollection;
 
     // style used for constructing and querying Typeface objects
@@ -44,19 +44,21 @@ struct ANDROID_API TypefaceImpl {
 // is just a pointer to SkTypeface, in the non-USE_MINIKIN case.
 // TODO: when #ifdef USE_MINIKIN is removed, move to member functions.
 
-ANDROID_API TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src);
+TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src);
 
-ANDROID_API TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style);
+TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style);
 
-ANDROID_API TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int baseweight);
+TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int baseweight);
 
-ANDROID_API TypefaceImpl* TypefaceImpl_createFromFamilies(const std::vector<FontFamily*>& families);
+// When we remove the USE_MINIKIN ifdef, probably a good idea to move the casting
+// (from jlong to FontFamily*) to the caller in Typeface.cpp.
+TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size);
 
-ANDROID_API void TypefaceImpl_unref(TypefaceImpl* face);
+void TypefaceImpl_unref(TypefaceImpl* face);
 
-ANDROID_API int TypefaceImpl_getStyle(TypefaceImpl* face);
+int TypefaceImpl_getStyle(TypefaceImpl* face);
 
-ANDROID_API void TypefaceImpl_setDefault(TypefaceImpl* face);
+void TypefaceImpl_setDefault(TypefaceImpl* face);
 
 }
 

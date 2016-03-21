@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MinikinUtils.h"
 
-#include "Paint.h"
-#include "SkPathMeasure.h"
-#include "TypefaceImpl.h"
-
+#define LOG_TAG "Minikin"
 #include <cutils/log.h>
 #include <string>
+
+#include "SkPathMeasure.h"
+#include "Paint.h"
+#include "TypefaceImpl.h"
+
+#include "MinikinUtils.h"
 
 namespace android {
 

@@ -17,7 +17,7 @@
 #ifndef ANDROID_HWUI_VPATH_H
 #define ANDROID_HWUI_VPATH_H
 
-#include "hwui/Canvas.h"
+#include "Canvas.h"
 
 #include <SkBitmap.h>
 #include <SkColor.h>

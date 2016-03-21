@@ -24,7 +24,6 @@
 #ifndef _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
 #define _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
 
-#include <cutils/compiler.h>
 #include <minikin/Layout.h>
 #include "Paint.h"
 #include "MinikinSkia.h"
@@ -34,24 +33,24 @@ namespace android {
 
 class MinikinUtils {
 public:
-    ANDROID_API static FontStyle prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
+    static FontStyle prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
             const Paint* paint, TypefaceImpl* typeface);
 
-    ANDROID_API static void doLayout(Layout* layout, const Paint* paint, int bidiFlags,
+    static void doLayout(Layout* layout, const Paint* paint, int bidiFlags,
             TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
             size_t bufSize);
 
-    ANDROID_API static float measureText(const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
+    static float measureText(const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
             const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances);
 
-    ANDROID_API static bool hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs);
+    static bool hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs);
 
-    ANDROID_API static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
+    static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 
-    ANDROID_API static float hOffsetForTextAlign(Paint* paint, const Layout& layout, const SkPath& path);
+    static float hOffsetForTextAlign(Paint* paint, const Layout& layout, const SkPath& path);
     // f is a functor of type void f(size_t start, size_t end);
     template <typename F>
-    ANDROID_API static void forFontRun(const Layout& layout, Paint* paint, F& f) {
+    static void forFontRun(const Layout& layout, Paint* paint, F& f) {
         float saveSkewX = paint->getTextSkewX();
         bool savefakeBold = paint->isFakeBoldText();
         MinikinFont* curFont = NULL;
