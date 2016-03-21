@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "Canvas.h"
 #include "CanvasState.h"
+#include "hwui/Canvas.h"
 #include "utils/MathUtils.h"
 
 namespace android {

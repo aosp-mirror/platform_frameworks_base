@@ -290,7 +290,7 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
     }
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawText(glyphs.glyphIDs, &pointStorage[0].fX, glyphs.count, glyphs.paint,
+    mCanvas->drawGlyphs(glyphs.glyphIDs, &pointStorage[0].fX, glyphs.count, glyphs.paint,
                       x, y, bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
 }
 
@@ -326,7 +326,7 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     bounds.offset(x, y);
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawText(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,
+    mCanvas->drawGlyphs(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,
                       bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
 }
 
@@ -344,7 +344,7 @@ void SkiaCanvasProxy::onDrawTextOnPath(const void* text, size_t byteLength, cons
         const SkMatrix* matrix, const SkPaint& origPaint) {
     // convert to glyphIDs if necessary
     GlyphIDConverter glyphs(text, byteLength, origPaint);
-    mCanvas->drawTextOnPath(glyphs.glyphIDs, glyphs.count, path, 0, 0, glyphs.paint);
+    mCanvas->drawGlyphsOnPath(glyphs.glyphIDs, glyphs.count, path, 0, 0, glyphs.paint);
 }
 
 void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,

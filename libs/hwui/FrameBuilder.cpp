@@ -16,11 +16,11 @@
 
 #include "FrameBuilder.h"
 
-#include "Canvas.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
 #include "renderstate/OffscreenBufferPool.h"
+#include "hwui/Canvas.h"
 #include "utils/FatVector.h"
 #include "utils/PaintUtils.h"
 #include "utils/TraceUtils.h"
