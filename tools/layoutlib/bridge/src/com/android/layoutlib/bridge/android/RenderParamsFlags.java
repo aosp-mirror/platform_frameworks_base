@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.SessionParams.Key;
 
@@ -42,11 +43,16 @@ public final class RenderParamsFlags {
     public static final Key<Boolean> FLAG_KEY_RECYCLER_VIEW_SUPPORT =
             new Key<Boolean>("recyclerViewSupport", Boolean.class);
     /**
-     * The application package name. Used via
-     * {@link com.android.ide.common.rendering.api.LayoutlibCallback#getFlag(Key)}
+     * The application package name. Used via {@link LayoutlibCallback#getFlag(Key)}
      */
     public static final Key<String> FLAG_KEY_APPLICATION_PACKAGE =
             new Key<String>("applicationPackage", String.class);
+    /**
+     * To tell LayoutLib that IDE supports providing XML Parser for a file (useful for getting in
+     * memory contents of the file). Used via {@link LayoutlibCallback#getFlag(Key)}
+     */
+    public static final Key<Boolean> FLAG_KEY_XML_FILE_PARSER_SUPPORT =
+            new Key<Boolean>("xmlFileParser", Boolean.class);
 
     // Disallow instances.
     private RenderParamsFlags() {}
