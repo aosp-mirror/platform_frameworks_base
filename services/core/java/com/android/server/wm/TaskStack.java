@@ -1089,7 +1089,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             }
         }
         try {
-            mService.mActivityManager.resizeStack(mStackId, bounds, false, true, false);
+            mService.mActivityManager.resizeStack(mStackId, bounds, false, true, false, -1);
         } catch (RemoteException e) {
         }
         return true;

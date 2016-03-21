@@ -385,7 +385,7 @@ public class PipManager {
                 break;
         }
         try {
-            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds, true, true, true);
+            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds, true, true, true, -1);
         } catch (RemoteException e) {
             Log.e(TAG, "showPipMenu failed", e);
         }

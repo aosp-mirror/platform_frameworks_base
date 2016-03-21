@@ -8241,8 +8241,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case RESIZE_STACK: {
                     try {
-                        mActivityManager.resizeStack(msg.arg1, (Rect) msg.obj, msg.arg2 == 1, false,
-                                false);
+                        mActivityManager.resizeStack(
+                                msg.arg1, (Rect) msg.obj, msg.arg2 == 1, false, false, -1);
                     } catch (RemoteException e) {
                         // This will not happen since we are in the same process.
                     }
@@ -10460,7 +10460,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void animateResizePinnedStack(final Rect bounds) {
+    public void animateResizePinnedStack(final Rect bounds, final int animationDuration) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
             if (stack == null) {
@@ -10472,7 +10472,8 @@ public class WindowManagerService extends IWindowManager.Stub
             UiThread.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    mBoundsAnimationController.animateBounds(stack, originalBounds, bounds);
+                    mBoundsAnimationController.animateBounds(
+                            stack, originalBounds, bounds, animationDuration);
                 }
             });
         }
