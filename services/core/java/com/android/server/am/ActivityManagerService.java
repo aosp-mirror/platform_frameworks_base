@@ -63,6 +63,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -11392,18 +11393,37 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + android.Manifest.permission.DEVICE_POWER);
         }
 
-        final int user = UserHandle.myUserId();
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (!shown && mStackSupervisor.isFocusedUserLockedProfile()) {
-                    startHomeActivityLocked(user, "setLockScreenShown");
-                }
                 if (DEBUG_LOCKSCREEN) logLockScreen(" shown=" + shown);
                 mLockScreenShown = shown ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
                 updateSleepIfNeededLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public void notifyLockedProfile(@UserIdInt int userId) {
+        try {
+            if (!AppGlobals.getPackageManager().isUidPrivileged(Binder.getCallingUid())) {
+                throw new SecurityException("Only privileged app can call notifyLockedProfile");
+            }
+        } catch (RemoteException ex) {
+            throw new SecurityException("Fail to check is caller a privileged app", ex);
+        }
+
+        synchronized (this) {
+            if (mStackSupervisor.isFocusedUserLockedProfile()) {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    final int currentUserId = mUserController.getCurrentUserIdLocked();
+                    startHomeActivityLocked(currentUserId, "notifyProfileLocked");
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
     }

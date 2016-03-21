@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard;
 
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -253,6 +254,11 @@ public class KeyguardViewMediator extends SystemUI {
     private int mDelayedShowingSequence;
 
     /**
+     * Simiar to {@link #mDelayedProfileShowingSequence}, but it is for profile case.
+     */
+    private int mDelayedProfileShowingSequence;
+
+    /**
      * If the user has disabled the keyguard, then requests to exit, this is
      * how we'll ultimately let them know whether it was successful.  We use this
      * var being non-null as an indicator that there is an in progress request.
@@ -326,6 +332,8 @@ public class KeyguardViewMediator extends SystemUI {
      * committed when finished going to sleep.
      */
     private boolean mPendingLock;
+
+    private boolean mLockLater;
 
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
@@ -709,7 +717,7 @@ public class KeyguardViewMediator extends SystemUI {
                     mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
                             || !mLockPatternUtils.isSecure(currentUser);
             long timeout = getLockTimeout(KeyguardUpdateMonitor.getCurrentUser());
-
+            mLockLater = false;
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
                 try {
@@ -726,6 +734,7 @@ public class KeyguardViewMediator extends SystemUI {
             } else if ((why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT && timeout > 0)
                     || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
                 doKeyguardLaterLocked(timeout);
+                mLockLater = true;
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
                 mPendingLock = true;
             }
@@ -753,12 +762,20 @@ public class KeyguardViewMediator extends SystemUI {
                 resetStateLocked();
                 mPendingReset = false;
             }
+
             if (mPendingLock) {
                 doKeyguardLocked(null);
                 mPendingLock = false;
             }
+
+            // We do not have timeout and power button instant lock setting for profile lock.
+            // So we use the personal setting if there is any. But if there is no device
+            // we need to make sure we lock it immediately when the screen is off.
+            if (!mLockLater) {
+                doKeyguardForChildProfilesLocked();
+            }
+
         }
-        doKeyguardForChildProfilesLocked();
         KeyguardUpdateMonitor.getInstance(mContext).dispatchFinishedGoingToSleep(why);
     }
 
@@ -791,6 +808,7 @@ public class KeyguardViewMediator extends SystemUI {
             // policy in effect. Make sure we don't go beyond policy limit.
             displayTimeout = Math.max(displayTimeout, 0); // ignore negative values
             timeout = Math.min(policyTimeout - displayTimeout, lockAfterTimeout);
+            timeout = Math.max(timeout, 0);
         }
         return timeout;
     }
@@ -823,13 +841,18 @@ public class KeyguardViewMediator extends SystemUI {
         for (UserInfo info : profiles) {
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
                 long userTimeout = getLockTimeout(info.id);
-                long userWhen = SystemClock.elapsedRealtime() + userTimeout;
-                Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
-                lockIntent.putExtra(Intent.EXTRA_USER_ID, info.id);
-                PendingIntent lockSender = PendingIntent.getBroadcast(
-                        mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        userWhen, lockSender);
+                if (userTimeout == 0) {
+                    doKeyguardForChildProfilesLocked();
+                } else {
+                    long userWhen = SystemClock.elapsedRealtime() + userTimeout;
+                    Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
+                    lockIntent.putExtra("seq", mDelayedProfileShowingSequence);
+                    lockIntent.putExtra(Intent.EXTRA_USER_ID, info.id);
+                    PendingIntent lockSender = PendingIntent.getBroadcast(
+                            mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            userWhen, lockSender);
+                }
             }
         }
     }
@@ -848,6 +871,10 @@ public class KeyguardViewMediator extends SystemUI {
         mDelayedShowingSequence++;
     }
 
+    private void cancelDoKeyguardForChildProfilesLocked() {
+        mDelayedProfileShowingSequence++;
+    }
+
     /**
      * Let's us know when the device is waking up.
      */
@@ -857,6 +884,7 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (this) {
             mDeviceInteractive = true;
             cancelDoKeyguardLaterLocked();
+            cancelDoKeyguardForChildProfilesLocked();
             if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
             notifyStartedWakingUp();
         }
@@ -1179,6 +1207,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void lockProfile(int userId) {
         mTrustManager.setDeviceLockedForUser(userId, true);
+        notifyLockedProfile(userId);
     }
 
     private boolean shouldWaitForProvisioning() {
@@ -1300,10 +1329,13 @@ public class KeyguardViewMediator extends SystemUI {
                     }
                 }
             } else if (DELAYED_LOCK_PROFILE_ACTION.equals(intent.getAction())) {
+                final int sequence = intent.getIntExtra("seq", 0);
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, 0);
                 if (userId != 0) {
                     synchronized (KeyguardViewMediator.this) {
-                        lockProfile(userId);
+                        if (mDelayedProfileShowingSequence == sequence) {
+                            lockProfile(userId);
+                        }
                     }
                 }
             }
@@ -1501,6 +1533,13 @@ public class KeyguardViewMediator extends SystemUI {
     private void updateActivityLockScreenState() {
         try {
             ActivityManagerNative.getDefault().setLockScreenShown(mShowing && !mOccluded);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void notifyLockedProfile(@UserIdInt int userId) {
+        try {
+            ActivityManagerNative.getDefault().notifyLockedProfile(userId);
         } catch (RemoteException e) {
         }
     }
