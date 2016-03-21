@@ -29,13 +29,16 @@ import android.view.ViewGroup;
  */
 public final class KeyboardShortcutKeysLayout extends ViewGroup {
     private int mLineHeight;
+    private final Context mContext;
 
     public KeyboardShortcutKeysLayout(Context context) {
         super(context);
+        this.mContext = context;
     }
 
     public KeyboardShortcutKeysLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.mContext = context;
     }
 
     @Override
@@ -104,7 +107,9 @@ public final class KeyboardShortcutKeysLayout extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int childCount = getChildCount();
         int fullRowWidth = r - l;
-        int xPos = getPaddingLeft();
+        int xPos = isRTL()
+                ? fullRowWidth - getPaddingRight()
+                : getPaddingLeft();
         int yPos = getPaddingTop();
         int lastHorizontalSpacing = 0;
         // The index of the child which starts the current row.
@@ -117,18 +122,25 @@ public final class KeyboardShortcutKeysLayout extends ViewGroup {
                 int currentChildWidth = currentChild.getMeasuredWidth();
                 LayoutParams lp = (LayoutParams) currentChild.getLayoutParams();
 
-                // If the current child does not fit on this row.
-                if (xPos + currentChildWidth > fullRowWidth) {
+                boolean childDoesNotFitOnRow = isRTL()
+                        ? xPos - getPaddingLeft() - currentChildWidth < 0
+                        : xPos + currentChildWidth > fullRowWidth;
+
+                if (childDoesNotFitOnRow) {
                     // Layout all the children on this row but the current one.
                     layoutChildrenOnRow(rowStartIdx, i, fullRowWidth, xPos, yPos,
                             lastHorizontalSpacing);
                     // Update the positions for starting on the new row.
-                    xPos = getPaddingLeft();
+                    xPos = isRTL()
+                            ? fullRowWidth - getPaddingRight()
+                            : getPaddingLeft();
                     yPos += mLineHeight;
                     rowStartIdx = i;
                 }
 
-                xPos += currentChildWidth + lp.mHorizontalSpacing;
+                xPos = isRTL()
+                        ? xPos - currentChildWidth - lp.mHorizontalSpacing
+                        : xPos + currentChildWidth + lp.mHorizontalSpacing;
                 lastHorizontalSpacing = lp.mHorizontalSpacing;
             }
         }
@@ -148,19 +160,39 @@ public final class KeyboardShortcutKeysLayout extends ViewGroup {
 
     private void layoutChildrenOnRow(int startIndex, int endIndex, int fullRowWidth, int xPos,
             int yPos, int lastHorizontalSpacing) {
-        int freeSpace = fullRowWidth - xPos + lastHorizontalSpacing;
-        xPos = getPaddingLeft() + freeSpace;
+        if (!isRTL()) {
+            xPos = getPaddingLeft() + fullRowWidth - xPos + lastHorizontalSpacing;
+        }
 
         for (int j = startIndex; j < endIndex; ++j) {
             View currentChild = getChildAt(j);
+            int currentChildWidth = currentChild.getMeasuredWidth();
+            LayoutParams lp = (LayoutParams) currentChild.getLayoutParams();
+            if (isRTL() && j == startIndex) {
+                xPos = fullRowWidth - xPos - getPaddingRight() - currentChildWidth
+                        - lp.mHorizontalSpacing;
+            }
+
             currentChild.layout(
                     xPos,
                     yPos,
-                    xPos + currentChild.getMeasuredWidth(),
+                    xPos + currentChildWidth,
                     yPos + currentChild.getMeasuredHeight());
-            xPos += currentChild.getMeasuredWidth()
-                    + ((LayoutParams) currentChild.getLayoutParams()).mHorizontalSpacing;
+
+            if (isRTL()) {
+                int nextChildWidth = j < endIndex - 1
+                        ? getChildAt(j + 1).getMeasuredWidth()
+                        : 0;
+                xPos -= nextChildWidth + lp.mHorizontalSpacing;
+            } else {
+                xPos += currentChildWidth + lp.mHorizontalSpacing;
+            }
         }
+    }
+
+    private boolean isRTL() {
+        return mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
     }
 
     public static class LayoutParams extends ViewGroup.LayoutParams {
