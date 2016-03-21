@@ -60,6 +60,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import libcore.util.Objects;
 
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -1095,6 +1096,13 @@ public class RemoteViews implements Parcelable, Filter {
             for (int i = 0; i < mBitmaps.size(); i++) {
                 memoryCounter.addBitmapMemory(mBitmaps.get(i));
             }
+        }
+
+        @Override
+        protected BitmapCache clone() {
+            BitmapCache bitmapCache = new BitmapCache();
+            bitmapCache.mBitmaps.addAll(mBitmaps);
+            return bitmapCache;
         }
     }
 
@@ -2227,10 +2235,21 @@ public class RemoteViews implements Parcelable, Filter {
 
 
     public RemoteViews clone() {
+        Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
+                + "May only clone the root of a RemoteView hierarchy.");
+
         Parcel p = Parcel.obtain();
+
+        // Do not parcel the Bitmap cache - doing so creates an expensive copy of all bitmaps.
+        // Instead pretend we're not owning the cache while parceling.
+        mIsRoot = false;
         writeToParcel(p, 0);
         p.setDataPosition(0);
-        RemoteViews rv = new RemoteViews(p);
+        mIsRoot = true;
+
+        RemoteViews rv = new RemoteViews(p, mBitmapCache.clone());
+        rv.mIsRoot = true;
+
         p.recycle();
         return rv;
     }
@@ -2240,7 +2259,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Reutrns the layout id of the root layout associated with this RemoteViews. In the case
+     * Returns the layout id of the root layout associated with this RemoteViews. In the case
      * that the RemoteViews has both a landscape and portrait root, this will return the layout
      * id associated with the portrait layout.
      *
