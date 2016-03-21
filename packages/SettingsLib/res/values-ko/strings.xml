@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"단독 프로세스 내에서 WebView 렌더러를 실행합니다."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 구현"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView 구현 설정"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"선택이 더 이상 유효하지 않습니다. 다시 시도하세요."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"파일 암호화로 변환"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"변환..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"파일이 이미 암호화됨"</string>

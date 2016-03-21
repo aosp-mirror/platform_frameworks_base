@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"လုပ်ငန်းဖြစ်စဉ်တစ်ခုတည်းအတွက် ဝဘ်မြင်ကွင်း အဖြစ်ပြုလုပ်ခြင်းကို ဖွင့်ပါ။"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ဤရွေးချယ်မှု မှန်ကန်မှု မရှိတော့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ဖိုင်လုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းပါ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ပြောင်းရန်…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ဖိုင်ကို လုံခြုံအောင်ပြုလုပ်ပြီးပါပြီ"</string>
