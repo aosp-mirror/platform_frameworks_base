@@ -19,8 +19,11 @@ package android.os;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.TypedProperties;
 
+import android.app.AppGlobals;
+import android.content.Context;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -100,14 +103,6 @@ public final class Debug
      */
     private static final String DEFAULT_TRACE_BODY = "dmtrace";
     private static final String DEFAULT_TRACE_EXTENSION = ".trace";
-    private static class NoPreloadHolder {
-        private static final String DEFAULT_TRACE_PATH_PREFIX =
-                Environment.getLegacyExternalStorageDirectory().getPath() + "/";
-        private static final String DEFAULT_TRACE_FILE_PATH =
-                DEFAULT_TRACE_PATH_PREFIX + DEFAULT_TRACE_BODY
-                + DEFAULT_TRACE_EXTENSION;
-    }
-
 
     /**
      * This class is used to retrieved various statistics about the memory mappings for this
@@ -938,109 +933,171 @@ public final class Debug
     }
 
     /**
-     * Start method tracing with default log name and buffer size. See <a
-href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
-     * information about reading these files. Call stopMethodTracing() to stop
-     * tracing.
+     * Start method tracing with default log name and buffer size.
+     * <p>
+     * By default, the trace file is called "dmtrace.trace" and it's placed
+     * under your package-specific directory on primary shared/external storage,
+     * as returned by {@link Context#getExternalFilesDir(String)}.
+     * <p>
+     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
+     * A Graphical Log Viewer</a> for information about reading trace files.
+     * <p class="note">
+     * When method tracing is enabled, the VM will run more slowly than usual,
+     * so the timings from the trace files should only be considered in relative
+     * terms (e.g. was run #1 faster than run #2). The times for native methods
+     * will not change, so don't try to use this to compare the performance of
+     * interpreted and native implementations of the same method. As an
+     * alternative, consider using sampling-based method tracing via
+     * {@link #startMethodTracingSampling(String, int, int)} or "native" tracing
+     * in the emulator via {@link #startNativeTracing()}.
+     * </p>
      */
     public static void startMethodTracing() {
-        VMDebug.startMethodTracing(fixTraceName(null), 0, 0, false, 0);
+        VMDebug.startMethodTracing(fixTracePath(null), 0, 0, false, 0);
     }
 
     /**
-     * Start method tracing, specifying the trace log file name.  The trace
-     * file will be put under "/sdcard" unless an absolute path is given.
-     * See <a
-       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
-     * information about reading trace files.
-     *
-     * @param traceName Name for the trace log file to create.
-     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
-     * If the files already exist, they will be truncated.
-     * If the trace file given does not end in ".trace", it will be appended for you.
-     */
-    public static void startMethodTracing(String traceName) {
-        startMethodTracing(traceName, 0, 0);
-    }
-
-    /**
-     * Start method tracing, specifying the trace log file name and the
-     * buffer size. The trace files will be put under "/sdcard" unless an
-     * absolute path is given. See <a
-       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
-     * information about reading trace files.
-     * @param traceName    Name for the trace log file to create.
-     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
-     * If the files already exist, they will be truncated.
-     * If the trace file given does not end in ".trace", it will be appended for you.
-     *
-     * @param bufferSize    The maximum amount of trace data we gather. If not given, it defaults to 8MB.
-     */
-    public static void startMethodTracing(String traceName, int bufferSize) {
-        startMethodTracing(traceName, bufferSize, 0);
-    }
-
-    /**
-     * Start method tracing, specifying the trace log file name and the
-     * buffer size. The trace files will be put under "/sdcard" unless an
-     * absolute path is given. See <a
-       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
-     * information about reading trace files.
-     *
+     * Start method tracing, specifying the trace log file path.
      * <p>
-     * When method tracing is enabled, the VM will run more slowly than
-     * usual, so the timings from the trace files should only be considered
-     * in relative terms (e.g. was run #1 faster than run #2).  The times
-     * for native methods will not change, so don't try to use this to
-     * compare the performance of interpreted and native implementations of the
-     * same method.  As an alternative, consider using sampling-based method
-     * tracing via {@link #startMethodTracingSampling(String, int, int)} or
-     * "native" tracing in the emulator via {@link #startNativeTracing()}.
+     * When a relative file path is given, the trace file will be placed under
+     * your package-specific directory on primary shared/external storage, as
+     * returned by {@link Context#getExternalFilesDir(String)}.
+     * <p>
+     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
+     * A Graphical Log Viewer</a> for information about reading trace files.
+     * <p class="note">
+     * When method tracing is enabled, the VM will run more slowly than usual,
+     * so the timings from the trace files should only be considered in relative
+     * terms (e.g. was run #1 faster than run #2). The times for native methods
+     * will not change, so don't try to use this to compare the performance of
+     * interpreted and native implementations of the same method. As an
+     * alternative, consider using sampling-based method tracing via
+     * {@link #startMethodTracingSampling(String, int, int)} or "native" tracing
+     * in the emulator via {@link #startNativeTracing()}.
      * </p>
      *
-     * @param traceName    Name for the trace log file to create.
-     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
-     * If the files already exist, they will be truncated.
-     * If the trace file given does not end in ".trace", it will be appended for you.
-     * @param bufferSize    The maximum amount of trace data we gather. If not given, it defaults to 8MB.
-     * @param flags    Flags to control method tracing. The only one that is currently defined is {@link #TRACE_COUNT_ALLOCS}.
+     * @param tracePath Path to the trace log file to create. If {@code null},
+     *            this will default to "dmtrace.trace". If the file already
+     *            exists, it will be truncated. If the path given does not end
+     *            in ".trace", it will be appended for you.
      */
-    public static void startMethodTracing(String traceName, int bufferSize,
-        int flags) {
-        VMDebug.startMethodTracing(fixTraceName(traceName), bufferSize, flags, false, 0);
+    public static void startMethodTracing(String tracePath) {
+        startMethodTracing(tracePath, 0, 0);
+    }
+
+    /**
+     * Start method tracing, specifying the trace log file name and the buffer
+     * size.
+     * <p>
+     * When a relative file path is given, the trace file will be placed under
+     * your package-specific directory on primary shared/external storage, as
+     * returned by {@link Context#getExternalFilesDir(String)}.
+     * <p>
+     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
+     * A Graphical Log Viewer</a> for information about reading trace files.
+     * <p class="note">
+     * When method tracing is enabled, the VM will run more slowly than usual,
+     * so the timings from the trace files should only be considered in relative
+     * terms (e.g. was run #1 faster than run #2). The times for native methods
+     * will not change, so don't try to use this to compare the performance of
+     * interpreted and native implementations of the same method. As an
+     * alternative, consider using sampling-based method tracing via
+     * {@link #startMethodTracingSampling(String, int, int)} or "native" tracing
+     * in the emulator via {@link #startNativeTracing()}.
+     * </p>
+     *
+     * @param tracePath Path to the trace log file to create. If {@code null},
+     *            this will default to "dmtrace.trace". If the file already
+     *            exists, it will be truncated. If the path given does not end
+     *            in ".trace", it will be appended for you.
+     * @param bufferSize The maximum amount of trace data we gather. If not
+     *            given, it defaults to 8MB.
+     */
+    public static void startMethodTracing(String tracePath, int bufferSize) {
+        startMethodTracing(tracePath, bufferSize, 0);
+    }
+
+    /**
+     * Start method tracing, specifying the trace log file name, the buffer
+     * size, and flags.
+     * <p>
+     * When a relative file path is given, the trace file will be placed under
+     * your package-specific directory on primary shared/external storage, as
+     * returned by {@link Context#getExternalFilesDir(String)}.
+     * <p>
+     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
+     * A Graphical Log Viewer</a> for information about reading trace files.
+     * <p class="note">
+     * When method tracing is enabled, the VM will run more slowly than usual,
+     * so the timings from the trace files should only be considered in relative
+     * terms (e.g. was run #1 faster than run #2). The times for native methods
+     * will not change, so don't try to use this to compare the performance of
+     * interpreted and native implementations of the same method. As an
+     * alternative, consider using sampling-based method tracing via
+     * {@link #startMethodTracingSampling(String, int, int)} or "native" tracing
+     * in the emulator via {@link #startNativeTracing()}.
+     * </p>
+     *
+     * @param tracePath Path to the trace log file to create. If {@code null},
+     *            this will default to "dmtrace.trace". If the file already
+     *            exists, it will be truncated. If the path given does not end
+     *            in ".trace", it will be appended for you.
+     * @param bufferSize The maximum amount of trace data we gather. If not
+     *            given, it defaults to 8MB.
+     * @param flags Flags to control method tracing. The only one that is
+     *            currently defined is {@link #TRACE_COUNT_ALLOCS}.
+     */
+    public static void startMethodTracing(String tracePath, int bufferSize, int flags) {
+        VMDebug.startMethodTracing(fixTracePath(tracePath), bufferSize, flags, false, 0);
     }
 
     /**
      * Start sampling-based method tracing, specifying the trace log file name,
-     * the buffer size, and the sampling interval. The trace files will be put
-     * under "/sdcard" unless an absolute path is given. See <a
-       href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a>
-     * for information about reading trace files.
+     * the buffer size, and the sampling interval.
+     * <p>
+     * When a relative file path is given, the trace file will be placed under
+     * your package-specific directory on primary shared/external storage, as
+     * returned by {@link Context#getExternalFilesDir(String)}.
+     * <p>
+     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
+     * A Graphical Log Viewer</a> for information about reading trace files.
      *
-     * @param traceName    Name for the trace log file to create.
-     * If {@code traceName} is null, this value defaults to "/sdcard/dmtrace.trace".
-     * If the files already exist, they will be truncated.
-     * If the trace file given does not end in ".trace", it will be appended for you.
-     * @param bufferSize    The maximum amount of trace data we gather. If not given, it defaults to 8MB.
-     * @param intervalUs    The amount of time between each sample in microseconds.
+     * @param tracePath Path to the trace log file to create. If {@code null},
+     *            this will default to "dmtrace.trace". If the file already
+     *            exists, it will be truncated. If the path given does not end
+     *            in ".trace", it will be appended for you.
+     * @param bufferSize The maximum amount of trace data we gather. If not
+     *            given, it defaults to 8MB.
+     * @param intervalUs The amount of time between each sample in microseconds.
      */
-    public static void startMethodTracingSampling(String traceName,
-        int bufferSize, int intervalUs) {
-        VMDebug.startMethodTracing(fixTraceName(traceName), bufferSize, 0, true, intervalUs);
+    public static void startMethodTracingSampling(String tracePath, int bufferSize,
+            int intervalUs) {
+        VMDebug.startMethodTracing(fixTracePath(tracePath), bufferSize, 0, true, intervalUs);
     }
-
+    
     /**
      * Formats name of trace log file for method tracing.
      */
-    private static String fixTraceName(String traceName) {
-        if (traceName == null)
-            traceName = NoPreloadHolder.DEFAULT_TRACE_FILE_PATH;
-        if (traceName.charAt(0) != '/')
-            traceName = NoPreloadHolder.DEFAULT_TRACE_PATH_PREFIX + traceName;
-        if (!traceName.endsWith(DEFAULT_TRACE_EXTENSION))
-            traceName = traceName + DEFAULT_TRACE_EXTENSION;
+    private static String fixTracePath(String tracePath) {
+        if (tracePath == null || tracePath.charAt(0) != '/') {
+            final Context context = AppGlobals.getInitialApplication();
+            final File dir;
+            if (context != null) {
+                dir = context.getExternalFilesDir(null);
+            } else {
+                dir = Environment.getExternalStorageDirectory();
+            }
 
-        return traceName;
+            if (tracePath == null) {
+                tracePath = new File(dir, DEFAULT_TRACE_BODY).getAbsolutePath();
+            } else {
+                tracePath = new File(dir, tracePath).getAbsolutePath();
+            }
+        }
+        if (!tracePath.endsWith(DEFAULT_TRACE_EXTENSION)) {
+            tracePath += DEFAULT_TRACE_EXTENSION;
+        }
+        return tracePath;
     }
 
     /**
