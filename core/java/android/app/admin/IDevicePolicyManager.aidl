@@ -144,6 +144,8 @@ interface IDevicePolicyManager {
     boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
     void uninstallCaCerts(in ComponentName admin, in String[] aliases);
     void enforceCanManageCaCerts(in ComponentName admin);
+    boolean approveCaCert(in String alias, int userHandle, boolean approval);
+    boolean isCaCertApproved(in String alias, int userHandle);
 
     boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer,
             String alias, boolean requestAccess);

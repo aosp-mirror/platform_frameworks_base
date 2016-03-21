@@ -136,6 +136,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
+import com.android.internal.util.ParcelableString;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -184,11 +185,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String DEVICE_POLICIES_XML = "device_policies.xml";
 
+    private static final String TAG_ACCEPTED_CA_CERTIFICATES = "accepted-ca-certificate";
+
     private static final String TAG_LOCK_TASK_COMPONENTS = "lock-task-component";
 
     private static final String TAG_STATUS_BAR = "statusbar";
 
     private static final String ATTR_DISABLED = "disabled";
+
+    private static final String ATTR_NAME = "name";
 
     private static final String DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML =
             "do-not-ask-credentials-on-boot";
@@ -420,6 +425,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
         final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
 
+        final ArraySet<String> mAcceptedCaCertificates = new ArraySet<>();
+
         // This is the list of component allowed to start lock task mode.
         List<String> mLockTaskPackages = new ArrayList<>();
 
@@ -483,7 +490,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
-                new MonitoringCertNotificationTask().execute(intent);
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
+                new MonitoringCertNotificationTask().execute(userId);
             }
             if (Intent.ACTION_USER_ADDED.equals(action)) {
                 disableSecurityLoggingIfNotCompliant();
@@ -2215,6 +2223,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, "active-password");
             }
 
+            for (int i = 0; i < policy.mAcceptedCaCertificates.size(); i++) {
+                out.startTag(null, TAG_ACCEPTED_CA_CERTIFICATES);
+                out.attribute(null, ATTR_NAME, policy.mAcceptedCaCertificates.valueAt(i));
+                out.endTag(null, TAG_ACCEPTED_CA_CERTIFICATES);
+            }
+
             for (int i=0; i<policy.mLockTaskPackages.size(); i++) {
                 String component = policy.mLockTaskPackages.get(i);
                 out.startTag(null, TAG_LOCK_TASK_COMPONENTS);
@@ -2381,6 +2395,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "symbols"));
                     policy.mActivePasswordNonLetter = Integer.parseInt(
                             parser.getAttributeValue(null, "nonletter"));
+                } else if (TAG_ACCEPTED_CA_CERTIFICATES.equals(tag)) {
+                    policy.mAcceptedCaCertificates.add(parser.getAttributeValue(null, ATTR_NAME));
                 } else if (TAG_LOCK_TASK_COMPONENTS.equals(tag)) {
                     policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
                 } else if (TAG_STATUS_BAR.equals(tag)) {
@@ -2632,17 +2648,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private class MonitoringCertNotificationTask extends AsyncTask<Intent, Void, Void> {
+    private class MonitoringCertNotificationTask extends AsyncTask<Integer, Void, Void> {
         @Override
-        protected Void doInBackground(Intent... params) {
-            int userHandle = params[0].getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
+        protected Void doInBackground(Integer... params) {
+            int userHandle = params[0];
 
             if (userHandle == UserHandle.USER_ALL) {
                 for (UserInfo userInfo : mUserManager.getUsers()) {
                     manageNotification(userInfo.getUserHandle());
                 }
             } else {
-                manageNotification(new UserHandle(userHandle));
+                manageNotification(UserHandle.of(userHandle));
             }
             return null;
         }
@@ -2652,25 +2668,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
 
-            // Call out to KeyChain to check for user-added CAs
-            boolean hasCert = false;
+            // Call out to KeyChain to check for CAs which are waiting for approval.
+            final List<String> pendingCertificates;
             try {
-                KeyChainConnection kcs = KeyChain.bindAsUser(mContext, userHandle);
-                try {
-                    if (!kcs.getService().getUserCaAliases().getList().isEmpty()) {
-                        hasCert = true;
-                    }
-                } catch (RemoteException e) {
-                    Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
-                } finally {
-                    kcs.close();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (RuntimeException | AssertionError e) {
-                Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
+                pendingCertificates = getInstalledCaCertificates(userHandle);
+            } catch (RemoteException | RuntimeException e) {
+                Log.e(LOG_TAG, "Could not retrieve certificates from KeyChain service", e);
+                return;
             }
-            if (!hasCert) {
+
+            synchronized (DevicePolicyManagerService.this) {
+                final DevicePolicyData policy = getUserData(userHandle.getIdentifier());
+
+                // Remove deleted certificates. Flush xml if necessary.
+                if (policy.mAcceptedCaCertificates.retainAll(pendingCertificates)) {
+                    saveSettingsLocked(userHandle.getIdentifier());
+                }
+                // Trim to approved certificates.
+                pendingCertificates.removeAll(policy.mAcceptedCaCertificates);
+            }
+
+            if (pendingCertificates.isEmpty()) {
                 mInjector.getNotificationManager().cancelAsUser(
                         null, MONITORING_CERT_NOTIFICATION_ID, userHandle);
                 return;
@@ -2701,7 +2719,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             final Context userContext;
             try {
-                userContext = mContext.createPackageContextAsUser("android", 0, userHandle);
+                final String packageName = mContext.getPackageName();
+                userContext = mContext.createPackageContextAsUser(packageName, 0, userHandle);
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(LOG_TAG, "Create context as " + userHandle + " failed", e);
                 return;
@@ -2719,6 +2738,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mInjector.getNotificationManager().notifyAsUser(
                     null, MONITORING_CERT_NOTIFICATION_ID, noti, userHandle);
+        }
+
+        private List<String> getInstalledCaCertificates(UserHandle userHandle)
+                throws RemoteException, RuntimeException {
+            KeyChainConnection conn = null;
+            try {
+                conn = KeyChain.bindAsUser(mContext, userHandle);
+                List<ParcelableString> aliases = conn.getService().getUserCaAliases().getList();
+                List<String> result = new ArrayList<>(aliases.size());
+                for (int i = 0; i < aliases.size(); i++) {
+                    result.add(aliases.get(i).string);
+                }
+                return result;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return null;
+            } catch (AssertionError e) {
+                throw new RuntimeException(e);
+            } finally {
+                if (conn != null) {
+                    conn.close();
+                }
+            }
         }
     }
 
@@ -4066,6 +4108,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (NameNotFoundException e) {
                 return false;
             }
+        }
+    }
+
+    @Override
+    public boolean approveCaCert(String alias, int userId, boolean approval) {
+        enforceManageUsers();
+        synchronized (this) {
+            Set<String> certs = getUserData(userId).mAcceptedCaCertificates;
+            boolean changed = (approval ? certs.add(alias) : certs.remove(alias));
+            if (!changed) {
+                return false;
+            }
+            saveSettingsLocked(userId);
+        }
+        new MonitoringCertNotificationTask().execute(userId);
+        return true;
+    }
+
+    @Override
+    public boolean isCaCertApproved(String alias, int userId) {
+        enforceManageUsers();
+        synchronized (this) {
+            return getUserData(userId).mAcceptedCaCertificates.contains(alias);
         }
     }
 
