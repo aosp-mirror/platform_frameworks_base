@@ -22,9 +22,10 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include "Paint.h"
 #include "SkLayerRasterizer.h"
 #include "core_jni_helpers.h"
+
+#include <hwui/Paint.h>
 
 // Rasterizer.java holds a pointer (jlong) to this guy
 class NativeRasterizer {

@@ -31,9 +31,9 @@
 #include <androidfw/AssetManager.h>
 #include "Utils.h"
 
-#include "TypefaceImpl.h"
+#include <hwui/MinikinSkia.h>
+#include <hwui/TypefaceImpl.h>
 #include <minikin/FontFamily.h>
-#include "MinikinSkia.h"
 
 #include <memory>
 
