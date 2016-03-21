@@ -188,7 +188,7 @@ public final class ParcelableConnection implements Parcelable {
             DisconnectCause disconnectCause = source.readParcelable(classLoader);
             List<String> conferenceableConnectionIds = new ArrayList<>();
             source.readStringList(conferenceableConnectionIds);
-            Bundle extras = source.readBundle(classLoader);
+            Bundle extras = Bundle.setDefusable(source.readBundle(classLoader), true);
 
             return new ParcelableConnection(
                     phoneAccount,
