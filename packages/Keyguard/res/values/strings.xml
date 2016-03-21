@@ -302,7 +302,7 @@
     <string name="keyguard_carrier_default">No service.</string>
 
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">Switch input method button.</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">Switch input method</string>
 
     <!-- Description of airplane mode -->
     <string name="airplane_mode">Airplane mode</string>
