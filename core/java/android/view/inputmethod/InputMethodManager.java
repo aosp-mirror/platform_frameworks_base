@@ -975,7 +975,17 @@ public final class InputMethodManager {
      * shown to the user, if needed.  Call this if the user interacts with
      * your view in such a way that they have expressed they would like to
      * start performing input into it.
-     * 
+     *
+     * <p><strong>Caveat:</strong> {@link ResultReceiver} instance passed to
+     * this method can be a long-lived object, because it may not be
+     * garbage-collected until all the corresponding {@link ResultReceiver}
+     * objects transferred to different processes get garbage-collected.
+     * Follow the general patterns to avoid memory leaks in Android.
+     * Consider to use {@link java.lang.ref.WeakReference} so that application
+     * logic objects such as {@link android.app.Activity} and {@link Context}
+     * can be garbage collected regardless of the lifetime of
+     * {@link ResultReceiver}.
+     *
      * @param view The currently focused view, which would like to receive
      * soft keyboard input.
      * @param flags Provides additional operating flags.  Currently may be
@@ -1044,7 +1054,17 @@ public final class InputMethodManager {
      * that is currently accepting input.  This should be called as a result
      * of the user doing some actually than fairly explicitly requests to
      * have the input window hidden.
-     * 
+     *
+     * <p><strong>Caveat:</strong> {@link ResultReceiver} instance passed to
+     * this method can be a long-lived object, because it may not be
+     * garbage-collected until all the corresponding {@link ResultReceiver}
+     * objects transferred to different processes get garbage-collected.
+     * Follow the general patterns to avoid memory leaks in Android.
+     * Consider to use {@link java.lang.ref.WeakReference} so that application
+     * logic objects such as {@link android.app.Activity} and {@link Context}
+     * can be garbage collected regardless of the lifetime of
+     * {@link ResultReceiver}.
+     *
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
      * @param flags Provides additional operating flags.  Currently may be
