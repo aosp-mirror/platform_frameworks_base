@@ -16,7 +16,7 @@
 
 #include "Snapshot.h"
 
-#include "hwui/Canvas.h"
+#include "Canvas.h"
 
 namespace android {
 namespace uirenderer {

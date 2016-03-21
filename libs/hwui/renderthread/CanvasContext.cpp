@@ -19,6 +19,7 @@
 
 #include "AnimationContext.h"
 #include "Caches.h"
+#include "Canvas.h"
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
 #include "LayerUpdateQueue.h"
@@ -26,7 +27,6 @@
 #include "OpenGLRenderer.h"
 #include "Properties.h"
 #include "RenderThread.h"
-#include "hwui/Canvas.h"
 #include "renderstate/RenderState.h"
 #include "renderstate/Stencil.h"
 #include "protos/hwui.pb.h"

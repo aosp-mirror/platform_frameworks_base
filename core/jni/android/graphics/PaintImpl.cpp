@@ -15,6 +15,10 @@
  */
 
 #include "Paint.h"
+#include <SkPaint.h>
+
+#define LOG_TAG "Paint"
+#include <cutils/log.h>
 
 namespace android {
 
