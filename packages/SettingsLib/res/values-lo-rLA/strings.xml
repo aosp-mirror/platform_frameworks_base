@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ເປີດໃຊ້ຕົວປະມວນ WebView ໃນໂປຣເຊສທີ່ແຍກຈາກກັນໄດ້."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ຕັ້ງການຈັດຕັ້ງປະຕິບັດ WebView"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ບໍ່ສາມາດໃຊ້ການເລືອກນີ້ໄດ້ອີກຕໍ່ໄປແລ້ວ. ກະລຸນາລອງໃໝ່."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ປ່ຽນ​ເປັນ​ການ​ເຂົ້າ​ລະ​ຫັດ​ໄຟ​ລ໌"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ປ່ຽນ..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ໄຟ​ລ໌​ເຂົ້າ​ລະ​ຫັດ​ຮຽບ​ຮ້ອຍ​ແລ້ວ"</string>
