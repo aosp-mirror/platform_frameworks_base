@@ -899,10 +899,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"ແກ້​ໄຂ​ໃນ %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ແບ່ງປັນກັບ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ແບ່ງ​ປັນ​ກັບ %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"ສົ່ງໂດຍໃຊ້"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ສົ່ງໂດຍໃຊ້ %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"​ເລືອກ​ແອັບຯ​ໂຮມ"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"​ໃຊ້ %1$s ເປັນ​ໜ້າຫຼັກ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ໃຊ້ໂດຍຄ່າເລີ່ມຕົນສຳລັບການເຮັດວຽກນີ້."</string>
@@ -1062,8 +1060,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ແບ່ງປັນ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ປະຕິເສດ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"​ປ່ຽນ​ແປ້ນ​ພິມ"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"ແປ້ນພິມອື່ນໆ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ເປີດໃຊ້ໃຫ້ມັນຢູ່ໃນໜ້າຈໍໃນຂະນະທີ່ໃຊ້ແປ້ນພິມພາຍນອກຢູ່"</string>
     <string name="hardware" msgid="194658061510127999">"ສະແດງແປ້ນພິມສະເໝືອນ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ເລືອກຮູບແບບແປ້ນພິມ"</string>

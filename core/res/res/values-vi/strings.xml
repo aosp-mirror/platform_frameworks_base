@@ -899,10 +899,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Chỉnh sửa bằng %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Chia sẻ với"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Chia sẻ với %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Gửi bằng"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Gửi bằng %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Chọn ứng dụng Home"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Sử dụng %1$s làm Home"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Sử dụng theo mặc định đối với tác vụ này."</string>
@@ -1062,8 +1060,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"CHIA SẺ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"TỪ CHỐI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Thay đổi bàn phím"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"Bàn phím khác"</string>
     <string name="show_ime" msgid="2506087537466597099">"Tiếp tục sử dụng ứng dụng trên màn hình trong khi bàn phím thực đang hoạt động"</string>
     <string name="hardware" msgid="194658061510127999">"Hiển thị bàn phím ảo"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Chọn bố cục bàn phím"</string>

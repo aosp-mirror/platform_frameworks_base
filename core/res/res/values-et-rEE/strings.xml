@@ -899,10 +899,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Muutmine rakendusega %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Jagamine:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Jagamine rakendusega %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Saada rakendusega"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Saada rakendusega %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Avaekraani rakenduse valimine"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Rakenduse %1$s kasutamine avaekraanina"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Kasuta vaikimisi selleks toiminguks."</string>
@@ -1062,8 +1060,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"JAGA"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"KEELDU"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatuuri muutmine"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"Muud klaviatuurid"</string>
     <string name="show_ime" msgid="2506087537466597099">"Hoia seda ekraanil, kui füüsiline klaviatuur on aktiivne"</string>
     <string name="hardware" msgid="194658061510127999">"Virtuaalse klaviatuuri kuvam."</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Klaviatuuri paigutuse valimine"</string>

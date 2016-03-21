@@ -911,10 +911,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Redaguoti naudojant %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Bendrinti naudojant"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Bendrinti naudojant %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Siųsti naudojant"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Siųsti naudojant „%1$s“"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Pasirinkti pagrindinę programą"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Naudoti „%1$s“ kaip pagrindinę programą"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Šiam veiksmui tai naudoti pagal numatytuosius nustatymus."</string>
@@ -1078,8 +1076,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"BENDRINTI"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ATMESTI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatūros keitimas"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"Kitos klaviatūros"</string>
     <string name="show_ime" msgid="2506087537466597099">"Palikti ekrane, kol fizinė klaviatūra aktyvi"</string>
     <string name="hardware" msgid="194658061510127999">"Rodyti virtualiąją klaviatūrą"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Pasirinkite klaviatūros išdėstymą"</string>
