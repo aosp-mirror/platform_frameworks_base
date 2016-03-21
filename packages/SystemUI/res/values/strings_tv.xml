@@ -19,13 +19,13 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Picture-in-Picture (PIP) menu -->
     <eat-comment />
-    <!-- Button to close picture-in-picture (PIP) in PIP menu [CHAR LIMIT=16] -->
+    <!-- Button to close picture-in-picture (PIP) in PIP menu [CHAR LIMIT=30] -->
     <string name="pip_close">Close PIP</string>
-    <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=16] -->
+    <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
     <string name="pip_fullscreen">Full screen</string>
-    <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=16] -->
+    <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_play">Play</string>
-    <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=16] -->
+    <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_pause">Pause</string>
     <!-- Overlay text on picture-in-picture (PIP) to indicate that longpress HOME key to control PIP [CHAR LIMIT=52] -->
     <string name="pip_hold_home">Hold <b>HOME</b> to control PIP</string>
