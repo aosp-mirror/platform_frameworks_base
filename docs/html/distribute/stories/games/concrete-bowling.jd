@@ -1,0 +1,93 @@
+page.title=Concrete Software increases engagement with quests
+page.metaDescription=Concrete Software makes use of Google Play games services in its 10-pin bowling game, PBA Bowling Challenge.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/concrete-bowling.jpg
+page.timestamp=1454440882
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img
+  src="{@docRoot}images/distribute/stories/concrete-bowling-icon.png" />
+</div>
+
+<p>
+  Concrete Software makes use of Google Play games services in its 10-pin
+  bowling game,
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.concretesoftware.pbachallenge_androidmarket">
+  PBA Bowling Challenge</a>. Once users have signed in with Google Play games
+  services they’re able to take part in multiplayer games, view leaderboards,
+  and gain achievements.
+</p>
+
+
+<h3>What they did</h3>
+
+<p>
+  To offer players new game content, Concrete Software implemented Google Play
+  games services quests. Easily accessible from the game’s home screen, quests
+  are designed with clear goals that integrated into in-game goals and core
+  experience. Each quest stated rewards; offered a progress tracker, which
+  updates as users advance; gave a clear deadline; and a call to action button.
+  Both short-term and long-term quests were offered to users.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:310px">
+  <img
+   src="{@docRoot}images/distribute/stories/concrete-bowling-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/concrete-bowling-screenshot.png 1x
+  {@docRoot}images/distribute/stories/concrete-bowling-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Prominent and customized quest icon displayed on home screen
+  </p>
+</div>
+
+<p>
+  Quests appealed most to dedicated users, and yet there is still an increase
+  in their engagement after using quests. <b>Sessions per user improved 14.4
+  percent</b> DoD upon quests acceptance, and <b>3.7 percent</b> DoD upon
+  completion. While users who accepted a quest <b>started 98 percent more
+  sessions per day</b>; users who completed a quest <b>started 140.2 percent
+  </b> more.
+</p>
+
+<p>
+  Concrete Software also found that quest acceptance and completion rates
+  increased overtime, while daily active users (DAU) remained constant. Among
+  users who accepted the first quest, almost <b>48% of the users accepted a
+  second</b> quest. Among those who completed the first, <b>78% accepted a
+  second</b>.
+</p>
+
+<p>
+  Quests also had a positive impact on retention with one day retention for
+  users who accepted a quest being <b>39.2 percent higher</b> than the average;
+  for users who completed a quest, it’s <b>60.7 percent higher</b> than the
+  average.
+</p>
+
+<p>
+  See examples of how Concrete Software integrated Google Play games services
+  into the <a class="external-link"
+  href="{@docRoot}shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf">
+  UI of PBA Bowling Challenge</a>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out how to
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/quests">
+  implement quests</a> in your games and discover more about
+  <a href="https://developer.android.com/distribute/engage/game-services.html">
+  using Google Play games services</a> in your games to increase player
+  engagement and revenues.
+</p>

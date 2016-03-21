@@ -1,0 +1,108 @@
+page.title=Noodlecake engages players with multiplayer in Super Stickman Golf 2
+page.metaDescription=For the update to Super Stickman Golf, Noodlecake made extensive use of Google Play games services.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/noodlecake-super-stickman.jpg
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/noodlecake-super-stickman-icon.png"
+  height="113" />
+</div>
+
+<p>
+  Founded in early 2011, Noodlecake Studios is an indie game studio based in
+  Canada. Noodlecake found success with its first game, Super Stickman Golf.
+  Since then they have expanded into publishing and releasing games on multiple
+  platforms.
+</p>
+
+<p>
+  For the update to Super Stickman Golf Noodlecake made extensive use of
+  Google Play games services.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  In
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.noodlecake.ssg2">
+  Super Stickman Golf 2</a> Noodlecake implemented a game open screen that
+  prompts the user to sign in, with a clear value proposition. Once the user has
+  signed in, they’re given the option to auto sign-in in the future. For users
+  who don’t select this option, sign-in is prominently displayed on the game’s
+  home screen.
+</p>
+
+<p>
+  In addition to achievements, the main Google Play games services feature in
+  Super Stickman Golf 2 is multiplayer. Users have two multiplayer options:
+  turn based or race mode,  which engage with different types of players.
+  Players can find an opponent among their friends or one at random to start a
+  game immediately. And to minimize drop-off asynchronous gameplay starts
+  immediately after an invite is issued.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:379px">
+  <img
+   src="{@docRoot}images/distribute/stories/noodlecake-super-stickman-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/noodlecake-super-stickman-screenshot.png 1x
+  {@docRoot}images/distribute/stories/noodlecake-super-stickman-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Two multiplayer options engage with different types of players
+  </p>
+</div>
+
+<p>
+  Noodlecake found that user acquisition, retention, and engagement positively
+  correlated with the use of Google Play Games by players. This is consistent
+  across different games and genres, not just for Stickman Golf 2.
+</p>
+
+<p>
+  Also multiplayer, in addition to increasing user engagement, is also an
+  effective user acquisition channel.
+</p>
+
+<p>
+  Some key metrics include:
+  <ul>
+    <li>~96 percent increase in the number of users after Google Play games
+    services integration.</li>
+    <li>~26 percent decrease in the user attrition rate.</li>
+    <li>~6 percent increase in session length.</li>
+  </ul>
+</p>
+
+<p>
+  See examples of how Noodlecake Studio integrated Google Play games services
+  multiplayer and achievements into the
+  <a style="external-link"
+  href="{@docRoot}shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf">
+  UI of Super Stickman Golf 2</a>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out how to add
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/realtimeMultiplayer">
+  real-time</a> or
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/turnbasedMultiplayer">
+  turn-based</a> multiplayer and
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/achievements">achievements</a> to your games and discover more about
+  <a href="https://developer.android.com/distribute/engage/game-services.html">
+  using Google Play games services</a> in your games to increase player
+  engagement and revenues.
+</p>
