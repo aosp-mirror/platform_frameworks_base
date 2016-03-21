@@ -53,8 +53,15 @@ import java.util.HashMap;
 import java.util.Stack;
 
 /**
- * This lets you create a drawable based on an XML vector graphic. It can be
- * defined in an XML file with the <code>&lt;vector></code> element.
+ * This lets you create a drawable based on an XML vector graphic.
+ * <p/>
+ * <strong>Note:</strong> To optimize for the re-drawing performance, one bitmap cache is created
+ * for each VectorDrawable. Therefore, referring to the same VectorDrawable means sharing the same
+ * bitmap cache. If these references don't agree upon on the same size, the bitmap will be recreated
+ * and redrawn every time size is changed. In other words, if a VectorDrawable is used for
+ * different sizes, it is more efficient to create multiple VectorDrawables, one for each size.
+ * <p/>
+ * VectorDrawable can be defined in an XML file with the <code>&lt;vector></code> element.
  * <p/>
  * The vector drawable has the following elements:
  * <p/>
