@@ -1183,28 +1183,28 @@ public class ListPopupWindow implements ShowableListMenu {
         }
 
         // getMaxAvailableHeight() subtracts the padding, so we put it back
-        // to get the available height for the whole window
-        int padding = 0;
-        Drawable background = mPopup.getBackground();
+        // to get the available height for the whole window.
+        final int padding;
+        final Drawable background = mPopup.getBackground();
         if (background != null) {
             background.getPadding(mTempRect);
             padding = mTempRect.top + mTempRect.bottom;
 
-            // If we don't have an explicit vertical offset, determine one from the window
-            // background so that content will line up.
+            // If we don't have an explicit vertical offset, determine one from
+            // the window background so that content will line up.
             if (!mDropDownVerticalOffsetSet) {
                 mDropDownVerticalOffset = -mTempRect.top;
             }
         } else {
             mTempRect.setEmpty();
+            padding = 0;
         }
 
         // Max height available on the screen for a popup.
-        boolean ignoreBottomDecorations =
+        final boolean ignoreBottomDecorations =
                 mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
-
         if (mDropDownAlwaysVisible || mDropDownHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
             return maxHeight + padding;
         }
@@ -1213,25 +1213,30 @@ public class ListPopupWindow implements ShowableListMenu {
         switch (mDropDownWidth) {
             case ViewGroup.LayoutParams.WRAP_CONTENT:
                 childWidthSpec = MeasureSpec.makeMeasureSpec(
-                        mContext.getResources().getDisplayMetrics().widthPixels -
-                        (mTempRect.left + mTempRect.right),
+                        mContext.getResources().getDisplayMetrics().widthPixels
+                                - (mTempRect.left + mTempRect.right),
                         MeasureSpec.AT_MOST);
                 break;
             case ViewGroup.LayoutParams.MATCH_PARENT:
                 childWidthSpec = MeasureSpec.makeMeasureSpec(
-                        mContext.getResources().getDisplayMetrics().widthPixels -
-                        (mTempRect.left + mTempRect.right),
+                        mContext.getResources().getDisplayMetrics().widthPixels
+                                - (mTempRect.left + mTempRect.right),
                         MeasureSpec.EXACTLY);
                 break;
             default:
                 childWidthSpec = MeasureSpec.makeMeasureSpec(mDropDownWidth, MeasureSpec.EXACTLY);
                 break;
         }
+
+        // Add padding only if the list has items in it, that way we don't show
+        // the popup if it is not needed.
         final int listContent = mDropDownList.measureHeightOfChildren(childWidthSpec,
-                0, ListView.NO_POSITION, maxHeight - otherHeights, -1);
-        // add padding only if the list has items in it, that way we don't show
-        // the popup if it is not needed
-        if (listContent > 0) otherHeights += padding;
+                0, DropDownListView.NO_POSITION, maxHeight - otherHeights, -1);
+        if (listContent > 0) {
+            final int listPadding = mDropDownList.getPaddingTop()
+                    + mDropDownList.getPaddingBottom();
+            otherHeights += padding + listPadding;
+        }
 
         return listContent + otherHeights;
     }
