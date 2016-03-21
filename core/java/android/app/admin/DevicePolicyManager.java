@@ -3736,24 +3736,22 @@ public class DevicePolicyManager {
      *
      * @param admin The name of the admin component to check.
      * @param info Device owner information which will be displayed instead of the user owner info.
-     * @return Whether the device owner information has been set.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public boolean setDeviceOwnerLockScreenInfo(@NonNull ComponentName admin, String info) {
+    public void setDeviceOwnerLockScreenInfo(@NonNull ComponentName admin, CharSequence info) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwnerLockScreenInfo(admin, info);
+                mService.setDeviceOwnerLockScreenInfo(admin, info);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
         }
-        return false;
     }
 
     /**
      * @return The device owner information. If it is not set returns {@code null}.
      */
-    public String getDeviceOwnerLockScreenInfo() {
+    public CharSequence getDeviceOwnerLockScreenInfo() {
         if (mService != null) {
             try {
                 return mService.getDeviceOwnerLockScreenInfo();
