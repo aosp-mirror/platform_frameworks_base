@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -56,6 +57,7 @@ import android.os.UserManager;
 import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -121,6 +123,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                     return mMockUserManager;
             }
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getSystemServiceName(Class<?> serviceClass) {
+            return getTestContext().getSystemServiceName(serviceClass);
         }
 
         @Override
@@ -231,7 +238,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         boolean injectIsLowRamDevice() {
-            return mInjectdIsLowRamDevice;
+            return mInjectedIsLowRamDevice;
         }
 
         @Override
@@ -343,7 +350,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private long mInjectedCurrentTimeLillis;
 
-    private boolean mInjectdIsLowRamDevice;
+    private boolean mInjectedIsLowRamDevice;
 
     private int mInjectedCallingUid;
     private String mInjectedClientPackage;
@@ -657,6 +664,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return new ComponentName(mClientContext, clazz);
     }
 
+    private <T> Set<T> makeSet(T... values) {
+        final HashSet<T> ret = new HashSet<>();
+        for (T s : values) {
+            ret.add(s);
+        }
+        return ret;
+    }
+
     @NonNull
     private ShortcutInfo findById(List<ShortcutInfo> list, String id) {
         for (ShortcutInfo s : list) {
@@ -841,12 +856,41 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return mService.getPackageShortcutForTest(packageName, shortcutId, userId);
     }
 
+    private void assertShortcutExists(String packageName, String shortcutId, int userId) {
+        assertTrue(getPackageShortcut(packageName, shortcutId, userId) != null);
+    }
+
+    private void assertShortcutNotExists(String packageName, String shortcutId, int userId) {
+        assertTrue(getPackageShortcut(packageName, shortcutId, userId) == null);
+    }
+
     private ShortcutInfo getPackageShortcut(String packageName, String shortcutId) {
         return getPackageShortcut(packageName, shortcutId, getCallingUserId());
     }
 
     private ShortcutInfo getCallerShortcut(String shortcutId) {
         return getPackageShortcut(getCallingPackage(), shortcutId, getCallingUserId());
+    }
+
+    private List<ShortcutInfo> getLauncherShortcuts(String launcher, int userId, int queryFlags) {
+        final List<ShortcutInfo>[] ret = new List[1];
+        runWithCaller(launcher, userId, () -> {
+            final ShortcutQuery q = new ShortcutQuery();
+            q.setQueryFlags(queryFlags);
+            ret[0] = mLauncherApps.getShortcuts(q, UserHandle.of(userId));
+        });
+        return ret[0];
+    }
+
+    private List<ShortcutInfo> getLauncherPinnedShortcuts(String launcher, int userId) {
+        return getLauncherShortcuts(launcher, userId, ShortcutQuery.FLAG_GET_PINNED);
+    }
+
+    /**
+     * Wrap a set in an ArraySet just to get a better toString.
+     */
+    private <T> Set<T> set(Set<T> in) {
+        return new ArraySet<T>(in);
     }
 
     /**
@@ -857,7 +901,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
-     * Test for {@link ShortcutService#updateTimes()}
+     * Test for {@link ShortcutService#getLastResetTimeLocked()} and
+     * {@link ShortcutService#getNextResetTimeLocked()}.
      */
     public void testUpdateAndGetNextResetTimeLocked() {
         assertResetTimes(START_TIME, START_TIME + INTERVAL);
@@ -928,7 +973,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(CompressFormat.WEBP, mService.getIconPersistFormatForTest());
         assertEquals(75, mService.getIconPersistQualityForTest());
 
-        mInjectdIsLowRamDevice = true;
+        mInjectedIsLowRamDevice = true;
         mService.updateConfigurationLocked(
                 ConfigConstants.KEY_MAX_ICON_DIMENSION_DP + "=100,"
                         + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM + "=50,"
@@ -2205,6 +2250,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // TODO Add "multi" version -- run the test with two launchers and make sure the callback
         // argument only contains the ones that are actually visible to each launcher.
 
+        when(mMockUserManager.isUserRunning(eq(USER_0))).thenReturn(true);
+
         LauncherApps.Callback c0 = mock(LauncherApps.Callback.class);
 
         // Set listeners
@@ -2316,6 +2363,20 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         shortcuts = ArgumentCaptor.forClass(List.class);
         verify(c0).onShortcutsChanged(
                 eq(CALLING_PACKAGE_1),
+                shortcuts.capture(),
+                eq(UserHandle.of(USER_0))
+        );
+        assertEquals(0, shortcuts.getValue().size());
+
+        // Remove CALLING_PACKAGE_2
+        reset(c0);
+        mService.cleanUpPackageLocked(CALLING_PACKAGE_2, USER_0);
+
+        // Should get a callback with an empty list.
+        waitOnMainThread();
+        shortcuts = ArgumentCaptor.forClass(List.class);
+        verify(c0).onShortcutsChanged(
+                eq(CALLING_PACKAGE_2),
                 shortcuts.capture(),
                 eq(UserHandle.of(USER_0))
         );
@@ -2436,7 +2497,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(0, mService.getShortcutsForTest().size());
 
         // this will pre-load the per-user info.
-        mService.onStartUserLocked(UserHandle.USER_SYSTEM);
+        mService.handleUnlockUser(UserHandle.USER_SYSTEM);
 
         // Now it's loaded.
         assertEquals(1, mService.getShortcutsForTest().size());
@@ -2462,7 +2523,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .getLauncherComponent().getPackageName());
 
         // Start another user
-        mService.onStartUserLocked(USER_10);
+        mService.handleUnlockUser(USER_10);
 
         // Now the size is 2.
         assertEquals(2, mService.getShortcutsForTest().size());
@@ -2478,12 +2539,254 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(mService.getShortcutsForTest().get(USER_10).getLauncherComponent());
 
         // Try stopping the user
-        mService.onCleanupUserLocked(USER_10);
+        mService.handleCleanupUser(USER_10);
 
         // Now it's unloaded.
         assertEquals(1, mService.getShortcutsForTest().size());
 
         // TODO Check all other fields
+    }
+
+    public void testCleanupPackage() {
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s0_1"))));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s0_2"))));
+        });
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList("s0_1"),
+                    UserHandle.of(USER_0));
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, Arrays.asList("s0_2"),
+                    UserHandle.of(USER_0));
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList("s0_1"),
+                    UserHandle.of(USER_0));
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, Arrays.asList("s0_2"),
+                    UserHandle.of(USER_0));
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s10_1"))));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(Arrays.asList(
+                    makeShortcut("s10_2"))));
+        });
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList("s10_1"),
+                    UserHandle.of(USER_10));
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, Arrays.asList("s10_2"),
+                    UserHandle.of(USER_10));
+        });
+        runWithCaller(LAUNCHER_2, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, Arrays.asList("s10_1"),
+                    UserHandle.of(USER_10));
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, Arrays.asList("s10_2"),
+                    UserHandle.of(USER_10));
+        });
+
+        // Remove all dynamic shortcuts; now all shortcuts are just pinned.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.deleteAllDynamicShortcuts();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            mManager.deleteAllDynamicShortcuts();
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            mManager.deleteAllDynamicShortcuts();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            mManager.deleteAllDynamicShortcuts();
+        });
+
+
+        final SparseArray<UserShortcuts> users =  mService.getShortcutsForTest();
+        assertEquals(2, users.size());
+        assertEquals(USER_0, users.keyAt(0));
+        assertEquals(USER_10, users.keyAt(1));
+
+        final UserShortcuts user0 =  users.get(USER_0);
+        final UserShortcuts user10 =  users.get(USER_10);
+
+
+        // Check the registered packages.
+
+        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_1", "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_1", "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
+
+        // Nonexistent package.
+        mService.cleanUpPackageLocked("abc", USER_0);
+
+        // No changes.
+        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_1", "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_1", "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
+
+        // Remove a package.
+        mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_0);
+
+        assertEquals(makeSet(CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
+
+        // Remove a launcher.
+        mService.cleanUpPackageLocked(LAUNCHER_1, USER_10);
+
+        assertEquals(makeSet(CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(LAUNCHER_2),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_10),
+                "s10_1", "s10_2");
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
+
+        // Remove a package.
+        mService.cleanUpPackageLocked(CALLING_PACKAGE_2, USER_10);
+
+        assertEquals(makeSet(CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(CALLING_PACKAGE_1),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(LAUNCHER_2),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_10),
+                "s10_1");
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutNotExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
+
+        // Remove the other launcher from user 10 too.
+        mService.cleanUpPackageLocked(LAUNCHER_2, USER_10);
+
+        assertEquals(makeSet(CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(CALLING_PACKAGE_1),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_2");
+
+        // Note the pinned shortcuts on user-10 no longer referred, so they should both be removed.
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutNotExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
+
+        // More remove.
+        mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_10);
+
+        assertEquals(makeSet(CALLING_PACKAGE_2),
+                set(user0.getPackages().keySet()));
+        assertEquals(makeSet(),
+                set(user10.getPackages().keySet()));
+        assertEquals(makeSet(LAUNCHER_1, LAUNCHER_2),
+                set(user0.getLaunchers().keySet()));
+        assertEquals(makeSet(),
+                set(user10.getLaunchers().keySet()));
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
+                "s0_2");
+        assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
+                "s0_2");
+
+        // Note the pinned shortcuts on user-10 no longer referred, so they should both be removed.
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s0_1", USER_0);
+        assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
+        assertShortcutNotExists(CALLING_PACKAGE_1, "s10_1", USER_10);
+        assertShortcutNotExists(CALLING_PACKAGE_2, "s10_2", USER_10);
+
+        mService.saveDirtyInfo();
     }
 
     // TODO Detailed test for hasShortcutPermissionInner().
