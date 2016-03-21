@@ -387,6 +387,15 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             applyUserRestrictionsLR(UserHandle.USER_SYSTEM);
         }
+
+        UserInfo currentGuestUser = findCurrentGuestUser();
+        if (currentGuestUser != null && !hasUserRestriction(
+                UserManager.DISALLOW_CONFIG_WIFI, currentGuestUser.id)) {
+            // If a guest user currently exists, apply the DISALLOW_CONFIG_WIFI option
+            // to it, in case this guest was created in a previous version where this
+            // user restriction was not a default guest restriction.
+            setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
+        }
     }
 
     @Override
@@ -828,6 +837,7 @@ public class UserManagerService extends IUserManager.Stub {
     private void initDefaultGuestRestrictions() {
         synchronized (mGuestRestrictions) {
             if (mGuestRestrictions.isEmpty()) {
+                mGuestRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
                 mGuestRestrictions.putBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
                 mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
                 mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
