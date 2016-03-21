@@ -899,10 +899,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"แก้ไขด้วย %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"แชร์กับ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"แชร์กับ %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"ส่งโดยใช้"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ส่งโดยใช้ %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"เลือกแอปหน้าแรก"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ใช้ %1$s เป็นหน้าแรก"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ใช้ค่าเริ่มต้นสำหรับการทำงานนี้"</string>
@@ -1062,8 +1060,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"แชร์"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ปฏิเสธ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"เปลี่ยนแป้นพิมพ์"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"แป้นพิมพ์อื่นๆ"</string>
     <string name="show_ime" msgid="2506087537466597099">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
     <string name="hardware" msgid="194658061510127999">"แสดงแป้นพิมพ์เสมือน"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"เลือกรูปแบบแป้นพิมพ์"</string>

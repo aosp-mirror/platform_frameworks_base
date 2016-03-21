@@ -905,10 +905,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Uređivanje pomoću aplikacije %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Dijeljenje pomoću aplikacije"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Dijeljenje pomoću aplikacije %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Pošalji aplikacijom"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Slanje aplikacijom %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Odaberite početnu aplikaciju"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Upotrijebite %1$s kao početnu aplikaciju"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Koristi se kao zadana postavka za ovu lokaciju."</string>
@@ -1070,8 +1068,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"DIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ODBIJ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Promjena tipkovnice"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"Ostale tipkovnice"</string>
     <string name="show_ime" msgid="2506087537466597099">"Zadržava se na zaslonu dok je fizička tipkovnica aktivna"</string>
     <string name="hardware" msgid="194658061510127999">"Prikaži virtualnu tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Odaberite izgled tipkovnice"</string>
