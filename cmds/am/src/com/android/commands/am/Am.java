@@ -1814,7 +1814,7 @@ public class Am extends BaseCommand {
 
     private void resizeStackUnchecked(int stackId, Rect bounds, int delayMs, boolean animate) {
         try {
-            mAm.resizeStack(stackId, bounds, false, false, animate);
+            mAm.resizeStack(stackId, bounds, false, false, animate, -1);
             Thread.sleep(delayMs);
         } catch (RemoteException e) {
             showError("Error: resizing stack " + e);
