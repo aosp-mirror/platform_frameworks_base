@@ -999,6 +999,9 @@ public class Resources {
         return mResourcesImpl.loadColorStateList(this, value, id, theme);
     }
 
+    /**
+     * @hide
+     */
     @Nullable
     public ComplexColor loadComplexColor(@NonNull TypedValue value, int id, @Nullable Theme theme) {
         return mResourcesImpl.loadComplexColor(this, value, id, theme);
