@@ -12,47 +12,44 @@ page.tags=studio,sdk,tools,firstapp
       <li><a href="#project-structure">Project and File Structure</a></li>
       <li><a href="#build-system">Android Build System</a></li>
       <li><a href="#debug-perf">Debug and Performance</a></li>
-
-
     </ol>
 
-  <h2>See also</h2>
-  <ol>
-    <li><a class="external-link" href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
-  </ol>
+
+<a class="button" href="{@docRoot}sdk/index.html" style="margin:15px">
+  Get Android Studio
+</a>
 
 </div>
 </div>
 
 
-<p>Android Studio is the official IDE for Android application development,
+<p>Android Studio is the official IDE for Android app development,
 based on <a class="external-link" href="https://www.jetbrains.com/idea/" target="_blank">IntelliJ IDEA</a>.
 On top of the capabilities you expect from IntelliJ,
 Android Studio offers:</p>
 
 <ul>
   <li>Flexible Gradle-based build system</li>
-  <li>Build variants and multiple <code>apk</code> file generation</li>
+  <li>Build variants and multiple APK file generation</li>
   <li>Code templates to help you build common app features</li>
   <li>Rich layout editor with support for drag and drop theme editing</li>
-  <li>{@code lint} tools to catch performance, usability, version compatibility, and other problems</li>
-  <li>ProGuard and app-signing capabilities</li>
+  <li>Lint tools to catch performance, usability, version compatibility, and other problems</li>
+  <li>Code shrinking with ProGuard</li>
   <li>Built-in support for
   <a href="http://developers.google.com/cloud/devtools/android_studio_templates/">Google Cloud Platform</a>,
   making it easy to integrate Google Cloud Messaging and App Engine</li>
   <li>And much more</li>
 </ul>
 
-<p>If you're new to Android Studio or the IntelliJ IDEA interface, this
-page provides an introduction to some key Android
-Studio features.</p>
-
-<p>For specific Android Studio how-to documentation, see the pages in the <a href=
+<p>This page provides an introduction to some key Android Studio features. For
+specific Android Studio how-to documentation, see the pages in the <a href=
 "{@docRoot}tools/workflow/index.html">Workflow</a> section, such as <a href=
-"{@docRoot}sdk/installing/create-project.html">Managing Projects from Android Studio</a> and
-<a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android
-Studio</a>. For a summary of the latest changes to Android Studio, see the
-<a href="{@docRoot}tools/revisions/studio.html">Android Studio Release Notes</a>.</p>
+"{@docRoot}sdk/installing/create-project.html">Managing Projects from Android
+Studio</a> and <a href="{@docRoot}tools/building/building-studio.html">Building
+and Running from Android Studio</a>. For a summary of the latest changes to
+Android Studio, see the <a href="{@docRoot}tools/revisions/studio.html">Android
+Studio Release Notes</a>.</p>
+
 
 
 
@@ -103,8 +100,8 @@ from the <strong>Project</strong> drop-down. </p>
 <h3 id="other-views">Other Android Studio views</h3>
 <p>When you use the <em>Project</em> view in Android Studio, you
 should notice that the project structure appears different than you may be used to in Eclipse. Each
-instance of Android Studio contains a project with one or more application modules. Each
-application module folder contains the complete source sets for that module, including
+instance of Android Studio contains a project with one or more app modules. Each
+app module folder contains the complete source sets for that module, including
 {@code src/main/} and {@code src/androidTest/} directories, resources, build
 file and the Android manifest. For the most part, you will need to modify the files under each
 module's {@code src/main/} directory for source code updates, the gradle.build file for build
@@ -202,7 +199,7 @@ device or emulator, click the <strong>Android</strong> tab in the lower left cor
 runtime window to launch the Android runtime window. Click the <strong>Memory</strong> or
 <strong>CPU</strong> tab. </p>
 
-<img src="{@docRoot}images/tools/studio-memory-monitor.png" 
+<img src="{@docRoot}images/tools/studio-memory-monitor.png"
 srcset="{@docRoot}images/tools/studio-memory-monitor2x.png 2x" width"635" height="171" alt="" />
     <p class="img-caption"><strong>Figure 4.</strong> Monitor memory and CPU usage.</p>
 
