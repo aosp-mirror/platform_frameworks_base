@@ -158,7 +158,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             synchronized (mLock) {
                 Looper looper = Looper.getMainLooper();
                 Handler handler = new Handler(looper);
