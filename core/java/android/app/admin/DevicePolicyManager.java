@@ -145,19 +145,23 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, although specifying only
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported.
      *
-     * <p> The intent may also contain the following extras:
+     * <p>The intent may also contain the following extras:
      * <ul>
-     * <li> {@link #EXTRA_PROVISIONING_LOGO_URI}, optional </li>
-     * <li> {@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional </li>
+     * <li>{@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}, optional </li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional, supported from
+     * {@link android.os.Build.VERSION_CODES#N}</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * </ul>
      *
-     * <p> When managed provisioning has completed, broadcasts are sent to the application specified
+     * <p>When managed provisioning has completed, broadcasts are sent to the application specified
      * in the provisioning intent. The
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} broadcast is sent in the
      * managed profile and the {@link #ACTION_MANAGED_PROFILE_PROVISIONED} broadcast is sent in
      * the primary profile.
      *
-     * <p> If provisioning fails, the managedProfile is removed so the device returns to its
+     * <p>If provisioning fails, the managedProfile is removed so the device returns to its
      * previous state.
      *
      * <p>If launched with {@link android.app.Activity#startActivityForResult(Intent, int)} a
@@ -171,7 +175,6 @@ public class DevicePolicyManager {
         = "android.app.action.PROVISION_MANAGED_PROFILE";
 
     /**
-     * @hide
      * Activity action: Starts the provisioning flow which sets up a managed user.
      *
      * <p>This intent will typically be sent by a mobile device management application (MDM).
@@ -180,16 +183,24 @@ public class DevicePolicyManager {
      * been completed. Use {@link #isProvisioningAllowed(String)} to check if provisioning is
      * allowed.
      *
-     * <p>This intent should contain the extra
-     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}.
+     * <p>The intent contains the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
+     * </ul>
      *
-     * <p> If provisioning fails, the device returns to its previous state.
+     * <p>If provisioning fails, the device returns to its previous state.
      *
      * <p>If launched with {@link android.app.Activity#startActivityForResult(Intent, int)} a
      * result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part of
      * the provisioning flow was successful, although this doesn't guarantee the full flow will
      * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
      * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
+     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_USER
@@ -220,11 +231,11 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * </ul>
      *
-     * <p> When device owner provisioning has completed, an intent of the type
+     * <p>When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
      * device owner.
      *
-     * <p> If provisioning fails, the device is factory reset.
+     * <p>If provisioning fails, the device is factory reset.
      *
      * <p>A result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part
      * of the provisioning flow was successful, although this doesn't guarantee the full flow will
@@ -288,14 +299,14 @@ public class DevicePolicyManager {
      * The primary benefit is that multiple non-system users are supported when provisioning using
      * this form of device management.
      *
-     * <p> During device owner provisioning a device admin app is set as the owner of the device.
+     * <p>During device owner provisioning a device admin app is set as the owner of the device.
      * A device owner has full control over the device. The device owner can not be modified by the
      * user.
      *
-     * <p> A typical use case would be a device that is owned by a company, but used by either an
+     * <p>A typical use case would be a device that is owned by a company, but used by either an
      * employee or client.
      *
-     * <p> An intent with this action can be sent only on an unprovisioned device.
+     * <p>An intent with this action can be sent only on an unprovisioned device.
      * It is possible to check if provisioning is allowed or not by querying the method
      * {@link #isProvisioningAllowed(String)}.
      *
@@ -305,13 +316,15 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * </ul>
      *
-     * <p> When device owner provisioning has completed, an intent of the type
+     * <p>When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
      * device owner.
      *
-     * <p> If provisioning fails, the device is factory reset.
+     * <p>If provisioning fails, the device is factory reset.
      *
      * <p>A result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part
      * of the provisioning flow was successful, although this doesn't guarantee the full flow will
@@ -439,7 +452,7 @@ public class DevicePolicyManager {
      *
      * <p> When this extra is set, the application must have exactly one device admin receiver.
      * This receiver will be set as the profile or device owner and active admin.
-
+     *
      * @see DeviceAdminReceiver
      * @deprecated Use {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}. This extra is still
      * supported, but only if there is only one device admin receiver in the package that requires
@@ -461,7 +474,7 @@ public class DevicePolicyManager {
      * <p>This component is set as device owner and active admin when device owner provisioning is
      * started by an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE} or by an NFC
      * message containing an NFC record with MIME type
-     * {@link #MIME_TYPE_PROVISIONING_NFC}. For the NFC record, the component name should be
+     * {@link #MIME_TYPE_PROVISIONING_NFC}. For the NFC record, the component name must be
      * flattened to a string, via {@link ComponentName#flattenToShortString()}.
      *
      * @see DeviceAdminReceiver
@@ -664,8 +677,8 @@ public class DevicePolicyManager {
      * the file at download location specified in
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM} should be
-     * present. The provided checksum should match the checksum of the file at the download
+     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM} must be
+     * present. The provided checksum must match the checksum of the file at the download
      * location. If the checksum doesn't match an error will be shown to the user and the user will
      * be asked to factory reset the device.
      *
@@ -689,8 +702,8 @@ public class DevicePolicyManager {
      * {@link android.content.pm.PackageManager#getPackageArchiveInfo} with flag
      * {@link android.content.pm.PackageManager#GET_SIGNATURES}.
      *
-     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM} should be
-     * present. The provided checksum should match the checksum of any signature of the file at
+     * <p>Either this extra or {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM} must be
+     * present. The provided checksum must match the checksum of any signature of the file at
      * the download location. If the checksum does not match an error will be shown to the user and
      * the user will be asked to factory reset the device.
      *
@@ -715,11 +728,14 @@ public class DevicePolicyManager {
         = "android.app.action.MANAGED_PROFILE_PROVISIONED";
 
     /**
-     * A boolean extra indicating whether device encryption can be skipped as part of Device Owner
-     * provisioning.
+     * A boolean extra indicating whether device encryption can be skipped as part of device owner
+     * or managed profile provisioning.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} or an intent with action
      * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
+     *
+     * <p>From {@link android.os.Build.VERSION_CODES#N} onwards, this is also supported for an
+     * intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
@@ -762,7 +778,7 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SKIP_USER_SETUP";
 
     /**
-     * This MIME type is used for starting the Device Owner provisioning.
+     * This MIME type is used for starting the device owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
      * A device owner has full control over the device. The device owner can not be modified by the
@@ -772,7 +788,7 @@ public class DevicePolicyManager {
      * <p> A typical use case would be a device that is owned by a company, but used by either an
      * employee or client.
      *
-     * <p> The NFC message should be send to an unprovisioned device.
+     * <p> The NFC message must be sent to an unprovisioned device.
      *
      * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
      * contains the following properties:
