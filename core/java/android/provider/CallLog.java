@@ -440,6 +440,13 @@ public class CallLog {
         public static final String POST_DIAL_DIGITS = "post_dial_digits";
 
         /**
+         * For an incoming call, the secondary line number the call was received via.
+         * When a SIM card has multiple phone numbers associated with it, the via number indicates
+         * which of the numbers associated with the SIM was called.
+         */
+        public static final String VIA_NUMBER = "via_number";
+
+        /**
          * Indicates that the entry will be copied from primary user to other users.
          * <P>Type: INTEGER</P>
          *
@@ -485,10 +492,10 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
-            return addCall(ci, context, number, /* postDialDigits =*/ "", presentation,
-                    callType, features, accountHandle,
-                    start, duration, dataUsage, /* addForAllUsers =*/ false,
-                    /* userToBeInsertedTo =*/ null, /* is_read =*/ false);
+            return addCall(ci, context, number, /* postDialDigits =*/ "", /* viaNumber =*/ "",
+                    presentation, callType, features, accountHandle, start, duration,
+                    dataUsage, /* addForAllUsers =*/ false, /* userToBeInsertedTo =*/ null,
+                    /* is_read =*/ false);
         }
 
 
@@ -499,6 +506,8 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
+         * @param viaNumber the secondary number that the incoming call received with. If the
+         *       call was received with the SIM assigned number, then this field must be ''.
          * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
@@ -519,12 +528,12 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                String postDialDigits, int presentation, int callType, int features,
-                PhoneAccountHandle accountHandle, long start, int duration, Long dataUsage,
-                boolean addForAllUsers, UserHandle userToBeInsertedTo) {
-            return addCall(ci, context, number, postDialDigits, presentation, callType, features,
-                    accountHandle, start, duration, dataUsage, addForAllUsers, userToBeInsertedTo,
-                    /* is_read =*/ false);
+                String postDialDigits, String viaNumber, int presentation, int callType,
+                int features, PhoneAccountHandle accountHandle, long start, int duration,
+                Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo) {
+            return addCall(ci, context, number, postDialDigits, viaNumber, presentation, callType,
+                    features, accountHandle, start, duration, dataUsage, addForAllUsers,
+                    userToBeInsertedTo, /* is_read =*/ false);
         }
 
         /**
@@ -536,6 +545,8 @@ public class CallLog {
          * @param number the phone number to be added to the calls db
          * @param postDialDigits the post-dial digits that were dialed after the number,
          *        if it was outgoing. Otherwise it is ''.
+         * @param viaNumber the secondary number that the incoming call received with. If the
+         *        call was received with the SIM assigned number, then this field must be ''.
          * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
@@ -560,9 +571,10 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
-                String postDialDigits, int presentation, int callType, int features,
-                PhoneAccountHandle accountHandle, long start, int duration, Long dataUsage,
-                boolean addForAllUsers, UserHandle userToBeInsertedTo, boolean is_read) {
+                String postDialDigits, String viaNumber, int presentation, int callType,
+                int features, PhoneAccountHandle accountHandle, long start, int duration,
+                Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
+                boolean is_read) {
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, String.format("Add call: number=%s, user=%s, for all=%s",
                         number, userToBeInsertedTo, addForAllUsers));
@@ -618,6 +630,7 @@ public class CallLog {
 
             values.put(NUMBER, number);
             values.put(POST_DIAL_DIGITS, postDialDigits);
+            values.put(VIA_NUMBER, viaNumber);
             values.put(NUMBER_PRESENTATION, Integer.valueOf(numberPresentation));
             values.put(TYPE, Integer.valueOf(callType));
             values.put(FEATURES, features);
