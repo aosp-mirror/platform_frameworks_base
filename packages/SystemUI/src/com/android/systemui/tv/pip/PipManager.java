@@ -152,6 +152,7 @@ public class PipManager {
     private final Runnable mOnPinnedActivityRestartAttempt = new Runnable() {
         @Override
         public void run() {
+            // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
             movePipToFullscreen();
         }
     };
@@ -315,11 +316,7 @@ public class PipManager {
     private void showPipOverlay() {
         if (DEBUG) Log.d(TAG, "showPipOverlay()");
         mState = STATE_PIP_OVERLAY;
-        Intent intent = new Intent(mContext, PipOverlayActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchStackId(PINNED_STACK_ID);
-        mContext.startActivity(intent, options.toBundle());
+        PipOverlayActivity.showPipOverlay(mContext);
     }
 
     /**
