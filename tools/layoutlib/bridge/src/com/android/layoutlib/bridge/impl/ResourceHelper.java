@@ -25,6 +25,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.ninepatch.NinePatch;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.Density;
@@ -142,8 +143,13 @@ public final class ResourceHelper {
             return null;
         }
 
+        XmlPullParser parser = null;
         // first check if the value is a file (xml most likely)
-        XmlPullParser parser = context.getLayoutlibCallback().getXmlFileParser(value);
+        Boolean psiParserSupport = context.getLayoutlibCallback().getFlag(
+                RenderParamsFlags.FLAG_KEY_XML_FILE_PARSER_SUPPORT);
+        if (psiParserSupport != null && psiParserSupport) {
+            parser = context.getLayoutlibCallback().getXmlFileParser(value);
+        }
         if (parser == null) {
             File f = new File(value);
             if (f.isFile()) {
