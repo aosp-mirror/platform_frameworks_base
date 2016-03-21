@@ -665,7 +665,9 @@ public class SurfaceView extends View {
                             "postion = [%d, %d, %d, %d]", mWindowSpaceLeft, mWindowSpaceTop,
                             mLocation[0], mLocation[1]));
                     mSession.repositionChild(mWindow, mWindowSpaceLeft, mWindowSpaceTop,
-                            mLocation[0], mLocation[1], -1, mWinFrame);
+                            mLocation[0], mLocation[1],
+                            mWindowSpaceWidth, mWindowSpaceHeight,
+                            -1, mWinFrame);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Exception from relayout", ex);
                 }
@@ -700,7 +702,9 @@ public class SurfaceView extends View {
                         right, bottom));
             }
             // Just using mRTLastReportedPosition as a dummy rect here
-            session.repositionChild(window, left, top, right, bottom, frameNumber,
+            session.repositionChild(window, left, top, right, bottom,
+                    mWindowSpaceWidth, mWindowSpaceHeight,
+                    frameNumber,
                     mRTLastReportedPosition);
             // Now overwrite mRTLastReportedPosition with our values
             mRTLastReportedPosition.set(left, top, right, bottom);
