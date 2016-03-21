@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -3980,18 +3981,21 @@ public class DevicePolicyManager {
      * {@code null} value or uninstalling the managing package.
      * <p>
      * The supplied application restriction managing package must be installed when calling this
-     * API, otherwise an {@link IllegalArgumentException} will be thrown.
+     * API, otherwise an {@link NameNotFoundException} will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package name which will be given access to application restrictions
      *            APIs. If {@code null} is given the current package will be cleared.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws NameNotFoundException if {@code packageName} is not found
      */
     public void setApplicationRestrictionsManagingPackage(@NonNull ComponentName admin,
-            @Nullable String packageName) {
+            @Nullable String packageName) throws NameNotFoundException {
         if (mService != null) {
             try {
-                mService.setApplicationRestrictionsManagingPackage(admin, packageName);
+                if (!mService.setApplicationRestrictionsManagingPackage(admin, packageName)) {
+                    throw new NameNotFoundException(packageName);
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

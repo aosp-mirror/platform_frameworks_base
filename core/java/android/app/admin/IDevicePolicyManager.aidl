@@ -161,7 +161,7 @@ interface IDevicePolicyManager {
 
     void setApplicationRestrictions(in ComponentName who, in String packageName, in Bundle settings);
     Bundle getApplicationRestrictions(in ComponentName who, in String packageName);
-    void setApplicationRestrictionsManagingPackage(in ComponentName admin, in String packageName);
+    boolean setApplicationRestrictionsManagingPackage(in ComponentName admin, in String packageName);
     String getApplicationRestrictionsManagingPackage(in ComponentName admin);
     boolean isCallerApplicationRestrictionsManagingPackage();
 
