@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Izvajanje upodabljalnikov za WebView v ločenem procesu."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Izvedba spletnega pogleda"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastavitev izvedbe spletnega pogleda"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ta izbira ni več veljavna. Poskusite znova."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Preklop na šifriranje podatkov"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Preklop …"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Šifriranje podatkov je že uveljavljeno"</string>

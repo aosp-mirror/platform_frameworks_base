@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"પૃથક પ્રક્રિયામાં WebView રેંડરર્સ ચલાવો."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView અમલીકરણ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView અમલીકરણ સેટ કરો"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"આ વિકલ્પ હવે માન્ય નથી. ફરી પ્રયાસ કરો."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ફાઇલ એન્ક્રિપ્શનમાં રૂપાંતરિત કરો"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"રૂપાંતરિત કરો..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ફાઇલ પહેલેથી જ એન્ક્રિપ્ટ કરેલ છે"</string>

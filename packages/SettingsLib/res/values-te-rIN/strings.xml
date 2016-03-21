@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ప్రత్యేకప్రాసెస్‌లో వెబ్ వీక్షణ రెండెరెర్‌లను అమలుచేస్తుంది."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"వెబ్ వీక్షణ అమలు"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"వెబ్ వీక్షణ అమలుని సెట్ చేయండి"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ఫైల్ గుప్తీకరణకు మార్చు"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"మార్చండి…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ఫైల్ ఇప్పటికే గుప్తీకరించబడింది"</string>
