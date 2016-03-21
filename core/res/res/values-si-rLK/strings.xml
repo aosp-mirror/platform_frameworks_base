@@ -901,10 +901,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s සමඟ සංස්කරණය කරන්න"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"සමඟ බෙදාගන්න"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%s සමඟ බෙදාගන්න"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"මෙය භාවිතයෙන් යවන්න"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s භාවිතයෙන් යවන්න"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"මුල් පිටු යෙදුම තෝරන්න"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"මුල් පිටු යෙදුම ලෙස %1$s න් භාවිතා කරන්න"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"මෙම ක්‍රියාව සඳහා සුපුරුද්දෙන් භාවිත කරන්න."</string>
@@ -1064,8 +1062,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"බෙදා ගන්න"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"වෙනත් යතුරු පුවරු"</string>
     <string name="show_ime" msgid="2506087537466597099">"භෞතික යතුරු පුවරුව සක්‍රිය අතරතුර එය තිරය මත තබා ගන්න"</string>
     <string name="hardware" msgid="194658061510127999">"අතථ්‍ය යතුරු පුවරුව පෙන්වන්න"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"යතුරු පුවරුවට පිරිසැලැස්ම තෝරන්න"</string>

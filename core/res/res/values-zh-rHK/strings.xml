@@ -899,10 +899,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"使用 %1$s 編輯"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"分享對象"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"與 %1$s 分享"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"使用以下應用程式傳送："</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"使用「%1$s」傳送"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"選取主螢幕應用程式"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"使用「%1$s」作為主螢幕"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"設定用於執行這項操作。"</string>
@@ -1062,8 +1060,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"拒絕"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"其他鍵盤"</string>
     <string name="show_ime" msgid="2506087537466597099">"在實體鍵盤處於連接狀態時保持顯示"</string>
     <string name="hardware" msgid="194658061510127999">"顯示虛擬鍵盤"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"選取鍵盤配置"</string>
