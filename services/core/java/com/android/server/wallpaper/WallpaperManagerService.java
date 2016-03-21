@@ -20,6 +20,7 @@ import static android.app.WallpaperManager.FLAG_SET_SYSTEM;
 import static android.app.WallpaperManager.FLAG_SET_LOCK;
 import static android.os.ParcelFileDescriptor.*;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -875,12 +876,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         if (!isWallpaperSupported(callingPackage) || !isWallpaperSettingAllowed(callingPackage)) {
             return;
         }
-        if (userId != UserHandle.getCallingUserId()) {
-            // cross-user call
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "WallpaperManagerService");
-        }
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "clearWallpaper", null);
 
         synchronized (mLock) {
             clearWallpaperLocked(false, which, userId, null);
@@ -1103,12 +1100,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     @Override
     public ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb, final int which,
             Bundle outParams, int wallpaperUserId) {
-        if (wallpaperUserId != UserHandle.getCallingUserId()) {
-            // cross-user call
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "WallpaperManagerService");
-        }
+        wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), wallpaperUserId, false, true, "getWallpaper", null);
 
         if (which != FLAG_SET_SYSTEM && which != FLAG_SET_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to read");
@@ -1147,6 +1140,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    @Override
     public WallpaperInfo getWallpaperInfo() {
         int userId = UserHandle.getCallingUserId();
         synchronized (mLock) {
@@ -1156,6 +1150,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             return null;
         }
+    }
+
+    @Override
+    public int getWallpaperIdForUser(int which, int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "getWallpaperIdForUser", null);
+
+        if (which != FLAG_SET_SYSTEM && which != FLAG_SET_LOCK) {
+            throw new IllegalArgumentException("Must specify exactly one kind of wallpaper");
+        }
+
+        final SparseArray<WallpaperData> map =
+                (which == FLAG_SET_LOCK) ? mLockWallpaperMap : mWallpaperMap;
+        synchronized (mLock) {
+            WallpaperData wallpaper = map.get(userId);
+            if (wallpaper != null) {
+                return wallpaper.wallpaperId;
+            }
+        }
+        return -1;
     }
 
     @Override
