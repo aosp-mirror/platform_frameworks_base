@@ -26,6 +26,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
@@ -329,8 +330,13 @@ public final class BridgeTypedArray extends TypedArray {
 
 
         try {
-            // Get the state list file content from callback to parse PSI file
-            XmlPullParser parser = mContext.getLayoutlibCallback().getXmlFileParser(value);
+            XmlPullParser parser = null;
+            Boolean psiParserSupport = mContext.getLayoutlibCallback().getFlag(
+                    RenderParamsFlags.FLAG_KEY_XML_FILE_PARSER_SUPPORT);
+            if (psiParserSupport != null && psiParserSupport) {
+                // Get the state list file content from callback to parse PSI file
+                parser = mContext.getLayoutlibCallback().getXmlFileParser(value);
+            }
             if (parser == null) {
                 // If used with a version of Android Studio that does not implement getXmlFileParser
                 // fall back to reading the file from disk
