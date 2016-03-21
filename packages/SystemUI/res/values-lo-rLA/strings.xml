@@ -536,8 +536,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"ເລືອກປຸ່ມແປ້ນພິມ"</string>
     <string name="preview" msgid="9077832302472282938">"ສະແດງຕົວຢ່າງ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ລາກເພື່ອເພີ່ມໄທລ໌"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ລາກມາບ່ອນນີ້ເພື່ອລຶບອອກ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ແກ້ໄຂ"</string>
     <string name="tuner_time" msgid="6572217313285536011">"ເວລາ"</string>
   <string-array name="clock_options">
