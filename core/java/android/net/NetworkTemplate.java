@@ -250,6 +250,16 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    public boolean isPersistable() {
+        switch (mMatchRule) {
+            case MATCH_MOBILE_WILDCARD:
+            case MATCH_WIFI_WILDCARD:
+                return false;
+            default:
+                return true;
+        }
+    }
+
     public int getMatchRule() {
         return mMatchRule;
     }
