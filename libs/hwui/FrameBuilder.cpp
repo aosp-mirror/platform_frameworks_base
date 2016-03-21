@@ -574,7 +574,7 @@ void FrameBuilder::deferCirclePropsOp(const CirclePropsOp& op) {
 }
 
 void FrameBuilder::deferFunctorOp(const FunctorOp& op) {
-    BakedOpState* bakedState = tryBakeOpState(op);
+    BakedOpState* bakedState = tryBakeUnboundedOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Functor);
 }
@@ -663,7 +663,7 @@ void FrameBuilder::deferTextOp(const TextOp& op) {
 }
 
 void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
-    BakedOpState* bakedState = tryBakeOpState(op);
+    BakedOpState* bakedState = tryBakeUnboundedOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
 }

@@ -257,8 +257,10 @@ struct CirclePropsOp : RecordedOp {
 };
 
 struct FunctorOp : RecordedOp {
-    FunctorOp(BASE_PARAMS_PAINTLESS, Functor* functor)
-            : SUPER_PAINTLESS(FunctorOp)
+    // Note: undefined record-time bounds, since this op fills the clip
+    // TODO: explicitly define bounds
+    FunctorOp(const Matrix4& localMatrix, const ClipBase* localClip, Functor* functor)
+            : RecordedOp(RecordedOpId::FunctorOp, Rect(), localMatrix, localClip, nullptr)
             , functor(functor) {}
     Functor* functor;
 };
@@ -385,9 +387,10 @@ struct TextOp : RecordedOp {
 };
 
 struct TextOnPathOp : RecordedOp {
-    TextOnPathOp(BASE_PARAMS, const glyph_t* glyphs, int glyphCount,
-            const SkPath* path, float hOffset, float vOffset)
-            : SUPER(TextOnPathOp)
+    // TODO: explicitly define bounds
+    TextOnPathOp(const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint,
+            const glyph_t* glyphs, int glyphCount, const SkPath* path, float hOffset, float vOffset)
+            : RecordedOp(RecordedOpId::TextOnPathOp, Rect(), localMatrix, localClip, paint)
             , glyphs(glyphs)
             , glyphCount(glyphCount)
             , path(path)
