@@ -2918,9 +2918,15 @@ public class BackupManagerService {
                 mBackupRunning = false;
                 if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
                     // Make sure we back up everything and perform the one-time init
-                    clearMetadata();
                     if (MORE_DEBUG) Slog.d(TAG, "Server requires init; rerunning");
                     addBackupTrace("init required; rerunning");
+                    try {
+                        mPendingInits.add(mTransport.transportDirName());
+                    } catch (Exception e) {
+                        Slog.w(TAG, "Failed to query transport name heading for init", e);
+                        // swallow it and proceed; we don't rely on this
+                    }
+                    clearMetadata();
                     backupNow();
                 }
             }
@@ -4451,13 +4457,21 @@ public class BackupManagerService {
                             }
                         }
 
-                        // We still could fail in backup runner thread, getting result from there.
-                        int backupRunnerResult = backupRunner.getBackupResultBlocking();
-                        if (backupPackageStatus != BackupTransport.TRANSPORT_ERROR
-                                && backupRunnerResult != BackupTransport.TRANSPORT_OK) {
-                            // If there was an error in runner thread and
-                            // not TRANSPORT_ERROR here, overwrite it.
-                            backupPackageStatus = backupRunnerResult;
+                        // TRANSPORT_ERROR here means that we've hit an error that the runner
+                        // doesn't know about, so it's still moving data but we're pulling the
+                        // rug out from under it.  Don't ask for its result:  we already know better
+                        // and we'll hang if we block waiting for it, since it relies on us to
+                        // read back the data it's writing into the engine.  Just proceed with
+                        // a graceful failure.  The runner/engine mechanism will tear itself
+                        // down cleanly when we close the pipes from this end.
+                        if (backupPackageStatus != BackupTransport.TRANSPORT_ERROR) {
+                            // We still could fail in backup runner thread, getting result from there.
+                            int backupRunnerResult = backupRunner.getBackupResultBlocking();
+                            if (backupRunnerResult != BackupTransport.TRANSPORT_OK) {
+                                // If there was an error in runner thread and
+                                // not TRANSPORT_ERROR here, overwrite it.
+                                backupPackageStatus = backupRunnerResult;
+                            }
                         }
 
                         if (MORE_DEBUG) {
