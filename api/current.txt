@@ -15715,7 +15715,6 @@ package android.icu.text {
 
   public final class CollationKey implements java.lang.Comparable {
     ctor public CollationKey(java.lang.String, byte[]);
-    ctor public CollationKey(java.lang.String, android.icu.text.RawCollationKey);
     method public int compareTo(android.icu.text.CollationKey);
     method public boolean equals(android.icu.text.CollationKey);
     method public android.icu.text.CollationKey getBound(int, int);
@@ -15757,7 +15756,6 @@ package android.icu.text {
     method public static final java.lang.String[] getKeywordValuesForLocale(java.lang.String, android.icu.util.ULocale, boolean);
     method public static final java.lang.String[] getKeywords();
     method public int getMaxVariable();
-    method public abstract android.icu.text.RawCollationKey getRawCollationKey(java.lang.String, android.icu.text.RawCollationKey);
     method public int[] getReorderCodes();
     method public int getStrength();
     method public android.icu.text.UnicodeSet getTailoredSet();
@@ -16785,14 +16783,6 @@ package android.icu.text {
     enum_constant public static final android.icu.text.PluralRules.PluralType ORDINAL;
   }
 
-  public final class RawCollationKey extends android.icu.util.ByteArrayWrapper {
-    ctor public RawCollationKey();
-    ctor public RawCollationKey(int);
-    ctor public RawCollationKey(byte[]);
-    ctor public RawCollationKey(byte[], int);
-    method public int compareTo(android.icu.text.RawCollationKey);
-  }
-
   public final class RelativeDateTimeFormatter {
     method public java.lang.String combineDateAndTime(java.lang.String, java.lang.String);
     method public java.lang.String format(double, android.icu.text.RelativeDateTimeFormatter.Direction, android.icu.text.RelativeDateTimeFormatter.RelativeUnit);
@@ -16876,7 +16866,6 @@ package android.icu.text {
     method public android.icu.text.CollationKey getCollationKey(java.lang.String);
     method public void getContractionsAndExpansions(android.icu.text.UnicodeSet, android.icu.text.UnicodeSet, boolean) throws java.lang.Exception;
     method public boolean getNumericCollation();
-    method public android.icu.text.RawCollationKey getRawCollationKey(java.lang.String, android.icu.text.RawCollationKey);
     method public java.lang.String getRules();
     method public java.lang.String getRules(boolean);
     method public android.icu.util.VersionInfo getUCAVersion();
@@ -17369,19 +17358,6 @@ package android.icu.util {
     ctor public BuddhistCalendar(int, int, int);
     ctor public BuddhistCalendar(int, int, int, int, int, int);
     field public static final int BE = 0; // 0x0
-  }
-
-  public class ByteArrayWrapper implements java.lang.Comparable {
-    ctor public ByteArrayWrapper();
-    ctor public ByteArrayWrapper(byte[], int);
-    ctor public ByteArrayWrapper(java.nio.ByteBuffer);
-    method public final android.icu.util.ByteArrayWrapper append(byte[], int, int);
-    method public int compareTo(android.icu.util.ByteArrayWrapper);
-    method public android.icu.util.ByteArrayWrapper ensureCapacity(int);
-    method public final byte[] releaseBytes();
-    method public final android.icu.util.ByteArrayWrapper set(byte[], int, int);
-    field public byte[] bytes;
-    field public int size;
   }
 
    abstract class CECalendar extends android.icu.util.Calendar {
