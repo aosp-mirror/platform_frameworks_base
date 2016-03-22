@@ -418,7 +418,7 @@ void DisplayListCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     addDrawOp(new (alloc()) DrawVectorDrawableOp(tree));
 }
 
-void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,
+void DisplayListCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int count,
         const SkPath& path, float hOffset, float vOffset, const SkPaint& paint) {
     if (!glyphs || count <= 0) return;
 
@@ -429,7 +429,7 @@ void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,
     addDrawOp(op);
 }
 
-void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
+void DisplayListCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions,
         int count, const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
         float totalAdvance) {

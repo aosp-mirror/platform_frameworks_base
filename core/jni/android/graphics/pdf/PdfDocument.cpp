@@ -19,7 +19,6 @@
 #include "core_jni_helpers.h"
 #include <vector>
 
-#include "Canvas.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 
 #include "SkDocument.h"
@@ -27,6 +26,8 @@
 #include "SkPictureRecorder.h"
 #include "SkStream.h"
 #include "SkRect.h"
+
+#include <hwui/Canvas.h>
 
 namespace android {
 
