@@ -7190,10 +7190,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             tmpVisibility &= ~PolicyControl.adjustClearableFlags(win, View.SYSTEM_UI_CLEARABLE_FLAGS);
         }
 
-        if (mUiMode == Configuration.UI_MODE_TYPE_CAR) {
-            tmpVisibility |= StatusBarManager.DISABLE_RECENT;
-        }
-
         final int fullscreenVisibility = updateLightStatusBarLw(0 /* vis */,
                 mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
         final int dockedVisibility = updateLightStatusBarLw(0 /* vis */,
