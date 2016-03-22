@@ -1041,7 +1041,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-hdf android.whichdoc offline \
 		-referenceonly
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-refonly
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
 include $(BUILD_DROIDDOC)
 
