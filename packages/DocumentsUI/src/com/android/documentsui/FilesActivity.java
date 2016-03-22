@@ -109,9 +109,7 @@ public class FilesActivity extends BaseActivity {
             loadRoot(uri);
         } else {
             if (DEBUG) Log.d(TAG, "All other means skipped. Launching into default directory.");
-            Uri defaultUri = DocumentsContract.buildRootUri(
-                    "com.android.providers.downloads.documents", "downloads");
-            loadRoot(defaultUri);
+            loadRoot(getDefaultRoot());
         }
 
         final @DialogType int dialogType = intent.getIntExtra(

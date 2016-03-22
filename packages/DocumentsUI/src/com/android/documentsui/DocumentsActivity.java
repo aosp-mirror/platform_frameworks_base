@@ -108,9 +108,7 @@ public class DocumentsActivity extends BaseActivity {
             // we restore the stack as last used from that app.
             if (mState.action == ACTION_PICK_COPY_DESTINATION) {
                 if (DEBUG) Log.d(TAG, "Launching directly into Home directory.");
-                Uri homeUri = DocumentsContract.buildHomeUri();
-                new LoadRootTask(this, homeUri).executeOnExecutor(
-                        ProviderExecutor.forAuthority(homeUri.getAuthority()));
+                loadRoot(getDefaultRoot());
             } else {
                 if (DEBUG) Log.d(TAG, "Attempting to load last used stack for calling package.");
                 new LoadLastUsedStackTask(this).execute();
