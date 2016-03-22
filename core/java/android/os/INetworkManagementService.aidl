@@ -97,12 +97,6 @@ interface INetworkManagementService
     void setInterfaceIpv6NdOffload(String iface, boolean enable);
 
     /**
-     * Retrieves the network routes currently configured on the specified
-     * interface
-     */
-    RouteInfo[] getRoutes(String iface);
-
-    /**
      * Add the specified route to the interface.
      */
     void addRoute(int netId, in RouteInfo route);
