@@ -397,9 +397,6 @@
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
 
-    <!-- The vertical distance from which the notification appear when children are expanded -->
-    <dimen name="notification_appear_distance">140dp</dimen>
-
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
 
