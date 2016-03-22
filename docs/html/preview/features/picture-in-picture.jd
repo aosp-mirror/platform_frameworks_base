@@ -17,6 +17,8 @@ Picture-in-picture</a></li>
 </li>
   <li><a href="#continuing_playback">Continuing Video Playback While in
 Picture-in-picture</a></li>
+  <li><a href="#single_playback">Using a Single Playback Activity for
+Picture-in-picture</a></li>
   <li><a href="#best">Best Practices</a></li>
 </ol>
 
@@ -169,6 +171,31 @@ public void onPause() {
 
 <p>When your activity switches out of PIP mode back to full-screen mode, the
 system resumes your activity and calls your <code>onResume()</code> method.</p>
+
+<h2 id="single_playback">Using a Single Playback Activity for
+Picture-in-picture</h2>
+
+<p>In your app, a user might select a new video when browsing for content on
+the main screen, while a video playback activity is in PIP mode. Play the new
+video in the existing playback activity in full screen mode, instead of
+launching a new activity that might confuse the user.</p>
+
+<p>To ensure a single activity is used for video playback requests and
+switched into or out of PIP mode as needed, set the activity's
+<code>android:launchMode</code> to <code>singleTask</code> in your manifest:
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    ...
+    android:supportsPictureInPicture="true"
+    android:launchMode="singleTask"
+    ...
+</pre>
+
+<p>In your activity, override {@link android.app.Activity#onNewIntent
+Activity.onNewIntent()} and handle the new video, stopping any existing video
+playback if needed.</p>
 
 <h2 id="best">Best Practices</h2>
 
