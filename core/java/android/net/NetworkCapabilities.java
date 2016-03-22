@@ -248,7 +248,7 @@ public final class NetworkCapabilities implements Parcelable {
      * for a network to satisfy a request, all capabilities requested must be satisfied.
      *
      * @param capability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be added.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities addCapability(int capability) {
@@ -263,7 +263,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Removes (if found) the given capability from this {@code NetworkCapability} instance.
      *
      * @param capability the {@code NetworkCapabilities.NET_CAPABILTIY_*} to be removed.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities removeCapability(int capability) {
@@ -418,7 +418,7 @@ public final class NetworkCapabilities implements Parcelable {
      * {@code NetworkCapabilities.NET_CAPABILITY_*} listed above.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be added.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities addTransportType(int transportType) {
@@ -434,7 +434,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Removes (if found) the given transport from this {@code NetworkCapability} instance.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be removed.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities removeTransportType(int transportType) {
@@ -578,14 +578,16 @@ public final class NetworkCapabilities implements Parcelable {
      * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
      *                         specific network specifier where the bearer has a choice of
      *                         networks.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public void setNetworkSpecifier(String networkSpecifier) {
+    public NetworkCapabilities setNetworkSpecifier(String networkSpecifier) {
         if (TextUtils.isEmpty(networkSpecifier) == false && Long.bitCount(mTransportTypes) != 1) {
             throw new IllegalStateException("Must have a single transport specified to use " +
                     "setNetworkSpecifier");
         }
         mNetworkSpecifier = networkSpecifier;
+        return this;
     }
 
     /**
