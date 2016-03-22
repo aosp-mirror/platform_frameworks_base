@@ -1387,6 +1387,27 @@ public class RenderScript {
     }
 
     /**
+     * Name of the file that holds the object cache.
+     */
+    private static String mCachePath;
+
+    /**
+     * Gets the path to the code cache.
+     */
+    static synchronized String getCachePath() {
+        if (mCachePath == null) {
+            final String CACHE_PATH = "com.android.renderscript.cache";
+            if (RenderScriptCacheDir.mCacheDir == null) {
+                throw new RSRuntimeException("RenderScript code cache directory uninitialized.");
+            }
+            File f = new File(RenderScriptCacheDir.mCacheDir, CACHE_PATH);
+            mCachePath = f.getAbsolutePath();
+            f.mkdirs();
+        }
+        return mCachePath;
+    }
+
+    /**
      * Create a RenderScript context.
      *
      * @param ctx The context.
@@ -1415,11 +1436,7 @@ public class RenderScript {
         }
 
         // set up cache directory for entire context
-        final String CACHE_PATH = "com.android.renderscript.cache";
-        File f = new File(RenderScriptCacheDir.mCacheDir, CACHE_PATH);
-        String mCachePath = f.getAbsolutePath();
-        f.mkdirs();
-        rs.nContextSetCacheDir(mCachePath);
+        rs.nContextSetCacheDir(RenderScript.getCachePath());
 
         rs.mMessageThread = new MessageThread(rs);
         rs.mMessageThread.start();
