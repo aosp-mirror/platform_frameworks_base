@@ -1026,11 +1026,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private void onChildrenCountChanged() {
         mIsSummaryWithChildren = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
-                && mGroupManager.hasGroupChildren(mStatusBarNotification);
+                && mChildrenContainer != null && mChildrenContainer.getChildCount() > 0;
         if (mIsSummaryWithChildren) {
-            if (mChildrenContainer == null) {
-                mChildrenContainerStub.inflate();
-            }
             if (mNotificationHeader == null) {
                 recreateNotificationHeader();
             }
