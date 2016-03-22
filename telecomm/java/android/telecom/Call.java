@@ -250,7 +250,7 @@ public final class Call {
          * in its manifest.
          * <p>
          * See {@link Connection#CAPABILITY_CAN_PULL_CALL} and
-         * {@link Connection#CAPABILITY_IS_EXTERNAL_CALL}.
+         * {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
          */
         public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
 
@@ -296,13 +296,13 @@ public final class Call {
          * Consider, for example, a scenario where a user has two phones with the same phone number.
          * When a user places a call on one device, the telephony stack can represent that call on
          * the other device by adding it to the {@link ConnectionService} with the
-         * {@link Connection#CAPABILITY_IS_EXTERNAL_CALL} capability set.
+         * {@link Connection#PROPERTY_IS_EXTERNAL_CALL} property set.
          * <p>
          * An {@link InCallService} will only see calls with this property if it has the
          * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
          * in its manifest.
          * <p>
-         * See {@link Connection#CAPABILITY_IS_EXTERNAL_CALL}.
+         * See {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
          */
         public static final int PROPERTY_IS_EXTERNAL_CALL = 0x00000040;
 
@@ -686,7 +686,7 @@ public final class Call {
             sb.append(", caps: ");
             sb.append(capabilitiesToString(mCallCapabilities));
             sb.append(", props: ");
-            sb.append(mCallProperties);
+            sb.append(propertiesToString(mCallProperties));
             sb.append("]");
             return sb.toString();
         }
