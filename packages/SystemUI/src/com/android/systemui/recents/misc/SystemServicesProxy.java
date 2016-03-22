@@ -94,10 +94,16 @@ public class SystemServicesProxy {
     final static String TAG = "SystemServicesProxy";
 
     final static BitmapFactory.Options sBitmapOptions;
-
     static {
         sBitmapOptions = new BitmapFactory.Options();
         sBitmapOptions.inMutable = true;
+    }
+
+    final static List<String> sRecentsBlacklist;
+    static {
+        sRecentsBlacklist = new ArrayList<>();
+        sRecentsBlacklist.add("com.android.systemui.tv.pip.PipOnboardingActivity");
+        sRecentsBlacklist.add("com.android.systemui.tv.pip.PipMenuActivity");
     }
 
     AccessibilityManager mAccm;
@@ -227,12 +233,13 @@ public class SystemServicesProxy {
 
             // Check the first non-recents task, include this task even if it is marked as excluded
             // from recents if we are currently in the app.  In other words, only remove excluded
-            // tasks if it is not the first active task.
+            // tasks if it is not the first active task, and not in the blacklist.
             boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            boolean isBlackListed = sRecentsBlacklist.contains(t.realActivity.getClassName());
             // Filter out recent tasks from managed profiles which are in quiet mode.
             isExcluded |= quietProfileIds.contains(t.userId);
-            if (isExcluded && (isTopTaskHome || !isFirstValidTask)) {
+            if (isBlackListed || (isExcluded && (isTopTaskHome || !isFirstValidTask))) {
                 iter.remove();
                 continue;
             }
