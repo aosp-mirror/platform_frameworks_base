@@ -164,7 +164,7 @@ adb logcat ActivityManager:I MyApp:D *:S
 </pre>
 
   <p>The final element in the above expression, <code>*:S</code>, sets the priority level for all
-  tags to "silent", thus ensuring only log messages with "View" and "MyApp" are displayed. Using
+  tags to "silent", thus ensuring only log messages with "ActivityManager" and "MyApp" are displayed. Using
   <code>*:S</code> is an excellent way to ensure that log output is restricted to the filters that
   you have explicitly specified &mdash; it lets your filters serve as a "whitelist" for log
   output.</p>
