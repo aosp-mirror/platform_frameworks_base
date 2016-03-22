@@ -16,7 +16,7 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Title of the external storage application [CHAR LIMIT=32] -->
-    <string name="app_label">Files</string>
+    <string name="app_label">MTP Host</string>
     <!-- Name of MTP root shown in UI. Please align the two strings (device
          model and storage name) in proper order in the language.
          [CHAR LIMIT=32] -->
