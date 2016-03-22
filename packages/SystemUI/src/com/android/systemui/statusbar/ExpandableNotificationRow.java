@@ -605,6 +605,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mPrivateLayout.getSingleLineView();
     }
 
+    public boolean isOnKeyguard() {
+        return mOnKeyguard;
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -1289,7 +1293,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public int getMinExpandHeight() {
         if (mIsSummaryWithChildren && !mShowingPublic) {
-            return mChildrenContainer.getMinExpandHeight(mOnKeyguard);
+            return mChildrenContainer.getMinExpandHeight();
         }
         return getMinHeight();
     }
@@ -1376,7 +1380,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             if (isGroupExpanded()) {
                 return 1.0f;
             } else if (isUserLocked()) {
-                return mChildrenContainer.getChildExpandFraction();
+                return mChildrenContainer.getGroupExpandFraction();
             }
         }
         return 0.0f;
