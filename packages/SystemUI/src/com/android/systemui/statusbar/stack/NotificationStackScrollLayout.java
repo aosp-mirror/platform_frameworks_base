@@ -706,9 +706,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     private void performDismiss(View v) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            if (mGroupManager.isChildInSuppressedGroup(row.getStatusBarNotification())) {
+            if (mGroupManager.isOnlyChildInSuppressedGroup(row.getStatusBarNotification())) {
                 ExpandableNotificationRow groupSummary =
-                        mGroupManager.getGroupSummary(row.getStatusBarNotification());
+                        mGroupManager.getLogicalGroupSummary(row.getStatusBarNotification());
                 if (groupSummary.isClearable()) {
                     performDismiss(groupSummary);
                 }
