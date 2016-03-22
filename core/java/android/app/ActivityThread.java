@@ -4390,9 +4390,7 @@ public final class ActivityThread {
             int uid = Process.myUid();
             String[] packages = getPackageManager().getPackagesForUid(uid);
 
-            // If there are several packages in this application we won't
-            // initialize the graphics disk caches
-            if (packages != null && packages.length == 1) {
+            if (packages != null) {
                 HardwareRenderer.setupDiskCache(cacheDir);
                 RenderScriptCacheDir.setupDiskCache(cacheDir);
             }
