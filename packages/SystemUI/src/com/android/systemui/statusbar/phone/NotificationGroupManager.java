@@ -35,7 +35,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private OnGroupChangeListener mListener;
     private int mBarState = -1;
-    private HashMap<String, StatusBarNotification> mHeadsUpedEntries = new HashMap<>();
+    private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
         mListener = listener;
@@ -142,7 +142,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
     private int getNumberOfIsolatedChildren(String groupKey) {
         int count = 0;
-        for (StatusBarNotification sbn : mHeadsUpedEntries.values()) {
+        for (StatusBarNotification sbn : mIsolatedEntries.values()) {
             if (sbn.getGroupKey().equals(groupKey) && isIsolated(sbn)) {
                 count++;
             }
@@ -156,8 +156,8 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
             onEntryRemovedInternal(entry, oldNotification);
         }
         onEntryAdded(entry);
-        if (mHeadsUpedEntries.containsKey(entry.key)) {
-            mHeadsUpedEntries.put(entry.key, entry.notification);
+        if (isIsolated(entry.notification)) {
+            mIsolatedEntries.put(entry.key, entry.notification);
             String oldKey = oldNotification.getGroupKey();
             String newKey = entry.notification.getGroupKey();
             if (!oldKey.equals(newKey)) {
@@ -269,8 +269,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     }
 
     private boolean isIsolated(StatusBarNotification sbn) {
-        return mHeadsUpedEntries.containsKey(sbn.getKey())
-                && sbn.getNotification().isGroupChild();
+        return mIsolatedEntries.containsKey(sbn.getKey());
     }
 
     private boolean isGroupSummary(StatusBarNotification sbn) {
@@ -309,13 +308,12 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
         final StatusBarNotification sbn = entry.notification;
         if (entry.row.isHeadsUp()) {
-            final boolean groupChild = sbn.getNotification().isGroupChild();
-            if (groupChild) {
+            if (shouldIsolate(sbn)) {
                 // We will be isolated now, so lets update the groups
                 onEntryRemovedInternal(entry, entry.notification);
-            }
-            mHeadsUpedEntries.put(sbn.getKey(), sbn);
-            if (groupChild) {
+
+                mIsolatedEntries.put(sbn.getKey(), sbn);
+
                 onEntryAdded(entry);
                 // We also need to update the suppression of the old group, because this call comes
                 // even before the groupManager knows about the notification at all.
@@ -325,19 +323,30 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 mListener.onGroupsChanged();
             }
         } else {
-            if (mHeadsUpedEntries.containsKey(sbn.getKey())) {
-                boolean isolatedBefore = isIsolated(sbn);
-                if (isolatedBefore) {
-                    // not isolated anymore, we need to update the groups
-                    onEntryRemovedInternal(entry, entry.notification);
-                }
-                mHeadsUpedEntries.remove(sbn.getKey());
-                if (isolatedBefore) {
-                    onEntryAdded(entry);
-                    mListener.onGroupsChanged();
-                }
+            if (mIsolatedEntries.containsKey(sbn.getKey())) {
+                // not isolated anymore, we need to update the groups
+                onEntryRemovedInternal(entry, entry.notification);
+                mIsolatedEntries.remove(sbn.getKey());
+                onEntryAdded(entry);
+                mListener.onGroupsChanged();
             }
         }
+    }
+
+    private boolean shouldIsolate(StatusBarNotification sbn) {
+        NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
+        return sbn.getNotification().isGroupChild()
+                && (sbn.getNotification().fullScreenIntent != null
+                        || notificationGroup == null
+                        || !notificationGroup.expanded
+                        || isGroupNotFullyVisible(notificationGroup));
+    }
+
+    private boolean isGroupNotFullyVisible(NotificationGroup notificationGroup) {
+        return notificationGroup.summary == null
+                || notificationGroup.summary.row.getClipTopOptimization() > 0
+                || notificationGroup.summary.row.getClipTopAmount() > 0
+                || notificationGroup.summary.row.getTranslationY() < 0;
     }
 
     public static class NotificationGroup {
