@@ -608,6 +608,7 @@ public class UsbDeviceManager {
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                     | Intent.FLAG_RECEIVER_FOREGROUND);
             intent.putExtra(UsbManager.USB_CONNECTED, mConnected);
+            intent.putExtra(UsbManager.USB_HOST_CONNECTED, mHostConnected);
             intent.putExtra(UsbManager.USB_CONFIGURED, mConfigured);
             intent.putExtra(UsbManager.USB_DATA_UNLOCKED, isUsbTransferAllowed() && mUsbDataUnlocked);
 
@@ -717,6 +718,9 @@ public class UsbDeviceManager {
                 case MSG_UPDATE_HOST_STATE:
                     mHostConnected = (msg.arg1 == 1);
                     updateUsbNotification();
+                    if (mBootCompleted) {
+                        updateUsbStateBroadcastIfNeeded();
+                    }
                     break;
                 case MSG_ENABLE_ADB:
                     setAdbEnabled(msg.arg1 == 1);
