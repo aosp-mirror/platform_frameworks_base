@@ -21,7 +21,7 @@
     android:layout_height="wrap_content"
     android:paddingStart="@*android:dimen/notification_content_margin_start"
     android:paddingEnd="12dp"
-    android:gravity="bottom">
+    android:gravity="bottom|start">
     <TextView
         android:id="@+id/notification_title"
         android:layout_width="wrap_content"

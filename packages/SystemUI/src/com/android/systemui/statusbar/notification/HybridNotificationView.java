@@ -60,6 +60,14 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    public TextView getTitleView() {
+        return mTitleView;
+    }
+
+    public TextView getTextView() {
+        return mTextView;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

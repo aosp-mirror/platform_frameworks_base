@@ -18,24 +18,34 @@ package com.android.systemui.statusbar.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.text.BidiFormatter;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
+
+import java.util.List;
 
 /**
- * A class managing {@link HybridNotificationView} views
+ * A class managing hybrid groups that include {@link HybridNotificationView} and the notification
+ * group overflow.
  */
-public class HybridNotificationViewManager {
+public class HybridGroupManager {
 
     private final Context mContext;
     private ViewGroup mParent;
-    private String mDivider;
+    private int mOverflowNumberColor;
 
-    public HybridNotificationViewManager(Context ctx, ViewGroup parent) {
+    public HybridGroupManager(Context ctx, ViewGroup parent) {
         mContext = ctx;
         mParent = parent;
-        mDivider = " • ";
     }
 
     private HybridNotificationView inflateHybridView() {
@@ -44,6 +54,26 @@ public class HybridNotificationViewManager {
                 R.layout.hybrid_notification, mParent, false);
         mParent.addView(hybrid);
         return hybrid;
+    }
+
+    private TextView inflateOverflowNumber() {
+        LayoutInflater inflater = mContext.getSystemService(LayoutInflater.class);
+        TextView numberView = (TextView) inflater.inflate(
+                R.layout.hybrid_overflow_number, mParent, false);
+        mParent.addView(numberView);
+        updateOverFlowNumberColor(numberView);
+        return numberView;
+    }
+
+    private void updateOverFlowNumberColor(TextView numberView) {
+        numberView.setTextColor(mOverflowNumberColor);
+    }
+
+    public void setOverflowNumberColor(TextView numberView, int overflowNumberColor) {
+        mOverflowNumberColor = overflowNumberColor;
+        if (numberView != null) {
+            updateOverFlowNumberColor(numberView);
+        }
     }
 
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
@@ -71,5 +101,17 @@ public class HybridNotificationViewManager {
             titleText = notification.extras.getCharSequence(Notification.EXTRA_TITLE_BIG);
         }
         return titleText;
+    }
+
+    public TextView bindOverflowNumber(TextView reusableView, int number) {
+        if (reusableView == null) {
+            reusableView = inflateOverflowNumber();
+        }
+        String text = mContext.getResources().getString(
+                R.string.notification_group_overflow_indicator, number);
+        if (!text.equals(reusableView.getText())) {
+            reusableView.setText(text);
+        }
+        return reusableView;
     }
 }
