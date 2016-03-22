@@ -25,7 +25,6 @@ import android.app.ActivityManagerNative;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -90,14 +89,13 @@ public class NavigationBarView extends LinearLayout {
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
-    private boolean mIsLayoutRtl;
     private boolean mLayoutTransitionsEnabled = true;
     private boolean mWakeAndUnlocking;
     private boolean mCarMode = false;
     private boolean mDockedStackExists;
 
     private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
-    private int mDensity;
+    private Configuration mConfiguration;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -183,13 +181,13 @@ public class NavigationBarView extends LinearLayout {
         mDisplay = ((WindowManager) context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
 
-        final Resources res = getContext().getResources();
         mVertical = false;
         mShowMenu = false;
         mGestureHelper = new NavigationBarGestureHelper(context);
 
-        mDensity = context.getResources().getConfiguration().densityDpi;
-        getIcons(context);
+        mConfiguration = new Configuration();
+        mConfiguration.updateFrom(context.getResources().getConfiguration());
+        updateIcons(context, Configuration.EMPTY, mConfiguration);
 
         mBarTransitions = new NavigationBarTransitions(this);
 
@@ -263,7 +261,7 @@ public class NavigationBarView extends LinearLayout {
         return mButtonDisatchers.get(R.id.ime_switcher);
     }
 
-    private void getCarModeIcons(Context ctx) {
+    private void updateCarModeIcons(Context ctx) {
         mBackCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_carmode);
         mBackLandCarModeIcon = mBackCarModeIcon;
         mBackAltCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime_carmode);
@@ -271,22 +269,27 @@ public class NavigationBarView extends LinearLayout {
         mHomeCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_home_carmode);
     }
 
-    private void getIcons(Context ctx) {
-        mBackIcon = ctx.getDrawable(R.drawable.ic_sysbar_back);
-        mBackLandIcon = mBackIcon;
-        mBackAltIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime);
-        mBackAltLandIcon = mBackAltIcon;
+    private void updateIcons(Context ctx, Configuration oldConfig, Configuration newConfig) {
+        if (oldConfig.orientation != newConfig.orientation) {
+            mDockedIcon = ctx.getDrawable(R.drawable.ic_sysbar_docked);
+        }
+        if (oldConfig.densityDpi != newConfig.densityDpi) {
+            mBackIcon = ctx.getDrawable(R.drawable.ic_sysbar_back);
+            mBackLandIcon = mBackIcon;
+            mBackAltIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime);
+            mBackAltLandIcon = mBackAltIcon;
 
-        mHomeDefaultIcon = ctx.getDrawable(R.drawable.ic_sysbar_home);
+            mHomeDefaultIcon = ctx.getDrawable(R.drawable.ic_sysbar_home);
 
-        mRecentIcon = ctx.getDrawable(R.drawable.ic_sysbar_recent);
-        mDockedIcon = ctx.getDrawable(R.drawable.ic_sysbar_docked);
-        getCarModeIcons(ctx);
+            mRecentIcon = ctx.getDrawable(R.drawable.ic_sysbar_recent);
+            updateCarModeIcons(ctx);
+        }
     }
 
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        getIcons(getContext());
+        // Reload all the icons
+        updateIcons(getContext(), Configuration.EMPTY, mConfiguration);
 
         super.setLayoutDirection(layoutDirection);
     }
@@ -598,10 +601,9 @@ public class NavigationBarView extends LinearLayout {
             // we are switching to.
             setNavigationIconHints(mNavigationIconHints, true);
         }
-        if (mDensity != newConfig.densityDpi) {
-            mDensity = newConfig.densityDpi;
-            getIcons(getContext());
-        }
+        updateIcons(getContext(), mConfiguration, newConfig);
+        updateRecentsIcon();
+        mConfiguration.updateFrom(newConfig);
     }
 
     /**
