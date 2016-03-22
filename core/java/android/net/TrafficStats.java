@@ -147,8 +147,10 @@ public class TrafficStats {
     }
 
     /**
-     * System API for backup-related support components to tag network traffic
-     * appropriately.
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. The tag used internally is well-defined to
+     * distinguish all backup-related traffic.
+     *
      * @hide
      */
     @SystemApi
@@ -157,8 +159,10 @@ public class TrafficStats {
     }
 
     /**
-     * System API for restore-related support components to tag network traffic
-     * appropriately.
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. The tag used internally is well-defined to
+     * distinguish all restore-related traffic.
+     *
      * @hide
      */
     @SystemApi
@@ -205,7 +209,13 @@ public class TrafficStats {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
 
-    /** {@hide} */
+    /**
+     * Clear any active UID set to account {@link Socket} traffic originating
+     * from the current thread.
+     *
+     * @see #setThreadStatsUid(int)
+     * @hide
+     */
     @SystemApi
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
