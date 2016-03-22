@@ -17,7 +17,7 @@
 
 #include "Paint.h"
 #include "SkPathMeasure.h"
-#include "TypefaceImpl.h"
+#include "Typeface.h"
 
 #include <cutils/log.h>
 #include <string>
@@ -25,8 +25,8 @@
 namespace android {
 
 FontStyle MinikinUtils::prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
-        const Paint* paint, TypefaceImpl* typeface) {
-    const TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
+        const Paint* paint, Typeface* typeface) {
+    const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     *pFont = resolvedFace->fFontCollection;
     FontStyle resolved = resolvedFace->fStyle;
 
@@ -51,7 +51,7 @@ FontStyle MinikinUtils::prepareMinikinPaint(MinikinPaint* minikinPaint, FontColl
 }
 
 void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags,
-        TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
+        Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
         size_t bufSize) {
     FontCollection *font;
     MinikinPaint minikinPaint;
@@ -60,7 +60,7 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags,
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
 
-float MinikinUtils::measureText(const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
+float MinikinUtils::measureText(const Paint* paint, int bidiFlags, Typeface* typeface,
         const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances) {
     FontCollection *font;
     MinikinPaint minikinPaint;
@@ -69,8 +69,8 @@ float MinikinUtils::measureText(const Paint* paint, int bidiFlags, TypefaceImpl*
             font, advances);
 }
 
-bool MinikinUtils::hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs) {
-    const TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
+bool MinikinUtils::hasVariationSelector(Typeface* typeface, uint32_t codepoint, uint32_t vs) {
+    const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);
 }
 
