@@ -78,7 +78,7 @@ class ShortcutManager {
     public Intent getIntent(KeyCharacterMap kcm, int keyCode, int metaState) {
         ShortcutInfo shortcut = null;
 
-        // If the Shift key is preesed, then search for the shift shortcuts.
+        // If the Shift key is pressed, then search for the shift shortcuts.
         boolean isShiftOn = (metaState & KeyEvent.META_SHIFT_ON) == KeyEvent.META_SHIFT_ON;
         SparseArray<ShortcutInfo> shortcutMap = isShiftOn ? mShiftShortcuts : mShortcuts;
 
