@@ -471,6 +471,11 @@ public final class GnssClock implements Parcelable {
                 "DriftUncertaintyNanosPerSecond",
                 hasDriftUncertaintyNanosPerSecond() ? mDriftUncertaintyNanosPerSecond : null));
 
+        builder.append(String.format(
+                format,
+                "HardwareClockDiscontinuityCount",
+                mHardwareClockDiscontinuityCount));
+
         return builder.toString();
     }
 
