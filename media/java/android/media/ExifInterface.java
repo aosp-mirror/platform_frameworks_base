@@ -830,7 +830,9 @@ public class ExifInterface {
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
-            Log.w(TAG, "Invalid JPEG", e);
+            Log.w(TAG, "Invalid JPEG: ExifInterface got an unsupported image format file"
+                    + "(ExifInterface supports JPEG and some RAW image formats only) "
+                    + "or a corrupted JPEG file to ExifInterface.", e);
         }
 
         if (DEBUG) {
@@ -1189,6 +1191,10 @@ public class ExifInterface {
         ++bytesRead;
         while (true) {
             marker = dataInputStream.readByte();
+            if (marker == -1) {
+                Log.w(TAG, "Reading JPEG has ended unexpectedly");
+                break;
+            }
             if (marker != MARKER) {
                 throw new IOException("Invalid marker:" + Integer.toHexString(marker & 0xff));
             }
@@ -1207,7 +1213,8 @@ public class ExifInterface {
             int length = dataInputStream.readUnsignedShort() - 2;
             bytesRead += 2;
             if (DEBUG) {
-                Log.d(TAG, "JPEG segment: " + marker + " (length: " + (length + 2) + ")");
+                Log.d(TAG, "JPEG segment: " + Integer.toHexString(marker & 0xff) + " (length: "
+                        + (length + 2) + ")");
             }
             if (length < 0) {
                 throw new IOException("Invalid length");
@@ -1270,7 +1277,9 @@ public class ExifInterface {
                 case MARKER_SOF13:
                 case MARKER_SOF14:
                 case MARKER_SOF15: {
-                    dataInputStream.skipBytes(1);
+                    if (dataInputStream.skipBytes(1) != 1) {
+                        throw new IOException("Invalid SOFx");
+                    }
                     setAttribute("ImageLength",
                             String.valueOf(dataInputStream.readUnsignedShort()));
                     setAttribute("ImageWidth", String.valueOf(dataInputStream.readUnsignedShort()));
@@ -1285,7 +1294,9 @@ public class ExifInterface {
             if (length < 0) {
                 throw new IOException("Invalid length");
             }
-            dataInputStream.skipBytes(length);
+            if (dataInputStream.skipBytes(length) != length) {
+                throw new IOException("Invalid JPEG segment");
+            }
             bytesRead += length;
         }
     }
@@ -1317,10 +1328,15 @@ public class ExifInterface {
         byte[] bytes = new byte[4096];
 
         while (true) {
-            if (dataInputStream.readByte() != MARKER) {
+            byte marker = dataInputStream.readByte();
+            if (marker == -1) {
+                Log.w(TAG, "Reading JPEG has ended unexpectedly");
+                break;
+            }
+            if (marker != MARKER) {
                 throw new IOException("Invalid marker");
             }
-            byte marker = dataInputStream.readByte();
+            marker = dataInputStream.readByte();
             switch (marker) {
                 case MARKER_APP1: {
                     int length = dataInputStream.readUnsignedShort() - 2;
@@ -1644,7 +1660,7 @@ public class ExifInterface {
             String tagName = (String) sExifTagMapsForReading[hint].get(tagNumber);
 
             if (DEBUG) {
-                Log.d(TAG, String.format("hint: %d, tagNumber: %d, tagName: %s, dataFormat: %d," +
+                Log.d(TAG, String.format("hint: %d, tagNumber: %d, tagName: %s, dataFormat: %d, " +
                         "numberOfComponents: %d", hint, tagNumber, tagName, dataFormat,
                         numberOfComponents));
             }
