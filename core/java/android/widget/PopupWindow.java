@@ -2027,21 +2027,24 @@ public class PopupWindow {
             mAnchorYoff = yoff;
         }
 
+        final WindowManager.LayoutParams p =
+                (WindowManager.LayoutParams) mDecorView.getLayoutParams();
+
         if (updateDimension) {
             if (width == -1) {
                 width = mPopupWidth;
             } else {
                 mPopupWidth = width;
+                p.width = width;
             }
             if (height == -1) {
                 height = mPopupHeight;
             } else {
                 mPopupHeight = height;
+                p.height  = height;
             }
         }
 
-        final WindowManager.LayoutParams p =
-                (WindowManager.LayoutParams) mDecorView.getLayoutParams();
         final int x = p.x;
         final int y = p.y;
         if (updateLocation) {
