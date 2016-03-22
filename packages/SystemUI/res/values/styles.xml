@@ -305,7 +305,7 @@
 
     <style name="TextAppearance.NotificationGuts">
         <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">roboto-regular</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
 
