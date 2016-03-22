@@ -2056,24 +2056,24 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
+            boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
             if (onKeyguard) {
                 entry.row.setOnKeyguard(true);
             } else {
                 entry.row.setOnKeyguard(false);
-                boolean top = (i == 0);
-                entry.row.setSystemExpanded(top);
+                entry.row.setSystemExpanded(visibleNotifications == 0 && !childNotification);
             }
-            boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
+            boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(entry.notification);
             boolean childWithVisibleSummary = childNotification
                     && mGroupManager.getGroupSummary(entry.notification).getVisibility()
                     == View.VISIBLE;
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
-            if ((isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
+            if (suppressedSummary || (isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
                     (onKeyguard && (visibleNotifications >= maxNotifications
                             && !childWithVisibleSummary
                             || !showOnKeyguard))) {
                 entry.row.setVisibility(View.GONE);
-                if (onKeyguard && showOnKeyguard && !childNotification) {
+                if (onKeyguard && showOnKeyguard && !childNotification && !suppressedSummary) {
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
@@ -2082,7 +2082,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (!childNotification) {
                     if (wasGone) {
                         // notify the scroller of a child addition
-                        mStackScroller.generateAddAnimation(entry.row, true /* fromMoreCard */);
+                        mStackScroller.generateAddAnimation(entry.row,
+                                !showOnKeyguard /* fromMoreCard */);
                     }
                     visibleNotifications++;
                 }

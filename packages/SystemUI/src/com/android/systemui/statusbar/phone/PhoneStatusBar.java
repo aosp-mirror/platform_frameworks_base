@@ -132,6 +132,7 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
@@ -1632,16 +1633,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateSpeedbump() {
         int speedbumpIndex = -1;
         int currentIndex = 0;
-        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-        final int N = activeNotifications.size();
+        final int N = mStackScroller.getChildCount();
         for (int i = 0; i < N; i++) {
-            Entry entry = activeNotifications.get(i);
-            boolean isChild = !isTopLevelChild(entry);
-            if (isChild) {
+            View view = mStackScroller.getChildAt(i);
+            if (view.getVisibility() == View.GONE || !(view instanceof ExpandableNotificationRow)) {
                 continue;
             }
-            if (entry.row.getVisibility() != View.GONE &&
-                    mNotificationData.isAmbient(entry.key)) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (mNotificationData.isAmbient(row.getStatusBarNotification().getKey())) {
                 speedbumpIndex = currentIndex;
                 break;
             }
