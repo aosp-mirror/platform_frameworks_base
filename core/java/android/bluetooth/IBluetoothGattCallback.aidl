@@ -31,27 +31,12 @@ oneway interface IBluetoothGattCallback {
     void onScanResult(in ScanResult scanResult);
     void onBatchScanResults(in List<ScanResult> batchResults);
     void onSearchComplete(in String address, in List<BluetoothGattService> services, in int status);
-    void onCharacteristicRead(in String address, in int status, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid,
-                             in byte[] value);
-    void onCharacteristicWrite(in String address, in int status, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid);
+    void onCharacteristicRead(in String address, in int status, in int handle, in byte[] value);
+    void onCharacteristicWrite(in String address, in int status, in int handle);
     void onExecuteWrite(in String address, in int status);
-    void onDescriptorRead(in String address, in int status, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid,
-                             in int descrInstId, in ParcelUuid descrUuid,
-                             in byte[] value);
-    void onDescriptorWrite(in String address, in int status, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid,
-                             in int descrInstId, in ParcelUuid descrUuid);
-    void onNotify(in String address, in int srvcType,
-                             in int srvcInstId, in ParcelUuid srvcUuid,
-                             in int charInstId, in ParcelUuid charUuid,
-                             in byte[] value);
+    void onDescriptorRead(in String address, in int status, in int handle, in byte[] value);
+    void onDescriptorWrite(in String address, in int status, in int handle);
+    void onNotify(in String address, in int handle, in byte[] value);
     void onReadRemoteRssi(in String address, in int rssi, in int status);
     void onMultiAdvertiseCallback(in int status, boolean isStart,
                                   in AdvertiseSettings advertiseSettings);
