@@ -40,7 +40,7 @@
 #include <hwui/MinikinSkia.h>
 #include <hwui/MinikinUtils.h>
 #include <hwui/Paint.h>
-#include <hwui/TypefaceImpl.h>
+#include <hwui/Typeface.h>
 #include <minikin/GraphemeBreak.h>
 #include <minikin/Measurement.h>
 #include <unicode/utf16.h>
@@ -402,8 +402,8 @@ namespace PaintGlue {
         const int kElegantDescent = -500;
         const int kElegantLeading = 0;
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-        typeface = TypefaceImpl_resolveDefault(typeface);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        typeface = Typeface::resolveDefault(typeface);
         FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
         float saveSkewX = paint->getTextSkewX();
         bool savefakeBold = paint->isFakeBoldText();
@@ -474,7 +474,7 @@ namespace PaintGlue {
         return descent - ascent + leading;
     }
 
-    static jfloat doTextAdvances(JNIEnv *env, Paint *paint, TypefaceImpl* typeface,
+    static jfloat doTextAdvances(JNIEnv *env, Paint *paint, Typeface* typeface,
             const jchar *text, jint start, jint count, jint contextCount, jint bidiFlags,
             jfloatArray advances, jint advancesIndex) {
         NPE_CHECK_RETURN_ZERO(env, text);
@@ -510,7 +510,7 @@ namespace PaintGlue {
             jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
             jint bidiFlags, jfloatArray advances, jint advancesIndex) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = doTextAdvances(env, paint, typeface, textArray + contextIndex,
                 index - contextIndex, count, contextCount, bidiFlags, advances, advancesIndex);
@@ -523,7 +523,7 @@ namespace PaintGlue {
             jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint bidiFlags,
             jfloatArray advances, jint advancesIndex) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
         jfloat result = doTextAdvances(env, paint, typeface, textArray + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, bidiFlags,
@@ -590,7 +590,7 @@ namespace PaintGlue {
         SkPath tmpPath;
     };
 
-    static void getTextPath(JNIEnv* env, Paint* paint, TypefaceImpl* typeface, const jchar* text,
+    static void getTextPath(JNIEnv* env, Paint* paint, Typeface* typeface, const jchar* text,
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
         Layout layout;
         MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
@@ -613,7 +613,7 @@ namespace PaintGlue {
             jlong typefaceHandle, jint bidiFlags,
             jcharArray text, jint index, jint count, jfloat x, jfloat y, jlong pathHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
         getTextPath(env, paint, typeface, textArray + index, count, bidiFlags, x, y, path);
@@ -624,7 +624,7 @@ namespace PaintGlue {
             jlong typefaceHandle, jint bidiFlags,
             jstring text, jint start, jint end, jfloat x, jfloat y, jlong pathHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
         getTextPath(env, paint, typeface, textArray + start, end - start, bidiFlags, x, y, path);
@@ -648,7 +648,7 @@ namespace PaintGlue {
         return paint->getLooper() && paint->getLooper()->asABlurShadow(NULL);
     }
 
-    static int breakText(JNIEnv* env, const Paint& paint, TypefaceImpl* typeface, const jchar text[],
+    static int breakText(JNIEnv* env, const Paint& paint, Typeface* typeface, const jchar text[],
                          int count, float maxWidth, jint bidiFlags, jfloatArray jmeasured,
                          const bool forwardScan) {
         size_t measuredCount = 0;
@@ -685,7 +685,7 @@ namespace PaintGlue {
         NPE_CHECK_RETURN_ZERO(env, jtext);
 
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
         bool forwardTextDirection;
         if (count < 0) {
@@ -714,7 +714,7 @@ namespace PaintGlue {
         NPE_CHECK_RETURN_ZERO(env, jtext);
 
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
         int count = env->GetStringLength(jtext);
         const jchar* text = env->GetStringChars(jtext, NULL);
@@ -724,7 +724,7 @@ namespace PaintGlue {
     }
 
     static void doTextBounds(JNIEnv* env, const jchar* text, int count, jobject bounds,
-            const Paint& paint, TypefaceImpl* typeface, jint bidiFlags) {
+            const Paint& paint, Typeface* typeface, jint bidiFlags) {
         SkRect  r;
         SkIRect ir;
 
@@ -743,7 +743,7 @@ namespace PaintGlue {
     static void getStringBounds(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle,
                                 jstring text, jint start, jint end, jint bidiFlags, jobject bounds) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, NULL);
         doTextBounds(env, textArray + start, end - start, bounds, *paint, typeface, bidiFlags);
         env->ReleaseStringChars(text, textArray);
@@ -752,7 +752,7 @@ namespace PaintGlue {
     static void getCharArrayBounds(JNIEnv* env, jobject, jlong paintHandle, jlong typefaceHandle,
                         jcharArray text, jint index, jint count, jint bidiFlags, jobject bounds) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
         doTextBounds(env, textArray + index, count, bounds, *paint, typeface, bidiFlags);
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
@@ -771,7 +771,7 @@ namespace PaintGlue {
     static jboolean hasGlyph(JNIEnv *env, jclass, jlong paintHandle, jlong typefaceHandle,
             jint bidiFlags, jstring string) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         ScopedStringChars str(env, string);
 
         /* Start by rejecting unsupported base code point and variation selector pairs. */
@@ -820,7 +820,7 @@ namespace PaintGlue {
         return nGlyphs > 0 && !layoutContainsNotdef(layout);
     }
 
-    static jfloat doRunAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
+    static jfloat doRunAdvance(const Paint* paint, Typeface* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
         if (offset == count) {
@@ -837,7 +837,7 @@ namespace PaintGlue {
             jlong typefaceHandle, jcharArray text, jint start, jint end, jint contextStart,
             jint contextEnd, jboolean isRtl, jint offset) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         jchar* textArray = (jchar*) env->GetPrimitiveArrayCritical(text, NULL);
         jfloat result = doRunAdvance(paint, typeface, textArray + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, isRtl,
@@ -846,7 +846,7 @@ namespace PaintGlue {
         return result;
     }
 
-    static jint doOffsetForAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
+    static jint doOffsetForAdvance(const Paint* paint, Typeface* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jfloat advance) {
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
         std::unique_ptr<float[]> advancesArray(new float[count]);
@@ -859,7 +859,7 @@ namespace PaintGlue {
             jlong typefaceHandle, jcharArray text, jint start, jint end, jint contextStart,
             jint contextEnd, jboolean isRtl, jfloat advance) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         jchar* textArray = (jchar*) env->GetPrimitiveArrayCritical(text, NULL);
         jint result = doOffsetForAdvance(paint, typeface, textArray + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, isRtl, advance);

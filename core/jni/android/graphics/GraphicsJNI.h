@@ -19,7 +19,7 @@ class SkCanvas;
 
 namespace android {
 class Paint;
-struct TypefaceImpl;
+struct Typeface;
 }
 
 class GraphicsJNI {

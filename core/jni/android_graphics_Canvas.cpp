@@ -21,7 +21,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
-#include <hwui/TypefaceImpl.h>
+#include <hwui/Typeface.h>
 #include <minikin/Layout.h>
 
 #include "Bitmap.h"
@@ -478,7 +478,7 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray t
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
                           jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
@@ -489,7 +489,7 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring tex
                            jint start, jint end, jfloat x, jfloat y, jint bidiFlags,
                            jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
@@ -501,7 +501,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
                              jint count, jint contextIndex, jint contextCount, jfloat x, jfloat y,
                              jboolean isRtl, jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
@@ -515,7 +515,7 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
                               jfloat x, jfloat y, jboolean isRtl, jlong paintHandle,
                               jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     jint count = end - start;
@@ -532,7 +532,7 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
                                 jlong typefaceHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
@@ -547,7 +547,7 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
                                  jint bidiFlags, jlong paintHandle, jlong typefaceHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
