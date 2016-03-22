@@ -438,6 +438,17 @@ public abstract class BaseActivity extends Activity
         return mState;
     }
 
+    /*
+     * Get the default directory to be presented after starting the activity.
+     * Method can be overridden if the change of the behavior of the the child activity is needed.
+     */
+    public Uri getDefaultRoot() {
+        return Shared.isHomeRootHidden(this)
+                ? DocumentsContract.buildRootUri("com.android.providers.downloads.documents",
+                        "downloads")
+                : DocumentsContract.buildHomeUri();
+    }
+
     void setDisplayFileSize(boolean display) {
         LocalPreferences.setDisplayFileSize(this, display);
         mState.showSize = display;
