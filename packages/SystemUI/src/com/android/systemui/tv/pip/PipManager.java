@@ -120,6 +120,14 @@ public class PipManager {
             mMediaSessionManager.addOnActiveSessionsChangedListener(
                     mActiveMediaSessionListener, null);
             updateMediaController(mMediaSessionManager.getActiveSessions(null));
+            if (mIsRecentsShown) {
+                // If an activity becomes PIPed again after the fullscreen, the Recents is shown
+                // behind so we need to resize the pinned stack and show the correct overlay.
+                resizePinnedStack(STATE_PIP_OVERLAY);
+            }
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                mListeners.get(i).onPipEntered();
+            }
         }
     };
     private final Runnable mOnTaskStackChanged = new Runnable() {
@@ -384,7 +392,7 @@ public class PipManager {
         try {
             mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds, true, true, true, -1);
         } catch (RemoteException e) {
-            Log.e(TAG, "showPipMenu failed", e);
+            Log.e(TAG, "resizeStack failed", e);
         }
     }
 
@@ -482,17 +490,7 @@ public class PipManager {
      * Returns {@code true} if PIP is shown.
      */
     public boolean isPipShown() {
-        return hasPipTasks();
-    }
-
-    private boolean hasPipTasks() {
-        try {
-            StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-            return stackInfo != null;
-        } catch (RemoteException e) {
-            Log.e(TAG, "getStackInfo failed", e);
-            return false;
-        }
+        return mState != STATE_NO_PIP;
     }
 
     private void handleMediaResourceGranted(String[] packageNames) {
@@ -600,6 +598,13 @@ public class PipManager {
      * A listener interface to receive notification on changes in PIP.
      */
     public interface Listener {
+        /**
+         * Invoked when an activity is pinned and PIP manager is set corresponding information.
+         * Classes must use this instead of {@link android.app.ITaskStackListener.onActivityPinned}
+         * because there's no guarantee for the PIP manager be return relavent information
+         * correctly. (e.g. {@link isPipShown}, {@link getPipBounds})
+         */
+        void onPipEntered();
         /** Invoked when a PIPed activity is closed. */
         void onPipActivityClosed();
         /** Invoked when the PIP menu gets shown. */

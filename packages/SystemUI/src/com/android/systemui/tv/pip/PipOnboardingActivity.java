@@ -67,6 +67,9 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
     }
 
     @Override
+    public void onPipEntered() { }
+
+    @Override
     public void onPipActivityClosed() {
         finish();
     }

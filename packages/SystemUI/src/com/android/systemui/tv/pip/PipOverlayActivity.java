@@ -109,6 +109,9 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     }
 
     @Override
+    public void onPipEntered() { }
+
+    @Override
     public void onPipActivityClosed() {
         finish();
     }
@@ -131,8 +134,7 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     }
 
     @Override
-    public void onMediaControllerChanged() {
-    }
+    public void onMediaControllerChanged() { }
 
     @Override
     public void finish() {

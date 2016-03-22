@@ -38,16 +38,15 @@
         android:id="@+id/pip_shade"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:background="#76000000"/>
 
     <!-- Placeholder view to handle key events for PIP when it's focused.
-         Size and positions will be adjusted to comply with
-         config_pictureInPictureBoundsInRecents -->
+         Size and positions will be adjusted to comply with the PIP bounds -->
     <View
         android:id="@+id/pip"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:focusable="true" />
 </com.android.systemui.recents.tv.views.RecentsTvView>
