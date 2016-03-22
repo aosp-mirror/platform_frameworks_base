@@ -25,6 +25,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
@@ -73,6 +75,11 @@ public class SystemUIFactory {
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
             View headsUpScrim) {
         return new ScrimController(scrimBehind, scrimInFront, headsUpScrim);
+    }
+
+    public NotificationIconAreaController createNotificationIconAreaController(Context context,
+            PhoneStatusBar phoneStatusBar) {
+        return new NotificationIconAreaController(context, phoneStatusBar);
     }
 
     public <T> T createInstance(Class<T> classType) {
