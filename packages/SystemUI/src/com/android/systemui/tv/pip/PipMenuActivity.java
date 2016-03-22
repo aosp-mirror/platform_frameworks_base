@@ -198,6 +198,9 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     }
 
     @Override
+    public void onPipEntered() { }
+
+    @Override
     public void onPipActivityClosed() {
         finish();
     }
