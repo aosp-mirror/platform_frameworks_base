@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2011 The Android Open Source Project
  *
@@ -650,18 +651,27 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo getUserInfo(int userId) {
+        checkManageUsersPermission("query user");
+        synchronized (mUsersLock) {
+            return getUserInfoLU(userId);
+        }
+    }
+
+    @Override
+    public boolean isManagedProfile(int userId) {
         int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId != userId && !hasManageUsersPermission()) {
             synchronized (mPackagesLock) {
                 if (!isSameProfileGroupLP(callingUserId, userId)) {
                     throw new SecurityException(
-                            "You need MANAGE_USERS permission to: query users outside profile" +
-                                    " group");
+                            "You need MANAGE_USERS permission to: check if specified user a " +
+                            "managed profile outside your profile group");
                 }
             }
         }
         synchronized (mUsersLock) {
-            return getUserInfoLU(userId);
+            UserInfo userInfo =  getUserInfoLU(userId);
+            return userInfo != null && userInfo.isManagedProfile();
         }
     }
 
