@@ -858,7 +858,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             showing.setDark(dark, fade, delay);
         }
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.setDark(dark, fade, delay);
             mNotificationHeaderWrapper.setDark(dark, fade, delay);
         }
     }
@@ -955,9 +954,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mIsSystemExpanded = expand;
             notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
-            if (mChildrenContainer != null) {
-                mChildrenContainer.updateGroupOverflow();
-            }
         }
     }
 
@@ -970,9 +966,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mOnKeyguard = onKeyguard;
             logExpansionEvent(false, wasExpanded);
             if (wasExpanded != isExpanded()) {
-                if (mIsSummaryWithChildren) {
-                    mChildrenContainer.updateGroupOverflow();
-                }
                 notifyHeightChanged(false /* needsAnimation */);
             }
         }
