@@ -130,11 +130,14 @@ class MtpManager {
         return devices.toArray(new MtpDeviceRecord[devices.size()]);
     }
 
-    MtpObjectInfo getObjectInfo(int deviceId, int objectHandle)
-            throws IOException {
+    MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
-            return device.getObjectInfo(objectHandle);
+            final MtpObjectInfo info = device.getObjectInfo(objectHandle);
+            if (info == null) {
+                throw new IOException("Failed to get object info: " + objectHandle);
+            }
+            return info;
         }
     }
 
