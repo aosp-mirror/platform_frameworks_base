@@ -41,7 +41,6 @@
 extern "C" {
 int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
-int ifc_reset_connections(const char *ifname, int reset_mask);
 }
 
 #define NETUTILS_PKG_NAME "android/net/NetworkUtils"
@@ -49,21 +48,6 @@ int ifc_reset_connections(const char *ifname, int reset_mask);
 namespace android {
 
 static const uint16_t kDhcpClientPort = 68;
-
-static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz,
-      jstring ifname, jint mask)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-
-    ALOGD("android_net_utils_resetConnections in env=%p clazz=%p iface=%s mask=0x%x\n",
-          env, clazz, nameStr, mask);
-
-    result = ::ifc_reset_connections(nameStr, mask);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
 
 static void android_net_utils_attachDhcpFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
@@ -181,7 +165,6 @@ static jboolean android_net_utils_queryUserAccess(JNIEnv *env, jobject thiz, jin
  */
 static const JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
-    { "resetConnections", "(Ljava/lang/String;I)I",  (void *)android_net_utils_resetConnections },
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
     { "getBoundNetworkForProcess", "()I", (void*) android_net_utils_getBoundNetworkForProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
