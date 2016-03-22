@@ -20,7 +20,7 @@
  * being, that choice is hidden under the USE_MINIKIN compile-time flag.
  */
 
-#include "TypefaceImpl.h"
+#include "Typeface.h"
 
 #include "MinikinSkia.h"
 #include "SkTypeface.h"
@@ -34,7 +34,7 @@
 namespace android {
 
 // Resolve the 1..9 weight based on base weight and bold flag
-static void resolveStyle(TypefaceImpl* typeface) {
+static void resolveStyle(Typeface* typeface) {
     int weight = typeface->fBaseWeight / 100;
     if (typeface->fSkiaStyle & SkTypeface::kBold) {
         weight += 3;
@@ -46,7 +46,7 @@ static void resolveStyle(TypefaceImpl* typeface) {
     typeface->fStyle = FontStyle(weight, italic);
 }
 
-TypefaceImpl* gDefaultTypeface = NULL;
+Typeface* gDefaultTypeface = NULL;
 pthread_once_t gDefaultTypefaceOnce = PTHREAD_ONCE_INIT;
 
 // This installs a default typeface (from a hardcoded path) that allows
@@ -85,7 +85,7 @@ static void getDefaultTypefaceOnce() {
     if (gDefaultTypeface == NULL) {
         // We expect the client to set a default typeface, but provide a
         // default so we can make progress before that happens.
-        gDefaultTypeface = new TypefaceImpl;
+        gDefaultTypeface = new Typeface;
         gDefaultTypeface->fFontCollection = makeFontCollection();
         gDefaultTypeface->fSkiaStyle = SkTypeface::kNormal;
         gDefaultTypeface->fBaseWeight = 400;
@@ -93,7 +93,7 @@ static void getDefaultTypefaceOnce() {
     }
 }
 
-TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src) {
+Typeface* Typeface::resolveDefault(Typeface* src) {
     if (src == NULL) {
         pthread_once(&gDefaultTypefaceOnce, getDefaultTypefaceOnce);
         return gDefaultTypeface;
@@ -102,9 +102,9 @@ TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src) {
     }
 }
 
-TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style) {
-    TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(src);
-    TypefaceImpl* result = new TypefaceImpl;
+Typeface* Typeface::createFromTypeface(Typeface* src, SkTypeface::Style style) {
+    Typeface* resolvedFace = Typeface::resolveDefault(src);
+    Typeface* result = new Typeface;
     if (result != 0) {
         result->fFontCollection = resolvedFace->fFontCollection;
         result->fFontCollection->Ref();
@@ -115,9 +115,9 @@ TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Sty
     return result;
 }
 
-TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int weight) {
-    TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(src);
-    TypefaceImpl* result = new TypefaceImpl;
+Typeface* Typeface::createWeightAlias(Typeface* src, int weight) {
+    Typeface* resolvedFace = Typeface::resolveDefault(src);
+    Typeface* result = new Typeface;
     if (result != 0) {
         result->fFontCollection = resolvedFace->fFontCollection;
         result->fFontCollection->Ref();
@@ -128,8 +128,8 @@ TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int weight) {
     return result;
 }
 
-TypefaceImpl* TypefaceImpl_createFromFamilies(const std::vector<FontFamily*>& families) {
-    TypefaceImpl* result = new TypefaceImpl;
+Typeface* Typeface::createFromFamilies(const std::vector<FontFamily*>& families) {
+    Typeface* result = new Typeface;
     result->fFontCollection = new FontCollection(families);
     if (families.empty()) {
         ALOGW("createFromFamilies creating empty collection");
@@ -152,18 +152,12 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const std::vector<FontFamily*>& fa
     return result;
 }
 
-void TypefaceImpl_unref(TypefaceImpl* face) {
-    if (face != NULL) {
-        face->fFontCollection->Unref();
-    }
-    delete face;
+void Typeface::unref() {
+    fFontCollection->Unref();
+    delete this;
 }
 
-int TypefaceImpl_getStyle(TypefaceImpl* face) {
-    return face->fSkiaStyle;
-}
-
-void TypefaceImpl_setDefault(TypefaceImpl* face) {
+void Typeface::setDefault(Typeface* face) {
     gDefaultTypeface = face;
 }
 

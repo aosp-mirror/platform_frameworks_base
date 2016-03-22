@@ -32,7 +32,7 @@
 #include "Utils.h"
 
 #include <hwui/MinikinSkia.h>
-#include <hwui/TypefaceImpl.h>
+#include <hwui/Typeface.h>
 #include <minikin/FontFamily.h>
 
 #include <memory>

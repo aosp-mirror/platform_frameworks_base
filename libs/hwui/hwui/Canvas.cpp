@@ -20,7 +20,7 @@
 #include "RecordingCanvas.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
-#include "TypefaceImpl.h"
+#include "Typeface.h"
 
 #include <SkDrawFilter.h>
 
@@ -147,7 +147,7 @@ private:
 };
 
 void Canvas::drawText(const uint16_t* text, int start, int count, int contextCount,
-        float x, float y, int bidiFlags, const Paint& origPaint, TypefaceImpl* typeface) {
+        float x, float y, int bidiFlags, const Paint& origPaint, Typeface* typeface) {
     // minikin may modify the original paint
     Paint paint(origPaint);
 
@@ -202,7 +202,7 @@ private:
 };
 
 void Canvas::drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
-        float hOffset, float vOffset, const Paint& paint, TypefaceImpl* typeface) {
+        float hOffset, float vOffset, const Paint& paint, Typeface* typeface) {
     Paint paintCopy(paint);
     Layout layout;
     MinikinUtils::doLayout(&layout, &paintCopy, bidiFlags, typeface, text, 0, count, count);

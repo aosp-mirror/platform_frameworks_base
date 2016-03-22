@@ -22,38 +22,40 @@
 #include "SkTypeface.h"
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
-#include <hwui/TypefaceImpl.h>
+#include <hwui/Typeface.h>
 
 using namespace android;
 
 static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandle, jint style) {
-    TypefaceImpl* family = reinterpret_cast<TypefaceImpl*>(familyHandle);
-    TypefaceImpl* face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)style);
+    Typeface* family = reinterpret_cast<Typeface*>(familyHandle);
+    Typeface* face = Typeface::createFromTypeface(family, (SkTypeface::Style)style);
     // TODO: the following logic shouldn't be necessary, the above should always succeed.
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
-        face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
+        face = Typeface::createFromTypeface(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
     }
     for (int i = 0; NULL == face && i < 4; i++) {
-        face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)i);
+        face = Typeface::createFromTypeface(family, (SkTypeface::Style)i);
     }
     return reinterpret_cast<jlong>(face);
 }
 
 static jlong Typeface_createWeightAlias(JNIEnv* env, jobject, jlong familyHandle, jint weight) {
-    TypefaceImpl* family = reinterpret_cast<TypefaceImpl*>(familyHandle);
-    TypefaceImpl* face = TypefaceImpl_createWeightAlias(family, weight);
+    Typeface* family = reinterpret_cast<Typeface*>(familyHandle);
+    Typeface* face = Typeface::createWeightAlias(family, weight);
     return reinterpret_cast<jlong>(face);
 }
 
 static void Typeface_unref(JNIEnv* env, jobject obj, jlong faceHandle) {
-    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-    TypefaceImpl_unref(face);
+    Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
+    if (face != NULL) {
+        face->unref();
+    }
 }
 
 static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
-    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-    return TypefaceImpl_getStyle(face);
+    Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
+    return face->fSkiaStyle;
 }
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray) {
@@ -63,12 +65,12 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
         FontFamily* family = reinterpret_cast<FontFamily*>(families[i]);
         familyVec.push_back(family);
     }
-    return reinterpret_cast<jlong>(TypefaceImpl_createFromFamilies(familyVec));
+    return reinterpret_cast<jlong>(Typeface::createFromFamilies(familyVec));
 }
 
 static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
-    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-    return TypefaceImpl_setDefault(face);
+    Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
+    return Typeface::setDefault(face);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

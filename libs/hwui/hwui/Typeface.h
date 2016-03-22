@@ -26,7 +26,7 @@
 
 namespace android {
 
-struct ANDROID_API TypefaceImpl {
+struct ANDROID_API Typeface {
     FontCollection *fFontCollection;
 
     // style used for constructing and querying Typeface objects
@@ -36,27 +36,19 @@ struct ANDROID_API TypefaceImpl {
 
     // resolved style actually used for rendering
     FontStyle fStyle;
+
+    void unref();
+
+    static Typeface* resolveDefault(Typeface* src);
+
+    static Typeface* createFromTypeface(Typeface* src, SkTypeface::Style style);
+
+    static Typeface* createWeightAlias(Typeface* src, int baseweight);
+
+    static Typeface* createFromFamilies(const std::vector<FontFamily*>& families);
+
+    static void setDefault(Typeface* face);
 };
-
-// Note: it would be cleaner if the following functions were member
-// functions (static or otherwise) of the TypefaceImpl class. However,
-// that can't be easily accommodated in the case where TypefaceImpl
-// is just a pointer to SkTypeface, in the non-USE_MINIKIN case.
-// TODO: when #ifdef USE_MINIKIN is removed, move to member functions.
-
-ANDROID_API TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src);
-
-ANDROID_API TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style);
-
-ANDROID_API TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int baseweight);
-
-ANDROID_API TypefaceImpl* TypefaceImpl_createFromFamilies(const std::vector<FontFamily*>& families);
-
-ANDROID_API void TypefaceImpl_unref(TypefaceImpl* face);
-
-ANDROID_API int TypefaceImpl_getStyle(TypefaceImpl* face);
-
-ANDROID_API void TypefaceImpl_setDefault(TypefaceImpl* face);
 
 }
 
