@@ -574,15 +574,19 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     // We ref the DeferredLayerUpdater due to its thread-safe ref-counting semantics.
     mDisplayList->ref(layerHandle);
 
-    Layer* layer = layerHandle->backingLayer();
+    // Note that the backing layer has *not* yet been updated, so don't trust
+    // its width, height, transform, etc...!
     Matrix4 totalTransform(*(mState.currentSnapshot()->transform));
-    totalTransform.multiply(layer->getTransform());
+    if (layerHandle->getTransform()) {
+        Matrix4 layerTransform(*layerHandle->getTransform());
+        totalTransform.multiply(layerTransform);
+    }
 
     addOp(alloc().create_trivial<TextureLayerOp>(
-            Rect(layer->getWidth(), layer->getHeight()),
+            Rect(layerHandle->getWidth(), layerHandle->getHeight()),
             totalTransform,
             getRecordedClip(),
-            layer));
+            layerHandle->backingLayer()));
 }
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor) {

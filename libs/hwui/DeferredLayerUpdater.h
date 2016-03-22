@@ -47,6 +47,9 @@ public:
         return false;
     }
 
+    int getWidth() { return mWidth; }
+    int getHeight() { return mHeight; }
+
     ANDROID_API bool setBlend(bool blend) {
         if (blend != mBlend) {
             mBlend = blend;
@@ -73,6 +76,10 @@ public:
     ANDROID_API void setTransform(const SkMatrix* matrix) {
         delete mTransform;
         mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
+    }
+
+    SkMatrix* getTransform() {
+        return mTransform;
     }
 
     ANDROID_API void setPaint(const SkPaint* paint);

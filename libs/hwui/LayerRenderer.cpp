@@ -353,7 +353,7 @@ void LayerRenderer::flushLayer(RenderState& renderState, Layer* layer) {
 
 bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap) {
     Caches& caches = Caches::getInstance();
-    if (layer && layer->getRenderTarget() != GL_NONE
+    if (layer && layer->isRenderable()
             && bitmap->width() <= caches.maxTextureSize
             && bitmap->height() <= caches.maxTextureSize) {
 
