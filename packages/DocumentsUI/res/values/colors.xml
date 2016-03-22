@@ -16,6 +16,7 @@
 
 <resources>
     <color name="material_grey_400">#ffbdbdbd</color>
+    <color name="material_teal_700">#ff00796b</color>
 
     <!-- This is the window background, but also the background for anything
          else that needs to manually declare a background matching the "default"
@@ -27,7 +28,7 @@
 
     <color name="primary_dark">@*android:color/primary_dark_material_dark</color>
     <color name="primary">@*android:color/material_blue_grey_900</color>
-    <color name="accent">@*android:color/accent_material_light</color>
+    <color name="accent">@color/material_teal_700</color>
     <color name="accent_dark">@*android:color/accent_material_dark</color>
     <color name="action_mode">@color/material_grey_400</color>
 
