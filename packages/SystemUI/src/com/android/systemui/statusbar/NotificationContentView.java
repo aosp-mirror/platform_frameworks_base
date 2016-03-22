@@ -31,7 +31,7 @@ import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
-import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
+import com.android.systemui.statusbar.notification.HybridGroupManager;
 import com.android.systemui.statusbar.notification.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
@@ -75,7 +75,7 @@ public class NotificationContentView extends FrameLayout {
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
     private NotificationViewWrapper mHeadsUpWrapper;
-    private HybridNotificationViewManager mHybridViewManager;
+    private HybridGroupManager mHybridGroupManager;
     private int mClipTopAmount;
     private int mContentHeight;
     private int mUnrestrictedContentHeight;
@@ -116,10 +116,11 @@ public class NotificationContentView extends FrameLayout {
     private ExpandableNotificationRow mContainingNotification;
     private int mTransformationStartVisibleType;
     private boolean mUserExpanding;
+    private int mSingleLineWidthIndention;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
+        mHybridGroupManager = new HybridGroupManager(getContext(), this);
         mMinContractedHeight = getResources().getDimensionPixelSize(
                 R.dimen.min_notification_layout_height);
         mNotificationContentMarginEnd = getResources().getDimensionPixelSize(
@@ -139,6 +140,7 @@ public class NotificationContentView extends FrameLayout {
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
         int maxSize = Integer.MAX_VALUE;
+        int width = MeasureSpec.getSize(widthMeasureSpec);
         if (hasFixedHeight || isHeightLimited) {
             maxSize = MeasureSpec.getSize(heightMeasureSpec);
         }
@@ -187,12 +189,18 @@ public class NotificationContentView extends FrameLayout {
             maxChildHeight = Math.max(maxChildHeight, mHeadsUpChild.getMeasuredHeight());
         }
         if (mSingleLineView != null) {
-            mSingleLineView.measure(widthMeasureSpec,
+            int singleLineWidthSpec = widthMeasureSpec;
+            if (mSingleLineWidthIndention != 0
+                    && MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED) {
+                singleLineWidthSpec = MeasureSpec.makeMeasureSpec(
+                        width - mSingleLineWidthIndention + mSingleLineView.getPaddingEnd(),
+                        MeasureSpec.AT_MOST);
+            }
+            mSingleLineView.measure(singleLineWidthSpec,
                     MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.AT_MOST));
             maxChildHeight = Math.max(maxChildHeight, mSingleLineView.getMeasuredHeight());
         }
         int ownHeight = Math.min(maxChildHeight, maxSize);
-        int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, ownHeight);
     }
 
@@ -715,7 +723,7 @@ public class NotificationContentView extends FrameLayout {
 
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
-            mSingleLineView = mHybridViewManager.bindFromNotification(
+            mSingleLineView = mHybridGroupManager.bindFromNotification(
                     mSingleLineView, mStatusBarNotification.getNotification());
         } else if (mSingleLineView != null) {
             removeView(mSingleLineView);
@@ -877,5 +885,21 @@ public class NotificationContentView extends FrameLayout {
             updateViewVisibilities(mVisibleType);
             updateBackgroundColor(false);
         }
+    }
+
+    /**
+     * Set by how much the single line view should be indented. Used when a overflow indicator is
+     * present and only during measuring
+     */
+    public void setSingleLineWidthIndention(int singleLineWidthIndention) {
+        if (singleLineWidthIndention != mSingleLineWidthIndention) {
+            mSingleLineWidthIndention = singleLineWidthIndention;
+            mContainingNotification.forceLayout();
+            forceLayout();
+        }
+    }
+
+    public HybridNotificationView getSingleLineView() {
+        return mSingleLineView;
     }
 }

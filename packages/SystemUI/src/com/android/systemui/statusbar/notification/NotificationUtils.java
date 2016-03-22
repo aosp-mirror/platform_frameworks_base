@@ -17,15 +17,19 @@
 package com.android.systemui.statusbar.notification;
 
 import android.graphics.Color;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 
 /**
  * A util class for various reusable functions
  */
 public class NotificationUtils {
+    private static final int[] sLocationBase = new int[2];
+    private static final int[] sLocationOffset = new int[2];
     public static boolean isGrayscale(ImageView v, NotificationColorUtil colorUtil) {
         Object isGrayscale = v.getTag(R.id.icon_is_grayscale);
         if (isGrayscale != null) {
@@ -46,5 +50,11 @@ public class NotificationUtils {
                 (int) interpolate(Color.red(startColor), Color.red(endColor), amount),
                 (int) interpolate(Color.green(startColor), Color.green(endColor), amount),
                 (int) interpolate(Color.blue(startColor), Color.blue(endColor), amount));
+    }
+
+    public static float getRelativeYOffset(View offsetView, View baseView) {
+        baseView.getLocationOnScreen(sLocationBase);
+        offsetView.getLocationOnScreen(sLocationOffset);
+        return sLocationOffset[1] - sLocationBase[1];
     }
 }
