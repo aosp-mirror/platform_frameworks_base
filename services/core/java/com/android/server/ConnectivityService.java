@@ -3845,8 +3845,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
-        networkCapabilities = new NetworkCapabilities(networkCapabilities);
-        enforceNetworkRequestPermissions(networkCapabilities);
+        // If the requested networkCapabilities is null, take them instead from
+        // the default network request. This allows callers to keep track of
+        // the system default network.
+        if (networkCapabilities == null) {
+            networkCapabilities = new NetworkCapabilities(mDefaultRequest.networkCapabilities);
+            enforceAccessPermission();
+        } else {
+            networkCapabilities = new NetworkCapabilities(networkCapabilities);
+            enforceNetworkRequestPermissions(networkCapabilities);
+        }
         enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
 

@@ -1008,29 +1008,41 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private class TestNetworkCallback extends NetworkCallback {
         private final ConditionVariable mConditionVariable = new ConditionVariable();
         private CallbackState mLastCallback = CallbackState.NONE;
+        private Network mLastNetwork;
 
         public void onAvailable(Network network) {
             assertEquals(CallbackState.NONE, mLastCallback);
             mLastCallback = CallbackState.AVAILABLE;
+            mLastNetwork = network;
             mConditionVariable.open();
         }
 
         public void onLosing(Network network, int maxMsToLive) {
             assertEquals(CallbackState.NONE, mLastCallback);
             mLastCallback = CallbackState.LOSING;
+            mLastNetwork = network;
             mConditionVariable.open();
         }
 
         public void onLost(Network network) {
             assertEquals(CallbackState.NONE, mLastCallback);
             mLastCallback = CallbackState.LOST;
+            mLastNetwork = network;
             mConditionVariable.open();
         }
 
         void expectCallback(CallbackState state) {
+            expectCallback(state, null);
+        }
+
+        void expectCallback(CallbackState state, MockNetworkAgent mockAgent) {
             waitFor(mConditionVariable);
             assertEquals(state, mLastCallback);
+            if (mockAgent != null) {
+                assertEquals(mockAgent.getNetwork(), mLastNetwork);
+            }
             mLastCallback = CallbackState.NONE;
+            mLastNetwork = null;
             mConditionVariable.close();
         }
 
@@ -1387,6 +1399,55 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         assertTrue("ConnectivityService requestNetwork with MATCH_ALL_REQUESTS_NETWORK_SPECIFIER",
                 execptionCalled);
+    }
+
+    @LargeTest
+    public void testRegisterDefaultNetworkCallback() throws Exception {
+        final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(defaultNetworkCallback);
+        defaultNetworkCallback.assertNoCallback();
+
+        // Create a TRANSPORT_CELLULAR request to keep the mobile interface up
+        // whenever Wi-Fi is up. Without this, the mobile network agent is
+        // reaped before any other activity can take place.
+        final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        mCm.requestNetwork(cellRequest, cellNetworkCallback);
+        cellNetworkCallback.assertNoCallback();
+
+        // Bring up cell and expect CALLBACK_AVAILABLE.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        defaultNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+
+        // Bring up wifi and expect CALLBACK_AVAILABLE.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        cellNetworkCallback.assertNoCallback();
+        defaultNetworkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+
+        // Bring down cell. Expect no default network callback, since it wasn't the default.
+        mCellNetworkAgent.disconnect();
+        cellNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        defaultNetworkCallback.assertNoCallback();
+
+        // Bring up cell. Expect no default network callback, since it won't be the default.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        defaultNetworkCallback.assertNoCallback();
+
+        // Bring down wifi. Expect the default network callback to notified of LOST wifi
+        // followed by AVAILABLE cell.
+        mWiFiNetworkAgent.disconnect();
+        cellNetworkCallback.assertNoCallback();
+        defaultNetworkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        mCellNetworkAgent.disconnect();
+        cellNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        defaultNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
