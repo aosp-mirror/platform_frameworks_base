@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.content.ContentProvider;
@@ -338,7 +339,7 @@ public class RecentsProvider extends ContentProvider {
                 if (predicate.apply(authority)) {
                     db.delete(TABLE_STATE, StateColumns.AUTHORITY + "=?", new String[] {
                             authority });
-                    Log.d(TAG, "Purged state for " + authority);
+                    if (DEBUG) Log.d(TAG, "Purged state for " + authority);
                 }
             }
         } finally {

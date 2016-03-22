@@ -190,7 +190,7 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult() code=" + resultCode);
+        if (DEBUG) Log.d(TAG, "onActivityResult() code=" + resultCode);
 
         // Only relay back results when not canceled; otherwise stick around to
         // let the user pick another app/backend.
@@ -414,7 +414,7 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     void onTaskFinished(Uri... uris) {
-        Log.d(TAG, "onFinished() " + Arrays.toString(uris));
+        if (DEBUG) Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final Intent intent = new Intent();
         if (uris.length == 1) {
