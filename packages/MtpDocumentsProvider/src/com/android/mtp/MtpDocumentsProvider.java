@@ -360,8 +360,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     if (i == 0) {
                         infoUniqueName = info;
                     } else {
-                        infoUniqueName = new MtpObjectInfo.Builder(info).setName(
-                                baseName + " (" + i + ")." + extension).build();
+                        String suffixedName = baseName + " (" + i + " )";
+                        if (!extension.isEmpty()) {
+                            suffixedName += "." + extension;
+                        }
+                        infoUniqueName =
+                                new MtpObjectInfo.Builder(info).setName(suffixedName).build();
                     }
                     try {
                         objectHandle = mMtpManager.createDocument(
