@@ -726,6 +726,38 @@ public class WallpaperManager {
     }
 
     /**
+     * Get the ID of the current wallpaper of the given kind.  If there is no
+     * such wallpaper configured, returns a negative number.
+     *
+     * @param which The wallpaper whose ID is to be returned.  Must be a single
+     *     defined kind of wallpaper, either {@link #FLAG_SET_SYSTEM} or
+     *     {@link #FLAG_SET_LOCK}.
+     * @return The positive numeric ID of the current wallpaper of the given kind,
+     *     or a negative value if no such wallpaper is configured.
+     */
+    public int getWallpaperId(int which) {
+        return getWallpaperIdForUser(which, mContext.getUserId());
+    }
+
+    /**
+     * Get the ID of the given user's current wallpaper of the given kind.  If there
+     * is no such wallpaper configured, returns a negative number.
+     * @hide
+     */
+    public int getWallpaperIdForUser(int which, int userId) {
+        try {
+            if (sGlobals.mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+                return -1;
+            } else {
+                return sGlobals.mService.getWallpaperIdForUser(which, userId);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets an Intent that will launch an activity that crops the given
      * image and sets the device's wallpaper. If there is a default HOME activity
      * that supports cropping wallpapers, it will be preferred as the default.
