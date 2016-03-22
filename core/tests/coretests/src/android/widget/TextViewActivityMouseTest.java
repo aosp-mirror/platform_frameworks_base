@@ -44,6 +44,7 @@ import com.android.frameworks.coretests.R;
 import android.support.test.espresso.Espresso;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.MotionEvent;
 import android.widget.espresso.ContextMenuUtils;
 
@@ -97,6 +98,7 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
     }
 
     @SmallTest
+    @Suppress
     public void testContextMenu() throws Exception {
         final String text = "abc def ghi.";
         onView(withId(R.id.textview)).perform(click());
