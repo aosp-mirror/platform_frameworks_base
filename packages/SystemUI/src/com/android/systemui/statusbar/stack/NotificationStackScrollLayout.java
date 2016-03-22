@@ -694,17 +694,31 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mHeadsUpManager.addSwipedOutNotification(row.getStatusBarNotification().getKey());
             }
         }
-        final View veto = v.findViewById(R.id.veto);
-        if (veto != null && veto.getVisibility() != View.GONE) {
-            veto.performClick();
-        }
-        if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
+        performDismiss(v);
 
         mFalsingManager.onNotificationDismissed();
         if (mFalsingManager.shouldEnforceBouncer()) {
             mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */);
         }
+    }
+
+    private void performDismiss(View v) {
+        if (v instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (mGroupManager.isChildInSuppressedGroup(row.getStatusBarNotification())) {
+                ExpandableNotificationRow groupSummary =
+                        mGroupManager.getGroupSummary(row.getStatusBarNotification());
+                if (groupSummary.isClearable()) {
+                    performDismiss(groupSummary);
+                }
+            }
+        }
+        final View veto = v.findViewById(R.id.veto);
+        if (veto != null && veto.getVisibility() != View.GONE) {
+            veto.performClick();
+        }
+        if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
     }
 
     @Override
@@ -3265,7 +3279,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    public void onChildIsolationChanged() {
+    public void onGroupsChanged() {
         mPhoneStatusBar.requestNotificationUpdate();
     }
 
