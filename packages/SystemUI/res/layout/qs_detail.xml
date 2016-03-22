@@ -17,7 +17,6 @@
 <!-- Extends LinearLayout -->
 <com.android.systemui.qs.QSDetail
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/qs_detail_background"
@@ -41,7 +40,6 @@
         android:background="@color/qs_detail_progress_track"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        systemui:hasOverlappingRendering="false"
         />
 
     <FrameLayout
