@@ -77,28 +77,22 @@ public class WindowLayersController {
             int oldLayer = w.mLayer;
             if (w.mBaseLayer == curBaseLayer || w.mIsImWindow || (i > 0 && w.mIsWallpaper)) {
                 curLayer += WINDOW_LAYER_MULTIPLIER;
-                w.mLayer = curLayer;
             } else {
                 curBaseLayer = curLayer = w.mBaseLayer;
-                w.mLayer = curLayer;
             }
-            if (w.mLayer != oldLayer) {
-                layerChanged = true;
-                anyLayerChanged = true;
-            }
+            assignAnimLayer(w, curLayer);
 
-            final WindowStateAnimator winAnimator = w.mWinAnimator;
-            oldLayer = winAnimator.mAnimLayer;
-            winAnimator.mAnimLayer = w.mLayer + w.getAnimLayerAdjustment() +
-                    getSpecialWindowAnimLayerAdjustment(w);
-            if (winAnimator.mAnimLayer != oldLayer) {
+            // TODO: Preserved old behavior of code here but not sure comparing
+            // oldLayer to mAnimLayer and mLayer makes sense...though the
+            // worst case would be unintentionalp layer reassignment.
+            if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) {
                 layerChanged = true;
                 anyLayerChanged = true;
             }
 
             if (w.mAppToken != null) {
                 mHighestApplicationLayer = Math.max(mHighestApplicationLayer,
-                        winAnimator.mAnimLayer);
+                        w.mWinAnimator.mAnimLayer);
             }
             collectSpecialWindows(w);
 
@@ -223,11 +217,16 @@ public class WindowLayersController {
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
         if (win != null) {
-            win.mLayer = layer;
-            win.mWinAnimator.mAnimLayer = layer;
+            assignAnimLayer(win, layer);
             layer++;
         }
         return layer;
+    }
+    
+    private void assignAnimLayer(WindowState w, int layer) {
+        w.mLayer = layer;
+        w.mWinAnimator.mAnimLayer = w.mLayer + w.getAnimLayerAdjustment() +
+                    getSpecialWindowAnimLayerAdjustment(w);
     }
 
     void dump(PrintWriter pw, String s) {
