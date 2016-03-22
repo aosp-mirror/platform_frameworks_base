@@ -169,4 +169,18 @@ public final class Shared {
         }
     }
 
+    /*
+     * Indicates if the home directory should be hidden in the roots list.
+     */
+    public static boolean isHomeRootHidden(Context context) {
+        return context.getResources().getBoolean(R.bool.home_root_hidden);
+    }
+
+    /*
+     * Indicates if the advanced roots should be hidden.
+     */
+    public static boolean areAdvancedRootsHidden(Context context) {
+        return context.getResources().getBoolean(R.bool.advanced_roots_hidden);
+    }
+
 }
