@@ -32,7 +32,7 @@ import static junit.framework.Assert.assertTrue;
 final class UiBot {
 
     private static final String TAG = "UiBot";
-    private static final String SYSTEMUI_PACKAGED = "com.android.systemui";
+    private static final String SYSTEMUI_PACKAGE = "com.android.systemui";
 
     private final UiDevice mDevice;
     private final int mTimeout;
@@ -51,8 +51,8 @@ final class UiBot {
     public UiObject getNotification(String text) {
         boolean opened = mDevice.openNotification();
         Log.v(TAG, "openNotification(): " + opened);
-        boolean gotIt = mDevice.wait(Until.hasObject(By.pkg(SYSTEMUI_PACKAGED)), mTimeout);
-        assertTrue("could not get system ui (" + SYSTEMUI_PACKAGED + ")", gotIt);
+        boolean gotIt = mDevice.wait(Until.hasObject(By.pkg(SYSTEMUI_PACKAGE)), mTimeout);
+        assertTrue("could not get system ui (" + SYSTEMUI_PACKAGE + ")", gotIt);
 
         return getObject(text);
     }
