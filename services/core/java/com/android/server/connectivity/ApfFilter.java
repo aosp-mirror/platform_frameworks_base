@@ -90,6 +90,7 @@ public class ApfFilter {
     }
 
     private static final String TAG = "ApfFilter";
+    private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
     private final ConnectivityService mConnectivityService;
@@ -205,6 +206,10 @@ public class ApfFilter {
         // For debugging only. How many times this RA was seen.
         int seenCount = 0;
 
+        // For debugging only. Returns the hex representation of the last matching packet.
+        String getLastMatchingPacket() {
+            return HexDump.toHexString(mPacket.array(), 0, mPacket.capacity(), false /* lowercase */);
+        }
 
         private String IPv6AddresstoString(int pos) {
             try {
@@ -454,7 +459,7 @@ public class ApfFilter {
     private long mLastInstalledProgramMinLifetime;
 
     // For debugging only. The length in bytes of the last program.
-    private long mLastInstalledProgramLength;
+    private byte[] mLastInstalledProgram;
 
     private void installNewProgram() {
         if (mRas.size() == 0) return;
@@ -495,7 +500,7 @@ public class ApfFilter {
         }
         mLastTimeInstalledProgram = curTime();
         mLastInstalledProgramMinLifetime = programMinLifetime;
-        mLastInstalledProgramLength = program.length;
+        mLastInstalledProgram = program;
         if (VDBG) {
             hexDump("Installing filter: ", program, program.length);
         } else {
@@ -515,7 +520,7 @@ public class ApfFilter {
     }
 
     private void hexDump(String msg, byte[] packet, int length) {
-        log(msg + HexDump.toHexString(packet, 0, length));
+        log(msg + HexDump.toHexString(packet, 0, length, false /* lowercase */));
     }
 
     private void processRa(byte[] packet, int length) {
@@ -608,7 +613,7 @@ public class ApfFilter {
 
         pw.println(String.format(
                 "Last program length %d, installed %ds ago, lifetime %d",
-                mLastInstalledProgramLength, curTime() - mLastTimeInstalledProgram,
+                mLastInstalledProgram.length, curTime() - mLastTimeInstalledProgram,
                 mLastInstalledProgramMinLifetime));
 
         pw.println("RA filters:");
@@ -618,8 +623,22 @@ public class ApfFilter {
             pw.increaseIndent();
             pw.println(String.format(
                     "Seen: %d, last %ds ago", ra.seenCount, curTime() - ra.mLastSeen));
+            if (DBG) {
+                pw.println("Last match:");
+                pw.increaseIndent();
+                pw.println(ra.getLastMatchingPacket());
+                pw.decreaseIndent();
+            }
             pw.decreaseIndent();
         }
+
+        if (DBG) {
+            pw.println("Last program:");
+            pw.increaseIndent();
+            pw.println(HexDump.toHexString(mLastInstalledProgram, false /* lowercase */));
+            pw.decreaseIndent();
+        }
+
         pw.decreaseIndent();
     }
 }
