@@ -476,8 +476,8 @@ href="{@docRoot}preview/features/tv-recording-api.html">Android TV Recording API
 <h2 id="android_for_work">Android for Work</h2>
 
 <p>Android for Work adds many new features and APIs for devices running Android N.
-Some highlights are below &mdash; for a complete list of Android for Work updates
-related to Android N, please see Android for Work Changes.</p>
+Some highlights are below &mdash; for a complete list of changes, see
+<a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.</p>
 
 <h3 id="work_profile_security_challenge">Work profile security challenge </h3>
 
