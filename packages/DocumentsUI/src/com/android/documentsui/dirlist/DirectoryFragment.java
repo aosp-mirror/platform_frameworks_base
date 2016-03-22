@@ -506,8 +506,10 @@ public class DirectoryFragment extends Fragment
             getActivity().getWindow().setStatusBarColor(color.data);
 
             if (mActionMode != null) {
-                mActionMode.setTitle(Shared.getQuantityString(getActivity(),
-                        R.plurals.elements_selected, mSelected.size()));
+                final String title = Shared.getQuantityString(getActivity(),
+                        R.plurals.elements_selected, mSelected.size());
+                mActionMode.setTitle(title);
+                mRecView.announceForAccessibility(title);
             }
         }
 
