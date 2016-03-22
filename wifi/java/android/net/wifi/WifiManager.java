@@ -689,7 +689,6 @@ public class WifiManager {
         mContext = context;
         mService = service;
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
-        init();
     }
 
     /**
@@ -1478,8 +1477,7 @@ public class WifiManager {
      * @hide for CTS test only
      */
     public void getTxPacketCount(TxPacketCountListener listener) {
-        validateChannel();
-        mAsyncChannel.sendMessage(RSSI_PKTCNT_FETCH, 0, putListener(listener));
+        getChannel().sendMessage(RSSI_PKTCNT_FETCH, 0, putListener(listener));
     }
 
     /**
@@ -1972,30 +1970,28 @@ public class WifiManager {
         }
     }
 
-    private void init() {
-        Messenger messenger = getWifiServiceMessenger();
-        if (messenger == null) {
-            mAsyncChannel = null;
-            return;
+    private synchronized AsyncChannel getChannel() {
+        if (mAsyncChannel == null) {
+            Messenger messenger = getWifiServiceMessenger();
+            if (messenger == null) {
+                throw new IllegalStateException(
+                        "getWifiServiceMessenger() returned null!  This is invalid.");
+            }
+
+            mHandlerThread = new HandlerThread("WifiManager");
+            mAsyncChannel = new AsyncChannel();
+            mConnected = new CountDownLatch(1);
+
+            mHandlerThread.start();
+            Handler handler = new ServiceHandler(mHandlerThread.getLooper());
+            mAsyncChannel.connect(mContext, handler, messenger);
+            try {
+                mConnected.await();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "interrupted wait at init");
+            }
         }
-
-        mHandlerThread = new HandlerThread("WifiManager");
-        mAsyncChannel = new AsyncChannel();
-        mConnected = new CountDownLatch(1);
-
-        mHandlerThread.start();
-        Handler handler = new ServiceHandler(mHandlerThread.getLooper());
-        mAsyncChannel.connect(mContext, handler, messenger);
-        try {
-            mConnected.await();
-        } catch (InterruptedException e) {
-            Log.e(TAG, "interrupted wait at init");
-        }
-    }
-
-    private void validateChannel() {
-        if (mAsyncChannel == null) throw new IllegalStateException(
-                "No permission to access and change wifi or a bad initialization");
+        return mAsyncChannel;
     }
 
     /**
@@ -2016,10 +2012,9 @@ public class WifiManager {
      */
     public void connect(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
-        validateChannel();
         // Use INVALID_NETWORK_ID for arg1 when passing a config object
         // arg1 is used to pass network id when the network already exists
-        mAsyncChannel.sendMessage(CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
+        getChannel().sendMessage(CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
                 putListener(listener), config);
     }
 
@@ -2038,8 +2033,7 @@ public class WifiManager {
      */
     public void connect(int networkId, ActionListener listener) {
         if (networkId < 0) throw new IllegalArgumentException("Network id cannot be negative");
-        validateChannel();
-        mAsyncChannel.sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
+        getChannel().sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
     }
 
     /**
@@ -2062,8 +2056,7 @@ public class WifiManager {
      */
     public void save(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
-        validateChannel();
-        mAsyncChannel.sendMessage(SAVE_NETWORK, 0, putListener(listener), config);
+        getChannel().sendMessage(SAVE_NETWORK, 0, putListener(listener), config);
     }
 
     /**
@@ -2081,8 +2074,7 @@ public class WifiManager {
      */
     public void forget(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
-        validateChannel();
-        mAsyncChannel.sendMessage(FORGET_NETWORK, netId, putListener(listener));
+        getChannel().sendMessage(FORGET_NETWORK, netId, putListener(listener));
     }
 
     /**
@@ -2096,8 +2088,7 @@ public class WifiManager {
      */
     public void disable(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
-        validateChannel();
-        mAsyncChannel.sendMessage(DISABLE_NETWORK, netId, putListener(listener));
+        getChannel().sendMessage(DISABLE_NETWORK, netId, putListener(listener));
     }
 
     /**
@@ -2125,8 +2116,7 @@ public class WifiManager {
      */
     public void startWps(WpsInfo config, WpsCallback listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
-        validateChannel();
-        mAsyncChannel.sendMessage(START_WPS, 0, putListener(listener), config);
+        getChannel().sendMessage(START_WPS, 0, putListener(listener), config);
     }
 
     /**
@@ -2137,8 +2127,7 @@ public class WifiManager {
      * initialized again
      */
     public void cancelWps(WpsCallback listener) {
-        validateChannel();
-        mAsyncChannel.sendMessage(CANCEL_WPS, 0, putListener(listener));
+        getChannel().sendMessage(CANCEL_WPS, 0, putListener(listener));
     }
 
     /**
@@ -2153,8 +2142,6 @@ public class WifiManager {
             return mService.getWifiServiceMessenger();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (SecurityException e) {
-            return null;
         }
     }
 
