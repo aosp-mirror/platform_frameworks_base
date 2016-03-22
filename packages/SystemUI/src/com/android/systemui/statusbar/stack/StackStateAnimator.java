@@ -972,10 +972,10 @@ public class StackStateAnimator {
     }
 
     /**
-     * Get the end value of the height animation running on a view or the actualHeight
+     * Get the end value of the yTranslation animation running on a view or the yTranslation
      * if no animation is running.
      */
-    public static float getFinalTranslationY(ExpandableView view) {
+    public static float getFinalTranslationY(View view) {
         if (view == null) {
             return 0;
         }
