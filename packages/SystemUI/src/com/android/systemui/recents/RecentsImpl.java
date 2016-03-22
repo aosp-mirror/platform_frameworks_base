@@ -21,12 +21,10 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
-import android.app.UiModeManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -66,7 +64,6 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.tv.views.TaskCardView;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewScroller;
@@ -96,10 +93,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public final static String RECENTS_PACKAGE = "com.android.systemui";
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
-    public final static String RECENTS_TV_ACTIVITY = "com.android.systemui.recents.tv.RecentsTvActivity";
-
-    //Used to store tv or non-tv activty for use in creating intents.
-    private final String mRecentsIntentActivityName;
 
     /**
      * An implementation of ITaskStackListener, that allows us to listen for changes to the system
@@ -158,16 +151,15 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
     }
 
-    private static RecentsTaskLoadPlan sInstanceLoadPlan;
+    protected static RecentsTaskLoadPlan sInstanceLoadPlan;
 
-    Context mContext;
-    Handler mHandler;
+    protected Context mContext;
+    protected Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
     RecentsAppWidgetHost mAppWidgetHost;
-    boolean mCanReuseTaskStackViews = true;
+    protected boolean mCanReuseTaskStackViews = true;
     boolean mDraggingInRecents;
     boolean mLaunchedWhileDocking;
-    private boolean mIsRunningOnTv;
 
     // Task launching
     Rect mSearchBarBounds = new Rect();
@@ -182,11 +174,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     // Header (for transition)
     TaskViewHeader mHeaderBar;
     final Object mHeaderBarLock = new Object();
-    TaskStackView mDummyStackView;
+    protected TaskStackView mDummyStackView;
 
     // Variables to keep track of if we need to start recents after binding
-    boolean mTriggeredFromAltTab;
-    long mLastToggleTime;
+    protected boolean mTriggeredFromAltTab;
+    protected long mLastToggleTime;
     DozeTrigger mFastAltTabTrigger = new DozeTrigger(FAST_ALT_TAB_DELAY_MS, new Runnable() {
         @Override
         public void run() {
@@ -197,7 +189,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
     });
 
-    Bitmap mThumbnailTransitionBitmapCache;
+    protected Bitmap mThumbnailTransitionBitmapCache;
     Task mThumbnailTransitionBitmapCacheKey;
 
     public RecentsImpl(Context context) {
@@ -227,16 +219,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
         launchOpts.onlyLoadForCache = true;
         loader.loadTasks(mContext, plan, launchOpts);
-
-        //Manager used to determine if we are running on tv or not
-        UiModeManager uiModeManager = (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
-            mRecentsIntentActivityName = RECENTS_TV_ACTIVITY;
-            mIsRunningOnTv = true;
-        } else {
-            mRecentsIntentActivityName = RECENTS_ACTIVITY;
-            mIsRunningOnTv = false;
-        }
     }
 
     public void onBootCompleted() {
@@ -729,7 +711,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Creates the activity options for a unknown state->recents transition.
      */
-    private ActivityOptions getUnknownTransitionActivityOptions() {
+    protected ActivityOptions getUnknownTransitionActivityOptions() {
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
                 R.anim.recents_from_unknown_exit,
@@ -739,7 +721,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Creates the activity options for a home->recents transition.
      */
-    private ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
+    protected ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
         if (fromSearchHome) {
             return ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_search_launcher_enter,
@@ -795,22 +777,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // If both the screenshot and thumbnail fails, then just fall back to the default transition
             return getUnknownTransitionActivityOptions();
         }
-    }
-
-    /**
-     * Creates the activity options for an app->recents transition on TV.
-     */
-    private ActivityOptions getThumbnailTransitionActivityOptionsForTV(
-            ActivityManager.RunningTaskInfo topTask) {
-        Bitmap thumbnail = mThumbnailTransitionBitmapCache;
-        Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext);
-        if (thumbnail != null) {
-            return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    null, (int) rect.left, (int) rect.top,
-                    (int) rect.width(), (int) rect.height(), mHandler, null);
-        }
-        // If both the screenshot and thumbnail fails, then just fall back to the default transition
-        return getUnknownTransitionActivityOptions();
     }
 
     private Bitmap getThumbnailBitmap(ActivityManager.RunningTaskInfo topTask, Task toTask,
@@ -888,15 +854,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Shows the recents activity
      */
-    private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
+    protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
             boolean isTopTaskHome, boolean animate) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
 
-        // If we are on TV, divert to a different helper method
-        if (mIsRunningOnTv) {
-            setUpAndStartTvRecents(topTask, isTopTaskHome, animate);
-            return;
-        }
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
         // the stacks might have changed.
@@ -972,90 +933,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     /**
-     * Used to set up the animations of Tv Recents, then start the Recents Activity.
-     * TODO: Add the Transitions for Home -> Recents TV
-     * TODO: Shift Transition code to separate class under /tv directory and access
-     *              from here
-     */
-    private void setUpAndStartTvRecents(ActivityManager.RunningTaskInfo topTask,
-                                      boolean isTopTaskHome, boolean animate) {
-        RecentsTaskLoader loader = Recents.getTaskLoader();
-
-        // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
-        // should always preload the tasks now. If we are dragging in recents, reload them as
-        // the stacks might have changed.
-        if (mLaunchedWhileDocking || mTriggeredFromAltTab || sInstanceLoadPlan == null) {
-            // Create a new load plan if preloadRecents() was never triggered
-            sInstanceLoadPlan = loader.createLoadPlan(mContext);
-        }
-        if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, topTask.id, isTopTaskHome);
-        }
-        TaskStack stack = sInstanceLoadPlan.getTaskStack();
-
-        // Update the header bar if necessary
-        updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
-
-        // Prepare the dummy stack for the transition
-        TaskStackLayoutAlgorithm.VisibilityReport stackVr =
-                mDummyStackView.computeStackVisibilityReport();
-
-        if (!animate) {
-            ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext, -1, -1);
-            startRecentsActivity(topTask, opts, false /* fromHome */,
-                    false /* fromSearchHome */, false /* fromThumbnail*/, stackVr);
-            return;
-        }
-
-        boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
-
-        if (useThumbnailTransition) {
-            // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptionsForTV(topTask);
-            if (opts != null) {
-                startRecentsActivity(topTask, opts, false /* fromHome */,
-                        false /* fromSearchHome */, true /* fromThumbnail */, stackVr);
-            } else {
-                // Fall through below to the non-thumbnail transition
-                useThumbnailTransition = false;
-            }
-        }
-
-        if (!useThumbnailTransition) {
-            // If there is no thumbnail transition, but is launching from home into recents, then
-            // use a quick home transition and do the animation from home
-            if (hasRecentTasks) {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                String homeActivityPackage = ssp.getHomeActivityPackageName();
-                String searchWidgetPackage = null;
-                if (RecentsDebugFlags.Static.EnableSearchBar) {
-                    searchWidgetPackage = Prefs.getString(mContext,
-                            Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null);
-                } else {
-                    AppWidgetProviderInfo searchWidgetInfo = ssp.resolveSearchAppWidget();
-                    if (searchWidgetInfo != null) {
-                        searchWidgetPackage = searchWidgetInfo.provider.getPackageName();
-                    }
-                }
-
-                // Determine whether we are coming from a search owned home activity
-                boolean fromSearchHome = (homeActivityPackage != null) &&
-                        homeActivityPackage.equals(searchWidgetPackage);
-                ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
-                startRecentsActivity(topTask, opts, true /* fromHome */, fromSearchHome,
-                        false /* fromThumbnail */, stackVr);
-            } else {
-                // Otherwise we do the normal fade from an unknown source
-                ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startRecentsActivity(topTask, opts, true /* fromHome */,
-                        false /* fromSearchHome */, false /* fromThumbnail */, stackVr);
-            }
-        }
-        mLastToggleTime = SystemClock.elapsedRealtime();
-    }
-
-    /**
      * Starts the recents activity.
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
@@ -1078,7 +955,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchState.launchedWhileDocking = mLaunchedWhileDocking;
 
         Intent intent = new Intent();
-        intent.setClassName(RECENTS_PACKAGE, mRecentsIntentActivityName);
+        intent.setClassName(RECENTS_PACKAGE, RECENTS_ACTIVITY);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 | Intent.FLAG_ACTIVITY_TASK_ON_HOME);

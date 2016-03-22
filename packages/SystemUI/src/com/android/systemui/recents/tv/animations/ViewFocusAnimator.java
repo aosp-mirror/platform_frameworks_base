@@ -33,6 +33,8 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
     private final float mSelectedScaleDelta;
     private final float mUnselectedZ;
     private final float mSelectedZDelta;
+    private final float mUnselectedSpacing;
+    private final float mSelectedSpacingDelta;
     private final int mAnimDuration;
     private final Interpolator mFocusInterpolator;
 
@@ -56,6 +58,9 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
 
         mUnselectedZ = res.getDimensionPixelOffset(R.dimen.recents_tv_unselected_item_z);
         mSelectedZDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_selected_item_z_delta);
+
+        mUnselectedSpacing = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_card_spacing);
+        mSelectedSpacingDelta = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_focused_card_delta);
 
         mAnimDuration = res.getInteger(R.integer.item_scale_anim_duration);
 
@@ -85,10 +90,14 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
 
         float scale = mUnselectedScale + (level * mSelectedScaleDelta);
         float z = mUnselectedZ + (level * mSelectedZDelta);
+        float spacing = mUnselectedSpacing + (level * mSelectedSpacingDelta);
 
         mTargetView.setScaleX(scale);
         mTargetView.setScaleY(scale);
         mTargetView.setZ(z);
+
+        mTargetView.setPadding((int) spacing, mTargetView.getPaddingTop(),
+                (int) spacing, mTargetView.getPaddingBottom());
     }
 
     public float getFocusProgress() {

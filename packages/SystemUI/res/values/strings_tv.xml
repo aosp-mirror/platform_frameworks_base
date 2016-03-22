@@ -35,7 +35,11 @@
     <string name="pip_onboarding_description">Press and hold the HOME button to control PIP</string>
     <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
     <string name="pip_onboarding_button">Got it</string>
+    <!-- Dismiss icon description -->
+    <string name="recents_tv_dismiss">Dismiss</string>
     <!-- Font for Recents -->
     <!-- DO NOT TRANSLATE -->
     <string name="font_roboto_regular" translatable="false">sans-serif</string>
+    <!-- DO NOT TRANSLATE -->
+    <string name="font_roboto_light" translatable="false">sans-serif-light</string>
 </resources>

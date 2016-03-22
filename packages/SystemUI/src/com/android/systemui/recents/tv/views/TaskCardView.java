@@ -15,6 +15,7 @@
  */
 package com.android.systemui.recents.tv.views;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -22,12 +23,14 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.tv.animations.DismissAnimationsHolder;
 import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
 import com.android.systemui.recents.model.Task;
 
@@ -37,8 +40,10 @@ public class TaskCardView extends LinearLayout {
     private TextView mTitleTextView;
     private ImageView mBadgeView;
     private Task mTask;
+    private boolean mDismissState;
 
     private ViewFocusAnimator mViewFocusAnimator;
+    private DismissAnimationsHolder mDismissAnimationsHolder;
 
     public TaskCardView(Context context) {
         this(context, null);
@@ -51,6 +56,7 @@ public class TaskCardView extends LinearLayout {
     public TaskCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mViewFocusAnimator = new ViewFocusAnimator(this);
+        mDismissState = false;
     }
 
     @Override
@@ -58,6 +64,7 @@ public class TaskCardView extends LinearLayout {
         mThumbnailView = (ImageView) findViewById(R.id.card_view_thumbnail);
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
+        mDismissAnimationsHolder = new DismissAnimationsHolder(this);
     }
 
     public void init(Task task) {
@@ -98,13 +105,23 @@ public class TaskCardView extends LinearLayout {
 
         int width = res.getDimensionPixelOffset(R.dimen.recents_tv_card_width);
         int widthDelta = (int) (width * scale - width);
-        int height = (int) (res.getDimensionPixelOffset(
-                R.dimen.recents_tv_screenshot_height) * scale);
-        int padding = res.getDimensionPixelOffset(R.dimen.recents_tv_grid_row_padding);
+        int height = res.getDimensionPixelOffset(R.dimen.recents_tv_screenshot_height);
+        int heightDelta = (int) (height * scale - height);
+        int topMargin = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_row_top_margin);
 
-        int headerHeight = (int) ((res.getDimensionPixelOffset(
-                R.dimen.recents_tv_card_extra_badge_size) +
-                res.getDimensionPixelOffset(R.dimen.recents_tv_icon_padding_bottom)) * scale);
+        int headerHeight = res.getDimensionPixelOffset(R.dimen.recents_tv_card_extra_badge_size) +
+                res.getDimensionPixelOffset(R.dimen.recents_tv_icon_padding_bottom);
+        int headerHeightDelta = (int) (headerHeight * scale - headerHeight);
+
+        int dismissAreaHeight =
+                res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_icon_top_margin) +
+                res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_icon_bottom_margin) +
+                res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_icon_size) +
+                res.getDimensionPixelOffset(R.dimen.recents_tv_dismiss_text_size);
+
+        int dismissAreaHeightDelta = (int) (dismissAreaHeight * scale - dismissAreaHeight);
+
+        int totalHeightDelta = heightDelta + headerHeightDelta + dismissAreaHeightDelta;
 
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
@@ -113,9 +130,72 @@ public class TaskCardView extends LinearLayout {
         int screenWidth = size.x;
         int screenHeight = size.y;
 
-        return new Rect(screenWidth - width - padding - widthDelta / 2,
-                screenHeight / 2 - height / 2 + headerHeight / 2,
-                screenWidth - padding + widthDelta / 2,
-                screenHeight / 2 + height / 2 + headerHeight / 2);
+        return new Rect(screenWidth / 2 - width / 2 - widthDelta / 2,
+                topMargin - totalHeightDelta / 2 + (int) (headerHeight * scale),
+                screenWidth / 2 + width / 2 + widthDelta / 2,
+                topMargin - totalHeightDelta / 2 + (int) (headerHeight * scale) +
+                        (int) (height * scale));
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_DOWN : {
+                if (!isInDismissState()) {
+                    setDismissState(true);
+                    return true;
+                }
+                break;
+            }
+            case KeyEvent.KEYCODE_DPAD_UP : {
+                if (isInDismissState()) {
+                    setDismissState(false);
+                    return true;
+                }
+                break;
+            }
+
+            //Eat right and left key presses when we are in dismiss state
+            case KeyEvent.KEYCODE_DPAD_LEFT : {
+                if (isInDismissState()) {
+                    return true;
+                }
+                break;
+            }
+            case KeyEvent.KEYCODE_DPAD_RIGHT : {
+                if (isInDismissState()) {
+                    return true;
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void setDismissState(boolean dismissState) {
+        if (mDismissState != dismissState) {
+            mDismissState = dismissState;
+            if (dismissState) {
+                mDismissAnimationsHolder.startEnterAnimation();
+            } else {
+                mDismissAnimationsHolder.startExitAnimation();
+            }
+        }
+    }
+
+    public boolean isInDismissState() {
+        return mDismissState;
+    }
+
+    public void startDismissTaskAnimation(Animator.AnimatorListener listener) {
+        mDismissAnimationsHolder.startDismissAnimation(listener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        setDismissState(false);
     }
 }
