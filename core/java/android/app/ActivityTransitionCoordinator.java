@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.transition.TransitionSet;
+import android.transition.Visibility;
 import android.util.ArrayMap;
 import android.view.GhostView;
 import android.view.View;
@@ -378,6 +379,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             transition.setEpicenterCallback(mEpicenterCallback);
             transition = setTargets(transition, includeTransitioningViews);
         }
+        noLayoutSuppressionForVisibilityTransitions(transition);
         return transition;
     }
 
@@ -940,6 +942,24 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             view.setTransitionVisibility(visiblity);
             if (invalidate) {
                 view.invalidate();
+            }
+        }
+    }
+
+    /**
+     * Blocks suppressLayout from Visibility transitions. It is ok to suppress the layout,
+     * but we don't want to force the layout when suppressLayout becomes false. This leads
+     * to visual glitches.
+     */
+    private static void noLayoutSuppressionForVisibilityTransitions(Transition transition) {
+        if (transition instanceof Visibility) {
+            final Visibility visibility = (Visibility) transition;
+            visibility.setSuppressLayout(false);
+        } else if (transition instanceof TransitionSet) {
+            final TransitionSet set = (TransitionSet) transition;
+            final int count = set.getTransitionCount();
+            for (int i = 0; i < count; i++) {
+                noLayoutSuppressionForVisibilityTransitions(set.getTransitionAt(i));
             }
         }
     }
