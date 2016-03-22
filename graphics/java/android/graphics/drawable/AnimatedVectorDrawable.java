@@ -804,7 +804,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     private interface VectorDrawableAnimator {
-        void init(AnimatorSet set);
+        void init(@NonNull AnimatorSet set);
         void start();
         void end();
         void reset();
@@ -818,21 +818,44 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     private static class VectorDrawableAnimatorUI implements VectorDrawableAnimator {
-        private AnimatorSet mSet = new AnimatorSet();
+        // mSet is only initialized in init(). So we need to check whether it is null before any
+        // operation.
+        private AnimatorSet mSet = null;
         private final Drawable mDrawable;
+        // Caching the listener in the case when listener operation is called before the mSet is
+        // setup by init().
+        private ArrayList<AnimatorListener> mListenerArray = null;
 
-        VectorDrawableAnimatorUI(AnimatedVectorDrawable drawable) {
+        VectorDrawableAnimatorUI(@NonNull AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
         }
 
         @Override
-        public void init(AnimatorSet set) {
-            mSet = set;
+        public void init(@NonNull AnimatorSet set) {
+            if (mSet != null) {
+                // Already initialized
+                throw new UnsupportedOperationException("VectorDrawableAnimator cannot be " +
+                        "re-initialized");
+            }
+            // Keep a deep copy of the set, such that set can be still be constantly representing
+            // the static content from XML file.
+            mSet = set.clone();
+
+            // If there are listeners added before calling init(), now they should be setup.
+            if (mListenerArray != null && !mListenerArray.isEmpty()) {
+                for (int i = 0; i < mListenerArray.size(); i++) {
+                    mSet.addListener(mListenerArray.get(i));
+                }
+                mListenerArray.clear();
+                mListenerArray = null;
+            }
         }
 
+        // Although start(), reset() and reverse() should call init() already, it is better to
+        // protect these functions from NPE in any situation.
         @Override
         public void start() {
-            if (mSet.isStarted()) {
+            if (mSet == null || mSet.isStarted()) {
                 return;
             }
             mSet.start();
@@ -841,51 +864,74 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
         @Override
         public void end() {
+            if (mSet == null) {
+                return;
+            }
             mSet.end();
         }
 
         @Override
         public void reset() {
+            if (mSet == null) {
+                return;
+            }
             start();
             mSet.cancel();
         }
 
         @Override
         public void reverse() {
+            if (mSet == null) {
+                return;
+            }
             mSet.reverse();
             invalidateOwningView();
         }
 
         @Override
         public boolean canReverse() {
-            return mSet.canReverse();
+            return mSet != null && mSet.canReverse();
         }
 
         @Override
         public void setListener(AnimatorListener listener) {
-            mSet.addListener(listener);
+            if (mSet == null) {
+                if (mListenerArray == null) {
+                    mListenerArray = new ArrayList<AnimatorListener>();
+                }
+                mListenerArray.add(listener);
+            } else {
+                mSet.addListener(listener);
+            }
         }
 
         @Override
         public void removeListener(AnimatorListener listener) {
-            mSet.removeListener(listener);
+            if (mSet == null) {
+                if (mListenerArray == null) {
+                    return;
+                }
+                mListenerArray.remove(listener);
+            } else {
+                mSet.removeListener(listener);
+            }
         }
 
         @Override
         public void onDraw(Canvas canvas) {
-            if (mSet.isStarted()) {
+            if (mSet != null && mSet.isStarted()) {
                 invalidateOwningView();
             }
         }
 
         @Override
         public boolean isStarted() {
-            return mSet.isStarted();
+            return mSet != null && mSet.isStarted();
         }
 
         @Override
         public boolean isRunning() {
-            return mSet.isRunning();
+            return mSet != null && mSet.isRunning();
         }
 
         private void invalidateOwningView() {
@@ -928,7 +974,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         @Override
-        public void init(AnimatorSet set) {
+        public void init(@NonNull AnimatorSet set) {
             if (mInitialized) {
                 // Already initialized
                 throw new UnsupportedOperationException("VectorDrawableAnimator cannot be " +
