@@ -93,6 +93,9 @@ public final class DocumentsContract {
     public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
 
     /** {@hide} */
+    public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
+
+    /** {@hide} */
     public static final String EXTRA_SHOW_FILESIZE = "android.content.extra.SHOW_FILESIZE";
 
     /** {@hide} */
@@ -556,13 +559,22 @@ public final class DocumentsContract {
         public static final int FLAG_EMPTY = 1 << 16;
 
         /**
+         * Flag indicating that this root should only be visible to advanced
+         * users.
+         *
+         * @see #COLUMN_FLAGS
+         * @hide
+         */
+        public static final int FLAG_ADVANCED = 1 << 17;
+
+        /**
          * Flag indicating that this root has settings.
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsContract#ACTION_DOCUMENT_ROOT_SETTINGS
          * @hide
          */
-        public static final int FLAG_HAS_SETTINGS = 1 << 17;
+        public static final int FLAG_HAS_SETTINGS = 1 << 18;
 
         /**
          * Flag indicating that this root is on removable SD card storage.
@@ -570,7 +582,7 @@ public final class DocumentsContract {
          * @see #COLUMN_FLAGS
          * @hide
          */
-        public static final int FLAG_REMOVABLE_SD = 1 << 18;
+        public static final int FLAG_REMOVABLE_SD = 1 << 19;
 
         /**
          * Flag indicating that this root is on removable USB storage.
@@ -578,7 +590,7 @@ public final class DocumentsContract {
          * @see #COLUMN_FLAGS
          * @hide
          */
-        public static final int FLAG_REMOVABLE_USB = 1 << 19;
+        public static final int FLAG_REMOVABLE_USB = 1 << 20;
     }
 
     /**

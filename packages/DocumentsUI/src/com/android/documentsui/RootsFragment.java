@@ -320,6 +320,8 @@ public class RootsFragment extends Fragment {
 
                 if (root.isHome() && isHomeRootHidden(context)) {
                     continue;
+                } else if (root.isAdvanced() && areAdvancedRootsHidden(context)) {
+                    continue;
                 } else if (root.isLibrary()) {
                     if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
                     libraries.add(item);
@@ -375,6 +377,13 @@ public class RootsFragment extends Fragment {
          */
         private boolean isHomeRootHidden(Context context) {
             return context.getResources().getBoolean(R.bool.home_root_hidden);
+        }
+
+        /*
+         * Indicates if the advanced roots should be hidden.
+         */
+        private boolean areAdvancedRootsHidden(Context context) {
+            return context.getResources().getBoolean(R.bool.advanced_roots_hidden);
         }
 
         @Override
