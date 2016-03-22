@@ -83,18 +83,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
 
     /**
-     * Fraction of the divider position between two snap targets to switch to the full-screen
-     * target.
-     */
-    private static final float SWITCH_FULLSCREEN_FRACTION = 0.12f;
-
-    /**
-     * Fraction of the divider position between two snap targets to switch to the larger target
-     * for the bottom/right app layout.
-     */
-    private static final float BOTTOM_RIGHT_SWITCH_BIGGER_FRACTION = 0.2f;
-
-    /**
      * How much the background gets scaled when we are in the minimized dock state.
      */
     private static final float MINIMIZE_DOCK_SCALE = 0.375f;
@@ -653,12 +641,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     restrictDismissingTaskPosition(taskPosition, mDockSide, taskSnapTarget);
             int taskPositionOther =
                     restrictDismissingTaskPosition(taskPosition, dockSideInverted, taskSnapTarget);
-
-            taskPositionDocked = minimizeHoles(position, taskPositionDocked, mDockSide,
-                    taskSnapTarget);
-            taskPositionOther = minimizeHoles(position, taskPositionOther, dockSideInverted,
-                    taskSnapTarget);
-
             calculateBoundsForPosition(taskPositionDocked, mDockSide, mDockedTaskRect);
             calculateBoundsForPosition(taskPositionOther, dockSideInverted, mOtherTaskRect);
             mDisplayRect.set(0, 0, mDisplayWidth, mDisplayHeight);
@@ -721,51 +703,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 return mStableInsets.right != 0;
             }
         }
-    }
-
-    /**
-     * Given the current split position and the task position calculated by dragging, this
-     * method calculates a "better" task position in a sense so holes get smaller while dragging.
-     *
-     * @return the new task position
-     */
-    private int minimizeHoles(int position, int taskPosition, int dockSide,
-            SnapTarget taskSnapTarget) {
-        if (dockSideTopLeft(dockSide)) {
-            if (position > taskPosition) {
-                SnapTarget nextTarget = mSnapAlgorithm.getNextTarget(taskSnapTarget);
-
-                // If the next target is the dismiss end target, switch earlier to make the hole
-                // smaller.
-                if (nextTarget != taskSnapTarget
-                        && nextTarget == mSnapAlgorithm.getDismissEndTarget()) {
-                    float t = (float) (position - taskPosition)
-                            / (nextTarget.position - taskPosition);
-                    if (t > SWITCH_FULLSCREEN_FRACTION) {
-                        return nextTarget.position;
-                    }
-                }
-            }
-        } else if (dockSideBottomRight(dockSide)) {
-            if (position < taskPosition) {
-                SnapTarget previousTarget = mSnapAlgorithm.getPreviousTarget(taskSnapTarget);
-                if (previousTarget != taskSnapTarget) {
-                    float t = (float) (taskPosition - position)
-                            / (taskPosition - previousTarget.position);
-
-                    // In general, switch a bit earlier (at 20% instead of 50%), but if we are
-                    // dismissing the top, switch really early.
-                    float threshold = previousTarget == mSnapAlgorithm.getDismissStartTarget()
-                            ? SWITCH_FULLSCREEN_FRACTION
-                            : BOTTOM_RIGHT_SWITCH_BIGGER_FRACTION;
-                    if (t > threshold) {
-                        return previousTarget.position;
-                    }
-
-                }
-            }
-        }
-        return taskPosition;
     }
 
     /**
