@@ -26,6 +26,7 @@ import static com.android.shell.BugreportProgressService.EXTRA_PID;
 import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTED;
+import static com.android.shell.BugreportProgressService.POLLING_FREQUENCY;
 import static com.android.shell.BugreportProgressService.SCREENSHOT_DELAY_SECONDS;
 
 import java.io.BufferedOutputStream;
@@ -92,7 +93,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String TAG = "BugreportReceiverTest";
 
     // Timeout for UI operations, in milliseconds.
-    private static final int TIMEOUT = (int) BugreportProgressService.POLLING_FREQUENCY * 4;
+    private static final int TIMEOUT = (int) POLLING_FREQUENCY * 4;
 
     // Timeout for when waiting for a screenshot to finish.
     private static final int SAFE_SCREENSHOT_DELAY = SCREENSHOT_DELAY_SECONDS + 10;
@@ -190,8 +191,30 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         SystemProperties.set(PROGRESS_PROPERTY, "500");
         assertProgressNotification(NAME, nf.format(0.50));
 
+        SystemProperties.set(PROGRESS_PROPERTY, "950");
+        assertProgressNotification(NAME, nf.format(0.95));
+
+        // Make sure progress never goes back...
         SystemProperties.set(MAX_PROPERTY, "2000");
-        assertProgressNotification(NAME, nf.format(0.25));
+        Thread.sleep(POLLING_FREQUENCY + DateUtils.SECOND_IN_MILLIS);
+        assertProgressNotification(NAME, nf.format(0.95));
+
+        SystemProperties.set(PROGRESS_PROPERTY, "1000");
+        assertProgressNotification(NAME, nf.format(0.95));
+
+        // ...only forward...
+        SystemProperties.set(PROGRESS_PROPERTY, "1902");
+        assertProgressNotification(NAME, nf.format(0.9510));
+
+        SystemProperties.set(PROGRESS_PROPERTY, "1960");
+        assertProgressNotification(NAME, nf.format(0.98));
+
+        // ...but never more than the capped value.
+        SystemProperties.set(PROGRESS_PROPERTY, "2000");
+        assertProgressNotification(NAME, nf.format(0.99));
+
+        SystemProperties.set(PROGRESS_PROPERTY, "3000");
+        assertProgressNotification(NAME, nf.format(0.99));
 
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath, mScreenshotPath);

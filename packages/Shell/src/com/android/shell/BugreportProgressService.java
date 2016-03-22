@@ -149,6 +149,10 @@ public class BugreportProgressService extends Service {
     // Passed to Message.obtain() when msg.arg2 is not used.
     private static final int UNUSED_ARG2 = -2;
 
+    // Maximum progress displayed (like 99.00%).
+    private static final int CAPPED_PROGRESS = 9900;
+    private static final int CAPPED_MAX = 10000;
+
     /**
      * Delay before a screenshot is taken.
      * <p>
@@ -427,7 +431,7 @@ public class BugreportProgressService extends Service {
         final NumberFormat nf = NumberFormat.getPercentInstance();
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
-        final String percentText = nf.format((double) info.progress / info.max);
+        final String percentageText = nf.format((double) info.progress / info.max);
         final Action cancelAction = new Action.Builder(null, mContext.getString(
                 com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
         final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
@@ -458,7 +462,7 @@ public class BugreportProgressService extends Service {
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(name)
-                .setContentInfo(percentText)
+                .setContentInfo(percentageText)
                 .setProgress(info.max, info.progress, false)
                 .setOngoing(true)
                 .setContentIntent(infoPendingIntent)
@@ -472,7 +476,7 @@ public class BugreportProgressService extends Service {
         }
         if (DEBUG) {
             Log.d(TAG, "Sending 'Progress' notification for id " + info.id + "(pid " + info.pid
-                    + "): " + percentText);
+                    + "): " + percentageText);
         }
         NotificationManager.from(mContext).notify(TAG, info.id, notification);
     }
@@ -545,25 +549,47 @@ public class BugreportProgressService extends Service {
             }
             activeProcesses++;
             final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
-            final int progress = SystemProperties.getInt(progressKey, 0);
-            if (progress == 0) {
+            info.realProgress = SystemProperties.getInt(progressKey, 0);
+            if (info.realProgress == 0) {
                 Log.v(TAG, "System property " + progressKey + " is not set yet");
             }
-            final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
-            final boolean maxChanged = max > 0 && max != info.max;
-            final boolean progressChanged = progress > 0 && progress != info.progress;
+            final String maxKey = DUMPSTATE_PREFIX + pid + MAX_SUFFIX;
+            info.realMax = SystemProperties.getInt(maxKey, info.max);
+            if (info.realMax <= 0 ) {
+                Log.w(TAG, "Property " + maxKey + " is not positive: " + info.max);
+                continue;
+            }
+            /*
+             * Checks whether the progress changed in a way that should be displayed to the user:
+             * - info.progress / info.max represents the displayed progress
+             * - info.realProgress / info.realMax represents the real progress
+             * - since the real progress can decrease, the displayed progress is only updated if it
+             *   increases
+             * - the displayed progress is capped at a maximum (like 99%)
+             */
+            final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
+            int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
+            int max = info.realMax;
+            int progress = info.realProgress;
 
-            if (progressChanged || maxChanged) {
-                if (progressChanged) {
-                    if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + "(id: " + id
-                            + ") from " + info.progress + " to " + progress);
-                    info.progress = progress;
+            if (newPercentage > CAPPED_PROGRESS) {
+                progress = newPercentage = CAPPED_PROGRESS;
+                max = CAPPED_MAX;
+            }
+
+            if (newPercentage > oldPercentage) {
+                if (DEBUG) {
+                    if (progress != info.progress) {
+                        Log.v(TAG, "Updating progress for PID " + pid + "(id: " + id + ") from "
+                                + info.progress + " to " + progress);
+                    }
+                    if (max != info.max) {
+                        Log.v(TAG, "Updating max progress for PID " + pid + "(id: " + id + ") from "
+                                + info.max + " to " + max);
+                    }
                 }
-                if (maxChanged) {
-                    Log.i(TAG, "Updating max progress for PID " + pid + "(id: " + id
-                            + ") from " + info.max + " to " + max);
-                    info.max = max;
-                }
+                info.progress = progress;
+                info.max = max;
                 info.lastUpdate = System.currentTimeMillis();
                 updateProgress(info);
             } else {
@@ -1450,14 +1476,24 @@ public class BugreportProgressService extends Service {
         String description;
 
         /**
-         * Maximum progress of the bugreport generation.
+         * Maximum progress of the bugreport generation as displayed by the UI.
          */
         int max;
 
         /**
-         * Current progress of the bugreport generation.
+         * Current progress of the bugreport generation as displayed by the UI.
          */
         int progress;
+
+        /**
+         * Maximum progress of the bugreport generation as reported by dumpstate.
+         */
+        int realMax;
+
+        /**
+         * Current progress of the bugreport generation as reported by dumpstate.
+         */
+        int realProgress;
 
         /**
          * Time of the last progress update.
@@ -1568,10 +1604,12 @@ public class BugreportProgressService extends Service {
         @Override
         public String toString() {
             final float percent = ((float) progress * 100 / max);
+            final float realPercent = ((float) realProgress * 100 / realMax);
             return "id: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
                     + "\n\ttitle: " + title + "\n\tdescription: " + description
                     + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
                     + "\n\tprogress: " + progress + "/" + max + " (" + percent + ")"
+                    + "\n\treal progress: " + realProgress + "/" + realMax + " (" + realPercent + ")"
                     + "\n\tlast_update: " + getFormattedLastUpdate()
                     + "\naddingDetailsToZip: " + addingDetailsToZip
                     + " addedDetailsToZip: " + addedDetailsToZip;
@@ -1587,6 +1625,8 @@ public class BugreportProgressService extends Service {
             description = in.readString();
             max = in.readInt();
             progress = in.readInt();
+            realMax = in.readInt();
+            realProgress = in.readInt();
             lastUpdate = in.readLong();
             formattedLastUpdate = in.readString();
             bugreportFile = readFile(in);
@@ -1609,6 +1649,8 @@ public class BugreportProgressService extends Service {
             dest.writeString(description);
             dest.writeInt(max);
             dest.writeInt(progress);
+            dest.writeInt(realMax);
+            dest.writeInt(realProgress);
             dest.writeLong(lastUpdate);
             dest.writeString(getFormattedLastUpdate());
             writeFile(dest, bugreportFile);
