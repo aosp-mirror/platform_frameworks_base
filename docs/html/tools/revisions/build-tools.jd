@@ -52,6 +52,23 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 23.0.3</a> <em>(March 2016)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <ul>
+      <li>Fix issues in the <a href="{@docRoot}guide/topics/renderscript/compute.html">RenderScript</a>
+        Support Library on arm64 devices.</li>
+      <li>Fix issues in the <a href="{@docRoot}guide/topics/renderscript/compute.html">RenderScript</a>
+        Support Library on certain Jelly Bean devices.</li>
+      <li>Support <code>renderscriptTargetAPI 21+</code> when using Android
+        Plugin for Gradle, Revision 2.1.0 and above .</li>
+    </ul>
+  </div>
+</div>
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 23.0.2</a> <em>(November 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
