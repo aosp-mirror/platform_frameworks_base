@@ -7016,7 +7016,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean getPackageSuspended(ComponentName who, String packageName) {
+    public boolean isPackageSuspended(ComponentName who, String packageName) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {

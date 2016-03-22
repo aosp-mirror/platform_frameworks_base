@@ -234,7 +234,7 @@ public class RestrictedLockUtils {
             if (ipm.isPackageSuspendedForUser(packageName, userId)) {
                 return getProfileOrDeviceOwner(context, userId);
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalArgumentException e) {
             // Nothing to do
         }
         return null;

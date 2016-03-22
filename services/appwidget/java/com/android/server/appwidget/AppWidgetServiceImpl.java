@@ -486,8 +486,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 boolean changed = provider.setMaskedByLockedProfileLocked(lockedProfile);
                 changed |= provider.setMaskedByQuietProfileLocked(quietProfile);
                 try {
-                    boolean suspended = mPackageManager.isPackageSuspendedForUser(
-                            provider.info.provider.getPackageName(), provider.getUserId());
+                    boolean suspended;
+                    try {
+                        suspended = mPackageManager.isPackageSuspendedForUser(
+                                provider.info.provider.getPackageName(), provider.getUserId());
+                    } catch (IllegalArgumentException ex) {
+                        // Package not found.
+                        suspended = false;
+                    }
                     changed |= provider.setMaskedBySuspendedPackageLocked(suspended);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to query application info", e);

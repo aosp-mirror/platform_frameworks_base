@@ -10900,7 +10900,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 "isPackageSuspendedForUser for user " + userId);
         synchronized (mPackages) {
             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-            return pkgSetting != null && pkgSetting.getSuspended(userId);
+            if (pkgSetting == null) {
+                throw new IllegalArgumentException("Unknown target package: " + packageName);
+            }
+            return pkgSetting.getSuspended(userId);
         }
     }
 
