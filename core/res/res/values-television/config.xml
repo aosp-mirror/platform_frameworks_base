@@ -26,12 +26,4 @@
 
     <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
     <string translatable="false" name="config_defaultPictureInPictureBounds">"1328 54 1808 324"</string>
-
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows, when the PIP
-         is located in center. -->
-    <string translatable="false" name="config_centeredPictureInPictureBounds">"596 280 1324 690"</string>
-
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
-         when the PIP is shown with Recents. -->
-    <string translatable="false" name="config_pictureInPictureBoundsInRecents">"1484 96 1804 276"</string>
 </resources>

@@ -15,6 +15,8 @@
  */
 package com.android.systemui.recents.tv;
 
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
@@ -57,6 +59,7 @@ import com.android.systemui.recents.tv.views.RecentsTvView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.tv.pip.PipManager;
+import com.android.systemui.tv.pip.PipControlsView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,8 +80,10 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     private boolean mIgnoreAltTabRelease;
 
     private RecentsTvView mRecentsView;
-    private View mPipView;
+    private PipControlsView mPipControlsView;
     private View mPipShadeView;
+    private AnimatorSet mPipControlsViewFadeInAnimator;
+    private AnimatorSet mPipControlsViewFadeOutAnimator;
     private TaskStackHorizontalViewAdapter mTaskStackViewAdapter;
     private FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
@@ -95,7 +100,9 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         }
 
         @Override
-        public void onShowPipMenu() { }
+        public void onShowPipMenu() {
+            updatePipUI();
+        }
 
         @Override
         public void onMoveToFullscreen() { }
@@ -106,7 +113,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         @Override
         public void onMediaControllerChanged() { }
     };
-    private boolean mHasPip;
 
     /**
      * A common Runnable to finish Recents by launching Home with an animation depending on the
@@ -253,8 +259,22 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mPipView = findViewById(R.id.pip);
+        mPipControlsView = (PipControlsView) findViewById(R.id.pip_controls);
+        mPipControlsView.setListener(new PipControlsView.Listener() {
+            @Override
+            public void onClosed() {
+                dismissRecentsToLaunchTargetTaskOrHome();
+            }
+        });
         mPipShadeView = findViewById(R.id.pip_shade);
+
+        mPipControlsViewFadeInAnimator = (AnimatorSet) AnimatorInflater.loadAnimator(this,
+                R.anim.tv_pip_controls_fade_in);
+        mPipControlsViewFadeInAnimator.setTarget(mPipControlsView);
+        mPipControlsViewFadeOutAnimator = (AnimatorSet) AnimatorInflater.loadAnimator(this,
+                R.anim.tv_pip_controls_fade_out);
+        mPipControlsViewFadeOutAnimator.setTarget(mPipControlsView);
+
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 
@@ -265,7 +285,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
 
-        mHasPip = false;
         updatePipUI();
         mPipManager.addListener(mPipListener);
     }
@@ -456,37 +475,25 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     }
 
     private void updatePipUI() {
-        if (mHasPip == mPipManager.isPipShown()) {
-            return;
-        }
-        mHasPip = mPipManager.isPipShown();
-        if (mHasPip) {
-            // Place mPipView at the PIP bounds for fine tuned focus handling.
-            Rect pipBounds = mPipManager.getPipBounds();
-            LayoutParams lp = (LayoutParams) mPipView.getLayoutParams();
-            lp.width = pipBounds.width();
-            lp.height = pipBounds.height();
-            lp.leftMargin = pipBounds.left;
-            lp.topMargin = pipBounds.top;
-            mPipView.setLayoutParams(lp);
-
-            mPipView.setVisibility(View.VISIBLE);
-            mPipView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mPipManager.resizePinnedStack(PipManager.STATE_PIP_MENU);
-                }
-            });
-            mPipView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        if (mPipManager.isPipShown()) {
+            mPipControlsView.setAlpha(0);
+            mPipControlsView.setVisibility(View.VISIBLE);
+            mPipShadeView.setVisibility(View.INVISIBLE);
+            mPipControlsView.setOnChildFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
                     mPipManager.onPipViewFocusChangedInRecents(hasFocus);
+                    if (hasFocus) {
+                        mPipControlsViewFadeInAnimator.start();
+                    } else {
+                        mPipControlsViewFadeOutAnimator.start();
+                    }
                     mPipShadeView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
                 }
             });
             mPipShadeView.setVisibility(View.GONE);
         } else {
-            mPipView.setVisibility(View.GONE);
+            mPipControlsView.setVisibility(View.GONE);
             mPipShadeView.setVisibility(View.GONE);
         }
     }

@@ -2462,14 +2462,6 @@
     <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
     <string translatable="false" name="config_defaultPictureInPictureBounds">"0 0 100 100"</string>
 
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows, when the PIP
-         is located in center. -->
-    <string translatable="false" name="config_centeredPictureInPictureBounds">"0 0 300 300"</string>
-
-    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
-         when the PIP is shown with Recents. -->
-    <string translatable="false" name="config_pictureInPictureBoundsInRecents">"0 0 100 100"</string>
-
     <!-- Controls the snap mode for the docked stack divider
              0 - 3 snap targets: left/top has 16:9 ratio, 1:1, and right/bottom has 16:9 ratio
              1 - 3 snap targets: fixed ratio, 1:1, (1 - fixed ratio)
