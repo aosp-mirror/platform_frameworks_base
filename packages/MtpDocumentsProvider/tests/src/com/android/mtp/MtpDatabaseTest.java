@@ -103,7 +103,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertTrue(isNull(cursor, COLUMN_SUMMARY));
             assertTrue(isNull(cursor, COLUMN_LAST_MODIFIED));
             assertEquals(R.drawable.ic_root_mtp, getInt(cursor, COLUMN_ICON));
-            assertEquals(0, getInt(cursor, COLUMN_FLAGS));
+            assertEquals(Document.FLAG_DIR_SUPPORTS_CREATE, getInt(cursor, COLUMN_FLAGS));
             assertEquals(1000, getInt(cursor, COLUMN_SIZE));
             assertEquals(
                     MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE,
@@ -165,7 +165,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertTrue(isNull(cursor, COLUMN_SUMMARY));
             assertTrue(isNull(cursor, COLUMN_LAST_MODIFIED));
             assertEquals(R.drawable.ic_root_mtp, getInt(cursor, COLUMN_ICON));
-            assertEquals(0, getInt(cursor, COLUMN_FLAGS));
+            assertEquals(Document.FLAG_DIR_SUPPORTS_CREATE, getInt(cursor, COLUMN_FLAGS));
             assertEquals(1000, getInt(cursor, COLUMN_SIZE));
             assertEquals(
                     MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE, getInt(cursor, COLUMN_DOCUMENT_TYPE));
