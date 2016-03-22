@@ -156,6 +156,9 @@
     <!-- TV picture-in-picture -->
     <uses-permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE" />
 
+    <!-- DND access -->
+    <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"

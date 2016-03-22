@@ -1852,15 +1852,10 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPolicyAccess(String pkg) {
-            if (PackageManager.PERMISSION_GRANTED == getContext().checkCallingPermission(
-                    android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
+            if (PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
+                    android.Manifest.permission.MANAGE_NOTIFICATIONS, Binder.getCallingUid(),
+                    -1, true)) {
                 return true;
-            }
-            if (mAudioManagerInternal != null) {
-                final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
-                if (vcuid > 0 && Binder.getCallingUid() == vcuid) {
-                    return true;
-                }
             }
             return checkPackagePolicyAccess(pkg) || mListeners.isComponentEnabledForPackage(pkg);
         }
