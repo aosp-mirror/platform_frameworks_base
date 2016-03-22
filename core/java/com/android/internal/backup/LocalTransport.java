@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.SELinux;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
