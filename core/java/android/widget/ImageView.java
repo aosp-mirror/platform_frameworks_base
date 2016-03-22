@@ -911,11 +911,17 @@ public class ImageView extends View {
         }
 
         if (mDrawable != null) {
-            mDrawable.setCallback(null);
-            unscheduleDrawable(mDrawable);
-            if (isAttachedToWindow()) {
+            // It's possible for this method to be invoked from the constructor before
+            // subclass constructors have run. Drawables can and should trigger invalidations
+            // and other activity with their callback on visibility changes, which shouldn't
+            // happen before subclass constructors finish. However, we won't have set the
+            // drawable as visible until the view becomes attached. This guard below keeps
+            // multiple calls to this method from constructors from causing issues.
+            if (mDrawable.isVisible()) {
                 mDrawable.setVisible(false, false);
             }
+            mDrawable.setCallback(null);
+            unscheduleDrawable(mDrawable);
         }
 
         mDrawable = d;

@@ -18002,7 +18002,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * to clear the previous drawable. setVisible first while we still have the callback set.
          */
         if (mBackground != null) {
-            if (isAttachedToWindow()) {
+            // It's possible for this method to be invoked from the View constructor before
+            // subclass constructors have run. Drawables can and should trigger invalidations
+            // and other activity with their callback on visibility changes, which shouldn't
+            // happen before subclass constructors finish. However, we won't have set the
+            // drawable as visible until the view becomes attached. This guard below keeps
+            // multiple calls to this method from constructors from causing issues.
+            if (mBackground.isVisible()) {
                 mBackground.setVisible(false, false);
             }
             mBackground.setCallback(null);
@@ -18237,7 +18243,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mForegroundInfo.mDrawable != null) {
-            if (isAttachedToWindow()) {
+            // It's possible for this method to be invoked from the View constructor before
+            // subclass constructors have run. Drawables can and should trigger invalidations
+            // and other activity with their callback on visibility changes, which shouldn't
+            // happen before subclass constructors finish. However, we won't have set the
+            // drawable as visible until the view becomes attached. This guard below keeps
+            // multiple calls to this method from constructors from causing issues.
+            if (mForegroundInfo.mDrawable.isVisible()) {
                 mForegroundInfo.mDrawable.setVisible(false, false);
             }
             mForegroundInfo.mDrawable.setCallback(null);
