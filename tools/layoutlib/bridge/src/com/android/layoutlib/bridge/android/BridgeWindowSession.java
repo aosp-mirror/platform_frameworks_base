@@ -96,7 +96,8 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void repositionChild(IWindow childWindow, int x, int y, int width, int height,
+    public void repositionChild(IWindow window, int left, int top, int right, int bottom,
+            int requestedWidth, int requestedHeight,
             long deferTransactionUntilFrame, Rect outFrame) {
         // pass for now.
         return;
