@@ -54,6 +54,8 @@ public class UsbManager {
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
      * <ul>
      * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
+     * <li> {@link #USB_HOST_CONNECTED} boolean indicating whether USB is connected or
+     *     disconnected as host.
      * <li> {@link #USB_CONFIGURED} boolean indicating whether USB is configured.
      * currently zero if not configured, one for configured.
      * <li> {@link #USB_FUNCTION_ADB} boolean extra indicating whether the
@@ -150,6 +152,14 @@ public class UsbManager {
      * {@hide}
      */
     public static final String USB_CONNECTED = "connected";
+
+    /**
+     * Boolean extra indicating whether USB is connected or disconnected as host.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
+     *
+     * {@hide}
+     */
+    public static final String USB_HOST_CONNECTED = "host_connected";
 
     /**
      * Boolean extra indicating whether USB is configured.
