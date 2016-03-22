@@ -72,6 +72,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toolbar;
 import android.widget.TextView;
 
 import com.android.documentsui.BaseActivity;
@@ -521,6 +522,12 @@ public class DirectoryFragment extends Fragment
             mSelected.clear();
             mNoDeleteCount = 0;
             mNoRenameCount = -1;
+
+            // Re-enable TalkBack for the toolbars, as they are no longer covered by action mode.
+            final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+            final Toolbar rootsToolbar = (Toolbar) getActivity().findViewById(R.id.roots_toolbar);
+            toolbar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            rootsToolbar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         }
 
         @Override
@@ -530,7 +537,22 @@ public class DirectoryFragment extends Fragment
             int size = mSelectionManager.getSelection().size();
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
             mode.setTitle(TextUtils.formatSelectedCount(size));
-            return (size > 0);
+
+            if (size > 0) {
+                // Hide the toolbars if action mode is enabled, so TalkBack doesn't navigate to
+                // these controls when using linear navigation.
+                final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+                final Toolbar rootsToolbar = (Toolbar) getActivity().findViewById(
+                        R.id.roots_toolbar);
+                toolbar.setImportantForAccessibility(
+                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                rootsToolbar.setImportantForAccessibility(
+                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+
+                return true;
+            }
+
+            return false;
         }
 
         @Override
