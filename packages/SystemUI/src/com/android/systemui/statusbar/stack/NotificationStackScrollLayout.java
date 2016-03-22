@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
@@ -83,7 +84,7 @@ import java.util.HashSet;
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
-        SettingsIconRowListener, LongPressCancelable {
+        SettingsIconRowListener, ScrollContainer {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -134,7 +135,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
     private int mTopPadding;
-    private int mCollapseSecondCardPadding;
+    private int mBottomInset = 0;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -206,6 +207,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mStackTranslation;
     private float mTopPaddingOverflow;
     private boolean mDontReportNextOverScroll;
+    private boolean mDontClampNextScroll;
     private boolean mRequestViewResizeAnimationOnLayout;
     private boolean mNeedViewResizeAnimation;
     private View mExpandedGroupView;
@@ -905,6 +907,45 @@ public class NotificationStackScrollLayout extends ViewGroup
         mScrollingEnabled = enable;
     }
 
+    public void scrollTo(View v) {
+        ExpandableView expandableView = (ExpandableView) v;
+        int positionInLinearLayout = getPositionInLinearLayout(v);
+
+        int targetScroll = positionInLinearLayout + expandableView.getActualHeight() +
+                mBottomInset - getHeight() + getTopPadding();
+        if (mOwnScrollY < targetScroll) {
+            mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
+            mDontReportNextOverScroll = true;
+            postInvalidateOnAnimation();
+        }
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        mBottomInset = Math.max(0, insets.getSystemWindowInsetBottom()
+                - (getRootView().getHeight() - getHeight()));
+
+        int range = getScrollRange();
+        if (mOwnScrollY > range) {
+            // HACK: We're repeatedly getting staggered insets here while the IME is
+            // animating away. To work around that we'll wait until things have settled.
+            removeCallbacks(mReclamp);
+            postDelayed(mReclamp, 50);
+        }
+        return insets;
+    }
+
+    private Runnable mReclamp = new Runnable() {
+        @Override
+        public void run() {
+            int range = getScrollRange();
+            mScroller.startScroll(mScrollX, mOwnScrollY, 0, range - mOwnScrollY);
+            mDontReportNextOverScroll = true;
+            mDontClampNextScroll = true;
+            postInvalidateOnAnimation();
+        }
+    };
+
     public void setExpandingEnabled(boolean enable) {
         mExpandHelper.setEnabled(enable);
     }
@@ -1237,7 +1278,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             int y = mScroller.getCurrY();
 
             if (oldX != x || oldY != y) {
-                final int range = getScrollRange();
+                int range = getScrollRange();
                 if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
                     float currVelocity = mScroller.getCurrVelocity();
                     if (currVelocity >= mMinimumVelocity) {
@@ -1245,6 +1286,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                     }
                 }
 
+                if (mDontClampNextScroll) {
+                    range = Math.max(range, oldY);
+                }
                 overScrollBy(x - oldX, y - oldY, oldX, oldY, 0, range,
                         0, (int) (mMaxOverScroll), false);
                 onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
@@ -1252,6 +1296,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             // Keep on drawing until the animation has finished.
             postInvalidateOnAnimation();
+        } else {
+            mDontClampNextScroll = false;
         }
     }
 
@@ -1455,7 +1501,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                         - firstChild.getMinHeight());
             }
         }
-        return scrollRange;
+        int imeOverlap = Math.max(0,
+                getContentHeight() - (getHeight() - mBottomInset));
+        return scrollRange + imeOverlap;
     }
 
     /**

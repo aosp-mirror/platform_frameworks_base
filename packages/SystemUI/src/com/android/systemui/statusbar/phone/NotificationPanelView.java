@@ -1731,7 +1731,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mNavigationBarBottomHeight = insets.getSystemWindowInsetBottom();
+        mNavigationBarBottomHeight = insets.getStableInsetBottom();
         updateMaxHeadsUpTranslation();
         return insets;
     }
