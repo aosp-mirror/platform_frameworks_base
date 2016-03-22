@@ -69,7 +69,8 @@ class DocumentLoader implements AutoCloseable {
      */
     synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
             throws IOException {
-        Preconditions.checkArgument(parent.mDeviceId == mDevice.deviceId);
+        assert parent.mDeviceId == mDevice.deviceId;
+
         LoaderTask task = mTaskList.findTask(parent);
         if (task == null) {
             if (parent.mDocumentId == null) {
@@ -256,7 +257,8 @@ class DocumentLoader implements AutoCloseable {
 
         LoaderTask(MtpManager manager, MtpDatabase database, int[] operationsSupported,
                 Identifier identifier) {
-            Preconditions.checkNotNull(operationsSupported);
+            assert operationsSupported != null;
+            assert identifier.mDocumentType != MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE;
             mManager = manager;
             mDatabase = database;
             mOperationsSupported = operationsSupported;

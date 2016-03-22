@@ -617,6 +617,7 @@ class MtpDatabase {
         final String whereClosure =
                 "parent." + COLUMN_DEVICE_ID + " = ? AND " +
                 "parent." + COLUMN_ROW_STATE + " IN (?, ?) AND " +
+                "parent." + COLUMN_DOCUMENT_TYPE + " != ? AND " +
                 "child." + COLUMN_ROW_STATE + " = ?";
         try (final Cursor cursor = mDatabase.query(
                 fromClosure,
@@ -626,7 +627,7 @@ class MtpDatabase {
                         "parent." + Document.COLUMN_DOCUMENT_ID,
                         "parent." + COLUMN_DOCUMENT_TYPE),
                 whereClosure,
-                strings(deviceId, ROW_STATE_VALID, ROW_STATE_INVALIDATED,
+                strings(deviceId, ROW_STATE_VALID, ROW_STATE_INVALIDATED, DOCUMENT_TYPE_DEVICE,
                         ROW_STATE_DISCONNECTED),
                 null,
                 null,
