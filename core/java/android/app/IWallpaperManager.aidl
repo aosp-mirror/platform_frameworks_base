@@ -62,6 +62,11 @@ interface IWallpaperManager {
             out Bundle outParams, int userId);
 
     /**
+     * Retrieve the given user's current wallpaper ID of the given kind.
+     */
+    int getWallpaperIdForUser(int which, int userId);
+
+    /**
      * If the current system wallpaper is a live wallpaper component, return the
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
