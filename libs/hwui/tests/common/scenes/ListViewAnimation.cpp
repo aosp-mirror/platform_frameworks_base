@@ -136,9 +136,9 @@ private:
             textPaint.setAntiAlias(true);
             char buf[256];
             snprintf(buf, sizeof(buf), "This card is #%d", cardId);
-            TestUtils::drawTextToCanvas(&canvas, buf, textPaint, cardHeight, dp(25));
+            TestUtils::drawUtf8ToCanvas(&canvas, buf, textPaint, cardHeight, dp(25));
             textPaint.setTextSize(dp(15));
-            TestUtils::drawTextToCanvas(&canvas, "This is some more text on the card", textPaint,
+            TestUtils::drawUtf8ToCanvas(&canvas, "This is some more text on the card", textPaint,
                     cardHeight, dp(45));
 
             canvas.drawBitmap(createRandomCharIcon(), dp(10), dp(10), nullptr);
