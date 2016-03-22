@@ -351,7 +351,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(1422716400000L, cursor.getLong(3));
         assertEquals(
                 DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
-                DocumentsContract.Document.FLAG_SUPPORTS_WRITE |
                 DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE,
                 cursor.getInt(4));
         assertEquals(0, cursor.getInt(5));
