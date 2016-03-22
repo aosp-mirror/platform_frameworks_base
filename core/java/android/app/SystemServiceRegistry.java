@@ -69,6 +69,7 @@ import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
@@ -500,7 +501,8 @@ final class SystemServiceRegistry {
             public WifiManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.WIFI_SERVICE);
                 IWifiManager service = IWifiManager.Stub.asInterface(b);
-                return new WifiManager(ctx.getOuterContext(), service);
+                return new WifiManager(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.WIFI_P2P_SERVICE, WifiP2pManager.class,
