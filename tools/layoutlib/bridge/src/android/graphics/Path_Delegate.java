@@ -167,13 +167,13 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setFillType(long nPath, int ft) {
+    public static void native_setFillType(long nPath, int ft) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
-        pathDelegate.mFillType = Path.sFillTypeArray[ft];
+        pathDelegate.setFillType(Path.sFillTypeArray[ft]);
     }
 
     @LayoutlibDelegate

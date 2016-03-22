@@ -178,6 +178,7 @@ public class VectorDrawable_Delegate {
         properties.putInt(VFullPath_Delegate.STROKE_LINE_JOIN_INDEX * 4, path.getStrokeLineJoin());
         properties.putFloat(VFullPath_Delegate.STROKE_MITER_LIMIT_INDEX * 4,
                 path.getStrokeMiterlimit());
+        properties.putInt(VFullPath_Delegate.FILL_TYPE_INDEX * 4, path.getFillType());
 
         return true;
     }
@@ -186,7 +187,7 @@ public class VectorDrawable_Delegate {
     static void nUpdateFullPathProperties(long pathPtr, float strokeWidth,
             int strokeColor, float strokeAlpha, int fillColor, float fillAlpha, float trimPathStart,
             float trimPathEnd, float trimPathOffset, float strokeMiterLimit, int strokeLineCap,
-            int strokeLineJoin) {
+            int strokeLineJoin, int fillType) {
         VFullPath_Delegate path = VNativeObject.getDelegate(pathPtr);
 
         path.setStrokeWidth(strokeWidth);
@@ -200,6 +201,7 @@ public class VectorDrawable_Delegate {
         path.setStrokeMiterlimit(strokeMiterLimit);
         path.setStrokeLineCap(strokeLineCap);
         path.setStrokeLineJoin(strokeLineJoin);
+        path.setFillType(fillType);
     }
 
     @LayoutlibDelegate
@@ -530,6 +532,7 @@ public class VectorDrawable_Delegate {
         private static final int STROKE_LINE_CAP_INDEX = 8;
         private static final int STROKE_LINE_JOIN_INDEX = 9;
         private static final int STROKE_MITER_LIMIT_INDEX = 10;
+        private static final int FILL_TYPE_INDEX = 11;
 
         private static final int LINECAP_BUTT = 0;
         private static final int LINECAP_ROUND = 1;
@@ -590,6 +593,8 @@ public class VectorDrawable_Delegate {
         Join mStrokeLineJoin = MITER;
         float mStrokeMiterlimit = 4;
 
+        int mFillType = 0; // WINDING(0) is the default value. See Path.FillType
+
         private VFullPath_Delegate() {
             // Empty constructor.
         }
@@ -612,6 +617,7 @@ public class VectorDrawable_Delegate {
 
             mStrokeGradient = copy.mStrokeGradient;
             mFillGradient = copy.mFillGradient;
+            mFillType = copy.mFillType;
         }
 
         private int getStrokeLineCap() {
@@ -754,6 +760,14 @@ public class VectorDrawable_Delegate {
 
         private void setFillGradient(long gradientPtr) {
             mFillGradient = gradientPtr;
+        }
+
+        private void setFillType(int fillType) {
+            mFillType = fillType;
+        }
+
+        private int getFillType() {
+            return mFillType;
         }
     }
 
@@ -1124,6 +1138,7 @@ public class VectorDrawable_Delegate {
                     assert fillPaintDelegate != null;
                     fillPaintDelegate.setColorFilter(filterPtr);
                     fillPaintDelegate.setShader(fullPath.mFillGradient);
+                    Path_Delegate.native_setFillType(mRenderPath.mNativePath, fullPath.mFillType);
                     Canvas_Delegate.native_drawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
                             .getNativeInstance());
                 }
