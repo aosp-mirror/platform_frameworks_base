@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,8 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.views.TaskView;
 
 /**
- * This event is sent to request that the given {@link TaskView} is dismissed.
+ * This event is sent to request that all the {@link TaskView}s are dismissed.
  */
-public class DismissTaskViewEvent extends EventBus.AnimatedEvent {
-
-    public final TaskView taskView;
-
-    public DismissTaskViewEvent(TaskView taskView) {
-        this.taskView = taskView;
-    }
+public class DismissAllTaskViewsEvent extends EventBus.AnimatedEvent {
+    // Simple event
 }

@@ -2017,6 +2017,9 @@ message MetricsEvent {
     // action pass package name of calling package.
     ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_PACKAGE = 356;
 
+    // Logged when a user dismisses all task in overview
+    OVERVIEW_DISMISS_ALL = 357;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

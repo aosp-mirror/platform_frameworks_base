@@ -58,6 +58,9 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
+import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
+import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
@@ -86,6 +89,9 @@ public class RecentsView extends FrameLayout {
     private static final int DOCK_AREA_OVERLAY_TRANSITION_DURATION = 135;
     private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
     private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
+
+    private static final int SHOW_STACK_ACTION_BUTTON_DURATION = 150;
+    private static final int HIDE_STACK_ACTION_BUTTON_DURATION = 100;
 
     private TaskStack mStack;
     private TaskStackView mTaskStackView;
@@ -135,10 +141,11 @@ public class RecentsView extends FrameLayout {
                     R.dimen.recents_task_view_rounded_corners_radius);
             mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
                     this, false);
+            mStackActionButton.forceHasOverlappingRendering(false);
             mStackActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: To be implemented
+                    EventBus.getDefault().send(new DismissAllTaskViewsEvent());
                 }
             });
             addView(mStackActionButton);
@@ -579,12 +586,24 @@ public class RecentsView extends FrameLayout {
         animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, DEFAULT_UPDATE_SCRIM_DURATION);
     }
 
+    public final void onBusEvent(AllTaskViewsDismissedEvent event) {
+        hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
+    }
+
+    public final void onBusEvent(DismissAllTaskViewsEvent event) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (!ssp.hasDockedTask()) {
+            // Animate the background away only if we are dismissing Recents to home
+            animateBackgroundScrim(0f, DEFAULT_UPDATE_SCRIM_DURATION);
+        }
+    }
+
     public final void onBusEvent(ShowStackActionButtonEvent event) {
         if (!RecentsDebugFlags.Static.EnableStackActionButton) {
             return;
         }
 
-        showStackActionButton(150, event.translate);
+        showStackActionButton(SHOW_STACK_ACTION_BUTTON_DURATION, event.translate);
     }
 
     public final void onBusEvent(HideStackActionButtonEvent event) {
@@ -592,7 +611,7 @@ public class RecentsView extends FrameLayout {
             return;
         }
 
-        hideStackActionButton(100, true /* translate */);
+        hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
     }
 
     /**
@@ -623,7 +642,6 @@ public class RecentsView extends FrameLayout {
                             .alpha(1f)
                             .setDuration(duration)
                             .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                            .withLayer()
                             .start();
                 }
             });
@@ -669,7 +687,6 @@ public class RecentsView extends FrameLayout {
                             postAnimationTrigger.decrement();
                         }
                     })
-                    .withLayer()
                     .start();
             postAnimationTrigger.increment();
         }

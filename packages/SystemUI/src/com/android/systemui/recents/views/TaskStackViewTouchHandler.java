@@ -356,6 +356,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             return;
         }
 
+        // Disallow tapping above and below the stack to dismiss recents
+        if (x > mSv.mLayoutAlgorithm.mStackRect.left && x < mSv.mLayoutAlgorithm.mStackRect.right) {
+            return;
+        }
+
         // If tapping on the freeform workspace background, just launch the first freeform task
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.hasFreeformWorkspaceSupport()) {
@@ -507,13 +512,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
+        // Remove the task view from the stack
+        EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv));
         // Update the scroll to the final scroll position from onBeginDrag()
         mSv.getScroller().setStackScroll(mTargetStackScroll, null);
         // Update the focus state to the final focus state
         mSv.getStackAlgorithm().setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
         mSv.getStackAlgorithm().clearUnfocusedTaskOverrides();
-        // Remove the task view from the stack
-        EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv));
         // Stop tracking this deletion animation
         mSwipeHelperAnimations.remove(v);
         // Keep track of deletions by keyboard
