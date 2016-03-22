@@ -79,7 +79,7 @@ public final class RecoverySystemService extends SystemService {
                 uncryptFile.write(filename + "\n");
             } catch (IOException e) {
                 Slog.e(TAG, "IOException when writing \"" + RecoverySystem.UNCRYPT_PACKAGE_FILE +
-                        "\": " + e.getMessage());
+                        "\": ", e);
                 return false;
             }
 
@@ -94,8 +94,11 @@ public final class RecoverySystemService extends SystemService {
             }
 
             // Read the status from the socket.
-            try (DataInputStream dis = new DataInputStream(socket.getInputStream());
-                    DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
+            DataInputStream dis = null;
+            DataOutputStream dos = null;
+            try {
+                dis = new DataInputStream(socket.getInputStream());
+                dos = new DataOutputStream(socket.getOutputStream());
                 int lastStatus = Integer.MIN_VALUE;
                 while (true) {
                     int status = dis.readInt();
@@ -111,7 +114,7 @@ public final class RecoverySystemService extends SystemService {
                         if (listener != null) {
                             try {
                                 listener.onProgress(status);
-                            } catch (RemoteException unused) {
+                            } catch (RemoteException ignored) {
                                 Slog.w(TAG, "RemoteException when posting progress");
                             }
                         }
@@ -121,7 +124,6 @@ public final class RecoverySystemService extends SystemService {
                             // waits for the ack so the socket won't be
                             // destroyed before we receive the code.
                             dos.writeInt(0);
-                            dos.flush();
                             break;
                         }
                     } else {
@@ -131,14 +133,15 @@ public final class RecoverySystemService extends SystemService {
                         // for the ack so the socket won't be destroyed before
                         // we receive the code.
                         dos.writeInt(0);
-                        dos.flush();
                         return false;
                     }
                 }
             } catch (IOException e) {
-                Slog.e(TAG, "IOException when reading status: " + e);
+                Slog.e(TAG, "IOException when reading status: ", e);
                 return false;
             } finally {
+                IoUtils.closeQuietly(dis);
+                IoUtils.closeQuietly(dos);
                 IoUtils.closeQuietly(socket);
             }
 
@@ -169,11 +172,11 @@ public final class RecoverySystemService extends SystemService {
                             LocalSocketAddress.Namespace.RESERVED));
                     done = true;
                     break;
-                } catch (IOException unused) {
+                } catch (IOException ignored) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        Slog.w(TAG, "Interrupted: " + e);
+                        Slog.w(TAG, "Interrupted: ", e);
                     }
                 }
             }
@@ -200,8 +203,12 @@ public final class RecoverySystemService extends SystemService {
                 return false;
             }
 
-            try (DataInputStream dis = new DataInputStream(socket.getInputStream());
-                    DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
+            DataInputStream dis = null;
+            DataOutputStream dos = null;
+            try {
+                dis = new DataInputStream(socket.getInputStream());
+                dos = new DataOutputStream(socket.getOutputStream());
+
                 // Send the BCB commands if it's to setup BCB.
                 if (isSetup) {
                     dos.writeInt(command.length());
@@ -215,7 +222,6 @@ public final class RecoverySystemService extends SystemService {
                 // Ack receipt of the status code. uncrypt waits for the ack so
                 // the socket won't be destroyed before we receive the code.
                 dos.writeInt(0);
-                dos.flush();
 
                 if (status == 100) {
                     Slog.i(TAG, "uncrypt " + (isSetup ? "setup" : "clear") +
@@ -226,9 +232,11 @@ public final class RecoverySystemService extends SystemService {
                     return false;
                 }
             } catch (IOException e) {
-                Slog.e(TAG, "IOException when getting output stream: " + e);
+                Slog.e(TAG, "IOException when communicating with uncrypt: ", e);
                 return false;
             } finally {
+                IoUtils.closeQuietly(dis);
+                IoUtils.closeQuietly(dos);
                 IoUtils.closeQuietly(socket);
             }
 
