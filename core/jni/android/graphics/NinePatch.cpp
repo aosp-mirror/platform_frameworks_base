@@ -19,12 +19,12 @@
 #define LOG_NDEBUG 1
 
 #include <androidfw/ResourceTypes.h>
+#include <hwui/Canvas.h>
+#include <hwui/Paint.h>
 #include <utils/Log.h>
 
 #include <ResourceCache.h>
 
-#include "Paint.h"
-#include "Canvas.h"
 #include "SkCanvas.h"
 #include "SkRegion.h"
 #include "GraphicsJNI.h"

@@ -20,7 +20,7 @@
 #include <cutils/compiler.h>
 #include <SkCanvas.h>
 
-#include "Canvas.h"
+#include "hwui/Canvas.h"
 
 namespace android {
 namespace uirenderer {

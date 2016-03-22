@@ -16,9 +16,9 @@
 
 #include "CanvasState.h"
 
-#include "Canvas.h"
 #include "Matrix.h"
 #include "Rect.h"
+#include "hwui/Canvas.h"
 #include "utils/LinearAllocator.h"
 
 #include <gtest/gtest.h>
