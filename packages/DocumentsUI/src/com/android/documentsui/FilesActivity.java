@@ -414,7 +414,7 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     void onTaskFinished(Uri... uris) {
-        Log.d(TAG, "onFinished() " + Arrays.toString(uris));
+        if (DEBUG) Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final Intent intent = new Intent();
         if (uris.length == 1) {

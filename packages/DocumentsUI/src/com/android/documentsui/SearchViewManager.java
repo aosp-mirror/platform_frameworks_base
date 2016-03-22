@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.provider.DocumentsContract.Root;
@@ -80,7 +82,7 @@ final class SearchViewManager implements
      */
     void update(RootInfo root) {
         if (mMenu == null) {
-            Log.d(TAG, "update called before Search MenuItem installed.");
+            if (DEBUG) Log.d(TAG, "update called before Search MenuItem installed.");
             return;
         }
 
@@ -108,7 +110,7 @@ final class SearchViewManager implements
 
     void showMenu(boolean visible) {
         if (mMenu == null) {
-            Log.d(TAG, "showMenu called before Search MenuItem installed.");
+            if (DEBUG) Log.d(TAG, "showMenu called before Search MenuItem installed.");
             return;
         }
 
