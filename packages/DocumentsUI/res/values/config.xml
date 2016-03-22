@@ -24,5 +24,6 @@
     <!-- Indicates if the home directory should be hidden in the roots list, that is presented
          in the drawer/left side panel ) -->
     <bool name="home_root_hidden">true</bool>
-
+    <!-- Indicates if the advanced roots like internal storage should be hidden in the roots list) -->
+    <bool name="advanced_roots_hidden">true</bool>
 </resources>
