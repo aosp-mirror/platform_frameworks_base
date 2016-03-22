@@ -411,11 +411,17 @@ public class ApfFilter {
             for (int i = 0; i < mNonLifetimes.size(); i++) {
                 // Generate code to match the packet bytes
                 Pair<Integer, Integer> nonLifetime = mNonLifetimes.get(i);
-                gen.addLoadImmediate(Register.R0, nonLifetime.first);
-                gen.addJumpIfBytesNotEqual(Register.R0,
-                        Arrays.copyOfRange(mPacket.array(), nonLifetime.first,
-                                           nonLifetime.first + nonLifetime.second),
-                        nextFilterLabel);
+                // Don't generate JNEBS instruction for 0 bytes as it always fails the
+                // ASSERT_FORWARD_IN_PROGRAM(pc + cmp_imm - 1) check where cmp_imm is
+                // the number of bytes to compare. nonLifetime is zero between the
+                // valid and preferred lifetimes in the prefix option.
+                if (nonLifetime.second != 0) {
+                    gen.addLoadImmediate(Register.R0, nonLifetime.first);
+                    gen.addJumpIfBytesNotEqual(Register.R0,
+                            Arrays.copyOfRange(mPacket.array(), nonLifetime.first,
+                                               nonLifetime.first + nonLifetime.second),
+                            nextFilterLabel);
+                }
                 // Generate code to test the lifetimes haven't gone down too far
                 if ((i + 1) < mNonLifetimes.size()) {
                     Pair<Integer, Integer> nextNonLifetime = mNonLifetimes.get(i + 1);
