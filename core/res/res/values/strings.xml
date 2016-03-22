@@ -3368,8 +3368,8 @@
          tapping/clicking the whole thing is going to do. -->
     <string name="action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
 
-    <!-- Storage description for internal storage. [CHAR LIMIT=NONE] -->
-    <string name="storage_internal">Internal storage</string>
+    <!-- Storage description for internal shared storage. [CHAR LIMIT=NONE] -->
+    <string name="storage_internal">Internal shared storage</string>
 
     <!-- Storage description for a generic SD card. [CHAR LIMIT=NONE] -->
     <string name="storage_sd_card">SD card</string>
