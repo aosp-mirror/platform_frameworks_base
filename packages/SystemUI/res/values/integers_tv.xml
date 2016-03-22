@@ -15,4 +15,6 @@
 -->
 <resources>
     <integer name="item_scale_anim_duration">150</integer>
+    <integer name="dismiss_short_duration">200</integer>
+    <integer name="dismiss_long_duration">400</integer>
 </resources>

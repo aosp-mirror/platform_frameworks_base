@@ -15,6 +15,7 @@
  */
 package com.android.systemui.recents.tv.views;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
+import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.model.Task;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public class TaskStackHorizontalViewAdapter extends
     private static final String TAG = "TaskStackViewAdapter";
     private List<Task> mTaskList;
 
-    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TaskCardView mTaskCardView;
         private Task mTask;
         public ViewHolder(View v) {
@@ -58,9 +60,14 @@ public class TaskStackHorizontalViewAdapter extends
         @Override
         public void onClick(View v) {
             try {
-                EventBus.getDefault().send(new LaunchTvTaskEvent(mTaskCardView, mTask,
-                        null, INVALID_STACK_ID));
-                ((Activity)(v.getContext())).finish();
+                if (mTaskCardView.isInDismissState()) {
+                    mTaskCardView.startDismissTaskAnimation(
+                            getRemoveAtListener(getAdapterPosition(), mTaskCardView));
+                } else {
+                    EventBus.getDefault().send(new LaunchTvTaskEvent(mTaskCardView, mTask,
+                            null, INVALID_STACK_ID));
+                    ((Activity) (v.getContext())).finish();
+                }
             } catch (Exception e) {
                 Log.e(TAG, v.getContext()
                         .getString(R.string.recents_launch_error_message, mTask.title), e);
@@ -96,5 +103,32 @@ public class TaskStackHorizontalViewAdapter extends
     @Override
     public int getItemCount() {
         return mTaskList.size();
+    }
+
+    private Animator.AnimatorListener getRemoveAtListener(final int position,
+                                                          final TaskCardView taskCardView) {
+        return new Animator.AnimatorListener() {
+
+            @Override
+            public void onAnimationStart(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                removeAt(position);
+                EventBus.getDefault().send(new DeleteTaskDataEvent(taskCardView.getTask()));
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+        };
+
+    }
+
+    private void removeAt(int position) {
+        mTaskList.remove(position);
+        notifyItemRemoved(position);
     }
 }

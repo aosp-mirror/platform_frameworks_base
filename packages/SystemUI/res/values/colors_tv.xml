@@ -19,4 +19,5 @@
 <resources>
     <color name="recents_tv_card_background_color">#FF37474F</color>
     <color name="recents_tv_card_title_text_color">#CCEEEEEE</color>
+    <color name="recents_tv_dismiss_text_color">#7FEEEEEE</color>
 </resources>
