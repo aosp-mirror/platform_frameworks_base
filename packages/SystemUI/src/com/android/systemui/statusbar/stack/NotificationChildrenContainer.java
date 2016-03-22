@@ -379,6 +379,8 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             tmpState.alpha = alpha;
             state.applyViewState(divider, tmpState);
+            // There is no fake shadow to be drawn on the children
+            child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
         }
     }
 
@@ -413,6 +415,8 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             tmpState.alpha = alpha;
             stateAnimator.startViewAnimations(divider, tmpState, baseDelay, duration);
+            // There is no fake shadow to be drawn on the children
+            child.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
         }
     }
 
