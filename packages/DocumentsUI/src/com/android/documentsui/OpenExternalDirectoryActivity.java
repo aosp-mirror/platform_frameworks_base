@@ -282,7 +282,7 @@ public class OpenExternalDirectoryActivity extends Activity {
             logInvalidScopedAccessRequest(context, SCOPED_DIRECTORY_ACCESS_ERROR);
             return null;
         }
-        Log.d(TAG, "doc id for " + file + ": " + docId);
+        if (DEBUG) Log.d(TAG, "doc id for " + file + ": " + docId);
 
         final Uri uri = DocumentsContract.buildTreeDocumentUri(EXTERNAL_STORAGE_AUTH, docId);
         if (uri == null) {
