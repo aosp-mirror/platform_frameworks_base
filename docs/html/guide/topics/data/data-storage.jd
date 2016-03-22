@@ -178,6 +178,19 @@ android.content.Context#MODE_APPEND}, {@link
 android.content.Context#MODE_WORLD_READABLE}, and {@link
 android.content.Context#MODE_WORLD_WRITEABLE}.</p>
 
+<p class="note"><strong>Note:</strong> The constants {@link
+android.content.Context#MODE_WORLD_READABLE} and {@link
+android.content.Context#MODE_WORLD_WRITEABLE} have been deprecated since API level 17. Since
+API level 24 their use will result in a {@link java.lang.SecurityException} to be thrown.
+This means that apps targeting API level 24 and higher
+cannot share private files by name, and attempts to share a "file://" URI will result in a
+{@link android.os.FileUriExposedException} to be thrown. If your app needs to share private
+files with other apps, it may use a {@link android.support.v4.content.FileProvider} with
+the {@link android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION}.
+See also <a
+href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>.
+</p>
+
 <p>To read a file from internal storage:</p>
 
 <ol>
