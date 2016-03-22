@@ -17806,11 +17806,11 @@ package android.icu.util {
     ctor public IslamicCalendar(java.util.Date);
     ctor public IslamicCalendar(int, int, int);
     ctor public IslamicCalendar(int, int, int, int, int, int);
+    method public android.icu.util.IslamicCalendar.CalculationType getCalculationType();
     method protected int handleComputeMonthStart(int, int, boolean);
     method protected int handleGetExtendedYear();
     method protected int handleGetLimit(int, int);
-    method public boolean isCivil();
-    method public void setCivil(boolean);
+    method public void setCalculationType(android.icu.util.IslamicCalendar.CalculationType);
     field public static final int DHU_AL_HIJJAH = 11; // 0xb
     field public static final int DHU_AL_QIDAH = 10; // 0xa
     field public static final int JUMADA_1 = 4; // 0x4
