@@ -41,7 +41,7 @@ RENDERTHREAD_TEST(LeakCheck, saveLayerUnclipped_simple) {
     Caches& caches = Caches::getInstance();
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            TestUtils::createSyncedNodeList(node), sLightGeometery, nullptr);
+            TestUtils::createSyncedNodeList(node), sLightGeometery, Caches::getInstance());
     BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }
