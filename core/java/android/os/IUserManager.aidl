@@ -76,4 +76,5 @@ interface IUserManager {
     PersistableBundle getSeedAccountOptions();
     void clearSeedAccountData();
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
+    boolean isManagedProfile(int userId);
 }

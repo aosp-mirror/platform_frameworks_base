@@ -822,8 +822,28 @@ public class UserManager {
      */
     @SystemApi
     public boolean isManagedProfile() {
-        UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null ? user.isManagedProfile() : false;
+        try {
+            return mService.isManagedProfile(UserHandle.myUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the specified user is a managed profile.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission, otherwise the caller
+     * must be in the same profile group of specified user.
+     *
+     * @return whether the specified user is a managed profile.
+     * @hide
+     */
+    @SystemApi
+    public boolean isManagedProfile(@UserIdInt int userId) {
+        try {
+            return mService.isManagedProfile(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -964,8 +984,7 @@ public class UserManager {
 
     /**
      * Returns the UserInfo object describing a specific user.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission or the caller is
-     * in the same profile group of target user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle the user handle of the user whose information is being requested.
      * @return the UserInfo object for a specific user.
      * @hide
