@@ -2744,7 +2744,9 @@ public class ConnectivityManager {
         if (networkCallback == null) {
             throw new IllegalArgumentException("null NetworkCallback");
         }
-        if (need == null) throw new IllegalArgumentException("null NetworkCapabilities");
+        if (need == null && action != REQUEST) {
+            throw new IllegalArgumentException("null NetworkCapabilities");
+        }
         try {
             incCallbackHandlerRefCount();
             synchronized(sNetworkCallback) {
@@ -2767,7 +2769,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Helper function to requests a network with a particular legacy type.
+     * Helper function to request a network with a particular legacy type.
      *
      * This is temporarily public @hide so it can be called by system code that uses the
      * NetworkRequest API to request networks but relies on CONNECTIVITY_ACTION broadcasts for
@@ -3008,6 +3010,28 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Registers to receive notifications about whichever network currently satisfies the
+     * system default {@link NetworkRequest}.  The callbacks will continue to be called until
+     * either the application exits or {@link #unregisterNetworkCallback} is called
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @param networkCallback The {@link NetworkCallback} that the system will call as the
+     *                        system default network changes.
+     * @hide
+     */
+    public void registerDefaultNetworkCallback(NetworkCallback networkCallback) {
+        // This works because if the NetworkCapabilities are null,
+        // ConnectivityService takes them from the default request.
+        //
+        // Since the capabilities are exactly the same as the default request's
+        // capabilities, this request is guaranteed, at all times, to be
+        // satisfied by the same network, if any, that satisfies the default
+        // request, i.e., the system default network.
+        sendRequestForNetwork(null, networkCallback, 0, REQUEST, TYPE_NONE);
     }
 
     /**
