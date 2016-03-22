@@ -671,9 +671,7 @@ public class WifiManager {
 
     private AsyncChannel mAsyncChannel;
     private CountDownLatch mConnected;
-
-    /* TODO(b/27432949): Use a common connectivity thread for this. */
-    private HandlerThread mHandlerThread;
+    private Looper mLooper;
 
     /**
      * Create a new WifiManager instance.
@@ -685,9 +683,10 @@ public class WifiManager {
      * @hide - hide this because it takes in a parameter of type IWifiManager, which
      * is a system private class.
      */
-    public WifiManager(Context context, IWifiManager service) {
+    public WifiManager(Context context, IWifiManager service, Looper looper) {
         mContext = context;
         mService = service;
+        mLooper = looper;
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
     }
 
@@ -1978,12 +1977,10 @@ public class WifiManager {
                         "getWifiServiceMessenger() returned null!  This is invalid.");
             }
 
-            mHandlerThread = new HandlerThread("WifiManager");
             mAsyncChannel = new AsyncChannel();
             mConnected = new CountDownLatch(1);
 
-            mHandlerThread.start();
-            Handler handler = new ServiceHandler(mHandlerThread.getLooper());
+            Handler handler = new ServiceHandler(mLooper);
             mAsyncChannel.connect(mContext, handler, messenger);
             try {
                 mConnected.await();
