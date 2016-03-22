@@ -37,13 +37,6 @@ public class MediaResourceMonitorService extends SystemService {
 
     private static final String SERVICE_NAME = "media_resource_monitor";
 
-    /*
-     *  Resource types. Should be in sync with:
-     *  frameworks/av/media/libmedia/MediaResource.cpp
-     */
-    private static final String RESOURCE_AUDIO_CODEC = "audio-codec";
-    private static final String RESOURCE_VIDEO_CODEC = "video-codec";
-
     private final MediaResourceMonitorImpl mMediaResourceMonitorImpl;
 
     public MediaResourceMonitorService(Context context) {
@@ -58,25 +51,18 @@ public class MediaResourceMonitorService extends SystemService {
 
     class MediaResourceMonitorImpl extends IMediaResourceMonitor.Stub {
         @Override
-        public void notifyResourceGranted(int pid, String type, String subType, long value)
+        public void notifyResourceGranted(int pid, int type)
                 throws RemoteException {
             if (DEBUG) {
-                Slog.d(TAG, "notifyResourceGranted(pid=" + pid + ", type=" + type + ", subType="
-                        + subType + ", value=" + value + ")");
+                Slog.d(TAG, "notifyResourceGranted(pid=" + pid + ", type=" + type + ")");
             }
             final long identity = Binder.clearCallingIdentity();
             try {
                 String pkgNames[] = getPackageNamesFromPid(pid);
-                Integer resourceType = null;
-                if (RESOURCE_AUDIO_CODEC.equals(subType)) {
-                    resourceType = Intent.EXTRA_MEDIA_RESOURCE_TYPE_AUDIO_CODEC;
-                } else if (RESOURCE_VIDEO_CODEC.equals(subType)) {
-                    resourceType = Intent.EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC;
-                }
-                if (pkgNames != null && resourceType != null) {
+                if (pkgNames != null) {
                     Intent intent = new Intent(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
                     intent.putExtra(Intent.EXTRA_PACKAGES, pkgNames);
-                    intent.putExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE, resourceType);
+                    intent.putExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE, type);
                     getContext().sendBroadcastAsUser(intent,
                             new UserHandle(ActivityManager.getCurrentUser()),
                             android.Manifest.permission.RECEIVE_MEDIA_RESOURCE_USAGE);

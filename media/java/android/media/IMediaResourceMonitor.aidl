@@ -19,6 +19,6 @@ package android.media;
 /** {@hide} */
 interface IMediaResourceMonitor
 {
-    oneway void notifyResourceGranted(in int pid, String type, String subType, long value);
+    oneway void notifyResourceGranted(in int pid, in int type);
 }
 
