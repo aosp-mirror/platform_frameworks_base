@@ -1108,7 +1108,7 @@ const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
     } while (false)
 
 static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
-    static uint32_t discontinuity_count_to_handle_old_lock_type = 0;
+    static uint32_t discontinuity_count_to_handle_old_clock_type = 0;
     JavaObject object(env, "android/location/GnssClock");
     GpsClockFlags flags = clock->flags;
 
@@ -1137,7 +1137,7 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
         clock->full_bias_ns = clock->time_ns;
         clock->time_ns = 0;
         SET(HardwareClockDiscontinuityCount,
-            discontinuity_count_to_handle_old_lock_type++);
+            discontinuity_count_to_handle_old_clock_type++);
         break;
     }
 
@@ -1225,10 +1225,6 @@ static jobject translate_gps_measurement(JNIEnv* env,
     SET(MultipathIndicator,
         static_cast<int32_t>(measurement->multipath_indicator));
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
-
-    SET_IF_NOT(GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE,
-               PseudorangeRateCorrected,
-               true);
 
     return object.get();
 }
