@@ -417,6 +417,7 @@
     <protected-broadcast android:name="android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED" />
     <protected-broadcast android:name="android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.storage.action.VOLUME_STATE_CHANGED" />
+    <protected-broadcast android:name="android.os.storage.action.DISK_SCANNED" />
     <protected-broadcast android:name="com.android.server.action.UPDATE_TWILIGHT_STATE" />
     <protected-broadcast android:name="com.android.server.device_idle.STEP_IDLE_STATE" />
     <protected-broadcast android:name="com.android.server.device_idle.STEP_LIGHT_IDLE_STATE" />
