@@ -31,8 +31,12 @@ LOCAL_AAPT_FLAGS := \
   --extra-packages android.support.v7.recyclerview
 
 LOCAL_JACK_FLAGS := \
-  -D jack.assert.policy=enable \
   -D jack.optimization.inner-class.accessors=true
+
+# Only enable asserts on userdebug/eng builds
+ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
+LOCAL_JACK_FLAGS += -D jack.assert.policy=enable
+endif
 
 LOCAL_PACKAGE_NAME := DocumentsUI
 LOCAL_CERTIFICATE := platform
