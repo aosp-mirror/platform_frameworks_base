@@ -2605,13 +2605,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         });
 
 
-        final SparseArray<UserShortcuts> users =  mService.getShortcutsForTest();
+        final SparseArray<ShortcutUser> users =  mService.getShortcutsForTest();
         assertEquals(2, users.size());
         assertEquals(USER_0, users.keyAt(0));
         assertEquals(USER_10, users.keyAt(1));
 
-        final UserShortcuts user0 =  users.get(USER_0);
-        final UserShortcuts user10 =  users.get(USER_10);
+        final ShortcutUser user0 =  users.get(USER_0);
+        final ShortcutUser user10 =  users.get(USER_10);
 
 
         // Check the registered packages.
