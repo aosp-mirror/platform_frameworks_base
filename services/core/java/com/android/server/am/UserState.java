@@ -33,14 +33,16 @@ public final class UserState {
 
     // User is first coming up.
     public final static int STATE_BOOTING = 0;
-    // User is in the locked running state.
+    // User is in the locked state.
     public final static int STATE_RUNNING_LOCKED = 1;
-    // User is in the normal running state.
-    public final static int STATE_RUNNING = 2;
+    // User is in the unlocking state.
+    public final static int STATE_RUNNING_UNLOCKING = 2;
+    // User is in the running state.
+    public final static int STATE_RUNNING_UNLOCKED = 3;
     // User is in the initial process of being stopped.
-    public final static int STATE_STOPPING = 3;
+    public final static int STATE_STOPPING = 4;
     // User is in the final phase of stopping, sending Intent.ACTION_SHUTDOWN.
-    public final static int STATE_SHUTDOWN = 4;
+    public final static int STATE_SHUTDOWN = 5;
 
     public final UserHandle mHandle;
     public final ArrayList<IStopUserCallback> mStopCallbacks
@@ -61,6 +63,17 @@ public final class UserState {
         mHandle = handle;
     }
 
+    public boolean setState(int oldState, int newState) {
+        if (state == oldState) {
+            setState(newState);
+            return true;
+        } else {
+            Slog.w(TAG, "Expected user " + mHandle.getIdentifier() + " in state "
+                    + stateToString(oldState) + " but was in state " + stateToString(state));
+            return false;
+        }
+    }
+
     public void setState(int newState) {
         if (DEBUG_MU) {
             Slog.i(TAG, "User " + mHandle.getIdentifier() + " state changed from "
@@ -74,7 +87,8 @@ public final class UserState {
         switch (state) {
             case STATE_BOOTING: return "BOOTING";
             case STATE_RUNNING_LOCKED: return "RUNNING_LOCKED";
-            case STATE_RUNNING: return "RUNNING";
+            case STATE_RUNNING_UNLOCKING: return "RUNNING_UNLOCKING";
+            case STATE_RUNNING_UNLOCKED: return "RUNNING_UNLOCKED";
             case STATE_STOPPING: return "STOPPING";
             case STATE_SHUTDOWN: return "SHUTDOWN";
             default: return Integer.toString(state);
@@ -84,7 +98,6 @@ public final class UserState {
     void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("state="); pw.print(stateToString(state));
-        pw.print(" lastState="); pw.print(stateToString(lastState));
         if (switching) pw.print(" SWITCHING");
         if (initializing) pw.print(" INITIALIZING");
         pw.println();

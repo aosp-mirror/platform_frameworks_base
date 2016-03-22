@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.IProgressListener;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -461,7 +462,8 @@ public interface IActivityManager extends IInterface {
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
     public boolean startUserInBackground(int userid) throws RemoteException;
-    public boolean unlockUser(int userid, byte[] token, byte[] secret) throws RemoteException;
+    public boolean unlockUser(int userid, byte[] token, byte[] secret, IProgressListener listener)
+            throws RemoteException;
     public int stopUser(int userid, boolean force, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
     public boolean isUserRunning(int userid, int flags) throws RemoteException;

@@ -42,7 +42,10 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IProgressListener;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
 import android.os.ServiceManager;
@@ -56,6 +59,7 @@ import android.security.KeyStore;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -70,6 +74,8 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Keeps the lock pattern/password data and related settings for each user.
@@ -590,10 +596,36 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void unlockUser(int userId, byte[] token, byte[] secret) {
+        // TODO: make this method fully async so we can update UI with progress strings
+        final CountDownLatch latch = new CountDownLatch(1);
+        final IProgressListener listener = new IProgressListener.Stub() {
+            @Override
+            public void onStarted(int id, Bundle extras) throws RemoteException {
+                // Ignored
+            }
+
+            @Override
+            public void onProgress(int id, int progress, Bundle extras) throws RemoteException {
+                // Ignored
+            }
+
+            @Override
+            public void onFinished(int id, Bundle extras) throws RemoteException {
+                Log.d(TAG, "unlockUser finished!");
+                latch.countDown();
+            }
+        };
+
         try {
-            ActivityManagerNative.getDefault().unlockUser(userId, token, secret);
+            ActivityManagerNative.getDefault().unlockUser(userId, token, secret, listener);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+
+        try {
+            latch.await(15, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

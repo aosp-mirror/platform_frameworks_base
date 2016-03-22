@@ -41,6 +41,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.IProgressListener;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -2122,7 +2123,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int userId = data.readInt();
             byte[] token = data.createByteArray();
             byte[] secret = data.createByteArray();
-            boolean result = unlockUser(userId, token, secret);
+            IProgressListener listener = IProgressListener.Stub
+                    .asInterface(data.readStrongBinder());
+            boolean result = unlockUser(userId, token, secret, listener);
             reply.writeNoException();
             reply.writeInt(result ? 1 : 0);
             return true;
@@ -5707,13 +5710,15 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
-    public boolean unlockUser(int userId, byte[] token, byte[] secret) throws RemoteException {
+    public boolean unlockUser(int userId, byte[] token, byte[] secret, IProgressListener listener)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(userId);
         data.writeByteArray(token);
         data.writeByteArray(secret);
+        data.writeStrongInterface(listener);
         mRemote.transact(IActivityManager.UNLOCK_USER_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean result = reply.readInt() != 0;
