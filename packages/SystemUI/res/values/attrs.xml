@@ -85,7 +85,7 @@
         <attr name="ignoreRightInset" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="AlphaOptimizedImageView">
+    <declare-styleable name="AnimatedImageView">
         <attr name="hasOverlappingRendering" format="boolean" />
     </declare-styleable>
 

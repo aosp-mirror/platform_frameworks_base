@@ -17,14 +17,19 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.systemui.R;
+
 @RemoteView
-public class AnimatedImageView extends AlphaOptimizedImageView {
+public class AnimatedImageView extends ImageView {
+    private final boolean mHasOverlappingRendering;
     AnimationDrawable mAnim;
     boolean mAttached;
 
@@ -34,11 +39,21 @@ public class AnimatedImageView extends AlphaOptimizedImageView {
     int mDrawableId;
 
     public AnimatedImageView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public AnimatedImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
+                R.styleable.AnimatedImageView, 0, 0);
+
+        try {
+            // Default to true, which is what View.java defaults toA
+            mHasOverlappingRendering = a.getBoolean(
+                    R.styleable.AnimatedImageView_hasOverlappingRendering, true);
+        } finally {
+            a.recycle();
+        }
     }
 
     private void updateAnim() {
@@ -105,6 +120,11 @@ public class AnimatedImageView extends AlphaOptimizedImageView {
                 mAnim.stop();
             }
         }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return mHasOverlappingRendering;
     }
 }
 
