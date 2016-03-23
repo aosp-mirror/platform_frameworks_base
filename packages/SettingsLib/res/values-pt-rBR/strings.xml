@@ -147,7 +147,7 @@
     <string name="enable_adb" msgid="7982306934419797485">"Depuração USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Modo de depuração quando o USB estiver conectado"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Revogar autorizações de depuração USB"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Atalho para relatório de bugs"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Atalho para relatório do bug"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Mostrar um botão para gerar relatórios de bugs no menu do botão liga/desliga"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Permanecer ativo"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"A tela nunca entrará em inatividade enquanto estiver carregando."</string>
@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Executar renderizadores de WebView em um processo isolado."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementação do WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configurar implementação do WebView"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Esta opção não é mais válida. Tente novamente."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converter para criptografia de arquivos"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converter..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Já criptografado com base em arquivos"</string>
