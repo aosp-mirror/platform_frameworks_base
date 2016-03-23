@@ -669,6 +669,7 @@ void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
+    if (CC_UNLIKELY(!op.layer->isRenderable())) return;
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::TextureLayer);
