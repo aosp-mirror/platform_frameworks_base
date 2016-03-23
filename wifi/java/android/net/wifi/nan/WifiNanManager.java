@@ -16,6 +16,8 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +51,40 @@ public class WifiNanManager {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
+    /**
+     * Broadcast intent action to indicate whether Wi-Fi NAN is enabled or
+     * disabled. An extra {@link #EXTRA_WIFI_STATE} provides the state
+     * information as int.
+     *
+     * @see #EXTRA_WIFI_STATE
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String WIFI_NAN_STATE_CHANGED_ACTION = "android.net.wifi.nan.STATE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates whether Wi-Fi NAN is enabled or
+     * disabled. Retrieve it with
+     * {@link android.content.Intent#getIntExtra(String,int)}.
+     *
+     * @see #WIFI_NAN_STATE_DISABLED
+     * @see #WIFI_NAN_STATE_ENABLED
+     */
+    public static final String EXTRA_WIFI_STATE = "wifi_nan_state";
+
+    /**
+     * Wi-Fi NAN is disabled.
+     *
+     * @see #WIFI_NAN_STATE_CHANGED_ACTION
+     */
+    public static final int WIFI_NAN_STATE_DISABLED = 1;
+
+    /**
+     * Wi-Fi NAN is enabled.
+     *
+     * @see #WIFI_NAN_STATE_CHANGED_ACTION
+     */
+    public static final int WIFI_NAN_STATE_ENABLED = 2;
+
     private final IWifiNanManager mService;
 
     /*
@@ -81,6 +117,52 @@ public class WifiNanManager {
      */
     public WifiNanManager(IWifiNanManager service) {
         mService = service;
+    }
+
+    /**
+     * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster
+     * formation - that only happens when a connection is made.
+     *
+     * @hide PROPOSED_NAN_SYSTEM_API
+     */
+    public void enableUsage() {
+        try {
+            mService.enableUsage();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Disable the usage of the NAN API. All attempts to connect() will be
+     * rejected. All open connections and sessions will be terminated. The
+     * {@link WifiNanEventCallback#onNanDown(int)} will be called with reason
+     * code {@link WifiNanEventCallback#REASON_REQUESTED}.
+     *
+     * @hide PROPOSED_NAN_SYSTEM_API
+     */
+    public void disableUsage() {
+        try {
+            mService.disableUsage();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Returns the current status of NAN API: whether or not usage is enabled.
+     *
+     * @return A boolean indicating whether the app can use the NAN API (true)
+     *         or not (false).
+     */
+    public boolean isUsageEnabled() {
+        try {
+            return mService.isUsageEnabled();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+
+        return false;
     }
 
     /**
