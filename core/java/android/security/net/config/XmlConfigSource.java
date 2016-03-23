@@ -111,7 +111,7 @@ public class XmlConfigSource implements ConfigSource {
         if (parser.next() != XmlPullParser.TEXT) {
             throw new ParserException(parser, "Missing pin digest");
         }
-        String digest = parser.getText();
+        String digest = parser.getText().trim();
         byte[] decodedDigest = null;
         try {
             decodedDigest = Base64.decode(digest, 0);
@@ -168,7 +168,7 @@ public class XmlConfigSource implements ConfigSource {
         if (parser.next() != XmlPullParser.TEXT) {
             throw new ParserException(parser, "Domain name missing");
         }
-        String domain = parser.getText().toLowerCase(Locale.US);
+        String domain = parser.getText().trim().toLowerCase(Locale.US);
         if (parser.next() != XmlPullParser.END_TAG) {
             throw new ParserException(parser, "domain contains additional elements");
         }

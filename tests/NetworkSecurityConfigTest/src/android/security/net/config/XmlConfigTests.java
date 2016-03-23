@@ -464,4 +464,16 @@ public class XmlConfigTests extends AndroidTestCase {
         } catch (RuntimeException expected) {
         }
     }
+
+    public void testDomainWhitespaceTrimming() throws Exception {
+        XmlConfigSource source =
+                new XmlConfigSource(getContext(), R.xml.domain_whitespace, false);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        NetworkSecurityConfig defaultConfig = appConfig.getConfigForHostname("");
+        MoreAsserts.assertNotEqual(defaultConfig, appConfig.getConfigForHostname("developer.android.com"));
+        MoreAsserts.assertNotEqual(defaultConfig, appConfig.getConfigForHostname("android.com"));
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
+    }
 }
