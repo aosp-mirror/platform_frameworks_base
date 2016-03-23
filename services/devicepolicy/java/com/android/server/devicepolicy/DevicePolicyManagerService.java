@@ -7513,7 +7513,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * Sets which packages may enter lock task mode.
      *
-     * This function can only be called by the device owner.
+     * <p>This function can only be called by the device owner or alternatively by the profile owner
+     * in case the user is affiliated.
+     *
      * @param packages The list of packages allowed to enter lock task mode.
      */
     @Override
@@ -7521,10 +7523,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throws SecurityException {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-
-            int userHandle = mInjector.binderGetCallingUserHandle().getIdentifier();
-            setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
+            ActiveAdmin deviceOwner = getActiveAdminWithPolicyForUidLocked(
+                who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER, mInjector.binderGetCallingUid());
+            ActiveAdmin profileOwner = getActiveAdminWithPolicyForUidLocked(
+                who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid());
+            if (deviceOwner != null || (profileOwner != null && isAffiliatedUser())) {
+                int userHandle = mInjector.userHandleGetCallingUserId();
+                setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
+            } else {
+                throw new SecurityException("Admin " + who +
+                    " is neither the device owner or affiliated user's profile owner.");
+            }
         }
     }
 
