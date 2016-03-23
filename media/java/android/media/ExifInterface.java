@@ -1191,10 +1191,6 @@ public class ExifInterface {
         ++bytesRead;
         while (true) {
             marker = dataInputStream.readByte();
-            if (marker == -1) {
-                Log.w(TAG, "Reading JPEG has ended unexpectedly");
-                break;
-            }
             if (marker != MARKER) {
                 throw new IOException("Invalid marker:" + Integer.toHexString(marker & 0xff));
             }
@@ -1329,10 +1325,6 @@ public class ExifInterface {
 
         while (true) {
             byte marker = dataInputStream.readByte();
-            if (marker == -1) {
-                Log.w(TAG, "Reading JPEG has ended unexpectedly");
-                break;
-            }
             if (marker != MARKER) {
                 throw new IOException("Invalid marker");
             }
@@ -1357,6 +1349,8 @@ public class ExifInterface {
                         }
                     }
                     // Copy non-EXIF APP1 segment.
+                    dataOutputStream.writeByte(MARKER);
+                    dataOutputStream.writeByte(marker);
                     dataOutputStream.writeUnsignedShort(length + 2);
                     if (length >= 6) {
                         length -= 6;
