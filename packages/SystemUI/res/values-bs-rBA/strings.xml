@@ -237,6 +237,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija utvrđena GPS signalom"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktiviran je zahtjev za lokaciju"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Uklanjanje svih obavještenja."</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Postavke obavještenja"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Postavke aplikacije <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran će se automatski rotirati."</string>
@@ -479,6 +481,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Prikaži na vrhu liste obavještenja, kratko prikaži na ekranu i dozvoli zvuk"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"Boja i izgled"</string>
     <string name="night_mode" msgid="3540405868248625488">"Noćni način rada"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Kalibracija zaslona"</string>
