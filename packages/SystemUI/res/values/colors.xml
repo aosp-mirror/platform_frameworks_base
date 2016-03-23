@@ -79,7 +79,7 @@
     <color name="notification_legacy_background_color">#ff1a1a1a</color>
 
     <!-- The color of the material notification background -->
-    <color name="notification_material_background_color">#ffffffff</color>
+    <color name="notification_material_background_color">@*android:color/notification_material_background_color</color>
 
     <!-- The color of the material notification background when dimmed -->
     <color name="notification_material_background_dimmed_color">#ccffffff</color>
@@ -153,7 +153,7 @@
     <color name="docked_divider_handle">#ffffff</color>
 
     <color name="default_remote_input_background">@*android:color/notification_default_color</color>
-    <color name="remote_input_hint">#4dffffff</color>
+    <color name="remote_input_hint">#99ffffff</color>
 
     <color name="remote_input_accent">#eeeeee</color>
 
