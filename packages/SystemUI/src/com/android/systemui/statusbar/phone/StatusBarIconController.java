@@ -42,6 +42,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -116,8 +117,8 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mStatusIcons = (LinearLayout) statusBar.findViewById(R.id.statusIcons);
         mSignalCluster = (SignalClusterView) statusBar.findViewById(R.id.signal_cluster);
 
-        mNotificationIconAreaController =
-                new NotificationIconAreaController(context, phoneStatusBar);
+        mNotificationIconAreaController = SystemUIFactory.getInstance()
+                .createNotificationIconAreaController(context, phoneStatusBar);
         mNotificationIconAreaInner =
                 mNotificationIconAreaController.getNotificationInnerAreaView();
 

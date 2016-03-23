@@ -48,7 +48,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
@@ -132,7 +131,6 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
@@ -305,7 +303,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     Point mCurrentDisplaySize = new Point();
 
     protected StatusBarWindowView mStatusBarWindow;
-    PhoneStatusBarView mStatusBarView;
+    protected PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
@@ -317,7 +315,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int mPixelFormat;
     Object mQueueLock = new Object();
 
-    StatusBarIconController mIconController;
+    protected StatusBarIconController mIconController;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -329,7 +327,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // top bar
     BaseStatusBarHeader mHeader;
-    KeyguardStatusBarView mKeyguardStatusBar;
+    protected KeyguardStatusBarView mKeyguardStatusBar;
     View mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
@@ -678,6 +676,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mFalsingManager = FalsingManager.getInstance(mContext);
     }
 
+    protected void createIconController() {
+        mIconController = new StatusBarIconController(
+                mContext, mStatusBarView, mKeyguardStatusBar, this);
+    }
+
     // ================================================================================
     // Constructing the view
     // ================================================================================
@@ -811,8 +814,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // set the initial view visibility
         setAreThereNotifications();
 
-        mIconController = new StatusBarIconController(
-                mContext, mStatusBarView, mKeyguardStatusBar, this);
+        createIconController();
 
         // Background thread for any controllers that need it.
         mHandlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
@@ -1989,7 +1991,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private int adjustDisableFlags(int state) {
+    protected int adjustDisableFlags(int state) {
         if (!mLaunchTransitionFadingAway && !mKeyguardFadingAway
                 && (mExpandedVisible || mBouncerShowing || mWaitingForKeyguardExit)) {
             state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
