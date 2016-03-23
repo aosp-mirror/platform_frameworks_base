@@ -75,7 +75,7 @@ public final class PageContentRepository {
     private int mState;
 
     public interface OnPageContentAvailableCallback {
-        public void onPageContentAvailable(BitmapDrawable content);
+        void onPageContentAvailable(BitmapDrawable content);
     }
 
     public PageContentRepository(Context context) {
@@ -741,6 +741,7 @@ public final class PageContentRepository {
             final RenderSpec mRenderSpec;
             OnPageContentAvailableCallback mCallback;
             RenderedPage mRenderedPage;
+            private boolean mIsFailed;
 
             public RenderPageTask(int pageIndex, RenderSpec renderSpec,
                     OnPageContentAvailableCallback callback) {
@@ -826,25 +827,24 @@ public final class PageContentRepository {
 
                 Bitmap bitmap = mRenderedPage.content.getBitmap();
 
-                ParcelFileDescriptor[] pipe = null;
+                ParcelFileDescriptor[] pipe;
                 try {
                     pipe = ParcelFileDescriptor.createPipe();
-                    ParcelFileDescriptor source = pipe[0];
-                    ParcelFileDescriptor destination = pipe[1];
 
-                    mRenderer.renderPage(mPageIndex, bitmap.getWidth(), bitmap.getHeight(),
-                            mRenderSpec.printAttributes, destination);
+                    try (ParcelFileDescriptor source = pipe[0]) {
+                        try (ParcelFileDescriptor destination = pipe[1]) {
 
-                    // We passed the file descriptor to the other side which took
-                    // ownership, so close our copy for the write to complete.
-                    destination.close();
+                            mRenderer.renderPage(mPageIndex, bitmap.getWidth(), bitmap.getHeight(),
+                                    mRenderSpec.printAttributes, destination);
+                        }
 
-                    BitmapSerializeUtils.readBitmapPixels(bitmap, source);
-                } catch (IOException|RemoteException e) {
-                    Log.e(LOG_TAG, "Error rendering page:" + mPageIndex, e);
-                } finally {
-                    IoUtils.closeQuietly(pipe[0]);
-                    IoUtils.closeQuietly(pipe[1]);
+                        BitmapSerializeUtils.readBitmapPixels(bitmap, source);
+                    }
+
+                    mIsFailed = false;
+                } catch (IOException|RemoteException|IllegalStateException e) {
+                    Log.e(LOG_TAG, "Error rendering page " + mPageIndex, e);
+                    mIsFailed = true;
                 }
 
                 return mRenderedPage;
@@ -859,15 +859,22 @@ public final class PageContentRepository {
                 // This task is done.
                 mPageToRenderTaskMap.remove(mPageIndex);
 
-                // Take a note that the content is rendered.
-                renderedPage.state = RenderedPage.STATE_RENDERED;
+                if (mIsFailed) {
+                    renderedPage.state = RenderedPage.STATE_SCRAP;
+                } else {
+                    renderedPage.state = RenderedPage.STATE_RENDERED;
+                }
 
                 // Invalidate all caches of the old state of the bitmap
                 mRenderedPage.content.invalidateSelf();
 
                 // Announce success if needed.
                 if (mCallback != null) {
-                    mCallback.onPageContentAvailable(renderedPage.content);
+                    if (mIsFailed) {
+                        mCallback.onPageContentAvailable(null);
+                    } else {
+                        mCallback.onPageContentAvailable(renderedPage.content);
+                    }
                 }
             }
 
