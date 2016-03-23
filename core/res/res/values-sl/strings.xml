@@ -911,10 +911,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Urejanje z aplikacijo %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Skupna raba z aplikacijo"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Skupna raba z aplikacijo %1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Pošiljanje z aplikacijo"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Pošiljanje z aplikacijo %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Izbira aplikacije na začetnem zaslonu"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Uporaba aplikacije %1$s na začetnem zaslonu"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Privzeta uporaba za to dejanje."</string>
@@ -1078,8 +1076,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"SKUPNA RABA"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"NE SPREJMEM"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Sprememba tipkovnice"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"Druge tipkovnice"</string>
     <string name="show_ime" msgid="2506087537466597099">"Ohrani na zaslonu, dokler je aktivna fizična tipkovnica"</string>
     <string name="hardware" msgid="194658061510127999">"Pokaži navidezno tipkovnico"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Izberite razporeditev tipkovnice"</string>
@@ -1245,7 +1242,8 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Notranja shramba"</string>
+    <!-- no translation found for storage_internal (3570990907910199483) -->
+    <skip />
     <string name="storage_sd_card" msgid="3282948861378286745">"Kartica SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Kartica SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Pogon USB"</string>

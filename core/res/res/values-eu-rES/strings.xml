@@ -1224,7 +1224,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Aukera gehiago"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Barneko memoria"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Barneko biltegiratze partekatua"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD txartela"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB unitatea"</string>
@@ -1564,6 +1564,6 @@
     <string name="unpin_target" msgid="3556545602439143442">"Kendu aingura"</string>
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="audit_safemode_notification" msgid="6416076898350685856">"Berrezarri jatorrizko egoerara gailua murriztapenik gabe erabili ahal izateko"</string>
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"Berrezarri jatorrizko ezarpenak gailua murriztapenik gabe erabili ahal izateko"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Sakatu informazio gehiago lortzeko."</string>
 </resources>
