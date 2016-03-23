@@ -417,13 +417,15 @@ public class ExifInterfaceTest extends AndroidTestCase {
         testExifInterfaceForRaw(LG_G4_ISO_800_DNG, R.array.lg_g4_iso_800_dng);
     }
 
-    public void testCorruptedImage() throws Throwable {
+    public void testDoNotFailOnCorruptedImage() throws Throwable {
+        // To keep the compatibility with old versions of ExifInterface, even on a corrupted image,
+        // it shouldn't raise any exceptions except an IOException when unable to open a file.
         byte[] bytes = new byte[1024];
         try {
             new ExifInterface(new ByteArrayInputStream(bytes));
-            fail("Should not reach here!");
+            // Always success
         } catch (IOException e) {
-            // Success
+            fail("Should not reach here!");
         }
     }
 
