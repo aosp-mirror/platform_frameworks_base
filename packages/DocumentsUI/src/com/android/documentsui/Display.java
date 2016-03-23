@@ -20,15 +20,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.TypedValue;
-import android.view.WindowManager;
-import android.widget.Toolbar;
 
 /*
  * Convenience class for getting display related attributes
  */
 public final class Display {
     /*
-     * Returns the screen width in raw pixels.
+     * Returns the screen width in pixels.
      */
     public static float screenWidth(Activity activity) {
         Point size = new Point();
@@ -44,44 +42,15 @@ public final class Display {
     }
 
     /*
-     * Returns action bar height in raw pixels.
+     * Returns action bar height in pixels.
      */
     public static float actionBarHeight(Context context) {
-        int height = 0;
+        int actionBarHeight = 0;
         TypedValue tv = new TypedValue();
         if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            height = TypedValue.complexToDimensionPixelSize(tv.data,
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,
                     context.getResources().getDisplayMetrics());
         }
-        return height;
-    }
-
-    /*
-     * Returns status bar height in raw pixels.
-     */
-    private static int statusBarHeight(Context context) {
-        int height = 0;
-        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen",
-                "android");
-        if (resourceId > 0) {
-            height = context.getResources().getDimensionPixelSize(resourceId);
-        }
-        return height;
-    }
-
-    /*
-     * Adjusts toolbar for the layout with translucent status bar. Increases the
-     * height of the toolbar and adds padding at the top to accommodate status bar visible above
-     * toolbar.
-     */
-    public static void adjustToolbar(Toolbar toolbar, Activity activity) {
-        if ((activity.getWindow().getAttributes().flags
-                & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) != 0) {
-            int statusBarHeight = Display.statusBarHeight(activity);
-            toolbar.getLayoutParams().height = (int) (Display.actionBarHeight(activity)
-                    + statusBarHeight);
-            toolbar.setPadding(toolbar.getPaddingLeft(), statusBarHeight, toolbar.getPaddingRight(),
-                    toolbar.getPaddingBottom());
-        }
+        return actionBarHeight;
     }
 }

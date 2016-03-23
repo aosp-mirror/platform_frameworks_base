@@ -36,8 +36,6 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:fitsSystemWindows">false</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
     </style>
@@ -45,7 +43,7 @@
     <style name="TrimmedHorizontalProgressBar" parent="android:Widget.Material.ProgressBar.Horizontal">
         <item name="android:indeterminateDrawable">@drawable/progress_indeterminate_horizontal_material_trimmed</item>
         <item name="android:minHeight">3dp</item>
-        <item name="android:maxHeight">3dp</item>
+        <item name="android:maxHeight">3dp</item>    
     </style>
 
 </resources>
