@@ -41,6 +41,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnLayoutChangeListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -878,6 +879,10 @@ public final class FloatingToolbar {
                     .start();
         }
 
+        /**
+         * Defines the position of the floating toolbar popup panels when transition animation has
+         * stopped.
+         */
         private void setPanelsStatesAtRestingPosition() {
             mOverflowButton.setEnabled(true);
             mOverflowPanel.awakenScrollBars();
@@ -1236,7 +1241,15 @@ public final class FloatingToolbar {
                     Math.min(
                             Math.max(MIN_OVERFLOW_SIZE, maxItemSize),
                             mOverflowPanel.getCount()));
-            return actualSize * getLineHeight(mContext) + mOverflowButtonSize.getHeight();
+            int extension = 0;
+            if (actualSize < mOverflowPanel.getCount()) {
+                // The overflow will require scrolling to get to all the items.
+                // Extend the height so that part of the hidden items is displayed.
+                extension = (int) (getLineHeight(mContext) * 0.5f);
+            }
+            return actualSize * getLineHeight(mContext)
+                    + mOverflowButtonSize.getHeight()
+                    + extension;
         }
 
         private void setButtonTagAndClickListener(View menuItemButton, MenuItem menuItem) {
@@ -1446,6 +1459,7 @@ public final class FloatingToolbar {
             OverflowPanel(FloatingToolbarPopup popup) {
                 super(Preconditions.checkNotNull(popup).mContext);
                 this.mPopup = popup;
+                setScrollBarDefaultDelayBeforeFade(ViewConfiguration.getScrollDefaultDelay() * 3);
             }
 
             @Override
