@@ -257,6 +257,7 @@
     <protected-broadcast android:name="android.net.wifi.CONFIGURED_NETWORKS_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.supplicant.STATE_CHANGE" />
+    <protected-broadcast android:name="android.net.wifi.nan.STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.p2p.STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.p2p.DISCOVERY_STATE_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.p2p.THIS_DEVICE_CHANGED" />
