@@ -236,6 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोध सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"नोटिफिकेशन सेटिंग"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिंग"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
@@ -478,6 +479,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"नोटिफिकेशन सूची के शीर्ष पर दिखाएं, स्क्रीन पर झलक दिखाएं और ध्वनि करें"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"और सेटिंग"</string>
     <string name="notification_done" msgid="5279426047273930175">"हो गया"</string>
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> नोटिफ़िकेशन नियंत्रण"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"रंग और दिखावट"</string>
     <string name="night_mode" msgid="3540405868248625488">"रात्रि मोड"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"स्क्रीन को कैलिब्रेट करें"</string>

@@ -236,6 +236,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS அமைத்த இருப்பிடம்"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"இருப்பிடக் கோரிக்கைகள் இயக்கப்பட்டன"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"எல்லா அறிவிப்புகளையும் அழி."</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"அறிவிப்பு அமைப்புகள்"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> அமைப்புகள்"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"திரை தானாகச் சுழலும்."</string>
@@ -301,7 +303,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> வரம்பு"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"பணிப் பயன்முறை"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"சமீபத்திய செய்திகள் இல்லை"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"சமீபத்திய பணிகள் இல்லை"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"எல்லாவற்றையும் அழித்துவிட்டீர்கள்"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"பயன்பாட்டு தகவல்"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"திரையை பின் செய்தல்"</string>
@@ -478,6 +480,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"அறிவிப்புகள் பட்டியலின் மேற்பகுதியில், சில வினாடிகளுக்கு ஒலியுடன் திரையில் காட்டு"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"மேலும் அமைப்புகள்"</string>
     <string name="notification_done" msgid="5279426047273930175">"முடிந்தது"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"வண்ணமும் தோற்றமும்"</string>
     <string name="night_mode" msgid="3540405868248625488">"இரவுப் பயன்முறை"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"திரையை அளவுத்திருத்தம் செய்"</string>
@@ -536,8 +540,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"விசைப்பலகைப் பொத்தானைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="preview" msgid="9077832302472282938">"மாதிரிக்காட்சி"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"கட்டங்களைச் சேர்க்க, இழுக்கவும்"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"அகற்ற, இங்கே இழுக்கவும்"</string>
     <string name="qs_edit" msgid="2232596095725105230">"மாற்று"</string>
     <string name="tuner_time" msgid="6572217313285536011">"நேரம்"</string>
   <string-array name="clock_options">

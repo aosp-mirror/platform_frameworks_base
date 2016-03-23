@@ -26,4 +26,6 @@
     <string name="pip_hold_home" msgid="340086535668778109">"Управляйте кадром в кадре, удерживая кнопку "<b>"ГЛАВНАЯ"</b></string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"Управляйте режимом \"Кадр в кадре\", удерживая кнопку ГЛАВНАЯ"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"ОК"</string>
+    <!-- no translation found for recents_tv_dismiss (3555093879593377731) -->
+    <skip />
 </resources>
