@@ -1544,7 +1544,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_ENABLED,
-                    userState.isHandlingAccessibilityEvents() ? 0 : 1,
+                    userState.isHandlingAccessibilityEvents() ? 1 : 0,
                     userState.mUserId);
         } finally {
             Binder.restoreCallingIdentity(identity);
