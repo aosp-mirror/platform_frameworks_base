@@ -813,6 +813,7 @@ public final class Call {
     private String mRemainingPostDialSequence;
     private VideoCallImpl mVideoCallImpl;
     private Details mDetails;
+    private Bundle mExtras;
 
     /**
      * Obtains the post-dial sequence remaining to be emitted by this {@code Call}, if any.
@@ -985,6 +986,89 @@ public final class Call {
      */
     public void sendCallEvent(String event, Bundle extras) {
         mInCallAdapter.sendCallEvent(mTelecomCallId, event, extras);
+    }
+
+    /**
+     * Adds some extras to this {@link Call}.  Existing keys are replaced and new ones are
+     * added.
+     * <p>
+     * No assumptions should be made as to how an In-Call UI or service will handle these
+     * extras.  Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras to add.
+     */
+    public final void putExtras(Bundle extras) {
+        if (extras == null) {
+            return;
+        }
+
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putAll(extras);
+        mInCallAdapter.putExtras(mTelecomCallId, extras);
+    }
+
+    /**
+     * Adds a boolean extra to this {@link Call}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, boolean value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putBoolean(key, value);
+        mInCallAdapter.putExtra(mTelecomCallId, key, value);
+    }
+
+    /**
+     * Adds an integer extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, int value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putInt(key, value);
+        mInCallAdapter.putExtra(mTelecomCallId, key, value);
+    }
+
+    /**
+     * Adds a string extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, String value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putString(key, value);
+        mInCallAdapter.putExtra(mTelecomCallId, key, value);
+    }
+
+    /**
+     * Removes extras from this {@code Connection}.
+     *
+     * @param keys The keys of the extras to remove.
+     */
+    public final void removeExtras(List<String> keys) {
+        if (mExtras != null) {
+            for (String key : keys) {
+                mExtras.remove(key);
+            }
+            if (mExtras.size() == 0) {
+                mExtras = null;
+            }
+        }
+        mInCallAdapter.removeExtras(mTelecomCallId, keys);
     }
 
     /**

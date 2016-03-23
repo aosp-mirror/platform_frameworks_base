@@ -1302,15 +1302,35 @@ public final class RemoteConnection {
     }
 
     /** @hide */
-    void setExtras(final Bundle extras) {
-        mExtras = extras;
+    void putExtras(final Bundle extras) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putAll(extras);
+
+        notifyExtrasChanged();
+    }
+
+    /** @hide */
+    void removeExtras(List<String> keys) {
+        if (mExtras == null || keys == null || keys.isEmpty()) {
+            return;
+        }
+        for (String key : keys) {
+            mExtras.remove(key);
+        }
+
+        notifyExtrasChanged();
+    }
+
+    private void notifyExtrasChanged() {
         for (CallbackRecord record : mCallbackRecords) {
             final RemoteConnection connection = this;
             final Callback callback = record.getCallback();
             record.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onExtrasChanged(connection, extras);
+                    callback.onExtrasChanged(connection, mExtras);
                 }
             });
         }

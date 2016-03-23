@@ -79,4 +79,6 @@ oneway interface IConnectionService {
     void pullExternalCall(String callId);
 
     void sendCallEvent(String callId, String event, in Bundle extras);
+
+    void onExtrasChanged(String callId, in Bundle extras);
 }

@@ -279,15 +279,35 @@ public final class RemoteConference {
     }
 
     /** @hide */
-    void setExtras(final Bundle extras) {
-        mExtras = extras;
+    void putExtras(final Bundle extras) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putAll(extras);
+
+        notifyExtrasChanged();
+    }
+
+    /** @hide */
+    void removeExtras(List<String> keys) {
+        if (mExtras == null || keys == null || keys.isEmpty()) {
+            return;
+        }
+        for (String key : keys) {
+            mExtras.remove(key);
+        }
+
+        notifyExtrasChanged();
+    }
+
+    private void notifyExtrasChanged() {
         for (CallbackRecord<Callback> record : mCallbackRecords) {
             final RemoteConference conference = this;
             final Callback callback = record.getCallback();
             record.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onExtrasChanged(conference, extras);
+                    callback.onExtrasChanged(conference, mExtras);
                 }
             });
         }

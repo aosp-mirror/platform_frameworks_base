@@ -20,6 +20,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraManager;
@@ -30,6 +31,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.view.Surface;
 
 import java.util.ArrayList;
@@ -516,6 +518,7 @@ public abstract class Connection extends Conferenceable {
         public void onConferenceStarted() {}
         public void onConferenceMergeFailed(Connection c) {}
         public void onExtrasChanged(Connection c, Bundle extras) {}
+        public void onExtrasRemoved(Connection c, List<String> keys) {}
         public void onConnectionEvent(Connection c, String event, Bundle extras) {}
     }
 
@@ -1183,6 +1186,13 @@ public abstract class Connection extends Conferenceable {
     private Bundle mExtras;
 
     /**
+     * Tracks the key set for the extras bundle provided on the last invocation of
+     * {@link #setExtras(Bundle)}.  Used so that on subsequent invocations we can remove any extras
+     * keys which were set previously but are no longer present in the replacement Bundle.
+     */
+    private Set<String> mPreviousExtraKeys;
+
+    /**
      * Create a new Connection.
      */
     public Connection() {}
@@ -1318,6 +1328,17 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Returns the extras associated with this connection.
+     * <p>
+     * Extras should be updated using {@link #putExtras(Bundle)}.
+     * <p>
+     * Telecom or an {@link InCallService} can also update the extras via
+     * {@link android.telecom.Call#putExtras(Bundle)}, and
+     * {@link Call#removeExtras(List)}.
+     * <p>
+     * The connection is notified of changes to the extras made by Telecom or an
+     * {@link InCallService} by {@link #onExtrasChanged(Bundle)}.
+     *
      * @return The extras associated with this connection.
      */
     public final Bundle getExtras() {
@@ -1777,17 +1798,129 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Set some extras that can be associated with this {@code Connection}. No assumptions should
-     * be made as to how an In-Call UI or service will handle these extras.
+     * Set some extras that can be associated with this {@code Connection}.
+     * <p>
+     * New or existing keys are replaced in the {@code Connection} extras.  Keys which are no longer
+     * in the new extras, but were present the last time {@code setExtras} was called are removed.
+     * <p>
+     * No assumptions should be made as to how an In-Call UI or service will handle these extras.
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras associated with this {@code Connection}.
+     * @deprecated Use {@link #putExtras(Bundle)} to add extras.  Use {@link #removeExtras(List)}
+     * to remove extras.
      */
     public final void setExtras(@Nullable Bundle extras) {
         checkImmutable();
-        mExtras = extras;
+
+        // Add/replace any new or changed extras values.
+        putExtras(extras);
+
+        // If we have used "setExtras" in the past, compare the key set from the last invocation to
+        // the current one and remove any keys that went away.
+        if (mPreviousExtraKeys != null) {
+            List<String> toRemove = new ArrayList<String>();
+            for (String oldKey : mPreviousExtraKeys) {
+                if (!extras.containsKey(oldKey)) {
+                    toRemove.add(oldKey);
+                }
+            }
+            if (!toRemove.isEmpty()) {
+                removeExtras(toRemove);
+            }
+        }
+
+        // Track the keys the last time set called setExtras.  This way, the next time setExtras is
+        // called we can see if the caller has removed any extras values.
+        if (mPreviousExtraKeys == null) {
+            mPreviousExtraKeys = new ArraySet<String>();
+        }
+        mPreviousExtraKeys.clear();
+        mPreviousExtraKeys.addAll(extras.keySet());
+    }
+
+    /**
+     * Adds some extras to this {@code Connection}.  Existing keys are replaced and new ones are
+     * added.
+     * <p>
+     * No assumptions should be made as to how an In-Call UI or service will handle these extras.
+     * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras to add.
+     */
+    public final void putExtras(@NonNull Bundle extras) {
+        checkImmutable();
+        if (extras == null) {
+            return;
+        }
+
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putAll(extras);
+
         for (Listener l : mListeners) {
             l.onExtrasChanged(this, extras);
+        }
+    }
+
+    /**
+     * Adds a boolean extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, boolean value) {
+        Bundle newExtras = new Bundle();
+        newExtras.putBoolean(key, value);
+        putExtras(newExtras);
+    }
+
+    /**
+     * Adds an integer extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, int value) {
+        Bundle newExtras = new Bundle();
+        newExtras.putInt(key, value);
+        putExtras(newExtras);
+    }
+
+    /**
+     * Adds a string extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, String value) {
+        Bundle newExtras = new Bundle();
+        newExtras.putString(key, value);
+        putExtras(newExtras);
+    }
+
+    /**
+     * Removes an extra from this {@code Connection}.
+     *
+     * @param keys The key of the extra key to remove.
+     */
+    public final void removeExtras(List<String> keys) {
+        if (mExtras != null) {
+            for (String key : keys) {
+                mExtras.remove(key);
+            }
+
+            if (mExtras.size() == 0) {
+                mExtras = null;
+            }
+        }
+
+        for (Listener l : mListeners) {
+            l.onExtrasRemoved(this, keys);
         }
     }
 
@@ -1928,6 +2061,18 @@ public abstract class Connection extends Conferenceable {
      */
     public void onCallEvent(String event, Bundle extras) {}
 
+    /**
+     * Notifies this {@link Connection} of a change to the extras made outside the
+     * {@link ConnectionService}.
+     * <p>
+     * These extras changes can originate from Telecom itself, or from an {@link InCallService} via
+     * the {@link android.telecom.Call#putExtras(Bundle)} and
+     * {@link Call#removeExtras(List)}.
+     *
+     * @param extras The new extras bundle.
+     */
+    public void onExtrasChanged(Bundle extras) {}
+
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
         if (number == null) {
@@ -2045,6 +2190,17 @@ public abstract class Connection extends Conferenceable {
             }
         }
         mConferenceables.clear();
+    }
+
+    /**
+     * Handles a change to extras received from Telecom.
+     *
+     * @param extras The new extras.
+     * @hide
+     */
+    final void handleExtrasChanged(Bundle extras) {
+        mExtras = extras;
+        onExtrasChanged(mExtras);
     }
 
     /**
