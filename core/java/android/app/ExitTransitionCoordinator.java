@@ -268,7 +268,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (transition != null && decorView != null && mTransitioningViews != null) {
             setTransitioningViewsVisiblity(View.VISIBLE, false);
             TransitionManager.beginDelayedTransition(decorView, transition);
-            setTransitioningViewsVisiblity(View.INVISIBLE, true);
+            setTransitioningViewsVisiblity(View.INVISIBLE, false);
+            decorView.invalidate();
         } else {
             transitionStarted();
         }
@@ -367,7 +368,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             scheduleGhostVisibilityChange(View.VISIBLE);
             setGhostVisibility(View.VISIBLE);
             if (viewsTransition != null) {
-                setTransitioningViewsVisiblity(View.INVISIBLE, true);
+                setTransitioningViewsVisiblity(View.INVISIBLE, false);
             }
             decorView.invalidate();
         } else {
