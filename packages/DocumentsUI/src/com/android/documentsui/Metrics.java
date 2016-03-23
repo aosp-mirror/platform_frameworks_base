@@ -427,10 +427,14 @@ public final class Metrics {
     public static void logValidScopedAccessRequest(Activity activity, String directory,
             @ScopedAccessGrant int type) {
         int index = -1;
-        for (int i = 0; i < STANDARD_DIRECTORIES.length; i++) {
-            if (STANDARD_DIRECTORIES[i].equals(directory)) {
-                index = i;
-                break;
+        if (OpenExternalDirectoryActivity.DIRECTORY_ROOT.equals(directory)) {
+            index = -2;
+        } else {
+            for (int i = 0; i < STANDARD_DIRECTORIES.length; i++) {
+                if (STANDARD_DIRECTORIES[i].equals(directory)) {
+                    index = i;
+                    break;
+                }
             }
         }
         final String packageName = activity.getCallingPackage();
