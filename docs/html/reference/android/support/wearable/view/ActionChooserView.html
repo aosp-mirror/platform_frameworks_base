@@ -109,7 +109,7 @@
 <meta content="IE=edge" http-equiv="X-UA-Compatible">
 
 <link rel="shortcut icon" type="image/x-icon" href="../../../../../favicon.ico" />
-<title>DelayedConfirmationView | Android Developers</title>
+<title>ActionChooserView | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -227,7 +227,7 @@ type="text/css">
 
         <ul class="dac-header-crumbs">
           
-          <li class="dac-header-crumbs-item"><span class="dac-header-crumbs-link current ">DelayedConfirmationView</a></li>
+          <li class="dac-header-crumbs-item"><span class="dac-header-crumbs-link current ">ActionChooserView</a></li>
         </ul>
 
         
@@ -490,7 +490,7 @@ type="text/css">
               
     <li><h2>Classes</h2>
       <ul>
-          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></li>
+          <li class="selected api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionLabel.html">ActionLabel</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/ActionPage.html">ActionPage</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/BoxInsetLayout.html">BoxInsetLayout</a></li>
@@ -501,7 +501,7 @@ type="text/css">
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html">CircledImageView</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/CircularButton.html">CircularButton</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/CrossfadeDrawable.html">CrossfadeDrawable</a></li>
-          <li class="selected api apilevel-"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html">DelayedConfirmationView</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html">DelayedConfirmationView</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/DismissOverlayView.html">DismissOverlayView</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/DotsPageIndicator.html">DotsPageIndicator</a></li>
           <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/view/FragmentGridPagerAdapter.html">FragmentGridPagerAdapter</a></li>
@@ -577,13 +577,6 @@ type="text/css">
    
   
   
-  
-  
-
-  
-   
-  
-  
    
   
   
@@ -631,6 +624,9 @@ Summary:
 
 
 
+  &#124; <a href="#constants">Constants</a>
+  
+
 
   &#124; <a href="#inhconstants">Inherited Constants</a>
   
@@ -676,7 +672,7 @@ Summary:
      
     
     class
-<h1 itemprop="name">DelayedConfirmationView</h1>
+<h1 itemprop="name">ActionChooserView</h1>
 
 
 
@@ -685,11 +681,7 @@ Summary:
   
 
   
-  
-  
-
-  
-    extends <a href="../../../../../reference/android/support/wearable/view/CircledImageView.html">CircledImageView</a><br/>
+    extends View<br/>
   
   
   
@@ -712,7 +704,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="4" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -720,7 +712,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="3" class="jd-inheritance-class-cell">android.view.View</td>
+        <td colspan="2" class="jd-inheritance-class-cell">android.view.View</td>
     </tr>
     
 
@@ -730,19 +722,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html">android.support.wearable.view.CircledImageView</a></td>
-    </tr>
-    
-
-    <tr>
-        
-            <td class="jd-inheritance-space">&nbsp;</td>
-        
-            <td class="jd-inheritance-space">&nbsp;</td>
-        
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-         	
-        <td colspan="1" class="jd-inheritance-class-cell">android.support.wearable.view.DelayedConfirmationView</td>
+        <td colspan="1" class="jd-inheritance-class-cell">android.support.wearable.view.ActionChooserView</td>
     </tr>
     
 
@@ -758,14 +738,24 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody"><code>DelayedConfirmationView</code> provides a circular countdown timer, typically used to
- automatically confirm an operation after a short delay has elapsed. The delay is intended to give
- the user a chance to cancel the operation by tapping the View.
+<p itemprop="articleBody">The action chooser view allows the user to select from two options that are presented in the
+ sides of the view. The view background is transparent so that it may be populated by the
+ containing parent.
  <p>
- The developer can specify a countdown interval via <code><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#setTotalTimeMs(long)">setTotalTimeMs(long)</a></code> and a listener via
- <code><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#setListener(android.support.wearable.view.DelayedConfirmationView.DelayedConfirmationListener)">setListener(DelayedConfirmationView.DelayedConfirmationListener)</a></code> to be called when the <code>View</code> is tapped or the time has elapsed.
+ You can add this view to your layout as follows:
+ <pre>
+     &lt;android.support.wearable.view.ActionChooserView
+          android:id="@+id/actions"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent" /&gt;
+ </pre>
  <p>
- More information on what are required XML attributes can be found at <code><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html">CircledImageView</a></code>.
+ To set the properties of either option, you can call <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#setOption(int, android.graphics.drawable.Drawable, int)">setOption(int, Drawable, int)</a></code>,
+ specifying <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_START">OPTION_START</a></code> for the option at the start and <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_END">OPTION_END</a></code> for the
+ option at the end:
+ <p>
+ mChooserView.setOption(ActionChooserView.OPTION_START, acceptIcon, getResources().getColor(
+       R.color.option_color));
 </p>
 
 
@@ -808,10 +798,9 @@ Summary:
          
         
         interface</nobr></td>
-      <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html">DelayedConfirmationView.DelayedConfirmationListener</a></td>
+      <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a></td>
       <td class="jd-descrcol" width="100%">
-        Implement this interface to receive callbacks when the timer is finished and when the user
- taps the View to select it.&nbsp;
+        Interface for receiving callbacks about options chosen from an <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></code>.&nbsp;
         
     
 
@@ -832,6 +821,39 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_END">OPTION_END</a></td>
+        <td class="jd-descrcol" width="100%">
+          The option that appears at the end of the chooser.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_START">OPTION_START</a></td>
+        <td class="jd-descrcol" width="100%">
+          The option that appears at the start of the chooser.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+
+</table>
+
+
 
 
 
@@ -839,8 +861,6 @@ Summary:
 <table id="inhconstants" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Constants</div></th></tr>
-
-
 
 
 <tr class="api apilevel-" >
@@ -1944,8 +1964,6 @@ android.view.View
   <div style="clear:left;">Inherited Fields</div></th></tr>
 
 
-
-
 <tr class="api apilevel-" >
 <td colspan="12">
 
@@ -2702,7 +2720,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#DelayedConfirmationView(android.content.Context)">DelayedConfirmationView</a></span>(Context context)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#ActionChooserView(android.content.Context)">ActionChooserView</a></span>(Context context)</nobr>
         
   </td></tr>
 
@@ -2718,7 +2736,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#DelayedConfirmationView(android.content.Context, android.util.AttributeSet)">DelayedConfirmationView</a></span>(Context context, AttributeSet attrs)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#ActionChooserView(android.content.Context, android.util.AttributeSet)">ActionChooserView</a></span>(Context context, AttributeSet attrs)</nobr>
         
   </td></tr>
 
@@ -2734,7 +2752,7 @@ android.view.View
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#DelayedConfirmationView(android.content.Context, android.util.AttributeSet, int)">DelayedConfirmationView</a></span>(Context context, AttributeSet attrs, int defStyle)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#ActionChooserView(android.content.Context, android.util.AttributeSet, int)">ActionChooserView</a></span>(Context context, AttributeSet attrs, int defStyleAttr)</nobr>
         
   </td></tr>
 
@@ -2760,10 +2778,49 @@ android.view.View
             
             
             
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#addListener(android.support.wearable.view.ActionChooserView.ActionChooserListener)">addListener</a></span>(<a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">
+          Adds a listener to be notified when an option is chosen.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#onTouchEvent(android.view.MotionEvent)">onTouchEvent</a></span>(MotionEvent event)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#canScrollHorizontally(int)">canScrollHorizontally</a></span>(int direction)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#onTouchEvent(android.view.MotionEvent)">onTouchEvent</a></span>(MotionEvent event)</nobr>
         
   </td></tr>
 
@@ -2779,10 +2836,11 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#reset()">reset</a></span>()</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#performSelectOption(int)">performSelectOption</a></span>(int option)</nobr>
         
         <div class="jd-descrdiv">
-          Resets the timer.
+          Selects the provided option, animating the option's icon to the center of the view and
+ triggering the appropriate callbacks.
           
     
 
@@ -2802,10 +2860,10 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#setListener(android.support.wearable.view.DelayedConfirmationView.DelayedConfirmationListener)">setListener</a></span>(<a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html">DelayedConfirmationView.DelayedConfirmationListener</a> listener)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#removeListener(android.support.wearable.view.ActionChooserView.ActionChooserListener)">removeListener</a></span>(<a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">
-          Sets a listener to get callbacks for when the timer finishes or cancelled.
+          Removes a listener from receiving any future callbacks when an option is chosen.
           
     
 
@@ -2825,15 +2883,8 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#setStartTimeMs(long)">setStartTimeMs</a></span>(long time)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#setEnabled(boolean)">setEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">
-          Artificially sets the start time in milliseconds for the Timer to countdown from.
-          
-    
-
-        </div>
-  
   </td></tr>
 
 
@@ -2848,33 +2899,11 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#setTotalTimeMs(long)">setTotalTimeMs</a></span>(long time)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#setOption(int, android.graphics.drawable.Drawable, int)">setOption</a></span>(int option, Drawable drawable, int color)</nobr>
         
         <div class="jd-descrdiv">
-          Sets the total time in milliseconds for the Timer to countdown to.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#start()">start</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Starts the timer countdown.
+          Sets the characteristics of one of the predefined options, such as the option circle's
+ color and the <code><a href="../../../../../reference/android/graphics/drawable/Drawable.html">Drawable</a></code> to be drawn in the middle.
           
     
 
@@ -2905,7 +2934,55 @@ android.view.View
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#onDraw(android.graphics.Canvas)">onDraw</a></span>(Canvas canvas)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#onAttachedToWindow()">onAttachedToWindow</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#onDetachedFromWindow()">onDetachedFromWindow</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#onDraw(android.graphics.Canvas)">onDraw</a></span>(Canvas canvas)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#onLayout(boolean, int, int, int, int)">onLayout</a></span>(boolean changed, int left, int top, int right, int bottom)</nobr>
         
   </td></tr>
 
@@ -2921,612 +2998,6 @@ android.view.View
 <table id="inhmethods" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.support.wearable.view.CircledImageView" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.support.wearable.view.CircledImageView-trigger"
-          src="../../../../../assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  <a href="../../../../../reference/android/support/wearable/view/CircledImageView.html">android.support.wearable.view.CircledImageView</a>
-
-<div id="inherited-methods-android.support.wearable.view.CircledImageView">
-  <div id="inherited-methods-android.support.wearable.view.CircledImageView-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.support.wearable.view.CircledImageView-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#drawableStateChanged()">drawableStateChanged</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            ColorStateList</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getCircleColorStateList()">getCircleColorStateList</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            float</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getCircleRadius()">getCircleRadius</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            float</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getCircleRadiusPercent()">getCircleRadiusPercent</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            float</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getCircleRadiusPressed()">getCircleRadiusPressed</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            float</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getCircleRadiusPressedPercent()">getCircleRadiusPressedPercent</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            long</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getColorChangeAnimationDuration()">getColorChangeAnimationDuration</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getDefaultCircleColor()">getDefaultCircleColor</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            Drawable</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getImageDrawable()">getImageDrawable</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            float</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#getInitialCircleRadius()">getInitialCircleRadius</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#onDraw(android.graphics.Canvas)">onDraw</a></span>(Canvas canvas)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#onLayout(boolean, int, int, int, int)">onLayout</a></span>(boolean changed, int left, int top, int right, int bottom)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#onMeasure(int, int)">onMeasure</a></span>(int widthMeasureSpec, int heightMeasureSpec)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#onSetAlpha(int)">onSetAlpha</a></span>(int alpha)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#onVisibilityChanged(android.view.View, int)">onVisibilityChanged</a></span>(View changedView, int visibility)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleBorderColor(int)">setCircleBorderColor</a></span>(int circleBorderColor)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleBorderWidth(float)">setCircleBorderWidth</a></span>(float circleBorderWidth)</nobr>
-        
-        <div class="jd-descrdiv">
-          Set the border around the circle.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleColor(int)">setCircleColor</a></span>(int circleColor)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleColorStateList(android.content.res.ColorStateList)">setCircleColorStateList</a></span>(ColorStateList circleColor)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleHidden(boolean)">setCircleHidden</a></span>(boolean circleHidden)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleRadius(float)">setCircleRadius</a></span>(float circleRadius)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleRadiusPercent(float)">setCircleRadiusPercent</a></span>(float circleRadiusPercent)</nobr>
-        
-        <div class="jd-descrdiv">
-          Sets the radius of the circle to be a percentage of the largest dimension of the view.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleRadiusPressed(float)">setCircleRadiusPressed</a></span>(float circleRadiusPressed)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setCircleRadiusPressedPercent(float)">setCircleRadiusPressedPercent</a></span>(float circleRadiusPressedPercent)</nobr>
-        
-        <div class="jd-descrdiv">
-          Sets the radius of the circle to be a percentage of the largest dimension of the view when
- pressed.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setColorChangeAnimationDuration(long)">setColorChangeAnimationDuration</a></span>(long mColorChangeAnimationDurationMs)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setImageCirclePercentage(float)">setImageCirclePercentage</a></span>(float percentage)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setImageDrawable(android.graphics.drawable.Drawable)">setImageDrawable</a></span>(Drawable drawable)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setImageHorizontalOffcenterPercentage(float)">setImageHorizontalOffcenterPercentage</a></span>(float percentage)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setImageResource(int)">setImageResource</a></span>(int resId)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setImageTint(int)">setImageTint</a></span>(int tint)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setPressed(boolean)">setPressed</a></span>(boolean pressed)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setProgress(float)">setProgress</a></span>(float progress)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#setShadowVisibility(float)">setShadowVisibility</a></span>(float shadowVisibility)</nobr>
-        
-        <div class="jd-descrdiv">
-          Set how much of the shadow should be shown.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/view/CircledImageView.html#showIndeterminateProgress(boolean)">showIndeterminateProgress</a></span>(boolean show)</nobr>
-        
-        <div class="jd-descrdiv">
-          Show the circle border as an indeterminate progress spinner.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
 
 
 <tr class="api apilevel-" >
@@ -12097,6 +11568,97 @@ From interface
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="OPTION_END"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        OPTION_END
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The option that appears at the end of the chooser.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                2
+                (0x00000002)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="OPTION_START"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        OPTION_START
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The option that appears at the start of the chooser.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                1
+                (0x00000001)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -12108,7 +11670,7 @@ From interface
 
 
 
-<A NAME="DelayedConfirmationView(android.content.Context)"></A>
+<A NAME="ActionChooserView(android.content.Context)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12120,7 +11682,7 @@ From interface
          
         
       </span>
-      <span class="sympad">DelayedConfirmationView</span>
+      <span class="sympad">ActionChooserView</span>
       <span class="normal">(Context context)</span>
     </h4>
       <div class="api-level">
@@ -12140,7 +11702,7 @@ From interface
 </div>
 
 
-<A NAME="DelayedConfirmationView(android.content.Context, android.util.AttributeSet)"></A>
+<A NAME="ActionChooserView(android.content.Context, android.util.AttributeSet)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12152,7 +11714,7 @@ From interface
          
         
       </span>
-      <span class="sympad">DelayedConfirmationView</span>
+      <span class="sympad">ActionChooserView</span>
       <span class="normal">(Context context, AttributeSet attrs)</span>
     </h4>
       <div class="api-level">
@@ -12172,7 +11734,7 @@ From interface
 </div>
 
 
-<A NAME="DelayedConfirmationView(android.content.Context, android.util.AttributeSet, int)"></A>
+<A NAME="ActionChooserView(android.content.Context, android.util.AttributeSet, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12184,8 +11746,8 @@ From interface
          
         
       </span>
-      <span class="sympad">DelayedConfirmationView</span>
-      <span class="normal">(Context context, AttributeSet attrs, int defStyle)</span>
+      <span class="sympad">ActionChooserView</span>
+      <span class="normal">(Context context, AttributeSet attrs, int defStyleAttr)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12217,6 +11779,81 @@ From interface
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="addListener(android.support.wearable.view.ActionChooserView.ActionChooserListener)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">addListener</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a listener to be notified when an option is chosen.
+ see <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html#onOptionChosen(int)">onOptionChosen(int)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener to add.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="canScrollHorizontally(int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">canScrollHorizontally</span>
+      <span class="normal">(int direction)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
 
 
 <A NAME="onTouchEvent(android.view.MotionEvent)"></A>
@@ -12251,7 +11888,7 @@ From interface
 </div>
 
 
-<A NAME="reset()"></A>
+<A NAME="performSelectOption(int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12263,8 +11900,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">reset</span>
-      <span class="normal">()</span>
+      <span class="sympad">performSelectOption</span>
+      <span class="normal">(int option)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12277,14 +11914,24 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Resets the timer.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Selects the provided option, animating the option's icon to the center of the view and
+ triggering the appropriate callbacks.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>option</td>
+          <td>The option to select, either <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_START">OPTION_START</a></code> or <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_END">OPTION_END</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
 
 
-<A NAME="setListener(android.support.wearable.view.DelayedConfirmationView.DelayedConfirmationListener)"></A>
+<A NAME="removeListener(android.support.wearable.view.ActionChooserView.ActionChooserListener)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12296,8 +11943,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">setListener</span>
-      <span class="normal">(<a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html">DelayedConfirmationView.DelayedConfirmationListener</a> listener)</span>
+      <span class="sympad">removeListener</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a> listener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12310,29 +11957,23 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets a listener to get callbacks for when the timer finishes or cancelled.
- </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Removes a listener from receiving any future callbacks when an option is chosen.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>listener</td>
-          <td>listener to register.
+          <td>The listener to remove.
 </td>
         </tr>
       </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="../../../../../">ERROR(/DelayedConfirmationViewListener)</a></code></li>
-      </ul>
   </div>
 
     </div>
 </div>
 
 
-<A NAME="setStartTimeMs(long)"></A>
+<A NAME="setEnabled(boolean)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -12344,8 +11985,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">setStartTimeMs</span>
-      <span class="normal">(long time)</span>
+      <span class="sympad">setEnabled</span>
+      <span class="normal">(boolean enabled)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -12358,100 +11999,58 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Artificially sets the start time in milliseconds for the Timer to countdown from.
- This should be called after the timer is started with <code><a href="../../../../../reference/android/support/wearable/view/DelayedConfirmationView.html#start()">start()</a></code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setOption(int, android.graphics.drawable.Drawable, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setOption</span>
+      <span class="normal">(int option, Drawable drawable, int color)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the characteristics of one of the predefined options, such as the option circle's
+ color and the <code><a href="../../../../../reference/android/graphics/drawable/Drawable.html">Drawable</a></code> to be drawn in the middle.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>time</td>
-          <td>start time in milliseconds.
-</td>
+          <th>option</td>
+          <td>The option to set, either <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_START">OPTION_START</a></code> or <code><a href="../../../../../reference/android/support/wearable/view/ActionChooserView.html#OPTION_END">OPTION_END</a></code>.</td>
         </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="setTotalTimeMs(long)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">setTotalTimeMs</span>
-      <span class="normal">(long time)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the total time in milliseconds for the Timer to countdown to. Once the countdown is
- finished, if there is a listener registered, calls the listener.
- </p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
         <tr>
-          <th>time</td>
-          <td>countdown time in milliseconds.
+          <th>drawable</td>
+          <td>The drawable to draw in the center of the option circle.</td>
+        </tr>
+        <tr>
+          <th>color</td>
+          <td>The color of the option circle.
 </td>
         </tr>
       </table>
   </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="../../../../../">ERROR(/DelayedConfirmationViewListener)</a></code></li>
-      </ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="start()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">start</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Starts the timer countdown.
-</p></div>
 
     </div>
 </div>
@@ -12464,6 +12063,70 @@ From interface
 
 <h2>Protected Methods</h2>
 
+
+
+<A NAME="onAttachedToWindow()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">onAttachedToWindow</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onDetachedFromWindow()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">onDetachedFromWindow</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
 
 
 <A NAME="onDraw(android.graphics.Canvas)"></A>
@@ -12480,6 +12143,38 @@ From interface
       </span>
       <span class="sympad">onDraw</span>
       <span class="normal">(Canvas canvas)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onLayout(boolean, int, int, int, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">onLayout</span>
+      <span class="normal">(boolean changed, int left, int top, int right, int bottom)</span>
     </h4>
       <div class="api-level">
         <div></div>
