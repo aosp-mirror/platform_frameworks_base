@@ -166,8 +166,12 @@ public final class Installer extends SystemService {
         mInstaller.execute("rmpackagedir", packageDir);
     }
 
-    public void rmProfiles(String pkgName) throws InstallerException {
-        mInstaller.execute("rmprofiles", pkgName);
+    public void clearAppProfiles(String pkgName) throws InstallerException {
+        mInstaller.execute("clear_app_profiles", pkgName);
+    }
+
+    public void destroyAppProfiles(String pkgName) throws InstallerException {
+        mInstaller.execute("destroy_app_profiles", pkgName);
     }
 
     public void createUserConfig(int userid) throws InstallerException {

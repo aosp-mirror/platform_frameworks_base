@@ -7172,6 +7172,30 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private void deleteProfilesLI(String packageName, boolean destroy) {
+        final PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+        }
+        if (pkg == null) {
+            Slog.w(TAG, "Failed to delete profiles. No package: " + packageName);
+            return;
+        }
+        deleteProfilesLI(pkg, destroy);
+    }
+
+    private void deleteProfilesLI(PackageParser.Package pkg, boolean destroy) {
+        try {
+            if (destroy) {
+                mInstaller.clearAppProfiles(pkg.packageName);
+            } else {
+                mInstaller.destroyAppProfiles(pkg.packageName);
+            }
+        } catch (InstallerException ex) {
+            Log.e(TAG, "Could not delete profiles for package " + pkg.packageName);
+        }
+    }
+
     private void deleteCodeCacheDirsLI(String volumeUuid, String packageName) {
         final PackageParser.Package pkg;
         synchronized (mPackages) {
@@ -13204,6 +13228,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             deleteCodeCacheDirsLI(pkg);
+            deleteProfilesLI(pkg, /*destroy*/ false);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
@@ -13338,6 +13363,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Successfully disabled the old package. Now proceed with re-installation
         deleteCodeCacheDirsLI(pkg);
+        deleteProfilesLI(pkg, /*destroy*/ false);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -14410,6 +14436,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             res = deletePackageLI(packageName, removeForUser, true, allUsers,
                     flags | REMOVE_CHATTY, info, true, null);
+            deleteProfilesLI(packageName, /*destroy*/ true);
             synchronized (mPackages) {
                 if (res) {
                     mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPs.pkg);
@@ -15177,7 +15204,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void clearApplicationProfileData(String packageName) {
         enforceSystemOrRoot("Only the system can clear all profile data");
         try {
-            mInstaller.rmProfiles(packageName);
+            mInstaller.clearAppProfiles(packageName);
         } catch (InstallerException ex) {
             Log.e(TAG, "Could not clear profile data of package " + packageName);
         }
