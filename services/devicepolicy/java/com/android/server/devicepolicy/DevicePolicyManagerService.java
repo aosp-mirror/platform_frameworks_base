@@ -4138,8 +4138,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias,
-            boolean requestAccess) {
+    public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, byte[] chain,
+            String alias, boolean requestAccess) {
         enforceCanManageInstalledKeys(who);
 
         final int callingUid = mInjector.binderGetCallingUid();
@@ -4149,7 +4149,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid));
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                if (!keyChain.installKeyPair(privKey, cert, alias)) {
+                if (!keyChain.installKeyPair(privKey, cert, chain, alias)) {
                     return false;
                 }
                 if (requestAccess) {
