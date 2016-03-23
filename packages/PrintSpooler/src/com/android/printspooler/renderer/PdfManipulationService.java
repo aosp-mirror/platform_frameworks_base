@@ -108,62 +108,65 @@ public final class PdfManipulationService extends Service {
                 try {
                     throwIfNotOpened();
 
-                    PdfRenderer.Page page = mRenderer.openPage(pageIndex);
+                    try (PdfRenderer.Page page = mRenderer.openPage(pageIndex)) {
+                        final int srcWidthPts = page.getWidth();
+                        final int srcHeightPts = page.getHeight();
 
-                    final int srcWidthPts = page.getWidth();
-                    final int srcHeightPts = page.getHeight();
+                        final int dstWidthPts = pointsFromMils(
+                                attributes.getMediaSize().getWidthMils());
+                        final int dstHeightPts = pointsFromMils(
+                                attributes.getMediaSize().getHeightMils());
 
-                    final int dstWidthPts = pointsFromMils(
-                            attributes.getMediaSize().getWidthMils());
-                    final int dstHeightPts = pointsFromMils(
-                            attributes.getMediaSize().getHeightMils());
+                        final boolean scaleContent = mRenderer.shouldScaleForPrinting();
+                        final boolean contentLandscape = !attributes.getMediaSize().isPortrait();
 
-                    final boolean scaleContent = mRenderer.shouldScaleForPrinting();
-                    final boolean contentLandscape = !attributes.getMediaSize().isPortrait();
+                        final float displayScale;
+                        Matrix matrix = new Matrix();
 
-                    final float displayScale;
-                    Matrix matrix = new Matrix();
-
-                    if (scaleContent) {
-                        displayScale = Math.min((float) bitmapWidth / srcWidthPts,
-                                (float) bitmapHeight / srcHeightPts);
-                    } else {
-                        if (contentLandscape) {
-                            displayScale = (float) bitmapHeight / dstHeightPts;
+                        if (scaleContent) {
+                            displayScale = Math.min((float) bitmapWidth / srcWidthPts,
+                                    (float) bitmapHeight / srcHeightPts);
                         } else {
-                            displayScale = (float) bitmapWidth / dstWidthPts;
+                            if (contentLandscape) {
+                                displayScale = (float) bitmapHeight / dstHeightPts;
+                            } else {
+                                displayScale = (float) bitmapWidth / dstWidthPts;
+                            }
                         }
+                        matrix.postScale(displayScale, displayScale);
+
+                        Configuration configuration = PdfManipulationService.this.getResources()
+                                .getConfiguration();
+                        if (configuration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                            matrix.postTranslate(bitmapWidth - srcWidthPts * displayScale, 0);
+                        }
+
+                        Margins minMargins = attributes.getMinMargins();
+                        final int paddingLeftPts = pointsFromMils(minMargins.getLeftMils());
+                        final int paddingTopPts = pointsFromMils(minMargins.getTopMils());
+                        final int paddingRightPts = pointsFromMils(minMargins.getRightMils());
+                        final int paddingBottomPts = pointsFromMils(minMargins.getBottomMils());
+
+                        Rect clip = new Rect();
+                        clip.left = (int) (paddingLeftPts * displayScale);
+                        clip.top = (int) (paddingTopPts * displayScale);
+                        clip.right = (int) (bitmapWidth - paddingRightPts * displayScale);
+                        clip.bottom = (int) (bitmapHeight - paddingBottomPts * displayScale);
+
+                        if (DEBUG) {
+                            Log.i(LOG_TAG, "Rendering page:" + pageIndex);
+                        }
+
+                        Bitmap bitmap = getBitmapForSize(bitmapWidth, bitmapHeight);
+                        page.render(bitmap, clip, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+                        BitmapSerializeUtils.writeBitmapPixels(bitmap, destination);
                     }
-                    matrix.postScale(displayScale, displayScale);
+                } catch (Throwable e) {
+                    Log.e(LOG_TAG, "Cannot render page", e);
 
-                    Configuration configuration = PdfManipulationService.this.getResources()
-                            .getConfiguration();
-                    if (configuration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-                        matrix.postTranslate(bitmapWidth - srcWidthPts * displayScale, 0);
-                    }
-
-                    Margins minMargins = attributes.getMinMargins();
-                    final int paddingLeftPts = pointsFromMils(minMargins.getLeftMils());
-                    final int paddingTopPts = pointsFromMils(minMargins.getTopMils());
-                    final int paddingRightPts = pointsFromMils(minMargins.getRightMils());
-                    final int paddingBottomPts = pointsFromMils(minMargins.getBottomMils());
-
-                    Rect clip = new Rect();
-                    clip.left = (int) (paddingLeftPts * displayScale);
-                    clip.top = (int) (paddingTopPts * displayScale);
-                    clip.right = (int) (bitmapWidth - paddingRightPts * displayScale);
-                    clip.bottom = (int) (bitmapHeight - paddingBottomPts * displayScale);
-
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Rendering page:" + pageIndex);
-                    }
-
-                    Bitmap bitmap = getBitmapForSize(bitmapWidth, bitmapHeight);
-                    page.render(bitmap, clip, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
-                    page.close();
-
-                    BitmapSerializeUtils.writeBitmapPixels(bitmap, destination);
+                    // The error is propagated to the caller when it tries to read the bitmap and
+                    // the pipe is closed prematurely
                 } finally {
                     IoUtils.closeQuietly(destination);
                 }
