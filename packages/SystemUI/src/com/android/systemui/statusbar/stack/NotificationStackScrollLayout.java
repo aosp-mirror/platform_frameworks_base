@@ -3624,16 +3624,18 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mTranslatingParentView == null) {
                 return false;
             }
-            final float snapBackThreshold = getSpaceForGear(animView);
+            // If the notification can't be dismissed then how far it can move is
+            // restricted -- reduce the distance it needs to move in this case.
+            final float multiplier = canChildBeDismissed(animView) ? 0.4f : 0.2f;
+            final float snapBackThreshold = getSpaceForGear(animView) * multiplier;
             final float translation = getTranslation(animView);
             final boolean fromLeft = translation > 0;
             final float absTrans = Math.abs(translation);
             final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
 
-            // If the notification can't be dismissed then how far it can move is
-            // restricted -- reduce the distance it needs to move in this case.
-            final float multiplier = canChildBeDismissed(animView) ? 0.4f : 0.2f;
-            return absTrans >= snapBackThreshold * 0.4f && absTrans <= notiThreshold;
+            return mCurrIconRow.isVisible() && (mCurrIconRow.isIconOnLeft()
+                    ? (translation > snapBackThreshold && translation <= notiThreshold)
+                    : (translation < -snapBackThreshold && translation >= -notiThreshold));
         }
 
         @Override
