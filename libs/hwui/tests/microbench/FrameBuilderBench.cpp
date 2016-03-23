@@ -65,7 +65,7 @@ void BM_FrameBuilder_defer(benchmark::State& state) {
     auto nodes = createTestNodeList();
     while (state.KeepRunning()) {
         FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
-                nodes, sLightGeometry, nullptr);
+                nodes, sLightGeometry, Caches::getInstance());
         benchmark::DoNotOptimize(&frameBuilder);
     }
 }
@@ -80,7 +80,7 @@ void BM_FrameBuilder_deferAndRender(benchmark::State& state) {
 
         while (state.KeepRunning()) {
             FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
-                    nodes, sLightGeometry, nullptr);
+                    nodes, sLightGeometry, Caches::getInstance());
 
             BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
@@ -119,7 +119,7 @@ void BM_FrameBuilder_defer_scene(benchmark::State& state) {
     while (state.KeepRunning()) {
         FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
                 SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
-                nodes, sLightGeometry, nullptr);
+                nodes, sLightGeometry, Caches::getInstance());
         benchmark::DoNotOptimize(&frameBuilder);
     }
 }
@@ -137,7 +137,7 @@ void BM_FrameBuilder_deferAndRender_scene(benchmark::State& state) {
         while (state.KeepRunning()) {
             FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
                     SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
-                    nodes, sLightGeometry, nullptr);
+                    nodes, sLightGeometry, Caches::getInstance());
 
             BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
             frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);

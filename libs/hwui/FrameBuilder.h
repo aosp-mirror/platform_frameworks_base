@@ -65,14 +65,16 @@ public:
             uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes,
             const LightGeometry& lightGeometry,
-            Caches* caches)
-            : FrameBuilder(layers, clip, viewportWidth, viewportHeight, nodes, lightGeometry, Rect(), caches) {}
+            Caches& caches)
+            : FrameBuilder(layers, clip, viewportWidth, viewportHeight,
+                    nodes, lightGeometry, Rect(), caches) {}
 
     FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes,
             const LightGeometry& lightGeometry,
-            const Rect &contentDrawBounds, Caches* caches);
+            const Rect &contentDrawBounds,
+            Caches& caches);
 
     virtual ~FrameBuilder() {}
 
@@ -81,10 +83,10 @@ public:
      *
      * It constructs a lookup array of lambdas, which allows a recorded BakeOpState to use
      * state->op->opId to lookup a receiver that will be called when the op is replayed.
-     *
      */
     template <typename StaticDispatcher, typename Renderer>
     void replayBakedOps(Renderer& renderer) {
+        finishDefer();
         /**
          * Defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
          * dispatch the op via a method on a static dispatcher when the op is replayed.
@@ -157,6 +159,7 @@ public:
     virtual GLuint getTargetFbo() const override { return 0; }
 
 private:
+    void finishDefer();
     enum class ChildrenSelectMode {
         Negative,
         Positive
@@ -198,7 +201,7 @@ private:
         return mAllocator.create<SkPath>();
     }
 
-    void deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
+    const BakedOpState* deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
             BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
 
     /**
@@ -230,7 +233,7 @@ private:
 
     CanvasState mCanvasState;
 
-    Caches* mCaches = nullptr;
+    Caches& mCaches;
 
     float mLightRadius;
 
