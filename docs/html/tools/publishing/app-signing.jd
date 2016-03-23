@@ -175,11 +175,23 @@ enter the passwords for both. Then click <strong>Next</strong>.</p>
      width="349" height="232" style="margin-top:15px"/>
 <p class="img-caption"><strong>Figure 2</strong>. Select a private key in Android Studio.</p>
 </li>
-<li><p>On the next window, select a destination for the signed APK and click
-<strong>Finish</strong>.</p>
+<li><p>
+  On the next window, select a destination for the signed APK(s), select the
+  build type, (if applicable) choose the product flavor(s), and click
+  <strong>Finish</strong>.</p>
 <img src="{@docRoot}images/tools/signstudio3.png" alt=""
      width="350" height="175" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 3</strong>. Generate a signed APK in Android Studio.</p>
+<p class="img-caption">
+  <strong>Figure 3</strong>. Generate signed APKs for the selected product
+  flavors.
+</p>
+<p class="note">
+  <strong>Note:</strong> If your project uses product flavors, you can select
+  multiple product flavors while holding down the <strong>Ctrl</strong> key on
+  Windown/Linux, or the <strong>Command</strong> key on Mac OSX. Android Studio
+  will generate a separate APK for each selected product flavor.
+</p>
+
 </li>
 </ol>
 
