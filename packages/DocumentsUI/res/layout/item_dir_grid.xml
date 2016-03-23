@@ -23,14 +23,16 @@
     android:elevation="@dimen/grid_item_elevation"
     android:focusable="true" >
 
+    <!-- The height is 48px.
+         paddingTop (9dp) + @dimen/check_icon_size (30dp) + paddingBottom (9dp) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:paddingBottom="16dp"
-        android:paddingLeft="12dp"
+        android:paddingBottom="9dp"
+        android:paddingLeft="9dp"
         android:paddingRight="12dp"
-        android:paddingTop="16dp"
+        android:paddingTop="9dp"
         android:gravity="center_vertical">
 
         <FrameLayout
