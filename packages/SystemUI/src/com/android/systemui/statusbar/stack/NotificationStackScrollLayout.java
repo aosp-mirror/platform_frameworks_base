@@ -3456,8 +3456,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private class NotificationSwipeHelper extends SwipeHelper {
-        private static final long GEAR_SHOW_DELAY = 60;
+        private static final long SHOW_GEAR_DELAY = 60;
+        private static final long COVER_GEAR_DELAY = 4000;
         private CheckForDrag mCheckForDrag;
+        private Runnable mFalsingCheck;
         private Handler mHandler;
         private boolean mGearSnappedTo;
         private boolean mGearSnappedOnLeft;
@@ -3465,6 +3467,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         public NotificationSwipeHelper(int swipeDirection, Callback callback, Context context) {
             super(swipeDirection, callback, context);
             mHandler = new Handler();
+            mFalsingCheck = new Runnable() {
+                @Override
+                public void run() {
+                    resetExposedGearView(true /* animate */, true /* force */);
+                }
+            };
         }
 
         @Override
@@ -3479,6 +3487,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             mCheckForDrag = null;
             mCurrIconRow = null;
+            mHandler.removeCallbacks(mFalsingCheck);
 
             // Slide back any notifications that might be showing a gear
             resetExposedGearView(true /* animate */, false /* force */);
@@ -3492,6 +3501,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         @Override
         public void onMoveUpdate(View view, float translation, float delta) {
+            mHandler.removeCallbacks(mFalsingCheck);
+
             if (mCurrIconRow != null) {
                 mCurrIconRow.setSnapping(false); // If we're moving, we're not snapping.
 
@@ -3617,6 +3628,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                 setSnappedToGear(true);
             }
             onDragCancelled(animView);
+
+            // If we're on the lockscreen we want to false this.
+            if (mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+                mHandler.removeCallbacks(mFalsingCheck);
+                mHandler.postDelayed(mFalsingCheck, COVER_GEAR_DELAY);
+            }
             super.snapChild(animView, target, velocity);
         }
 
@@ -3733,7 +3750,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         private void checkForDrag() {
             if (mCheckForDrag == null || !mHandler.hasCallbacks(mCheckForDrag)) {
                 mCheckForDrag = new CheckForDrag();
-                mHandler.postDelayed(mCheckForDrag, GEAR_SHOW_DELAY);
+                mHandler.postDelayed(mCheckForDrag, SHOW_GEAR_DELAY);
             }
         }
 

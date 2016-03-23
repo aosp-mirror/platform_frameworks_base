@@ -91,6 +91,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -100,6 +101,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
+import com.android.systemui.statusbar.NotificationGuts.OnGutsClosedListener;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -114,12 +116,12 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener {
+        ExpandableNotificationRow.OnExpandClickListener,
+        OnGutsClosedListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -1010,6 +1012,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
         final NotificationGuts guts = row.getGuts();
+        guts.setClosedListener(this);
         final String pkg = sbn.getPackageName();
         String appname = pkg;
         Drawable pkgicon = null;
@@ -1037,6 +1040,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             settingsButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
+                    guts.resetFalsingCheck();
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
@@ -1069,6 +1073,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private void saveImportanceCloseControls(StatusBarNotification sbn,
             ExpandableNotificationRow row, NotificationGuts guts, View done) {
+        guts.resetFalsingCheck();
         guts.saveImportance(sbn);
 
         int[] rowLocation = new int[2];
@@ -1137,7 +1142,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                             }
                         });
                         a.start();
-                        guts.setExposed(true);
+                        guts.setExposed(true /* exposed */,
+                                mState == StatusBarState.KEYGUARD /* needsFalsingProtection */);
                         row.closeRemoteInput();
                         mStackScroller.onHeightChanged(null, true /* needsAnimation */);
                         mNotificationGutsExposed = guts;
@@ -1165,35 +1171,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void dismissPopups(int x, int y, boolean resetGear, boolean animate) {
         if (mNotificationGutsExposed != null) {
-            final NotificationGuts v = mNotificationGutsExposed;
-            mNotificationGutsExposed = null;
-
-            if (v.getWindowToken() == null) return;
-            if (x == -1 || y == -1) {
-                x = (v.getLeft() + v.getRight()) / 2;
-                y = (v.getTop() + v.getHeight() / 2);
-            }
-            final double horz = Math.max(v.getWidth() - x, x);
-            final double vert = Math.max(v.getHeight() - y, y);
-            final float r = (float) Math.hypot(horz, vert);
-            final Animator a = ViewAnimationUtils.createCircularReveal(v,
-                    x, y, r, 0);
-            a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            a.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-            a.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    v.setVisibility(View.GONE);
-                }
-            });
-            a.start();
-            v.setExposed(false);
-            mStackScroller.onHeightChanged(null, true /* needsAnimation */);
+            mNotificationGutsExposed.closeControls(x, y, true /* notify */);
         }
         if (resetGear) {
             mStackScroller.resetExposedGearView(animate, true /* force */);
         }
+    }
+
+    @Override
+    public void onGutsClosed(NotificationGuts guts) {
+        mStackScroller.onHeightChanged(null, true /* needsAnimation */);
+        mNotificationGutsExposed = null;
     }
 
     @Override
