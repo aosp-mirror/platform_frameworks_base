@@ -1318,8 +1318,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            EditorInfo attribute,
-            int controlFlags) {
+            @Nullable EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
@@ -1329,6 +1328,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (cs == null) {
             throw new IllegalArgumentException("unknown client "
                     + client.asBinder());
+        }
+
+        if (attribute == null) {
+            Slog.w(TAG, "Ignoring startInput with null EditorInfo."
+                    + " uid=" + cs.uid + " pid=" + cs.pid);
+            return null;
         }
 
         try {
@@ -1476,7 +1481,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            EditorInfo attribute, int controlFlags) {
+            @Nullable EditorInfo attribute, int controlFlags) {
         if (!calledFromValidUser()) {
             return null;
         }
@@ -2208,7 +2213,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
-            int windowFlags, EditorInfo attribute, IInputContext inputContext,
+            int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods) {
         if (windowToken != null) {
             return windowGainedFocus(startInputReason, client, windowToken, controlFlags,
