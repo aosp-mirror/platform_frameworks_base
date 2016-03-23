@@ -158,11 +158,11 @@ public final class FileOperations {
     }
 
     /**
-     * Starts the service for a move operation.
+     * Starts the service for a delete operation.
      *
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
-     * @param srcDocs A list of src files to copy.
+     * @param srcDocs A list of src files to delete.
      * @param srcParent Parent of all the source documents.
      * @return Id of the job.
      */
@@ -184,7 +184,7 @@ public final class FileOperations {
      *
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
-     * @param srcDocs A list of src files to copy.
+     * @param srcDocs A list of src files for an operation.
      * @return Id of the job.
      */
     public static Intent createBaseIntent(

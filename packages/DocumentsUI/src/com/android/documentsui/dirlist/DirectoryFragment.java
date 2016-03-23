@@ -1042,7 +1042,7 @@ public class DirectoryFragment extends Fragment
         }
 
         // Can't copy folders to downloads, because we don't show folders there.
-        if (!root.isDownloads()) {
+        if (root.isDownloads()) {
             for (DocumentInfo docs : files) {
                 if (docs.isDirectory()) {
                     return false;
