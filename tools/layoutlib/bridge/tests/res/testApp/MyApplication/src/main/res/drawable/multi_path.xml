@@ -63,6 +63,25 @@
             android:fillColor="@color/gradient"
             android:pathData="M-20,-20 l0, 10 l10, 0 l0, -10 l-10,0 "
         />
+
+        <!--
+            Draw squares with different fill types
+        -->
+        <path
+            android:fillType="evenOdd"
+            android:strokeWidth="1"
+            android:strokeColor="#AABBCC"
+            android:fillColor="#AAEFCC"
+            android:pathData="M-20,-40 l0, 10 l10, 0 l0, -10 l-10,0 m5,0 l0, 10 l10, 0 l0, -10 l-10,0"
+        />
+
+        <path
+            android:fillType="nonZero"
+            android:strokeWidth="1"
+            android:strokeColor="#AABBCC"
+            android:fillColor="#AAEFCC"
+            android:pathData="M0,-40 l0, 10 l10, 0 l0, -10 l-10,0 m5,0 l0, 10 l10, 0 l0, -10 l-10,0"
+        />
     </group>
 
 </vector>

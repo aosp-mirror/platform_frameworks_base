@@ -256,7 +256,6 @@ public final class CreateInfo implements ICreateInfo {
      */
     public final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.animation.PropertyValuesHolder",
-        "android.graphics.AvoidXfermode",
         "android.graphics.Bitmap",
         "android.graphics.BitmapFactory",
         "android.graphics.BitmapShader",
@@ -284,7 +283,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.PathDashPathEffect",
         "android.graphics.PathEffect",
         "android.graphics.PathMeasure",
-        "android.graphics.PixelXorXfermode",
         "android.graphics.PorterDuffColorFilter",
         "android.graphics.PorterDuffXfermode",
         "android.graphics.RadialGradient",
