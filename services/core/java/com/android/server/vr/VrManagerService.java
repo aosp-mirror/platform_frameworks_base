@@ -127,6 +127,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
+        public boolean isCurrentVrListener(String packageName, int userId) {
+            return VrManagerService.this.isCurrentVrListener(packageName, userId);
+        }
+
+        @Override
         public void registerListener(VrStateListener listener) {
             VrManagerService.this.addListener(listener);
         }
@@ -352,6 +357,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean getVrMode() {
         synchronized (mLock) {
             return mVrModeEnabled;
+        }
+    }
+
+    private boolean isCurrentVrListener(String packageName, int userId) {
+        synchronized (mLock) {
+            if (mCurrentVrService == null) {
+                return false;
+            }
+            return mCurrentVrService.getComponent().getPackageName().equals(packageName) &&
+                    userId == mCurrentVrService.getUserId();
         }
     }
 
