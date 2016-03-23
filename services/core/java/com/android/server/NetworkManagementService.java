@@ -513,6 +513,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    // Sync the state of the given chain with the native daemon.
+    private void syncFirewallChainLocked(int chain, SparseIntArray uidFirewallRules, String name) {
+        int size = uidFirewallRules.size();
+        if (size > 0) {
+            // Make a copy of the current rules, and then clear them. This is because
+            // setFirewallUidRuleInternal only pushes down rules to the native daemon if they are
+            // different from the current rules stored in the mUidFirewall*Rules array for the
+            // specified chain. If we don't clear the rules, setFirewallUidRuleInternal will do
+            // nothing.
+            final SparseIntArray rules = uidFirewallRules.clone();
+            uidFirewallRules.clear();
+
+            // Now push the rules. setFirewallUidRuleInternal will push each of these down to the
+            // native daemon, and also add them to the mUidFirewall*Rules array for the specified
+            // chain.
+            if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall " + name + "UID rules");
+            for (int i = 0; i < rules.size(); i++) {
+                setFirewallUidRuleInternal(chain, rules.keyAt(i), rules.valueAt(i));
+            }
+        }
+    }
+
     /**
      * Prepare native daemon once connected, enabling modules and pushing any
      * existing in-memory rules.
@@ -603,54 +625,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             setFirewallEnabled(mFirewallEnabled || LockdownVpnTracker.isEnabled());
 
-            size = mUidFirewallRules.size();
-            if (size > 0) {
-                if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall UID rules");
-                final SparseIntArray uidFirewallRules = mUidFirewallRules;
-                mUidFirewallRules = new SparseIntArray();
-                for (int i = 0; i < uidFirewallRules.size(); i++) {
-                    setFirewallUidRuleInternal(FIREWALL_CHAIN_NONE, uidFirewallRules.keyAt(i),
-                            uidFirewallRules.valueAt(i));
-                }
-            }
+            syncFirewallChainLocked(FIREWALL_CHAIN_NONE, mUidFirewallRules, "");
+            syncFirewallChainLocked(FIREWALL_CHAIN_STANDBY, mUidFirewallStandbyRules, "standby ");
+            syncFirewallChainLocked(FIREWALL_CHAIN_DOZABLE, mUidFirewallDozableRules, "dozable ");
+            syncFirewallChainLocked(FIREWALL_CHAIN_POWERSAVE, mUidFirewallPowerSaveRules,
+                    "powersave ");
 
-            size = mUidFirewallStandbyRules.size();
-            if (size > 0) {
-                if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall standby UID rules");
-                final SparseIntArray uidFirewallRules = mUidFirewallStandbyRules;
-                mUidFirewallStandbyRules = new SparseIntArray();
-                for (int i = 0; i < uidFirewallRules.size(); i++) {
-                    setFirewallUidRuleInternal(FIREWALL_CHAIN_STANDBY, uidFirewallRules.keyAt(i),
-                            uidFirewallRules.valueAt(i));
-                }
-            }
             if (mFirewallChainStates.get(FIREWALL_CHAIN_STANDBY)) {
                 setFirewallChainEnabled(FIREWALL_CHAIN_STANDBY, true);
             }
-
-            size = mUidFirewallDozableRules.size();
-            if (size > 0) {
-                if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall dozable UID rules");
-                final SparseIntArray uidFirewallRules = mUidFirewallDozableRules;
-                mUidFirewallDozableRules = new SparseIntArray();
-                for (int i = 0; i < uidFirewallRules.size(); i++) {
-                    setFirewallUidRuleInternal(FIREWALL_CHAIN_DOZABLE, uidFirewallRules.keyAt(i),
-                            uidFirewallRules.valueAt(i));
-                }
-            }
             if (mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE)) {
                 setFirewallChainEnabled(FIREWALL_CHAIN_DOZABLE, true);
-            }
-
-            size = mUidFirewallPowerSaveRules.size();
-            if (size > 0) {
-                Slog.d(TAG, "Pushing " + size + " active firewall powersave UID rules");
-                final SparseIntArray uidFirewallRules = mUidFirewallPowerSaveRules;
-                mUidFirewallPowerSaveRules = new SparseIntArray();
-                for (int i = 0; i < uidFirewallRules.size(); i++) {
-                    setFirewallUidRuleInternal(FIREWALL_CHAIN_POWERSAVE, uidFirewallRules.keyAt(i),
-                            uidFirewallRules.valueAt(i));
-                }
             }
             if (mFirewallChainStates.get(FIREWALL_CHAIN_POWERSAVE)) {
                 setFirewallChainEnabled(FIREWALL_CHAIN_POWERSAVE, true);
