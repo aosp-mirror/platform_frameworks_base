@@ -255,8 +255,9 @@ def main():
 
     ucd_path = sys.argv[2]
     parse_ucd(ucd_path)
-    check_emoji_availability()
-    check_emoji_defaults()
+    # Temporarily disable emoji checks for Bug 27785690
+    # check_emoji_availability()
+    # check_emoji_defaults()
 
 
 if __name__ == '__main__':
