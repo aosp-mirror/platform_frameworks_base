@@ -810,38 +810,44 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentInsets.setEmpty();
             mVisibleInsets.setEmpty();
         } else {
+            // Using mContentInsets as a temp rect. It is safe because we're setting it below.
+            getDisplayContent().getLogicalDisplayRect(mContentInsets);
+            // Override right and/or bottom insets in case if the frame doesn't fit the screen in
+            // non-fullscreen mode.
+            boolean overrideRightInset = !fullscreenTask && mFrame.right > mContentInsets.right;
+            boolean overrideBottomInset = !fullscreenTask && mFrame.bottom > mContentInsets.bottom;
             mContentInsets.set(mContentFrame.left - frame.left,
                     mContentFrame.top - frame.top,
-                    frame.right - mContentFrame.right,
-                    frame.bottom - mContentFrame.bottom);
+                    overrideRightInset ? 0 : frame.right - mContentFrame.right,
+                    overrideBottomInset ? 0 : frame.bottom - mContentFrame.bottom);
 
             mVisibleInsets.set(mVisibleFrame.left - frame.left,
                     mVisibleFrame.top - frame.top,
-                    frame.right - mVisibleFrame.right,
-                    frame.bottom - mVisibleFrame.bottom);
+                    overrideRightInset ? 0 : frame.right - mVisibleFrame.right,
+                    overrideBottomInset ? 0 : frame.bottom - mVisibleFrame.bottom);
 
             mStableInsets.set(Math.max(mStableFrame.left - frame.left, 0),
                     Math.max(mStableFrame.top - frame.top, 0),
-                    Math.max(frame.right - mStableFrame.right, 0),
-                    Math.max(frame.bottom - mStableFrame.bottom, 0));
+                    overrideRightInset ? 0 : Math.max(frame.right - mStableFrame.right, 0),
+                    overrideBottomInset ? 0 :  Math.max(frame.bottom - mStableFrame.bottom, 0));
         }
 
         if (!mInsetFrame.isEmpty()) {
             mContentFrame.set(mFrame);
             mContentFrame.top += mContentInsets.top;
-            mContentFrame.bottom += mContentInsets.bottom;
+            mContentFrame.bottom -= mContentInsets.bottom;
             mContentFrame.left += mContentInsets.left;
-            mContentFrame.right += mContentInsets.right;
+            mContentFrame.right -= mContentInsets.right;
             mVisibleFrame.set(mFrame);
             mVisibleFrame.top += mVisibleInsets.top;
-            mVisibleFrame.bottom += mVisibleInsets.bottom;
+            mVisibleFrame.bottom -= mVisibleInsets.bottom;
             mVisibleFrame.left += mVisibleInsets.left;
-            mVisibleFrame.right += mVisibleInsets.right;
+            mVisibleFrame.right -= mVisibleInsets.right;
             mStableFrame.set(mFrame);
             mStableFrame.top += mStableInsets.top;
-            mStableFrame.bottom += mStableInsets.bottom;
+            mStableFrame.bottom -= mStableInsets.bottom;
             mStableFrame.left += mStableInsets.left;
-            mStableFrame.right += mStableInsets.right;
+            mStableFrame.right -= mStableInsets.right;
         }
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
@@ -875,7 +881,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 + "): frame=" + mFrame.toShortString()
                 + " ci=" + mContentInsets.toShortString()
                 + " vi=" + mVisibleInsets.toShortString()
-                + " vi=" + mStableInsets.toShortString()
+                + " si=" + mStableInsets.toShortString()
                 + " of=" + mOutsets.toShortString());
     }
 
