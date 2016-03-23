@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"സിം PUK പ്രവർത്തനം പരാജയപ്പെട്ടു!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"കോഡ് അംഗികരിച്ചു!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"സേവനമൊന്നുമില്ല."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ടൈപ്പുചെയ്യൽ രീതി ബട്ടൺ മാറുക."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ഇൻപുട്ട് രീതി മാറുക"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ഉപകരണം പുനരാരംഭിച്ചതിന് ശേഷം പാറ്റേൺ ആവശ്യമാണ്"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ഉപകരണം പുനരാരംഭിച്ചതിന് ശേഷം പിൻ ആവശ്യമാണ്"</string>

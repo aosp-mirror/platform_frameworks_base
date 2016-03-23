@@ -112,7 +112,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Помилка введення PUK-коду SIM-карти."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код прийнято."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Зв’язку немає."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Кнопка перемикання методу введення."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Змінити метод введення"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Режим польоту"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Після перезавантаження пристрою потрібно ввести ключ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Після перезавантаження пристрою потрібно ввести PIN-код"</string>

@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"সিম PUK ক্রিয়াকলাপটি ব্যর্থ হয়েছে!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"কোড স্বীকৃত হয়েছে!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"কোনো পরিষেবা নেই৷"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ইনপুট পদ্ধতির বোতাম পরিবর্তন করুন৷"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ইনপুট পদ্ধতি পাল্টান"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"বিমান মোড"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ডিভাইস পুনরায় আরম্ভ করার পর প্যাটার্নের প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ডিভাইস পুনরায় আরম্ভ করার পর PIN এর প্রয়োজন হবে"</string>
