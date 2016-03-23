@@ -62,8 +62,6 @@ public class ManagedApplicationService {
     private IInterface mBoundInterface;
     private PendingEvent mPendingEvent;
 
-
-
     private ManagedApplicationService(final Context context, final ComponentName component,
             final int userId, int clientLabel, String settingsAction,
             BinderChecker binderChecker) {
@@ -211,6 +209,7 @@ public class ManagedApplicationService {
                         } else {
                             // Service connection wasn't pending, must have been disconnected
                             mContext.unbindService(this);
+                            return;
                         }
 
                         try {
@@ -242,6 +241,8 @@ public class ManagedApplicationService {
                 @Override
                 public void onServiceDisconnected(ComponentName componentName) {
                     Slog.w(TAG, "Service disconnected: " + intent);
+                    mConnection = null;
+                    mBoundInterface = null;
                 }
             };
 
