@@ -288,6 +288,10 @@
     <!-- Message for the currently selected printer being unavailable. [CHAR LIMIT=100] -->
     <string name="print_error_printer_unavailable">This printer isn\'t available right now.</string>
 
+    <!-- Message for the case when a preview of a page cannot be loaded because the printing app
+         provided a broken print preview rendering for this page. [CHAR LIMIT=50] -->
+    <string name="print_cannot_load_page">Can\'t display preview</string>
+
     <!-- Long running operations -->
 
     <!-- Message long running operation when preparing print preview. [CHAR LIMIT=50] -->
