@@ -1217,6 +1217,7 @@ public class PopupWindow {
         final boolean aboveAnchor = findDropDownPosition(anchor, p, xoff, yoff,
                 p.width, p.height, gravity);
         updateAboveAnchor(aboveAnchor);
+        p.accessibilityIdOfAnchor = (anchor != null) ? anchor.getAccessibilityViewId() : -1;
 
         invokePopup(p);
     }
@@ -1986,6 +1987,13 @@ public class PopupWindow {
         final int newFlags = computeFlags(p.flags);
         if (newFlags != p.flags) {
             p.flags = newFlags;
+            update = true;
+        }
+
+        int newAccessibilityIdOfAnchor =
+                (mAnchor != null) ? mAnchor.get().getAccessibilityViewId() : -1;
+        if (newAccessibilityIdOfAnchor != p.accessibilityIdOfAnchor) {
+            p.accessibilityIdOfAnchor = newAccessibilityIdOfAnchor;
             update = true;
         }
 

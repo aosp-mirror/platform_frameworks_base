@@ -24,6 +24,7 @@ import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.UserHandle;
 
+import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.IRotationWatcher.Stub;
@@ -514,6 +515,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mDecorContentParent.setWindowTitle(title);
         }
         mTitle = title;
+        WindowManager.LayoutParams params = getAttributes();
+        if (!TextUtils.equals(title, params.getTitle())) {
+            params.setTitle(title);
+            dispatchWindowAttributesChanged(getAttributes());
+        }
     }
 
     @Override
