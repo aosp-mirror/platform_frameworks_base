@@ -531,22 +531,25 @@ public final class InputMethodManager {
 
     private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
         private final InputMethodManager mParentInputMethodManager;
-        private boolean mActive;
 
         public ControlledInputConnectionWrapper(final Looper mainLooper, final InputConnection conn,
                 final InputMethodManager inputMethodManager) {
             super(mainLooper, conn);
             mParentInputMethodManager = inputMethodManager;
-            mActive = true;
         }
 
         @Override
         public boolean isActive() {
-            return mParentInputMethodManager.mActive && mActive;
+            return mParentInputMethodManager.mActive && !isFinished();
         }
 
         void deactivate() {
-            mActive = false;
+            if (isFinished()) {
+                // This is a small performance optimization.  Still only the 1st call of
+                // reportFinish() will take effect.
+                return;
+            }
+            reportFinish();
         }
 
         @Override
@@ -563,7 +566,7 @@ public final class InputMethodManager {
         public String toString() {
             return "ControlledInputConnectionWrapper{"
                     + "connection=" + getInputConnection()
-                    + " mActive=" + mActive
+                    + " finished=" + isFinished()
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
                     + "}";
         }
@@ -837,53 +840,10 @@ public final class InputMethodManager {
                     throw e.rethrowFromSystemServer();
                 }
             }
-            notifyInputConnectionFinished();
             mServedView = null;
             mCompletions = null;
             mServedConnecting = false;
             clearConnectionLocked();
-        }
-    }
-
-    /**
-     * Notifies the served view that the current InputConnection will no longer be used.
-     */
-    private void notifyInputConnectionFinished() {
-        if (mServedView == null || mServedInputConnectionWrapper == null) {
-            return;
-        }
-        final InputConnection inputConnection = mServedInputConnectionWrapper.getInputConnection();
-        if (inputConnection == null) {
-            return;
-        }
-        // We need to tell the previously served view that it is no
-        // longer the input target, so it can reset its state.  Schedule
-        // this call on its window's Handler so it will be on the correct
-        // thread and outside of our lock.
-        ViewRootImpl viewRootImpl = mServedView.getViewRootImpl();
-        if (viewRootImpl != null) {
-            // This will result in a call to reportFinishInputConnection() below.
-            viewRootImpl.dispatchFinishInputConnection(inputConnection);
-        }
-    }
-
-    /**
-     * Called from the FINISH_INPUT_CONNECTION message above.
-     * @hide
-     */
-    public void reportFinishInputConnection(InputConnection ic) {
-        final InputConnection currentConnection;
-        if (mServedInputConnectionWrapper == null) {
-            currentConnection = null;
-        } else {
-            currentConnection = mServedInputConnectionWrapper.getInputConnection();
-        }
-        if (currentConnection != ic) {
-            ic.finishComposingText();
-            // To avoid modifying the public InputConnection interface
-            if (ic instanceof BaseInputConnection) {
-                ((BaseInputConnection) ic).reportFinish();
-            }
         }
     }
 
@@ -1232,8 +1192,10 @@ public final class InputMethodManager {
             // Hook 'em up and let 'er rip.
             mCurrentTextBoxAttribute = tba;
             mServedConnecting = false;
-            // Notify the served view that its previous input connection is finished
-            notifyInputConnectionFinished();
+            if (mServedInputConnectionWrapper != null) {
+                mServedInputConnectionWrapper.deactivate();
+                mServedInputConnectionWrapper = null;
+            }
             ControlledInputConnectionWrapper servedContext;
             final int missingMethodFlags;
             if (ic != null) {
@@ -1257,9 +1219,6 @@ public final class InputMethodManager {
             } else {
                 servedContext = null;
                 missingMethodFlags = 0;
-            }
-            if (mServedInputConnectionWrapper != null) {
-                mServedInputConnectionWrapper.deactivate();
             }
             mServedInputConnectionWrapper = servedContext;
 
