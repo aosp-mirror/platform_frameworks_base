@@ -96,6 +96,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private final Interpolator mMinimizedDockInterpolator;
     private float mMaximizeMeetFraction;
     private final Rect mTouchRegion = new Rect();
+    private boolean mAdjustingForIme;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -171,6 +172,14 @@ public class DockedStackDividerController implements DimLayerUser {
 
     boolean wasVisible() {
         return mLastVisibility;
+    }
+
+    void setAdjustingForIme(boolean adjusting) {
+        mAdjustingForIme = adjusting;
+    }
+
+    boolean isAdjustingForIme() {
+        return mAdjustingForIme;
     }
 
     void positionDockedStackedDivider(Rect frame) {
