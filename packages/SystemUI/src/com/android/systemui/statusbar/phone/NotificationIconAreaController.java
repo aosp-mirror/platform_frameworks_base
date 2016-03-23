@@ -17,6 +17,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A controller for the space in the status bar to the left of the system icons. This area is
@@ -42,6 +43,10 @@ public class NotificationIconAreaController {
         initializeNotificationAreaViews(context);
     }
 
+    protected View inflateIconArea(LayoutInflater inflater) {
+        return inflater.inflate(R.layout.notification_icon_area, null);
+    }
+
     /**
      * Initializes the views that will represent the notification area.
      */
@@ -51,14 +56,16 @@ public class NotificationIconAreaController {
         mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
 
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        mNotificationIconArea = layoutInflater.inflate(R.layout.notification_icon_area, null);
-
-        mMoreIcon = (ImageView) mNotificationIconArea.findViewById(R.id.moreIcon);
-        mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
+        mNotificationIconArea = inflateIconArea(layoutInflater);
 
         mNotificationIcons =
                 (IconMerger) mNotificationIconArea.findViewById(R.id.notificationIcons);
-        mNotificationIcons.setOverflowIndicator(mMoreIcon);
+
+        mMoreIcon = (ImageView) mNotificationIconArea.findViewById(R.id.moreIcon);
+        if (mMoreIcon != null) {
+            mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
+            mNotificationIcons.setOverflowIndicator(mMoreIcon);
+        }
     }
 
     /**
@@ -88,8 +95,30 @@ public class NotificationIconAreaController {
      */
     public void setIconTint(int iconTint) {
         mIconTint = iconTint;
-        mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
+        if (mMoreIcon != null) {
+            mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
+        }
         applyNotificationIconsTint();
+    }
+
+    protected int getHeight() {
+        return mPhoneStatusBar.getStatusBarHeight();
+    }
+
+    protected boolean shouldShowNotification(NotificationData.Entry entry,
+            NotificationData notificationData) {
+        if (notificationData.isAmbient(entry.key)
+                && !NotificationData.showNotificationEvenIfUnprovisioned(entry.notification)) {
+            return false;
+        }
+        if (!PhoneStatusBar.isTopLevelChild(entry)) {
+            return false;
+        }
+        if (entry.row.getVisibility() == View.GONE) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -97,7 +126,7 @@ public class NotificationIconAreaController {
      */
     public void updateNotificationIcons(NotificationData notificationData) {
         final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                mIconSize + 2 * mIconHPadding, mPhoneStatusBar.getStatusBarHeight());
+                mIconSize + 2 * mIconHPadding, getHeight());
 
         ArrayList<NotificationData.Entry> activeNotifications =
                 notificationData.getActiveNotifications();
@@ -107,17 +136,9 @@ public class NotificationIconAreaController {
         // Filter out ambient notifications and notification children.
         for (int i = 0; i < size; i++) {
             NotificationData.Entry ent = activeNotifications.get(i);
-            if (notificationData.isAmbient(ent.key)
-                    && !NotificationData.showNotificationEvenIfUnprovisioned(ent.notification)) {
-                continue;
+            if (shouldShowNotification(ent, notificationData)) {
+                toShow.add(ent.icon);
             }
-            if (!PhoneStatusBar.isTopLevelChild(ent)) {
-                continue;
-            }
-            if (ent.row.getVisibility() == View.GONE) {
-                continue;
-            }
-            toShow.add(ent.icon);
         }
 
         ArrayList<View> toRemove = new ArrayList<>();
