@@ -117,11 +117,11 @@ $(eval $(call check-api, \
 .PHONY: update-uiautomator-api
 update-uiautomator-api: PRIVATE_API_DIR := $(uiautomator_api_dir)
 update-uiautomator-api: PRIVATE_REMOVED_API_FILE := $(uiautomator_internal_removed_api_file)
-update-uiautomator-api: $(uiautomator_internal_api_file) | $(ACP)
+update-uiautomator-api: $(uiautomator_internal_api_file)
 	@echo Copying uiautomator current.txt
-	$(hide) $(ACP) $< $(PRIVATE_API_DIR)/current.txt
+	$(hide) cp $< $(PRIVATE_API_DIR)/current.txt
 	@echo Copying uiautomator removed.txt
-	$(hide) $(ACP) $(PRIVATE_REMOVED_API_FILE) $(PRIVATE_API_DIR)/removed.txt
+	$(hide) cp $(PRIVATE_REMOVED_API_FILE) $(PRIVATE_API_DIR)/removed.txt
 ###############################################
 # clean up temp vars
 uiautomator.core_src_files :=
