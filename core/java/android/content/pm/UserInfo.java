@@ -216,6 +216,7 @@ public class UserInfo implements Parcelable {
         lastLoggedInTime = orig.lastLoggedInTime;
         partial = orig.partial;
         profileGroupId = orig.profileGroupId;
+        restrictedProfileParentId = orig.restrictedProfileParentId;
         guestToRemove = orig.guestToRemove;
     }
 
