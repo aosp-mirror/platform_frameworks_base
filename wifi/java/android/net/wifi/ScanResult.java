@@ -56,6 +56,11 @@ public class ScanResult implements Parcelable {
      */
     public int anqpDomainId;
 
+    /*
+     * This field is equivalent to the |flags|, rather than the |capabilities| field
+     * of the per-BSS scan results returned by WPA supplicant. See the definition of
+     * |struct wpa_bss| in wpa_supplicant/bss.h for more details.
+     */
     /**
      * Describes the authentication, key management, and encryption schemes
      * supported by the access point.
@@ -211,6 +216,10 @@ public class ScanResult implements Parcelable {
     /** {@hide} */
     public static final long FLAG_80211mc_RESPONDER               = 0x0000000000000002;
 
+    /*
+     * These flags are specific to the ScanResult class, and are not related to the |flags|
+     * field of the per-BSS scan results from WPA supplicant.
+     */
     /**
      * Defines flags; such as {@link #FLAG_PASSPOINT_NETWORK}.
      * {@hide}
