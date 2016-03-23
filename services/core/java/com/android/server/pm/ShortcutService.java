@@ -19,13 +19,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -55,7 +59,6 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
-import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -70,13 +73,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -122,6 +125,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
+    static final boolean ENABLE_DEBUG_COMMAND = true; // STOPSHIP if true
 
     @VisibleForTesting
     static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
@@ -249,6 +253,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private int mSaveDelayMillis;
 
+    private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final UserManager mUserManager;
 
@@ -264,6 +269,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mContext = Preconditions.checkNotNull(context);
         LocalServices.addService(ShortcutServiceInternal.class, new LocalService());
         mHandler = new Handler(looper);
+        mIPackageManager = AppGlobals.getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mUserManager = context.getSystemService(UserManager.class);
 
@@ -319,6 +325,8 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             // Preload
             getUserShortcutsLocked(userId);
+
+            cleanupGonePackages(userId);
         }
     }
 
@@ -434,6 +442,10 @@ public class ShortcutService extends IShortcutService.Stub {
         return parser.getAttributeValue(null, attribute);
     }
 
+    static boolean parseBooleanAttribute(XmlPullParser parser, String attribute) {
+        return parseLongAttribute(parser, attribute) == 1;
+    }
+
     static int parseIntAttribute(XmlPullParser parser, String attribute) {
         return (int) parseLongAttribute(parser, attribute);
     }
@@ -508,6 +520,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
     static void writeAttr(XmlSerializer out, String name, long value) throws IOException {
         writeAttr(out, name, String.valueOf(value));
+    }
+
+    static void writeAttr(XmlSerializer out, String name, boolean value) throws IOException {
+        if (value) {
+            writeAttr(out, name, "1");
+        }
     }
 
     static void writeAttr(XmlSerializer out, String name, ComponentName comp) throws IOException {
@@ -616,7 +634,7 @@ public class ShortcutService extends IShortcutService.Stub {
             out.setOutput(outs, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
-            getUserShortcutsLocked(userId).saveToXml(out);
+            getUserShortcutsLocked(userId).saveToXml(this, out, /* forBackup= */ false);
 
             out.endDocument();
 
@@ -682,17 +700,17 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void scheduleSaveBaseState() {
-        scheduleSave(UserHandle.USER_NULL); // Special case -- use USER_NULL for base state.
+        scheduleSaveInner(UserHandle.USER_NULL); // Special case -- use USER_NULL for base state.
     }
 
     void scheduleSaveUser(@UserIdInt int userId) {
-        scheduleSave(userId);
+        scheduleSaveInner(userId);
     }
 
     // In order to re-schedule, we need to reuse the same instance, so keep it in final.
     private final Runnable mSaveDirtyInfoRunner = this::saveDirtyInfo;
 
-    private void scheduleSave(@UserIdInt int userId) {
+    private void scheduleSaveInner(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "Scheduling to save for " + userId);
         }
@@ -1169,6 +1187,8 @@ public class ShortcutService extends IShortcutService.Stub {
         final int size = newShortcuts.size();
 
         synchronized (mLock) {
+            getUserShortcutsLocked(userId).ensurePackageInfo(this, packageName, userId);
+
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
 
             // Throttling.
@@ -1204,6 +1224,8 @@ public class ShortcutService extends IShortcutService.Stub {
         final int size = newShortcuts.size();
 
         synchronized (mLock) {
+            getUserShortcutsLocked(userId).ensurePackageInfo(this, packageName, userId);
+
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
 
             // Throttling.
@@ -1241,6 +1263,8 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
+            getUserShortcutsLocked(userId).ensurePackageInfo(this, packageName, userId);
+
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
 
             // Throttling.
@@ -1376,10 +1400,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean hasShortcutHostPermissionInner(@NonNull String callingPackage, int userId) {
         synchronized (mLock) {
-            long start = 0;
-            if (DEBUG) {
-                start = System.currentTimeMillis();
-            }
+            long start = System.currentTimeMillis();
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
 
@@ -1430,8 +1451,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     lastPriority = ri.priority;
                 }
             }
+            final long end = System.currentTimeMillis();
             if (DEBUG) {
-                long end = System.currentTimeMillis();
                 Slog.v(TAG, String.format("hasShortcutPermission took %d ms", end - start));
             }
             if (detected != null) {
@@ -1472,6 +1493,9 @@ public class ShortcutService extends IShortcutService.Stub {
         for (int i = mUser.getPackages().size() - 1; i >= 0; i--) {
             mUser.getPackages().valueAt(i).refreshPinnedFlags(this);
         }
+
+        // Remove the package info too.
+        mUser.getPackageInfos().remove(packageName);
 
         scheduleSaveUser(userId);
 
@@ -1567,6 +1591,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
             synchronized (mLock) {
+                getUserShortcutsLocked(userId).ensurePackageInfo(
+                        ShortcutService.this, callingPackage, userId);
+
                 getLauncherShortcuts(callingPackage, userId).pinShortcuts(
                         ShortcutService.this, packageName, shortcutIds);
             }
@@ -1640,7 +1667,16 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    private PackageMonitor mPackageMonitor = new PackageMonitor() {
+    /**
+     * Package event callbacks.
+     */
+    @VisibleForTesting
+    final PackageMonitor mPackageMonitor = new PackageMonitor() {
+        @Override
+        public void onPackageAdded(String packageName, int uid) {
+            handlePackageAdded(packageName, getChangingUserId());
+        }
+
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
             handlePackageUpdateFinished(packageName, getChangingUserId());
@@ -1650,38 +1686,120 @@ public class ShortcutService extends IShortcutService.Stub {
         public void onPackageRemoved(String packageName, int uid) {
             handlePackageRemoved(packageName, getChangingUserId());
         }
-
-        @Override
-        public void onPackageRemovedAllUsers(String packageName, int uid) {
-            handlePackageRemovedAllUsers(packageName, getChangingUserId());
-        }
     };
 
-    void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
+    /**
+     * Called when a user is unlocked.  Check all known packages still exist, and otherwise
+     * perform cleanup.
+     */
+    private void cleanupGonePackages(@UserIdInt int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onPackageUpdateFinished() userId=" + userId);
+            Slog.d(TAG, "cleanupGonePackages() userId=" + userId);
         }
-        // TODO Update the version.
+        ArrayList<String> gonePackages = null;
+
+        final ShortcutUser user = getUserShortcutsLocked(userId);
+        final ArrayMap<String, ShortcutPackageInfo> infos = user.getPackageInfos();
+        for (int i = infos.size() -1; i >= 0; i--) {
+            final ShortcutPackageInfo info = infos.valueAt(i);
+            if (info.isShadow()) {
+                continue;
+            }
+            if (isPackageInstalled(info.getPackageName(), userId)) {
+                continue;
+            }
+            gonePackages = ArrayUtils.add(gonePackages, info.getPackageName());
+        }
+        if (gonePackages != null) {
+            for (int i = gonePackages.size() - 1; i >= 0; i--) {
+                handlePackageGone(gonePackages.get(i), userId);
+            }
+        }
     }
 
-    void handlePackageRemoved(String packageName, @UserIdInt int userId) {
+    private void handlePackageAdded(String packageName, @UserIdInt int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onPackageRemoved() userId=" + userId);
+            Slog.d(TAG, String.format("handlePackageAdded: %s user=%d", packageName, userId));
+        }
+        synchronized (mLock) {
+            final ArrayMap<String, ShortcutPackageInfo> infos =
+                    getUserShortcutsLocked(userId).getPackageInfos();
+            final ShortcutPackageInfo existing = infos.get(packageName);
+
+            if (existing != null && existing.isShadow()) {
+                Slog.w(TAG, "handlePackageAdded: TODO Restore not implemented");
+            }
+        }
+    }
+
+    private void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
+        final PackageInfo pi = getPackageInfo(packageName, userId);
+        if (pi == null) {
+            Slog.w(TAG, "Package not found: " + packageName);
+            return;
+        }
+        synchronized (mLock) {
+            final ShortcutPackageInfo spi =
+                    getUserShortcutsLocked(userId).getPackageInfos().get(packageName);
+            if (spi != null) {
+                spi.refreshAndSave(this, userId);
+            }
+        }
+    }
+
+    private void handlePackageRemoved(String packageName, @UserIdInt int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, String.format("handlePackageRemoved: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
             cleanUpPackageLocked(packageName, userId);
         }
     }
 
-    void handlePackageRemovedAllUsers(String packageName, @UserIdInt int userId) {
+    private void handlePackageGone(String packageName, @UserIdInt int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onPackageRemovedAllUsers() userId=" + userId);
+            Slog.d(TAG, String.format("handlePackageGone: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
             cleanUpPackageLocked(packageName, userId);
         }
+    }
 
-        // TODO Remove from all users, which we can't if the user is locked.
+    // === Backup & restore ===
+
+    PackageInfo getPackageInfo(String packageName, @UserIdInt int userId) {
+        return getPackageInfo(packageName, userId, /*getSignatures=*/ false);
+    }
+
+    PackageInfo getPackageInfo(String packageName, @UserIdInt int userId,
+            boolean getSignatures) {
+        return injectPackageInfo(packageName, userId, getSignatures);
+    }
+
+    @VisibleForTesting
+    PackageInfo injectPackageInfo(String packageName, @UserIdInt int userId,
+            boolean getSignatures) {
+        try {
+            return mIPackageManager.getPackageInfo(packageName,
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | (getSignatures ? PackageManager.GET_SIGNATURES : 0)
+                    , userId);
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+            Slog.wtf(TAG, "RemoteException", e);
+            return null;
+        }
+    }
+
+    boolean shouldBackupApp(String packageName, int userId) {
+        final PackageInfo pi = getPackageInfo(packageName, userId);
+        return (pi != null) &&
+                ((pi.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0);
+    }
+
+    private boolean isPackageInstalled(String packageName, int userId) {
+        return getPackageInfo(packageName, userId) != null;
     }
 
     // === Dump ===
@@ -2037,6 +2155,16 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
+        }
+    }
+
+    @VisibleForTesting
+    ShortcutPackageInfo getPackageInfoForTest(String packageName, int userId) {
+        synchronized (mLock) {
+            final ShortcutUser user = mUsers.get(userId);
+            if (user == null) return null;
+
+            return user.getPackageInfos().get(packageName);
         }
     }
 }
