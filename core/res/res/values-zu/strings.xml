@@ -899,10 +899,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Hlela nge-%1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Yabelana no-"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Yabelana no-%1$s"</string>
-    <!-- no translation found for whichSendToApplication (8272422260066642057) -->
-    <skip />
-    <!-- no translation found for whichSendToApplicationNamed (7768387871529295325) -->
-    <skip />
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Thumela usebenzisa"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Thumela usebenzisa i-%1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Khetha uhlelo lokusebenza lasekhaya"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Sebenzisa i-%1$s njengekhaya"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Sebenzisa ngokuzenzakalelayo kulesenzo."</string>
@@ -1062,8 +1060,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"YABELANA"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"YENQABA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Shintsha ikhibhodi"</string>
-    <!-- no translation found for configure_input_methods (5673193194563164021) -->
-    <skip />
+    <string name="configure_input_methods" msgid="5673193194563164021">"Amanye amakhibhodi"</string>
     <string name="show_ime" msgid="2506087537466597099">"Yigcine kusikrini ngenkathi kusebenza ikhibhodi ephathekayo"</string>
     <string name="hardware" msgid="194658061510127999">"Bonisa ikhibhodi ebonakalayo"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Khetha isendlalelo sekhibhodi"</string>
@@ -1227,7 +1224,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Izinketho ezingaphezulu"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Isitoreji sangaphakathi"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Isitoreji esabiwe sangaphakathi"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Ikhadi le-SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> ikhadi le-SD"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Idrayivu ye-USB"</string>
