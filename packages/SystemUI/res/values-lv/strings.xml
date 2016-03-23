@@ -237,6 +237,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS iestatītā atrašanās vieta"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktīvi atrašanās vietu pieprasījumi"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Notīrīt visus paziņojumus"</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"vēl <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Paziņojumu iestatījumi"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> iestatījumi"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekrāns tiks pagriezts automātiski."</string>
@@ -479,6 +480,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Rādīt paziņojumu saraksta augšdaļā, rādīt ekrānā ar skaņas signālu"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Citi iestatījumi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gatavs"</string>
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> paziņojumu vadīklas"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Krāsas un izskats"</string>
     <string name="night_mode" msgid="3540405868248625488">"Nakts režīms"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Ekrāna kalibrēšana"</string>
@@ -537,8 +539,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Tastatūras pogas atlase"</string>
     <string name="preview" msgid="9077832302472282938">"Priekšskatījums"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Velciet elementus, lai tos pievienotu"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Lai noņemtu vienumus, velciet tos šeit."</string>
     <string name="qs_edit" msgid="2232596095725105230">"Rediģēt"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Laiks"</string>
   <string-array name="clock_options">

@@ -238,6 +238,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavena pomocí systému GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivní žádosti o polohu"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazat všechna oznámení."</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"a ještě <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Nastavení oznámení"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Nastavení aplikace <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka se automaticky otočí."</string>
@@ -480,6 +481,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Tato oznámení zobrazovat na začátku seznamu, zobrazit přímo na obrazovce a upozornit na ně zvukem"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Další nastavení"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Nastavení oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Barva a vzhled"</string>
     <string name="night_mode" msgid="3540405868248625488">"Noční režim"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Kalibrovat displej"</string>

@@ -237,6 +237,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Локацију је подесио GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Има активних захтева за локацију"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Обриши сва обавештења."</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Подешавања обавештења"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Подешавања за <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Екран ће се аутоматски ротирати."</string>
@@ -479,6 +481,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Приказују се у врху листе обавештења, накратко се приказују на екрану и емитују звук"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Још подешавања"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"Боја и изглед"</string>
     <string name="night_mode" msgid="3540405868248625488">"Ноћни режим"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Калибришите екран"</string>
@@ -537,8 +541,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Изаберите дугме за тастатуру"</string>
     <string name="preview" msgid="9077832302472282938">"Преглед"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Превуците да бисте додали плочице"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Превуците овде да бисте уклонили"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Измени"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Време"</string>
   <string-array name="clock_options">
