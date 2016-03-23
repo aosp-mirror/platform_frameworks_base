@@ -127,7 +127,6 @@ public abstract class BaseActivity extends Activity
         mSearchManager = new SearchViewManager(this, icicle);
 
         DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
-        Display.adjustToolbar(toolbar, this);
         setActionBar(toolbar);
         mNavigator = new NavigationView(
                 mDrawer,
