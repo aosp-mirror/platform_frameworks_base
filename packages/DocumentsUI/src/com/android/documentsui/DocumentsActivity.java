@@ -95,7 +95,7 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (mState.restored) {
-            refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
+            if (DEBUG) Log.d(TAG, "Stack already resolved");
         } else {
             // We set the activity title in AsyncTask.onPostExecute().
             // To prevent talkback from reading aloud the default title, we clear it here.
@@ -151,30 +151,6 @@ public class DocumentsActivity extends BaseActivity {
             state.copyOperationSubType = intent.getIntExtra(
                     FileOperationService.EXTRA_OPERATION,
                     FileOperationService.OPERATION_COPY);
-        }
-    }
-
-    private void onStackRestored(boolean restored, boolean external) {
-        // Show drawer when no stack restored, but only when requesting
-        // non-visual content. However, if we last used an external app,
-        // drawer is always shown.
-
-        boolean showDrawer = false;
-        if (!restored) {
-            showDrawer = true;
-        }
-        if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
-            showDrawer = false;
-        }
-        if (external && mState.action == ACTION_GET_CONTENT) {
-            showDrawer = true;
-        }
-        if (mState.action == ACTION_PICK_COPY_DESTINATION) {
-            showDrawer = true;
-        }
-
-        if (showDrawer) {
-            mNavigator.revealRootsDrawer(true);
         }
     }
 
@@ -515,8 +491,8 @@ public class DocumentsActivity extends BaseActivity {
         @Override
         protected void finish(Void result) {
             mState.restored = true;
+            mState.external = mExternal;
             mOwner.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
-            mOwner.onStackRestored(mRestoredStack, mExternal);
         }
     }
 
