@@ -236,6 +236,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Vị trí đặt bởi GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Yêu cầu về thông tin vị trí đang hoạt động"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Xóa tất cả thông báo."</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Cài đặt thông báo"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Cài đặt <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Màn hình sẽ xoay tự động."</string>
@@ -478,6 +480,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Hiển thị ở đầu danh sách thông báo, hiển thị trên màn hình và phát ra âm thanh"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Cài đặt khác"</string>
     <string name="notification_done" msgid="5279426047273930175">"Xong"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"Màu sắc và giao diện"</string>
     <string name="night_mode" msgid="3540405868248625488">"Chế độ ban đêm"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Hiệu chỉnh hiển thị"</string>

@@ -236,6 +236,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ലൊക്കേഷൻ സജ്ജീകരിച്ചത് GPS ആണ്"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ലൊക്കേഷൻ അഭ്യർത്ഥനകൾ സജീവമാണ്"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"എല്ലാ വിവരങ്ങളും മായ്‌ക്കുക."</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"അറിയിപ്പ് ക്രമീകരണങ്ങൾ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ക്രമീകരണങ്ങൾ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"സ്‌ക്രീൻ യാന്ത്രികമായി തിരിയും."</string>
@@ -478,6 +480,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"അറിയിപ്പ് ലിസ്റ്റിന്റെ ഏറ്റവും മുകളിൽ കാണിക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"കൂടുതൽ ക്രമീകരണം"</string>
     <string name="notification_done" msgid="5279426047273930175">"പൂർത്തിയായി"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"വർണ്ണവും രൂപഭാവവും"</string>
     <string name="night_mode" msgid="3540405868248625488">"നൈറ്റ് മോഡ്"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"ഡിസ്പ്ലേ കാലിബ്രേറ്റുചെയ്യുക"</string>

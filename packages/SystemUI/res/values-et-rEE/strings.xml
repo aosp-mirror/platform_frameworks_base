@@ -236,6 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS-i määratud asukoht"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Asukoha taotlused on aktiivsed"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Kustuta kõik teatised."</string>
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Märguandeseaded"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Rakenduse <xliff:g id="APP_NAME">%s</xliff:g> seaded"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekraani pööramine toimub automaatselt."</string>
@@ -478,6 +479,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Kuva märguannete loendi ülaservas, kuva ekraani servas ja luba heli"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Rohkem seadeid"</string>
     <string name="notification_done" msgid="5279426047273930175">"Valmis"</string>
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> märguannete juhtnupud"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Värv ja ilme"</string>
     <string name="night_mode" msgid="3540405868248625488">"Öörežiim"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Ekraani kalibreerimine"</string>
@@ -536,8 +538,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Klaviatuuri nupu valimine"</string>
     <string name="preview" msgid="9077832302472282938">"Eelvaade"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Lohistage paanide lisamiseks"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Lohistage eemaldamiseks siia"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Muuda"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Kellaaeg"</string>
   <string-array name="clock_options">

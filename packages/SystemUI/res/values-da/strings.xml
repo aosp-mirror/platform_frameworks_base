@@ -236,6 +236,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Placeringen er angivet ved hjælp af GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktive placeringsanmodninger"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Ryd alle underretninger."</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Underretningsindstillinger"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Indstillinger for <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
@@ -478,6 +480,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Vis øverst på listen over underretninger, vis på skærmen, og tillad lyd"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere indstillinger"</string>
     <string name="notification_done" msgid="5279426047273930175">"Færdig"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"Farve og udseende"</string>
     <string name="night_mode" msgid="3540405868248625488">"Nattilstand"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Kalibrer skærmen"</string>

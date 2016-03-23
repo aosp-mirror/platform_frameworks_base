@@ -26,4 +26,6 @@
     <string name="pip_hold_home" msgid="340086535668778109">"PIP を管理するには ["<b>"ホーム"</b>"] を押し続けます"</string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP を管理するには [ホーム] ボタンを押し続けます"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"閉じる"</string>
+    <!-- no translation found for recents_tv_dismiss (3555093879593377731) -->
+    <skip />
 </resources>

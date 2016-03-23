@@ -26,4 +26,6 @@
     <string name="pip_hold_home" msgid="340086535668778109">"PIP ਕੰਟਰੋਲ ਕਰਨ ਲਈ "<b>"ਹੋਮ"</b>" ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਲਈ ਹੋਮ ਬਟਨ ਨੂੰ ਦੱਬੋ ਅਤੇ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"ਸਮਝ ਲਿਆ"</string>
+    <!-- no translation found for recents_tv_dismiss (3555093879593377731) -->
+    <skip />
 </resources>

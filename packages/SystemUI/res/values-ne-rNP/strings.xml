@@ -236,6 +236,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा स्थान सेट गरिएको"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोधहरू सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सबै सूचनाहरू हटाउनुहोस्।"</string>
+    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
+    <skip />
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"अधिसूचना सेटिङ्हरू"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिङ्हरू"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्क्रिन स्वतः घुम्ने छ।"</string>
@@ -478,6 +480,8 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"सूचना सूचीको शीर्षमा देखाउने, स्क्रिनमा चियाउने र ध्वनि निकाल्न अनुमति दिने"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"थप सेटिङहरू"</string>
     <string name="notification_done" msgid="5279426047273930175">"सम्पन्‍न भयो"</string>
+    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
+    <skip />
     <string name="color_and_appearance" msgid="1254323855964993144">"रंग र रूप"</string>
     <string name="night_mode" msgid="3540405868248625488">"रात्री मोड"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"प्रदर्शनको स्तर  मिलाउनुहोस्"</string>
