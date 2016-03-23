@@ -216,6 +216,10 @@ public:
         this->renderTarget = renderTarget;
     }
 
+    inline bool isRenderable() const {
+        return renderTarget != GL_NONE;
+    }
+
     void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
         texture.setWrap(wrap, bindTexture, force, renderTarget);
     }
