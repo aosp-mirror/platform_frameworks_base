@@ -236,9 +236,27 @@ class ActivityTransitionState {
         }
     }
 
-    public void onResume() {
-        restoreExitedViews();
-        restoreReenteringViews();
+    public void onResume(Activity activity, boolean isTopOfTask) {
+        // After orientation change, the onResume can come in before the top Activity has
+        // left, so if the Activity is not top, wait a second for the top Activity to exit.
+        if (mCalledExitCoordinator == null) {
+            return; // This is the called activity
+        }
+        if (isTopOfTask || mEnterTransitionCoordinator == null) {
+            restoreExitedViews();
+            restoreReenteringViews();
+        } else {
+            activity.mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mEnterTransitionCoordinator == null ||
+                            mEnterTransitionCoordinator.isWaitingForRemoteExit()) {
+                        restoreExitedViews();
+                        restoreReenteringViews();
+                    }
+                }
+            }, 1000);
+        }
     }
 
     public void clear() {

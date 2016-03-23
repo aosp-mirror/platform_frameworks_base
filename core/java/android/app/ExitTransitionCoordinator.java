@@ -100,6 +100,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mExitSharedElementBundle = resultData;
                 sharedElementExitBack();
                 break;
+            case MSG_CANCEL:
+                mIsCanceled = true;
+                finish();
+                break;
         }
     }
 
