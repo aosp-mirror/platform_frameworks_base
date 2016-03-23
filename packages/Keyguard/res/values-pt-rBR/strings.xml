@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Falha na operação de PUK do SIM."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceito."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sem serviço."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alterar botão do método de entrada."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Alterar o método de entrada"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo avião"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"O padrão é exigido após a reinicialização do dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"O PIN é exigido após a reinicialização do dispositivo"</string>
