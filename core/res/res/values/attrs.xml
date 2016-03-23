@@ -2846,6 +2846,11 @@ i
             <!-- Pointer icon of a hand sign while grabbing something. -->
             <enum name="grabbing" value="1021" />
         </attr>
+
+        <!-- Whether this view has elements that may overlap when drawn. See
+             {@link android.view.View#forceHasOverlappingRendering(boolean)}. -->
+        <attr name="forceHasOverlappingRendering" format="boolean" />
+
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
