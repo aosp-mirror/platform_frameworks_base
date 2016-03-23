@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.NotificationSettingsIconRow;
 import com.android.systemui.statusbar.NotificationSettingsIconRow.SettingsIconRowListener;
@@ -220,7 +221,6 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private int mMaxScrollAfterExpand;
     private SwipeHelper.LongPressListener mLongPressListener;
-    private GearDisplayedListener mGearDisplayedListener;
 
     private NotificationSettingsIconRow mCurrIconRow;
     private View mTranslatingParentView;
@@ -374,8 +374,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    public void onSettingsIconRowReset(NotificationSettingsIconRow row) {
-        mSwipeHelper.setSnappedToGear(false);
+    public void onSettingsIconRowReset(ExpandableNotificationRow row) {
+        if (mTranslatingParentView != null && row == mTranslatingParentView) {
+            mSwipeHelper.setSnappedToGear(false);
+            mGearExposedView = null;
+            mTranslatingParentView = null;
+        }
     }
 
     @Override
@@ -669,10 +673,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mLongPressListener = listener;
     }
 
-    public void setGearDisplayedListener(GearDisplayedListener listener) {
-        mGearDisplayedListener = listener;
-    }
-
     public void setQsContainer(ViewGroup qsContainer) {
         mQsContainer = qsContainer;
     }
@@ -737,17 +737,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             // We start the swipe and snap back in the same frame, we don't want any animation
             mDragAnimPendingChildren.remove(animView);
         }
-
-        if (mCurrIconRow != null) {
-            if (targetLeft == 0) {
-                mCurrIconRow.resetState();
-                mCurrIconRow = null;
-                if (mGearExposedView != null && mGearExposedView == mTranslatingParentView) {
-                    mGearExposedView = null;
-                }
-            } else {
-                mSwipeHelper.setSnappedToGear(true);
-            }
+        if (mCurrIconRow != null && targetLeft == 0) {
+            mCurrIconRow.resetState();
+            mCurrIconRow = null;
         }
     }
 
@@ -3470,13 +3462,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void flingTopOverscroll(float velocity, boolean open);
     }
 
-    /**
-     * A listener that is notified when the gear is shown behind a notification.
-     */
-    public interface GearDisplayedListener {
-        void onGearDisplayed(ExpandableNotificationRow row);
-    }
-
     private class NotificationSwipeHelper extends SwipeHelper {
         private static final long GEAR_SHOW_DELAY = 60;
         private CheckForDrag mCheckForDrag;
@@ -3503,7 +3488,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mCurrIconRow = null;
 
             // Slide back any notifications that might be showing a gear
-            resetExposedGearView();
+            resetExposedGearView(true /* animate */, false /* force */);
 
             if (currView instanceof ExpandableNotificationRow) {
                 // Set the listener for the current row's gear
@@ -3551,8 +3536,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void dismissChild(final View view, float velocity,
                 boolean useAccelerateInterpolator) {
             super.dismissChild(view, velocity, useAccelerateInterpolator);
-            cancelCheckForDrag();
-            setSnappedToGear(false);
+            handleGearCoveredOrDismissed();
         }
 
         @Override
@@ -3560,11 +3544,17 @@ public class NotificationStackScrollLayout extends ViewGroup
             super.snapChild(animView, targetLeft, velocity);
             onDragCancelled(animView);
             if (targetLeft == 0) {
-                cancelCheckForDrag();
-                setSnappedToGear(false);
+                handleGearCoveredOrDismissed();
             }
         }
 
+        private void handleGearCoveredOrDismissed() {
+            cancelCheckForDrag();
+            setSnappedToGear(false);
+            if (mGearExposedView != null && mGearExposedView == mTranslatingParentView) {
+                mGearExposedView = null;
+            }
+        }
 
         @Override
         public boolean handleUpEvent(MotionEvent ev, View animView, float velocity,
@@ -3624,9 +3614,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             final float target = mCurrIconRow.isIconOnLeft() ? snapBackThreshold
                     : -snapBackThreshold;
             mGearExposedView = mTranslatingParentView;
-            if (mGearDisplayedListener != null
-                    && (animView instanceof ExpandableNotificationRow)) {
-                mGearDisplayedListener.onGearDisplayed((ExpandableNotificationRow) animView);
+            if (animView instanceof ExpandableNotificationRow) {
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_REVEAL_GEAR,
+                        ((ExpandableNotificationRow) animView).getStatusBarNotification()
+                                .getPackageName());
             }
             if (mCurrIconRow != null) {
                 mCurrIconRow.setSnapping(true);
@@ -3637,6 +3628,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         private boolean swipedEnoughToShowGear(View animView) {
+            if (mTranslatingParentView == null) {
+                return false;
+            }
             final float snapBackThreshold = getSpaceForGear(animView);
             final float translation = getTranslation(animView);
             final boolean fromLeft = translation > 0;
@@ -3679,6 +3673,37 @@ public class NotificationStackScrollLayout extends ViewGroup
                 return super.getTranslation(v);
             } else {
                 return ((ExpandableView) v).getTranslation();
+            }
+        }
+
+        public void closeControlsIfOutsideTouch(MotionEvent ev) {
+            NotificationGuts guts = mPhoneStatusBar.getExposedGuts();
+            View view = null;
+            int height = 0;
+            if (guts != null) {
+                // Checking guts
+                view = guts;
+                height = guts.getActualHeight();
+            } else if (mCurrIconRow != null && mCurrIconRow.isVisible()
+                    && mTranslatingParentView != null) {
+                // Checking gear
+                view = mTranslatingParentView;
+                height = ((ExpandableView) mTranslatingParentView).getActualHeight();
+            }
+            if (view != null) {
+                final int rx = (int) ev.getRawX();
+                final int ry = (int) ev.getRawY();
+
+                getLocationOnScreen(mTempInt2);
+                int[] location = new int[2];
+                view.getLocationOnScreen(location);
+                final int x = location[0] - mTempInt2[0];
+                final int y = location[1] - mTempInt2[1];
+                Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
+                if (!rect.contains((int) rx, (int) ry)) {
+                    // Touch was outside visible guts / gear notification, close what's visible
+                    mPhoneStatusBar.dismissPopups(-1, -1, true /* resetGear */, true /* animate */);
+                }
             }
         }
 
@@ -3729,6 +3754,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         private final class CheckForDrag implements Runnable {
             @Override
             public void run() {
+                if (mTranslatingParentView == null) {
+                    return;
+                }
                 final float translation = getTranslation(mTranslatingParentView);
                 final float absTransX = Math.abs(translation);
                 final float bounceBackToGearWidth = getSpaceForGear(mTranslatingParentView);
@@ -3744,20 +3772,24 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
 
-        private void resetExposedGearView() {
-            if (mGearExposedView == null || mGearExposedView == mTranslatingParentView) {
+        public void resetExposedGearView(boolean animate, boolean force) {
+            if (mGearExposedView == null
+                    || (!force && mGearExposedView == mTranslatingParentView)) {
                 // If no gear is showing or it's showing for this view we do nothing.
                 return;
             }
-
             final View prevGearExposedView = mGearExposedView;
+            if (animate) {
+                Animator anim = getViewTranslationAnimator(prevGearExposedView,
+                        0 /* leftTarget */, null /* updateListener */);
+                if (anim != null) {
+                    anim.start();
+                }
+            } else if (mGearExposedView instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) mGearExposedView).resetTranslation();
+            }
             mGearExposedView = null;
             mGearSnappedTo = false;
-            Animator anim = getViewTranslationAnimator(prevGearExposedView,
-                    0 /* leftTarget */, null /* updateListener */);
-            if (anim != null) {
-                anim.start();
-            }
         }
     }
 
@@ -3771,6 +3803,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                 getViewTreeObserver().removeOnPreDrawListener(mShadowUpdater);
             }
         }
+    }
+
+    public void resetExposedGearView(boolean animate, boolean force) {
+        mSwipeHelper.resetExposedGearView(animate, force);
+    }
+
+    public void closeControlsIfOutsideTouch(MotionEvent ev) {
+        mSwipeHelper.closeControlsIfOutsideTouch(ev);
     }
 
     static class AnimationEvent {

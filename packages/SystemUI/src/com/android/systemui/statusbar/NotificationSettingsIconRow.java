@@ -41,7 +41,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         /**
          * Called when a notification is slid back over the gear.
          */
-        public void onSettingsIconRowReset(NotificationSettingsIconRow row);
+        public void onSettingsIconRowReset(ExpandableNotificationRow row);
     }
 
     private ExpandableNotificationRow mParent;
@@ -94,7 +94,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         mDismissing = false;
         setIconLocation(true /* on left */, true /* force */);
         if (mListener != null) {
-            mListener.onSettingsIconRowReset(this);
+            mListener.onSettingsIconRowReset(mParent);
         }
     }
 
