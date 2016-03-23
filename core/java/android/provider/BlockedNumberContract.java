@@ -68,7 +68,12 @@ import android.os.Bundle;
  * Apps can optionally provide the {@link BlockedNumbers#COLUMN_E164_NUMBER} which is the phone
  * number's E164 representation. The provider automatically populates this column if the app does
  * not provide it. Note that this column is not populated if normalization fails or if the address
- * is not a phone number (eg: email). The provider enforces uniqueness constraint on this column.
+ * is not a phone number (eg: email).
+ * <p>
+ * Attempting to insert an existing blocked number (same
+ * {@link BlockedNumbers#COLUMN_ORIGINAL_NUMBER} column) will result in replacing the existing
+ * blocked number.
+ * <p>
  * Examples:
  * <pre>
  * ContentValues values = new ContentValues();
