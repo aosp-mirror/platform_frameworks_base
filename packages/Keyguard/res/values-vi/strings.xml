@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Thao tác mã PUK của SIM không thành công!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Mã được chấp nhận!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Không có dịch vụ."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Nút chuyển phương thức nhập."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Chuyển phương thức nhập"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Chế độ trên máy bay"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Yêu cầu hình mở khóa sau khi thiết bị khởi động lại"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Yêu cầu mã PIN sau khi thiết bị khởi động lại"</string>

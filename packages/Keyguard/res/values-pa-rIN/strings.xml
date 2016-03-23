@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK ਓਪਰੇਸ਼ਨ ਅਸਫਲ!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"ਕੋਡ ਸਵੀਕਾਰ ਕੀਤਾ ਗਿਆ!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ਕੋਈ ਸੇਵਾ ਨਹੀਂ।"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ਇਨਪੁਟ ਵਿਧੀ ਬਟਨ ਸਵਿਚ ਕਰੋ।"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ਇਨਪੁੱਟ ਵਿਧੀ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ਏਅਰਪਲੇਨ ਮੋਡ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ PIN ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>

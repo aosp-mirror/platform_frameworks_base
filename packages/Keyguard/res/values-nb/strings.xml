@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"PUK-koden for SIM-kortet ble avvist."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koden er godkjent."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ingen tjeneste."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bytt knapp for inndatametode."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Bytt inndatametode"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Flymodus"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Du må tegne mønsteret etter at enheten har startet på nytt"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Du må skrive inn PIN-koden etter at enheten har startet på nytt"</string>

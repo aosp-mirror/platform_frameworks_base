@@ -112,7 +112,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Не удалось разблокировать SIM-карту"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код принят"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Нет сигнала."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Кнопка переключения способа ввода."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Сменить способ ввода"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Режим полета"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"После перезагрузки устройства необходимо ввести графический ключ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"После перезагрузки устройства необходимо ввести PIN-код"</string>
