@@ -34,7 +34,7 @@ namespace uirenderer {
 FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
         const std::vector< sp<RenderNode> >& nodes,
-        const LightGeometry& lightGeometry, const Rect &contentDrawBounds, Caches* caches)
+        const LightGeometry& lightGeometry, const Rect &contentDrawBounds, Caches& caches)
         : mCanvasState(*this)
         , mCaches(caches)
         , mLightRadius(lightGeometry.radius) {
@@ -364,15 +364,13 @@ void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
         casterPath = frameAllocatedPath;
     }
 
-
     if (CC_LIKELY(!mCanvasState.getRenderTargetClipBounds().isEmpty())) {
         Matrix4 shadowMatrixXY(casterNodeOp.localMatrix);
         Matrix4 shadowMatrixZ(casterNodeOp.localMatrix);
         node.applyViewPropertyTransforms(shadowMatrixXY, false);
         node.applyViewPropertyTransforms(shadowMatrixZ, true);
 
-        LOG_ALWAYS_FATAL_IF(!mCaches, "Caches needed for shadows");
-        sp<TessellationCache::ShadowTask> task = mCaches->tessellationCache.getShadowTask(
+        sp<TessellationCache::ShadowTask> task = mCaches.tessellationCache.getShadowTask(
                 mCanvasState.currentTransform(),
                 mCanvasState.getLocalClipBounds(),
                 casterAlpha >= 1.0f,
@@ -483,13 +481,14 @@ void FrameBuilder::deferRenderNodeOp(const RenderNodeOp& op) {
  * Defers an unmergeable, strokeable op, accounting correctly
  * for paint's style on the bounds being computed.
  */
-void FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
+const BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
         BakedOpState::StrokeBehavior strokeBehavior) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
             mAllocator, *mCanvasState.writableSnapshot(), op, strokeBehavior);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return nullptr; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
+    return bakedState;
 }
 
 /**
@@ -607,7 +606,10 @@ void FrameBuilder::deferPatchOp(const PatchOp& op) {
 }
 
 void FrameBuilder::deferPathOp(const PathOp& op) {
-    deferStrokeableOp(op, OpBatchType::Bitmap);
+    auto state = deferStrokeableOp(op, OpBatchType::AlphaMaskTexture);
+    if (CC_LIKELY(state)) {
+        mCaches.pathCache.precache(op.path, op.paint);
+    }
 }
 
 void FrameBuilder::deferPointsOp(const PointsOp& op) {
@@ -620,7 +622,12 @@ void FrameBuilder::deferRectOp(const RectOp& op) {
 }
 
 void FrameBuilder::deferRoundRectOp(const RoundRectOp& op) {
-    deferStrokeableOp(op, tessBatchId(op));
+    auto state = deferStrokeableOp(op, tessBatchId(op));
+    if (CC_LIKELY(state && !op.paint->getPathEffect())) {
+        // TODO: consider storing tessellation task in BakedOpState
+        mCaches.tessellationCache.precacheRoundRect(state->computedState.transform, *(op.paint),
+                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.rx, op.ry);
+    }
 }
 
 void FrameBuilder::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
@@ -660,12 +667,28 @@ void FrameBuilder::deferTextOp(const TextOp& op) {
     } else {
         currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
     }
+
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
+    auto& totalTransform = bakedState->computedState.transform;
+    if (totalTransform.isPureTranslate() || totalTransform.isPerspective()) {
+        fontRenderer.precache(op.paint, op.glyphs, op.glyphCount, SkMatrix::I());
+    } else {
+        // Partial transform case, see BakedOpDispatcher::renderTextOp
+        float sx, sy;
+        totalTransform.decomposeScale(sx, sy);
+        fontRenderer.precache(op.paint, op.glyphs, op.glyphCount, SkMatrix::MakeScale(
+                roundf(std::max(1.0f, sx)),
+                roundf(std::max(1.0f, sy))));
+    }
 }
 
 void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
     BakedOpState* bakedState = tryBakeUnboundedOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
+
+    mCaches.fontRenderer.getFontRenderer().precache(
+            op.paint, op.glyphs, op.glyphCount, SkMatrix::I());
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
@@ -825,6 +848,10 @@ void FrameBuilder::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignore
     if (copyFromLayerOp) {
         currentLayer().deferUnmergeableOp(mAllocator, copyFromLayerOp, OpBatchType::CopyFromLayer);
     }
+}
+
+void FrameBuilder::finishDefer() {
+    mCaches.fontRenderer.endPrecaching();
 }
 
 } // namespace uirenderer
