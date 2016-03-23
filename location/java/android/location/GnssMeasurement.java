@@ -78,41 +78,42 @@ public final class GnssMeasurement implements Parcelable {
      */
     public static final int MULTIPATH_INDICATOR_NOT_USED = 2;
 
-    /**
-     * The state of GNSS receiver the measurement is invalid or unknown.
-     */
+    /** This GNSS measurement's tracking state is invalid or unknown. */
     public static final int STATE_UNKNOWN = 0;
-
-    /**
-     * The state of the GNSS receiver is ranging code lock.
-     */
+    /** This GNSS measurement's tracking state has code lock. */
     public static final int STATE_CODE_LOCK = (1<<0);
-
-    /**
-     * The state of the GNSS receiver is in bit sync.
-     */
+    /** This GNSS measurement's tracking state has bit sync. */
     public static final int STATE_BIT_SYNC = (1<<1);
-
-    /**
-     *The state of the GNSS receiver is in sub-frame sync.
-     */
+    /** This GNSS measurement's tracking state has sub-frame sync. */
     public static final int STATE_SUBFRAME_SYNC = (1<<2);
-
-    /**
-     * The state of the GNSS receiver has TOW decoded.
-     */
+    /** This GNSS measurement's tracking state has time-of-week decoded. */
     public static final int STATE_TOW_DECODED = (1<<3);
-
-    /**
-     * The state of the GNSS receiver contains millisecond ambiguity.
-     */
+    /** This GNSS measurement's tracking state contains millisecond ambiguity. */
     public static final int STATE_MSEC_AMBIGUOUS = (1<<4);
+    /** This GNSS measurement's tracking state has symbol sync. */
+    public static final int STATE_SYMBOL_SYNC = (1<<5);
+    /** This Glonass measurement's tracking state has string sync. */
+    public static final int STATE_GLO_STRING_SYNC = (1<<6);
+    /** This Glonass measurement's tracking state has time-of-day decoded. */
+    public static final int STATE_GLO_TOD_DECODED = (1<<7);
+    /** This Beidou measurement's tracking state has D2 bit sync. */
+    public static final int STATE_BDS_D2_BIT_SYNC = (1<<8);
+    /** This Beidou measurement's tracking state has D2 sub-frame sync. */
+    public static final int STATE_BDS_D2_SUBFRAME_SYNC = (1<<9);
+    /** This Galileo measurement's tracking state has E1B/C code lock. */
+    public static final int STATE_GAL_E1BC_CODE_LOCK = (1<<10);
+    /** This Galileo measurement's tracking state has E1C secondary code lock. */
+    public static final int STATE_GAL_E1C_2ND_CODE_LOCK = (1<<11);
+    /** This Galileo measurement's tracking state has E1B page sync. */
+    public static final int STATE_GAL_E1B_PAGE_SYNC = (1<<12);
+    /** This SBAS measurement's tracking state has whole second level sync. */
+    public static final int STATE_SBAS_SYNC = (1<<13);
 
     /**
-     * All the GNSS receiver state flags.
+     * All the GNSS receiver state flags, for bit masking purposes (not a sensible state for any
+     * individual measurement.)
      */
-    private static final int STATE_ALL = STATE_CODE_LOCK | STATE_BIT_SYNC | STATE_SUBFRAME_SYNC
-            | STATE_TOW_DECODED | STATE_MSEC_AMBIGUOUS;
+    private static final int STATE_ALL = 0x3fff;  // 2 bits + 4 bits + 4 bits + 4 bits = 14 bits
 
     /**
      * The state of the 'Accumulated Delta Range' is invalid or unknown.
@@ -273,29 +274,58 @@ public final class GnssMeasurement implements Parcelable {
         if (mState == STATE_UNKNOWN) {
             return "Unknown";
         }
+
         StringBuilder builder = new StringBuilder();
-        if ((mState & STATE_CODE_LOCK) == STATE_CODE_LOCK) {
+        if ((mState & STATE_CODE_LOCK) != 0) {
             builder.append("CodeLock|");
         }
-        if ((mState & STATE_BIT_SYNC) == STATE_BIT_SYNC) {
+        if ((mState & STATE_BIT_SYNC) != 0) {
             builder.append("BitSync|");
         }
-        if ((mState & STATE_SUBFRAME_SYNC) == STATE_SUBFRAME_SYNC) {
+        if ((mState & STATE_SUBFRAME_SYNC) != 0) {
             builder.append("SubframeSync|");
         }
-        if ((mState & STATE_TOW_DECODED) == STATE_TOW_DECODED) {
+        if ((mState & STATE_TOW_DECODED) != 0) {
             builder.append("TowDecoded|");
         }
-        if ((mState & STATE_MSEC_AMBIGUOUS) == STATE_MSEC_AMBIGUOUS) {
-            builder.append("MsecAmbiguous");
+        if ((mState & STATE_MSEC_AMBIGUOUS) != 0) {
+            builder.append("MsecAmbiguous|");
         }
+        if ((mState & STATE_SYMBOL_SYNC) != 0) {
+            builder.append("SymbolSync|");
+        }
+        if ((mState & STATE_GLO_STRING_SYNC) != 0) {
+            builder.append("GloStringSync|");
+        }
+        if ((mState & STATE_GLO_TOD_DECODED) != 0) {
+            builder.append("GloTodDecoded|");
+        }
+        if ((mState & STATE_BDS_D2_BIT_SYNC) != 0) {
+            builder.append("BdsD2BitSync|");
+        }
+        if ((mState & STATE_BDS_D2_SUBFRAME_SYNC) != 0) {
+            builder.append("BdsD2SubframeSync|");
+        }
+        if ((mState & STATE_GAL_E1BC_CODE_LOCK) != 0) {
+            builder.append("GalE1bcCodeLock|");
+        }
+        if ((mState & STATE_GAL_E1C_2ND_CODE_LOCK) != 0) {
+            builder.append("E1c2ndCodeLock|");
+        }
+        if ((mState & STATE_GAL_E1B_PAGE_SYNC) != 0) {
+            builder.append("GalE1bPageSync|");
+        }
+        if ((mState & STATE_SBAS_SYNC) != 0) {
+            builder.append("SbasSync|");
+        }
+
         int remainingStates = mState & ~STATE_ALL;
         if (remainingStates > 0) {
             builder.append("Other(");
             builder.append(Integer.toBinaryString(remainingStates));
             builder.append(")|");
         }
-        builder.deleteCharAt(builder.length() - 1);
+        builder.setLength(builder.length() - 1);
         return builder.toString();
     }
 
