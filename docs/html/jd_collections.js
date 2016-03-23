@@ -370,7 +370,6 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/users/your-listing.html",
       "distribute/users/promote-with-ads.html",
-      "distribute/users/appindexing.html",
       "distribute/googleplay/index.html#opportunities",
       "distribute/analyze/improve-roi.html",
       "distribute/users/expand-to-new-markets.html",
@@ -1032,7 +1031,6 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/engage/intents.html",
       "distribute/engage/deep-linking.html",
-      "distribute/users/appindexing.html",
       "training/app-indexing/index.html"
     ]
   },
