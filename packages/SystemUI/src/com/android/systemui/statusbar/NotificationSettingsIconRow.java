@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -103,6 +104,13 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     public void setNotificationRowParent(ExpandableNotificationRow parent) {
         mParent = parent;
+    }
+
+    public void setAppName(String appName) {
+        Resources res = getResources();
+        String description = String.format(res.getString(R.string.notification_gear_accessibility),
+                appName);
+        mGearIcon.setContentDescription(description);
     }
 
     public ExpandableNotificationRow getNotificationParent() {
