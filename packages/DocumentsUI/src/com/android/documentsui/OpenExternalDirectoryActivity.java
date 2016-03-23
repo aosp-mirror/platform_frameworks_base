@@ -85,6 +85,9 @@ public class OpenExternalDirectoryActivity extends Activity {
     private static final String EXTRA_APP_LABEL = "com.android.documentsui.APP_LABEL";
     private static final String EXTRA_VOLUME_LABEL = "com.android.documentsui.VOLUME_LABEL";
     private static final String EXTRA_VOLUME_UUID = "com.android.documentsui.VOLUME_UUID";
+    private static final String EXTRA_IS_ROOT = "com.android.documentsui.IS_ROOT";
+    // Special directory name representing the full volume
+    static final String DIRECTORY_ROOT = "ROOT_DIRECTORY";
 
     private ContentProviderClient mExternalStorageClient;
 
@@ -114,13 +117,9 @@ public class OpenExternalDirectoryActivity extends Activity {
             finish();
             return;
         }
-        final String directoryName = intent.getStringExtra(EXTRA_DIRECTORY_NAME);
+        String directoryName = intent.getStringExtra(EXTRA_DIRECTORY_NAME );
         if (directoryName == null) {
-            logInvalidScopedAccessRequest(this, SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS);
-            if (DEBUG) Log.d(TAG, "missing extra " + EXTRA_DIRECTORY_NAME + " on " + intent);
-            setResult(RESULT_CANCELED);
-            finish();
-            return;
+            directoryName = DIRECTORY_ROOT;
         }
         final StorageVolume volume = (StorageVolume) storageVolume;
         if (getScopedAccessPermissionStatus(getApplicationContext(), getCallingPackage(),
@@ -157,9 +156,11 @@ public class OpenExternalDirectoryActivity extends Activity {
         if (DEBUG)
             Log.d(TAG, "showFragment() for volume " + storageVolume.dump() + ", directory "
                     + directoryName + ", and user " + userId);
+        final boolean isRoot = directoryName.equals(DIRECTORY_ROOT);
+        final File volumeRoot = storageVolume.getPathFile();
         File file;
         try {
-            file = new File(storageVolume.getPathFile(), directoryName).getCanonicalFile();
+            file = isRoot ? volumeRoot : new File(volumeRoot, directoryName).getCanonicalFile();
         } catch (IOException e) {
             Log.e(TAG, "Could not get canonical file for volume " + storageVolume.dump()
                     + " and directory " + directoryName);
@@ -169,16 +170,21 @@ public class OpenExternalDirectoryActivity extends Activity {
         final StorageManager sm =
                 (StorageManager) activity.getSystemService(Context.STORAGE_SERVICE);
 
-        final String root = file.getParent();
-        final String directory = file.getName();
-
-        // Verify directory is valid.
-        if (TextUtils.isEmpty(directory) || !isStandardDirectory(directory)) {
-            if (DEBUG)
-                Log.d(TAG, "Directory '" + directory + "' is not standard (full path: '"
-                        + file.getAbsolutePath() + "')");
-            logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY);
-            return false;
+        final String root, directory;
+        if (isRoot) {
+            root = volumeRoot.getAbsolutePath();
+            directory = ".";
+        } else {
+            root = file.getParent();
+            directory = file.getName();
+            // Verify directory is valid.
+            if (TextUtils.isEmpty(directory) || !isStandardDirectory(directory)) {
+                if (DEBUG)
+                    Log.d(TAG, "Directory '" + directory + "' is not standard (full path: '"
+                            + file.getAbsolutePath() + "')");
+                logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY);
+                return false;
+            }
         }
 
         // Gets volume label and converted path.
@@ -186,12 +192,13 @@ public class OpenExternalDirectoryActivity extends Activity {
         String volumeUuid = null;
         final List<VolumeInfo> volumes = sm.getVolumes();
         if (DEBUG) Log.d(TAG, "Number of volumes: " + volumes.size());
+        File internalRoot = null;
         for (VolumeInfo volume : volumes) {
             if (isRightVolume(volume, root, userId)) {
-                final File internalRoot = volume.getInternalPathForUser(userId);
+                internalRoot = volume.getInternalPathForUser(userId);
                 // Must convert path before calling getDocIdForFileCreateNewDir()
                 if (DEBUG) Log.d(TAG, "Converting " + root + " to " + internalRoot);
-                file = new File(internalRoot, directory);
+                file = isRoot ? internalRoot : new File(internalRoot, directory);
                 volumeLabel = sm.getBestVolumeDescription(volume);
                 volumeUuid = volume.getFsUuid();
                 break;
@@ -199,7 +206,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         }
 
         // Checks if the user has granted the permission already.
-        final Intent intent = getIntentForExistingPermission(activity, file);
+        final Intent intent = getIntentForExistingPermission(activity, isRoot, internalRoot, file);
         if (intent != null) {
             logValidScopedAccessRequest(activity, directory,
                     SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED);
@@ -227,6 +234,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         args.putString(EXTRA_VOLUME_LABEL, volumeLabel);
         args.putString(EXTRA_VOLUME_UUID, volumeUuid);
         args.putString(EXTRA_APP_LABEL, appLabel);
+        args.putBoolean(EXTRA_IS_ROOT, isRoot);
 
         final FragmentManager fm = activity.getFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
@@ -310,19 +318,27 @@ public class OpenExternalDirectoryActivity extends Activity {
     }
 
     private static Intent getIntentForExistingPermission(OpenExternalDirectoryActivity activity,
-            File file) {
+            boolean isRoot, File root, File file) {
         final String packageName = activity.getCallingPackage();
-        final Uri grantedUri =
-                getGrantedUriPermission(activity, activity.getExternalStorageClient(), file);
+        final ContentProviderClient storageClient = activity.getExternalStorageClient();
+        final Uri grantedUri = getGrantedUriPermission(activity, storageClient, file);
+        final Uri rootUri = root.equals(file) ? grantedUri
+                : getGrantedUriPermission(activity, storageClient, root);
+
         if (DEBUG)
-            Log.d(TAG, "checking if " + packageName + " already has permission for " + grantedUri);
+            Log.d(TAG, "checking if " + packageName + " already has permission for " + grantedUri
+                    + " or its root (" + rootUri + ")");
         final ActivityManager am =
                 (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
         for (UriPermission uriPermission : am.getGrantedUriPermissions(packageName).getList()) {
             final Uri uri = uriPermission.getUri();
-            if (uri.equals(grantedUri)) {
+            if (uri == null) {
+                Log.w(TAG, "null URI for " + uriPermission);
+                continue;
+            }
+            if (uri.equals(grantedUri) || uri.equals(rootUri)) {
                 if (DEBUG) Log.d(TAG, packageName + " already has permission: " + uriPermission);
-                return createGrantedUriPermissionsIntent(uri);
+                return createGrantedUriPermissionsIntent(grantedUri);
             }
         }
         if (DEBUG) Log.d(TAG, packageName + " does not have permission for " + grantedUri);
@@ -335,6 +351,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         private String mVolumeUuid;
         private String mVolumeLabel;
         private String mAppLabel;
+        private boolean mIsRoot;
         private CheckBox mDontAskAgain;
         private OpenExternalDirectoryActivity mActivity;
         private AlertDialog mDialog;
@@ -349,6 +366,7 @@ public class OpenExternalDirectoryActivity extends Activity {
                 mVolumeUuid = args.getString(EXTRA_VOLUME_UUID);
                 mVolumeLabel = args.getString(EXTRA_VOLUME_LABEL);
                 mAppLabel = args.getString(EXTRA_APP_LABEL);
+                mIsRoot = args.getBoolean(EXTRA_IS_ROOT);
             }
             mActivity = (OpenExternalDirectoryActivity) getActivity();
         }
@@ -375,6 +393,7 @@ public class OpenExternalDirectoryActivity extends Activity {
                 mActivity = (OpenExternalDirectoryActivity) getActivity();
             }
             final String directory = mFile.getName();
+            final String directoryName = mIsRoot ? DIRECTORY_ROOT : directory;
             final Context context = mActivity.getApplicationContext();
             final OnClickListener listener = new OnClickListener() {
 
@@ -386,17 +405,17 @@ public class OpenExternalDirectoryActivity extends Activity {
                                 mActivity.getExternalStorageClient(), mFile);
                     }
                     if (which == DialogInterface.BUTTON_NEGATIVE || intent == null) {
-                        logValidScopedAccessRequest(mActivity, directory,
+                        logValidScopedAccessRequest(mActivity, directoryName,
                                 SCOPED_DIRECTORY_ACCESS_DENIED);
                         final boolean checked = mDontAskAgain.isChecked();
                         if (checked) {
                             logValidScopedAccessRequest(mActivity, directory,
                                     SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST);
                             setScopedAccessPermissionStatus(context, mActivity.getCallingPackage(),
-                                    mVolumeUuid, directory, PERMISSION_NEVER_ASK);
+                                    mVolumeUuid, directoryName, PERMISSION_NEVER_ASK);
                         } else {
                             setScopedAccessPermissionStatus(context, mActivity.getCallingPackage(),
-                                    mVolumeUuid, directory, PERMISSION_ASK_AGAIN);
+                                    mVolumeUuid, directoryName, PERMISSION_ASK_AGAIN);
                         }
                         mActivity.setResult(RESULT_CANCELED);
                     } else {
@@ -408,13 +427,17 @@ public class OpenExternalDirectoryActivity extends Activity {
                 }
             };
 
-            final CharSequence message = TextUtils
-                    .expandTemplate(
-                            getText(R.string.open_external_dialog_request), mAppLabel, directory,
-                            mVolumeLabel);
             @SuppressLint("InflateParams")
             // It's ok pass null ViewRoot on AlertDialogs.
             final View view = View.inflate(mActivity, R.layout.dialog_open_scoped_directory, null);
+            final CharSequence message;
+            if (mIsRoot) {
+                message = TextUtils.expandTemplate(getText(
+                        R.string.open_external_dialog_root_request), mAppLabel, mVolumeLabel);
+            } else {
+                message = TextUtils.expandTemplate(getText(R.string.open_external_dialog_request),
+                        mAppLabel, directory, mVolumeLabel);
+            }
             final TextView messageField = (TextView) view.findViewById(R.id.message);
             messageField.setText(message);
             mDialog = new AlertDialog.Builder(mActivity, R.style.Theme_AppCompat_Light_Dialog_Alert)
@@ -425,7 +448,7 @@ public class OpenExternalDirectoryActivity extends Activity {
 
             mDontAskAgain = (CheckBox) view.findViewById(R.id.do_not_ask_checkbox);
             if (getScopedAccessPermissionStatus(context, mActivity.getCallingPackage(),
-                    mVolumeUuid, directory) == PERMISSION_ASK_AGAIN) {
+                    mVolumeUuid, directoryName) == PERMISSION_ASK_AGAIN) {
                 mDontAskAgain.setVisibility(View.VISIBLE);
                 mDontAskAgain.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 

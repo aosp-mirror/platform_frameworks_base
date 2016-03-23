@@ -16,8 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.State.MODE_UNKNOWN;
 
 import java.lang.annotation.Retention;
@@ -29,7 +27,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.UserHandle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.model.RootInfo;
