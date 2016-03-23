@@ -118,10 +118,8 @@
       <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
     </plurals>
-    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
-    <skip />
-    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
-    <skip />
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"要删除“<xliff:g id="NAME">%1$s</xliff:g>”吗？"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"要删除文件夹“<xliff:g id="NAME">%1$s</xliff:g>”及其中的内容吗？"</string>
     <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
     <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
     <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->

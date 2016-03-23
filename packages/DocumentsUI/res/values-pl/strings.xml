@@ -134,10 +134,8 @@
       <item quantity="other">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Wybrano <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
-    <skip />
-    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
-    <skip />
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Usunąć „<xliff:g id="NAME">%1$s</xliff:g>”?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Usunąć folder „<xliff:g id="NAME">%1$s</xliff:g>” i jego zawartość?"</string>
     <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
     <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
     <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
