@@ -1429,16 +1429,20 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         final Context context = getContext();
         final int version = context != null ? context.getApplicationInfo().targetSdkVersion : 0;
         if (version >= Build.VERSION_CODES.N) {
-            if (savedInstanceState != null) {
-                Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
-                if (p != null) {
-                    if (mChildFragmentManager == null) {
-                        instantiateChildFragmentManager();
-                    }
-                    mChildFragmentManager.restoreAllState(p, mChildNonConfig);
-                    mChildNonConfig = null;
-                    mChildFragmentManager.dispatchCreate();
+            restoreChildFragmentState(savedInstanceState, true);
+        }
+    }
+
+    void restoreChildFragmentState(@Nullable Bundle savedInstanceState, boolean provideNonConfig) {
+        if (savedInstanceState != null) {
+            Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
+            if (p != null) {
+                if (mChildFragmentManager == null) {
+                    instantiateChildFragmentManager();
                 }
+                mChildFragmentManager.restoreAllState(p, provideNonConfig ? mChildNonConfig : null);
+                mChildNonConfig = null;
+                mChildFragmentManager.dispatchCreate();
             }
         }
     }
@@ -1692,6 +1696,18 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void onDetach() {
         mCalled = true;
+
+        // Destroy the child FragmentManager if we still have it here.
+        // We won't unless we're retaining our instance and if we do,
+        // our child FragmentManager instance state will have already been saved.
+        if (mChildFragmentManager != null) {
+            if (!mRetaining) {
+                throw new IllegalStateException("Child FragmentManager of " + this + " was not "
+                        + " destroyed and this fragment is not retaining instance");
+            }
+            mChildFragmentManager.dispatchDestroy();
+            mChildFragmentManager = null;
+        }
     }
 
     /**
@@ -2252,16 +2268,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         final Context context = getContext();
         final int version = context != null ? context.getApplicationInfo().targetSdkVersion : 0;
         if (version < Build.VERSION_CODES.N) {
-            if (savedInstanceState != null) {
-                Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
-                if (p != null) {
-                    if (mChildFragmentManager == null) {
-                        instantiateChildFragmentManager();
-                    }
-                    mChildFragmentManager.restoreAllState(p, null);
-                    mChildFragmentManager.dispatchCreate();
-                }
-            }
+            restoreChildFragmentState(savedInstanceState, false);
         }
     }
 
