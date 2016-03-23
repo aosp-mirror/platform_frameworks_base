@@ -345,10 +345,10 @@ void CanvasContext::draw() {
     mEglManager.damageFrame(frame, dirty);
 
 #if HWUI_NEW_OPS
+    auto& caches = Caches::getInstance();
     FrameBuilder frameBuilder(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
-            mRenderNodes, mLightGeometry, mContentDrawBounds, &Caches::getInstance());
+            mRenderNodes, mLightGeometry, mContentDrawBounds, caches);
     mLayerUpdateQueue.clear();
-    auto&& caches = Caches::getInstance();
     BakedOpRenderer renderer(caches, mRenderThread.renderState(),
             mOpaque, mLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
