@@ -409,10 +409,11 @@ public class BugreportProgressService extends Service {
 
         final BugreportInfo info = new BugreportInfo(mContext, id, pid, name, max);
         if (mProcesses.indexOfKey(id) >= 0) {
+            // BUGREPORT_STARTED intent was already received; ignore it.
             Log.w(TAG, "ID " + id + " already watched");
-        } else {
-            mProcesses.put(info.id, info);
+            return true;
         }
+        mProcesses.put(info.id, info);
         // Take initial screenshot.
         takeScreenshot(id, false);
         updateProgress(info);
