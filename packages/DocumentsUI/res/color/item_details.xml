@@ -18,9 +18,5 @@
     <item
         android:state_enabled="true"
         android:color="?android:attr/textColorPrimary"
-        android:alpha="0.63" />
-    <item
-        android:state_enabled="false"
-        android:color="?android:attr/textColorPrimary"
-        android:alpha="0.3" />
+        android:alpha="0.54" />
 </selector>
