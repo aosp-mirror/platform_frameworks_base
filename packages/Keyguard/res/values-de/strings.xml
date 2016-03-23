@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Fehler beim Entsperren mithilfe des PUK-Codes der SIM-Karte"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Code akzeptiert"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Kein Dienst"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Schaltfläche zum Ändern der Eingabemethode"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Eingabemethode wechseln"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Flugmodus"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Nach dem Neustart des Geräts ist die Eingabe des Musters erforderlich."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Nach dem Neustart des Geräts ist die Eingabe der PIN erforderlich."</string>

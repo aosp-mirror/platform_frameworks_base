@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK əməliyyatı alınmadı!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod Qəbul Edildi!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Xidmət yoxdur."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Daxiletmə metodu düyməsinə keç"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Daxiletmə metoduna keçin"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Təyyarə rejimi"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Cihaz yeniden başladıqdan sonra qəlib kod tələb olunur"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Cihaz yeniden başladıqdan sonra PIN tələb olunur"</string>

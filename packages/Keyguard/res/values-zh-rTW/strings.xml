@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM 卡 PUK 碼操作失敗！"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"密碼正確！"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"沒有服務。"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"切換輸入法"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"飛航模式"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"裝置重新啟動後需要畫出解鎖圖案"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"裝置重新啟動後需要輸入 PIN 碼"</string>
