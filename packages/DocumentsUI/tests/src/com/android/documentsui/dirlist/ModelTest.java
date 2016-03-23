@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.provider.DocumentsContract.Document;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
@@ -117,20 +118,24 @@ public class ModelTest extends AndroidTestCase {
 
     // Tests multiple authorities with clashing document IDs.
     public void testModelIdIsUnique() {
-        MatrixCursor cIn = new MatrixCursor(COLUMNS);
+        MatrixCursor cIn1 = new MatrixCursor(COLUMNS);
+        MatrixCursor cIn2 = new MatrixCursor(COLUMNS);
 
         // Make two sets of items with the same IDs, under different authorities.
         final String AUTHORITY0 = "auth0";
         final String AUTHORITY1 = "auth1";
+
         for (int i = 0; i < ITEM_COUNT; ++i) {
-            MatrixCursor.RowBuilder row0 = cIn.newRow();
+            MatrixCursor.RowBuilder row0 = cIn1.newRow();
             row0.add(RootCursorWrapper.COLUMN_AUTHORITY, AUTHORITY0);
             row0.add(Document.COLUMN_DOCUMENT_ID, Integer.toString(i));
 
-            MatrixCursor.RowBuilder row1 = cIn.newRow();
+            MatrixCursor.RowBuilder row1 = cIn2.newRow();
             row1.add(RootCursorWrapper.COLUMN_AUTHORITY, AUTHORITY1);
             row1.add(Document.COLUMN_DOCUMENT_ID, Integer.toString(i));
         }
+
+        Cursor cIn = new MergeCursor(new Cursor[] { cIn1, cIn2 });
 
         // Update the model, then make sure it contains all the expected items.
         DirectoryResult r = new DirectoryResult();
