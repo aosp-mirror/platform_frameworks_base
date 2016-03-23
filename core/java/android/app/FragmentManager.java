@@ -941,6 +941,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
                     if (!f.mRetaining) {
                         f.performCreate(f.mSavedFragmentState);
+                    } else {
+                        f.restoreChildFragmentState(f.mSavedFragmentState, true);
+                        f.mState = Fragment.CREATED;
                     }
                     f.mRetaining = false;
                     if (f.mFromLayout) {
@@ -1009,6 +1012,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         f.mSavedFragmentState = null;
                     }
                 case Fragment.ACTIVITY_CREATED:
+                    if (newState > Fragment.ACTIVITY_CREATED) {
+                        f.mState = Fragment.STOPPED;
+                    }
                 case Fragment.STOPPED:
                     if (newState > Fragment.STOPPED) {
                         if (DEBUG) Log.v(TAG, "moveto STARTED: " + f);
@@ -1108,7 +1114,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                             if (!f.mRetaining) {
                                 f.performDestroy();
                             } else {
-                                f.mState = Fragment.INITIALIZING;
+                                f.mState = Fragment.CREATED;
                             }
 
                             f.mCalled = false;
@@ -1124,7 +1130,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                     f.mHost = null;
                                     f.mParentFragment = null;
                                     f.mFragmentManager = null;
-                                    f.mChildFragmentManager = null;
                                 }
                             }
                         }
