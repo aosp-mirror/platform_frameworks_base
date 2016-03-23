@@ -5830,14 +5830,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
-     * @hide
-     */
-    public void setDeviceLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
-        setSecurityLoggingEnabled(admin, enabled);
-    }
-
-    /**
      * Return whether security logging is enabled or not by the device owner.
      *
      * <p>Can only be called by the device owner, otherwise a {@link SecurityException} will be
@@ -5853,14 +5845,6 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
-     * @hide
-     */
-    public boolean getDeviceLoggingEnabled(@NonNull ComponentName admin) {
-        return isSecurityLoggingEnabled(admin);
     }
 
     /**
@@ -5890,14 +5874,6 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
-     * @hide
-     */
-    public List<SecurityEvent> retrieveDeviceLogs(@NonNull ComponentName admin) {
-        return retrieveSecurityLogs(admin);
     }
 
     /**
@@ -5938,14 +5914,6 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Temporary // STOPSHIP TODO(mkarpinski): remove those once change to TestDPC is pushed
-     * @hide
-     */
-    public List<SecurityEvent> retrievePreviousDeviceLogs(@NonNull ComponentName admin) {
-        return retrievePreRebootSecurityLogs(admin);
     }
 
     /**
