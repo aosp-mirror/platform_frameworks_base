@@ -458,7 +458,7 @@ public class UserManagerService extends IUserManager.Stub {
                     continue;
                 }
                 if (!excludeDying || !mRemovingUserIds.get(ui.id)) {
-                    users.add(ui);
+                    users.add(userWithName(ui));
                 }
             }
             return users;
@@ -500,7 +500,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (mRemovingUserIds.get(profile.id)) {
                 continue;
             }
-            users.add(profile);
+            users.add(userWithName(profile));
         }
         return users;
     }
@@ -653,7 +653,21 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo getUserInfo(int userId) {
         checkManageUsersPermission("query user");
         synchronized (mUsersLock) {
-            return getUserInfoLU(userId);
+            return userWithName(getUserInfoLU(userId));
+        }
+    }
+
+    /**
+     * Returns a UserInfo object with the name filled in, for Owner, or the original
+     * if the name is already set.
+     */
+    private UserInfo userWithName(UserInfo orig) {
+        if (orig != null && orig.name == null && orig.id == UserHandle.USER_SYSTEM) {
+            UserInfo withName = new UserInfo(orig);
+            withName.name = getOwnerName();
+            return withName;
+        } else {
+            return orig;
         }
     }
 
@@ -1459,9 +1473,7 @@ public class UserManagerService extends IUserManager.Stub {
             flags |= UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY;
         }
         // Create the system user
-        UserInfo system = new UserInfo(UserHandle.USER_SYSTEM,
-                mContext.getResources().getString(com.android.internal.R.string.owner_name), null,
-                flags);
+        UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags);
         UserData userData = new UserData();
         userData.info = system;
         synchronized (mUsersLock) {
@@ -1480,6 +1492,10 @@ public class UserManagerService extends IUserManager.Stub {
 
         writeUserListLP();
         writeUserLP(userData);
+    }
+
+    private String getOwnerName() {
+        return mContext.getResources().getString(com.android.internal.R.string.owner_name);
     }
 
     private void scheduleWriteUser(UserData UserData) {
@@ -1551,9 +1567,11 @@ public class UserManagerService extends IUserManager.Stub {
                     serializer.attribute(null, ATTR_SEED_ACCOUNT_TYPE, userData.seedAccountType);
                 }
             }
-            serializer.startTag(null, TAG_NAME);
-            serializer.text(userInfo.name);
-            serializer.endTag(null, TAG_NAME);
+            if (userInfo.name != null) {
+                serializer.startTag(null, TAG_NAME);
+                serializer.text(userInfo.name);
+                serializer.endTag(null, TAG_NAME);
+            }
             synchronized (mRestrictionsLock) {
                 UserRestrictionsUtils.writeRestrictions(serializer,
                         mBaseUserRestrictions.get(userInfo.id), TAG_RESTRICTIONS);
