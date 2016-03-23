@@ -24,7 +24,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -566,6 +565,12 @@ public class Notification implements Parcelable
      */
     @ColorInt
     public static final int COLOR_DEFAULT = 0; // AKA Color.TRANSPARENT
+
+    /**
+     * Special value of {@link #color} used as a place holder for an invalid color.
+     */
+    @ColorInt
+    private static final int COLOR_INVALID = 1;
 
     /**
      * Sphere of visibility of this notification, which affects how and when the SystemUI reveals 
@@ -2092,6 +2097,12 @@ public class Notification implements Parcelable
         private boolean mColorUtilInited = false;
 
         /**
+         * Caches a contrast-enhanced version of {@link #mCachedContrastColorIsFor}.
+         */
+        private int mCachedContrastColor = COLOR_INVALID;
+        private int mCachedContrastColorIsFor = COLOR_INVALID;
+
+        /**
          * Constructs a new Builder with the defaults:
          *
 
@@ -3074,7 +3085,7 @@ public class Notification implements Parcelable
                         R.id.progress, ColorStateList.valueOf(mContext.getColor(
                                 R.color.notification_progress_background_color)));
                 if (mN.color != COLOR_DEFAULT) {
-                    ColorStateList colorStateList = ColorStateList.valueOf(mN.color);
+                    ColorStateList colorStateList = ColorStateList.valueOf(resolveContrastColor());
                     contentView.setProgressTintList(R.id.progress, colorStateList);
                     contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
                 }
@@ -3135,10 +3146,10 @@ public class Notification implements Parcelable
         }
 
         private void bindExpandButton(RemoteViews contentView) {
-            contentView.setDrawableParameters(R.id.expand_button, false, -1, resolveColor(),
+            contentView.setDrawableParameters(R.id.expand_button, false, -1, resolveContrastColor(),
                     PorterDuff.Mode.SRC_ATOP, -1);
             contentView.setInt(R.id.notification_header, "setOriginalNotificationColor",
-                    resolveColor());
+                    resolveContrastColor());
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView) {
@@ -3180,7 +3191,7 @@ public class Notification implements Parcelable
                 return;
             }
             contentView.setTextViewText(R.id.app_name_text, appName);
-            contentView.setTextColor(R.id.app_name_text, resolveColor());
+            contentView.setTextColor(R.id.app_name_text, resolveContrastColor());
         }
 
         private void bindSmallIcon(RemoteViews contentView) {
@@ -3405,7 +3416,7 @@ public class Notification implements Parcelable
                 button.setRemoteInputs(R.id.action0, action.mRemoteInputs);
             }
             if (mN.color != COLOR_DEFAULT) {
-                button.setTextColor(R.id.action0, mN.color);
+                button.setTextColor(R.id.action0, resolveContrastColor());
             }
             return button;
         }
@@ -3432,12 +3443,12 @@ public class Notification implements Parcelable
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
             if (colorable) {
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveColor(),
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
 
             }
             contentView.setInt(R.id.notification_header, "setOriginalIconColor",
-                    colorable ? resolveColor() : NotificationHeaderView.NO_COLOR);
+                    colorable ? resolveContrastColor() : NotificationHeaderView.NO_COLOR);
         }
 
         /**
@@ -3449,7 +3460,7 @@ public class Notification implements Parcelable
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
                 // resolve color will fall back to the default when legacy
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveColor(),
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
             }
         }
@@ -3460,11 +3471,14 @@ public class Notification implements Parcelable
             }
         }
 
-        int resolveColor() {
-            if (mN.color == COLOR_DEFAULT) {
-                return mContext.getColor(R.color.notification_icon_default_color);
+        int resolveContrastColor() {
+            if (mCachedContrastColorIsFor == mN.color && mCachedContrastColor != COLOR_INVALID) {
+                return mCachedContrastColor;
             }
-            return mN.color;
+            final int contrasted = NotificationColorUtil.resolveContrastColor(mContext, mN.color);
+
+            mCachedContrastColorIsFor = mN.color;
+            return mCachedContrastColor = contrasted;
         }
 
         /**
@@ -4427,7 +4441,7 @@ public class Notification implements Parcelable
 
                     final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
                     final RemoteViews button = generateMediaActionButton(action,
-                            mBuilder.resolveColor());
+                            mBuilder.resolveContrastColor());
                     view.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
@@ -4460,7 +4474,7 @@ public class Notification implements Parcelable
                 big.removeAllViews(com.android.internal.R.id.media_actions);
                 for (int i = 0; i < actionCount; i++) {
                     final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i),
-                            mBuilder.resolveColor());
+                            mBuilder.resolveContrastColor());
                     big.addView(com.android.internal.R.id.media_actions, button);
                 }
             }

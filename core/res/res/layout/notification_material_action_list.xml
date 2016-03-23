@@ -28,7 +28,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:visibility="gone"
-            android:background="#ffeeeeee"
+            android:background="@color/notification_action_list"
             >
         <!-- actions will be added here -->
     </LinearLayout>
