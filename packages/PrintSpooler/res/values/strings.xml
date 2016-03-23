@@ -211,9 +211,6 @@
     <!-- Label for an unknown reason for failed or blocked print job. [CHAR LIMIT=25] -->
     <string name="reason_unknown">unknown</string>
 
-    <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
-    <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
-
     <!-- Title for a warning message about security implications of using a print service,
          displayed as a dialog message when the user prints using a print service that has not been
          used before. [CHAR LIMIT=NONE] -->
@@ -253,26 +250,6 @@
         <!-- Orientation label: Landscape page orientation [CHAR LIMIT=30] -->
         <item>Landscape</item>
     </string-array>
-
-    <!-- Permissions -->
-
-    <!-- Title of an application permission, listed so the user can choose whether they want
-         to allow the application to do this. -->
-    <string name="permlab_accessAllPrintJobs" translatable="false">access all print jobs</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-         they want to allow the application to do this. -->
-    <string name="permdesc_accessAllPrintJobs" translatable="false">Allows the holder to access
-        print jobs created by another app. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want
-         to allow the application to do this. -->
-    <string name="permlab_startPrintServiceConfigActivity" translatable="false">start print
-        service configuration activities</string>
-    <!-- Description of an application permission, listed so the user can choose whether they
-         want to allow the application to do this. -->
-    <string name="permdesc_startPrintServiceConfigActivity" translatable="false">Allows the
-        holder to start the configuration activities of a print service. Should never be needed
-        for normal apps.</string>
 
     <!-- Error messages -->
 
