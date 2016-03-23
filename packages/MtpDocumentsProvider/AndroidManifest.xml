@@ -15,10 +15,12 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
-        
+
         <service android:name=".MtpDocumentsService" />
 
         <activity android:name=".ReceiverActivity"
+                  android:label="@string/downloads_app_label"
+                  android:icon="@mipmap/ic_launcher_download"
                   android:theme="@android:style/Theme.NoDisplay"
                   android:screenOrientation="locked"
                   android:excludeFromRecents="true">
