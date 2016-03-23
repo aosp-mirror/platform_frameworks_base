@@ -347,6 +347,15 @@
         </activity>
 
         <activity
+                android:name="SingleFrameTextureViewTestActivity"
+                android:label="TextureView/SingleFrameTextureViewTest">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="HardwareCanvasSurfaceViewActivity"
                 android:label="SurfaceView/HardwareCanvas">
             <intent-filter>
