@@ -204,6 +204,9 @@ public class AlertController {
         mShowTitle = a.getBoolean(R.styleable.AlertDialog_showTitle, true);
 
         a.recycle();
+
+        /* We use a custom title so never request a window title */
+        window.requestFeature(Window.FEATURE_NO_TITLE);
     }
 
     static boolean canTextInput(View v) {
@@ -229,8 +232,6 @@ public class AlertController {
     }
 
     public void installContent() {
-        /* We use a custom title so never request a window title */
-        mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         int contentView = selectContentView();
         mWindow.setContentView(contentView);
         setupView();
