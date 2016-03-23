@@ -899,6 +899,34 @@ public class Notification implements Parcelable
     public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
 
     /**
+     * {@link #extras} key: the username to be displayed for all messages sent by the user including
+     * direct replies
+     * {@link android.app.Notification.MessagingStyle} notification.
+     */
+    public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
+
+    /**
+     * {@link #extras} key: a boolean describing whether the platform should automatically
+     * generate possible replies to
+     * {@link android.app.Notification.MessagingStyle.Message} objects provided by a
+     * {@link android.app.Notification.MessagingStyle} notification.
+     */
+    public static final String EXTRA_ALLOW_GENERATED_REPLIES = "android.allowGeneratedReplies";
+
+    /**
+     * {@link #extras} key: a {@link String} to be displayed as the title to a thread represented by
+     * a {@link android.app.Notification.MessagingStyle}
+     */
+    public static final String EXTRA_THREAD_TITLE = "android.threadTitle";
+
+    /**
+     * {@link #extras} key: an array of {@link android.app.Notification.MessagingStyle.Message}
+     * bundles provided by a
+     * {@link android.app.Notification.MessagingStyle} notification.
+     */
+    public static final String EXTRA_MESSAGES = "android.messages";
+
+    /**
      * {@link #extras} key: the user that built the notification.
      *
      * @hide
@@ -3529,7 +3557,8 @@ public class Notification implements Parcelable
         private static Class<? extends Style> getNotificationStyleClass(String templateClass) {
             Class<? extends Style>[] classes = new Class[] {
                     BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
-                    DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class };
+                    DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
+                    MessagingStyle.class };
             for (Class<? extends Style> innerClass : classes) {
                 if (templateClass.equals(innerClass.getName())) {
                     return innerClass;
@@ -4122,6 +4151,350 @@ public class Notification implements Parcelable
                 lineCount -= LINES_CONSUMED_BY_ACTIONS;
             }
             return lineCount;
+        }
+    }
+
+    /**
+     * Helper class for generating large-format notifications that include multiple back-and-forth
+     * messages of varying types between any number of people.
+     *
+     * <br>
+     * If the platform does not provide large-format notifications, this method has no effect. The
+     * user will always see the normal notification view.
+     * <br>
+     * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior, like
+     * so:
+     * <pre class="prettyprint">
+     *
+     * Notification noti = new Notification.Builder()
+     *     .setContentTitle(&quot;2 new messages wtih &quot; + sender.toString())
+     *     .setContentText(subject)
+     *     .setSmallIcon(R.drawable.new_message)
+     *     .setLargeIcon(aBitmap)
+     *     .setStyle(new Notification.MessagingStyle(resources.getString(R.string.reply_name))
+     *         .addMessage(messages[0].getText(), messages[0].getTime(), messages[0].getSender())
+     *         .addMessage(messages[1].getText(), messages[1].getTime(), messages[1].getSender()))
+     *     .build();
+     * </pre>
+     */
+    public static class MessagingStyle extends Style {
+
+        /**
+         * The maximum number of messages that will be retained in the Notification itself (the
+         * number displayed is up to the platform).
+         */
+        public static final int MAXIMUM_RETAINED_MESSAGES = 25;
+
+        CharSequence mUserDisplayName;
+        CharSequence mConversationTitle;
+        boolean mAllowGeneratedReplies = true;
+        ArrayList<Message> mMessages = new ArrayList<>();
+
+        MessagingStyle() {
+        }
+
+        /**
+         * @param userDisplayName the name to be displayed for any replies sent by the user before the
+         * posting app reposts the notification with those messages after they've been actually
+         * sent and in previous messages sent by the user added in
+         * {@link #addMessage(Notification.MessagingStyle.Message)}
+         */
+        public MessagingStyle(CharSequence userDisplayName) {
+            mUserDisplayName = userDisplayName;
+        }
+
+        /**
+         * Returns the name to be displayed for any replies sent by the user
+         */
+        public CharSequence getUserDisplayName() {
+            return mUserDisplayName;
+        }
+
+        /**
+         * Set whether the platform should automatically generate possible replies from messages.
+         * @param allowGeneratedReplies {@code true} to allow generated replies, {@code false}
+         * otherwise
+         * @return this object for method chaining
+         * The default value is {@code true}
+         */
+        public MessagingStyle setAllowGeneratedReplies(boolean allowGeneratedReplies) {
+            mAllowGeneratedReplies = allowGeneratedReplies;
+            return this;
+        }
+
+        /**
+         * Return whether the platform should automatically generate possible replies from messages.
+         */
+        public boolean getAllowGeneratedReplies() {
+            return mAllowGeneratedReplies;
+        }
+
+        /**
+         * Sets the title to be displayed on this conversation. This should only be used for
+         * group messaging and left unset for one-on-one conversations.
+         * @param conversationTitle
+         * @return this object for method chaining.
+         */
+        public MessagingStyle setConversationTitle(CharSequence conversationTitle) {
+            mConversationTitle = conversationTitle;
+            return this;
+        }
+
+        /**
+         * Return the title to be displayed on this conversation. Can be <code>null</code> and
+         * should be for one-on-one conversations
+         */
+        public CharSequence getConversationTitle() {
+            return mConversationTitle;
+        }
+
+        /**
+         * Adds a message for display by this notification. Convenience call for a simple
+         * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
+         * @param text A {@link CharSequence} to be displayed as the message content
+         * @param timestamp Time at which the message arrived
+         * @param sender A {@link CharSequence} to be used for displaying the name of the
+         * sender. Should be <code>null</code> for messages by the current user, in which case
+         * the platform will insert {@link #getUserDisplayName()}.
+         * Should be unique amongst all individuals in the conversation, and should be
+         * consistent during re-posts of the notification.
+         *
+         * @see Message#Message(CharSequence, long, CharSequence)
+         *
+         * @return this object for method chaining
+         */
+        public MessagingStyle addMessage(CharSequence text, long timestamp, CharSequence sender) {
+            mMessages.add(new Message(text, timestamp, sender));
+            if (mMessages.size() > MAXIMUM_RETAINED_MESSAGES) {
+                mMessages.remove(0);
+            }
+            return this;
+        }
+
+        /**
+         * Adds a {@link Message} for display in this notification.
+         * @param message The {@link Message} to be displayed
+         * @return this object for method chaining
+         */
+        public MessagingStyle addMessage(Message message) {
+            mMessages.add(message);
+            if (mMessages.size() > MAXIMUM_RETAINED_MESSAGES) {
+                mMessages.remove(0);
+            }
+            return this;
+        }
+
+        /**
+         * Gets the list of {@code Message} objects that represent the notification
+         */
+        public List<Message> getMessages() {
+            return mMessages;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+            if (mUserDisplayName != null) {
+                extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUserDisplayName);
+            }
+            if (mConversationTitle != null) {
+                extras.putCharSequence(EXTRA_THREAD_TITLE, mConversationTitle);
+            }
+            extras.putBoolean(EXTRA_ALLOW_GENERATED_REPLIES, mAllowGeneratedReplies);
+            if (!mMessages.isEmpty()) {
+                extras.putParcelableArrayList(EXTRA_MESSAGES, mMessages);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+
+            mMessages.clear();
+            mUserDisplayName = extras.getString(EXTRA_SELF_DISPLAY_NAME);
+            mConversationTitle = extras.getString(EXTRA_THREAD_TITLE);
+            mAllowGeneratedReplies = extras.getBoolean(EXTRA_ALLOW_GENERATED_REPLIES,
+                    mAllowGeneratedReplies);
+            List<Message> messages = extras.getParcelableArrayList(EXTRA_MESSAGES);
+            if (messages != null) {
+                mMessages.addAll(messages);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public RemoteViews makeBigContentView() {
+            // TODO handset to write implementation
+            RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource());
+
+            return contentView;
+        }
+
+        public static final class Message implements Parcelable {
+
+            private final CharSequence mText;
+            private final long mTimestamp;
+            private final CharSequence mSender;
+
+            private String mDataMimeType;
+            private Uri mDataUri;
+
+            /**
+             * Constructor
+             * @param text A {@link CharSequence} to be displayed as the message content
+             * @param timestamp Time at which the message arrived
+             * @param sender A {@link CharSequence} to be used for displaying the name of the
+             * sender. Should be <code>null</code> for messages by the current user, in which case
+             * the platform will insert {@link MessagingStyle#getUserDisplayName()}.
+             * Should be unique amongst all individuals in the conversation, and should be
+             * consistent during re-posts of the notification.
+             */
+            public Message(CharSequence text, long timestamp, CharSequence sender){
+                mText = text;
+                mTimestamp = timestamp;
+                mSender = sender;
+            }
+
+            /**
+             * Sets a binary blob of data and an associated MIME type for a message. In the case
+             * where the platform doesn't support the MIME type, the original text provided in the
+             * constructor will be used.
+             * @param dataMimeType The MIME type of the content. See
+             * <a href="{@docRoot}notifications/messaging.html"> for the list of supported MIME
+             * types on Android and Android Wear.
+             * @param dataUri The uri containing the content whose type is given by the MIME type.
+             * <p class="note">
+             * <ol>
+             *   <li>Notification Listeners including the System UI need permission to access the
+             *       data the Uri points to. The recommended ways to do this are:</li>
+             *   <li>Store the data in your own ContentProvider, making sure that other apps have
+             *       the correct permission to access your provider. The preferred mechanism for
+             *       providing access is to use per-URI permissions which are temporary and only
+             *       grant access to the receiving application. An easy way to create a
+             *       ContentProvider like this is to use the FileProvider helper class.</li>
+             *   <li>Use the system MediaStore. The MediaStore is primarily aimed at video, audio
+             *       and image MIME types, however beginning with Android 3.0 (API level 11) it can
+             *       also store non-media types (see MediaStore.Files for more info). Files can be
+             *       inserted into the MediaStore using scanFile() after which a content:// style
+             *       Uri suitable for sharing is passed to the provided onScanCompleted() callback.
+             *       Note that once added to the system MediaStore the content is accessible to any
+             *       app on the device.</li>
+             * </ol>
+             * @return this object for method chaining
+             */
+            public Message setData(String dataMimeType, Uri dataUri) {
+                mDataMimeType = dataMimeType;
+                mDataUri = dataUri;
+                return this;
+            }
+
+            private Message(Parcel in) {
+                if (in.readInt() != 0) {
+                    mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+                } else {
+                    mText = null;
+                }
+                mTimestamp = in.readLong();
+                if (in.readInt() != 0) {
+                    mSender = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+                } else {
+                    mSender = null;
+                }
+                if (in.readInt() != 0) {
+                    mDataMimeType = in.readString();
+                }
+                if (in.readInt() != 0) {
+                    mDataUri = in.readParcelable(Uri.class.getClassLoader());
+                }
+            }
+
+            /**
+             * Get the text to be used for this message, or the fallback text if a type and content
+             * Uri have been set
+             */
+            public CharSequence getText() {
+                return mText;
+            }
+
+            /**
+             * Get the time at which this message arrived
+             */
+            public long getTimestamp() {
+                return mTimestamp;
+            }
+
+            /**
+             * Get the text used to display the contact's name in the messaging experience
+             */
+            public CharSequence getSender() {
+                return mSender;
+            }
+
+            /**
+             * Get the MIME type of the data pointed to by the Uri
+             */
+            public String getDataMimeType() {
+                return mDataMimeType;
+            }
+
+            /**
+             * Get the the Uri pointing to the content of the message. Can be null, in which case
+             * {@see #getText()} is used.
+             */
+            public Uri getDataUri() {
+                return mDataUri;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel out, int flags) {
+                if (mText != null) {
+                    out.writeInt(1);
+                    TextUtils.writeToParcel(mText, out, flags);
+                } else {
+                    out.writeInt(0);
+                }
+                out.writeLong(mTimestamp);
+                if (mSender != null) {
+                    out.writeInt(1);
+                    TextUtils.writeToParcel(mSender, out, flags);
+                } else {
+                    out.writeInt(0);
+                }
+                if (mDataMimeType != null) {
+                    out.writeInt(1);
+                    out.writeString(mDataMimeType);
+                } else {
+                    out.writeInt(0);
+                }
+                if (mDataUri != null) {
+                    out.writeInt(1);
+                    out.writeParcelable(mDataUri, flags);
+                } else {
+                    out.writeInt(0);
+                }
+            }
+
+            public static final Parcelable.Creator<Message> CREATOR =
+                    new Parcelable.Creator<Message>() {
+                        public Message createFromParcel(Parcel in) {
+                            return new Message(in);
+                        }
+                        public Message[] newArray(int size) {
+                            return new Message[size];
+                        }
+                    };
         }
     }
 
