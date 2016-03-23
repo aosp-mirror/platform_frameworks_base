@@ -1084,7 +1084,7 @@ public class DirectoryFragment extends Fragment
         }
 
         // Make all items draggable.
-        view.setOnLongClickListener(mDragHelper);
+        view.setOnLongClickListener(onLongClickListener);
     }
 
     private View.OnDragListener mOnDragListener = new View.OnDragListener() {
@@ -1387,9 +1387,10 @@ public class DirectoryFragment extends Fragment
         }
     }
 
-    private DragStartHelper mDragHelper = new DragStartHelper(null) {
+    private DragStartHelper.OnDragStartListener mOnDragStartListener =
+            new DragStartHelper.OnDragStartListener() {
         @Override
-        protected boolean onDragStart(View v) {
+        public boolean onDragStart(View v, DragStartHelper helper) {
             if (isSelected(getModelId(v))) {
                 List<DocumentInfo> docs = getDraggableDocuments(v);
                 if (docs.isEmpty()) {
@@ -1406,6 +1407,15 @@ public class DirectoryFragment extends Fragment
             }
 
             return false;
+        }
+    };
+
+    private DragStartHelper mDragHelper = new DragStartHelper(null, mOnDragStartListener);
+
+    private View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            return mDragHelper.onLongClick(v);
         }
     };
 
@@ -1439,7 +1449,7 @@ public class DirectoryFragment extends Fragment
 
             // Detect drag events. When a drag is detected, intercept the rest of the gesture.
             View itemView = rv.findChildViewUnder(e.getX(), e.getY());
-            if (itemView != null && mDragHelper.handleTouch(itemView,  e)) {
+            if (itemView != null && mDragHelper.onTouch(itemView,  e)) {
                 return true;
             }
             // Forward unhandled events to the GestureDetector.
@@ -1451,7 +1461,7 @@ public class DirectoryFragment extends Fragment
         @Override
         public void onTouchEvent(RecyclerView rv, MotionEvent e) {
             View itemView = rv.findChildViewUnder(e.getX(), e.getY());
-            mDragHelper.handleTouch(itemView,  e);
+            mDragHelper.onTouch(itemView,  e);
             // Note: even though this event is being handled as part of a drag gesture, continue
             // forwarding to the GestureDetector. The detector needs to see the entire cluster of
             // events in order to properly interpret gestures.
