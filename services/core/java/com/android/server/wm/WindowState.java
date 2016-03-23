@@ -71,6 +71,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -1883,6 +1884,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     private boolean shouldSaveSurface() {
+        if ((mAttrs.flags & FLAG_SECURE) != 0) {
+            // We don't save secure surfaces since their content shouldn't be shown while the app
+            // isn't on screen and content might leak through during the transition animation with
+            // saved surface.
+            return false;
+        }
+
         if (ActivityManager.isLowRamDeviceStatic()) {
             // Don't save surfaces on Svelte devices.
             return false;
