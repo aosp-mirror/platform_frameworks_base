@@ -48,7 +48,7 @@ include $(BUILD_PACKAGE)
 FrameworkCoreTests_all_apks_res := $(addprefix $(FrameworkCoreTests_intermediates)/raw/, \
     $(foreach a, $(FrameworkCoreTests_all_apks), $(patsubst FrameworkCoreTests_%,%,$(a))))
 
-$(FrameworkCoreTests_all_apks_res): $(FrameworkCoreTests_intermediates)/raw/%: $(call intermediates-dir-for,APPS,FrameworkCoreTests_%)/package.apk | $(ACP)
+$(FrameworkCoreTests_all_apks_res): $(FrameworkCoreTests_intermediates)/raw/%: $(call intermediates-dir-for,APPS,FrameworkCoreTests_%)/package.apk
 	$(call copy-file-to-new-target)
 
 # Use R_file_stamp as dependency because we want the test apks in place before the R.java is generated.
