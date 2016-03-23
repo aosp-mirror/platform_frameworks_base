@@ -934,10 +934,8 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 include $(BUILD_DROIDDOC)
 
 static_doc_index_redirect := $(out_dir)/index.html
-$(static_doc_index_redirect): \
-	$(LOCAL_PATH)/docs/docs-documentation-redirect.html | $(ACP)
-	$(hide) mkdir -p $(dir $@)
-	$(hide) $(ACP) $< $@
+$(static_doc_index_redirect): $(LOCAL_PATH)/docs/docs-documentation-redirect.html
+	$(copy-file-to-target)
 
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
