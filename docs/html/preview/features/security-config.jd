@@ -311,6 +311,7 @@ android:debuggable</a>
             &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
             &lt;!-- backup pin --&gt
             &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
 </pre>
