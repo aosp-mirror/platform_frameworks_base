@@ -180,7 +180,7 @@ public class Recents extends SystemUI
     @Override
     public void start() {
         sDebugFlags = new RecentsDebugFlags(mContext);
-        sSystemServicesProxy = new SystemServicesProxy(mContext);
+        sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         mHandler = new Handler();
