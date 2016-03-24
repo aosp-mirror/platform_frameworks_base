@@ -49,8 +49,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>
+#include <SkImage.h>
 #include <SkStream.h>
-#include <SkImageDecoder.h>
 #pragma GCC diagnostic pop
 
 #include <GLES/gl.h>
@@ -117,8 +117,10 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     if (asset == NULL)
         return NO_INIT;
     SkBitmap bitmap;
-    SkImageDecoder::DecodeMemory(asset->getBuffer(false), asset->getLength(),
-            &bitmap, kUnknown_SkColorType, SkImageDecoder::kDecodePixels_Mode);
+    sk_sp<SkData> data = SkData::MakeWithoutCopy(asset->getBuffer(false),
+            asset->getLength());
+    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
+    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
     asset->close();
     delete asset;
 
@@ -171,15 +173,10 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
     //StopWatch watch("blah");
 
     SkBitmap bitmap;
-    SkMemoryStream  stream(frame.map->getDataPtr(), frame.map->getDataLength());
-    SkImageDecoder* codec = SkImageDecoder::Factory(&stream);
-    if (codec != NULL) {
-        codec->setDitherImage(false);
-        codec->decode(&stream, &bitmap,
-                kN32_SkColorType,
-                SkImageDecoder::kDecodePixels_Mode);
-        delete codec;
-    }
+    sk_sp<SkData> data = SkData::MakeWithoutCopy(frame.map->getDataPtr(),
+            frame.map->getDataLength());
+    sk_sp<SkImage> image = SkImage::MakeFromEncoded(data);
+    image->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
 
     // FileMap memory is never released until application exit.
     // Release it now as the texture is already loaded and the memory used for
