@@ -140,11 +140,16 @@ public void onCreate(Bundle savedInstanceState) {
 <p>If the user does not interact with your app for a period of time while it is displayed, or if
 the user covers the screen with their palm, the system switches the activity to ambient mode.
 After the app switches to ambient mode, update the activity UI to a more basic layout to reduce
-power consumption. You should use a black background with minimal white graphics and text. To
-ease a user into the transition from interactive to ambient mode, try to maintain similar placement
-of items on the screen. For more information on presenting content on an ambient screen, see the
+power consumption. You should use a black background with minimal white graphics and text.
+ To ease a user into the transition from interactive to ambient mode, try to maintain similar
+ placement of items on the screen. For more information on presenting content on an ambient screen,
+ see the
 <a href="{@docRoot}design/wear/watchfaces.html#DisplayModes">Watch Faces for Android Wear</a>
-design guide.
+design guide.</p>
+<p> Note that when your app runs on a device without a hardware button, palming the screen does not
+switch an app into ambient mode. Rather, it causes the app to exit and the home screen to appear.
+This behavior is intended to ensure that users can exit apps gracefully. However, these devices still
+ go to ambient mode when the screen times out.
 </p>
 
 <p class="note"><b>Note:</b> In ambient mode, disable any interactive elements on the
