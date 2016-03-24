@@ -2063,6 +2063,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+        if (disallowIntercept) {
+            mSwipeHelper.removeLongPressCallback();
+        }
+    }
+
     private void onViewRemovedInternal(View child) {
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
