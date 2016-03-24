@@ -16,6 +16,7 @@
 
 package android.renderscript;
 
+import dalvik.system.CloseGuard;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -69,6 +70,7 @@ public class BaseObj {
     }
 
     private long mID;
+    final CloseGuard guard = CloseGuard.get();
     private boolean mDestroyed;
     private String mName;
     RenderScript mRS;
@@ -119,6 +121,7 @@ public class BaseObj {
         }
 
         if (shouldDestroy) {
+            guard.close();
             // must include nObjDestroy in the critical section
             ReentrantReadWriteLock.ReadLock rlock = mRS.mRWLock.readLock();
             rlock.lock();
@@ -133,8 +136,14 @@ public class BaseObj {
     }
 
     protected void finalize() throws Throwable {
-        helpDestroy();
-        super.finalize();
+        try {
+            if (guard != null) {
+                guard.warnIfOpen();
+            }
+            helpDestroy();
+        } finally {
+            super.finalize();
+        }
     }
 
     /**
