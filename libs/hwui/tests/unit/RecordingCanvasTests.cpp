@@ -23,6 +23,9 @@
 #include <tests/common/TestUtils.h>
 #include <utils/Color.h>
 
+#include <SkGradientShader.h>
+#include <SkShader.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -597,6 +600,45 @@ TEST(RecordingCanvas, refPaint) {
     EXPECT_NE(nullptr, ops[3]->paint);
     EXPECT_NE(ops[0]->paint, ops[3]->paint);
     EXPECT_NE(&paint, ops[3]->paint);
+}
+
+TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
+    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
+        SkPaint paint;
+        SkAutoTUnref<SkShader> shader(SkShader::CreateBitmapShader(bitmap,
+                SkShader::TileMode::kClamp_TileMode,
+                SkShader::TileMode::kClamp_TileMode));
+        paint.setShader(shader);
+        canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
+    });
+    auto& bitmaps = dl->getBitmapResources();
+    EXPECT_EQ(1u, bitmaps.size());
+}
+
+TEST(RecordingCanvas, refBitmapInShader_composeShader) {
+    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
+        SkPaint paint;
+        SkAutoTUnref<SkShader> shader1(SkShader::CreateBitmapShader(bitmap,
+                SkShader::TileMode::kClamp_TileMode,
+                SkShader::TileMode::kClamp_TileMode));
+
+        SkPoint center;
+        center.set(50, 50);
+        SkColor colors[2];
+        colors[0] = Color::Black;
+        colors[1] = Color::White;
+        SkAutoTUnref<SkShader> shader2(SkGradientShader::CreateRadial(center, 50, colors, nullptr, 2,
+                SkShader::TileMode::kRepeat_TileMode));
+
+        SkAutoTUnref<SkShader> composeShader(SkShader::CreateComposeShader(shader1, shader2,
+                SkXfermode::Mode::kMultiply_Mode));
+        paint.setShader(composeShader);
+        canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
+    });
+    auto& bitmaps = dl->getBitmapResources();
+    EXPECT_EQ(1u, bitmaps.size());
 }
 
 TEST(RecordingCanvas, drawText) {
