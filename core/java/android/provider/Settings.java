@@ -322,6 +322,20 @@ public final class Settings {
             "android.settings.PRIVACY_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of VPN.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VPN_SETTINGS =
+            "android.settings.VPN_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Wi-Fi.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
