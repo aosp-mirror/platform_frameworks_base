@@ -1431,8 +1431,11 @@
          Choices are: OFF, DELETE, TRUNCATE, PERSIST and MEMORY.
          PERSIST may improve performance by reducing how often journal blocks are
          reallocated (compared to truncation) resulting in better data block locality
-         and less churn of the storage media. -->
-    <string name="db_default_journal_mode" translatable="false">PERSIST</string>
+         and less churn of the storage media.
+
+         The PERSIST mode results in data persisting in the journal beyond the life of
+         a transaction, so it interacts poorly with SECURE_DELETE. -->
+    <string name="db_default_journal_mode" translatable="false">TRUNCATE</string>
 
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
