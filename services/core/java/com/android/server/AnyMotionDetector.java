@@ -108,63 +108,71 @@ public class AnyMotionDetector {
     public AnyMotionDetector(PowerManager pm, Handler handler, SensorManager sm,
             DeviceIdleCallback callback, float thresholdAngle) {
         if (DEBUG) Slog.d(TAG, "AnyMotionDetector instantiated.");
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        mWakeLock.setReferenceCounted(false);
-        mHandler = handler;
-        mSensorManager = sm;
-        mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mMeasurementInProgress = false;
-        mState = STATE_INACTIVE;
-        mCallback = callback;
-        mThresholdAngle = thresholdAngle;
-        mRunningStats = new RunningSignalStats();
-        mNumSufficientSamples = (int) Math.ceil(
-                ((double)ORIENTATION_MEASUREMENT_DURATION_MILLIS / SAMPLING_INTERVAL_MILLIS));
-        if (DEBUG) Slog.d(TAG, "mNumSufficientSamples = " + mNumSufficientSamples);
+        synchronized (mLock) {
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            mWakeLock.setReferenceCounted(false);
+            mHandler = handler;
+            mSensorManager = sm;
+            mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mMeasurementInProgress = false;
+            mState = STATE_INACTIVE;
+            mCallback = callback;
+            mThresholdAngle = thresholdAngle;
+            mRunningStats = new RunningSignalStats();
+            mNumSufficientSamples = (int) Math.ceil(
+                    ((double)ORIENTATION_MEASUREMENT_DURATION_MILLIS / SAMPLING_INTERVAL_MILLIS));
+            if (DEBUG) Slog.d(TAG, "mNumSufficientSamples = " + mNumSufficientSamples);
+        }
     }
 
     /*
      * Acquire accel data until we determine AnyMotion status.
      */
     public void checkForAnyMotion() {
-      if (DEBUG) Slog.d(TAG, "checkForAnyMotion(). mState = " + mState);
+        if (DEBUG) {
+            Slog.d(TAG, "checkForAnyMotion(). mState = " + mState);
+        }
         if (mState != STATE_ACTIVE) {
-            mState = STATE_ACTIVE;
-            if (DEBUG) Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_ACTIVE.");
-            mCurrentGravityVector = null;
-            mPreviousGravityVector = null;
-            startOrientationMeasurement();
+            synchronized (mLock) {
+                mState = STATE_ACTIVE;
+                if (DEBUG) {
+                    Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_ACTIVE.");
+                }
+                mCurrentGravityVector = null;
+                mPreviousGravityVector = null;
+                mWakeLock.acquire();
+                startOrientationMeasurementLocked();
+            }
         }
     }
 
     public void stop() {
         if (mState == STATE_ACTIVE) {
-            mState = STATE_INACTIVE;
-            if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE.");
-            if (mMeasurementInProgress) {
-                mMeasurementInProgress = false;
-                mSensorManager.unregisterListener(mListener);
+            synchronized (mLock) {
+                mState = STATE_INACTIVE;
+                if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE.");
+                if (mMeasurementInProgress) {
+                    mMeasurementInProgress = false;
+                    mSensorManager.unregisterListener(mListener);
+                }
+                mHandler.removeCallbacks(mMeasurementTimeout);
+                mHandler.removeCallbacks(mSensorRestart);
+                mCurrentGravityVector = null;
+                mPreviousGravityVector = null;
+                mWakeLock.release();
             }
-            mHandler.removeCallbacks(mMeasurementTimeout);
-            mHandler.removeCallbacks(mSensorRestart);
-            mWakeLock.release();
-            mCurrentGravityVector = null;
-            mPreviousGravityVector = null;
         }
     }
 
-    private void startOrientationMeasurement() {
-        if (DEBUG) Slog.d(TAG, "startOrientationMeasurement: mMeasurementInProgress=" +
+    private void startOrientationMeasurementLocked() {
+        if (DEBUG) Slog.d(TAG, "startOrientationMeasurementLocked: mMeasurementInProgress=" +
             mMeasurementInProgress + ", (mAccelSensor != null)=" + (mAccelSensor != null));
-
         if (!mMeasurementInProgress && mAccelSensor != null) {
             if (mSensorManager.registerListener(mListener, mAccelSensor,
                     SAMPLING_INTERVAL_MILLIS * 1000)) {
-                mWakeLock.acquire();
                 mMeasurementInProgress = true;
                 mRunningStats.reset();
             }
-
             Message msg = Message.obtain(mHandler, mMeasurementTimeout);
             msg.setAsynchronous(true);
             mHandler.sendMessageDelayed(msg, ACCELEROMETER_DATA_TIMEOUT_MILLIS);
@@ -178,7 +186,6 @@ public class AnyMotionDetector {
         if (mMeasurementInProgress) {
             mSensorManager.unregisterListener(mListener);
             mHandler.removeCallbacks(mMeasurementTimeout);
-            mWakeLock.release();
             long detectionEndTime = SystemClock.elapsedRealtime();
             mMeasurementInProgress = false;
             mPreviousGravityVector = mCurrentGravityVector;
@@ -196,8 +203,10 @@ public class AnyMotionDetector {
             status = getStationaryStatus();
             if (DEBUG) Slog.d(TAG, "getStationaryStatus() returned " + status);
             if (status != RESULT_UNKNOWN) {
-                if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE. status = " +
-                        status);
+                mWakeLock.release();
+                if (DEBUG) {
+                    Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE. status = " + status);
+                }
                 mState = STATE_INACTIVE;
             } else {
                 /*
@@ -275,7 +284,7 @@ public class AnyMotionDetector {
         @Override
         public void run() {
             synchronized (mLock) {
-                startOrientationMeasurement();
+                startOrientationMeasurementLocked();
             }
         }
     };
