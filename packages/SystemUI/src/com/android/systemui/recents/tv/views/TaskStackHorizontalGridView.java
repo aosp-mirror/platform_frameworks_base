@@ -156,9 +156,4 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
             }
         }
     }
-
-    @Override
-    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask, AnimationProps animation) {
-        //No history task on tv
-    }
 }

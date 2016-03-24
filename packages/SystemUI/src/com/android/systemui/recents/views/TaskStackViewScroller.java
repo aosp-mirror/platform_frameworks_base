@@ -28,8 +28,6 @@ import android.widget.OverScroller;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
 /* The scrolling logic for a TaskStackView */
@@ -189,7 +187,7 @@ public class TaskStackViewScroller {
         // Finish any current scrolling animations
         if (mScrollAnimator != null && mScrollAnimator.isRunning()) {
             setStackScroll(mFinalAnimatedScroll);
-            mScroller.startScroll(0, progressToScrollRange(mFinalAnimatedScroll), 0, 0, 0);
+            mScroller.forceFinished(true);
         }
         stopScroller();
         stopBoundScrollAnimation();
@@ -222,12 +220,6 @@ public class TaskStackViewScroller {
     }
 
     /**** OverScroller ****/
-
-    // TODO: Remove
-    @Deprecated
-    int progressToScrollRange(float p) {
-        return (int) (p * mLayoutAlgorithm.mStackRect.height());
-    }
 
     /** Called from the view draw, computes the next scroll. */
     boolean computeScroll() {

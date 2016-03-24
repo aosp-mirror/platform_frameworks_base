@@ -121,7 +121,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mScrollTouchSlop = configuration.getScaledTouchSlop();
         mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
         mFlingAnimUtils = new FlingAnimationUtils(context, 0.2f);
-        mOverscrollSize = res.getDimensionPixelSize(R.dimen.recents_stack_overscroll);
+        mOverscrollSize = res.getDimensionPixelSize(R.dimen.recents_fling_overscroll_distance);
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, context) {
             @Override
             protected float getSize(View v) {
@@ -458,12 +458,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 newStackScroll = stackScroller.getBoundedStackScroll(newStackScroll);
             } else if (pullStackForward) {
                 // Otherwise, offset the scroll by the movement of the anchor task
-                float anchorTaskScroll = layoutAlgorithm.getStackScrollForTask(anchorTask);
+                float anchorTaskScroll =
+                        layoutAlgorithm.getStackScrollForTaskIgnoreOverrides(anchorTask);
                 float stackScrollOffset = (anchorTaskScroll - prevAnchorTaskScroll);
                 if (layoutAlgorithm.getFocusState() != TaskStackLayoutAlgorithm.STATE_FOCUSED) {
                     // If we are focused, we don't want the front task to move, but otherwise, we
                     // allow the back task to move up, and the front task to move back
-                    stackScrollOffset /= 2;
+                    stackScrollOffset *= 0.75f;
                 }
                 newStackScroll = stackScroller.getBoundedStackScroll(stackScroller.getStackScroll()
                         + stackScrollOffset);

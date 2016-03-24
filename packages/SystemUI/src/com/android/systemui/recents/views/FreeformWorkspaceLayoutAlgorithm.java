@@ -46,7 +46,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
     public void reloadOnConfigurationChange(Context context) {
         // This is applied to the edges of each task
         mTaskPadding = context.getResources().getDimensionPixelSize(
-                R.dimen.recents_freeform_workspace_task_padding) / 2;
+                R.dimen.recents_freeform_layout_task_padding) / 2;
     }
 
     /**

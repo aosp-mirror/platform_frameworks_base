@@ -59,8 +59,7 @@ import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
-import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
-import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
@@ -68,8 +67,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
-import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
-import com.android.systemui.recents.events.activity.ShowHistoryEvent;
+import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
@@ -84,7 +82,6 @@ import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -106,15 +103,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private final static String KEY_SAVED_STATE_LAYOUT_STACK_SCROLL =
             "saved_instance_state_layout_stack_scroll";
 
-    // The thresholds at which to show/hide the history button.
-    private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
-    private static final float HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
+    // The thresholds at which to show/hide the stack action button.
+    private static final float SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
+    private static final float HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
     public static final int DEFAULT_SYNC_STACK_DURATION = 200;
     private static final int DRAG_SCALE_DURATION = 175;
     private static final float DRAG_SCALE_FACTOR = 1.05f;
 
-    private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 200;
+    private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 216;
     private static final int LAUNCH_NEXT_SCROLL_INCR_DURATION = 32;
 
     private static final ArraySet<Task.TaskKey> EMPTY_TASK_SET = new ArraySet<>();
@@ -165,11 +162,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // The current stack bounds are dynamic and may change as the user drags and drops
     @ViewDebug.ExportedProperty(category="recents")
     private Rect mStackBounds = new Rect();
+    // The current window bounds at the point we were measured
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mStableWindowRect = new Rect();
+    // The current window bounds are dynamic and may change as the user drags and drops
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mWindowRect = new Rect();
 
     private Rect mTmpRect = new Rect();
     private ArrayMap<Task.TaskKey, TaskView> mTmpTaskViewMap = new ArrayMap<>();
     private List<TaskView> mTmpTaskViews = new ArrayList<>();
     private TaskViewTransform mTmpTransform = new TaskViewTransform();
+    private ArrayList<TaskViewTransform> mTmpTaskTransforms = new ArrayList<>();
     private int[] mTmpIntPair = new int[2];
 
     // A convenience update listener to request updating clipping of tasks
@@ -302,7 +306,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Sets the stack tasks of this TaskStackView from the given TaskStack.
      */
-    public void setTasks(TaskStack stack, boolean notifyStackChanges, boolean relayoutTaskStack) {
+    public void setTasks(TaskStack stack, boolean notifyStackChanges, boolean relayoutTaskStack,
+            boolean multiWindowChange) {
         boolean isInitialized = mLayoutAlgorithm.isInitialized();
         mStack.setTasks(getContext(), stack.computeAllTasksList(),
                 notifyStackChanges && isInitialized);
@@ -310,7 +315,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Only update the layout if we are notifying, otherwise, we will update it in the next
             // measure/layout pass
             updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
-            updateToInitialState();
+            if (!multiWindowChange) {
+                updateToInitialState();
+            }
 
             if (relayoutTaskStack) {
                 relayoutTaskViews(AnimationProps.IMMEDIATE);
@@ -622,15 +629,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Relayout the the visible {@link TaskView}s to their current transforms as specified by the
-     * {@link TaskStackLayoutAlgorithm} with the given {@param animation}. This call cancels any
-     * animations that are current running on those task views, and will ensure that the children
-     * {@link TaskView}s will match the set of visible tasks in the stack.
-     *
-     * @see #relayoutTaskViews(AnimationProps, ArraySet<Task.TaskKey>)
+     * @see #relayoutTaskViews(AnimationProps, ArraySet<Task.TaskKey>, boolean)
      */
     void relayoutTaskViews(AnimationProps animation) {
-        relayoutTaskViews(animation, mIgnoreTasks);
+        relayoutTaskViews(animation, mIgnoreTasks, false /* ignoreTaskOverrides */);
+    }
+
+    /**
+     * @see #relayoutTaskViews(AnimationProps, ArraySet<Task.TaskKey>, boolean)
+     */
+    void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet) {
+        relayoutTaskViews(animation, ignoreTasksSet, false /* ignoreTaskOverrides */);
     }
 
     /**
@@ -641,13 +650,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @param ignoreTasksSet the set of tasks to ignore in the relayout
      */
-    void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet) {
+    void relayoutTaskViews(AnimationProps animation, ArraySet<Task.TaskKey> ignoreTasksSet,
+            boolean ignoreTaskOverrides) {
         // If we had a deferred animation, cancel that
         mDeferredTaskViewLayoutAnimation = null;
 
         // Synchronize the current set of TaskViews
         bindVisibleTaskViews(mStackScroller.getStackScroll(), ignoreTasksSet,
-                false /* ignoreTaskOverrides */);
+                ignoreTaskOverrides /* ignoreTaskOverrides */);
 
         // Animate them to their final transforms with the given animation
         List<TaskView> taskViews = getTaskViews();
@@ -1059,8 +1069,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             event.setContentDescription(frontMostTask.getTask().title);
         }
         event.setItemCount(mStack.getTaskCount());
-        event.setScrollY(mStackScroller.mScroller.getCurrY());
-        event.setMaxScrollY(mStackScroller.progressToScrollRange(mLayoutAlgorithm.mMaxScrollP));
+
+        int stackHeight = mLayoutAlgorithm.mStackRect.height();
+        event.setScrollY((int) (mStackScroller.getStackScroll() * stackHeight));
+        event.setMaxScrollY((int) (mLayoutAlgorithm.mMaxScrollP * stackHeight));
     }
 
     @Override
@@ -1161,23 +1173,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Updates the expected task stack bounds for this stack view.
+     * Updates the system insets.
      */
-    public void setTaskStackBounds(Rect taskStackBounds, Rect systemInsets) {
-        // We can get spurious measure passes with the old bounds when docking, and since we are
-        // using the current stack bounds during drag and drop, don't overwrite them until we
-        // actually get new bounds
-        boolean requiresLayout = false;
-        if (!taskStackBounds.equals(mStableStackBounds)) {
-            mStableStackBounds.set(taskStackBounds);
-            mStackBounds.set(taskStackBounds);
-            requiresLayout = true;
-        }
+    public void setSystemInsets(Rect systemInsets) {
         if (!systemInsets.equals(mLayoutAlgorithm.mSystemInsets)) {
             mLayoutAlgorithm.setSystemInsets(systemInsets);
-            requiresLayout = true;
-        }
-        if (requiresLayout) {
             requestLayout();
         }
     }
@@ -1192,8 +1192,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
+        // Update the stable stack bounds, but only update the current stack bounds if the stable
+        // bounds have changed.  This is because we may get spurious measures while dragging where
+        // our current stack bounds reflect the target drop region.
+        mLayoutAlgorithm.getTaskStackBounds(new Rect(0, 0, width, height),
+                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
+        if (!mTmpRect.equals(mStableStackBounds)) {
+            mStableStackBounds.set(mTmpRect);
+            mStackBounds.set(mTmpRect);
+            mStableWindowRect.set(0, 0, width, height);
+            mWindowRect.set(0, 0, width, height);
+        }
+
         // Compute the rects in the stack algorithm
-        mLayoutAlgorithm.initialize(mStackBounds,
+        mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
         updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
 
@@ -1241,11 +1253,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         MeasureSpec.EXACTLY));
     }
 
-    /**
-     * This is called with the size of the space not including the top or right insets, or the
-     * search bar height in portrait (but including the search bar width in landscape, since we want
-     * to draw under it.
-     */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         // Layout each of the TaskViews
@@ -1282,6 +1289,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mTmpRect.setEmpty();
         }
         Rect taskRect = mLayoutAlgorithm.mTaskRect;
+        tv.cancelTransformAnimation();
         tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
                 taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
     }
@@ -1306,12 +1314,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     false /* requestViewFocus */);
         }
 
-        // Update the history button visibility
-        if (shouldShowHistoryButton() &&
-                mStackScroller.getStackScroll() < SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-            EventBus.getDefault().send(new ShowHistoryButtonEvent(false /* translate */));
+        // Update the stack action button visibility
+        if (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+            EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
         } else {
-            EventBus.getDefault().send(new HideHistoryButtonEvent());
+            EventBus.getDefault().send(new HideStackActionButtonEvent());
         }
     }
 
@@ -1430,12 +1437,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     ? R.string.recents_empty_message
                     : R.string.recents_empty_message_dismissed_all));
         }
-    }
-
-    @Override
-    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask,
-            AnimationProps animation) {
-        // To be implemented
     }
 
     /**** ViewPoolConsumer Implementation ****/
@@ -1572,13 +1573,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm.updateFocusStateOnScroll(curScroll, curScroll - prevScroll);
 
         if (mEnterAnimationComplete) {
-            if (shouldShowHistoryButton() &&
-                    prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
-                    curScroll <= SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-                EventBus.getDefault().send(new ShowHistoryButtonEvent(true /* translate */));
-            } else if (prevScroll < HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD &&
-                    curScroll >= HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-                EventBus.getDefault().send(new HideHistoryButtonEvent());
+            if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                    curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+                EventBus.getDefault().send(new ShowStackActionButtonEvent(true /* translate */));
+            } else if (prevScroll < HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                    curScroll >= HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+                EventBus.getDefault().send(new HideStackActionButtonEvent());
             }
         }
     }
@@ -1625,15 +1625,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             cancelAllTaskViewAnimations();
 
             final Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
-            if (getChildViewForTask(launchTask) == null) {
-                List<TaskView> taskViews = getTaskViews();
-                int lastTaskIndex = !taskViews.isEmpty()
-                        ? mStack.indexOfStackTask(taskViews.get(taskViews.size() - 1).getTask())
-                        : mStack.getTaskCount() - 1;
-                int duration = LAUNCH_NEXT_SCROLL_BASE_DURATION +
-                        Math.abs(mStack.indexOfStackTask(launchTask) - lastTaskIndex)
-                                * LAUNCH_NEXT_SCROLL_INCR_DURATION;
-                mStackScroller.animateScroll(mLayoutAlgorithm.getStackScrollForTask(launchTask),
+            float curScroll = mStackScroller.getStackScroll();
+            float targetScroll = mLayoutAlgorithm.getStackScrollForTaskAtInitialOffset(launchTask);
+            float absScrollDiff = Math.abs(targetScroll - curScroll);
+            if (getChildViewForTask(launchTask) == null || absScrollDiff > 0.35f) {
+                int duration = (int) (LAUNCH_NEXT_SCROLL_BASE_DURATION +
+                        absScrollDiff * LAUNCH_NEXT_SCROLL_INCR_DURATION);
+                mStackScroller.animateScroll(targetScroll,
                         duration, new Runnable() {
                             @Override
                             public void run() {
@@ -1757,32 +1755,38 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
         AnimationProps animation = new AnimationProps(250, Interpolators.FAST_OUT_SLOW_IN);
+        boolean ignoreTaskOverrides = false;
         if (event.dropTarget instanceof TaskStack.DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
             mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
                     getMeasuredHeight(), mDividerSize, mLayoutAlgorithm.mSystemInsets,
-                    getResources()));
-            mLayoutAlgorithm.initialize(mStackBounds,
+                    mLayoutAlgorithm, getResources(), mWindowRect));
+            mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
             updateLayoutAlgorithm(true /* boundScroll */);
+            ignoreTaskOverrides = true;
         } else {
             // Restore the pre-drag task stack bounds, but ensure that we don't layout the dragging
             // task view, so add it back to the ignore set after updating the layout
+            mWindowRect.set(mStableWindowRect);
             mStackBounds.set(mStableStackBounds);
             removeIgnoreTask(event.task);
-            mLayoutAlgorithm.initialize(mStackBounds,
+            mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
             updateLayoutAlgorithm(true /* boundScroll */);
             addIgnoreTask(event.task);
         }
-        relayoutTaskViews(animation);
+        relayoutTaskViews(animation, mIgnoreTasks, ignoreTaskOverrides);
     }
 
     public final void onBusEvent(final DragEndEvent event) {
         // We don't handle drops on the dock regions
         if (event.dropTarget instanceof TaskStack.DockState) {
+            // However, we do need to reset the overrides, since the last state of this task stack
+            // view layout was ignoring task overrides (see DragDropTargetChangedEvent handler)
+            mLayoutAlgorithm.clearUnfocusedTaskOverrides();
             return;
         }
 
@@ -1888,22 +1892,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    public final void onBusEvent(ShowHistoryEvent event) {
-        ReferenceCountedTrigger postAnimTrigger = new ReferenceCountedTrigger();
-        postAnimTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                setVisibility(View.INVISIBLE);
-            }
-        });
-        mAnimationHelper.startShowHistoryAnimation(postAnimTrigger);
-    }
-
-    public final void onBusEvent(HideHistoryEvent event) {
-        setVisibility(View.VISIBLE);
-        mAnimationHelper.startHideHistoryAnimation();
-    }
-
     public final void onBusEvent(MultiWindowStateChangedEvent event) {
         if (!event.inMultiWindow) {
             // Scroll the stack to the front to see the undocked task
@@ -1924,7 +1912,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
         mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
-        mLayoutAlgorithm.initialize(mStackBounds,
+        mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
     }
 
@@ -1990,13 +1978,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         return -1;
-    }
-
-    /**
-     * @return whether the history button should be visible
-     */
-    private boolean shouldShowHistoryButton() {
-        return !mStack.getHistoricalTasks().isEmpty();
     }
 
     /**

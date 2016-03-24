@@ -33,16 +33,6 @@
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">true</bool>
 
-    <!-- Recents: The relative range of visible tasks from the current scroll position
-         while the stack is focused. -->
-    <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>
-    <item name="recents_layout_focused_range_max" format="float" type="integer">3</item>
-
-    <!-- Recents: The relative range of visible tasks from the current scroll position
-         while the stack is not focused. -->
-    <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
-    <item name="recents_layout_unfocused_range_max" format="float" type="integer">2.5</item>
-
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">space;back,home,recent;menu_ime</string>
 

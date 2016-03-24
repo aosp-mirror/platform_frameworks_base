@@ -19,6 +19,7 @@ package com.android.systemui.recents.misc;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.annotation.FloatRange;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -26,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.IntProperty;
 import android.util.Property;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewParent;
 
@@ -66,6 +68,8 @@ public class Utilities {
             };
 
     public static final RectFEvaluator RECTF_EVALUATOR = new RectFEvaluator();
+
+    public static final Rect EMPTY_RECT = new Rect();
 
     /**
      * @return the first parent walking up the view hierarchy that has the given class type.
@@ -231,5 +235,12 @@ public class Utilities {
             // If there are more transforms than tasks, then just subset the transform list
             transforms.subList(taskCount, taskTransformCount).clear();
         }
+    }
+
+    /**
+     * Used for debugging, converts DP to PX.
+     */
+    public static float dpToPx(Resources res, float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
     }
 }

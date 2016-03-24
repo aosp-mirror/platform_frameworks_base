@@ -31,7 +31,6 @@ public class RecentsActivityLaunchState {
     public boolean launchedFromApp;
     public boolean launchedFromAppDocked;
     public boolean launchedFromHome;
-    public boolean launchedFromSearchHome;
     public boolean launchedReuseTaskStackViews;
     public boolean launchedHasConfigurationChanged;
     public boolean launchedViaDragGesture;
@@ -42,7 +41,6 @@ public class RecentsActivityLaunchState {
 
     public void reset() {
         launchedFromHome = false;
-        launchedFromSearchHome = false;
         launchedFromApp = false;
         launchedFromAppDocked = false;
         launchedToTaskId = -1;

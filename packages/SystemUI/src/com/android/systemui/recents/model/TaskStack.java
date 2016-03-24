@@ -16,6 +16,16 @@
 
 package com.android.systemui.recents.model;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -37,29 +47,19 @@ import android.view.animation.Interpolator;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.views.DropTarget;
 import com.android.systemui.recents.views.AnimationProps;
+import com.android.systemui.recents.views.DropTarget;
+import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
-import static android.view.WindowManager.DOCKED_TOP;
 
 
 /**
@@ -220,11 +220,6 @@ public class TaskStack {
          */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
             Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture);
-
-        /**
-         * Notifies when a task has been removed from the history.
-         */
-        void onHistoryTaskRemoved(TaskStack stack, Task removedTask, AnimationProps animation);
     }
 
     /**
@@ -375,29 +370,24 @@ public class TaskStack {
          * {@param height}.
          */
         public Rect getDockedTaskStackBounds(int width, int height, int dividerSize, Rect insets,
-                Resources res) {
-            RecentsConfiguration config = Recents.getConfiguration();
-
+                TaskStackLayoutAlgorithm layoutAlgorithm, Resources res, Rect windowRectOut) {
             // Calculate the inverse docked task bounds
             boolean isHorizontalDivision =
                     res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
             int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
                     insets, width, height, dividerSize);
-            Rect newWindowBounds = new Rect();
             DockedDividerUtils.calculateBoundsForPosition(position,
-                    DockedDividerUtils.invertDockSide(dockSide), newWindowBounds, width, height,
+                    DockedDividerUtils.invertDockSide(dockSide), windowRectOut, width, height,
                     dividerSize);
 
             // Calculate the task stack bounds from the new window bounds
-            Rect searchBarSpaceBounds = new Rect();
             Rect taskStackBounds = new Rect();
             // If the task stack bounds is specifically under the dock area, then ignore the top
             // inset
             int top = dockArea.bottom < 1f
                     ? 0
                     : insets.top;
-            config.getTaskStackBounds(newWindowBounds, top, insets.right,
-                    searchBarSpaceBounds, taskStackBounds);
+            layoutAlgorithm.getTaskStackBounds(windowRectOut, top, insets.right, taskStackBounds);
             return taskStackBounds;
         }
     }
@@ -429,7 +419,6 @@ public class TaskStack {
 
     ArrayList<Task> mRawTaskList = new ArrayList<>();
     FilteredTaskList mStackTaskList = new FilteredTaskList();
-    FilteredTaskList mHistoryTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
     ArrayList<TaskGrouping> mGroups = new ArrayList<>();
@@ -448,21 +437,7 @@ public class TaskStack {
                         t = parentTask;
                     }
                 }
-                return !t.isHistorical;
-            }
-        });
-        mHistoryTaskList.setFilter(new TaskFilter() {
-            @Override
-            public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
-                if (t.isAffiliatedTask()) {
-                    // If this task is affiliated with another parent in the stack, then the
-                    // historical state of this task depends on the state of the parent task
-                    Task parentTask = taskIdMap.get(t.affiliationTaskId);
-                    if (parentTask != null) {
-                        t = parentTask;
-                    }
-                }
-                return t.isHistorical;
+                return t.isStackTask;
             }
         });
     }
@@ -523,12 +498,6 @@ public class TaskStack {
                 mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask, animation,
                         fromDockGesture);
             }
-        } else if (mHistoryTaskList.contains(t)) {
-            removeTaskImpl(mHistoryTaskList, t);
-            if (mCb != null) {
-                // Notify that a task has been removed
-                mCb.onHistoryTaskRemoved(this, t, animation);
-            }
         }
         mRawTaskList.remove(t);
     }
@@ -586,21 +555,7 @@ public class TaskStack {
         // Sort all the tasks to ensure they are ordered correctly
         Collections.sort(allTasks, FREEFORM_LAST_ACTIVE_TIME_COMPARATOR);
 
-        // Filter out the historical tasks from this new list
-        ArrayList<Task> stackTasks = new ArrayList<>();
-        ArrayList<Task> historyTasks = new ArrayList<>();
-        int newTaskCount = allTasks.size();
-        for (int i = 0; i < newTaskCount; i++) {
-            Task task = allTasks.get(i);
-            if (task.isHistorical) {
-                historyTasks.add(task);
-            } else {
-                stackTasks.add(task);
-            }
-        }
-
-        mStackTaskList.set(stackTasks);
-        mHistoryTaskList.set(historyTasks);
+        mStackTaskList.set(allTasks);
         mRawTaskList = allTasks;
 
         // Only callback for the newly added tasks after this stack has been updated
@@ -650,14 +605,6 @@ public class TaskStack {
     }
 
     /**
-     * Returns the set of tasks that are inactive. These tasks will be presented in a separate
-     * history view.
-     */
-    public ArrayList<Task> getHistoricalTasks() {
-        return mHistoryTaskList.getTasks();
-    }
-
-    /**
      * Returns the set of "freeform" tasks in the stack.
      */
     public ArrayList<Task> getFreeformTasks() {
@@ -679,7 +626,6 @@ public class TaskStack {
     public ArrayList<Task> computeAllTasksList() {
         ArrayList<Task> tasks = new ArrayList<>();
         tasks.addAll(mStackTaskList.getTasks());
-        tasks.addAll(mHistoryTaskList.getTasks());
         Collections.sort(tasks, LAST_ACTIVE_TIME_COMPARATOR);
         return tasks;
     }
@@ -925,10 +871,6 @@ public class TaskStack {
     public String toString() {
         String str = "Stack Tasks (" + mStackTaskList.size() + "):\n";
         for (Task t : mStackTaskList.getTasks()) {
-            str += "    " + t.toString() + "\n";
-        }
-        str += "Historical Tasks(" + mHistoryTaskList.size() + "):\n";
-        for (Task t : mHistoryTaskList.getTasks()) {
             str += "    " + t.toString() + "\n";
         }
         return str;

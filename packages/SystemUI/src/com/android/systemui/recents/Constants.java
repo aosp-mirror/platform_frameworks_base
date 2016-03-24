@@ -27,6 +27,7 @@ public class Constants {
         public static final int DismissSourceKeyboard = 0;
         public static final int DismissSourceSwipeGesture = 1;
         public static final int DismissSourceHeaderButton = 2;
+        @Deprecated
         public static final int DismissSourceHistorySwipeGesture = 3;
     }
 

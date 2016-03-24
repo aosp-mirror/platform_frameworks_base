@@ -39,7 +39,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 
 
@@ -196,7 +195,7 @@ public class RecentsTaskLoadPlan {
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, contentDescription, dismissDescription, activityColor,
-                    backgroundColor, !isStackTask, isLaunchTarget, isSystemApp, t.isDockable,
+                    backgroundColor, isLaunchTarget, isStackTask, isSystemApp, t.isDockable,
                     t.bounds, t.taskDescription);
 
             allTasks.add(task);
@@ -273,7 +272,7 @@ public class RecentsTaskLoadPlan {
     }
 
     /**
-     * Returns whether this task is considered a task to be shown in the history.
+     * Returns whether this task is too old to be shown.
      */
     private boolean isHistoricalTask(ActivityManager.RecentTaskInfo t) {
         return t.lastActiveTime < (System.currentTimeMillis() - SESSION_BEGIN_TIME);
