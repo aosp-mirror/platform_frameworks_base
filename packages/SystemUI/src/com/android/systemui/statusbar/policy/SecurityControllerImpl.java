@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.policy;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
@@ -54,10 +56,13 @@ public class SecurityControllerImpl implements SecurityController {
             .build();
     private static final int NO_NETWORK = -1;
 
+    private static final String VPN_BRANDED_META_DATA = "com.android.systemui.IS_BRANDED";
+
     private final Context mContext;
     private final ConnectivityManager mConnectivityManager;
     private final IConnectivityManager mConnectivityManagerService;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final PackageManager mPackageManager;
     private final UserManager mUserManager;
 
     @GuardedBy("mCallbacks")
@@ -75,6 +80,7 @@ public class SecurityControllerImpl implements SecurityController {
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mConnectivityManagerService = IConnectivityManager.Stub.asInterface(
                 ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+        mPackageManager = context.getPackageManager();
         mUserManager = (UserManager)
                 context.getSystemService(Context.USER_SERVICE);
 
@@ -165,6 +171,21 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    public boolean isVpnBranded() {
+        VpnConfig cfg = mCurrentVpns.get(mVpnUserId);
+        if (cfg == null) {
+            return false;
+        }
+
+        String packageName = getPackageNameForVpnConfig(cfg);
+        if (packageName == null) {
+            return false;
+        }
+
+        return isVpnPackageBranded(packageName);
+    }
+
+    @Override
     public void removeCallback(SecurityControllerCallback callback) {
         synchronized (mCallbacks) {
             if (callback == null) return;
@@ -243,6 +264,28 @@ public class SecurityControllerImpl implements SecurityController {
             return;
         }
         mCurrentVpns = vpns;
+    }
+
+    private String getPackageNameForVpnConfig(VpnConfig cfg) {
+        if (cfg.legacy) {
+            return null;
+        }
+        return cfg.user;
+    }
+
+    private boolean isVpnPackageBranded(String packageName) {
+        boolean isBranded;
+        try {
+            ApplicationInfo info = mPackageManager.getApplicationInfo(packageName,
+                PackageManager.GET_META_DATA);
+            if (info == null || info.metaData == null || !info.isSystemApp()) {
+                return false;
+            }
+            isBranded = info.metaData.getBoolean(VPN_BRANDED_META_DATA, false);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+        return isBranded;
     }
 
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
