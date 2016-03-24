@@ -1502,6 +1502,9 @@ final class TaskRecord {
     Rect updateOverrideConfigurationFromLaunchBounds() {
         final Rect bounds = validateBounds(getLaunchBounds());
         updateOverrideConfiguration(bounds);
+        if (bounds != null) {
+            bounds.set(mBounds);
+        }
         return bounds;
     }
 
