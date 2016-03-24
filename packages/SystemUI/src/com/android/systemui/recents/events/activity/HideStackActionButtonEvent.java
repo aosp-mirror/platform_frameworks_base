@@ -16,13 +16,11 @@
 
 package com.android.systemui.recents.events.activity;
 
-import com.android.systemui.recents.RecentsAppWidgetHost;
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent by the {@link RecentsAppWidgetHost} whenever the search provider widget changes, and
- * subscribers can update accordingly.
+ * This is sent when the stack action button should be hidden.
  */
-public class AppWidgetProviderChangedEvent extends EventBus.Event {
+public class HideStackActionButtonEvent extends EventBus.Event {
     // Simple event
 }

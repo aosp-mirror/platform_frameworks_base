@@ -30,8 +30,6 @@ public final class Prefs {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Key.OVERVIEW_SEARCH_APP_WIDGET_ID,
-        Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
         Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
         Key.DEBUG_MODE_ENABLED,
         Key.HOTSPOT_TILE_LAST_USED,
@@ -51,8 +49,6 @@ public final class Prefs {
         Key.QS_NIGHT_ADDED,
     })
     public @interface Key {
-        String OVERVIEW_SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
-        String OVERVIEW_SEARCH_APP_WIDGET_PACKAGE = "searchAppWidgetPackage";
         String OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME = "OverviewLastStackTaskActiveTime";
         String DEBUG_MODE_ENABLED = "debugModeEnabled";
         String HOTSPOT_TILE_LAST_USED = "HotspotTileLastUsed";

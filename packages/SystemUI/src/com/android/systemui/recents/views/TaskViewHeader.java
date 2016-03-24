@@ -350,6 +350,7 @@ public class TaskViewHeader extends FrameLayout
     public void setDimAlpha(float dimAlpha) {
         if (Float.compare(mDimAlpha, dimAlpha) != 0) {
             mDimAlpha = dimAlpha;
+            mTitleView.setAlpha(1f - dimAlpha);
             updateBackgroundColor(mBackground.getColor(), dimAlpha);
         }
     }

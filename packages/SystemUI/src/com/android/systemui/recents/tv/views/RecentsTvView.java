@@ -104,28 +104,6 @@ public class RecentsTvView extends FrameLayout {
         requestLayout();
     }
 
-    public Task getNextTaskOrTopTask(Task taskToSearch) {
-        Task returnTask = null;
-        boolean found = false;
-        if (mTaskStackHorizontalView != null) {
-            TaskStack stack = mTaskStackHorizontalView.getStack();
-            ArrayList<Task> taskList = stack.getStackTasks();
-            // Iterate the stack views and try and find the focused task
-            for (int j = taskList.size() - 1; j >= 0; --j) {
-                Task task = taskList.get(j);
-                // Return the next task in the line.
-                if (found)
-                    return task;
-                // Remember the first possible task as the top task.
-                if (returnTask == null)
-                    returnTask = task;
-                if (task == taskToSearch)
-                    found = true;
-            }
-        }
-        return returnTask;
-    }
-
     public boolean launchFocusedTask() {
         if (mTaskStackHorizontalView != null) {
             Task task = mTaskStackHorizontalView.getFocusedTask();

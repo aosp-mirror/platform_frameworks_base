@@ -25,8 +25,8 @@
         android:layout_gravity="center_vertical|start"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="16dp" />
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp" />
     <TextView
         android:id="@+id/app_title"
         android:layout_width="match_parent"
@@ -45,9 +45,9 @@
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/app_info"
         android:layout_width="@dimen/recents_task_view_header_button_width"
-        android:layout_height="@dimen/recents_task_bar_height"
+        android:layout_height="@dimen/recents_task_view_header_button_height"
         android:layout_gravity="center_vertical|end"
-        android:padding="13dp"
+        android:padding="16dp"
         android:background="?android:selectableItemBackground"
         android:src="@drawable/recents_info_light" />
 </FrameLayout>
