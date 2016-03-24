@@ -56,6 +56,7 @@ public class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
 
     private static final SparseArray<String> SPECIAL_CHARACTER_NAMES = new SparseArray<>();
+    private static final SparseArray<String> MODIFIER_NAMES = new SparseArray<>();
 
     private static void loadSpecialCharacterNames(Context context) {
         SPECIAL_CHARACTER_NAMES.put(
@@ -195,6 +196,13 @@ public class KeyboardShortcuts {
         SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MUHENKAN, "無変換");
         SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_HENKAN, "変換");
         SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_KATAKANA_HIRAGANA, "かな");
+
+        MODIFIER_NAMES.put(KeyEvent.META_META_ON, "Meta");
+        MODIFIER_NAMES.put(KeyEvent.META_CTRL_ON, "Ctrl");
+        MODIFIER_NAMES.put(KeyEvent.META_ALT_ON, "Alt");
+        MODIFIER_NAMES.put(KeyEvent.META_SHIFT_ON, "Shift");
+        MODIFIER_NAMES.put(KeyEvent.META_SYM_ON, "Sym");
+        MODIFIER_NAMES.put(KeyEvent.META_FUNCTION_ON, "Fn");
     }
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -227,16 +235,16 @@ public class KeyboardShortcuts {
                     public void onKeyboardShortcutsReceived(
                             final List<KeyboardShortcutGroup> result) {
                         KeyboardShortcutGroup systemGroup = new KeyboardShortcutGroup(
-                            mContext.getString(R.string.keyboard_shortcut_group_system), true);
+                                mContext.getString(R.string.keyboard_shortcut_group_system), true);
                         systemGroup.addItem(new KeyboardShortcutInfo(
-                            mContext.getString(R.string.keyboard_shortcut_group_system_home),
-                            KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON));
+                                mContext.getString(R.string.keyboard_shortcut_group_system_home),
+                                KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON));
                         systemGroup.addItem(new KeyboardShortcutInfo(
-                            mContext.getString(R.string.keyboard_shortcut_group_system_back),
-                            KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON));
+                                mContext.getString(R.string.keyboard_shortcut_group_system_back),
+                                KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON));
                         systemGroup.addItem(new KeyboardShortcutInfo(
-                            mContext.getString(R.string.keyboard_shortcut_group_system_recents),
-                            KeyEvent.KEYCODE_TAB, KeyEvent.META_ALT_ON));
+                                mContext.getString(R.string.keyboard_shortcut_group_system_recents),
+                                KeyEvent.KEYCODE_TAB, KeyEvent.META_ALT_ON));
                         result.add(systemGroup);
                         showKeyboardShortcutsDialog(result);
                     }
@@ -341,10 +349,10 @@ public class KeyboardShortcuts {
     }
 
     private List<String> getHumanReadableShortcutKeys(KeyboardShortcutInfo info) {
-        // TODO: fix the shortcuts. Find or build an util which can produce human readable
-        // names of the modifiers.
-        List<String> shortcutKeys = new ArrayList<>();
-        shortcutKeys.add(KeyEvent.metaStateToString(info.getModifiers()).toUpperCase());
+        List<String> shortcutKeys = getHumanReadableModifiers(info);
+        if (shortcutKeys == null) {
+            return null;
+        }
         String displayLabelString;
         if (info.getKeycode() == KeyEvent.KEYCODE_UNKNOWN) {
             displayLabelString = String.valueOf(info.getBaseCharacter());
@@ -361,6 +369,26 @@ public class KeyboardShortcuts {
             }
         }
         shortcutKeys.add(displayLabelString.toUpperCase());
+        return shortcutKeys;
+    }
+
+    private List<String> getHumanReadableModifiers(KeyboardShortcutInfo info) {
+        final List<String> shortcutKeys = new ArrayList<>();
+        int modifiers = info.getModifiers();
+        if (modifiers == 0) {
+            return shortcutKeys;
+        }
+        for(int i = 0; i < MODIFIER_NAMES.size(); ++i) {
+            final int supportedModifier = MODIFIER_NAMES.keyAt(i);
+            if ((modifiers & supportedModifier) != 0) {
+                shortcutKeys.add(MODIFIER_NAMES.get(supportedModifier).toUpperCase());
+                modifiers &= ~supportedModifier;
+            }
+        }
+        if (modifiers != 0) {
+            // Remaining unsupported modifiers, don't show anything.
+            return null;
+        }
         return shortcutKeys;
     }
 }
