@@ -1546,18 +1546,6 @@ public class WifiConfiguration implements Parcelable {
         return sbuf.toString();
     }
 
-    /**
-     * Construct a WifiConfiguration from a scanned network
-     * @param scannedAP the scan result used to construct the config entry
-     * TODO: figure out whether this is a useful way to construct a new entry.
-     *
-    public WifiConfiguration(ScanResult scannedAP) {
-        networkId = -1;
-        SSID = scannedAP.SSID;
-        BSSID = scannedAP.BSSID;
-    }
-    */
-
     /** {@hide} */
     public String getPrintableSsid() {
         if (SSID == null) return "";
@@ -1869,11 +1857,6 @@ public class WifiConfiguration implements Parcelable {
             shared = source.shared;
         }
     }
-
-    /** {@hide} */
-    //public static final int NOTHING_TAG = 0;
-    /** {@hide} */
-    //public static final int SCAN_CACHE_TAG = 1;
 
     /** Implement the Parcelable interface {@hide} */
     @Override
