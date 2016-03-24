@@ -684,13 +684,18 @@ public class DeviceIdleController extends SystemService
         public long SMS_TEMP_APP_WHITELIST_DURATION;
 
         private final ContentResolver mResolver;
+        private final boolean mHasWatch;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
         public Constants(Handler handler, ContentResolver resolver) {
             super(handler);
             mResolver = resolver;
-            mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS), false, this);
+            mHasWatch = getContext().getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WATCH);
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    mHasWatch ? Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH
+                              : Settings.Global.DEVICE_IDLE_CONSTANTS),
+                    false, this);
             updateConstants();
         }
 
@@ -703,13 +708,20 @@ public class DeviceIdleController extends SystemService
             synchronized (DeviceIdleController.this) {
                 try {
                     mParser.setString(Settings.Global.getString(mResolver,
-                            Settings.Global.DEVICE_IDLE_CONSTANTS));
+                            mHasWatch ? Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH
+                                      : Settings.Global.DEVICE_IDLE_CONSTANTS));
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
                     Slog.e(TAG, "Bad device idle settings", e);
                 }
 
+                // For now, the default values for watches and non-watches are the same. After
+                // investigation, we will likely decrease KEY_INACTIVE_TIMEOUT and other keys in the
+                // style of:
+                // long inactiveTimeoutDefault = (mHasWatch ? 15 : 30) * 60 * 1000L;
+                // INACTIVE_TIMEOUT = mParser.getLong(KEY_INACTIVE_TIMEOUT,
+                //         !COMPRESS_TIME ? inactiveTimeoutDefault : (inactiveTimeoutDefault / 10));
                 LIGHT_IDLE_TIMEOUT = mParser.getLong(KEY_LIGHT_IDLE_TIMEOUT,
                         !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L);
                 LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = mParser.getLong(
