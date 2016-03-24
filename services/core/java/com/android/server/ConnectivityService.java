@@ -630,7 +630,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mDefaultRequest = createInternetRequestForTransport(-1);
         NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest,
-                new Binder(), NetworkRequestInfo.REQUEST);
+                new Binder(), NetworkRequestType.REQUEST);
         mNetworkRequests.put(mDefaultRequest, defaultNRI);
         mNetworkRequestInfoLogs.log("REGISTER " + defaultNRI);
 
@@ -806,7 +806,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (enable) {
             handleRegisterNetworkRequest(new NetworkRequestInfo(
-                    null, mDefaultMobileDataRequest, new Binder(), NetworkRequestInfo.REQUEST));
+                    null, mDefaultMobileDataRequest, new Binder(), NetworkRequestType.REQUEST));
         } else {
             handleReleaseNetworkRequest(mDefaultMobileDataRequest, Process.SYSTEM_UID);
         }
@@ -1945,7 +1945,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private boolean isRequest(NetworkRequest request) {
-        return mNetworkRequests.get(request).isRequest;
+        return mNetworkRequests.get(request).isRequest();
     }
 
     // must be stateless - things change under us.
@@ -2164,7 +2164,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (VDBG) log("NetworkFactory connected");
                 // A network factory has connected.  Send it all current NetworkRequests.
                 for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-                    if (nri.isRequest == false) continue;
+                    if (!nri.isRequest()) continue;
                     NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
                     ac.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK,
                             (nai != null ? nai.getCurrentScore() : 0), 0, nri.request);
@@ -2301,7 +2301,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
         mNetworkRequests.put(nri.request, nri);
         mNetworkRequestInfoLogs.log("REGISTER " + nri);
-        if (!nri.isRequest) {
+        if (!nri.isRequest()) {
             for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
                 if (nri.request.networkCapabilities.hasSignalStrength() &&
                         network.satisfiesImmutableCapabilitiesOf(nri.request)) {
@@ -2310,7 +2310,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         rematchAllNetworksAndRequests(null, 0);
-        if (nri.isRequest && mNetworkForRequestId.get(nri.request.requestId) == null) {
+        if (nri.isRequest() && mNetworkForRequestId.get(nri.request.requestId) == null) {
             sendUpdatedScoreToFactories(nri.request, 0);
         }
     }
@@ -2331,7 +2331,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             // If this Network is already the highest scoring Network for a request, or if
             // there is hope for it to become one if it validated, then it is needed.
-            if (nri.isRequest && nai.satisfies(nri.request) &&
+            if (nri.isRequest() && nai.satisfies(nri.request) &&
                     (nai.networkRequests.get(nri.request.requestId) != null ||
                     // Note that this catches two important cases:
                     // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
@@ -2359,7 +2359,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nri.unlinkDeathRecipient();
             mNetworkRequests.remove(request);
             mNetworkRequestInfoLogs.log("RELEASE " + nri);
-            if (nri.isRequest) {
+            if (nri.isRequest()) {
                 // Find all networks that are satisfying this request and remove the request
                 // from their request lists.
                 // TODO - it's my understanding that for a request there is only a single
@@ -3736,13 +3736,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
+     * A NetworkRequest as registered by an application can be one of three
+     * types:
+     *
+     *     - "listen", for which the framework will issue callbacks about any
+     *       and all networks that match the specified NetworkCapabilities,
+     *
+     *     - "request", capable of causing a specific network to be created
+     *       first (e.g. a telephony DUN request), the framework will issue
+     *       callbacks about the single, highest scoring current network
+     *       (if any) that matches the specified NetworkCapabilities, or
+     *
+     *     - "track the default network", a hybrid of the two designed such
+     *       that the framework will issue callbacks for the single, highest
+     *       scoring current network (if any) that matches the capabilities of
+     *       the default Internet request (mDefaultRequest), but which cannot
+     *       cause the framework to either create or retain the existence of
+     *       any specific network.
+     *
+     */
+    private static enum NetworkRequestType {
+        LISTEN,
+        TRACK_DEFAULT,
+        REQUEST
+    };
+
+    /**
      * Tracks info about the requester.
      * Also used to notice when the calling process dies so we can self-expire
      */
     private class NetworkRequestInfo implements IBinder.DeathRecipient {
-        static final boolean REQUEST = true;
-        static final boolean LISTEN = false;
-
         final NetworkRequest request;
         final PendingIntent mPendingIntent;
         boolean mPendingIntentSent;
@@ -3750,32 +3773,42 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int mPid;
         final int mUid;
         final Messenger messenger;
-        final boolean isRequest;
+        private final NetworkRequestType mType;
 
-        NetworkRequestInfo(NetworkRequest r, PendingIntent pi, boolean isRequest) {
+        NetworkRequestInfo(NetworkRequest r, PendingIntent pi, NetworkRequestType type) {
             request = r;
             mPendingIntent = pi;
             messenger = null;
             mBinder = null;
             mPid = getCallingPid();
             mUid = getCallingUid();
-            this.isRequest = isRequest;
+            mType = type;
         }
 
-        NetworkRequestInfo(Messenger m, NetworkRequest r, IBinder binder, boolean isRequest) {
+        NetworkRequestInfo(Messenger m, NetworkRequest r, IBinder binder, NetworkRequestType type) {
             super();
             messenger = m;
             request = r;
             mBinder = binder;
             mPid = getCallingPid();
             mUid = getCallingUid();
-            this.isRequest = isRequest;
+            mType = type;
             mPendingIntent = null;
 
             try {
                 mBinder.linkToDeath(this, 0);
             } catch (RemoteException e) {
                 binderDied();
+            }
+        }
+
+        private String typeString() {
+            switch (mType) {
+                case LISTEN: return "Listen";
+                case REQUEST: return "Request";
+                case TRACK_DEFAULT: return "Track default";
+                default:
+                    return "unknown type";
             }
         }
 
@@ -3791,8 +3824,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
             releaseNetworkRequest(request);
         }
 
+        /**
+         * Returns true iff. the contained NetworkRequest is one that:
+         *
+         *     - should be associated with at most one satisfying network
+         *       at a time;
+         *
+         *     - should cause a network to be kept up if it is the only network
+         *       which can satisfy the NetworkReqeust.
+         *
+         * For full detail of how isRequest() is used for pairing Networks with
+         * NetworkRequests read rematchNetworkAndRequests().
+         *
+         * TODO: Rename to something more properly descriptive.
+         */
+        public boolean isRequest() {
+            return (mType == NetworkRequestType.TRACK_DEFAULT) ||
+                   (mType == NetworkRequestType.REQUEST);
+        }
+
         public String toString() {
-            return (isRequest ? "Request" : "Listen") +
+            return typeString() +
                     " from uid/pid:" + mUid + "/" + mPid +
                     " for " + request +
                     (mPendingIntent == null ? "" : " to trigger " + mPendingIntent);
@@ -3845,10 +3897,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
+        final NetworkRequestType type = (networkCapabilities == null)
+                ? NetworkRequestType.TRACK_DEFAULT
+                : NetworkRequestType.REQUEST;
         // If the requested networkCapabilities is null, take them instead from
         // the default network request. This allows callers to keep track of
         // the system default network.
-        if (networkCapabilities == null) {
+        if (type == NetworkRequestType.TRACK_DEFAULT) {
             networkCapabilities = new NetworkCapabilities(mDefaultRequest.networkCapabilities);
             enforceAccessPermission();
         } else {
@@ -3870,8 +3925,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId());
-        NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
-                NetworkRequestInfo.REQUEST);
+        NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder, type);
         if (DBG) log("requestNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST, nri));
@@ -3936,7 +3990,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
-                NetworkRequestInfo.REQUEST);
+                NetworkRequestType.REQUEST);
         if (DBG) log("pendingRequest for " + nri);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT,
                 nri));
@@ -3988,7 +4042,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequest networkRequest = new NetworkRequest(
                 new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
-                NetworkRequestInfo.LISTEN);
+                NetworkRequestType.LISTEN);
         if (DBG) log("listenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
@@ -4006,7 +4060,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequest networkRequest = new NetworkRequest(
                 new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
-                NetworkRequestInfo.LISTEN);
+                NetworkRequestType.LISTEN);
         if (DBG) log("pendingListenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
@@ -4523,7 +4577,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
             if (satisfies) {
-                if (!nri.isRequest) {
+                if (!nri.isRequest()) {
                     // This is not a request, it's a callback listener.
                     // Add it to newNetwork regardless of score.
                     if (newNetwork.addRequest(nri.request)) addedRequests.add(nri);
@@ -4583,7 +4637,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     mNetworkForRequestId.remove(nri.request.requestId);
                     sendUpdatedScoreToFactories(nri.request, 0);
                 } else {
-                    if (nri.isRequest == true) {
+                    if (nri.isRequest()) {
                         Slog.wtf(TAG, "BUG: Removing request " + nri.request.requestId + " from " +
                                 newNetwork.name() +
                                 " without updating mNetworkForRequestId or factories!");
