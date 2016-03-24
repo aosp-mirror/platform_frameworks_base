@@ -259,7 +259,7 @@ public class RenderNode {
         return nSetLayerType(mNativeRenderNode, layerType);
     }
 
-    public boolean setLayerPaint(Paint paint) {
+    public boolean setLayerPaint(@Nullable Paint paint) {
         return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.getNativeInstance() : 0);
     }
 

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -133,7 +134,6 @@ public class TextureView extends View {
      */
     public TextureView(Context context) {
         super(context);
-        init();
     }
 
     /**
@@ -144,7 +144,6 @@ public class TextureView extends View {
      */
     public TextureView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
     }
 
     /**
@@ -158,7 +157,6 @@ public class TextureView extends View {
      */
     public TextureView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
     }
 
     /**
@@ -176,11 +174,6 @@ public class TextureView extends View {
      */
     public TextureView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
-
-    private void init() {
-        mLayerPaint = new Paint();
     }
 
     /**
@@ -260,7 +253,7 @@ public class TextureView extends View {
      * method will however be taken into account when rendering the content of
      * this TextureView.
      *
-     * @param layerType The ype of layer to use with this view, must be one of
+     * @param layerType The type of layer to use with this view, must be one of
      *        {@link #LAYER_TYPE_NONE}, {@link #LAYER_TYPE_SOFTWARE} or
      *        {@link #LAYER_TYPE_HARDWARE}
      * @param paint The paint used to compose the layer. This argument is optional
@@ -268,16 +261,16 @@ public class TextureView extends View {
      *        {@link #LAYER_TYPE_NONE}
      */
     @Override
-    public void setLayerType(int layerType, Paint paint) {
-        if (paint != mLayerPaint) {
-            mLayerPaint = paint == null ? new Paint() : paint;
-            invalidate();
-        }
+    public void setLayerType(int layerType, @Nullable Paint paint) {
+        setLayerPaint(paint);
     }
 
     @Override
-    public void setLayerPaint(Paint paint) {
-        setLayerType(/* ignored */ 0, paint);
+    public void setLayerPaint(@Nullable Paint paint) {
+        if (paint != mLayerPaint) {
+            mLayerPaint = paint;
+            invalidate();
+        }
     }
 
     /**
