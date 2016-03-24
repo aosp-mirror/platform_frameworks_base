@@ -368,7 +368,7 @@ public class StackScrollAlgorithm {
             childViewState.location = StackViewState.LOCATION_UNKNOWN;
             paddingAfterChild = getPaddingAfterChild(algorithmState, child);
             int childHeight = getMaxAllowedChildHeight(child);
-            int minHeight = child.getMinHeight();
+            int collapsedHeight = child.getCollapsedHeight();
             childViewState.yTranslation = currentYPosition;
             if (i == 0) {
                 updateFirstChildHeight(child, childViewState, childHeight, ambientState);
@@ -384,7 +384,7 @@ public class StackScrollAlgorithm {
                     // According to the regular scroll view we are fully translated out of the
                     // bottom of the screen so we are fully in the bottom stack
                     updateStateForChildFullyInBottomStack(algorithmState,
-                            bottomStackStart, childViewState, minHeight, ambientState, child);
+                            bottomStackStart, childViewState, collapsedHeight, ambientState, child);
                 } else {
                     // According to the regular scroll view we are currently translating out of /
                     // into the bottom of the screen
@@ -475,17 +475,17 @@ public class StackScrollAlgorithm {
         float newTranslation = Math.max(ambientState.getTopPadding()
                 + ambientState.getStackTranslation(), childState.yTranslation);
         childState.height = (int) Math.max(childState.height - (newTranslation
-                - childState.yTranslation), row.getMinHeight());
+                - childState.yTranslation), row.getCollapsedHeight());
         childState.yTranslation = newTranslation;
     }
 
     private void clampHunToMaxTranslation(AmbientState ambientState, ExpandableNotificationRow row,
             StackViewState childState) {
         float newTranslation;
-        float bottomPosition = ambientState.getMaxHeadsUpTranslation() - row.getMinHeight();
+        float bottomPosition = ambientState.getMaxHeadsUpTranslation() - row.getCollapsedHeight();
         newTranslation = Math.min(childState.yTranslation, bottomPosition);
         childState.height = (int) Math.max(childState.height
-                - (childState.yTranslation - newTranslation), row.getMinHeight());
+                - (childState.yTranslation - newTranslation), row.getCollapsedHeight());
         childState.yTranslation = newTranslation;
     }
 
@@ -534,10 +534,10 @@ public class StackScrollAlgorithm {
         float offset = mBottomStackIndentationFunctor.getValue(algorithmState.partialInBottom);
         algorithmState.itemsInBottomStack += algorithmState.partialInBottom;
         int newHeight = childHeight;
-        if (childHeight > child.getMinHeight()) {
+        if (childHeight > child.getCollapsedHeight()) {
             newHeight = (int) Math.max(Math.min(transitioningPositionStart + offset -
                     getPaddingAfterChild(algorithmState, child) - currentYPosition, childHeight),
-                    child.getMinHeight());
+                    child.getCollapsedHeight());
             childViewState.height = newHeight;
         }
         childViewState.yTranslation = transitioningPositionStart + offset - newHeight
@@ -547,7 +547,7 @@ public class StackScrollAlgorithm {
 
     private void updateStateForChildFullyInBottomStack(StackScrollAlgorithmState algorithmState,
             float transitioningPositionStart, StackViewState childViewState,
-            int minHeight, AmbientState ambientState, ExpandableView child) {
+            int collapsedHeight, AmbientState ambientState, ExpandableView child) {
         float currentYPosition;
         algorithmState.itemsInBottomStack += 1.0f;
         if (algorithmState.itemsInBottomStack < MAX_ITEMS_IN_BOTTOM_STACK) {
@@ -568,16 +568,14 @@ public class StackScrollAlgorithm {
             childViewState.location = StackViewState.LOCATION_BOTTOM_STACK_HIDDEN;
             currentYPosition = ambientState.getInnerHeight();
         }
-        childViewState.height = minHeight;
-        childViewState.yTranslation = currentYPosition - minHeight;
+        childViewState.height = collapsedHeight;
+        childViewState.yTranslation = currentYPosition - collapsedHeight;
     }
 
 
     /**
      * Update the height of the first child i.e clamp it to the bottom stack
      *
-     *
-
      * @param child the child to update
      * @param childViewState the viewstate of the child
      * @param childHeight the height of the child
@@ -591,7 +589,7 @@ public class StackScrollAlgorithm {
                     mBottomStackSlowDownLength + ambientState.getScrollY();
             // Collapse and expand the first child while the shade is being expanded
         childViewState.height = (int) Math.max(Math.min(bottomPeekStart, (float) childHeight),
-                    child.getMinHeight());
+                    child.getCollapsedHeight());
     }
 
     /**
