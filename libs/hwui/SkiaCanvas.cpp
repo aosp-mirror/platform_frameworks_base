@@ -147,13 +147,6 @@ public:
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) override;
 
-    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
-            const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
-            float totalAdvance) override;
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) override;
-
     virtual bool drawTextAbsolutePos() const  override { return true; }
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
@@ -168,6 +161,14 @@ public:
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
     virtual void callDrawGLFunction(Functor* functor) override;
+
+protected:
+    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
+            const SkPaint& paint, float x, float y,
+            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+            float totalAdvance) override;
+    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+            float hOffset, float vOffset, const SkPaint& paint) override;
 
 private:
     struct SaveRec {
@@ -761,14 +762,8 @@ void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int co
         const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
         float totalAdvance) {
-    // Set align to left for drawing, as we don't want individual
-    // glyphs centered or right-aligned; the offset above takes
-    // care of all alignment.
-    SkPaint paintCopy(paint);
-    paintCopy.setTextAlign(SkPaint::kLeft_Align);
-
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawPosText(text, count << 1, reinterpret_cast<const SkPoint*>(positions), paintCopy);
+    mCanvas->drawPosText(text, count << 1, reinterpret_cast<const SkPoint*>(positions), paint);
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 

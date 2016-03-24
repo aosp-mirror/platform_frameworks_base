@@ -191,12 +191,15 @@ public:
             const SkPaint* paint) override;
 
     // Text
-    virtual void drawGlyphs(const uint16_t* glyphs, const float* positions, int glyphCount,
-            const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
-            float boundsRight, float boundsBottom, float totalAdvance) override;
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) override;
     virtual bool drawTextAbsolutePos() const override { return false; }
+
+protected:
+    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
+            const SkPaint& paint, float x, float y,
+            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+            float totalAdvance) override;
+    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+            float hOffset, float vOffset, const SkPaint& paint) override;
 
 private:
     const ClipBase* getRecordedClip() {
