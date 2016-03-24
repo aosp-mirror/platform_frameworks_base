@@ -58,11 +58,22 @@ public final class StrictJarFile {
 
     public StrictJarFile(String fileName)
             throws IOException, SecurityException {
-        this(fileName, true);
+        this(fileName, true, true);
     }
 
-    public StrictJarFile(String fileName, boolean verify)
-            throws IOException, SecurityException {
+    /**
+     *
+     * @param verify whether to verify the file's JAR signatures and collect the corresponding
+     *        signer certificates.
+     * @param signatureSchemeRollbackProtectionsEnforced {@code true} to enforce protections against
+     *        stripping newer signature schemes (e.g., APK Signature Scheme v2) from the file, or
+     *        {@code false} to ignore any such protections. This parameter is ignored when
+     *        {@code verify} is {@code false}.
+     */
+    public StrictJarFile(String fileName,
+            boolean verify,
+            boolean signatureSchemeRollbackProtectionsEnforced)
+                    throws IOException, SecurityException {
         this.nativeHandle = nativeOpenJarFile(fileName);
         this.raf = new RandomAccessFile(fileName, "r");
 
@@ -73,7 +84,12 @@ public final class StrictJarFile {
             if (verify) {
                 HashMap<String, byte[]> metaEntries = getMetaEntries();
                 this.manifest = new StrictJarManifest(metaEntries.get(JarFile.MANIFEST_NAME), true);
-                this.verifier = new StrictJarVerifier(fileName, manifest, metaEntries);
+                this.verifier =
+                        new StrictJarVerifier(
+                                fileName,
+                                manifest,
+                                metaEntries,
+                                signatureSchemeRollbackProtectionsEnforced);
                 Set<String> files = manifest.getEntries().keySet();
                 for (String file : files) {
                     if (findEntry(file) == null) {

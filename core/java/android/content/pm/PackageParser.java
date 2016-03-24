@@ -1158,10 +1158,15 @@ public class PackageParser {
         StrictJarFile jarFile = null;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "strictJarFileCtor");
+            // Ignore signature stripping protections when verifying APKs from system partition.
+            // For those APKs we only care about extracting signer certificates, and don't care
+            // about verifying integrity.
+            boolean signatureSchemeRollbackProtectionsEnforced =
+                    (parseFlags & PARSE_IS_SYSTEM) == 0;
             jarFile = new StrictJarFile(
                     apkPath,
-                    !verified // whether to verify JAR signature
-                    );
+                    !verified, // whether to verify JAR signature
+                    signatureSchemeRollbackProtectionsEnforced);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Always verify manifest, regardless of source
