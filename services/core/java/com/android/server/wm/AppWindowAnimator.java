@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import android.graphics.Matrix;
 import android.util.Slog;
@@ -106,6 +107,7 @@ public class AppWindowAnimator {
     boolean usingTransferredAnimation = false;
 
     private boolean mSkipFirstFrame = false;
+    private int mStackClip = STACK_CLIP_BEFORE_ANIM;
 
     static final Animation sDummyAnimation = new DummyAnimation();
 
@@ -115,7 +117,8 @@ public class AppWindowAnimator {
         mAnimator = mService.mAnimator;
     }
 
-    public void setAnimation(Animation anim, int width, int height, boolean skipFirstFrame) {
+    public void setAnimation(Animation anim, int width, int height, boolean skipFirstFrame,
+            int stackClip) {
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting animation in " + mAppToken
                 + ": " + anim + " wxh=" + width + "x" + height
                 + " isVisible=" + mAppToken.isVisible());
@@ -142,6 +145,7 @@ public class AppWindowAnimator {
         transformation.clear();
         transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
+        mStackClip = stackClip;
 
         this.mSkipFirstFrame = skipFirstFrame;
 
@@ -186,6 +190,7 @@ public class AppWindowAnimator {
             mAppToken.allDrawn = false;
             mAppToken.deferClearAllDrawn = false;
         }
+        mStackClip = STACK_CLIP_BEFORE_ANIM;
     }
 
     public boolean isAnimating() {
@@ -199,6 +204,10 @@ public class AppWindowAnimator {
             thumbnail = null;
         }
         deferThumbnailDestruction = false;
+    }
+
+    int getStackClip() {
+        return mStackClip;
     }
 
     void transferCurrentAnimation(
