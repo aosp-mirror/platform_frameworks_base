@@ -7352,6 +7352,30 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void adjustForImeIfNeeded(final DisplayContent displayContent) {
+        final WindowState imeWin = mInputMethodWindow;
+        final TaskStack focusedStack =
+                mCurrentFocus != null ? mCurrentFocus.getStack() : null;
+        if (imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
+                && isStackVisibleLocked(DOCKED_STACK_ID)
+                && focusedStack != null
+                && focusedStack.getDockSide() == DOCKED_BOTTOM){
+            final ArrayList<TaskStack> stacks = displayContent.getStacks();
+            for (int i = stacks.size() - 1; i >= 0; --i) {
+                final TaskStack stack = stacks.get(i);
+                if (stack.isVisibleLocked()) {
+                    stack.setAdjustedForIme(imeWin);
+                }
+            }
+        } else {
+            final ArrayList<TaskStack> stacks = displayContent.getStacks();
+            for (int i = stacks.size() - 1; i >= 0; --i) {
+                final TaskStack stack = stacks.get(i);
+                stack.resetAdjustedForIme();
+            }
+        }
+    }
+
     // -------------------------------------------------------------
     // Drag and drop
     // -------------------------------------------------------------
@@ -8209,30 +8233,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mWindowMap) {
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
-
                         displayContent.getDockedDividerController().reevaluateVisibility(false);
-
-                        final WindowState imeWin = mInputMethodWindow;
-                        final TaskStack focusedStack =
-                                mCurrentFocus != null ? mCurrentFocus.getStack() : null;
-                        if (imeWin != null && imeWin.isVisibleNow()
-                                && isStackVisibleLocked(DOCKED_STACK_ID)
-                                && focusedStack != null
-                                && focusedStack.getDockSide() == DOCKED_BOTTOM){
-                            final ArrayList<TaskStack> stacks = displayContent.getStacks();
-                            for (int i = stacks.size() - 1; i >= 0; --i) {
-                                final TaskStack stack = stacks.get(i);
-                                if (stack.isVisibleLocked()) {
-                                    stack.setAdjustedForIme(imeWin);
-                                }
-                            }
-                        } else {
-                            final ArrayList<TaskStack> stacks = displayContent.getStacks();
-                            for (int i = stacks.size() - 1; i >= 0; --i) {
-                                final TaskStack stack = stacks.get(i);
-                                stack.resetAdjustedForIme();
-                            }
-                        }
+                        adjustForImeIfNeeded(displayContent);
                     }
                 }
                 break;

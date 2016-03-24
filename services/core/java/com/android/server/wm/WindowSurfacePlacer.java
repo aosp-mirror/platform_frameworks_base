@@ -9,6 +9,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
@@ -689,6 +690,9 @@ class WindowSurfacePlacer {
                             && !w.isDragResizing() && !adjustedForMinimizedDockedStack
                             && (task == null || !w.getTask().mStack.getFreezeMovementAnimations())) {
                         winAnimator.setMoveAnimation(left, top);
+                    } else if (w.mAttrs.type  == TYPE_DOCK_DIVIDER &&
+                            displayContent.getDockedDividerController().isAdjustingForIme()) {
+                        winAnimator.setMoveAnimation(left, top);
                     }
 
                     //TODO (multidisplay): Accessibility supported only for the default display.
@@ -804,6 +808,8 @@ class WindowSurfacePlacer {
 
                 mService.updateResizingWindows(w);
             }
+
+            displayContent.getDockedDividerController().setAdjustingForIme(false);
 
             mService.mDisplayManagerInternal.setDisplayProperties(displayId,
                     mDisplayHasContent,
