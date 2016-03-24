@@ -72,6 +72,7 @@ class StrictJarVerifier {
     private final StrictJarManifest manifest;
     private final HashMap<String, byte[]> metaEntries;
     private final int mainAttributesEnd;
+    private final boolean signatureSchemeRollbackProtectionsEnforced;
 
     private final Hashtable<String, HashMap<String, Attributes>> signatures =
             new Hashtable<String, HashMap<String, Attributes>>(5);
@@ -164,13 +165,19 @@ class StrictJarVerifier {
      *
      * @param name
      *            the name of the JAR file being verified.
+     *
+     * @param signatureSchemeRollbackProtectionsEnforced {@code true} to enforce protections against
+     *        stripping newer signature schemes (e.g., APK Signature Scheme v2) from the file, or
+     *        {@code false} to ignore any such protections.
      */
     StrictJarVerifier(String name, StrictJarManifest manifest,
-        HashMap<String, byte[]> metaEntries) {
+        HashMap<String, byte[]> metaEntries, boolean signatureSchemeRollbackProtectionsEnforced) {
         jarName = name;
         this.manifest = manifest;
         this.metaEntries = metaEntries;
         this.mainAttributesEnd = manifest.getMainAttributesEnd();
+        this.signatureSchemeRollbackProtectionsEnforced =
+                signatureSchemeRollbackProtectionsEnforced;
     }
 
     /**
@@ -357,40 +364,42 @@ class StrictJarVerifier {
             return;
         }
 
-        // Check whether APK Signature Scheme v2 signature was stripped.
-        String apkSignatureSchemeIdList =
-                attributes.getValue(
-                        ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_NAME);
-        if (apkSignatureSchemeIdList != null) {
-            // This field contains a comma-separated list of APK signature scheme IDs which were
-            // used to sign this APK. If an ID is known to us, it means signatures of that scheme
-            // were stripped from the APK because otherwise we wouldn't have fallen back to
-            // verifying the APK using the JAR signature scheme.
-            boolean v2SignatureGenerated = false;
-            StringTokenizer tokenizer = new StringTokenizer(apkSignatureSchemeIdList, ",");
-            while (tokenizer.hasMoreTokens()) {
-                String idText = tokenizer.nextToken().trim();
-                if (idText.isEmpty()) {
-                    continue;
+        // If requested, check whether APK Signature Scheme v2 signature was stripped.
+        if (signatureSchemeRollbackProtectionsEnforced) {
+            String apkSignatureSchemeIdList =
+                    attributes.getValue(
+                            ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_NAME);
+            if (apkSignatureSchemeIdList != null) {
+                // This field contains a comma-separated list of APK signature scheme IDs which
+                // were used to sign this APK. If an ID is known to us, it means signatures of that
+                // scheme were stripped from the APK because otherwise we wouldn't have fallen back
+                // to verifying the APK using the JAR signature scheme.
+                boolean v2SignatureGenerated = false;
+                StringTokenizer tokenizer = new StringTokenizer(apkSignatureSchemeIdList, ",");
+                while (tokenizer.hasMoreTokens()) {
+                    String idText = tokenizer.nextToken().trim();
+                    if (idText.isEmpty()) {
+                        continue;
+                    }
+                    int id;
+                    try {
+                        id = Integer.parseInt(idText);
+                    } catch (Exception ignored) {
+                        continue;
+                    }
+                    if (id == ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID) {
+                        // This APK was supposed to be signed with APK Signature Scheme v2 but no
+                        // such signature was found.
+                        v2SignatureGenerated = true;
+                        break;
+                    }
                 }
-                int id;
-                try {
-                    id = Integer.parseInt(idText);
-                } catch (Exception ignored) {
-                    continue;
-                }
-                if (id == ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID) {
-                    // This APK was supposed to be signed with APK Signature Scheme v2 but no such
-                    // signature was found.
-                    v2SignatureGenerated = true;
-                    break;
-                }
-            }
 
-            if (v2SignatureGenerated) {
-                throw new SecurityException(signatureFile + " indicates " + jarName + " is signed"
-                        + " using APK Signature Scheme v2, but no such signature was found."
-                        + " Signature stripped?");
+                if (v2SignatureGenerated) {
+                    throw new SecurityException(signatureFile + " indicates " + jarName
+                            + " is signed using APK Signature Scheme v2, but no such signature was"
+                            + " found. Signature stripped?");
+                }
             }
         }
 
