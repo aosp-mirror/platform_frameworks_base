@@ -21,6 +21,7 @@ public class PowerMenuConstants {
     public static final String GLOBAL_ACTION_KEY_POWER = "power";
     public static final String GLOBAL_ACTION_KEY_REBOOT = "reboot";
     public static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
+    public static final String GLOBAL_ACTION_KEY_TORCH = "torch";
     public static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
     public static final String GLOBAL_ACTION_KEY_USERS = "users";
     public static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
@@ -34,6 +35,7 @@ public class PowerMenuConstants {
         GLOBAL_ACTION_KEY_POWER,
         GLOBAL_ACTION_KEY_REBOOT,
         GLOBAL_ACTION_KEY_SCREENSHOT,
+        GLOBAL_ACTION_KEY_TORCH,
         GLOBAL_ACTION_KEY_AIRPLANE,
         GLOBAL_ACTION_KEY_USERS,
         GLOBAL_ACTION_KEY_SETTINGS,
