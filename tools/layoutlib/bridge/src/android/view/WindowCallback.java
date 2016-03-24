@@ -141,9 +141,4 @@ public class WindowCallback implements Window.Callback {
     public void onActionModeFinished(ActionMode mode) {
 
     }
-
-    @Override
-    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, @Nullable Menu menu) {
-
-    }
 }

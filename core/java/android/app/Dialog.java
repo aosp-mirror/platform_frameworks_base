@@ -1082,13 +1082,6 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {
-    }
-
-    /**
      * @return The activity associated with this dialog, or null if there is no associated activity.
      */
     private ComponentName getAssociatedActivity() {

@@ -565,9 +565,10 @@ public abstract class Window {
          *
          * @param data The data list to populate with shortcuts.
          * @param menu The current menu, which may be null.
+         * @param deviceId The id for the connected device the shortcuts should be provided for.
          */
         default public void onProvideKeyboardShortcuts(
-                List<KeyboardShortcutGroup> data, @Nullable Menu menu) { };
+                List<KeyboardShortcutGroup> data, @Nullable Menu menu, int deviceId) { };
     }
 
     /** @hide */

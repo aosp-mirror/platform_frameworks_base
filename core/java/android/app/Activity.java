@@ -57,6 +57,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
+import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -91,6 +92,8 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.DragEvent;
 import android.view.DropPermissions;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
@@ -1679,10 +1682,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     @Override
-    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {
+    public void onProvideKeyboardShortcuts(
+            List<KeyboardShortcutGroup> data, Menu menu, int deviceId) {
         if (menu == null) {
           return;
         }
+        final InputDevice inputDevice = InputManager.getInstance().getInputDevice(deviceId);
+        if (inputDevice == null) {
+            return;
+        }
+        final KeyCharacterMap keyCharacterMap = inputDevice.getKeyCharacterMap();
         KeyboardShortcutGroup group = null;
         int menuSize = menu.size();
         for (int i = 0; i < menuSize; ++i) {

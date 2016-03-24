@@ -103,7 +103,8 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
-    public void requestAppKeyboardShortcuts(IResultReceiver receiver) throws RemoteException {
+    public void requestAppKeyboardShortcuts(
+            IResultReceiver receiver, int deviceId) throws RemoteException {
     }
 
     @Override
