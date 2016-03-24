@@ -527,9 +527,13 @@ public class DirectoryFragment extends Fragment
 
             // Re-enable TalkBack for the toolbars, as they are no longer covered by action mode.
             final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-            final Toolbar rootsToolbar = (Toolbar) getActivity().findViewById(R.id.roots_toolbar);
             toolbar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-            rootsToolbar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+
+            // This toolbar is not present in the fixed_layout
+            final Toolbar rootsToolbar = (Toolbar) getActivity().findViewById(R.id.roots_toolbar);
+            if (rootsToolbar != null) {
+                rootsToolbar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            }
         }
 
         @Override
@@ -544,13 +548,16 @@ public class DirectoryFragment extends Fragment
                 // Hide the toolbars if action mode is enabled, so TalkBack doesn't navigate to
                 // these controls when using linear navigation.
                 final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-                final Toolbar rootsToolbar = (Toolbar) getActivity().findViewById(
-                        R.id.roots_toolbar);
                 toolbar.setImportantForAccessibility(
                         View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
-                rootsToolbar.setImportantForAccessibility(
-                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
 
+                // This toolbar is not present in the fixed_layout
+                final Toolbar rootsToolbar = (Toolbar) getActivity().findViewById(
+                        R.id.roots_toolbar);
+                if (rootsToolbar != null) {
+                    rootsToolbar.setImportantForAccessibility(
+                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+                }
                 return true;
             }
 
