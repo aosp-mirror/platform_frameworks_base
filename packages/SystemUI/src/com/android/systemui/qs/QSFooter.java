@@ -36,11 +36,11 @@ import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
 
+import static android.provider.Settings.ACTION_VPN_SETTINGS;
+
 public class QSFooter implements OnClickListener, DialogInterface.OnClickListener {
     protected static final String TAG = "QSFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final String ACTION_VPN_SETTINGS = "android.net.vpn.SETTINGS";
 
     private final View mRootView;
     private final TextView mFooterText;
