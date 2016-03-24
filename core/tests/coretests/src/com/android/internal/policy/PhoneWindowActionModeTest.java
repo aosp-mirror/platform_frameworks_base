@@ -22,7 +22,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.KeyEvent;
-import android.view.KeyboardShortcutGroup;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
