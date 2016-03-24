@@ -647,16 +647,4 @@ public final class Rect implements Parcelable {
         }
     }
 
-    /**
-     * Scales up the rect by the given scale, rounding values toward the inside.
-     * @hide
-     */
-    public void scaleRoundIn(float scale) {
-        if (scale != 1.0f) {
-            left = (int) Math.ceil(left * scale);
-            top = (int) Math.ceil(top * scale);
-            right = (int) Math.floor(right * scale);
-            bottom = (int) Math.floor(bottom * scale);
-        }
-    }
 }
