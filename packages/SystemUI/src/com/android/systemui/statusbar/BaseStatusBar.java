@@ -1210,10 +1210,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
-    public void toggleKeyboardShortcutsMenu() {
+    public void toggleKeyboardShortcutsMenu(int deviceId) {
         int msg = MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU;
         mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
+        mHandler.obtainMessage(msg, deviceId, 0).sendToTarget();
     }
 
     /** Jumps to the next affiliated task in the group. */
@@ -1299,8 +1299,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected void toggleKeyboardShortcuts() {
-        getKeyboardShortcuts().toggleKeyboardShortcuts();
+    protected void toggleKeyboardShortcuts(int deviceId) {
+        getKeyboardShortcuts().toggleKeyboardShortcuts(deviceId);
     }
 
     protected void cancelPreloadingRecents() {
@@ -1473,7 +1473,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                   showRecentsPreviousAffiliatedTask();
                   break;
              case MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU:
-                  toggleKeyboardShortcuts();
+                  toggleKeyboardShortcuts(m.arg1);
                   break;
             }
         }

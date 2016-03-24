@@ -21,9 +21,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
@@ -42,16 +47,155 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-import static android.view.Gravity.TOP;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
 /**
  * Contains functionality for handling keyboard shortcuts.
  */
 public class KeyboardShortcuts {
-    private static final char SYSTEM_HOME_BASE_CHARACTER = '\u2386';
-    private static final char SYSTEM_BACK_BASE_CHARACTER = '\u007F';
-    private static final char SYSTEM_RECENTS_BASE_CHARACTER = '\u0009';
+    private static final String TAG = KeyboardShortcuts.class.getSimpleName();
+
+    private static final SparseArray<String> SPECIAL_CHARACTER_NAMES = new SparseArray<>();
+
+    private static void loadSpecialCharacterNames(Context context) {
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_HOME, context.getString(R.string.keyboard_key_home));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_BACK, context.getString(R.string.keyboard_key_back));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_DPAD_UP, context.getString(R.string.keyboard_key_dpad_up));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_DPAD_DOWN, context.getString(R.string.keyboard_key_dpad_down));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_DPAD_LEFT, context.getString(R.string.keyboard_key_dpad_left));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_DPAD_RIGHT, context.getString(R.string.keyboard_key_dpad_right));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_DPAD_CENTER, context.getString(R.string.keyboard_key_dpad_center));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_PERIOD, ".");
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_TAB, context.getString(R.string.keyboard_key_tab));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_SPACE, context.getString(R.string.keyboard_key_space));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_ENTER, context.getString(R.string.keyboard_key_enter));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_DEL, context.getString(R.string.keyboard_key_backspace));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                context.getString(R.string.keyboard_key_media_play_pause));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_MEDIA_STOP, context.getString(R.string.keyboard_key_media_stop));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_MEDIA_NEXT, context.getString(R.string.keyboard_key_media_next));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_PREVIOUS,
+                context.getString(R.string.keyboard_key_media_previous));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_REWIND,
+                context.getString(R.string.keyboard_key_media_rewind));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MEDIA_FAST_FORWARD,
+                context.getString(R.string.keyboard_key_media_fast_forward));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_PAGE_UP, context.getString(R.string.keyboard_key_page_up));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_PAGE_DOWN, context.getString(R.string.keyboard_key_page_down));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_A,
+                context.getString(R.string.keyboard_key_button_template, "A"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_B,
+                context.getString(R.string.keyboard_key_button_template, "B"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_C,
+                context.getString(R.string.keyboard_key_button_template, "C"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_X,
+                context.getString(R.string.keyboard_key_button_template, "X"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_Y,
+                context.getString(R.string.keyboard_key_button_template, "Y"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_Z,
+                context.getString(R.string.keyboard_key_button_template, "Z"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_L1,
+                context.getString(R.string.keyboard_key_button_template, "L1"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_R1,
+                context.getString(R.string.keyboard_key_button_template, "R1"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_L2,
+                context.getString(R.string.keyboard_key_button_template, "L2"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_R2,
+                context.getString(R.string.keyboard_key_button_template, "R2"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_START,
+                context.getString(R.string.keyboard_key_button_template, "Start"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_SELECT,
+                context.getString(R.string.keyboard_key_button_template, "Select"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BUTTON_MODE,
+                context.getString(R.string.keyboard_key_button_template, "Mode"));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_FORWARD_DEL, context.getString(R.string.keyboard_key_forward_del));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_ESCAPE, "Esc");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_SYSRQ, "SysRq");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_BREAK, "Break");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_SCROLL_LOCK, "Scroll Lock");
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_MOVE_HOME, context.getString(R.string.keyboard_key_move_home));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_MOVE_END, context.getString(R.string.keyboard_key_move_end));
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_INSERT, context.getString(R.string.keyboard_key_insert));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F1, "F1");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F2, "F2");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F3, "F3");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F4, "F4");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F5, "F5");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F6, "F6");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F7, "F7");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F8, "F8");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F9, "F9");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F10, "F10");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F11, "F11");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_F12, "F12");
+        SPECIAL_CHARACTER_NAMES.put(
+                KeyEvent.KEYCODE_NUM_LOCK, context.getString(R.string.keyboard_key_num_lock));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_0,
+                context.getString(R.string.keyboard_key_numpad_template, "0"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_1,
+                context.getString(R.string.keyboard_key_numpad_template, "1"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_2,
+                context.getString(R.string.keyboard_key_numpad_template, "2"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_3,
+                context.getString(R.string.keyboard_key_numpad_template, "3"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_4,
+                context.getString(R.string.keyboard_key_numpad_template, "4"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_5,
+                context.getString(R.string.keyboard_key_numpad_template, "5"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_6,
+                context.getString(R.string.keyboard_key_numpad_template, "6"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_7,
+                context.getString(R.string.keyboard_key_numpad_template, "7"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_8,
+                context.getString(R.string.keyboard_key_numpad_template, "8"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_9,
+                context.getString(R.string.keyboard_key_numpad_template, "9"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_DIVIDE,
+                context.getString(R.string.keyboard_key_numpad_template, "/"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_MULTIPLY,
+                context.getString(R.string.keyboard_key_numpad_template, "*"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_SUBTRACT,
+                context.getString(R.string.keyboard_key_numpad_template, "-"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_ADD,
+                context.getString(R.string.keyboard_key_numpad_template, "+"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_DOT,
+                context.getString(R.string.keyboard_key_numpad_template, "."));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_COMMA,
+                context.getString(R.string.keyboard_key_numpad_template, ","));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_ENTER,
+                context.getString(R.string.keyboard_key_numpad_template,
+                        context.getString(R.string.keyboard_key_enter)));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_EQUALS,
+                context.getString(R.string.keyboard_key_numpad_template, "="));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_LEFT_PAREN,
+                context.getString(R.string.keyboard_key_numpad_template, "("));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_NUMPAD_RIGHT_PAREN,
+                context.getString(R.string.keyboard_key_numpad_template, ")"));
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_ZENKAKU_HANKAKU, "半角/全角");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_EISU, "英数");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_MUHENKAN, "無変換");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_HENKAN, "変換");
+        SPECIAL_CHARACTER_NAMES.put(KeyEvent.KEYCODE_KATAKANA_HIRAGANA, "かな");
+    }
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
@@ -62,12 +206,20 @@ public class KeyboardShortcuts {
     };
 
     private Dialog mKeyboardShortcutsDialog;
+    private KeyCharacterMap mKeyCharacterMap;
 
     public KeyboardShortcuts(Context context) {
         this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
+        if (SPECIAL_CHARACTER_NAMES.size() == 0) {
+            loadSpecialCharacterNames(context);
+        }
     }
 
-    public void toggleKeyboardShortcuts() {
+    public void toggleKeyboardShortcuts(int deviceId) {
+        InputDevice inputDevice = InputManager.getInstance().getInputDevice(deviceId);
+        if (inputDevice != null) {
+            mKeyCharacterMap = inputDevice.getKeyCharacterMap();
+        }
         if (mKeyboardShortcutsDialog == null) {
             Recents.getSystemServices().requestKeyboardShortcuts(mContext,
                 new KeyboardShortcutsReceiver() {
@@ -78,13 +230,13 @@ public class KeyboardShortcuts {
                             mContext.getString(R.string.keyboard_shortcut_group_system), true);
                         systemGroup.addItem(new KeyboardShortcutInfo(
                             mContext.getString(R.string.keyboard_shortcut_group_system_home),
-                            SYSTEM_HOME_BASE_CHARACTER, KeyEvent.META_META_ON));
+                            KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON));
                         systemGroup.addItem(new KeyboardShortcutInfo(
                             mContext.getString(R.string.keyboard_shortcut_group_system_back),
-                            SYSTEM_BACK_BASE_CHARACTER, KeyEvent.META_META_ON));
+                            KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON));
                         systemGroup.addItem(new KeyboardShortcutInfo(
                             mContext.getString(R.string.keyboard_shortcut_group_system_recents),
-                            SYSTEM_RECENTS_BASE_CHARACTER, KeyEvent.META_ALT_ON));
+                            KeyEvent.KEYCODE_TAB, KeyEvent.META_ALT_ON));
                         result.add(systemGroup);
                         showKeyboardShortcutsDialog(result);
                     }
@@ -148,6 +300,18 @@ public class KeyboardShortcuts {
             final int itemsSize = group.getItems().size();
             for (int j = 0; j < itemsSize; j++) {
                 KeyboardShortcutInfo info = group.getItems().get(j);
+                if (info.getKeycode() != KeyEvent.KEYCODE_UNKNOWN
+                        && !KeyCharacterMap.deviceHasKey(info.getKeycode())) {
+                    // The user can't achieve this shortcut, so skipping.
+                    Log.w(TAG, "Keyboard Shortcut contains key not on device, skipping.");
+                    continue;
+                }
+                List<String> shortcutKeys = getHumanReadableShortcutKeys(info);
+                if (shortcutKeys == null) {
+                    // Ignore shortcuts we can't display keys for.
+                    Log.w(TAG, "Keyboard Shortcut contains unsupported keys, skipping.");
+                    continue;
+                }
                 View shortcutView = inflater.inflate(R.layout.keyboard_shortcut_app_item,
                         shortcutContainer, false);
                 TextView textView = (TextView) shortcutView
@@ -156,7 +320,6 @@ public class KeyboardShortcuts {
 
                 ViewGroup shortcutItemsContainer = (ViewGroup) shortcutView
                         .findViewById(R.id.keyboard_shortcuts_item_container);
-                List<String> shortcutKeys = getHumanReadableShortcutKeys(info);
                 final int shortcutKeysSize = shortcutKeys.size();
                 for (int k = 0; k < shortcutKeysSize; k++) {
                     String shortcutKey = shortcutKeys.get(k);
@@ -179,10 +342,25 @@ public class KeyboardShortcuts {
 
     private List<String> getHumanReadableShortcutKeys(KeyboardShortcutInfo info) {
         // TODO: fix the shortcuts. Find or build an util which can produce human readable
-        // names of the baseCharacter and the modifiers.
+        // names of the modifiers.
         List<String> shortcutKeys = new ArrayList<>();
         shortcutKeys.add(KeyEvent.metaStateToString(info.getModifiers()).toUpperCase());
-        shortcutKeys.add(Character.getName(info.getBaseCharacter()).toUpperCase());
+        String displayLabelString;
+        if (info.getKeycode() == KeyEvent.KEYCODE_UNKNOWN) {
+            displayLabelString = String.valueOf(info.getBaseCharacter());
+        } else if (SPECIAL_CHARACTER_NAMES.get(info.getKeycode()) != null) {
+            displayLabelString = SPECIAL_CHARACTER_NAMES.get(info.getKeycode());
+        } else {
+            // TODO: Have a generic map for when we don't have the device's.
+            char displayLabel = mKeyCharacterMap == null
+                    ? 0 : mKeyCharacterMap.getDisplayLabel(info.getKeycode());
+            if (displayLabel != 0) {
+                displayLabelString = String.valueOf(displayLabel);
+            } else {
+                return null;
+            }
+        }
+        shortcutKeys.add(displayLabelString.toUpperCase());
         return shortcutKeys;
     }
 }
