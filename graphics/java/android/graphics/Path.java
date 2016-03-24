@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * The Path class encapsulates compound (multiple contour) geometric paths
  * consisting of straight line segments, quadratic curves, and cubic curves.
@@ -91,10 +94,22 @@ public class Path {
 
     /** Replace the contents of this with the contents of src.
     */
-    public void set(Path src) {
-        if (this != src) {
-            isSimplePath = src.isSimplePath;
-            native_set(mNativePath, src.mNativePath);
+    public void set(@NonNull Path src) {
+        if (this == src) {
+            return;
+        }
+        isSimplePath = src.isSimplePath;
+        native_set(mNativePath, src.mNativePath);
+        if (!isSimplePath) {
+            return;
+        }
+
+        if (rects != null && src.rects != null) {
+            rects.set(src.rects);
+        } else if (rects != null && src.rects == null) {
+            rects.setEmpty();
+        } else if (src.rects != null) {
+            rects = new Region(src.rects);
         }
     }
 
@@ -685,13 +700,13 @@ public class Path {
      * @param dst The translated path is written here. If this is null, then
      *            the original path is modified.
      */
-    public void offset(float dx, float dy, Path dst) {
-        long dstNative = 0;
+    public void offset(float dx, float dy, @Nullable Path dst) {
         if (dst != null) {
-            dstNative = dst.mNativePath;
-            dst.isSimplePath = false;
+            dst.set(this);
+        } else {
+            dst = this;
         }
-        native_offset(mNativePath, dx, dy, dstNative);
+        dst.offset(dx, dy);
     }
 
     /**
@@ -701,7 +716,15 @@ public class Path {
      * @param dy The amount in the Y direction to offset the entire path
      */
     public void offset(float dx, float dy) {
-        isSimplePath = false;
+        if (isSimplePath && rects == null) {
+            // nothing to offset
+            return;
+        }
+        if (isSimplePath && dx == Math.rint(dx) && dy == Math.rint(dy)) {
+            rects.translate((int) dx, (int) dy);
+        } else {
+            isSimplePath = false;
+        }
         native_offset(mNativePath, dx, dy);
     }
 
@@ -823,7 +846,6 @@ public class Path {
     private static native void native_addPath(long nPath, long src, float dx, float dy);
     private static native void native_addPath(long nPath, long src);
     private static native void native_addPath(long nPath, long src, long matrix);
-    private static native void native_offset(long nPath, float dx, float dy, long dst_path);
     private static native void native_offset(long nPath, float dx, float dy);
     private static native void native_setLastPoint(long nPath, float dx, float dy);
     private static native void native_transform(long nPath, long matrix, long dst_path);
