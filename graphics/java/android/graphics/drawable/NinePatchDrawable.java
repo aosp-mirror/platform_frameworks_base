@@ -706,18 +706,9 @@ public class NinePatchDrawable extends Drawable {
 
         final NinePatch.InsetStruct insets = ninePatch.getBitmap().getNinePatchInsets();
         if (insets != null) {
-            if (mOutlineInsets == null) {
-                mOutlineInsets = new Rect();
-            }
-            final Rect outlineInsets = insets.outlineRect;
-            mOutlineInsets.left = Drawable.scaleFromDensity(
-                    outlineInsets.left, sourceDensity, targetDensity, false);
-            mOutlineInsets.top = Drawable.scaleFromDensity(
-                    outlineInsets.top, sourceDensity, targetDensity, false);
-            mOutlineInsets.right = Drawable.scaleFromDensity(
-                    outlineInsets.right, sourceDensity, targetDensity, false);
-            mOutlineInsets.bottom = Drawable.scaleFromDensity(
-                    outlineInsets.bottom, sourceDensity, targetDensity, false);
+            Rect outlineRect = insets.outlineRect;
+            mOutlineInsets = NinePatch.InsetStruct.scaleInsets(outlineRect.left, outlineRect.top,
+                    outlineRect.right, outlineRect.bottom, targetDensity / (float) sourceDensity);
             mOutlineRadius = Drawable.scaleFromDensity(
                     insets.outlineRadius, sourceDensity, targetDensity);
         } else {
