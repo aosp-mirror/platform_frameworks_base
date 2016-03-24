@@ -189,6 +189,16 @@ class WindowSurfaceController {
         }
     }
 
+    void setFinalCropInTransaction(Rect clipRect) {
+        if (SHOW_TRANSACTIONS) logSurface(
+                "FINAL CROP " + clipRect.toShortString(), null);
+        try {
+            mSurfaceControl.setFinalCrop(clipRect);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Error disconnecting surface in: " + this, e);
+        }
+    }
+
     void setLayer(int layer) {
         if (mSurfaceControl != null) {
             SurfaceControl.openTransaction();
@@ -460,6 +470,7 @@ class WindowSurfaceController {
         private final PointF mPosition = new PointF();
         private final Point mSize = new Point();
         private final Rect mWindowCrop = new Rect();
+        private final Rect mFinalCrop = new Rect();
         private boolean mShown = false;
         private int mLayerStack;
         private boolean mIsOpaque;
@@ -542,6 +553,19 @@ class WindowSurfaceController {
                 }
             }
             super.setWindowCrop(crop);
+        }
+
+        @Override
+        public void setFinalCrop(Rect crop) {
+            if (crop != null) {
+                if (!crop.equals(mFinalCrop)) {
+                    if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setFinalCrop("
+                            + crop.toShortString() + "): OLD:" + this + ". Called by "
+                            + Debug.getCallers(3));
+                    mFinalCrop.set(crop);
+                }
+            }
+            super.setFinalCrop(crop);
         }
 
         @Override
@@ -655,6 +679,7 @@ class WindowSurfaceController {
                             pw.print(" mSize="); pw.print(s.mSize.x); pw.print("x");
                             pw.println(s.mSize.y);
                     pw.print("    mCrop="); s.mWindowCrop.printShortString(pw); pw.println();
+                    pw.print("    mFinalCrop="); s.mFinalCrop.printShortString(pw); pw.println();
                     pw.print("    Transform: ("); pw.print(s.mDsdx); pw.print(", ");
                             pw.print(s.mDtdx); pw.print(", "); pw.print(s.mDsdy);
                             pw.print(", "); pw.print(s.mDtdy); pw.println(")");

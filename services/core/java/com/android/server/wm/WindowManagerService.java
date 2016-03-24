@@ -236,6 +236,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -3039,7 +3040,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int containingWidth = frame.width();
                 final int containingHeight = frame.height();
                 atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight,
-                        mAppTransition.canSkipFirstFrame());
+                        mAppTransition.canSkipFirstFrame(), mAppTransition.getAppStackClipMode());
             }
         } else {
             atoken.mAppAnimator.clearAnimation();
@@ -8973,7 +8974,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + ", mDrawState=DRAW_PENDING in " + w
                                 + ", surfaceController " + winAnimator.mSurfaceController);
                     }
-                    winAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+                    winAnimator.mDrawState = DRAW_PENDING;
                     if (w.mAppToken != null) {
                         w.mAppToken.allDrawn = false;
                         w.mAppToken.deferClearAllDrawn = false;
@@ -10787,7 +10788,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final boolean isForceHiding = mPolicy.isForceHiding(win.mAttrs);
                     if (win.isVisibleLw()
                             && (win.mAppToken != null || isForceHiding)) {
-                        win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
+                        win.mWinAnimator.mDrawState = DRAW_PENDING;
                         // Force add to mResizingWindows.
                         win.mLastContentInsets.set(-1, -1, -1, -1);
                         mWaitingForDrawn.add(win);

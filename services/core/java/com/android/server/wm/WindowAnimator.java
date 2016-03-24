@@ -36,6 +36,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
@@ -406,7 +408,8 @@ public class WindowAnimator {
 
                             Animation a = mPolicy.createForceHideEnterAnimation(false,
                                     keyguardGoingAwayToShade);
-                            winAnimator.setAnimation(a, mPostKeyguardExitAnimation.getStartTime());
+                            winAnimator.setAnimation(a, mPostKeyguardExitAnimation.getStartTime(),
+                                    STACK_CLIP_BEFORE_ANIM);
                             winAnimator.mKeyguardGoingAwayAnimation = true;
                             winAnimator.mKeyguardGoingAwayWithWallpaper
                                     = keyguardGoingAwayWithWallpaper;
@@ -445,7 +448,7 @@ public class WindowAnimator {
             }
 
             final AppWindowToken atoken = win.mAppToken;
-            if (winAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW) {
+            if (winAnimator.mDrawState == READY_TO_SHOW) {
                 if (atoken == null || atoken.allDrawn) {
                     if (winAnimator.performShowLocked()) {
                         setPendingLayoutChanges(displayId,
@@ -487,7 +490,7 @@ public class WindowAnimator {
                     if (a != null) {
                         if (DEBUG_KEYGUARD) Slog.v(TAG,
                                 "Starting keyguard exit animation on window " + winAnimator.mWin);
-                        winAnimator.setAnimation(a);
+                        winAnimator.setAnimation(a, STACK_CLIP_BEFORE_ANIM);
                         winAnimator.mKeyguardGoingAwayAnimation = true;
                         winAnimator.mKeyguardGoingAwayWithWallpaper
                                 = keyguardGoingAwayWithWallpaper;
