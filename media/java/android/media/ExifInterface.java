@@ -1888,6 +1888,19 @@ public class ExifInterface {
         for (ExifTag tag : IFD_POINTER_TAGS) {
             setAttribute(tag.name, null);
         }
+        // Remove old thumbnail data
+        setAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name, null);
+        setAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name, null);
+
+        // Remove null value tags.
+        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
+            for (Object obj : mAttributes[hint].entrySet().toArray()) {
+                Map.Entry entry = (Map.Entry) obj;
+                if (entry.getValue() == null) {
+                    mAttributes[hint].remove(entry.getKey());
+                }
+            }
+        }
 
         // Add IFD pointer tags. The next offset of primary image TIFF IFD will have thumbnail IFD
         // offset when there is one or more tags in the thumbnail IFD.
@@ -1900,23 +1913,10 @@ public class ExifInterface {
         if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
             mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[1].name, "0");
         }
-        // Remove old thumbnail data
-        setAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name, null);
-        setAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name, null);
         if (mHasThumbnail) {
             mAttributes[IFD_TIFF_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name, "0");
             mAttributes[IFD_TIFF_HINT].put(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
                     String.valueOf(mThumbnailLength));
-        }
-
-        // Remove null value tags.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            for (Object obj : mAttributes[hint].entrySet().toArray()) {
-                Map.Entry entry = (Map.Entry) obj;
-                if (entry.getValue() == null) {
-                    mAttributes[hint].remove(entry.getKey());
-                }
-            }
         }
 
         // Calculate IFD group data area sizes. IFD group data area is assigned to save the entry
