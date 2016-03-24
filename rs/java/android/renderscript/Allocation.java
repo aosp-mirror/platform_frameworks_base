@@ -372,6 +372,7 @@ public class Allocation extends BaseObj {
             Log.e(RenderScript.LOG_TAG, "Couldn't invoke registerNativeAllocation:" + e);
             throw new RSRuntimeException("Couldn't invoke registerNativeAllocation:" + e);
         }
+        guard.open("destroy");
     }
 
     Allocation(long id, RenderScript rs, Type t, int usage, MipmapControl mips) {
@@ -1907,6 +1908,7 @@ public class Allocation extends BaseObj {
             if (type.getID(rs) == 0) {
                 throw new RSInvalidStateException("Bad Type");
             }
+            // TODO: What if there is an exception after this? The native allocation would leak.
             long id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
             if (id == 0) {
                 throw new RSRuntimeException("Allocation creation failed.");

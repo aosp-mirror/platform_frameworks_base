@@ -148,6 +148,8 @@ public final class ScriptGroup extends BaseObj {
                                         fieldIDs, values, sizes, depClosures, depFieldIDs);
 
             setID(id);
+
+            guard.open("destroy");
         }
 
         Closure(RenderScript rs, Script.InvokeID invokeID,
@@ -181,6 +183,8 @@ public final class ScriptGroup extends BaseObj {
                                               values, sizes);
 
             setID(id);
+
+            guard.open("destroy");
         }
 
         private void retrieveValueAndDependenceInfo(RenderScript rs,
@@ -382,6 +386,7 @@ public final class ScriptGroup extends BaseObj {
 
     ScriptGroup(long id, RenderScript rs) {
         super(id, rs);
+        guard.open("destroy");
     }
 
     ScriptGroup(RenderScript rs, String name, List<Closure> closures,
@@ -398,6 +403,7 @@ public final class ScriptGroup extends BaseObj {
         }
         long id = rs.nScriptGroup2Create(name, RenderScript.getCachePath(), closureIDs);
         setID(id);
+        guard.open("destroy");
     }
 
     /**
