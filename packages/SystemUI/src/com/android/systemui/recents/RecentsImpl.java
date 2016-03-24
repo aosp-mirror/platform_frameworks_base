@@ -818,6 +818,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     protected void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
             boolean isTopTaskHome, boolean animate) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
@@ -829,7 +830,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
             loader.preloadTasks(sInstanceLoadPlan, topTask.id, isTopTaskHome);
         }
+
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
+        boolean hasRecentTasks = stack.getTaskCount() > 0;
+        boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 
         // Update the header bar if necessary
         updateHeaderBarLayout(stack);
@@ -838,22 +842,31 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         TaskStackLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
 
+        // Update the launch state
+        launchState.launchedFromHome = false;
+        launchState.launchedFromApp = mLaunchedWhileDocking;
+        launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
+        launchState.launchedFromAppDocked = mLaunchedWhileDocking;
+        launchState.launchedWithAltTab = mTriggeredFromAltTab;
+        launchState.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
+        launchState.launchedNumVisibleTasks = stackVr.numVisibleTasks;
+        launchState.launchedNumVisibleThumbnails = stackVr.numVisibleThumbnails;
+        launchState.launchedHasConfigurationChanged = false;
+        launchState.launchedViaDragGesture = mDraggingInRecents;
+        launchState.launchedWhileDocking = mLaunchedWhileDocking;
+
         if (!animate) {
-            ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext, -1, -1);
-            startRecentsActivity(topTask, opts, false /* fromHome */, false /* fromThumbnail*/,
-                    stackVr);
+            startRecentsActivity(ActivityOptions.makeCustomAnimation(mContext, -1, -1));
             return;
         }
 
-        boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
-
         if (useThumbnailTransition) {
+            launchState.launchedFromApp = true;
+
             // Try starting with a thumbnail transition
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, mDummyStackView);
             if (opts != null) {
-                startRecentsActivity(topTask, opts, false /* fromHome */, true /* fromThumbnail */,
-                        stackVr);
+                startRecentsActivity(opts);
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -861,13 +874,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         if (!useThumbnailTransition) {
+            launchState.launchedFromHome = true;
+
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition
             ActivityOptions opts = hasRecentTasks
                     ? getHomeTransitionActivityOptions()
                     : getUnknownTransitionActivityOptions();
-            startRecentsActivity(topTask, opts, true /* fromHome */, false /* fromThumbnail */,
-                    stackVr);
+            startRecentsActivity(opts);
         }
         mLastToggleTime = SystemClock.elapsedRealtime();
     }
@@ -875,24 +889,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Starts the recents activity.
      */
-    private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-                ActivityOptions opts, boolean fromHome, boolean fromThumbnail,
-                TaskStackLayoutAlgorithm.VisibilityReport vr) {
-        // Update the configuration based on the launch options
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        launchState.launchedFromHome = fromHome;
-        launchState.launchedFromApp = fromThumbnail || mLaunchedWhileDocking;
-        launchState.launchedFromAppDocked = mLaunchedWhileDocking;
-        launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
-        launchState.launchedWithAltTab = mTriggeredFromAltTab;
-        launchState.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
-        launchState.launchedNumVisibleTasks = vr.numVisibleTasks;
-        launchState.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
-        launchState.launchedHasConfigurationChanged = false;
-        launchState.launchedViaDragGesture = mDraggingInRecents;
-        launchState.launchedWhileDocking = mLaunchedWhileDocking;
-
+    private void startRecentsActivity(ActivityOptions opts) {
         Intent intent = new Intent();
         intent.setClassName(RECENTS_PACKAGE, RECENTS_ACTIVITY);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
