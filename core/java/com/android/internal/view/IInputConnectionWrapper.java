@@ -16,8 +16,6 @@
 
 package com.android.internal.view;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -59,8 +57,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_CLEAR_META_KEY_STATES = 130;
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
 
-    @NonNull
-    private final WeakReference<InputConnection> mInputConnection;
+    private WeakReference<InputConnection> mInputConnection;
 
     private Looper mMainLooper;
     private Handler mH;
@@ -87,11 +84,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         mInputConnection = new WeakReference<>(conn);
         mMainLooper = mainLooper;
         mH = new MyHandler(mMainLooper);
-    }
-
-    @Nullable
-    public InputConnection getInputConnection() {
-        return mInputConnection.get();
     }
 
     abstract protected boolean isActive();
