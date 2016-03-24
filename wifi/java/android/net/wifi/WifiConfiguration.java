@@ -684,6 +684,13 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * A hint about whether or not the network represented by this WifiConfiguration
+     * is metered.
+     */
+    public boolean meteredHint;
+
+    /**
+     * @hide
      * Number of time the scorer overrode a the priority based choice, when comparing two
      * WifiConfigurations, note that since comparing WifiConfiguration happens very often
      * potentially at every scan, this number might become very large, even on an idle
@@ -1302,6 +1309,7 @@ public class WifiConfiguration implements Parcelable {
         selfAdded = false;
         didSelfAdd = false;
         ephemeral = false;
+        meteredHint = false;
         validatedInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
         lastUpdateUid = -1;
@@ -1399,7 +1407,9 @@ public class WifiConfiguration implements Parcelable {
         if (this.selfAdded) sbuf.append(" selfAdded");
         if (this.validatedInternetAccess) sbuf.append(" validatedInternetAccess");
         if (this.ephemeral) sbuf.append(" ephemeral");
-        if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess || this.ephemeral) {
+        if (this.meteredHint) sbuf.append(" meteredHint");
+        if (this.didSelfAdd || this.selfAdded || this.validatedInternetAccess
+            || this.ephemeral || this.meteredHint) {
             sbuf.append("\n");
         }
         sbuf.append(" KeyMgmt:");
@@ -1832,6 +1842,7 @@ public class WifiConfiguration implements Parcelable {
             selfAdded = source.selfAdded;
             validatedInternetAccess = source.validatedInternetAccess;
             ephemeral = source.ephemeral;
+            meteredHint = source.meteredHint;
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
             }
@@ -1916,6 +1927,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(didSelfAdd ? 1 : 0);
         dest.writeInt(validatedInternetAccess ? 1 : 0);
         dest.writeInt(ephemeral ? 1 : 0);
+        dest.writeInt(meteredHint ? 1 : 0);
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
@@ -1985,6 +1997,7 @@ public class WifiConfiguration implements Parcelable {
                 config.didSelfAdd = in.readInt() != 0;
                 config.validatedInternetAccess = in.readInt() != 0;
                 config.ephemeral = in.readInt() != 0;
+                config.meteredHint = in.readInt() != 0;
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
