@@ -30,7 +30,6 @@
 #include <cutils/properties.h>
 
 #include <SkGraphics.h>
-#include <SkImageDecoder.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
