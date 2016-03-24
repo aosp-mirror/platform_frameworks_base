@@ -317,6 +317,7 @@ public final class InputMethodManager {
     /**
      * The InputConnection that was last retrieved from the served view.
      */
+    InputConnection mServedInputConnection;
     ControlledInputConnectionWrapper mServedInputConnectionWrapper;
     /**
      * The completions that were last provided by the served view.
@@ -497,7 +498,7 @@ public final class InputMethodManager {
                             // from a thread that created mServedView. That could happen
                             // the current activity is running in the system process.
                             // In that case, we really should not call
-                            // mServedInputConnectionWrapper.finishComposingText().
+                            // mServedInputConnection.finishComposingText.
                             if (checkFocusNoStartInput(mHasBeenInactive, false)) {
                                 final int reason = active ?
                                         InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS :
@@ -531,25 +532,22 @@ public final class InputMethodManager {
 
     private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
         private final InputMethodManager mParentInputMethodManager;
+        private boolean mActive;
 
         public ControlledInputConnectionWrapper(final Looper mainLooper, final InputConnection conn,
                 final InputMethodManager inputMethodManager) {
             super(mainLooper, conn);
             mParentInputMethodManager = inputMethodManager;
+            mActive = true;
         }
 
         @Override
         public boolean isActive() {
-            return mParentInputMethodManager.mActive && !isFinished();
+            return mParentInputMethodManager.mActive && mActive;
         }
 
         void deactivate() {
-            if (isFinished()) {
-                // This is a small performance optimization.  Still only the 1st call of
-                // reportFinish() will take effect.
-                return;
-            }
-            reportFinish();
+            mActive = false;
         }
 
         @Override
@@ -564,9 +562,7 @@ public final class InputMethodManager {
 
         @Override
         public String toString() {
-            return "ControlledInputConnectionWrapper{"
-                    + "connection=" + getInputConnection()
-                    + " finished=" + isFinished()
+            return "ControlledInputConnectionWrapper{mActive=" + mActive
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
                     + "}";
         }
@@ -784,8 +780,7 @@ public final class InputMethodManager {
      */
     public boolean isAcceptingText() {
         checkFocus();
-        return mServedInputConnectionWrapper != null &&
-                mServedInputConnectionWrapper.getInputConnection() != null;
+        return mServedInputConnection != null;
     }
 
     /**
@@ -820,6 +815,7 @@ public final class InputMethodManager {
      */
     void clearConnectionLocked() {
         mCurrentTextBoxAttribute = null;
+        mServedInputConnection = null;
         if (mServedInputConnectionWrapper != null) {
             mServedInputConnectionWrapper.deactivate();
             mServedInputConnectionWrapper = null;
@@ -840,10 +836,42 @@ public final class InputMethodManager {
                     throw e.rethrowFromSystemServer();
                 }
             }
+            notifyInputConnectionFinished();
             mServedView = null;
             mCompletions = null;
             mServedConnecting = false;
             clearConnectionLocked();
+        }
+    }
+
+    /**
+     * Notifies the served view that the current InputConnection will no longer be used.
+     */
+    private void notifyInputConnectionFinished() {
+        if (mServedView != null && mServedInputConnection != null) {
+            // We need to tell the previously served view that it is no
+            // longer the input target, so it can reset its state.  Schedule
+            // this call on its window's Handler so it will be on the correct
+            // thread and outside of our lock.
+            ViewRootImpl viewRootImpl = mServedView.getViewRootImpl();
+            if (viewRootImpl != null) {
+                // This will result in a call to reportFinishInputConnection() below.
+                viewRootImpl.dispatchFinishInputConnection(mServedInputConnection);
+            }
+        }
+    }
+
+    /**
+     * Called from the FINISH_INPUT_CONNECTION message above.
+     * @hide
+     */
+    public void reportFinishInputConnection(InputConnection ic) {
+        if (mServedInputConnection != ic) {
+            ic.finishComposingText();
+            // To avoid modifying the public InputConnection interface
+            if (ic instanceof BaseInputConnection) {
+                ((BaseInputConnection) ic).reportFinish();
+            }
         }
     }
 
@@ -1212,10 +1240,9 @@ public final class InputMethodManager {
             // Hook 'em up and let 'er rip.
             mCurrentTextBoxAttribute = tba;
             mServedConnecting = false;
-            if (mServedInputConnectionWrapper != null) {
-                mServedInputConnectionWrapper.deactivate();
-                mServedInputConnectionWrapper = null;
-            }
+            // Notify the served view that its previous input connection is finished
+            notifyInputConnectionFinished();
+            mServedInputConnection = ic;
             ControlledInputConnectionWrapper servedContext;
             final int missingMethodFlags;
             if (ic != null) {
@@ -1239,6 +1266,9 @@ public final class InputMethodManager {
             } else {
                 servedContext = null;
                 missingMethodFlags = 0;
+            }
+            if (mServedInputConnectionWrapper != null) {
+                mServedInputConnectionWrapper.deactivate();
             }
             mServedInputConnectionWrapper = servedContext;
 
@@ -1383,7 +1413,7 @@ public final class InputMethodManager {
             return false;
         }
 
-        final ControlledInputConnectionWrapper ic;
+        InputConnection ic = null;
         synchronized (mH) {
             if (mServedView == mNextServedView && !forceNewFocus) {
                 return false;
@@ -1403,7 +1433,7 @@ public final class InputMethodManager {
                 return false;
             }
 
-            ic = mServedInputConnectionWrapper;
+            ic = mServedInputConnection;
 
             mServedView = mNextServedView;
             mCurrentTextBoxAttribute = null;
@@ -2252,7 +2282,7 @@ public final class InputMethodManager {
         } else {
             p.println("  mCurrentTextBoxAttribute: null");
         }
-        p.println("  mServedInputConnectionWrapper=" + mServedInputConnectionWrapper);
+        p.println("  mServedInputConnection=" + mServedInputConnection);
         p.println("  mCompletions=" + Arrays.toString(mCompletions));
         p.println("  mCursorRect=" + mCursorRect);
         p.println("  mCursorSelStart=" + mCursorSelStart
