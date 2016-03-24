@@ -30,7 +30,6 @@ import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.FileUriExposedException;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
@@ -388,7 +387,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     new MtpObjectInfo.Builder(info).setObjectHandle(objectHandle).build();
             final String documentId = mDatabase.putNewDocument(
                     parentId.mDeviceId, parentDocumentId, record.operationsSupported,
-                    infoWithHandle);
+                    infoWithHandle, 0l);
             getDocumentLoader(parentId).clearTask(parentId);
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;

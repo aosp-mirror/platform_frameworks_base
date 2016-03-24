@@ -174,7 +174,8 @@ class PipeManager {
                         mIdentifier.mDeviceId,
                         parentIdentifier.mDocumentId,
                         mOperationsSupported,
-                        newObjectInfo);
+                        newObjectInfo,
+                        tempFile.length());
             } catch (IOException error) {
                 Log.w(MtpDocumentsProvider.TAG,
                         "Failed to send a file because of: " + error.getMessage());
