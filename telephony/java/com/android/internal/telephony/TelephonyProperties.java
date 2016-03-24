@@ -218,11 +218,4 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_VIDEOCALL_AUDIO_OUTPUT = "persist.radio.call.audio.output";
 
-    /**
-     * For MultiEndpoint Feature
-     * If true: Dial intent is for call pull functionality
-     * if false: normal dial
-     */
-    static final String EXTRA_IS_CALL_PULL =
-            "android.telephony.extra.IS_CALL_PULL";
 }
