@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_BACKGROUND_DEXOPT;
+
 import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -50,8 +52,6 @@ public class BackgroundDexOptService extends JobService {
     static final ArraySet<String> sFailedPackageNames = new ArraySet<String>();
 
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
-
-    private boolean useJitProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
 
     public static void schedule(Context context) {
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -93,8 +93,8 @@ public class BackgroundDexOptService extends JobService {
                         // skip previously failing package
                         continue;
                     }
-                    if (!pm.performDexOpt(pkg, /* instruction set */ null, useJitProfiles,
-                            /* extractOnly */ false, /* force */ false)) {
+                    if (!pm.performDexOpt(pkg, /* instruction set */ null, /* checkProfiles */ true,
+                            REASON_BACKGROUND_DEXOPT, /* force */ false)) {
                         // there was a problem running dexopt,
                         // remember this so we do not keep retrying.
                         sFailedPackageNames.add(pkg);

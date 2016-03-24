@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
-import android.os.storage.StorageManager;
 import android.util.Slog;
 
 import com.android.internal.os.InstallerConnection;
@@ -37,17 +36,17 @@ public final class Installer extends SystemService {
      * frameworks/native/cmds/installd/installd.h
      * **************************************************************************/
     /** Application should be visible to everyone */
-    public static final int DEXOPT_PUBLIC       = 1 << 1;
+    public static final int DEXOPT_PUBLIC         = 1 << 1;
     /** Application wants to run in VM safe mode */
-    public static final int DEXOPT_SAFEMODE     = 1 << 2;
+    public static final int DEXOPT_SAFEMODE       = 1 << 2;
     /** Application wants to allow debugging of its code */
-    public static final int DEXOPT_DEBUGGABLE   = 1 << 3;
+    public static final int DEXOPT_DEBUGGABLE     = 1 << 3;
     /** The system boot has finished */
-    public static final int DEXOPT_BOOTCOMPLETE = 1 << 4;
-    /** Do not compile, only extract bytecode into an OAT file */
-    public static final int DEXOPT_EXTRACTONLY  = 1 << 5;
+    public static final int DEXOPT_BOOTCOMPLETE   = 1 << 4;
+    /** Hint that the dexopt type is profile-guided. */
+    public static final int DEXOPT_PROFILE_GUIDED = 1 << 5;
     /** This is an OTA update dexopt */
-    public static final int DEXOPT_OTA          = 1 << 6;
+    public static final int DEXOPT_OTA            = 1 << 6;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
@@ -137,19 +136,23 @@ public final class Installer extends SystemService {
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags, String volumeUuid, boolean useProfiles) throws InstallerException {
+            int dexFlags, String compilerFilter, String volumeUuid) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags,
-                volumeUuid, useProfiles);
+                compilerFilter, volumeUuid);
     }
 
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String volumeUuid, boolean useProfiles)
+            String compilerFilter, String volumeUuid)
                     throws InstallerException {
         assertValidInstructionSet(instructionSet);
         mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
-                outputPath, dexFlags, volumeUuid, useProfiles);
+                outputPath, dexFlags, compilerFilter, volumeUuid);
+    }
+
+    public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
+        return mInstaller.mergeProfiles(uid, pkgName);
     }
 
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
