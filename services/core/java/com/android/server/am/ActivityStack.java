@@ -1980,7 +1980,9 @@ final class ActivityStack {
         if (next == null) {
             // There are no more activities!
             final String reason = "noMoreActivities";
-            if (!mFullscreen && adjustFocusToNextFocusableStackLocked(reason)) {
+            final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack()
+                    ? HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();
+            if (!mFullscreen && adjustFocusToNextFocusableStackLocked(returnTaskType, reason)) {
                 // Try to move focus to the next visible stack with a running activity if this
                 // stack is not covering the entire screen.
                 return mStackSupervisor.resumeFocusedStackTopActivityLocked(
@@ -1993,8 +1995,6 @@ final class ActivityStack {
                     "resumeTopActivityLocked: No more activities go home");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             // Only resume home if on home display
-            final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack() ?
-                    HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();
             return isOnHomeDisplay() &&
                     mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, reason);
         }
@@ -3004,16 +3004,18 @@ final class ActivityStack {
             } else {
                 final TaskRecord task = r.task;
                 if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
+                    final int taskToReturnTo = task.getTaskToReturnTo();
+
                     // For non-fullscreen stack, we want to move the focus to the next visible
                     // stack to prevent the home screen from moving to the top and obscuring
                     // other visible stacks.
-                    if (!mFullscreen && adjustFocusToNextFocusableStackLocked(myReason)) {
+                    if (!mFullscreen
+                            && adjustFocusToNextFocusableStackLocked(taskToReturnTo, myReason)) {
                         return;
                     }
                     // Move the home stack to the top if this stack is fullscreen or there is no
                     // other visible stack.
-                    if (mStackSupervisor.moveHomeStackTaskToTop(
-                            task.getTaskToReturnTo(), myReason)) {
+                    if (mStackSupervisor.moveHomeStackTaskToTop(taskToReturnTo, myReason)) {
                         // Activity focus was already adjusted. Nothing else to do...
                         return;
                     }
@@ -3024,11 +3026,15 @@ final class ActivityStack {
         mService.setFocusedActivityLocked(mStackSupervisor.topRunningActivityLocked(), myReason);
     }
 
-    private boolean adjustFocusToNextFocusableStackLocked(String reason) {
+    private boolean adjustFocusToNextFocusableStackLocked(int taskToReturnTo, String reason) {
         final ActivityStack stack = getNextFocusableStackLocked();
         final String myReason = reason + " adjustFocusToNextFocusableStack";
         if (stack == null) {
             return false;
+        }
+
+        if (stack.isHomeStack()) {
+            return mStackSupervisor.moveHomeStackTaskToTop(taskToReturnTo, reason);
         }
         return mService.setFocusedActivityLocked(stack.topRunningActivityLocked(), myReason);
     }
@@ -4843,7 +4849,9 @@ final class ActivityStack {
             // We only need to adjust focused stack if this stack is in focus.
             if (isOnHomeDisplay() && mStackSupervisor.isFocusedStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
-                if (mFullscreen || !adjustFocusToNextFocusableStackLocked(myReason)) {
+                if (mFullscreen
+                        || !adjustFocusToNextFocusableStackLocked(
+                        task.getTaskToReturnTo(), myReason)) {
                     mStackSupervisor.moveHomeStackToFront(myReason);
                 }
             }
