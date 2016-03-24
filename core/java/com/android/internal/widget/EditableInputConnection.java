@@ -83,11 +83,8 @@ public class EditableInputConnection extends BaseInputConnection {
         return false;
     }
 
-    /**
-     * @hide
-     */
     @Override
-    public void reportFinish() {
+    protected void reportFinish() {
         super.reportFinish();
 
         synchronized(this) {
