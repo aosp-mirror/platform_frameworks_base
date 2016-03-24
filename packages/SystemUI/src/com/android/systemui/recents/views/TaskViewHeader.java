@@ -337,6 +337,11 @@ public class TaskViewHeader extends FrameLayout
         }
     }
 
+    /** Only exposed for the workaround for b/27815919. */
+    public ImageView getIconView() {
+        return mIconView;
+    }
+
     /** Returns the secondary color for a primary color. */
     int getSecondaryColor(int primaryColor, boolean useLightOverlayColor) {
         int overlayColor = useLightOverlayColor ? Color.WHITE : Color.BLACK;
