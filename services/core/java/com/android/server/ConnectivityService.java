@@ -1006,7 +1006,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public Network getActiveNetwork() {
         enforceAccessPermission();
-        final int uid = Binder.getCallingUid();
+        return getActiveNetworkForUidInternal(Binder.getCallingUid());
+    }
+
+    @Override
+    public Network getActiveNetworkForUid(int uid) {
+        enforceConnectivityInternalPermission();
+        return getActiveNetworkForUidInternal(uid);
+    }
+
+    private Network getActiveNetworkForUidInternal(final int uid) {
         final int user = UserHandle.getUserId(uid);
         int vpnNetId = NETID_UNSET;
         synchronized (mVpns) {

@@ -59,6 +59,7 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Messenger;
 import android.os.MessageQueue.IdleHandler;
+import android.os.Process;
 import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -690,6 +691,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertEquals(transportToLegacyType(transport), mCm.getActiveNetworkInfo().getType());
         // Test getActiveNetwork()
         assertNotNull(mCm.getActiveNetwork());
+        assertEquals(mCm.getActiveNetwork(), mCm.getActiveNetworkForUid(Process.myUid()));
         switch (transport) {
             case TRANSPORT_WIFI:
                 assertEquals(mCm.getActiveNetwork(), mWiFiNetworkAgent.getNetwork());
@@ -713,6 +715,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertNull(mCm.getActiveNetworkInfo());
         // Test getActiveNetwork()
         assertNull(mCm.getActiveNetwork());
+        assertNull(mCm.getActiveNetworkForUid(Process.myUid()));
         // Test getAllNetworks()
         assertEquals(0, mCm.getAllNetworks().length);
     }
