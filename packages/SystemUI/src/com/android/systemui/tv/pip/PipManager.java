@@ -21,7 +21,6 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
-import android.app.ITaskStackListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,6 +37,8 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.systemui.Prefs;
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,89 +95,6 @@ public class PipManager {
 
     private boolean mIsRecentsShown;
     private boolean mIsPipFocusedInRecent;
-
-    private final Runnable mOnActivityPinnedRunnable = new Runnable() {
-        @Override
-        public void run() {
-            StackInfo stackInfo = null;
-            try {
-                stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                if (stackInfo == null) {
-                    Log.w(TAG, "Cannot find pinned stack");
-                    return;
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "getStackInfo failed", e);
-                return;
-            }
-            if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
-            mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
-            mPipComponentName = ComponentName.unflattenFromString(
-                    stackInfo.taskNames[stackInfo.taskNames.length - 1]);
-            // Set state to overlay so we show it when the pinned stack animation ends.
-            mState = STATE_PIP_OVERLAY;
-            mCurrentPipBounds = mPipBounds;
-            launchPipOnboardingActivityIfNeeded();
-            mMediaSessionManager.addOnActiveSessionsChangedListener(
-                    mActiveMediaSessionListener, null);
-            updateMediaController(mMediaSessionManager.getActiveSessions(null));
-            if (mIsRecentsShown) {
-                // If an activity becomes PIPed again after the fullscreen, the Recents is shown
-                // behind so we need to resize the pinned stack and show the correct overlay.
-                resizePinnedStack(STATE_PIP_OVERLAY);
-            }
-            for (int i = mListeners.size() - 1; i >= 0; i--) {
-                mListeners.get(i).onPipEntered();
-            }
-        }
-    };
-    private final Runnable mOnTaskStackChanged = new Runnable() {
-        @Override
-        public void run() {
-            if (mState != STATE_NO_PIP) {
-                StackInfo stackInfo = null;
-                try {
-                    stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                    if (stackInfo == null) {
-                        Log.w(TAG, "There is no pinned stack");
-                        closePipInternal(false);
-                        return;
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "getStackInfo failed", e);
-                    return;
-                }
-                for (int i = stackInfo.taskIds.length - 1; i >= 0; --i) {
-                    if (stackInfo.taskIds[i] == mPipTaskId) {
-                        // PIP task is still alive.
-                        return;
-                    }
-                }
-                // PIP task doesn't exist anymore in PINNED_STACK.
-                closePipInternal(true);
-            }
-        }
-    };
-    private final Runnable mOnPinnedActivityRestartAttempt = new Runnable() {
-        @Override
-        public void run() {
-            // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
-            movePipToFullscreen();
-        }
-    };
-    private final Runnable mOnPinnedStackAnimationEnded = new Runnable() {
-        @Override
-        public void run() {
-            switch (mState) {
-                case STATE_PIP_OVERLAY:
-                    showPipOverlay();
-                    break;
-                case STATE_PIP_MENU:
-                    showPipMenu();
-                    break;
-            }
-        }
-    };
 
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
@@ -241,13 +159,7 @@ public class PipManager {
                 (int) (mRecentsPipBounds.bottom + scaleBy * mRecentsPipBounds.height()));
 
         mActivityManager = ActivityManagerNative.getDefault();
-        TaskStackListener taskStackListener = new TaskStackListener();
-        IActivityManager iam = ActivityManagerNative.getDefault();
-        try {
-            iam.registerTaskStackListener(taskStackListener);
-        } catch (RemoteException e) {
-            Log.e(TAG, "registerTaskStackListener failed", e);
-        }
+        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
@@ -566,33 +478,88 @@ public class PipManager {
         return mPipMediaController;
     }
 
-    private class TaskStackListener extends ITaskStackListener.Stub {
+    TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
-        public void onTaskStackChanged() throws RemoteException {
-            // Post the message back to the UI thread.
-            mHandler.post(mOnTaskStackChanged);
+        public void onTaskStackChanged() {
+            if (mState != STATE_NO_PIP) {
+                StackInfo stackInfo = null;
+                try {
+                    stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+                    if (stackInfo == null) {
+                        Log.w(TAG, "There is no pinned stack");
+                        closePipInternal(false);
+                        return;
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "getStackInfo failed", e);
+                    return;
+                }
+                for (int i = stackInfo.taskIds.length - 1; i >= 0; --i) {
+                    if (stackInfo.taskIds[i] == mPipTaskId) {
+                        // PIP task is still alive.
+                        return;
+                    }
+                }
+                // PIP task doesn't exist anymore in PINNED_STACK.
+                closePipInternal(true);
+            }
         }
 
         @Override
-        public void onActivityPinned()  throws RemoteException {
-            // Post the message back to the UI thread.
+        public void onActivityPinned() {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
-            mHandler.post(mOnActivityPinnedRunnable);
+            StackInfo stackInfo = null;
+            try {
+                stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+                if (stackInfo == null) {
+                    Log.w(TAG, "Cannot find pinned stack");
+                    return;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "getStackInfo failed", e);
+                return;
+            }
+            if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
+            mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
+            mPipComponentName = ComponentName.unflattenFromString(
+                    stackInfo.taskNames[stackInfo.taskNames.length - 1]);
+            // Set state to overlay so we show it when the pinned stack animation ends.
+            mState = STATE_PIP_OVERLAY;
+            mCurrentPipBounds = mPipBounds;
+            launchPipOnboardingActivityIfNeeded();
+            mMediaSessionManager.addOnActiveSessionsChangedListener(
+                    mActiveMediaSessionListener, null);
+            updateMediaController(mMediaSessionManager.getActiveSessions(null));
+            if (mIsRecentsShown) {
+                // If an activity becomes PIPed again after the fullscreen, the Recents is shown
+                // behind so we need to resize the pinned stack and show the correct overlay.
+                resizePinnedStack(STATE_PIP_OVERLAY);
+            }
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                mListeners.get(i).onPipEntered();
+            }
         }
 
         @Override
         public void onPinnedActivityRestartAttempt() {
-            // Post the message back to the UI thread.
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
-            mHandler.post(mOnPinnedActivityRestartAttempt);
+            // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
+            movePipToFullscreen();
         }
 
         @Override
         public void onPinnedStackAnimationEnded() {
             if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
-            mHandler.post(mOnPinnedStackAnimationEnded);
+            switch (mState) {
+                case STATE_PIP_OVERLAY:
+                    showPipOverlay();
+                    break;
+                case STATE_PIP_MENU:
+                    showPipMenu();
+                    break;
+            }
         }
-    }
+    };
 
     /**
      * A listener interface to receive notification on changes in PIP.

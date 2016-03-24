@@ -20,7 +20,6 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.ITaskStackListener;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -59,6 +58,7 @@ import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -95,37 +95,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
 
     /**
-     * An implementation of ITaskStackListener, that allows us to listen for changes to the system
+     * An implementation of TaskStackListener, that allows us to listen for changes to the system
      * task stacks and update recents accordingly.
      */
-    class TaskStackListenerImpl extends ITaskStackListener.Stub implements Runnable {
-        Handler mHandler;
-
-        public TaskStackListenerImpl(Handler handler) {
-            mHandler = handler;
-        }
-
+    class TaskStackListenerImpl extends TaskStackListener {
         @Override
         public void onTaskStackChanged() {
-            // Debounce any task stack changes
-            mHandler.removeCallbacks(this);
-            mHandler.post(this);
-        }
-
-        @Override
-        public void onActivityPinned() {
-        }
-
-        @Override
-        public void onPinnedActivityRestartAttempt() {
-        }
-
-        @Override
-        public void onPinnedStackAnimationEnded() {
-        }
-
-        /** Preloads the next task */
-        public void run() {
+            // Preloads the next task
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
                 RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -201,7 +177,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         ForegroundThread.get();
 
         // Register the task stack listener
-        mTaskStackListener = new TaskStackListenerImpl(mHandler);
+        mTaskStackListener = new TaskStackListenerImpl();
         SystemServicesProxy ssp = Recents.getSystemServices();
         ssp.registerTaskStackListener(mTaskStackListener);
 

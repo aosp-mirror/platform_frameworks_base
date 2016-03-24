@@ -48,6 +48,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -106,6 +109,8 @@ public class SystemServicesProxy {
         sRecentsBlacklist.add("com.android.systemui.tv.pip.PipMenuActivity");
     }
 
+    private static SystemServicesProxy sSystemServicesProxy;
+
     AccessibilityManager mAccm;
     ActivityManager mAm;
     IActivityManager mIam;
@@ -128,8 +133,58 @@ public class SystemServicesProxy {
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
 
+    private final Handler mHandler = new H();
+
+    /**
+     * An abstract class to track task stack changes.
+     * Classes should implement this instead of {@link android.app.ITaskStackListener}
+     * to reduce IPC calls from system services. These callbacks will be called on the main thread.
+     */
+    public abstract static class TaskStackListener {
+        public void onTaskStackChanged() { }
+        public void onActivityPinned() { }
+        public void onPinnedActivityRestartAttempt() { }
+        public void onPinnedStackAnimationEnded() { }
+    }
+
+    /**
+     * Implementation of {@link android.app.ITaskStackListener} to listen task stack changes from
+     * ActivityManagerNative.
+     * This simply passes callbacks to listeners through {@link H}.
+     * */
+    private ITaskStackListener.Stub mTaskStackListener = new ITaskStackListener.Stub() {
+        @Override
+        public void onTaskStackChanged() throws RemoteException {
+            mHandler.removeMessages(H.ON_TASK_STACK_CHANGED);
+            mHandler.sendEmptyMessage(H.ON_TASK_STACK_CHANGED);
+        }
+
+        @Override
+        public void onActivityPinned() throws RemoteException {
+            mHandler.removeMessages(H.ON_ACTIVITY_PINNED);
+            mHandler.sendEmptyMessage(H.ON_ACTIVITY_PINNED);
+        }
+
+        @Override
+        public void onPinnedActivityRestartAttempt() throws RemoteException{
+            mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
+            mHandler.sendEmptyMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
+        }
+
+        @Override
+        public void onPinnedStackAnimationEnded() throws RemoteException {
+            mHandler.removeMessages(H.ON_PINNED_STACK_ANIMATION_ENDED);
+            mHandler.sendEmptyMessage(H.ON_PINNED_STACK_ANIMATION_ENDED);
+        }
+    };
+
+    /**
+     * List of {@link TaskStackListener} registered from {@link registerTaskStackListener}.
+     */
+    private List<TaskStackListener> mTaskStackListeners = new ArrayList<>();
+
     /** Private constructor */
-    public SystemServicesProxy(Context context) {
+    private SystemServicesProxy(Context context) {
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManagerNative.getDefault();
@@ -168,6 +223,20 @@ public class SystemServicesProxy {
             mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             mDummyIcon.eraseColor(0xFF999999);
         }
+    }
+
+    /**
+     * Returns the single instance of the {@link SystemServicesProxy}.
+     * This should only be called on the main thread.
+     */
+    public static SystemServicesProxy getInstance(Context context) {
+        if (!Looper.getMainLooper().isCurrentThread()) {
+            throw new RuntimeException("Must be called on the UI thread");
+        }
+        if (sSystemServicesProxy == null) {
+            sSystemServicesProxy = new SystemServicesProxy(context);
+        }
+        return sSystemServicesProxy;
     }
 
     /** Returns a list of the recents tasks */
@@ -982,14 +1051,21 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Registers a task stack listener with the system. */
-    public void registerTaskStackListener(ITaskStackListener listener) {
+    /**
+     * Registers a task stack listener with the system.
+     * This should be called on the main thread.
+     */
+    public void registerTaskStackListener(TaskStackListener listener) {
         if (mIam == null) return;
 
-        try {
-            mIam.registerTaskStackListener(listener);
-        } catch (Exception e) {
-            e.printStackTrace();
+        mTaskStackListeners.add(listener);
+        if (mTaskStackListeners.size() == 1) {
+            // Register mTaskStackListener to IActivityManager only once if needed.
+            try {
+                mIam.registerTaskStackListener(mTaskStackListener);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to call registerTaskStackListener", e);
+            }
         }
     }
 
@@ -1037,6 +1113,43 @@ public class SystemServicesProxy {
             WindowManagerGlobal.getWindowManagerService().getStableInsets(outStableInsets);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private final class H extends Handler {
+        private static final int ON_TASK_STACK_CHANGED = 1;
+        private static final int ON_ACTIVITY_PINNED = 2;
+        private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 3;
+        private static final int ON_PINNED_STACK_ANIMATION_ENDED = 4;
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case ON_TASK_STACK_CHANGED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onTaskStackChanged();
+                    }
+                    break;
+                }
+                case ON_ACTIVITY_PINNED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onActivityPinned();
+                    }
+                    break;
+                }
+                case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onPinnedActivityRestartAttempt();
+                    }
+                    break;
+                }
+                case ON_PINNED_STACK_ANIMATION_ENDED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onPinnedStackAnimationEnded();
+                    }
+                    break;
+                }
+            }
         }
     }
 }

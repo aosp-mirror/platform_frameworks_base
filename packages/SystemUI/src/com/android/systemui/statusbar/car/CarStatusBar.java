@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
-import android.app.ITaskStackListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +32,7 @@ import android.view.WindowManager;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
@@ -40,9 +40,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
 public class CarStatusBar extends PhoneStatusBar {
-    private SystemServicesProxy mSystemServicesProxy;
     private TaskStackListenerImpl mTaskStackListener;
-    private Handler mHandler;
 
     private CarNavigationBarView mCarNavigationBar;
     private CarNavigationBarController mController;
@@ -51,10 +49,8 @@ public class CarStatusBar extends PhoneStatusBar {
     @Override
     public void start() {
         super.start();
-        mHandler = new Handler();
-        mTaskStackListener = new TaskStackListenerImpl(mHandler);
-        mSystemServicesProxy = new SystemServicesProxy(mContext);
-        mSystemServicesProxy.registerTaskStackListener(mTaskStackListener);
+        mTaskStackListener = new TaskStackListenerImpl();
+        SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
         registerPackageChangeReceivers();
     }
 
@@ -114,46 +110,15 @@ public class CarStatusBar extends PhoneStatusBar {
     }
 
     /**
-     * An implementation of ITaskStackListener, that listens for changes in the system task
+     * An implementation of TaskStackListener, that listens for changes in the system task
      * stack and notifies the navigation bar.
      */
-    private class TaskStackListenerImpl extends ITaskStackListener.Stub implements Runnable {
-        private Handler mHandler;
-
-        public TaskStackListenerImpl(Handler handler) {
-            this.mHandler = handler;
-        }
-
-        @Override
-        public void onActivityPinned() {
-        }
-
-        @Override
-        public void onPinnedActivityRestartAttempt() {
-        }
-
-        @Override
-        public void onPinnedStackAnimationEnded() {
-        }
-
+    private class TaskStackListenerImpl extends TaskStackListener {
         @Override
         public void onTaskStackChanged() {
-            mHandler.removeCallbacks(this);
-            mHandler.post(this);
-        }
-
-        @Override
-        public void run() {
-            ensureMainThread();
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getTopMostTask();
             mController.taskChanged(runningTaskInfo.baseActivity.getPackageName());
-        }
-
-        private void ensureMainThread() {
-            if (!Looper.getMainLooper().isCurrentThread()) {
-                throw new RuntimeException("Must be called on the UI thread");
-            }
         }
     }
 
