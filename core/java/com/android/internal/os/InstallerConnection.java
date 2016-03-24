@@ -21,7 +21,6 @@ import android.net.LocalSocketAddress;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
@@ -140,14 +139,14 @@ public class InstallerConnection {
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags, String volumeUuid, boolean useProfiles) throws InstallerException {
+            int dexFlags, String compilerFilter, String volumeUuid) throws InstallerException {
         dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded,
-                null /*outputPath*/, dexFlags, volumeUuid, useProfiles);
+                null /*outputPath*/, dexFlags, compilerFilter, volumeUuid);
     }
 
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, String outputPath, int dexFlags, String volumeUuid,
-            boolean useProfiles) throws InstallerException {
+            int dexoptNeeded, String outputPath, int dexFlags, String compilerFilter,
+            String volumeUuid) throws InstallerException {
         execute("dexopt",
                 apkPath,
                 uid,
@@ -156,8 +155,27 @@ public class InstallerConnection {
                 dexoptNeeded,
                 outputPath,
                 dexFlags,
-                volumeUuid,
-                useProfiles ? '1' : '0');
+                compilerFilter,
+                volumeUuid);
+    }
+
+    public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
+        String rawReply = executeForResult("merge_profiles", uid, pkgName);
+        if (rawReply == null) {
+            throw new IllegalStateException("Unexpected null reply");
+        }
+        final String res[] = rawReply.split(" ");
+
+        if ((res == null) || (res.length != 2)) {
+            throw new InstallerException("Invalid size result: " + rawReply);
+        }
+
+        // Just as a sanity check. Anything != "true" will be interpreted as false by parseBoolean.
+        if (!res[1].equals("true") && !res[1].equals("false")) {
+            throw new InstallerException("Invalid boolean result: " + rawReply);
+        }
+
+        return Boolean.parseBoolean(res[1]);
     }
 
     private boolean connect() {

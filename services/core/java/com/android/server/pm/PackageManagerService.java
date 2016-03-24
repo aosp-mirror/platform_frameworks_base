@@ -92,6 +92,13 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getFullCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_BOOT;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_FORCED_DEXOPT;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_INSTALL;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_NON_SYSTEM_LIBRARY;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_SHARED_APK;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
@@ -1956,6 +1963,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public static PackageManagerService main(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
+        // Self-check for initial settings.
+        PackageManagerServiceCompilerMapping.checkProperties();
+
         PackageManagerService m = new PackageManagerService(context, installer,
                 factoryTest, onlyCore);
         m.enableSystemUserPackages();
@@ -2168,12 +2178,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // AOT compilation (if needed).
                             int dexoptNeeded = DexFile.getDexOptNeeded(
                                     lib, dexCodeInstructionSet,
-                                    DexFile.COMPILATION_TYPE_FULL);
+                                    getCompilerFilterForReason(REASON_SHARED_APK),
+                                    false /* newProfile */);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
                                         dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/,
-                                        StorageManager.UUID_PRIVATE_INTERNAL,
-                                        false /*useProfiles*/);
+                                        getCompilerFilterForReason(REASON_SHARED_APK),
+                                        StorageManager.UUID_PRIVATE_INTERNAL);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
@@ -6934,7 +6945,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // and would have to be patched (would be SELF_PATCHOAT, which is deprecated).
                 // Instead, force the extraction in this case.
                 performDexOpt(pkg.packageName, null /* instructionSet */,
-                         false /* useProfiles */, true /* extractOnly */, prunedCache);
+                         false /* checkProfiles */, REASON_BOOT, prunedCache);
             }
         }
     }
@@ -6953,29 +6964,37 @@ public class PackageManagerService extends IPackageManager.Stub {
     // TODO: this is not used nor needed. Delete it.
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        return performDexOptTraced(packageName, instructionSet, false /* useProfiles */,
-                false /* extractOnly */, false /* force */);
+        return performDexOptTraced(packageName, instructionSet, false /* checkProfiles */,
+                getFullCompilerFilter(), false /* force */);
     }
 
     @Override
-    public boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles,
-            boolean extractOnly, boolean force) {
-        return performDexOptTraced(packageName, instructionSet, useProfiles, extractOnly, force);
+    public boolean performDexOpt(String packageName, String instructionSet,
+            boolean checkProfiles, int compileReason, boolean force) {
+        return performDexOptTraced(packageName, instructionSet, checkProfiles,
+                getCompilerFilterForReason(compileReason), force);
+    }
+
+    @Override
+    public boolean performDexOptMode(String packageName, String instructionSet,
+            boolean checkProfiles, String targetCompilerFilter, boolean force) {
+        return performDexOptTraced(packageName, instructionSet, checkProfiles,
+                targetCompilerFilter, force);
     }
 
     private boolean performDexOptTraced(String packageName, String instructionSet,
-                boolean useProfiles, boolean extractOnly, boolean force) {
+                boolean checkProfiles, String targetCompilerFilter, boolean force) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, instructionSet, useProfiles, extractOnly,
-                    force);
+            return performDexOptInternal(packageName, instructionSet, checkProfiles,
+                    targetCompilerFilter, force);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
     private boolean performDexOptInternal(String packageName, String instructionSet,
-                boolean useProfiles, boolean extractOnly, boolean force) {
+                boolean checkProfiles, String targetCompilerFilter, boolean force) {
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
@@ -6993,7 +7012,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = performDexOptInternalWithDependenciesLI(p, instructionSets,
-                        useProfiles, extractOnly, force);
+                        checkProfiles, targetCompilerFilter, force);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -7014,7 +7033,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private int performDexOptInternalWithDependenciesLI(PackageParser.Package p,
-            String instructionSets[], boolean useProfiles, boolean extractOnly, boolean force) {
+            String instructionSets[], boolean checkProfiles, String targetCompilerFilter,
+            boolean force) {
         // Select the dex optimizer based on the force parameter.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
         //       allocate an object here.
@@ -7028,13 +7048,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!deps.isEmpty()) {
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
-                // Currently this will do a full compilation of the library.
-                pdo.performDexOpt(depPackage, instructionSets, false /* useProfiles */,
-                        false /* extractOnly */);
+                // Currently this will do a full compilation of the library by default.
+                pdo.performDexOpt(depPackage, instructionSets, false /* checkProfiles */,
+                        getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY));
             }
         }
 
-        return pdo.performDexOpt(p, instructionSets, useProfiles, extractOnly);
+        return pdo.performDexOpt(p, instructionSets, checkProfiles, targetCompilerFilter);
     }
 
     Collection<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
@@ -7112,7 +7132,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Whoever is calling forceDexOpt wants a fully compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = performDexOptInternalWithDependenciesLI(pkg, instructionSets,
-                    false /* useProfiles */, false /* extractOnly */, true /* force */);
+                    false /* checkProfiles */, getCompilerFilterForReason(REASON_FORCED_DEXOPT),
+                    true /* force */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -13979,7 +14000,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Do not run PackageDexOptimizer through the local performDexOpt
             // method because `pkg` is not in `mPackages` yet.
             int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
-                    false /* useProfiles */, true /* extractOnly */);
+                    false /* checkProfiles */, getCompilerFilterForReason(REASON_INSTALL));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 String msg = "Extracking package failed for " + pkgName;
