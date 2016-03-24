@@ -1041,7 +1041,9 @@ public final class PrintSpoolerService extends Service {
             try {
                 in = mStatePersistFile.openRead();
             } catch (FileNotFoundException e) {
-                Log.i(LOG_TAG, "No existing print spooler state.");
+                if (DEBUG_PERSISTENCE) {
+                    Log.d(LOG_TAG, "No existing print spooler state.");
+                }
                 return;
             }
             try {
