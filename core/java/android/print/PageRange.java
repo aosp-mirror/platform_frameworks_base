@@ -32,6 +32,9 @@ public final class PageRange implements Parcelable {
      */
     public static final PageRange ALL_PAGES = new PageRange(0, Integer.MAX_VALUE);
 
+    /** @hide */
+    public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[]{PageRange.ALL_PAGES};
+
     private final int mStart;
     private final int mEnd;
 
