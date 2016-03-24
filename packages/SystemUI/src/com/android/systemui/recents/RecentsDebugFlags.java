@@ -34,7 +34,7 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         // This disables the bitmap and icon caches
         public static final boolean DisableBackgroundCache = false;
         // Enables the task affiliations
-        public static final boolean EnableAffiliatedTaskGroups = true;
+        public static final boolean EnableAffiliatedTaskGroups = false;
         // TODO: To be repurposed
         public static final boolean EnableStackActionButton = false;
         // Overrides the Tuner flags and enables the timeout

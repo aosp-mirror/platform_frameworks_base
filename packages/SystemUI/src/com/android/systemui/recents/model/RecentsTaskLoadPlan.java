@@ -160,8 +160,15 @@ public class RecentsTaskLoadPlan {
                 long parentTaskLastActiveTime = parentTask != null
                         ? parentTask.lastActiveTime
                         : prevLastActiveTime;
-                t.lastActiveTime = parentTaskLastActiveTime +
-                        affiliatedTaskCounts.get(t.affiliatedTaskId, 0) + 1;
+                if (RecentsDebugFlags.Static.EnableAffiliatedTaskGroups) {
+                    t.lastActiveTime = parentTaskLastActiveTime +
+                            affiliatedTaskCounts.get(t.affiliatedTaskId, 0) + 1;
+                } else {
+                    if (t.lastActiveTime == 0) {
+                        t.lastActiveTime = parentTaskLastActiveTime -
+                                affiliatedTaskCounts.get(t.affiliatedTaskId, 0) - 1;
+                    }
+                }
             }
 
             // Compose the task key
@@ -201,7 +208,6 @@ public class RecentsTaskLoadPlan {
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
             affiliatedTasks.put(taskKey.id, taskKey);
-
             prevLastActiveTime = t.lastActiveTime;
         }
         if (newLastStackActiveTime != -1) {
