@@ -16,13 +16,14 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -58,8 +59,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
-
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
  * A {@link TaskView} represents a fixed view of a task. Because the TaskView's layout is directed
@@ -557,6 +556,13 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         hideActionButton(true /* fadeOut */, duration,
                 !screenPinningRequested /* scaleDown */,
                 postAnimationTrigger.decrementOnAnimationEnd());
+    }
+
+    @Override
+    public void onStartFrontTaskEnterAnimation(boolean screenPinningEnabled) {
+        if (screenPinningEnabled) {
+            showActionButton(false /* fadeIn */, 0 /* fadeInDuration */);
+        }
     }
 
     /**** TaskCallbacks Implementation ****/

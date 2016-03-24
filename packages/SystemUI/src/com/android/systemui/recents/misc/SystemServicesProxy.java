@@ -16,15 +16,18 @@
 
 package com.android.systemui.recents.misc;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
-import android.appwidget.AppWidgetHost;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,6 +37,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,7 +51,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -60,9 +63,9 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MutableBoolean;
-import android.util.Pair;
 import android.view.Display;
 import android.view.IDockedStackListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
@@ -71,7 +74,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
@@ -82,12 +84,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -114,7 +110,6 @@ public class SystemServicesProxy {
     AccessibilityManager mAccm;
     ActivityManager mAm;
     IActivityManager mIam;
-    AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
     AssistUtils mAssistUtils;
@@ -188,7 +183,6 @@ public class SystemServicesProxy {
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManagerNative.getDefault();
-        mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
@@ -854,89 +848,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns the current search widget id.
-     */
-    public int getSearchAppWidgetId(Context context) {
-        return Prefs.getInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, -1);
-    }
-
-    /**
-     * Returns the current search widget info, binding a new one if necessary.
-     */
-    public AppWidgetProviderInfo getOrBindSearchAppWidget(Context context, AppWidgetHost host) {
-        int searchWidgetId = Prefs.getInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, -1);
-        AppWidgetProviderInfo searchWidgetInfo = mAwm.getAppWidgetInfo(searchWidgetId);
-        AppWidgetProviderInfo resolvedSearchWidgetInfo = resolveSearchAppWidget();
-
-        // Return the search widget info if it hasn't changed
-        if (searchWidgetInfo != null && resolvedSearchWidgetInfo != null &&
-                searchWidgetInfo.provider.equals(resolvedSearchWidgetInfo.provider)) {
-            if (Prefs.getString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null) == null) {
-                Prefs.putString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
-                        searchWidgetInfo.provider.getPackageName());
-            }
-            return searchWidgetInfo;
-        }
-
-        // Delete the old widget
-        if (searchWidgetId != -1) {
-            host.deleteAppWidgetId(searchWidgetId);
-        }
-
-        // And rebind a new search widget
-        if (resolvedSearchWidgetInfo != null) {
-            Pair<Integer, AppWidgetProviderInfo> widgetInfo = bindSearchAppWidget(host,
-                    resolvedSearchWidgetInfo);
-            if (widgetInfo != null) {
-                Prefs.putInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, widgetInfo.first);
-                Prefs.putString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
-                        widgetInfo.second.provider.getPackageName());
-                return widgetInfo.second;
-            }
-        }
-
-        // If we fall through here, then there is no resolved search widget, so clear the state
-        Prefs.remove(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID);
-        Prefs.remove(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE);
-        return null;
-    }
-
-    /**
-     * Returns the first Recents widget from the same package as the global assist activity.
-     */
-    public AppWidgetProviderInfo resolveSearchAppWidget() {
-        if (mAssistComponent == null) return null;
-        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
-                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-        for (AppWidgetProviderInfo info : widgets) {
-            if (info.provider.getPackageName().equals(mAssistComponent.getPackageName())) {
-                return info;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Resolves and binds the search app widget that is to appear in the recents.
-     */
-    private Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host,
-            AppWidgetProviderInfo resolvedSearchWidgetInfo) {
-        if (mAwm == null) return null;
-        if (mAssistComponent == null) return null;
-
-        // Allocate a new widget id and try and bind the app widget (if that fails, then just skip)
-        int searchWidgetId = host.allocateAppWidgetId();
-        Bundle opts = new Bundle();
-        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, resolvedSearchWidgetInfo.provider, opts)) {
-            host.deleteAppWidgetId(searchWidgetId);
-            return null;
-        }
-        return new Pair<>(searchWidgetId, resolvedSearchWidgetInfo);
-    }
-
-    /**
      * Returns whether touch exploration is currently enabled.
      */
     public boolean isTouchExplorationEnabled() {
@@ -985,25 +896,37 @@ public class SystemServicesProxy {
      * Returns the smallest width/height.
      */
     public int getDeviceSmallestWidth() {
-        if (mWm == null) return 0;
+        if (mDisplay == null) return 0;
 
         Point smallestSizeRange = new Point();
         Point largestSizeRange = new Point();
-        mWm.getDefaultDisplay().getCurrentSizeRange(smallestSizeRange, largestSizeRange);
+        mDisplay.getCurrentSizeRange(smallestSizeRange, largestSizeRange);
         return smallestSizeRange.x;
     }
 
     /**
-     * Returns the display rect.
+     * Returns the current display rect in the current display orientation.
      */
     public Rect getDisplayRect() {
         Rect displayRect = new Rect();
-        if (mWm == null) return displayRect;
+        if (mDisplay == null) return displayRect;
 
         Point p = new Point();
-        mWm.getDefaultDisplay().getRealSize(p);
+        mDisplay.getRealSize(p);
         displayRect.set(0, 0, p.x, p.y);
         return displayRect;
+    }
+
+    /**
+     * Returns the current display orientation.
+     */
+    public int getDisplayOrientation() {
+        // Because of multi-window, the configuration orientation does not necessarily reflect the
+        // orientation of the display, instead we just use the display's real-size.
+        Rect displayRect = getDisplayRect();
+        return displayRect.width() > displayRect.height()
+                ? Configuration.ORIENTATION_LANDSCAPE
+                : Configuration.ORIENTATION_PORTRAIT;
     }
 
     /**

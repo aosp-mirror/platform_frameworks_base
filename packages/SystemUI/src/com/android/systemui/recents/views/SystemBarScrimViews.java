@@ -16,11 +16,9 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;

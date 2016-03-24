@@ -29,11 +29,6 @@
     <!-- Bottom margin (from display edge) for status bar panels -->
     <dimen name="panel_float">56dp</dimen>
 
-    <!-- The radius of the rounded corners on a task view. -->
-    <dimen name="recents_task_view_rounded_corners_radius">3dp</dimen>
-    <!-- The radius of the rounded corners on a task view's shadow. -->
-    <dimen name="recents_task_view_shadow_rounded_corners_radius">12dp</dimen>
-
     <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
      max value is used when no notifications are displaying, and the min value is when the
      highest possible number of notifications are showing. -->
