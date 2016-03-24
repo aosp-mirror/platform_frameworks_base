@@ -95,7 +95,7 @@ public class ZenModePanel extends LinearLayout {
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
-    private SegmentedButtons mZenButtons;
+    protected SegmentedButtons mZenButtons;
     private View mZenIntroduction;
     private TextView mZenIntroductionMessage;
     private View mZenIntroductionConfirm;
@@ -148,10 +148,7 @@ public class ZenModePanel extends LinearLayout {
         mTransitionHelper.dump(fd, pw, args);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
+    protected void createZenButtons() {
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
         mZenButtons.addButton(R.string.interruption_level_none_twoline,
                 R.string.interruption_level_none_with_warning,
@@ -163,7 +160,12 @@ public class ZenModePanel extends LinearLayout {
                 R.string.interruption_level_priority,
                 Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         mZenButtons.setCallback(mZenButtonsCallback);
+    }
 
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        createZenButtons();
         mZenIntroduction = findViewById(R.id.zen_introduction);
         mZenIntroductionMessage = (TextView) findViewById(R.id.zen_introduction_message);
         mSpTexts.add(mZenIntroductionMessage);
@@ -917,7 +919,7 @@ public class ZenModePanel extends LinearLayout {
         }
     }
 
-    private final SegmentedButtons.Callback mZenButtonsCallback = new SegmentedButtons.Callback() {
+    protected final SegmentedButtons.Callback mZenButtonsCallback = new SegmentedButtons.Callback() {
         @Override
         public void onSelected(final Object value, boolean fromClick) {
             if (value != null && mZenButtons.isShown() && isAttachedToWindow()) {
