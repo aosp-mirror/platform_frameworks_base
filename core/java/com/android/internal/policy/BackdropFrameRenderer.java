@@ -16,6 +16,8 @@
 
 package com.android.internal.policy;
 
+import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
+
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -69,6 +71,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     private ColorDrawable mNavigationBarColor;
     private boolean mOldFullscreen;
     private boolean mFullscreen;
+    private final int mResizeMode;
     private final Rect mOldSystemInsets = new Rect();
     private final Rect mOldStableInsets = new Rect();
     private final Rect mSystemInsets = new Rect();
@@ -77,7 +80,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
             Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable,
             Drawable userCaptionBackgroundDrawable, int statusBarColor, int navigationBarColor,
-            boolean fullscreen, Rect systemInsets, Rect stableInsets) {
+            boolean fullscreen, Rect systemInsets, Rect stableInsets, int resizeMode) {
         setName("ResizeFrame");
 
         mRenderer = renderer;
@@ -98,6 +101,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mStableInsets.set(stableInsets);
         mOldSystemInsets.set(systemInsets);
         mOldStableInsets.set(stableInsets);
+        mResizeMode = resizeMode;
         synchronized (this) {
             redrawLocked(initialBounds, fullscreen, mSystemInsets, mStableInsets);
         }
@@ -266,11 +270,16 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             mLastXOffset = xOffset;
             mLastYOffset = yOffset;
 
-            mRenderer.setContentDrawBounds(
-                    mLastXOffset,
-                    mLastYOffset,
-                    mLastXOffset + mLastContentWidth,
-                    mLastYOffset + mLastCaptionHeight + mLastContentHeight);
+            // Only clip the content to the bounds if we are not fullscreen. In the other case, we
+            // actually need to draw outside these.
+            if (mResizeMode == RESIZE_MODE_FREEFORM) {
+                mRenderer.setContentDrawBounds(
+                        mLastXOffset,
+                        mLastYOffset,
+                        mLastXOffset + mLastContentWidth,
+                        mLastYOffset + mLastCaptionHeight + mLastContentHeight);
+            }
+
             // If this was the first call and redrawLocked got already called prior
             // to us, we should re-issue a redrawLocked now.
             return firstCall

@@ -39,8 +39,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.RemoteException;
@@ -49,6 +52,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
+import android.view.DisplayListCanvas;
 import android.view.Gravity;
 import android.view.InputQueue;
 import android.view.KeyEvent;
@@ -88,6 +92,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -211,6 +216,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private boolean mApplyFloatingVerticalInsets = false;
     private boolean mApplyFloatingHorizontalInsets = false;
 
+    private int mResizeMode = RESIZE_MODE_INVALID;
+    private final int mResizeShadowSize;
+    private final Paint mVerticalResizeShadowPaint = new Paint();
+    private final Paint mHorizontalResizeShadowPaint = new Paint();
+
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
         super(context);
@@ -233,6 +243,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         setWindow(window);
 
         updateLogTag(params);
+
+        mResizeShadowSize = context.getResources().getDimensionPixelSize(
+                R.dimen.resize_shadow_size);
+        initResizingPaints();
     }
 
     void setBackgroundFallback(int resId) {
@@ -699,6 +713,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         // our shadow elevation.
         updateElevation();
         mAllowUpdateElevation = true;
+
+        if (changed && mResizeMode == RESIZE_MODE_DOCKED_DIVIDER) {
+            getViewRootImpl().requestInvalidateRootRenderNode();
+        }
     }
 
     @Override
@@ -1907,7 +1925,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public void onWindowDragResizeStart(Rect initialBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets) {
+            Rect stableInsets, int resizeMode) {
         if (mWindow.isDestroyed()) {
             // If the owner's window is gone, we should not be able to come here anymore.
             releaseThreadedRenderer();
@@ -1923,7 +1941,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
                     getCurrentColor(mNavigationColorViewState), fullscreen, systemInsets,
-                    stableInsets);
+                    stableInsets, resizeMode);
 
             // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
             // If we want to get the shadow shown while resizing, we would need to elevate a new
@@ -1932,12 +1950,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
             updateColorViews(null /* insets */, false);
         }
+        mResizeMode = resizeMode;
+        getViewRootImpl().requestInvalidateRootRenderNode();
     }
 
     @Override
     public void onWindowDragResizeEnd() {
         releaseThreadedRenderer();
         updateColorViews(null /* insets */, false);
+        mResizeMode = RESIZE_MODE_INVALID;
+        getViewRootImpl().requestInvalidateRootRenderNode();
     }
 
     @Override
@@ -1958,6 +1980,41 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 getViewRootImpl().reportDrawFinish();
             }
         }
+    }
+
+    @Override
+    public void onPostDraw(DisplayListCanvas canvas) {
+        drawResizingShadowIfNeeded(canvas);
+    }
+
+    private void initResizingPaints() {
+        final int startColor = mContext.getResources().getColor(
+                R.color.resize_shadow_start_color, null);
+        final int endColor = mContext.getResources().getColor(
+                R.color.resize_shadow_end_color, null);
+        final int middleColor = (startColor + endColor) / 2;
+        mHorizontalResizeShadowPaint.setShader(new LinearGradient(
+                0, 0, 0, mResizeShadowSize, new int[] { startColor, middleColor, endColor },
+                new float[] { 0f, 0.3f, 1f }, Shader.TileMode.CLAMP));
+        mVerticalResizeShadowPaint.setShader(new LinearGradient(
+                0, 0, mResizeShadowSize, 0, new int[] { startColor, middleColor, endColor },
+                new float[] { 0f, 0.3f, 1f }, Shader.TileMode.CLAMP));
+    }
+
+    private void drawResizingShadowIfNeeded(DisplayListCanvas canvas) {
+        if (mResizeMode != RESIZE_MODE_DOCKED_DIVIDER || mWindow.mIsFloating
+                || mWindow.isTranslucent()
+                || (mWindow.getAttributes().flags & FLAG_SHOW_WALLPAPER) != 0) {
+            return;
+        }
+        canvas.save();
+        canvas.translate(0, getHeight() - mFrameOffsets.bottom);
+        canvas.drawRect(0, 0, getWidth(), mResizeShadowSize, mHorizontalResizeShadowPaint);
+        canvas.restore();
+        canvas.save();
+        canvas.translate(getWidth() - mFrameOffsets.right, 0);
+        canvas.drawRect(0, 0, mResizeShadowSize, getHeight(), mVerticalResizeShadowPaint);
+        canvas.restore();
     }
 
     /** Release the renderer thread which is usually done when the user stops resizing. */

@@ -26,6 +26,11 @@ import android.graphics.Rect;
  * @hide
  */
 public interface WindowCallbacks {
+
+    public static final int RESIZE_MODE_INVALID = -1;
+    public static final int RESIZE_MODE_FREEFORM = 0;
+    public static final int RESIZE_MODE_DOCKED_DIVIDER = 1;
+
     /**
      * Called by the system when the window got changed by the user, before the layouter got called.
      * It also gets called when the insets changed, or when the window switched between a fullscreen
@@ -51,7 +56,7 @@ public interface WindowCallbacks {
      * @param stableInsets The stable insets for the window.
      */
     void onWindowDragResizeStart(Rect initialBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets);
+            Rect stableInsets, int resizeMode);
 
     /**
      * Called when a drag resize ends.
@@ -69,4 +74,13 @@ public interface WindowCallbacks {
      * @param reportNextDraw Whether it should report when the requested draw finishes.
      */
     void onRequestDraw(boolean reportNextDraw);
+
+    /**
+     * Called after all the content has drawn and the callback now has the ability to draw something
+     * on top of everything. Call {@link ViewRootImpl#requestInvalidateRootRenderNode} when this
+     * content needs to be redrawn.
+     *
+     * @param canvas The canvas to draw on.
+     */
+    void onPostDraw(DisplayListCanvas canvas);
 }
