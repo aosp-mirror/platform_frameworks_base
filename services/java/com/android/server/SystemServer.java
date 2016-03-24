@@ -1129,7 +1129,9 @@ public final class SystemServer {
                 mSystemServiceManager.startService(TvInputManagerService.class);
             }
 
-            mSystemServiceManager.startService(MediaResourceMonitorService.class);
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+                mSystemServiceManager.startService(MediaResourceMonitorService.class);
+            }
 
             if (!disableNonCoreServices) {
                 traceBeginAndSlog("StartMediaRouterService");
