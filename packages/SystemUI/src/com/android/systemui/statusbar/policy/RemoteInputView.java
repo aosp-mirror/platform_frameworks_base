@@ -46,7 +46,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
-import com.android.systemui.statusbar.stack.LongPressCancelable;
+import com.android.systemui.statusbar.stack.ScrollContainer;
 
 /**
  * Host for the remote input.
@@ -67,7 +67,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private RemoteInputController mController;
 
     private NotificationData.Entry mEntry;
-    private LongPressCancelable mLongPressCancelable;
+
+    private ScrollContainer mScrollContainer;
+    private View mScrollContainerChild;
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -106,7 +108,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setOnClickListener(this);
         mEditText.addTextChangedListener(this);
         mEditText.setInnerFocusable(false);
-        mEditText.mDefocusListener = this;
+        mEditText.mRemoteInputView = this;
     }
 
     private void sendRemoteInput() {
@@ -237,21 +239,32 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            if (mLongPressCancelable == null) {
-                ViewParent p = getParent();
-                while (p != null) {
-                    if (p instanceof LongPressCancelable) {
-                        mLongPressCancelable = (LongPressCancelable) p;
-                        break;
-                    }
-                    p = p.getParent();
-                }
-            }
-            if (mLongPressCancelable != null) {
-                mLongPressCancelable.requestDisallowLongPress();
+            findScrollContainer();
+            if (mScrollContainer != null) {
+                mScrollContainer.requestDisallowLongPress();
             }
         }
         return super.onInterceptTouchEvent(ev);
+    }
+
+    public boolean requestScrollTo() {
+        findScrollContainer();
+        mScrollContainer.scrollTo(mScrollContainerChild);
+        return true;
+    }
+
+    private void findScrollContainer() {
+        if (mScrollContainer == null) {
+            ViewParent p = this;
+            while (p != null) {
+                if (p.getParent() instanceof ScrollContainer) {
+                    mScrollContainer = (ScrollContainer) p.getParent();
+                    mScrollContainerChild = (View) p;
+                    break;
+                }
+                p = p.getParent();
+            }
+        }
     }
 
     /**
@@ -261,7 +274,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     public static class RemoteEditText extends EditText {
 
         private final Drawable mBackground;
-        private RemoteInputView mDefocusListener;
+        private RemoteInputView mRemoteInputView;
         boolean mShowImeOnInputConnection;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
@@ -270,13 +283,13 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         private void defocusIfNeeded() {
-            if (mDefocusListener.mEntry.row.isChangingPosition()) {
+            if (mRemoteInputView != null && mRemoteInputView.mEntry.row.isChangingPosition()) {
                 return;
             }
             if (isFocusable() && isEnabled()) {
                 setInnerFocusable(false);
-                if (mDefocusListener != null) {
-                    mDefocusListener.onDefocus();
+                if (mRemoteInputView != null) {
+                    mRemoteInputView.onDefocus();
                 }
                 mShowImeOnInputConnection = false;
             }
@@ -300,17 +313,15 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         @Override
-        public boolean requestRectangleOnScreen(Rect r) {
-            r.top = mScrollY;
-            r.bottom = mScrollY + (mBottom - mTop);
-            return super.requestRectangleOnScreen(r);
-        }
-
-        @Override
         public void getFocusedRect(Rect r) {
             super.getFocusedRect(r);
             r.top = mScrollY;
             r.bottom = mScrollY + (mBottom - mTop);
+        }
+
+        @Override
+        public boolean requestRectangleOnScreen(Rect rectangle) {
+            return mRemoteInputView.requestScrollTo();
         }
 
         @Override

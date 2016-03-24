@@ -138,11 +138,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         }
 
-        if (state.remoteInputActive) {
-            mLpChanged.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
-        } else {
-            mLpChanged.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-        }
+        mLpChanged.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
     }
 
     private void applyHeight(State state) {

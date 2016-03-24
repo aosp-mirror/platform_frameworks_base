@@ -75,7 +75,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        setPadding(0, 0, 0, insets.getSystemWindowInsetBottom());
+        setPadding(0, 0, 0, insets.getStableInsetBottom());
         return insets;
     }
 

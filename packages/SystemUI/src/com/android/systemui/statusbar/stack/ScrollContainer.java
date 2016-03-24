@@ -16,13 +16,21 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.view.View;
+
 /**
- * Interface for container layouts that listen for long presses. A child that
- * wants to handle long press can use this to cancel the parents long press logic.
+ * Interface for container layouts that scroll and listen for long presses. A child that
+ * wants to handle long press can use this to cancel the parents long press logic or request
+ * to be made visible by scrolling to it.
  */
-public interface LongPressCancelable {
+public interface ScrollContainer {
     /**
      * Request that the view does not perform long press for the current touch.
      */
     void requestDisallowLongPress();
+
+    /**
+     * Request that the view is made visible by scrolling to it.
+     */
+    void scrollTo(View v);
 }
