@@ -18,7 +18,11 @@ page.image=images/cards/card-n-changes_2x.png
       <li><a href="#bg-opt">Background Optimizations</a></li>
     </ol>
   </li>
-  <li><a href="#perm">Permissions Changes</a></li>
+  <li><a href="#perm">Permissions Changes</a>
+    <ol>
+      <li><a href="#permfilesys">File System Permission Changes</a></li>
+    </ol>
+  </li>
   <li><a href="#accessibility">Accessibility Improvements</a>
     <ol>
       <li><a href="#screen-zoom">Screen Zoom</a></li>
@@ -200,7 +204,52 @@ page.image=images/cards/card-n-changes_2x.png
 
 </ul>
 
+<h3 id="permfilesys">File system permission changes</h3>
 
+<p>
+  In order to improve the security of private files, the private directory of
+  apps targeting Android N or higher has restricted access (0700). This prevents
+  leakage of metadata of private files, such as their size or existence. This
+  has multiple side effects:
+</p>
+
+<ul>
+  <li>
+    Private files’ file permissions can no longer be relaxed by the owner, and
+    an attempt to do so using
+    {@link android.content.Context#MODE_WORLD_READABLE} and/or
+    {@link android.content.Context#MODE_WORLD_WRITEABLE}, will trigger a
+    {@link java.lang.SecurityException}.
+  </li>
+  <li>
+    Passing <code>file://</code> URIs outside the package domain may leave the
+    receiver with an unaccessible path. Therefore, attempts to pass a
+    <code>file://</code> URI trigger a
+    <code>FileUriExposedException</code>. The recommended way to share the
+    content of a private file is using the {@link
+    android.support.v4.content.FileProvider}.
+  </li>
+  <li>
+    The {@link android.app.DownloadManager} can no longer share privately
+    stored files by filename. Legacy applications may end up with an
+    unaccessible path when accessing {@link
+    android.app.DownloadManager#COLUMN_LOCAL_FILENAME}. Apps targeting
+    Android N or higher trigger a {@link java.lang.SecurityException} when
+    attempting to access
+    {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}.
+    Legacy applications that set the download location to a public location by
+    using
+    {@link
+    android.app.DownloadManager.Request#setDestinationInExternalFilesDir} or
+    {@link
+    android.app.DownloadManager.Request#setDestinationInExternalPublicDir}
+    can still access the path in
+    {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}, however, this
+    method is strongly discouraged. The preferred way of accessing a file
+    exposed by the {@link android.app.DownloadManager} is using
+    {@link android.content.ContentResolver#openFileDescriptor}.
+  </li>
+</ul>
 
 <h2 id="accessibility">Accessibility Improvements</h2>
 
