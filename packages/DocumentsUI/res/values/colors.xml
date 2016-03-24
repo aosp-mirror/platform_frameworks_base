@@ -16,6 +16,7 @@
 
 <resources>
     <color name="material_grey_400">#ffbdbdbd</color>
+    <color name="material_teal_700">#ff00796b</color>
 
     <!-- This is the window background, but also the background for anything
          else that needs to manually declare a background matching the "default"
@@ -35,6 +36,8 @@
     <color name="band_select_border">#44000000</color>
 
     <color name="item_doc_background_disabled">#fff4f4f4</color>
+
+    <color name="root_activated_color">@color/material_teal_700</color>
 
     <!-- TODO: Would be nice to move this to a color-set, but not sure how to support animation -->
     <color name="item_doc_background">#fffafafa</color>
