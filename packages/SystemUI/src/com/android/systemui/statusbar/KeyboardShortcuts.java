@@ -248,7 +248,7 @@ public class KeyboardShortcuts {
                         result.add(systemGroup);
                         showKeyboardShortcutsDialog(result);
                     }
-                });
+                }, deviceId);
         } else {
             dismissKeyboardShortcutsDialog();
         }

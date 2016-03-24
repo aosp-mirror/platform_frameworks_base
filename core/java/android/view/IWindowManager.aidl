@@ -387,7 +387,7 @@ interface IWindowManager
      *
      * @param receiver The receiver to deliver the results to.
      */
-    void requestAppKeyboardShortcuts(IResultReceiver receiver);
+    void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId);
 
     /**
      * Retrieves the current stable insets from the primary display.
