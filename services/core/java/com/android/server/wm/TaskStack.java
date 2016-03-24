@@ -200,10 +200,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * @param bounds The adjusted bounds.
      * @param keepInsets Whether to keep the insets from the original bounds or to calculate new
      *                   ones depending on the adjusted bounds.
+     * @return true if the adjusted bounds has changed.
      */
-    private void setAdjustedBounds(Rect bounds, boolean keepInsets) {
+    private boolean setAdjustedBounds(Rect bounds, boolean keepInsets) {
         if (mAdjustedBounds.equals(bounds)) {
-            return;
+            return false;
         }
 
         mAdjustedBounds.set(bounds);
@@ -211,6 +212,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         alignTasksToAdjustedBounds(adjusted ? mAdjustedBounds : mBounds,
                 adjusted && keepInsets ? mBounds : null);
         mDisplayContent.layoutNeeded = true;
+        return true;
     }
 
     private void alignTasksToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds) {
@@ -794,7 +796,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
     void setAdjustedForIme(WindowState imeWin) {
         mAdjustedForIme = true;
         mImeWin = imeWin;
-        updateAdjustedBounds();
+        if (updateAdjustedBounds()) {
+            getDisplayContent().mDividerControllerLocked.setAdjustingForIme(true);
+        }
     }
 
     /**
@@ -803,7 +807,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
     void resetAdjustedForIme() {
         mAdjustedForIme = false;
         mImeWin = null;
-        updateAdjustedBounds();
+        if (updateAdjustedBounds()) {
+            getDisplayContent().mDividerControllerLocked.setAdjustingForIme(true);
+        }
     }
 
     /**
@@ -920,7 +926,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     /**
      * Updates the adjustment depending on it's current state.
      */
-    void updateAdjustedBounds() {
+    boolean updateAdjustedBounds() {
         boolean adjust = false;
         if (mMinimizeAmount != 0f) {
             adjust = adjustForMinimizedDockedStack(mMinimizeAmount);
@@ -931,7 +937,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mTmpAdjustedBounds.setEmpty();
             mLastContentBounds.setEmpty();
         }
-        setAdjustedBounds(mTmpAdjustedBounds, isAdjustedForMinimizedDockedStack());
+        return setAdjustedBounds(mTmpAdjustedBounds, isAdjustedForMinimizedDockedStack());
     }
 
     boolean isAdjustedForMinimizedDockedStack() {
