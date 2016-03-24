@@ -15,6 +15,7 @@
  */
 package android.provider;
 
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -109,6 +110,8 @@ import android.os.Bundle;
  * Uri uri = getContentResolver().insert(BlockedNumbers.CONTENT_URI, values);
  * getContentResolver().delete(uri, null, null);
  * </pre>
+ * To check if a particular number is blocked, use the method
+ * {@link #isBlocked(Context, String)}.
  * </p>
  * </dd>
  * <dt><b>Query</b></dt>
@@ -120,8 +123,12 @@ import android.os.Bundle;
  *          new String[]{BlockedNumbers.COLUMN_ID, BlockedNumbers.COLUMN_ORIGINAL_NUMBER,
  *          BlockedNumbers.COLUMN_E164_NUMBER}, null, null, null);
  * </pre>
- * To check if a particular number is blocked, use the method
- * {@link #isBlocked(Context, String)}.
+ * </p>
+ * </dd>
+ * <dt><b>Unblock</b></dt>
+ * <dd>
+ * <p>
+ * Use the method {@link #unblock(Context, String)} to unblock numbers.
  * </p>
  * </dd>
  *
@@ -206,7 +213,13 @@ public class BlockedNumberContract {
     public static final String METHOD_IS_BLOCKED = "is_blocked";
 
     /** @hide */
+    public static final String METHOD_UNBLOCK= "unblock";
+
+    /** @hide */
     public static final String RES_NUMBER_IS_BLOCKED = "blocked";
+
+    /** @hide */
+    public static final String RES_NUM_ROWS_DELETED = "num_deleted";
 
     /** @hide */
     public static final String METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS =
@@ -217,13 +230,43 @@ public class BlockedNumberContract {
 
     /**
      * Returns whether a given number is in the blocked list.
+     *
+     * <p> This matches the {@code phoneNumber} against the
+     * {@link BlockedNumbers#COLUMN_ORIGINAL_NUMBER} column, and the E164 representation of the
+     * {@code phoneNumber} with the {@link BlockedNumbers#COLUMN_E164_NUMBER} column.
+     *
      * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
      * context {@code context}, this method will throw an {@link UnsupportedOperationException}.
      */
+    @WorkerThread
     public static boolean isBlocked(Context context, String phoneNumber) {
         final Bundle res = context.getContentResolver().call(
                 AUTHORITY_URI, METHOD_IS_BLOCKED, phoneNumber, null);
         return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+    }
+
+    /**
+     * Unblocks the {@code phoneNumber} if it is blocked.
+     *
+     * <p> Returns the number of rows deleted in the blocked number provider as a result of unblock.
+     *
+     * <p> This deletes all rows where the {@code phoneNumber} matches the
+     * {@link BlockedNumbers#COLUMN_ORIGINAL_NUMBER} column or the E164 representation of the
+     * {@code phoneNumber} matches the {@link BlockedNumbers#COLUMN_E164_NUMBER} column.
+     *
+     * <p>To delete rows based on exact match with specific columns such as
+     * {@link BlockedNumbers#COLUMN_ID} use
+     * {@link android.content.ContentProvider#delete(Uri, String, String[])} with
+     * {@link BlockedNumbers#CONTENT_URI} URI.
+     *
+     * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
+     * context {@code context}, this method will throw an {@link UnsupportedOperationException}.
+     */
+    @WorkerThread
+    public static int unblock(Context context, String phoneNumber) {
+        final Bundle res = context.getContentResolver().call(
+                AUTHORITY_URI, METHOD_UNBLOCK, phoneNumber, null);
+        return res.getInt(RES_NUM_ROWS_DELETED, 0);
     }
 
     /**
