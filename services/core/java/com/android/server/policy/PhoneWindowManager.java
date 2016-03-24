@@ -3101,7 +3101,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_SLASH && event.isMetaPressed()) {
             if (down) {
                 if (repeatCount == 0) {
-                    toggleKeyboardShortcutsMenu();
+                    toggleKeyboardShortcutsMenu(event.getDeviceId());
                 }
             }
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
@@ -3576,11 +3576,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void toggleKeyboardShortcutsMenu() {
+    private void toggleKeyboardShortcutsMenu(int deviceId) {
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
-                statusbar.toggleKeyboardShortcutsMenu();
+                statusbar.toggleKeyboardShortcutsMenu(deviceId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException when showing keyboard shortcuts menu", e);

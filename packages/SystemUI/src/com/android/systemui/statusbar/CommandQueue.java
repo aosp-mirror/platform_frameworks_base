@@ -107,7 +107,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void toggleRecentApps();
         public void toggleSplitScreen();
         public void preloadRecentApps();
-        public void toggleKeyboardShortcutsMenu();
+        public void toggleKeyboardShortcutsMenu(int deviceId);
         public void cancelPreloadRecentApps();
         public void setWindowState(int window, int state);
         public void buzzBeepBlinked();
@@ -254,10 +254,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void toggleKeyboardShortcutsMenu() {
+    public void toggleKeyboardShortcutsMenu(int deviceId) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_TOGGLE_KEYBOARD_SHORTCUTS);
-            mHandler.obtainMessage(MSG_TOGGLE_KEYBOARD_SHORTCUTS).sendToTarget();
+            mHandler.obtainMessage(MSG_TOGGLE_KEYBOARD_SHORTCUTS, deviceId, 0).sendToTarget();
         }
     }
 
@@ -425,7 +425,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.cancelPreloadRecentApps();
                     break;
                 case MSG_TOGGLE_KEYBOARD_SHORTCUTS:
-                    mCallbacks.toggleKeyboardShortcutsMenu();
+                    mCallbacks.toggleKeyboardShortcutsMenu(msg.arg1);
                     break;
                 case MSG_SET_WINDOW_STATE:
                     mCallbacks.setWindowState(msg.arg1, msg.arg2);

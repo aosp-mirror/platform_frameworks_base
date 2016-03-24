@@ -71,7 +71,7 @@ interface IStatusBarService
     void preloadRecentApps();
     void cancelPreloadRecentApps();
 
-    void toggleKeyboardShortcutsMenu();
+    void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**
      * Notifies the status bar that an app transition is pending to delay applying some flags with
