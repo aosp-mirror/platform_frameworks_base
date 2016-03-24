@@ -454,8 +454,21 @@ interface IPackageManager {
      */
     boolean performDexOptIfNeeded(String packageName, String instructionSet);
 
-    boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles,
-            boolean extractOnly, boolean force);
+    /**
+     * Ask the package manager to perform a dex-opt for the given reason. The package
+     * manager will map the reason to a compiler filter according to the current system
+     * configuration.
+     */
+    boolean performDexOpt(String packageName, String instructionSet, boolean checkProfiles,
+            int compileReason, boolean force);
+    /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
+    boolean performDexOptMode(String packageName, String instructionSet, boolean checkProfiles,
+            String targetCompilerFilter, boolean force);
 
     void forceDexOpt(String packageName);
 

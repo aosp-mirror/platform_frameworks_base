@@ -501,12 +501,14 @@ public class ZygoteInit {
             for (String classPathElement : classPathElements) {
                 // System server is fully AOTed and never profiled
                 // for profile guided compilation.
+                // TODO: Make this configurable between INTERPRET_ONLY, SPEED, SPACE and EVERYTHING?
                 final int dexoptNeeded = DexFile.getDexOptNeeded(
-                        classPathElement, instructionSet, DexFile.COMPILATION_TYPE_FULL);
+                        classPathElement, instructionSet, "speed",
+                        false /* newProfile */);
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                     installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
-                            dexoptNeeded, 0 /*dexFlags*/, null /*volumeUuid*/,
-                            false /*useProfiles*/);
+                            dexoptNeeded, 0 /*dexFlags*/, "speed",
+                            null /*volumeUuid*/);
                 }
             }
         } catch (IOException | InstallerException e) {

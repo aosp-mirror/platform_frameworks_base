@@ -20,13 +20,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.Package;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.storage.StorageManager;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
@@ -34,18 +31,18 @@ import com.android.internal.os.InstallerConnection.InstallerException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import dalvik.system.DexFile;
 
 import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
+import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
 import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
 import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
-import static com.android.server.pm.Installer.DEXOPT_EXTRACTONLY;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getFullCompilerFilter;
 
 /**
  * Helper class for running dexopt command on packages.
@@ -58,8 +55,6 @@ class PackageDexOptimizer {
     static final int DEX_OPT_PERFORMED = 1;
     static final int DEX_OPT_DEFERRED = 2;
     static final int DEX_OPT_FAILED = -1;
-
-    private static final boolean DEBUG_DEXOPT = PackageManagerService.DEBUG_DEXOPT;
 
     private final Installer mInstaller;
     private final Object mInstallLock;
@@ -94,8 +89,8 @@ class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(PackageParser.Package pkg, String[] instructionSets, boolean useProfiles,
-            boolean extractOnly) {
+    int performDexOpt(PackageParser.Package pkg, String[] instructionSets, boolean checkProfiles,
+            String targetCompilationFilter) {
         synchronized (mInstallLock) {
             final boolean useLock = mSystemReady;
             if (useLock) {
@@ -103,7 +98,8 @@ class PackageDexOptimizer {
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, useProfiles, extractOnly);
+                return performDexOptLI(pkg, instructionSets, checkProfiles,
+                        targetCompilationFilter);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -128,7 +124,7 @@ class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            boolean useProfiles, boolean extractOnly) {
+            boolean checkProfiles, String targetCompilerFilter) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -136,36 +132,51 @@ class PackageDexOptimizer {
             return DEX_OPT_SKIPPED;
         }
 
+        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
+        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+
+        boolean isProfileGuidedFilter = DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter);
+        // If any part of the app is used by other apps, we cannot use profile-guided
+        // compilation.
+        // TODO: This needs to be refactored to be also checked when the target mode is
+        //       profile-guided.
+        if (isProfileGuidedFilter) {
+            for (String path : paths) {
+                if (isUsedByOtherApps(path)) {
+                    checkProfiles = false;
+
+                    // TODO: Should we only upgrade to the non-profile-guided version? That is,
+                    //       given verify-profile, should we move to interpret-only?
+                    targetCompilerFilter = getFullCompilerFilter();
+                    isProfileGuidedFilter = false;
+
+                    break;
+                }
+            }
+        }
+
+        // If we're asked to take profile updates into account, check now.
+        boolean newProfile = false;
+        if (checkProfiles && isProfileGuidedFilter) {
+            // Merge profiles, see if we need to do anything.
+            try {
+                newProfile = mInstaller.mergeProfiles(sharedGid, pkg.packageName);
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to merge profiles", e);
+            }
+        }
+
         final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
-        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
             for (String path : paths) {
-                if (useProfiles && isUsedByOtherApps(path)) {
-                    // We cannot use profile guided compilation if the apk was used by another app.
-                    useProfiles = false;
-                }
                 int dexoptNeeded;
-
                 try {
-                    int compilationTypeMask = 0;
-                    if (extractOnly) {
-                        // For extract only, any type of compilation is good.
-                        compilationTypeMask = DexFile.COMPILATION_TYPE_FULL
-                            | DexFile.COMPILATION_TYPE_PROFILE_GUIDE
-                            | DexFile.COMPILATION_TYPE_EXTRACT_ONLY;
-                    } else {
-                        // Branch taken for profile guide and full compilation.
-                        // Profile guide compilation should only recompile a previous
-                        // profile compiled/extract only file and should not be attempted if the
-                        // apk is already fully compiled. So test against a full compilation type.
-                        compilationTypeMask = DexFile.COMPILATION_TYPE_FULL;
-                    }
                     dexoptNeeded = DexFile.getDexOptNeeded(path,
-                            dexCodeInstructionSet, compilationTypeMask);
+                            dexCodeInstructionSet, targetCompilerFilter, newProfile);
                 } catch (IOException ioe) {
                     Slog.w(TAG, "IOException reading apk: " + path, ioe);
                     return DEX_OPT_FAILED;
@@ -194,20 +205,20 @@ class PackageDexOptimizer {
                 Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                        + " extractOnly=" + extractOnly + " oatDir = " + oatDir);
-                final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                        + " target-filter=" + targetCompilerFilter + " oatDir = " + oatDir);
                 // Profile guide compiled oat files should not be public.
-                final boolean isPublic = !pkg.isForwardLocked() && !useProfiles;
+                final boolean isPublic = !pkg.isForwardLocked() && !isProfileGuidedFilter;
+                final int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
                 final int dexFlags = adjustDexoptFlags(
                         ( isPublic ? DEXOPT_PUBLIC : 0)
                         | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                         | (debuggable ? DEXOPT_DEBUGGABLE : 0)
-                        | (extractOnly ? DEXOPT_EXTRACTONLY : 0)
+                        | profileFlag
                         | DEXOPT_BOOTCOMPLETE);
 
                 try {
                     mInstaller.dexopt(path, sharedGid, pkg.packageName, dexCodeInstructionSet,
-                            dexoptNeeded, oatDir, dexFlags, pkg.volumeUuid, useProfiles);
+                            dexoptNeeded, oatDir, dexFlags, targetCompilerFilter, pkg.volumeUuid);
                     performedDexOpt = true;
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
