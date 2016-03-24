@@ -158,8 +158,8 @@ public class BaseInputConnection implements InputConnection {
      *
      * @hide
      */
-    public void reportFinish() {
-        // Intentionally empty
+    protected void reportFinish() {
+        // Intentionaly empty
     }
 
     /**

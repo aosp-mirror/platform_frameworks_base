@@ -16,10 +16,6 @@
 
 package com.android.internal.view;
 
-import com.android.internal.annotations.GuardedBy;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,7 +23,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -61,16 +56,11 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
-    private static final int DO_REPORT_FINISH = 150;
 
-    @NonNull
-    private final WeakReference<InputConnection> mInputConnection;
+    private WeakReference<InputConnection> mInputConnection;
 
     private Looper mMainLooper;
     private Handler mH;
-    private Object mLock = new Object();
-    @GuardedBy("mLock")
-    private boolean mFinished = false;
 
     static class SomeArgs {
         Object arg1;
@@ -94,17 +84,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         mInputConnection = new WeakReference<>(conn);
         mMainLooper = mainLooper;
         mH = new MyHandler(mMainLooper);
-    }
-
-    @Nullable
-    public InputConnection getInputConnection() {
-        return mInputConnection.get();
-    }
-
-    protected boolean isFinished() {
-        synchronized (mLock) {
-            return mFinished;
-        }
     }
 
     abstract protected boolean isActive();
@@ -219,10 +198,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 seq, callback));
     }
 
-    public void reportFinish() {
-        dispatchMessage(obtainMessage(DO_REPORT_FINISH));
-    }
-
     void dispatchMessage(Message msg) {
         // If we are calling this from the main thread, then we can call
         // right through.  Otherwise, we need to send the message to the
@@ -235,7 +210,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         
         mH.sendMessage(msg);
     }
-
+    
     void executeMessage(Message msg) {
         switch (msg.what) {
             case DO_GET_TEXT_AFTER_CURSOR: {
@@ -495,36 +470,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                             ic.requestCursorUpdates(msg.arg1), args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling requestCursorAnchorInfo", e);
-                }
-                return;
-            }
-            case DO_REPORT_FINISH: {
-                // Note that we do not need to worry about race condition here, because 1) mFinished
-                // is updated only inside this block, and 2) the code here is running on a Handler
-                // hence we assume multiple DO_REPORT_FINISH messages will not be handled at the
-                // same time.
-                if (isFinished()) {
-                    return;
-                }
-                try {
-                    InputConnection ic = mInputConnection.get();
-                    // Note we do NOT check isActive() here, because this is safe
-                    // for an IME to call at any time, and we need to allow it
-                    // through to clean up our state after the IME has switched to
-                    // another client.
-                    if (ic == null) {
-                        return;
-                    }
-                    ic.finishComposingText();
-                    // TODO: Make reportFinish() public method of InputConnection to remove this
-                    // check.
-                    if (ic instanceof BaseInputConnection) {
-                        ((BaseInputConnection) ic).reportFinish();
-                    }
-                } finally {
-                    synchronized (mLock) {
-                        mFinished = true;
-                    }
                 }
                 return;
             }
