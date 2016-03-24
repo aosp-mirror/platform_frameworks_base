@@ -28,7 +28,7 @@ import android.telephony.Rlog;
  */
 
 /**
- * Parcelable object to handle VICE Dialog Information
+ * Parcelable object to handle MultiEndpoint Dialog Information
  * @hide
  */
 public class ImsExternalCallState implements Parcelable {
@@ -39,17 +39,28 @@ public class ImsExternalCallState implements Parcelable {
     public static final int CALL_STATE_CONFIRMED = 1;
     public static final int CALL_STATE_TERMINATED = 2;
     // Dialog Id
-    public int mCallId;
+    private int mCallId;
     // Number
-    public Uri mAddress;
-    public boolean mIsPullable;
+    private Uri mAddress;
+    private boolean mIsPullable;
     // CALL_STATE_CONFIRMED / CALL_STATE_TERMINATED
-    public int mCallState;
+    private int mCallState;
     // ImsCallProfile#CALL_TYPE_*
-    public int mCallType;
-    public boolean mIsHeld;
+    private int mCallType;
+    private boolean mIsHeld;
 
     public ImsExternalCallState() {
+    }
+
+    public ImsExternalCallState(int callId, Uri address, boolean isPullable, int callState,
+            int callType, boolean isCallheld) {
+        mCallId = callId;
+        mAddress = address;
+        mIsPullable = isPullable;
+        mCallState = callState;
+        mCallType = callType;
+        mIsHeld = isCallheld;
+        Rlog.d(TAG, "ImsExternalCallState = " + this);
     }
 
     public ImsExternalCallState(Parcel in) {
@@ -60,12 +71,7 @@ public class ImsExternalCallState implements Parcelable {
         mCallState = in.readInt();
         mCallType = in.readInt();
         mIsHeld = (in.readInt() != 0);
-        Rlog.d(TAG, "ImsExternalCallState const = " +
-                "callid = " + getCallId() +
-                ", address = " + getAddress() +
-                ", mCallState = " + getCallState() +
-                ", calltype = " + getCallType() +
-                ", isheld = " + isCallHeld());
+        Rlog.d(TAG, "ImsExternalCallState const = " + this);
     }
 
     @Override
@@ -81,6 +87,7 @@ public class ImsExternalCallState implements Parcelable {
         out.writeInt(mCallState);
         out.writeInt(mCallType);
         out.writeInt(mIsHeld ? 1 : 0);
+        Rlog.d(TAG, "ImsExternalCallState writeToParcel = " + out.toString());
     }
 
     public static final Parcelable.Creator<ImsExternalCallState> CREATOR =
