@@ -44,7 +44,7 @@ public:
 
 protected:
 
-    virtual SkSurface* onNewSurface(const SkImageInfo&, const SkSurfaceProps&) override;
+    virtual sk_sp<SkSurface> onNewSurface(const SkImageInfo&, const SkSurfaceProps&) override;
 
     virtual void willSave() override;
     virtual SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec&) override;
