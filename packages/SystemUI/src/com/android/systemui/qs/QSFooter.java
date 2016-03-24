@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -57,6 +58,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private boolean mIsVisible;
     private boolean mIsIconVisible;
     private int mFooterTextId;
+    private int mFooterIconId;
 
     public QSFooter(QSPanel qsPanel, Context context) {
         mRootView = LayoutInflater.from(context)
@@ -64,6 +66,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         mRootView.setOnClickListener(this);
         mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
         mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
+        mFooterIconId = R.drawable.ic_qs_vpn;
         mContext = context;
         mMainHandler = new Handler();
     }
@@ -118,6 +121,14 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             mIsVisible = true;
         } else {
             mFooterTextId = R.string.vpn_footer;
+            // Update the VPN footer icon, if needed.
+            int footerIconId = (mSecurityController.isVpnBranded()
+                ? R.drawable.ic_qs_branded_vpn
+                : R.drawable.ic_qs_vpn);
+            if (mFooterIconId != footerIconId) {
+                mFooterIcon.setImageResource(footerIconId);
+                mFooterIconId = footerIconId;
+            }
             mIsVisible = mIsIconVisible;
         }
         mMainHandler.post(mUpdateDisplayState);

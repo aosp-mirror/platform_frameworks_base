@@ -67,6 +67,8 @@ public class SignalClusterView
 
     private boolean mNoSimsVisible = false;
     private boolean mVpnVisible = false;
+    private int mVpnIconId = 0;
+    private int mLastVpnIconId = -1;
     private boolean mEthernetVisible = false;
     private int mEthernetIconId = 0;
     private int mLastEthernetIconId = -1;
@@ -164,6 +166,7 @@ public class SignalClusterView
         mSC = sc;
         mSC.addCallback(this);
         mVpnVisible = mSC.isVpnEnabled();
+        mVpnIconId = currentVpnIconId(mSC.isVpnBranded());
     }
 
     @Override
@@ -241,6 +244,7 @@ public class SignalClusterView
             @Override
             public void run() {
                 mVpnVisible = mSC.isVpnEnabled();
+                mVpnIconId = currentVpnIconId(mSC.isVpnBranded());
                 apply();
             }
         });
@@ -415,6 +419,15 @@ public class SignalClusterView
         if (mWifiGroup == null) return;
 
         mVpn.setVisibility(mVpnVisible ? View.VISIBLE : View.GONE);
+        if (mVpnVisible) {
+            if (mLastVpnIconId != mVpnIconId) {
+                setIconForView(mVpn, mVpnIconId);
+                mLastVpnIconId = mVpnIconId;
+            }
+            mVpn.setVisibility(View.VISIBLE);
+        } else {
+            mVpn.setVisibility(View.GONE);
+        }
         if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
 
         if (mEthernetVisible) {
@@ -543,6 +556,10 @@ public class SignalClusterView
         v.setImageTintList(ColorStateList.valueOf(tint));
     }
 
+    private int currentVpnIconId(boolean isBranded) {
+        return isBranded ? R.drawable.stat_sys_branded_vpn : R.drawable.stat_sys_vpn_ic;
+    }
+
     private class PhoneState {
         private final int mSubId;
         private boolean mMobileVisible = false;
@@ -664,4 +681,3 @@ public class SignalClusterView
         }
     }
 }
-
