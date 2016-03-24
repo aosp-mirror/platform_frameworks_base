@@ -367,11 +367,6 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public void onActionModeFinished(ActionMode mode) {
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {
-    }
     // end Window.Callback methods
 
     // begin public api

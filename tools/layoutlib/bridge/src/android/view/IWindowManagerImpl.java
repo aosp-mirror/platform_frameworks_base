@@ -564,7 +564,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void requestAppKeyboardShortcuts(IResultReceiver receiver) throws RemoteException {
+    public void requestAppKeyboardShortcuts(
+            IResultReceiver receiver, int deviceId) throws RemoteException {
     }
 
     @Override

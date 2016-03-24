@@ -158,7 +158,7 @@ public interface WindowManager extends ViewManager {
      *
      * @hide
      */
-    public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver);
+    public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
