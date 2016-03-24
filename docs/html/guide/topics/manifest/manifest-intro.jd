@@ -279,7 +279,7 @@ example, a label and an icon for an activity.  The values of these attributes
 should be localized and therefore set from a resource or theme.  Resource 
 values are expressed in the following format,</p>
 
-<p style="margin-left: 2em">{@code @[<i>package</i>:]<i>type</i>:<i>name</i>}</p>
+<p style="margin-left: 2em">{@code @[<i>package</i>:]<i>type</i>/<i>name</i>}</p>
 
 <p>
 where the <i>package</i> name can be omitted if the resource is in the same package 
@@ -295,7 +295,7 @@ Values from a theme are expressed in a similar manner, but with an initial '{@co
 rather than '{@code @}':
 </p>
 
-<p style="margin-left: 2em">{@code ?[<i>package</i>:]<i>type</i>:<i>name</i>}
+<p style="margin-left: 2em">{@code ?[<i>package</i>:]<i>type</i>/<i>name</i>}
 </p></dd>
 
 <dt><b>String values</b></dt>
