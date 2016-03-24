@@ -174,6 +174,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int StrictCleartext           = 617;
     }
 
+    /**
+     * String indicating a softap command.
+     */
+    static final String SOFT_AP_COMMAND = "softap";
+
+    /**
+     * String passed back to netd connector indicating softap command success.
+     */
+    static final String SOFT_AP_COMMAND_SUCCESS = "Ok";
+
     static final int DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO = 1;
 
     /**
@@ -1426,20 +1436,48 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    /**
+     * Private method used to call execute for a command given the provided arguments.
+     *
+     * This function checks the returned NativeDaemonEvent for the provided expected response code
+     * and message.  If either of these is not correct, an error is logged.
+     *
+     * @param String command The command to execute.
+     * @param Object[] args If needed, arguments for the command to execute.
+     * @param int expectedResponseCode The code expected to be returned in the corresponding event.
+     * @param String expectedResponseMessage The message expected in the returned event.
+     * @param String logMsg The message to log as an error (TAG will be applied).
+     */
+    private void executeOrLogWithMessage(String command, Object[] args,
+            int expectedResponseCode, String expectedResponseMessage, String logMsg)
+            throws NativeDaemonConnectorException {
+        NativeDaemonEvent event = mConnector.execute(command, args);
+        if (event.getCode() != expectedResponseCode
+                || !event.getMessage().equals(expectedResponseMessage)) {
+            Log.e(TAG, logMsg + ": event = " + event);
+        }
+    }
+
     @Override
-    public void startAccessPoint(
-            WifiConfiguration wifiConfig, String wlanIface) {
+    public void startAccessPoint(WifiConfiguration wifiConfig, String wlanIface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Object[] args;
+        String logMsg = "startAccessPoint Error setting up softap";
         try {
             if (wifiConfig == null) {
-                mConnector.execute("softap", "set", wlanIface);
+                args = new Object[] {"set", wlanIface};
             } else {
-                mConnector.execute("softap", "set", wlanIface, wifiConfig.SSID,
-                                   "broadcast", Integer.toString(wifiConfig.apChannel),
-                                   getSecurityType(wifiConfig),
-                                   new SensitiveArg(wifiConfig.preSharedKey));
+                args = new Object[] {"set", wlanIface, wifiConfig.SSID,
+                        "broadcast", Integer.toString(wifiConfig.apChannel),
+                        getSecurityType(wifiConfig), new SensitiveArg(wifiConfig.preSharedKey)};
             }
-            mConnector.execute("softap", "startap");
+            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
+                    SOFT_AP_COMMAND_SUCCESS, logMsg);
+
+            logMsg = "startAccessPoint Error starting softap";
+            args = new Object[] {"startap"};
+            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
+                    SOFT_AP_COMMAND_SUCCESS, logMsg);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1460,8 +1498,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void wifiFirmwareReload(String wlanIface, String mode) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Object[] args = {"fwreload", wlanIface, mode};
+        String logMsg = "wifiFirmwareReload Error reloading "
+                + wlanIface + " fw in " + mode + " mode";
         try {
-            mConnector.execute("softap", "fwreload", wlanIface, mode);
+            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
+                    SOFT_AP_COMMAND_SUCCESS, logMsg);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1470,8 +1512,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void stopAccessPoint(String wlanIface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Object[] args = {"stopap"};
+        String logMsg = "stopAccessPoint Error stopping softap";
+
         try {
-            mConnector.execute("softap", "stopap");
+            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
+                    SOFT_AP_COMMAND_SUCCESS, logMsg);
             wifiFirmwareReload(wlanIface, "STA");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
@@ -1481,14 +1527,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void setAccessPoint(WifiConfiguration wifiConfig, String wlanIface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        Object[] args;
+        String logMsg = "startAccessPoint Error setting up softap";
         try {
             if (wifiConfig == null) {
-                mConnector.execute("softap", "set", wlanIface);
+                args = new Object[] {"set", wlanIface};
             } else {
-                mConnector.execute("softap", "set", wlanIface, wifiConfig.SSID,
-                                   "broadcast", "6", getSecurityType(wifiConfig),
-                                   new SensitiveArg(wifiConfig.preSharedKey));
+                // TODO: understand why this is set to "6" instead of
+                // Integer.toString(wifiConfig.apChannel) as in startAccessPoint
+                // TODO: should startAccessPoint call this instead of repeating code?
+                args = new Object[] {"set", wlanIface, wifiConfig.SSID,
+                        "broadcast", "6",
+                        getSecurityType(wifiConfig), new SensitiveArg(wifiConfig.preSharedKey)};
             }
+            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
+                    SOFT_AP_COMMAND_SUCCESS, logMsg);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
