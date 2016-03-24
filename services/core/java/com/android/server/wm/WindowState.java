@@ -656,8 +656,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         if (mInsetFrame.isEmpty()  && (fullscreenTask
-                || (isChildWindow() && (mAttrs.privateFlags
-                        & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0))) {
+                || layoutInParentFrame())) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mContainingFrame.set(pf);
             mDisplayFrame.set(df);
@@ -2601,6 +2600,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean isChildWindow() {
         return mAttachedWindow != null;
+    }
+
+    boolean layoutInParentFrame() {
+        return isChildWindow() && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
     }
 
     void setReplacing(boolean animate) {

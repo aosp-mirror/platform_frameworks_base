@@ -994,6 +994,17 @@ class WindowStateAnimator {
                     if (appTransformation.hasClipRect()) {
                         mClipRect.set(appTransformation.getClipRect());
                         mHasClipRect = true;
+                        // The app transformation clip will be in the coordinate space of the main
+                        // activity window, which the animation correctly assumes will be placed at
+                        // (0,0)+(insets) relative to the containing frame. This isn't necessarily
+                        // true for child windows though which can have an arbitrary frame position
+                        // relative to their containing frame. We need to offset the difference
+                        // between the containing frame as used to calculate the crop and our
+                        // bounds to compensate for this.
+                        if (mWin.isChildWindow() && mWin.layoutInParentFrame()) {
+                            mClipRect.offset( (mWin.mContainingFrame.left - mWin.mFrame.left),
+                                    mWin.mContainingFrame.top - mWin.mFrame.top );
+                        }
                     }
                 }
                 if (screenAnimation) {
