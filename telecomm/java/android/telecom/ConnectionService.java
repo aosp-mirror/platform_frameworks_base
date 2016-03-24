@@ -105,6 +105,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_SILENCE = 21;
     private static final int MSG_PULL_EXTERNAL_CALL = 22;
     private static final int MSG_SEND_CALL_EVENT = 23;
+    private static final int MSG_ON_EXTRAS_CHANGED = 24;
 
     private static Connection sNullConnection;
 
@@ -261,6 +262,14 @@ public abstract class ConnectionService extends Service {
             args.arg3 = extras;
             mHandler.obtainMessage(MSG_SEND_CALL_EVENT, args).sendToTarget();
         }
+
+        @Override
+        public void onExtrasChanged(String callId, Bundle extras) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = extras;
+            mHandler.obtainMessage(MSG_ON_EXTRAS_CHANGED, args).sendToTarget();
+        }
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -414,6 +423,17 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_ON_EXTRAS_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        Bundle extras = (Bundle) args.arg2;
+                        handleExtrasChanged(callId, extras);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -492,13 +512,25 @@ public abstract class ConnectionService extends Service {
         @Override
         public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {
             String id = mIdByConference.get(conference);
-            mAdapter.setStatusHints(id, statusHints);
+            if (id != null) {
+                mAdapter.setStatusHints(id, statusHints);
+            }
         }
 
         @Override
-        public void onExtrasChanged(Conference conference, Bundle extras) {
-            String id = mIdByConference.get(conference);
-            mAdapter.setExtras(id, extras);
+        public void onExtrasChanged(Conference c, Bundle extras) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.putExtras(id, extras);
+            }
+        }
+
+        @Override
+        public void onExtrasRemoved(Conference c, List<String> keys) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.removeExtras(id, keys);
+            }
         }
     };
 
@@ -639,12 +671,20 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onExtrasChanged(Connection connection, Bundle extras) {
-            String id = mIdByConnection.get(connection);
+        public void onExtrasChanged(Connection c, Bundle extras) {
+            String id = mIdByConnection.get(c);
             if (id != null) {
-                mAdapter.setExtras(id, extras);
+                mAdapter.putExtras(id, extras);
             }
         }
+        
+        public void onExtrasRemoved(Connection c, List<String> keys) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.removeExtras(id, keys);
+            }
+        }
+
 
         @Override
         public void onConnectionEvent(Connection connection, String event, Bundle extras) {
@@ -927,6 +967,27 @@ public abstract class ConnectionService extends Service {
             connection.onCallEvent(event, extras);
         }
 
+    }
+
+    /**
+     * Notifies a {@link Connection} or {@link Conference} of a change to the extras from Telecom.
+     * <p>
+     * These extra changes can originate from Telecom itself, or from an {@link InCallService} via
+     * the {@link android.telecom.Call#putExtra(String, boolean)},
+     * {@link android.telecom.Call#putExtra(String, int)},
+     * {@link android.telecom.Call#putExtra(String, String)},
+     * {@link Call#removeExtras(List)}.
+     *
+     * @param callId The ID of the call receiving the event.
+     * @param extras The new extras bundle.
+     */
+    private void handleExtrasChanged(String callId, Bundle extras) {
+        Log.d(this, "handleExtrasChanged(%s, %s)", callId, extras);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "handleExtrasChanged").handleExtrasChanged(extras);
+        } else if (mConferenceById.containsKey(callId)) {
+            findConferenceForAction(callId, "handleExtrasChanged").handleExtrasChanged(extras);
+        }
     }
 
     private void onPostDialContinue(String callId, boolean proceed) {

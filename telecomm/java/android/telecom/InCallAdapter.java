@@ -21,6 +21,8 @@ import android.os.RemoteException;
 
 import com.android.internal.telecom.IInCallAdapter;
 
+import java.util.List;
+
 /**
  * Receives commands from {@link InCallService} implementations which should be executed by
  * Telecom. When Telecom binds to a {@link InCallService}, an instance of this class is given to
@@ -273,6 +275,79 @@ public final class InCallAdapter {
     public void sendCallEvent(String callId, String event, Bundle extras) {
         try {
             mAdapter.sendCallEvent(callId, event, extras);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Intructs Telecom to add extras to a call.
+     *
+     * @param callId The callId to add the extras to.
+     * @param extras The extras.
+     */
+    public void putExtras(String callId, Bundle extras) {
+        try {
+            mAdapter.putExtras(callId, extras);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Intructs Telecom to add an extra to a call.
+     *
+     * @param callId The callId to add the extras to.
+     * @param key The extra key.
+     * @param value The extra value.
+     */
+    public void putExtra(String callId, String key, boolean value) {
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(key, value);
+            mAdapter.putExtras(callId, bundle);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Intructs Telecom to add an extra to a call.
+     *
+     * @param callId The callId to add the extras to.
+     * @param key The extra key.
+     * @param value The extra value.
+     */
+    public void putExtra(String callId, String key, int value) {
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putInt(key, value);
+            mAdapter.putExtras(callId, bundle);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Intructs Telecom to add an extra to a call.
+     *
+     * @param callId The callId to add the extras to.
+     * @param key The extra key.
+     * @param value The extra value.
+     */
+    public void putExtra(String callId, String key, String value) {
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putString(key, value);
+            mAdapter.putExtras(callId, bundle);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Intructs Telecom to remove extras from a call.
+     * @param callId The callId to remove the extras from.
+     * @param keys The extra keys to remove.
+     */
+    public void removeExtras(String callId, List<String> keys) {
+        try {
+            mAdapter.removeExtras(callId, keys);
         } catch (RemoteException ignored) {
         }
     }
