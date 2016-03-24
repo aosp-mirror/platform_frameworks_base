@@ -464,7 +464,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 if (layoutAlgorithm.getFocusState() != TaskStackLayoutAlgorithm.STATE_FOCUSED) {
                     // If we are focused, we don't want the front task to move, but otherwise, we
                     // allow the back task to move up, and the front task to move back
-                    stackScrollOffset /= 2;
+                    stackScrollOffset *= 0.75f;
                 }
                 newStackScroll = stackScroller.getBoundedStackScroll(stackScroller.getStackScroll()
                         + stackScrollOffset);

@@ -921,8 +921,8 @@ public class TaskStackLayoutAlgorithm {
     float getStackScrollForTaskAtInitialOffset(Task t) {
         float normX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
         mUnfocusedRange.offset(0f);
-        return (float) mTaskIndexMap.get(t.key.id, 0) - Math.max(0,
-                mUnfocusedRange.getAbsoluteX(normX));
+        return Utilities.clamp((float) mTaskIndexMap.get(t.key.id, 0) - Math.max(0,
+                mUnfocusedRange.getAbsoluteX(normX)), mMinScrollP, mMaxScrollP);
     }
 
     /**

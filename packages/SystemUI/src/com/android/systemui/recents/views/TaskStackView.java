@@ -111,7 +111,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final int DRAG_SCALE_DURATION = 175;
     private static final float DRAG_SCALE_FACTOR = 1.05f;
 
-    private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 200;
+    private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 216;
     private static final int LAUNCH_NEXT_SCROLL_INCR_DURATION = 32;
 
     private static final ArraySet<Task.TaskKey> EMPTY_TASK_SET = new ArraySet<>();
@@ -1625,15 +1625,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             cancelAllTaskViewAnimations();
 
             final Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
-            if (getChildViewForTask(launchTask) == null) {
-                List<TaskView> taskViews = getTaskViews();
-                int lastTaskIndex = !taskViews.isEmpty()
-                        ? mStack.indexOfStackTask(taskViews.get(taskViews.size() - 1).getTask())
-                        : mStack.getTaskCount() - 1;
-                int duration = LAUNCH_NEXT_SCROLL_BASE_DURATION +
-                        Math.abs(mStack.indexOfStackTask(launchTask) - lastTaskIndex)
-                                * LAUNCH_NEXT_SCROLL_INCR_DURATION;
-                mStackScroller.animateScroll(mLayoutAlgorithm.getStackScrollForTask(launchTask),
+            float curScroll = mStackScroller.getStackScroll();
+            float targetScroll = mLayoutAlgorithm.getStackScrollForTaskAtInitialOffset(launchTask);
+            float absScrollDiff = Math.abs(targetScroll - curScroll);
+            if (getChildViewForTask(launchTask) == null || absScrollDiff > 0.35f) {
+                int duration = (int) (LAUNCH_NEXT_SCROLL_BASE_DURATION +
+                        absScrollDiff * LAUNCH_NEXT_SCROLL_INCR_DURATION);
+                mStackScroller.animateScroll(targetScroll,
                         duration, new Runnable() {
                             @Override
                             public void run() {
