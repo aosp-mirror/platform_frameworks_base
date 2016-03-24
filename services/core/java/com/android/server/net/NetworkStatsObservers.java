@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 class NetworkStatsObservers {
     private static final String TAG = "NetworkStatsObservers";
-    private static final boolean LOGV = true;
+    private static final boolean LOGV = false;
 
     private static final long MIN_THRESHOLD_BYTES = 2 * MB_IN_BYTES;
 
