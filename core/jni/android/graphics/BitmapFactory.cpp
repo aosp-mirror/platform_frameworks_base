@@ -7,7 +7,6 @@
 #include "SkAndroidCodec.h"
 #include "SkBRDAllocator.h"
 #include "SkFrontBufferedStream.h"
-#include "SkImageDecoder.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
