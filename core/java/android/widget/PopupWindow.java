@@ -1499,8 +1499,8 @@ public class PopupWindow {
      *
      * @param anchor the view on which the popup window must be anchored
      * @param outParams the layout parameters used to display the drop down
-     * @param xOffset horizontal offset used to adjust for background padding
-     * @param yOffset vertical offset used to adjust for background padding
+     * @param xOffset absolute horizontal offset from the top of the anchor
+     * @param yOffset absolute vertical offset from the top of the anchor
      * @param gravity horizontal gravity specifying popup alignment
      * @return true if the popup is translated upwards to fit on screen
      */
@@ -1512,19 +1512,21 @@ public class PopupWindow {
             yOffset -= anchorHeight;
         }
 
+        // Initially, align to the bottom-left corner of the anchor plus offsets.
         final int[] drawingLocation = mTmpDrawingLocation;
         anchor.getLocationInWindow(drawingLocation);
         outParams.x = drawingLocation[0] + xOffset;
         outParams.y = drawingLocation[1] + anchorHeight + yOffset;
 
+        // If we need to adjust for gravity RIGHT, align to the bottom-right
+        // corner of the anchor (still accounting for offsets).
         final int hgrav = Gravity.getAbsoluteGravity(gravity, anchor.getLayoutDirection())
                 & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (hgrav == Gravity.RIGHT) {
-            // Flip the location to align the right sides of the popup and
-            // anchor instead of left.
             outParams.x -= width - anchorWidth;
         }
 
+        // Let the window manager know to align the top to y.
         outParams.gravity = Gravity.LEFT | Gravity.TOP;
 
         final int[] screenLocation = mTmpScreenLocation;
@@ -1533,14 +1535,15 @@ public class PopupWindow {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
-        final boolean onTop;
-        final int screenY = screenLocation[1] + anchorHeight + yOffset;
+        boolean onTop = false;
+
         final View root = anchor.getRootView();
-        if (screenY + height > displayFrame.bottom
-                || outParams.x + width - root.getWidth() > 0) {
-            // If the drop down disappears at the bottom of the screen, we try
-            // to scroll a parent scrollview or move the drop down back up on
-            // top of the edit box.
+        final int screenY = screenLocation[1] + anchorHeight + yOffset;
+        final boolean tooFarDown = screenY + height > displayFrame.bottom;
+        final boolean tooFarRight = outParams.x + width > root.getWidth();
+        if (tooFarDown || tooFarRight) {
+            // If the popup extends beyond the visible area, try to scroll the
+            // parent so that it is fully visible.
             if (mAllowScrollingAnchorParent) {
                 final int scrollX = anchor.getScrollX();
                 final int scrollY = anchor.getScrollY();
@@ -1549,8 +1552,7 @@ public class PopupWindow {
                 anchor.requestRectangleOnScreen(r, true);
             }
 
-            // Now we re-evaluate the space available, and decide from that
-            // whether the pop-up will go above or below the anchor.
+            // Update for the new anchor position.
             anchor.getLocationInWindow(drawingLocation);
             outParams.x = drawingLocation[0] + xOffset;
             outParams.y = drawingLocation[1] + anchorHeight + yOffset;
@@ -1560,25 +1562,30 @@ public class PopupWindow {
                 outParams.x -= width - anchorWidth;
             }
 
-            // Determine whether there is more space above or below the anchor.
-            anchor.getLocationOnScreen(screenLocation);
-            final int spaceBelow = displayFrame.bottom - screenLocation[1] - anchorHeight - yOffset;
-            final int spaceAbove = screenLocation[1] - yOffset - displayFrame.top;
-            onTop = spaceBelow < spaceAbove;
+            final int newScreenY = screenLocation[1] + anchorHeight + yOffset;
+            final boolean stillTooFarDown = newScreenY + height > displayFrame.bottom;
+            if (stillTooFarDown) {
+                // If the popup is still too far down, re-evaluate the space
+                // available and decide whether the pop-up will go above or
+                // below the anchor.
+                anchor.getLocationOnScreen(screenLocation);
 
-            if (!mOverlapAnchor) {
+                final int below = displayFrame.bottom - screenLocation[1] - anchorHeight - yOffset;
+                final int above = screenLocation[1] - displayFrame.top + yOffset;
+                onTop = above > below;
+
                 if (onTop) {
-                    outParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
-                    outParams.y = root.getHeight() - drawingLocation[1] + yOffset;
-                } else {
-                    outParams.y = drawingLocation[1] + anchorHeight + yOffset;
+                    // Move everything up.
+                    if (mOverlapAnchor) {
+                        yOffset += anchorHeight;
+                    }
+                    outParams.y = drawingLocation[1] - height + yOffset;
                 }
             }
-        } else {
-            onTop = false;
         }
 
         if (mClipToScreen) {
+            // Use screen coordinates for comparison against display frame.
             final int winOffsetX = screenLocation[0] - drawingLocation[0];
             final int winOffsetY = screenLocation[1] - drawingLocation[1];
             outParams.x += winOffsetX;
@@ -1586,30 +1593,32 @@ public class PopupWindow {
 
             final int right = outParams.x + width;
             if (right > displayFrame.right) {
+                // The popup is too far right, move it back in.
                 outParams.x -= right - displayFrame.right;
             }
 
             if (outParams.x < displayFrame.left) {
+                // The popup is too far left, move it back in and clip if it's
+                // still too large.
                 outParams.x = displayFrame.left;
 
-                final int displayFrameWidth = displayFrame.right - displayFrame.left;
+                final int displayFrameWidth = displayFrame.width();
                 width = Math.min(width, displayFrameWidth);
             }
 
-            if (mOverlapAnchor) {
-                final int bottom = outParams.y + width;
-                if (bottom > displayFrame.bottom) {
-                    outParams.y -= bottom - displayFrame.bottom;
-                }
-            } else {
-                if (onTop) {
-                    final int popupTop = screenLocation[1] + yOffset - height;
-                    if (popupTop < 0) {
-                        outParams.y += popupTop;
-                    }
-                } else {
-                    outParams.y = Math.max(outParams.y, displayFrame.top);
-                }
+            final int bottom = outParams.y + height;
+            if (bottom > displayFrame.bottom) {
+                // The popup is too far down, move it back in.
+                outParams.y -= bottom - displayFrame.bottom;
+            }
+
+            if (outParams.y < displayFrame.top) {
+                // The popup is too far up, move it back in and clip if
+                // it's still too large.
+                outParams.y = displayFrame.top;
+
+                final int displayFrameHeight = displayFrame.height();
+                height = Math.min(height, displayFrameHeight);
             }
 
             outParams.x -= winOffsetX;
@@ -1618,7 +1627,6 @@ public class PopupWindow {
 
         outParams.width = width;
         outParams.height = height;
-        outParams.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
 
         return onTop;
     }
