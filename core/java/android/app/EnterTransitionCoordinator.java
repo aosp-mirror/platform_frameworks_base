@@ -537,12 +537,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 setTransitioningViewsVisiblity(View.INVISIBLE, false);
             }
             TransitionManager.beginDelayedTransition(decorView, transition);
-            if (startSharedElementTransition && !mSharedElementNames.isEmpty()) {
-                mSharedElements.get(0).invalidate();
-            }
             if (startEnterTransition) {
-                setTransitioningViewsVisiblity(View.VISIBLE, true);
+                setTransitioningViewsVisiblity(View.VISIBLE, false);
             }
+            decorView.invalidate();
         } else {
             transitionStarted();
         }
