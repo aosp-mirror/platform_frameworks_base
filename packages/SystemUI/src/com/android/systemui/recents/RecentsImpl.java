@@ -20,8 +20,6 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.ITaskStackListener;
-import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -795,6 +794,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 } else {
                     Canvas c = new Canvas(thumbnail);
                     c.scale(toTransform.scale, toTransform.scale);
+                    // Workaround for b/27815919, reset the callback so that we do not trigger an
+                    // invalidate on the header bar as a result of updating the icon
+                    Drawable icon = mHeaderBar.getIconView().getDrawable();
+                    if (icon != null) {
+                        icon.setCallback(null);
+                    }
                     mHeaderBar.rebindToTask(toTask, false /* touchExplorationEnabled */,
                             disabledInSafeMode);
                     mHeaderBar.setDimAlpha(toTransform.dimAlpha);
