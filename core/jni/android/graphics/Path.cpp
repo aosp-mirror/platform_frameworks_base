@@ -232,12 +232,6 @@ public:
         obj->addPath(*src, *matrix);
     }
 
-    static void offset__FFPath(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy, jlong dstHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
-        obj->offset(dx, dy, dst);
-    }
-
     static void offset__FF(JNIEnv* env, jobject clazz, jlong objHandle, jfloat dx, jfloat dy) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->offset(dx, dy);
@@ -508,7 +502,6 @@ static const JNINativeMethod methods[] = {
     {"native_addPath","(JJFF)V", (void*) SkPathGlue::addPath__PathFF},
     {"native_addPath","(JJ)V", (void*) SkPathGlue::addPath__Path},
     {"native_addPath","(JJJ)V", (void*) SkPathGlue::addPath__PathMatrix},
-    {"native_offset","(JFFJ)V", (void*) SkPathGlue::offset__FFPath},
     {"native_offset","(JFF)V", (void*) SkPathGlue::offset__FF},
     {"native_setLastPoint","(JFF)V", (void*) SkPathGlue::setLastPoint},
     {"native_transform","(JJJ)V", (void*) SkPathGlue::transform__MatrixPath},
