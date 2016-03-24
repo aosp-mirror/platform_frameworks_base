@@ -11422,18 +11422,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     final int currentUserId = mUserController.getCurrentUserIdLocked();
                     // Get the focused task before launching launcher.
-                    final int taskId = (mFocusedActivity == null)
-                            ? -1 : mFocusedActivity.task.taskId;
-                    startHomeActivityLocked(currentUserId, "notifyLockedProfile");
+
                     if (mUserController.isLockScreenDisabled(currentUserId)) {
-                        // If there is no device lock, we first go to launcher and then resume the
-                        // original task. Work challenge will be shown because we intercepted
-                        // startActivityFromRecentsInner and the reason why we switch to home stack
-                        // first is to prevent pressing back button brings user back to the work
-                        // app.
-                        if (taskId != -1) {
-                            startActivityFromRecentsInner(taskId, null);
+                        // If there is no device lock, we will show the profile's credential page.
+                        // startActivityFromRecentsInner is intercepted and will forward user to it.
+                        if (mFocusedActivity != null) {
+                            startActivityFromRecentsInner(mFocusedActivity.task.taskId, null);
                         }
+                    } else {
+                        // Showing launcher to avoid user entering credential twice.
+                        startHomeActivityLocked(currentUserId, "notifyLockedProfile");
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);

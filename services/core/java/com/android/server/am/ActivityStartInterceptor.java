@@ -26,6 +26,7 @@ import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import android.app.KeyguardManager;
@@ -192,14 +193,14 @@ class ActivityStartInterceptor {
                 Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
                 new String[]{ resolvedType },
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE, null);
-        final int flags = intent.getFlags();
         final KeyguardManager km = (KeyguardManager) mService.mContext
                 .getSystemService(KEYGUARD_SERVICE);
         final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
         if (newIntent == null) {
             return null;
         }
-        newIntent.setFlags(flags | FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        newIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
+                FLAG_ACTIVITY_TASK_ON_HOME);
         newIntent.putExtra(EXTRA_PACKAGE_NAME, aInfo.packageName);
         newIntent.putExtra(EXTRA_INTENT, new IntentSender(target));
         return newIntent;
