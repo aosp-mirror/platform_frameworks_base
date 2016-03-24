@@ -16,7 +16,6 @@
 
 package android.os.storage;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
@@ -336,7 +335,7 @@ public final class StorageVolume implements Parcelable {
      *
      * @see DocumentsContract
      */
-    public Intent createAccessIntent(@NonNull String directoryName) {
+    public Intent createAccessIntent(String directoryName) {
         final Intent intent = new Intent(ACTION_OPEN_EXTERNAL_DIRECTORY);
         intent.putExtra(EXTRA_STORAGE_VOLUME, this);
         intent.putExtra(EXTRA_DIRECTORY_NAME, directoryName);
