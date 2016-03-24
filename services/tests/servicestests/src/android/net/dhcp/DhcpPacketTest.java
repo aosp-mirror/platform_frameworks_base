@@ -631,18 +631,10 @@ public class DhcpPacketTest extends TestCase {
         byte[] hwaddr = {
                 (byte) 0xda, (byte) 0x01, (byte) 0x19, (byte) 0x5b, (byte) 0xb1, (byte) 0x7a
         };
-        byte[] params = new byte[] {
-            DHCP_SUBNET_MASK,
-            DHCP_ROUTER,
-            DHCP_DNS_SERVER,
-            DHCP_DOMAIN_NAME,
-            DHCP_MTU,
-            DHCP_LEASE_TIME,
-        };
 
         ByteBuffer packet = DhcpPacket.buildDiscoverPacket(
                 DhcpPacket.ENCAP_L2, transactionId, secs, hwaddr,
-                false /* do unicast */, params);
+                false /* do unicast */, DhcpClient.REQUESTED_PARAMS);
 
         byte[] headers = new byte[] {
             // Ethernet header.
@@ -650,14 +642,14 @@ public class DhcpPacketTest extends TestCase {
             (byte) 0xda, (byte) 0x01, (byte) 0x19, (byte) 0x5b, (byte) 0xb1, (byte) 0x7a,
             (byte) 0x08, (byte) 0x00,
             // IP header.
-            (byte) 0x45, (byte) 0x10, (byte) 0x01, (byte) 0x52,
+            (byte) 0x45, (byte) 0x10, (byte) 0x01, (byte) 0x56,
             (byte) 0x00, (byte) 0x00, (byte) 0x40, (byte) 0x00,
-            (byte) 0x40, (byte) 0x11, (byte) 0x39, (byte) 0x8c,
+            (byte) 0x40, (byte) 0x11, (byte) 0x39, (byte) 0x88,
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
             (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
             // UDP header.
             (byte) 0x00, (byte) 0x44, (byte) 0x00, (byte) 0x43,
-            (byte) 0x01, (byte) 0x3e, (byte) 0xd8, (byte) 0xa4,
+            (byte) 0x01, (byte) 0x42, (byte) 0x6a, (byte) 0x4a,
             // BOOTP.
             (byte) 0x01, (byte) 0x01, (byte) 0x06, (byte) 0x00,
             (byte) 0xde, (byte) 0xad, (byte) 0xbe, (byte) 0xef,
@@ -688,13 +680,17 @@ public class DhcpPacketTest extends TestCase {
                     'a', 'n', 'd', 'r', 'o', 'i', 'd', '-',
                     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e',
             // Requested parameter list.
-            (byte) 0x37, (byte) 0x06,
+            (byte) 0x37, (byte) 0x0a,
                 DHCP_SUBNET_MASK,
                 DHCP_ROUTER,
                 DHCP_DNS_SERVER,
                 DHCP_DOMAIN_NAME,
                 DHCP_MTU,
+                DHCP_BROADCAST_ADDRESS,
                 DHCP_LEASE_TIME,
+                DHCP_RENEWAL_TIME,
+                DHCP_REBINDING_TIME,
+                DHCP_VENDOR_INFO,
             // End options.
             (byte) 0xff,
             // Our packets are always of even length. TODO: find out why and possibly fix it.
