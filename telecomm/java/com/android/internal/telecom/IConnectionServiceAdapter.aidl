@@ -85,7 +85,9 @@ oneway interface IConnectionServiceAdapter {
 
     void addExistingConnection(String callId, in ParcelableConnection connection);
 
-    void setExtras(String callId, in Bundle extras);
+    void putExtras(String callId, in Bundle extras);
+
+    void removeExtras(String callId, in List<String> keys);
 
     void onConnectionEvent(String callId, String event, in Bundle extras);
 }

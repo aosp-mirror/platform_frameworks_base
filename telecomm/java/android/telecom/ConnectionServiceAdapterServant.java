@@ -61,8 +61,9 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_ADD_EXISTING_CONNECTION = 21;
     private static final int MSG_ON_POST_DIAL_CHAR = 22;
     private static final int MSG_SET_CONFERENCE_MERGE_FAILED = 23;
-    private static final int MSG_SET_EXTRAS = 24;
-    private static final int MSG_ON_CONNECTION_EVENT = 25;
+    private static final int MSG_PUT_EXTRAS = 24;
+    private static final int MSG_REMOVE_EXTRAS = 25;
+    private static final int MSG_ON_CONNECTION_EVENT = 26;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -233,10 +234,19 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
-                case MSG_SET_EXTRAS: {
+                case MSG_PUT_EXTRAS: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        mDelegate.setExtras((String) args.arg1, (Bundle) args.arg2);
+                        mDelegate.putExtras((String) args.arg1, (Bundle) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_REMOVE_EXTRAS: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.removeExtras((String) args.arg1, (List<String>) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -425,11 +435,19 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public final void setExtras(String connectionId, Bundle extras) {
+        public final void putExtras(String connectionId, Bundle extras) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = connectionId;
             args.arg2 = extras;
-            mHandler.obtainMessage(MSG_SET_EXTRAS, args).sendToTarget();
+            mHandler.obtainMessage(MSG_PUT_EXTRAS, args).sendToTarget();
+        }
+
+        @Override
+        public final void removeExtras(String connectionId, List<String> keys) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionId;
+            args.arg2 = keys;
+            mHandler.obtainMessage(MSG_REMOVE_EXTRAS, args).sendToTarget();
         }
 
         @Override

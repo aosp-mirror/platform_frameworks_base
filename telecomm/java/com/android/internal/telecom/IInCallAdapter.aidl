@@ -65,4 +65,8 @@ oneway interface IInCallAdapter {
     void pullExternalCall(String callId);
 
     void sendCallEvent(String callId, String event, in Bundle extras);
+
+    void putExtras(String callId, in Bundle extras);
+
+    void removeExtras(String callId, in List<String> keys);
 }
