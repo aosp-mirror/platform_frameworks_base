@@ -1363,6 +1363,15 @@ class ActivityStarter {
                                 intentActivity.task, mNoAnimation, mOptions,
                                 mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
                         mMovedToFront = true;
+                    } else if ((launchStack.mStackId == DOCKED_STACK_ID
+                            || launchStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID)
+                            && (mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
+                        // If we want to launch adjacent and mTargetStack is not the computed
+                        // launch stack - move task to top of computed stack.
+                        mSupervisor.moveTaskToStackLocked(intentActivity.task.taskId,
+                                launchStack.mStackId, ON_TOP, FORCE_FOCUS, "launchToSide",
+                                ANIMATE);
+                        mMovedToFront = true;
                     }
                     mOptions = null;
                 }
@@ -1770,26 +1779,41 @@ class ActivityStarter {
         if (!launchToSideAllowed || (launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0) {
             return null;
         }
+        // Otherwise handle adjacent launch.
 
         // The parent activity doesn't want to launch the activity on top of itself, but
         // instead tries to put it onto other side in side-by-side mode.
         final ActivityStack parentStack = task != null ? task.stack
                 : r.mInitialActivityContainer != null ? r.mInitialActivityContainer.mStack
                 : mSupervisor.mFocusedStack;
-        if (parentStack != null && parentStack.mStackId == DOCKED_STACK_ID) {
-            // If parent was in docked stack, the natural place to launch another activity
-            // will be fullscreen, so it can appear alongside the docked window.
-            return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+
+        if (parentStack != mSupervisor.mFocusedStack) {
+            // If task's parent stack is not focused - use it during adjacent launch.
+            return parentStack;
         } else {
-            // If the parent is not in the docked stack, we check if there is docked window
-            // and if yes, we will launch into that stack. If not, we just put the new
-            // activity into parent's stack, because we can't find a better place.
-            final ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
-            if (stack != null && stack.getStackVisibilityLocked(r) == STACK_INVISIBLE) {
-                // There is a docked stack, but it isn't visible, so we can't launch into that.
-                return null;
+            if (mSupervisor.mFocusedStack != null && task == mSupervisor.mFocusedStack.topTask()) {
+                // If task is already on top of focused stack - use it. We don't want to move the
+                // existing focused task to adjacent stack, just deliver new intent in this case.
+                return mSupervisor.mFocusedStack;
+            }
+
+            if (parentStack != null && parentStack.mStackId == DOCKED_STACK_ID) {
+                // If parent was in docked stack, the natural place to launch another activity
+                // will be fullscreen, so it can appear alongside the docked window.
+                return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED,
+                        ON_TOP);
             } else {
-                return stack;
+                // If the parent is not in the docked stack, we check if there is docked window
+                // and if yes, we will launch into that stack. If not, we just put the new
+                // activity into parent's stack, because we can't find a better place.
+                final ActivityStack dockedStack = mSupervisor.getStack(DOCKED_STACK_ID);
+                if (dockedStack != null
+                        && dockedStack.getStackVisibilityLocked(r) == STACK_INVISIBLE) {
+                    // There is a docked stack, but it isn't visible, so we can't launch into that.
+                    return null;
+                } else {
+                    return dockedStack;
+                }
             }
         }
     }
