@@ -274,10 +274,7 @@ public class SwipeHelper implements Gefingerpoken {
                             mWatchLongPress = new Runnable() {
                                 @Override
                                 public void run() {
-                                    float pos = getPos(ev);
-                                    float delta = pos - mInitialTouchPos;
-                                    if (mCurrView != null && !mLongPressSent
-                                            && Math.abs(delta) < mPagingTouchSlop) {
+                                    if (mCurrView != null && !mLongPressSent) {
                                         mLongPressSent = true;
                                         mCurrView.sendAccessibilityEvent(
                                                 AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
