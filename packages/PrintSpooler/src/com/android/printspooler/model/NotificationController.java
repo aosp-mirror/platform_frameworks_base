@@ -208,7 +208,7 @@ final class NotificationController {
             }
         }
 
-        CharSequence status = printJob.getStatus();
+        CharSequence status = printJob.getStatus(mContext.getPackageManager());
         if (status != null) {
             builder.setContentText(status);
         } else {

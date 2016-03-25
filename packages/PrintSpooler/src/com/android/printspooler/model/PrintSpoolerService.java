@@ -19,6 +19,7 @@ package com.android.printspooler.model;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -575,19 +576,35 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
-   /**
-    * Set the status for a print job.
-    *
-    * @param printJobId ID of the print job to update
-    * @param status the new status
-    */
-   public void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
-       synchronized (mLock) {
-           getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setStatus(status);
+    /**
+     * Set the status for a print job.
+     *
+     * @param printJobId ID of the print job to update
+     * @param status the new status
+     */
+    public void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
+        synchronized (mLock) {
+            getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setStatus(status);
 
-           mNotificationController.onUpdateNotifications(mPrintJobs);
-       }
-   }
+            mNotificationController.onUpdateNotifications(mPrintJobs);
+        }
+    }
+
+    /**
+     * Set the status for a print job.
+     *
+     * @param printJobId ID of the print job to update
+     * @param status the new status as a string resource
+     * @param appPackageName app package the resource belongs to
+     */
+    public void setStatus(@NonNull PrintJobId printJobId, @StringRes int status,
+            @Nullable CharSequence appPackageName) {
+        synchronized (mLock) {
+            getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setStatus(status, appPackageName);
+
+            mNotificationController.onUpdateNotifications(mPrintJobs);
+        }
+    }
 
     public boolean hasActivePrintJobsLocked() {
         final int printJobCount = mPrintJobs.size();
@@ -884,7 +901,7 @@ public final class PrintSpoolerService extends Service {
                         serializer.attribute(null, ATTR_PROGRESS, String.valueOf(progress));
                     }
 
-                    CharSequence status = printJob.getStatus();
+                    CharSequence status = printJob.getStatus(getPackageManager());
                     if (!TextUtils.isEmpty(status)) {
                         serializer.attribute(null, ATTR_STATUS, status.toString());
                     }
@@ -1434,6 +1451,13 @@ public final class PrintSpoolerService extends Service {
                 @Nullable CharSequence status) throws RemoteException {
             PrintSpoolerService.this.setStatus(printJobId, status);
         }
+
+        @Override
+        public void setStatusRes(@NonNull PrintJobId printJobId, @StringRes int status,
+                @NonNull CharSequence appPackageName) throws RemoteException {
+            PrintSpoolerService.this.setStatus(printJobId, status, appPackageName);
+        }
+
 
         public PrintSpoolerService getService() {
             return PrintSpoolerService.this;

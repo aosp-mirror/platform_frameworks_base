@@ -19,6 +19,7 @@ package com.android.server.print;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -287,6 +288,35 @@ final class RemotePrintSpooler {
         }
         try {
             getRemoteInstanceLazy().setStatus(printJobId, status);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error setting status.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setStatus()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Set status of a print job.
+     *
+     * @param printJobId The print job to update
+     * @param status The new status as a string resource
+     * @param appPackageName The app package name the string res belongs to
+     */
+    public final void setStatus(@NonNull PrintJobId printJobId, @StringRes int status,
+            @NonNull CharSequence appPackageName) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setStatusRes(printJobId, status, appPackageName);
         } catch (RemoteException|TimeoutException re) {
             Slog.e(LOG_TAG, "Error setting status.", re);
         } finally {

@@ -467,10 +467,12 @@ public final class PrinterInfo implements Parcelable {
          * {@link android.printservice.PrinterDiscoverySession#onRequestCustomPrinterIcon}.
          * </p>
          *
+         * @param hasCustomPrinterIcon If the printer has a custom icon or not.
+         *
          * @return This builder.
          */
-        public @NonNull Builder setHasCustomPrinterIcon() {
-            mHasCustomPrinterIcon = true;
+        public @NonNull Builder setHasCustomPrinterIcon(boolean hasCustomPrinterIcon) {
+            mHasCustomPrinterIcon = hasCustomPrinterIcon;
             return this;
         }
 
