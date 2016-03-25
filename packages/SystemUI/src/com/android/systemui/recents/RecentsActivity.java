@@ -73,6 +73,7 @@ import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.AnimationProps;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -285,6 +286,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         registerReceiver(mSystemBroadcastReceiver, filter);
 
         getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
+
+        // Reload the stack view
+        reloadStackView();
     }
 
     @Override
@@ -297,15 +301,17 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
-    public void onEnterAnimationComplete() {
-        super.onEnterAnimationComplete();
-        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // Reload the stack view
+        reloadStackView();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
+    /**
+     * Reloads the stack views upon launching Recents.
+     */
+    private void reloadStackView() {
         // If the Recents component has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -328,37 +334,20 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
         loader.loadTasks(this, loadPlan, loadOpts);
         TaskStack stack = loadPlan.getTaskStack();
-        mRecentsView.onResume(mIsVisible, false /* multiWindowChange */, stack);
+        mRecentsView.onReload(mIsVisible, stack.getTaskCount() == 0);
+        mRecentsView.updateStack(stack);
 
-        // Animate the SystemUI scrims into view
-        Task launchTarget = stack.getLaunchTarget();
-        int taskCount = stack.getTaskCount();
-        int launchTaskIndexInStack = launchTarget != null
-                ? stack.indexOfStackTask(launchTarget)
-                : 0;
-        boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
+        // Update the nav bar scrim, but defer the animation until the enter-window event
         boolean animateNavBarScrim = !launchState.launchedWhileDocking;
-        mScrimViews.prepareEnterRecentsAnimation(hasNavBarScrim, animateNavBarScrim);
+        updateNavBarScrim(animateNavBarScrim, null);
 
-        // If this is a new instance from a configuration change, then we have to manually trigger
-        // the enter animation state, or if recents was relaunched by AM, without going through
-        // the normal mechanisms
+        // If this is a new instance relaunched by AM, without going through the normal mechanisms,
+        // then we have to manually trigger the enter animation state
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
                 !launchState.launchedFromApp;
-        if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
+        if (wasLaunchedByAm) {
             EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
         }
-
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-
-                    @Override
-                    public boolean onPreDraw() {
-                        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        EventBus.getDefault().post(new RecentsDrawnEvent());
-                        return true;
-                    }
-                });
 
         // Keep track of whether we launched from the nav bar button or via alt-tab
         if (launchState.launchedWithAltTab) {
@@ -369,6 +358,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Keep track of whether we launched from an app or from home
         if (launchState.launchedFromApp) {
+            Task launchTarget = stack.getLaunchTarget();
+            int launchTaskIndexInStack = launchTarget != null
+                    ? stack.indexOfStackTask(launchTarget)
+                    : 0;
             MetricsLogger.count(this, "overview_source_app", 1);
             // If from an app, track the stack index of the app in the stack (for affiliated tasks)
             MetricsLogger.histogram(this, "overview_source_app_index", launchTaskIndexInStack);
@@ -377,10 +370,34 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         }
 
         // Keep track of the total stack task count
+        int taskCount = mRecentsView.getStack().getTaskCount();
         MetricsLogger.histogram(this, "overview_task_count", taskCount);
 
         // After we have resumed, set the visible state until the next onStop() call
         mIsVisible = true;
+    }
+
+    @Override
+    public void onEnterAnimationComplete() {
+        super.onEnterAnimationComplete();
+        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Notify of the next draw
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+
+                    @Override
+                    public boolean onPreDraw() {
+                        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        EventBus.getDefault().post(new RecentsDrawnEvent());
+                        return true;
+                    }
+                });
     }
 
     @Override
@@ -395,7 +412,34 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        // Update the nav bar for the current orientation
+        updateNavBarScrim(false /* animateNavBarScrim */, AnimationProps.IMMEDIATE);
+
         EventBus.getDefault().send(new ConfigurationChangedEvent());
+    }
+
+    @Override
+    public void onMultiWindowChanged(boolean inMultiWindow) {
+        super.onMultiWindowChanged(inMultiWindow);
+        EventBus.getDefault().send(new ConfigurationChangedEvent());
+
+        if (mRecentsView != null) {
+            // Reload the task stack completely
+            RecentsConfiguration config = Recents.getConfiguration();
+            RecentsActivityLaunchState launchState = config.getLaunchState();
+            RecentsTaskLoader loader = Recents.getTaskLoader();
+            RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
+            loader.preloadTasks(loadPlan, -1 /* topTaskId */, false /* isTopTaskHome */);
+
+            RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
+            loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
+            loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
+            loader.loadTasks(this, loadPlan, loadOpts);
+
+            mRecentsView.updateStack(loadPlan.getTaskStack());
+        }
+
+        EventBus.getDefault().send(new MultiWindowStateChangedEvent(inMultiWindow));
     }
 
     @Override
@@ -451,28 +495,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (loader != null) {
             loader.onTrimMemory(level);
         }
-    }
-
-    @Override
-    public void onMultiWindowChanged(boolean inMultiWindow) {
-        super.onMultiWindowChanged(inMultiWindow);
-        EventBus.getDefault().send(new ConfigurationChangedEvent());
-
-        // Reload the task stack completely
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        RecentsTaskLoader loader = Recents.getTaskLoader();
-        RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-        loader.preloadTasks(loadPlan, -1 /* topTaskId */, false /* isTopTaskHome */);
-
-        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
-        loadOpts.numVisibleTasks = launchState.launchedNumVisibleTasks;
-        loadOpts.numVisibleTaskThumbnails = launchState.launchedNumVisibleThumbnails;
-        loader.loadTasks(this, loadPlan, loadOpts);
-
-        mRecentsView.onResume(mIsVisible, true /* multiWindowChange */, loadPlan.getTaskStack());
-
-        EventBus.getDefault().send(new MultiWindowStateChangedEvent(inMultiWindow));
     }
 
     @Override
@@ -696,5 +718,19 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         });
         return true;
+    }
+
+    /**
+     * Updates the nav bar scrim.
+     */
+    private void updateNavBarScrim(boolean animateNavBarScrim, AnimationProps animation) {
+        // Animate the SystemUI scrims into view
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        int taskCount = mRecentsView.getStack().getTaskCount();
+        boolean hasNavBarScrim = (taskCount > 0) && !ssp.hasTransposedNavBar();
+        mScrimViews.prepareEnterRecentsAnimation(hasNavBarScrim, animateNavBarScrim);
+        if (animateNavBarScrim && animation != null) {
+            mScrimViews.animateNavBarScrimVisibility(true, animation);
+        }
     }
 }

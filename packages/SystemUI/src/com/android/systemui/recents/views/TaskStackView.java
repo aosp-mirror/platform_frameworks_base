@@ -255,10 +255,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+        super.onAttachedToWindow();
+        readSystemFlags();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        EventBus.getDefault().unregister(this);
+    }
+
     /**
-     * Called only if we are resuming Recents.
+     * Called from RecentsActivity when it is relaunched.
      */
-    void onResume(boolean isResumingFromVisible) {
+    void onReload(boolean isResumingFromVisible) {
         if (!isResumingFromVisible) {
             // Reset the focused task
             resetFocusedTask(getFocusedTask());
@@ -269,7 +282,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         taskViews.addAll(getTaskViews());
         taskViews.addAll(mViewPool.getViews());
         for (int i = taskViews.size() - 1; i >= 0; i--) {
-            taskViews.get(i).onResume(isResumingFromVisible);
+            taskViews.get(i).onReload(isResumingFromVisible);
         }
 
         // Reset the stack state
@@ -285,53 +298,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         } else {
             mStackScroller.reset();
             mLayoutAlgorithm.reset();
-            mAwaitingFirstLayout = true;
-            requestLayout();
         }
-    }
 
-    @Override
-    protected void onAttachedToWindow() {
-        EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
-        super.onAttachedToWindow();
-        readSystemFlags();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        EventBus.getDefault().unregister(this);
+        // Since we always animate to the same place in (the initial state), always reset the stack
+        // to the initial state when resuming
+        mAwaitingFirstLayout = true;
+        requestLayout();
     }
 
     /**
      * Sets the stack tasks of this TaskStackView from the given TaskStack.
      */
-    public void setTasks(TaskStack stack, boolean notifyStackChanges, boolean relayoutTaskStack,
-            boolean multiWindowChange) {
+    public void setTasks(TaskStack stack, boolean allowNotifyStackChanges) {
         boolean isInitialized = mLayoutAlgorithm.isInitialized();
+        // Only notify if we are already initialized, otherwise, everything will pick up all the
+        // new and old tasks when we next layout
         mStack.setTasks(getContext(), stack.computeAllTasksList(),
-                notifyStackChanges && isInitialized);
-        if (isInitialized) {
-            // Only update the layout if we are notifying, otherwise, we will update it in the next
-            // measure/layout pass
-            updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
-            if (!multiWindowChange) {
-                updateToInitialState();
-            }
-
-            if (relayoutTaskStack) {
-                relayoutTaskViews(AnimationProps.IMMEDIATE);
-
-                // Rebind all the task views.  This will not trigger new resources to be loaded
-                // unless they have actually changed
-                List<TaskView> taskViews = getTaskViews();
-                int taskViewCount = taskViews.size();
-                for (int i = 0; i < taskViewCount; i++) {
-                    TaskView tv = taskViews.get(i);
-                    bindTaskView(tv, tv.getTask());
-                }
-            }
-        }
+                allowNotifyStackChanges && isInitialized);
     }
 
     /** Returns the task stack. */
@@ -771,8 +754,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Updates the clip for each of the task views from back to front.
      */
     private void clipTaskViews() {
-        RecentsConfiguration config = Recents.getConfiguration();
-
         // Update the clip on each task child
         List<TaskView> taskViews = getTaskViews();
         TaskView tmpTv = null;
@@ -1436,6 +1417,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             EventBus.getDefault().send(new AllTaskViewsDismissedEvent(fromDockGesture
                     ? R.string.recents_empty_message
                     : R.string.recents_empty_message_dismissed_all));
+        }
+    }
+
+    @Override
+    public void onStackTasksUpdated(TaskStack stack) {
+        // Update the layout and immediately layout
+        updateLayoutAlgorithm(false /* boundScroll */);
+        relayoutTaskViews(AnimationProps.IMMEDIATE);
+
+        // Rebind all the task views.  This will not trigger new resources to be loaded
+        // unless they have actually changed
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = 0; i < taskViewCount; i++) {
+            TaskView tv = taskViews.get(i);
+            bindTaskView(tv, tv.getTask());
         }
     }
 

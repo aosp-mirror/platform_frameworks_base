@@ -313,7 +313,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         RecentsActivityLaunchState launchState = config.getLaunchState();
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
                 !launchState.launchedFromApp;
-        if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
+        if (wasLaunchedByAm) {
             EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
         }
 

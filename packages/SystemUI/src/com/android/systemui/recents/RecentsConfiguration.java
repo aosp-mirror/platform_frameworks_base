@@ -47,11 +47,6 @@ public class RecentsConfiguration {
     // Launch states
     public RecentsActivityLaunchState mLaunchState = new RecentsActivityLaunchState();
 
-    // TODO: Values determined by the current context, needs to be refactored into something that is
-    //       agnostic of the activity context, but still calculable from the Recents component for
-    //       the transition into recents
-    public boolean hasTransposedNavBar;
-
     // Since the positions in Recents has to be calculated globally (before the RecentsActivity
     // starts), we need to calculate some resource values ourselves, instead of relying on framework
     // resources.
@@ -76,13 +71,6 @@ public class RecentsConfiguration {
         smallestWidth = ssp.getDeviceSmallestWidth();
         isLargeScreen = smallestWidth >= (int) (screenDensity * LARGE_SCREEN_MIN_DP);
         isXLargeScreen = smallestWidth >= (int) (screenDensity * XLARGE_SCREEN_MIN_DP);
-    }
-
-    /**
-     * Updates the configuration based on the current state of the system
-     */
-    void update(Rect systemInsets) {
-        hasTransposedNavBar = systemInsets.right > 0;
     }
 
     /**

@@ -284,14 +284,14 @@ public class TaskViewHeader extends FrameLayout
         icon.setLayoutParams(lp);
         lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL);
-        lp.leftMargin = mHeaderBarHeight;
+        lp.setMarginStart(mHeaderBarHeight);
         lp.rightMargin = mMoveTaskButton != null
                 ? 2 * mHeaderBarHeight
                 : mHeaderBarHeight;
         title.setLayoutParams(lp);
         if (secondaryButton != null) {
             lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.END);
-            lp.rightMargin = mHeaderBarHeight;
+            lp.setMarginEnd(mHeaderBarHeight);
             secondaryButton.setLayoutParams(lp);
             secondaryButton.setPadding(mHeaderButtonPadding, mHeaderButtonPadding,
                     mHeaderButtonPadding, mHeaderButtonPadding);

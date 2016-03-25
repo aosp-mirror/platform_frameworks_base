@@ -953,14 +953,8 @@ public class TaskStackLayoutAlgorithm {
      */
     public void getTaskStackBounds(Rect windowRect, int topInset, int rightInset,
             Rect taskStackBounds) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        if (config.hasTransposedNavBar) {
-            taskStackBounds.set(windowRect.left, windowRect.top + topInset,
-                    windowRect.right - rightInset, windowRect.bottom);
-        } else {
-            taskStackBounds.set(windowRect.left, windowRect.top + topInset,
-                    windowRect.right - rightInset, windowRect.bottom);
-        }
+        taskStackBounds.set(windowRect.left, windowRect.top + topInset,
+                windowRect.right - rightInset, windowRect.bottom);
 
         // Ensure that the new width is at most the smaller display edge size
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -1105,9 +1099,11 @@ public class TaskStackLayoutAlgorithm {
     private int getScaleForExtent(Rect instance, Rect other, int value, int minValue,
                                   @Extent int extent) {
         if (extent == WIDTH) {
-            return Math.max(minValue, (int) (((float) instance.width() / other.width()) * value));
+            float scale = Utilities.clamp01((float) instance.width() / other.width());
+            return Math.max(minValue, (int) (scale * value));
         } else if (extent == HEIGHT) {
-            return Math.max(minValue, (int) (((float) instance.height() / other.height()) * value));
+            float scale = Utilities.clamp01((float) instance.height() / other.height());
+            return Math.max(minValue, (int) (scale * value));
         }
         return value;
     }

@@ -191,15 +191,15 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mCb = cb;
     }
 
-    /** Resets this TaskView for reuse. */
-    void onResume(boolean isResumingFromVisible) {
+    /**
+     * Called from RecentsActivity when it is relaunched.
+     */
+    void onReload(boolean isResumingFromVisible) {
         resetNoUserInteractionState();
         readSystemFlags();
         if (!isResumingFromVisible) {
             resetViewProperties();
-            setClipViewInStack(false);
         }
-        setCallbacks(null);
     }
 
     /** Gets the task */

@@ -140,7 +140,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     protected Context mContext;
     protected Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
-    protected boolean mCanReuseTaskStackViews = true;
     boolean mDraggingInRecents;
     boolean mLaunchedWhileDocking;
 
@@ -209,8 +208,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public void onConfigurationChanged() {
         reloadHeaderBarLayout();
         updateHeaderBarLayout(null /* stack */);
-        // Don't reuse task stack views if the configuration changes
-        mCanReuseTaskStackViews = false;
         Recents.getConfiguration().updateOnConfigurationChange();
     }
 
@@ -592,9 +589,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         calculateWindowStableInsets(systemInsets, windowRect);
         windowRect.offsetTo(0, 0);
 
-        // Update the configuration for the current state
-        Recents.getConfiguration().update(systemInsets);
-
         TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
         stackLayout.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
                 mTaskStackBounds);
@@ -605,8 +599,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         if (stack != null) {
             stackLayout.initialize(windowRect, taskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
-            mDummyStackView.setTasks(stack, false /* notifyStackChanges */,
-                    false /* relayoutTaskStack */, false /* multiWindowChange */);
+            mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
         }
         Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
@@ -862,10 +855,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
         launchState.launchedFromAppDocked = mLaunchedWhileDocking;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
-        launchState.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
         launchState.launchedNumVisibleTasks = stackVr.numVisibleTasks;
         launchState.launchedNumVisibleThumbnails = stackVr.numVisibleThumbnails;
-        launchState.launchedHasConfigurationChanged = false;
         launchState.launchedViaDragGesture = mDraggingInRecents;
         launchState.launchedWhileDocking = mLaunchedWhileDocking;
 
@@ -915,7 +906,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         } else {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
-        mCanReuseTaskStackViews = true;
         EventBus.getDefault().send(new RecentsActivityStartingEvent());
     }
 
