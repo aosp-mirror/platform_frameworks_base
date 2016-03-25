@@ -23,6 +23,8 @@ import android.os.Binder;
 import android.os.CpuUsageInfo;
 import android.os.IHardwarePropertiesManager;
 import android.os.Process;
+import android.os.UserHandle;
+import com.android.server.vr.VrManagerInternal;
 
 import java.util.Arrays;
 
@@ -78,14 +80,15 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
      *
      * @param callingPackage The calling package name.
      *
-     * @throws SecurityException if a non profile or device owner or system tries to retrieve
-     * information provided by the service.
+     * @throws SecurityException if something other than the profile or device owner, or the
+     *        current VR service tries to retrieve information provided by this service.
      */
     private void enforceHardwarePropertiesRetrievalAllowed(String callingPackage)
             throws SecurityException {
         final PackageManager pm = mContext.getPackageManager();
+        int uid = 0;
         try {
-            final int uid = pm.getPackageUid(callingPackage, 0);
+            uid = pm.getPackageUid(callingPackage, 0);
             if (Binder.getCallingUid() != uid) {
                 throw new SecurityException("The caller has faked the package name.");
             }
@@ -93,10 +96,13 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
             throw new SecurityException("The caller has faked the package name.");
         }
 
+        final int userId = UserHandle.getUserId(uid);
+        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
         if (!dpm.isDeviceOwnerApp(callingPackage) && !dpm.isProfileOwnerApp(callingPackage)
-                && Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("The caller is not a device or profile owner or system.");
+                && !vrService.isCurrentVrListener(callingPackage, userId)) {
+            throw new SecurityException("The caller is not a device or profile owner or bound "
+                + "VrListenerService.");
         }
     }
 }
