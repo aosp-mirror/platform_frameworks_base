@@ -24,7 +24,9 @@ import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ParserFactory;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
+import com.android.ide.common.rendering.api.SessionParams.Key;
 import com.android.ide.common.resources.IntArrayWrapper;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 import com.android.utils.ILogger;
@@ -175,5 +177,13 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
                 return new KXmlParser();
             }
         };
+    }
+
+    @Override
+    public <T> T getFlag(Key<T> key) {
+        if (key.equals(RenderParamsFlags.FLAG_KEY_APPLICATION_PACKAGE)) {
+            return (T) PACKAGE_NAME;
+        }
+        return null;
     }
 }
