@@ -16,7 +16,9 @@
 
 package com.android.systemui.recents.views;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -34,6 +36,8 @@ import android.view.View;
 import android.view.ViewDebug;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 
 
@@ -43,17 +47,24 @@ import com.android.systemui.recents.model.Task;
  */
 public class TaskViewThumbnail extends View {
 
-
     private static final ColorMatrix TMP_FILTER_COLOR_MATRIX = new ColorMatrix();
     private static final ColorMatrix TMP_BRIGHTNESS_COLOR_MATRIX = new ColorMatrix();
 
     private Task mTask;
 
+    private Rect mDisplayRect = new Rect();
+    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
+
     // Drawing
+    @ViewDebug.ExportedProperty(category="recents")
+    Rect mTaskViewRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
     Rect mThumbnailRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
-    Rect mTaskViewRect = new Rect();
+    float mThumbnailScale;
+    float mFullscreenThumbnailScale;
+    ActivityManager.TaskThumbnailInfo mThumbnailInfo;
+
     int mCornerRadius;
     @ViewDebug.ExportedProperty(category="recents")
     float mDimAlpha;
@@ -97,6 +108,8 @@ public class TaskViewThumbnail extends View {
         mCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
         mBgFillPaint.setColor(Color.WHITE);
+        mFullscreenThumbnailScale = context.getResources().getFraction(
+                com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
     }
 
     /**
@@ -114,57 +127,75 @@ public class TaskViewThumbnail extends View {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mOrientation = ssp.getDisplayOrientation();
+        mDisplayRect = ssp.getDisplayRect();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         if (mInvisible) {
             return;
         }
 
-        int thumbnailHeight = (int) (((float) mTaskViewRect.width() / mThumbnailRect.width()) *
-                mThumbnailRect.height());
-        if (thumbnailHeight >= mTaskViewRect.height()) {
-            // The thumbnail fills the full task view bounds, so just draw it
-            canvas.drawRoundRect(0, 0, mTaskViewRect.width(), mTaskViewRect.height(),
-                    mCornerRadius, mCornerRadius, mDrawPaint);
-        } else {
-            int count = 0;
-            if (thumbnailHeight > 0) {
-                // The thumbnail only covers part of the task view bounds, so fill in the
-                // non-thumbnail space with the default background color.  This is the equivalent of
-                // the GL border texture mode.
-                count = canvas.save();
+        if (mBitmapShader != null) {
+            int viewWidth = mTaskViewRect.width();
+            int viewHeight = mTaskViewRect.height();
+
+            // We are drawing the thumbnail in the same orientation, so just fit the width
+            int thumbnailWidth = (int) (mThumbnailRect.width() * mThumbnailScale);
+            int thumbnailHeight = (int) (mThumbnailRect.height() * mThumbnailScale);
+
+            if (thumbnailWidth >= viewWidth && thumbnailHeight >= viewHeight) {
+                // Thumbnail fills the full task view bounds, so just draw it
+                canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
+                        mDrawPaint);
+            } else {
+                // Thumbnail does not fill the full task view bounds, so just draw it and fill the
+                // empty areas with the background color
+                int count = canvas.save();
 
                 // Since we only want the top corners to be rounded, draw slightly beyond the
                 // thumbnail height, but clip to the thumbnail height
-                canvas.clipRect(0, 0, mTaskViewRect.width(), thumbnailHeight, Region.Op.REPLACE);
-                canvas.drawRoundRect(0, 0, mTaskViewRect.width(), thumbnailHeight + mCornerRadius,
+                canvas.clipRect(0, 0, thumbnailWidth, thumbnailHeight, Region.Op.REPLACE);
+                canvas.drawRoundRect(0, 0,
+                        thumbnailWidth + (thumbnailWidth < viewWidth ? mCornerRadius : 0),
+                        thumbnailHeight + (thumbnailHeight < viewHeight ? mCornerRadius : 0),
                         mCornerRadius, mCornerRadius, mDrawPaint);
-            }
 
-            // In the remaining space, draw the background color
-            canvas.clipRect(0, thumbnailHeight, mTaskViewRect.width(), mTaskViewRect.height(),
-                    Region.Op.REPLACE);
-            canvas.drawRoundRect(0, Math.max(0, thumbnailHeight - mCornerRadius),
-                    mTaskViewRect.width(), mTaskViewRect.height(), mCornerRadius, mCornerRadius,
-                    mBgFillPaint);
+                // In the remaining space, draw the background color
+                if (thumbnailWidth < viewWidth) {
+                    canvas.clipRect(thumbnailWidth, 0, viewWidth, viewHeight, Region.Op.REPLACE);
+                    canvas.drawRoundRect(Math.max(0, thumbnailWidth - mCornerRadius), 0,
+                            viewWidth, viewHeight, mCornerRadius, mCornerRadius, mBgFillPaint);
+                }
+                if (thumbnailWidth > 0 && thumbnailHeight < viewHeight) {
+                    canvas.clipRect(0, thumbnailHeight, viewWidth, viewHeight, Region.Op.REPLACE);
+                    canvas.drawRoundRect(0, Math.max(0, thumbnailHeight - mCornerRadius),
+                            viewWidth, viewHeight, mCornerRadius, mCornerRadius, mBgFillPaint);
+                }
 
-            if (thumbnailHeight > 0) {
                 canvas.restoreToCount(count);
             }
         }
     }
 
     /** Sets the thumbnail to a given bitmap. */
-    void setThumbnail(Bitmap bm) {
+    void setThumbnail(Bitmap bm, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
         if (bm != null) {
-            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP,
-                    Shader.TileMode.CLAMP);
+            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
             mThumbnailRect.set(0, 0, bm.getWidth(), bm.getHeight());
+            mThumbnailInfo = thumbnailInfo;
             updateThumbnailScale();
         } else {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
             mThumbnailRect.setEmpty();
+            mThumbnailInfo = null;
         }
     }
 
@@ -210,20 +241,46 @@ public class TaskViewThumbnail extends View {
      * Updates the scale of the bitmap relative to this view.
      */
     public void updateThumbnailScale() {
+        mThumbnailScale = 1f;
         if (mBitmapShader != null) {
-            float thumbnailScale;
-            if (!mTask.isFreeformTask() || mTask.bounds == null) {
-                // If this is a stack task, or a stack task moved into the freeform workspace, then
-                // just scale this thumbnail to fit the width of the view
-                thumbnailScale = (float) mTaskViewRect.width() / mThumbnailRect.width();
+
+            if (mThumbnailInfo != null) {
+                System.out.println(mTask.title + " bounds: " + mThumbnailInfo.taskWidth + "x" + mThumbnailInfo.taskHeight + ", " + mThumbnailInfo.screenOrientation);
+            }
+
+            // We consider this a stack task if it is not freeform (ie. has no bounds) or has been
+            // dragged into the stack from the freeform workspace
+            boolean isStackTask = !mTask.isFreeformTask() || mTask.bounds == null;
+            if (mTaskViewRect.isEmpty() || mThumbnailInfo == null ||
+                    mThumbnailInfo.taskWidth == 0 || mThumbnailInfo.taskHeight == 0) {
+                // If we haven't measured or the thumbnail is invalid, skip the thumbnail drawing
+                // and only draw the background color
+                mThumbnailScale = 0f;
+            } else if (isStackTask) {
+                float invThumbnailScale = 1f / mFullscreenThumbnailScale;
+                if (mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                    if (mThumbnailInfo.screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // If we are in the same orientation as the screenshot, just scale it to the
+                        // width of the task view
+                        mThumbnailScale = (float) mTaskViewRect.width() / mThumbnailRect.width();
+                    } else {
+                        // Scale the landscape thumbnail up to app size, then scale that to the task
+                        // view size to match other portrait screenshots
+                        mThumbnailScale = invThumbnailScale *
+                                ((float) mTaskViewRect.width() / mDisplayRect.width());
+                    }
+                } else {
+                    // Otherwise, scale the screenshot to fit 1:1 in the current orientation
+                    mThumbnailScale = invThumbnailScale;
+                }
             } else {
                 // Otherwise, if this is a freeform task with task bounds, then scale the thumbnail
                 // to fit the entire bitmap into the task bounds
-                thumbnailScale = Math.min(
+                mThumbnailScale = Math.min(
                         (float) mTaskViewRect.width() / mThumbnailRect.width(),
                         (float) mTaskViewRect.height() / mThumbnailRect.height());
             }
-            mScaleMatrix.setScale(thumbnailScale, thumbnailScale);
+            mScaleMatrix.setScale(mThumbnailScale, mThumbnailScale);
             mBitmapShader.setLocalMatrix(mScaleMatrix);
         }
         if (!mInvisible) {
@@ -261,22 +318,23 @@ public class TaskViewThumbnail extends View {
     }
 
     /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t, boolean disabledInSafeMode) {
+    void rebindToTask(Task t, ActivityManager.TaskThumbnailInfo thumbnailInfo,
+            boolean disabledInSafeMode) {
         mTask = t;
         mDisabledInSafeMode = disabledInSafeMode;
         if (t.thumbnail != null) {
-            setThumbnail(t.thumbnail);
+            setThumbnail(t.thumbnail, thumbnailInfo);
             if (t.colorBackground != 0) {
                 mBgFillPaint.setColor(t.colorBackground);
             }
         } else {
-            setThumbnail(null);
+            setThumbnail(null, null);
         }
     }
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
         mTask = null;
-        setThumbnail(null);
+        setThumbnail(null, null);
     }
 }

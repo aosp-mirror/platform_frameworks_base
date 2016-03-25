@@ -40,7 +40,7 @@ public class Task {
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
-        public void onTaskDataLoaded(Task task);
+        public void onTaskDataLoaded(Task task, ActivityManager.TaskThumbnailInfo thumbnailInfo);
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
         /* Notifies when a task's stack id has changed. */
@@ -217,6 +217,7 @@ public class Task {
         this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
         this.bounds = o.bounds;
+        this.taskDescription = o.taskDescription;
         this.isLaunchTarget = o.isLaunchTarget;
         this.isStackTask = o.isStackTask;
         this.isSystemApp = o.isSystemApp;
@@ -264,12 +265,13 @@ public class Task {
     }
 
     /** Notifies the callback listeners that this task has been loaded */
-    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon) {
+    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon,
+            ActivityManager.TaskThumbnailInfo thumbnailInfo) {
         this.icon = applicationIcon;
         this.thumbnail = thumbnail;
         int callbackCount = mCallbacks.size();
         for (int i = 0; i < callbackCount; i++) {
-            mCallbacks.get(i).onTaskDataLoaded(this);
+            mCallbacks.get(i).onTaskDataLoaded(this, thumbnailInfo);
         }
     }
 

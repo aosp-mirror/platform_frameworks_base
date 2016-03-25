@@ -95,7 +95,7 @@ class BackgroundTaskLoader implements Runnable {
 
     TaskResourceLoadQueue mLoadQueue;
     TaskKeyLruCache<Drawable> mIconCache;
-    TaskKeyLruCache<Bitmap> mThumbnailCache;
+    TaskKeyLruCache<ThumbnailData> mThumbnailCache;
     Bitmap mDefaultThumbnail;
     BitmapDrawable mDefaultIcon;
 
@@ -104,7 +104,7 @@ class BackgroundTaskLoader implements Runnable {
 
     /** Constructor, creates a new loading thread that loads task resources in the background */
     public BackgroundTaskLoader(TaskResourceLoadQueue loadQueue,
-            TaskKeyLruCache<Drawable> iconCache, TaskKeyLruCache<Bitmap> thumbnailCache,
+            TaskKeyLruCache<Drawable> iconCache, TaskKeyLruCache<ThumbnailData> thumbnailCache,
             Bitmap defaultThumbnail, BitmapDrawable defaultIcon) {
         mLoadQueue = loadQueue;
         mIconCache = iconCache;
@@ -165,7 +165,7 @@ class BackgroundTaskLoader implements Runnable {
                     final Task t = mLoadQueue.nextTask();
                     if (t != null) {
                         Drawable cachedIcon = mIconCache.get(t.key);
-                        Bitmap cachedThumbnail = mThumbnailCache.get(t.key);
+                        ThumbnailData cachedThumbnailData = mThumbnailCache.get(t.key);
 
                         // Load the icon if it is stale or we haven't cached one yet
                         if (cachedIcon == null) {
@@ -190,30 +190,32 @@ class BackgroundTaskLoader implements Runnable {
                             mIconCache.put(t.key, cachedIcon);
                         }
                         // Load the thumbnail if it is stale or we haven't cached one yet
-                        if (cachedThumbnail == null) {
+                        if (cachedThumbnailData == null) {
                             if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
                                 if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
-                                cachedThumbnail = ssp.getTaskThumbnail(t.key.id);
+                                cachedThumbnailData = ssp.getTaskThumbnail(t.key.id);
                             }
-                            if (cachedThumbnail == null) {
-                                cachedThumbnail = mDefaultThumbnail;
+
+                            if (cachedThumbnailData.thumbnail == null) {
+                                cachedThumbnailData.thumbnail = mDefaultThumbnail;
                             }
+
                             // When svelte, we trim the memory to just the visible thumbnails when
                             // leaving, so don't thrash the cache as the user scrolls (just load
                             // them from scratch each time)
                             if (config.svelteLevel < RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                                mThumbnailCache.put(t.key, cachedThumbnail);
+                                mThumbnailCache.put(t.key, cachedThumbnailData);
                             }
                         }
                         if (!mCancelled) {
                             // Notify that the task data has changed
                             final Drawable newIcon = cachedIcon;
-                            final Bitmap newThumbnail = cachedThumbnail == mDefaultThumbnail
-                                    ? null : cachedThumbnail;
+                            final ThumbnailData newThumbnailData = cachedThumbnailData;
                             mMainThreadHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    t.notifyTaskDataLoaded(newThumbnail, newIcon);
+                                    t.notifyTaskDataLoaded(newThumbnailData.thumbnail, newIcon,
+                                            newThumbnailData.thumbnailInfo);
                                 }
                             });
                         }
@@ -252,7 +254,7 @@ public class RecentsTaskLoader {
     // package in the cache has been updated, so that we may remove it.
     private final LruCache<ComponentName, ActivityInfo> mActivityInfoCache;
     private final TaskKeyLruCache<Drawable> mIconCache;
-    private final TaskKeyLruCache<Bitmap> mThumbnailCache;
+    private final TaskKeyLruCache<ThumbnailData> mThumbnailCache;
     private final TaskKeyLruCache<String> mActivityLabelCache;
     private final TaskKeyLruCache<String> mContentDescriptionCache;
     private final TaskResourceLoadQueue mLoadQueue;
@@ -356,9 +358,16 @@ public class RecentsTaskLoader {
      */
     public void loadTaskData(Task t, boolean fetchAndInvalidateThumbnails) {
         Drawable icon = mIconCache.getAndInvalidateIfModified(t.key);
-        Bitmap thumbnail = mDefaultThumbnail;
+        Bitmap thumbnail = null;
+        ActivityManager.TaskThumbnailInfo thumbnailInfo = null;
         if (fetchAndInvalidateThumbnails) {
-            thumbnail = mThumbnailCache.getAndInvalidateIfModified(t.key);
+            ThumbnailData thumbnailData = mThumbnailCache.getAndInvalidateIfModified(t.key);
+            if (thumbnailData != null) {
+                thumbnail = thumbnailData.thumbnail;
+                thumbnailInfo = thumbnailData.thumbnailInfo;
+            }
+        } else {
+            thumbnail = mDefaultThumbnail;
         }
 
         // Grab the thumbnail/icon from the cache, if either don't exist, then trigger a reload and
@@ -368,7 +377,8 @@ public class RecentsTaskLoader {
         if (requiresLoad) {
             mLoadQueue.addTask(t);
         }
-        t.notifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? null : thumbnail, icon);
+        t.notifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? null : thumbnail, icon,
+                thumbnailInfo);
     }
 
     /** Releases the task resource data back into the pool. */
@@ -535,19 +545,19 @@ public class RecentsTaskLoader {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the cached thumbnail if it exists
-        Bitmap thumbnail = mThumbnailCache.getAndInvalidateIfModified(taskKey);
-        if (thumbnail != null) {
-            return thumbnail;
+        ThumbnailData thumbnailData = mThumbnailCache.getAndInvalidateIfModified(taskKey);
+        if (thumbnailData != null) {
+            return thumbnailData.thumbnail;
         }
 
         if (loadIfNotCached) {
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
                 // Load the thumbnail from the system
-                thumbnail = ssp.getTaskThumbnail(taskKey.id);
-                if (thumbnail != null) {
-                    mThumbnailCache.put(taskKey, thumbnail);
-                    return thumbnail;
+                thumbnailData = ssp.getTaskThumbnail(taskKey.id);
+                if (thumbnailData.thumbnail != null) {
+                    mThumbnailCache.put(taskKey, thumbnailData);
+                    return thumbnailData.thumbnail;
                 }
             }
         }

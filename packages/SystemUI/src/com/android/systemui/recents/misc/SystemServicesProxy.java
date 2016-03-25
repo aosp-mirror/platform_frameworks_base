@@ -78,6 +78,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.tv.RecentsTvImpl;
+import com.android.systemui.recents.model.ThumbnailData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -513,44 +514,47 @@ public class SystemServicesProxy {
     }
 
     /** Returns the top task thumbnail for the given task id */
-    public Bitmap getTaskThumbnail(int taskId) {
+    public ThumbnailData getTaskThumbnail(int taskId) {
         if (mAm == null) return null;
+        ThumbnailData thumbnailData = new ThumbnailData();
 
         // If we are mocking, then just return a dummy thumbnail
         if (RecentsDebugFlags.Static.EnableMockTasks) {
-            Bitmap thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth, mDummyThumbnailHeight,
-                    Bitmap.Config.ARGB_8888);
-            thumbnail.eraseColor(0xff333333);
-            return thumbnail;
+            thumbnailData.thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth,
+                    mDummyThumbnailHeight, Bitmap.Config.ARGB_8888);
+            thumbnailData.thumbnail.eraseColor(0xff333333);
+            return thumbnailData;
         }
 
-        Bitmap thumbnail = getThumbnail(taskId);
-        if (thumbnail != null) {
-            thumbnail.setHasAlpha(false);
+        getThumbnail(taskId, thumbnailData);
+        if (thumbnailData.thumbnail != null) {
+            thumbnailData.thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
             // screenshots are always composed onto a bitmap that has no alpha.
-            if (Color.alpha(thumbnail.getPixel(0, 0)) == 0) {
-                mBgProtectionCanvas.setBitmap(thumbnail);
-                mBgProtectionCanvas.drawRect(0, 0, thumbnail.getWidth(), thumbnail.getHeight(),
-                        mBgProtectionPaint);
+            if (Color.alpha(thumbnailData.thumbnail.getPixel(0, 0)) == 0) {
+                mBgProtectionCanvas.setBitmap(thumbnailData.thumbnail);
+                mBgProtectionCanvas.drawRect(0, 0, thumbnailData.thumbnail.getWidth(),
+                        thumbnailData.thumbnail.getHeight(), mBgProtectionPaint);
                 mBgProtectionCanvas.setBitmap(null);
                 Log.e(TAG, "Invalid screenshot detected from getTaskThumbnail()");
             }
         }
-        return thumbnail;
+        return thumbnailData;
     }
 
     /**
      * Returns a task thumbnail from the activity manager
      */
-    public Bitmap getThumbnail(int taskId) {
+    public void getThumbnail(int taskId, ThumbnailData thumbnailDataOut) {
         if (mAm == null) {
-            return null;
+            return;
         }
 
         ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
-        if (taskThumbnail == null) return null;
+        if (taskThumbnail == null) {
+            return;
+        }
 
         Bitmap thumbnail = taskThumbnail.mainThumbnail;
         ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
@@ -564,7 +568,8 @@ public class SystemServicesProxy {
             } catch (IOException e) {
             }
         }
-        return thumbnail;
+        thumbnailDataOut.thumbnail = thumbnail;
+        thumbnailDataOut.thumbnailInfo = taskThumbnail.thumbnailInfo;
     }
 
     /**
