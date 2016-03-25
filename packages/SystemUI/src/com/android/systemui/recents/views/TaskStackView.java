@@ -109,7 +109,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public static final int DEFAULT_SYNC_STACK_DURATION = 200;
     private static final int DRAG_SCALE_DURATION = 175;
-    private static final float DRAG_SCALE_FACTOR = 1.05f;
+    static final float DRAG_SCALE_FACTOR = 1.05f;
 
     private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 216;
     private static final int LAUNCH_NEXT_SCROLL_INCR_DURATION = 32;

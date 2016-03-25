@@ -154,6 +154,12 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_STACK_ID = "android.activity.launchStackId";
 
     /**
+     * The task id the activity should be launched into.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_TASK_ID = "android.activity.launchTaskId";
+
+    /**
      * Where the docked stack should be positioned.
      * @hide
      */
@@ -224,6 +230,7 @@ public class ActivityOptions {
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
     private int mLaunchStackId = INVALID_STACK_ID;
+    private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private AppTransitionAnimationSpec mAnimSpecs[];
 
@@ -766,6 +773,7 @@ public class ActivityOptions {
                 break;
         }
         mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
+        mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
@@ -927,6 +935,21 @@ public class ActivityOptions {
         mLaunchStackId = launchStackId;
     }
 
+    /**
+     * Sets the task the activity will be launched in.
+     * @hide
+     */
+    public void setLaunchTaskId(int taskId) {
+        mLaunchTaskId = taskId;
+    }
+
+    /**
+     * @hide
+     */
+    public int getLaunchTaskId() {
+        return mLaunchTaskId;
+    }
+
     /** @hide */
     public int getDockCreateMode() {
         return mDockCreateMode;
@@ -1079,6 +1102,7 @@ public class ActivityOptions {
                 break;
         }
         b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
+        b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);

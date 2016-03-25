@@ -73,6 +73,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_REMOVE_QS_TILE                = 28 << MSG_SHIFT;
     private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
     private static final int MSG_TOGGLE_APP_SPLIT_SCREEN       = 30 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_FINISHED       = 31 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -117,6 +118,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void appTransitionPending();
         public void appTransitionCancelled();
         public void appTransitionStarting(long startTime, long duration);
+        public void appTransitionFinished();
         public void showAssistDisclosure();
         public void startAssist(Bundle args);
         public void onCameraLaunchGestureDetected(int source);
@@ -324,6 +326,14 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    @Override
+    public void appTransitionFinished() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_FINISHED);
+            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_FINISHED);
+        }
+    }
+
     public void showAssistDisclosure() {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_ASSIST_DISCLOSURE);
@@ -451,6 +461,9 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_APP_TRANSITION_STARTING:
                     Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
                     mCallbacks.appTransitionStarting(data.first, data.second);
+                    break;
+                case MSG_APP_TRANSITION_FINISHED:
+                    mCallbacks.appTransitionFinished();
                     break;
                 case MSG_ASSIST_DISCLOSURE:
                     mCallbacks.showAssistDisclosure();

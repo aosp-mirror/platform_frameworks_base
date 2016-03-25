@@ -34,8 +34,9 @@ import java.util.ArrayList;
  * Typically, the returned type is a PointF, but the individual components can be extracted
  * as either an IntKeyframes or FloatKeyframes.
  * </p>
+ * @hide
  */
-class PathKeyframes implements Keyframes {
+public class PathKeyframes implements Keyframes {
     private static final int FRACTION_OFFSET = 0;
     private static final int X_OFFSET = 1;
     private static final int Y_OFFSET = 2;

@@ -50,6 +50,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
@@ -76,6 +77,7 @@ import com.android.server.AttributeCache;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.animation.ClipRectLRAnimation;
 import com.android.server.wm.animation.ClipRectTBAnimation;
+import com.android.server.wm.animation.CurvedTranslateAnimation;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -130,6 +132,8 @@ public class AppTransition implements Dump {
     public static final int TRANSIT_TASK_IN_PLACE = 17;
     /** An activity is being relaunched (e.g. due to configuration change). */
     public static final int TRANSIT_ACTIVITY_RELAUNCH = 18;
+    /** A task is being docked from recents. */
+    public static final int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
 
     /** Fraction of animation at which the recents thumbnail stays completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.5f;
@@ -142,13 +146,15 @@ public class AppTransition implements Dump {
     static final Interpolator TOUCH_RESPONSE_INTERPOLATOR =
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
+    private static final Interpolator THUMBNAIL_DOCK_INTERPOLATOR =
+            new PathInterpolator(0.85f, 0f, 1f, 1f);
+
     /**
      * Maximum duration for the clip reveal animation. This is used when there is a lot of movement
      * involved, to make it more understandable.
      */
     private static final int MAX_CLIP_REVEAL_TRANSITION_DURATION = 420;
     private static final int THUMBNAIL_APP_TRANSITION_DURATION = 336;
-    private static final int THUMBNAIL_APP_TRANSITION_ALPHA_DURATION = 336;
     private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
 
     private final Context mContext;
@@ -209,6 +215,7 @@ public class AppTransition implements Dump {
     private final Interpolator mThumbnailFadeOutInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
     private final Interpolator mFastOutLinearInInterpolator;
+    private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mClipHorizontalInterpolator = new PathInterpolator(0, 0, 0.4f, 1f);
 
     private final int mClipRevealTranslationY;
@@ -229,6 +236,8 @@ public class AppTransition implements Dump {
                 com.android.internal.R.interpolator.linear_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_linear_in);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
         mDecelerateInterpolator = AnimationUtils.loadInterpolator(context,
@@ -815,12 +824,14 @@ public class AppTransition implements Dump {
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
     Animation prepareThumbnailAnimationWithDuration(Animation a, int appWidth, int appHeight,
-            int duration, Interpolator interpolator) {
+            long duration, Interpolator interpolator) {
         if (duration > 0) {
             a.setDuration(duration);
         }
         a.setFillAfter(true);
-        a.setInterpolator(interpolator);
+        if (interpolator != null) {
+            a.setInterpolator(interpolator);
+        }
         a.initialize(appWidth, appHeight, appWidth, appHeight);
         return a;
     }
@@ -869,55 +880,77 @@ public class AppTransition implements Dump {
      * This animation runs for the thumbnail that gets cross faded with the enter/exit activity
      * when a thumbnail is specified with the pending animation override.
      */
-    Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, Bitmap thumbnailHeader,
-            final int taskId) {
+    Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
+            Bitmap thumbnailHeader, final int taskId) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = thumbnailHeader.getHeight();
-        final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
         final int appWidth = appRect.width();
 
         float scaleW = appWidth / thumbWidth;
-        float unscaledHeight = thumbHeight * scaleW;
         getNextAppTransitionStartRect(taskId, mTmpRect);
-        final float unscaledStartY = mTmpRect.top - (unscaledHeight - thumbHeight) / 2f;
-        final float toY = appRect.top + -unscaledStartY;
+        final float toY = mTmpRect.height() / 2 * (scaleW - 1f) + appRect.top;
+        final float fromY = mTmpRect.top;
+        final float toX = mTmpRect.width() / 2 * (scaleW - 1f) + appRect.left;
+        final float fromX = mTmpRect.left;
+        final float pivotX = mTmpRect.width() / 2;
+        final float pivotY = mTmpRect.height() / 2;
+        final long duration = getAspectScaleDuration();
+        final Interpolator interpolator = getAspectScaleInterpolator();
         if (mNextAppTransitionScaleUp) {
             // Animation up from the thumbnail to the full screen
-            Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW,
-                    mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
-            scale.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
-            scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
+            Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW, pivotX, pivotY);
+            scale.setInterpolator(interpolator);
+            scale.setDuration(duration);
             Animation alpha = new AlphaAnimation(1f, 0f);
-            alpha.setInterpolator(mThumbnailFadeOutInterpolator);
-            alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
-            final float toX = appRect.left + appRect.width() / 2 -
-                    (mTmpRect.left + thumbWidth / 2);
-            Animation translate = new TranslateAnimation(0, toX, 0, toY);
-            translate.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
-            translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
+            alpha.setInterpolator(mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
+                    ? THUMBNAIL_DOCK_INTERPOLATOR : mThumbnailFadeOutInterpolator);
+            alpha.setDuration(mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
+                    ? duration / 2
+                    : duration);
+            Animation translate = createCurvedMotion(fromX, toX, fromY, toY);
+            translate.setInterpolator(interpolator);
+            translate.setDuration(duration);
+
+            mTmpFromClipRect.set(0, 0, thumbWidthI, thumbHeightI);
+            mTmpToClipRect.set(appRect);
+
+            // Containing frame is in screen space, but we need the clip rect in the
+            // app space.
+            mTmpToClipRect.offsetTo(0, 0);
+            mTmpToClipRect.right = (int) (mTmpToClipRect.right / scaleW);
+            mTmpToClipRect.bottom = (int) (mTmpToClipRect.bottom / scaleW);
+
+            if (contentInsets != null) {
+                mTmpToClipRect.inset((int) (-contentInsets.left * scaleW),
+                        (int) (-contentInsets.top * scaleW),
+                        (int) (-contentInsets.right * scaleW),
+                        (int) (-contentInsets.bottom * scaleW));
+            }
+
+            Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+            clipAnim.setInterpolator(interpolator);
+            clipAnim.setDuration(duration);
 
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
             set.addAnimation(alpha);
             set.addAnimation(translate);
+            set.addAnimation(clipAnim);
             a = set;
         } else {
             // Animation down from the full screen to the thumbnail
-            Animation scale = new ScaleAnimation(scaleW, 1f, scaleW, 1f,
-                    mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
-            scale.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
-            scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
+            Animation scale = new ScaleAnimation(scaleW, 1f, scaleW, 1f, pivotX, pivotY);
+            scale.setInterpolator(interpolator);
+            scale.setDuration(duration);
             Animation alpha = new AlphaAnimation(0f, 1f);
             alpha.setInterpolator(mThumbnailFadeInInterpolator);
-            alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
-            final float toX = appRect.left + appRect.width() / 2 -
-                    (mTmpRect.left + thumbWidth / 2);
-            Animation translate = new TranslateAnimation(toX, 0, toY, 0);
-            translate.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
-            translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
+            alpha.setDuration(duration);
+            Animation translate = createCurvedMotion(toX, fromX, toY, fromY);
+            translate.setInterpolator(interpolator);
+            translate.setDuration(duration);
 
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
@@ -928,7 +961,41 @@ public class AppTransition implements Dump {
 
         }
         return prepareThumbnailAnimationWithDuration(a, appWidth, appRect.height(), 0,
-                TOUCH_RESPONSE_INTERPOLATOR);
+                null);
+    }
+
+    private Animation createCurvedMotion(float fromX, float toX, float fromY, float toY) {
+
+        // Almost no x-change - use linear animation
+        if (Math.abs(toX - fromX) < 1f || mNextAppTransition != TRANSIT_DOCK_TASK_FROM_RECENTS) {
+            return new TranslateAnimation(fromX, toX, fromY, toY);
+        } else {
+            final Path path = createCurvedPath(fromX, toX, fromY, toY);
+            return new CurvedTranslateAnimation(path);
+        }
+    }
+
+    private Path createCurvedPath(float fromX, float toX, float fromY, float toY) {
+        final Path path = new Path();
+        path.moveTo(fromX, fromY);
+        path.cubicTo(fromX, fromY, toX, 0.9f * fromY + 0.1f * toY, toX, toY);
+        return path;
+    }
+
+    private long getAspectScaleDuration() {
+        if (mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+            return (long) (THUMBNAIL_APP_TRANSITION_DURATION * 1.35f);
+        } else {
+            return THUMBNAIL_APP_TRANSITION_DURATION;
+        }
+    }
+
+    private Interpolator getAspectScaleInterpolator() {
+        if (mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+            return mFastOutSlowInInterpolator;
+        } else {
+            return TOUCH_RESPONSE_INTERPOLATOR;
+        }
     }
 
     /**
@@ -949,14 +1016,15 @@ public class AppTransition implements Dump {
         final int thumbStartX = mTmpRect.left - containingFrame.left;
         final int thumbStartY = mTmpRect.top - containingFrame.top;
 
-        // Used for the ENTER_SCALE_UP and EXIT_SCALE_DOWN transitions
-        float scale = 1f;
-        int scaledTopDecor = 0;
-
         switch (thumbTransitState) {
-            case THUMBNAIL_TRANSITION_ENTER_SCALE_UP: {
-                if (freeform) {
+            case THUMBNAIL_TRANSITION_ENTER_SCALE_UP:
+            case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
+                final boolean scaleUp = thumbTransitState == THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
+                if (freeform && scaleUp) {
                     a = createAspectScaledThumbnailEnterFreeformAnimationLocked(
+                            containingFrame, surfaceInsets, taskId);
+                } else if (freeform) {
+                    a = createAspectScaledThumbnailExitFreeformAnimationLocked(
                             containingFrame, surfaceInsets, taskId);
                 } else {
                     AnimationSet set = new AnimationSet(true);
@@ -976,16 +1044,33 @@ public class AppTransition implements Dump {
 
                     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
                         // We scale the width and clip to the top/left square
-                        scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        // We scale the width and clip to the top/left square
+                        float scale = thumbWidth /
+                                (appWidth - contentInsets.left - contentInsets.right);
                         int unscaledThumbHeight = (int) (thumbHeight / scale);
                         mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
 
-                        Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
-                                computePivot(mTmpRect.left - containingFrame.left, scale),
-                                computePivot(mTmpRect.top - containingFrame.top, scale));
-                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                        Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
+                        mNextAppTransitionInsets.set(contentInsets);
+
+                        Animation scaleAnim = new ScaleAnimation(
+                                scaleUp ? scale : 1, scaleUp ? 1 : scale,
+                                scaleUp ? scale : 1, scaleUp ? 1 : scale,
+                                containingFrame.width() / 2f,
+                                containingFrame.height() / 2f + contentInsets.top);
+                        final float targetX = (mTmpRect.left - containingFrame.left);
+                        final float x = containingFrame.width() / 2f
+                                - containingFrame.width() / 2f * scale;
+                        final float targetY = (mTmpRect.top - containingFrame.top);
+                        final float y = containingFrame.height() / 2f
+                                - containingFrame.height() / 2f * scale;
+                        final float startX = targetX - x;
+                        final float startY = targetY - y;
+                        Animation clipAnim = scaleUp
+                                ? new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect)
+                                : new ClipRectAnimation(mTmpToClipRect, mTmpFromClipRect);
+                        Animation translateAnim = scaleUp
+                                ? createCurvedMotion(startX, 0, startY - contentInsets.top, 0)
+                                : createCurvedMotion(0, startX, 0, startY - contentInsets.top);
 
                         set.addAnimation(clipAnim);
                         set.addAnimation(scaleAnim);
@@ -996,14 +1081,18 @@ public class AppTransition implements Dump {
                         mTmpFromClipRect.bottom = mTmpFromClipRect.top + thumbHeightI;
                         mTmpFromClipRect.right = mTmpFromClipRect.left + thumbWidthI;
 
-                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                        Animation translateAnim = new TranslateAnimation(thumbStartX, 0,
-                                thumbStartY - contentInsets.top, 0);
+                        Animation clipAnim = scaleUp
+                                ? new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect)
+                                : new ClipRectAnimation(mTmpToClipRect, mTmpFromClipRect);
+                        Animation translateAnim = scaleUp
+                                ? createCurvedMotion(thumbStartX, 0,
+                                thumbStartY - contentInsets.top, 0)
+                                : createCurvedMotion(0, thumbStartX, 0,
+                                        thumbStartY - contentInsets.top);
 
                         set.addAnimation(clipAnim);
                         set.addAnimation(translateAnim);
                     }
-
                     a = set;
                     a.setZAdjustment(Animation.ZORDER_TOP);
                 }
@@ -1031,68 +1120,12 @@ public class AppTransition implements Dump {
                 }
                 break;
             }
-            case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
-                // App window scaling down from full screen
-                if (freeform) {
-                    a = createAspectScaledThumbnailExitFreeformAnimationLocked(
-                            containingFrame, surfaceInsets, taskId);
-                } else {
-                    AnimationSet set = new AnimationSet(true);
-                    mTmpFromClipRect.set(containingFrame);
-                    mTmpToClipRect.set(containingFrame);
-
-                    // Containing frame is in screen space, but we need the clip rect in the
-                    // app space.
-                    mTmpFromClipRect.offsetTo(0, 0);
-                    mTmpToClipRect.offsetTo(0, 0);
-
-                    // Exclude insets region from the target clip.
-                    mTmpToClipRect.inset(contentInsets);
-                    mNextAppTransitionInsets.set(contentInsets);
-
-                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        // We scale the width and clip to the top/left square
-                        scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                        scaledTopDecor = (int) (scale * contentInsets.top);
-                        int unscaledThumbHeight = (int) (thumbHeight / scale);
-                        mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
-
-                        Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
-                                computePivot(mTmpRect.left - containingFrame.left, scale),
-                                computePivot(mTmpRect.top - containingFrame.top, scale));
-                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                        Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
-
-                        set.addAnimation(clipAnim);
-                        set.addAnimation(scaleAnim);
-                        set.addAnimation(translateAnim);
-
-                    } else {
-                        // In landscape, we don't scale at all and only crop
-                        mTmpToClipRect.bottom = mTmpToClipRect.top + thumbHeightI;
-                        mTmpToClipRect.right = mTmpToClipRect.left + thumbWidthI;
-
-                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                        Animation translateAnim = new TranslateAnimation(0, thumbStartX, 0,
-                                thumbStartY - contentInsets.top);
-
-                        set.addAnimation(clipAnim);
-                        set.addAnimation(translateAnim);
-                    }
-
-                    a = set;
-                    a.setZAdjustment(Animation.ZORDER_TOP);
-                }
-                break;
-            }
             default:
                 throw new RuntimeException("Invalid thumbnail transition state");
         }
 
-        int duration = Math.max(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION,
-                THUMBNAIL_APP_TRANSITION_DURATION);
-        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, duration,
-                TOUCH_RESPONSE_INTERPOLATOR);
+        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
+                getAspectScaleDuration(), getAspectScaleInterpolator());
     }
 
     private Animation createAspectScaledThumbnailEnterFreeformAnimationLocked(Rect frame,
@@ -1446,6 +1479,7 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
                     break;
+                case TRANSIT_DOCK_TASK_FROM_RECENTS:
                 case TRANSIT_TASK_OPEN:
                     animAttr = enter
                             ? WindowAnimation_taskOpenEnterAnimation
@@ -1504,6 +1538,7 @@ public class AppTransition implements Dump {
 
     int getAppStackClipMode() {
         return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
+                || mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
                 ? STACK_CLIP_NONE
                 : STACK_CLIP_AFTER_ANIM;
     }
@@ -1726,6 +1761,9 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_ACTIVITY_RELAUNCH: {
                 return "TRANSIT_ACTIVITY_RELAUNCH";
+            }
+            case TRANSIT_DOCK_TASK_FROM_RECENTS: {
+                return "TRANSIT_DOCK_TASK_FROM_RECENTS";
             }
             default: {
                 return "<UNKNOWN>";

@@ -34,6 +34,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -43,6 +44,7 @@ import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnim
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
@@ -281,6 +283,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(mSystemBroadcastReceiver, filter);
+
+        getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
     }
 
     @Override
@@ -598,6 +602,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (mRecentsView.isLastTaskLaunchedFreeform()) {
             EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(false));
         }
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+        mRecentsView.invalidate();
+    }
+
+    public final void onBusEvent(DockedFirstAnimationFrameEvent event) {
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
         mRecentsView.invalidate();
     }

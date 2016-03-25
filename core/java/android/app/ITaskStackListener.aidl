@@ -35,4 +35,9 @@ oneway interface ITaskStackListener {
      * Called whenever the pinned stack is done animating a resize.
      */
     void onPinnedStackAnimationEnded();
+
+    /**
+     * Called when we launched an activity that we forced to be resizable.
+     */
+    void onActivityForcedResizable(String packageName, int taskId);
 }

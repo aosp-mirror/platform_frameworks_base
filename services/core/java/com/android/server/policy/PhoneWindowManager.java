@@ -2778,8 +2778,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // If the divider is behind the navigation bar, don't animate.
         if (mNavigationBar != null
-                && (win.getFrameLw().top + insets >= mNavigationBar.getFrameLw().top
-                        || win.getFrameLw().left + insets >= mNavigationBar.getFrameLw().left)) {
+                && ((mNavigationBarOnBottom
+                        && win.getFrameLw().top + insets >= mNavigationBar.getFrameLw().top)
+                || (!mNavigationBarOnBottom
+                        && win.getFrameLw().left + insets >= mNavigationBar.getFrameLw().left))) {
             return 0;
         }
         if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {

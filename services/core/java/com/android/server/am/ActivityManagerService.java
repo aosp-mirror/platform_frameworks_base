@@ -55,7 +55,6 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
-import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -103,7 +102,6 @@ import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.app.admin.IDevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
@@ -355,6 +353,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
+import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
@@ -1471,6 +1470,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 64;
     static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 65;
     static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 66;
+    static final int NOTIFY_FORCED_RESIZABLE_MSG = 67;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2011,6 +2011,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             // Make a one-way callback to the listener
                             mTaskStackListeners.getBroadcastItem(i).onPinnedStackAnimationEnded();
+                        } catch (RemoteException e){
+                            // Handled by the RemoteCallbackList
+                        }
+                    }
+                    mTaskStackListeners.finishBroadcast();
+                }
+                break;
+            }
+            case NOTIFY_FORCED_RESIZABLE_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
+                        try {
+                            // Make a one-way callback to the listener
+                            mTaskStackListeners.getBroadcastItem(i).onActivityForcedResizable(
+                                    (String) msg.obj, msg.arg1);
                         } catch (RemoteException e){
                             // Handled by the RemoteCallbackList
                         }
@@ -4479,61 +4494,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            return startActivityFromRecentsInner(taskId, bOptions);
+            synchronized (this) {
+                return mStackSupervisor.startActivityFromRecentsInner(taskId, bOptions);
+            }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
-    }
-
-    final int startActivityFromRecentsInner(int taskId, Bundle bOptions) {
-        final TaskRecord task;
-        final int callingUid;
-        final String callingPackage;
-        final Intent intent;
-        final int userId;
-        synchronized (this) {
-            final ActivityOptions activityOptions = (bOptions != null)
-                    ? new ActivityOptions(bOptions) : null;
-            final int launchStackId = (activityOptions != null)
-                    ? activityOptions.getLaunchStackId() : INVALID_STACK_ID;
-
-            if (launchStackId == HOME_STACK_ID) {
-                throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
-                        + taskId + " can't be launch in the home stack.");
-            }
-            task = mStackSupervisor.anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
-            if (task == null) {
-                throw new IllegalArgumentException(
-                        "startActivityFromRecentsInner: Task " + taskId + " not found.");
-            }
-
-            if (launchStackId != INVALID_STACK_ID) {
-                if (launchStackId == DOCKED_STACK_ID && activityOptions != null) {
-                    mWindowManager.setDockedStackCreateState(
-                            activityOptions.getDockCreateMode(), null /* initialBounds */);
-                }
-                if (task.stack.mStackId != launchStackId) {
-                    mStackSupervisor.moveTaskToStackLocked(
-                            taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
-                            ANIMATE);
-                }
-            }
-
-            // If the user must confirm credentials (e.g. when first launching a work app and the
-            // Work Challenge is present) let startActivityInPackage handle the intercepting.
-            if (!mUserController.shouldConfirmCredentials(task.userId)
-                    && task.getRootActivity() != null) {
-                moveTaskToFrontLocked(task.taskId, 0, bOptions);
-                return ActivityManager.START_TASK_TO_FRONT;
-            }
-            callingUid = task.mCallingUid;
-            callingPackage = task.mCallingPackage;
-            intent = task.intent;
-            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            userId = task.userId;
-        }
-        return startActivityInPackage(callingUid, callingPackage, intent, null, null, null, 0, 0,
-                bOptions, userId, null, task);
     }
 
     final int startActivityInPackage(int uid, String callingPackage,
@@ -11426,10 +11392,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Get the focused task before launching launcher.
 
                     if (mUserController.isLockScreenDisabled(currentUserId)) {
+
                         // If there is no device lock, we will show the profile's credential page.
                         // startActivityFromRecentsInner is intercepted and will forward user to it.
                         if (mFocusedActivity != null) {
-                            startActivityFromRecentsInner(mFocusedActivity.task.taskId, null);
+                            mStackSupervisor.startActivityFromRecentsInner(
+                                    mFocusedActivity.task.taskId, null);
                         }
                     } else {
                         // Showing launcher to avoid user entering credential twice.
@@ -21033,6 +21001,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reason);
             }
         }
+
+        @Override
+        public void notifyAppTransitionFinished() {
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.notifyAppTransitionDone();
+            }
+        }
+
+        @Override
+        public void notifyAppTransitionCancelled() {
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.notifyAppTransitionDone();
+            }
+        }
     }
 
     private final class SleepTokenImpl extends SleepToken {
@@ -21121,7 +21103,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Will bring task to front if it already has a root activity.
             final long origId = Binder.clearCallingIdentity();
             try {
-                startActivityFromRecentsInner(mTaskId, null);
+                synchronized (this) {
+                    mStackSupervisor.startActivityFromRecentsInner(mTaskId, null);
+                }
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

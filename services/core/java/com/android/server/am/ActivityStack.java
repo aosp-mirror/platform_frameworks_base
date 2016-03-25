@@ -258,6 +258,12 @@ final class ActivityStack {
     // Current bounds of the stack or null if fullscreen.
     Rect mBounds = null;
 
+    boolean mUpdateBoundsDeferred;
+    boolean mUpdateBoundsDeferredCalled;
+    final Rect mDeferredBounds = new Rect();
+    final Rect mDeferredTaskBounds = new Rect();
+    final Rect mDeferredTaskInsetBounds = new Rect();
+
     long mLaunchStartTime = 0;
     long mFullyDrawnStartTime = 0;
 
@@ -425,6 +431,57 @@ final class ActivityStack {
 
     public void getDisplaySize(Point out) {
         mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
+    }
+
+    /**
+     * Defers updating the bounds of the stack. If the stack was resized/repositioned while
+     * deferring, the bounds will update in {@link #continueUpdateBounds()}.
+     */
+    void deferUpdateBounds() {
+        if (!mUpdateBoundsDeferred) {
+            mUpdateBoundsDeferred = true;
+            mUpdateBoundsDeferredCalled = false;
+        }
+    }
+
+    /**
+     * Continues updating bounds after updates have been deferred. If there was a resize attempt
+     * between {@link #deferUpdateBounds()} and {@link #continueUpdateBounds()}, the stack will
+     * be resized to that bounds.
+     */
+    void continueUpdateBounds() {
+        final boolean wasDeferred = mUpdateBoundsDeferred;
+        mUpdateBoundsDeferred = false;
+        if (wasDeferred && mUpdateBoundsDeferredCalled) {
+            mStackSupervisor.resizeStackUncheckedLocked(this,
+                    mDeferredBounds.isEmpty() ? null : mDeferredBounds,
+                    mDeferredTaskBounds.isEmpty() ? null : mDeferredTaskBounds,
+                    mDeferredTaskInsetBounds.isEmpty() ? null : mDeferredTaskInsetBounds);
+        }
+    }
+
+    boolean updateBoundsAllowed(Rect bounds, Rect tempTaskBounds,
+            Rect tempTaskInsetBounds) {
+        if (!mUpdateBoundsDeferred) {
+            return true;
+        }
+        if (bounds != null) {
+            mDeferredBounds.set(bounds);
+        } else {
+            mDeferredBounds.setEmpty();
+        }
+        if (tempTaskBounds != null) {
+            mDeferredTaskBounds.set(tempTaskBounds);
+        } else {
+            mDeferredTaskBounds.setEmpty();
+        }
+        if (tempTaskInsetBounds != null) {
+            mDeferredTaskInsetBounds.set(tempTaskInsetBounds);
+        } else {
+            mDeferredTaskInsetBounds.setEmpty();
+        }
+        mUpdateBoundsDeferredCalled = true;
+        return false;
     }
 
     void setBounds(Rect bounds) {

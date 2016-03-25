@@ -88,6 +88,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -123,9 +125,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // The thickness of a window resize handle outside the window bounds on the free form workspace
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
-
-    static final int DRAG_RESIZE_MODE_FREEFORM = 0;
-    static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
 
     static final boolean DEBUG_DISABLE_SAVING_SURFACES = false;
 
@@ -756,20 +755,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleFrame.set(mContentFrame);
             mStableFrame.set(mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            if (isVisibleLw() || mWinAnimator.isAnimating()) {
-                // We don't adjust the dock divider frame for reasons other than performance. The
-                // real reason is that if it gets adjusted before it is shown for the first time,
-                // it would get size (0, 0). This causes a problem when we finally show the dock
-                // divider and try to draw to it. We do set the surface size at that moment to
-                // the correct size, but it's too late for the Surface Flinger to make it
-                // available for view rendering and as a result the renderer receives size 1, 1.
-                // This way we just keep the divider at the original size and Surface Flinger
-                // will return the correct value to the renderer.
-                mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
-                mContentFrame.set(mFrame);
-                if (!mFrame.equals(mLastFrame)) {
-                    mMovedByResize = true;
-                }
+            mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
+            mContentFrame.set(mFrame);
+            if (!mFrame.equals(mLastFrame)) {
+                mMovedByResize = true;
             }
         } else {
             mContentFrame.set(Math.max(mContentFrame.left, frame.left),
@@ -1309,7 +1298,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
-                && !mAnimatingExit && !mWinAnimator.mLastHidden && mService.okToDisplay()
+                && !mAnimatingExit && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
@@ -2258,7 +2247,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mResizeMode;
     }
 
-    private boolean computeDragResizing() {
+    boolean computeDragResizing() {
         final Task task = getTask();
         if (task == null) {
             return false;
@@ -2288,9 +2277,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return;
         }
         mDragResizing = resizing;
-        mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
-                ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
-                : DRAG_RESIZE_MODE_FREEFORM;
+        final Task task = getTask();
+        if (task != null && task.isDragResizing()) {
+            mResizeMode = task.getDragResizeMode();
+        } else {
+            mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
+                    ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
+                    : DRAG_RESIZE_MODE_FREEFORM;
+        }
     }
 
     boolean isDragResizing() {
