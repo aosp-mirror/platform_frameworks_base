@@ -64,6 +64,7 @@ public final class Metrics {
     private static final String COUNT_FILEOP_SYSTEM = "docsui_fileop_system";
     private static final String COUNT_FILEOP_EXTERNAL = "docsui_fileop_external";
     private static final String COUNT_FILEOP_CANCELED = "docsui_fileop_canceled";
+    private static final String COUNT_STARTUP_MS = "docsui_startup_ms";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -347,12 +348,21 @@ public final class Metrics {
     }
 
     /**
-     * Log the cancellation of a file operation.  Call this when a Job is canceled.
+     * Logs the cancellation of a file operation.  Call this when a Job is canceled.
      * @param context
      * @param operationType
      */
     public static void logFileOperationCancelled(Context context, @OpType int operationType) {
         logHistogram(context, COUNT_FILEOP_CANCELED, toMetricsOpType(operationType));
+    }
+
+    /**
+     * Logs startup time in milliseconds.
+     * @param context
+     * @param startupMs Startup time in milliseconds.
+     */
+    public static void logStartupMs(Context context, int startupMs) {
+        logHistogram(context, COUNT_STARTUP_MS, startupMs);
     }
 
     private static void logInterProviderFileOps(

@@ -58,6 +58,7 @@ import com.android.documentsui.model.RootInfo;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -79,6 +80,7 @@ public abstract class BaseActivity extends Activity
     private int mLayoutId;
 
     private boolean mNavDrawerHasFocus;
+    private long mStartTime;
 
     public abstract void onDocumentPicked(DocumentInfo doc, Model model);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
@@ -96,16 +98,14 @@ public abstract class BaseActivity extends Activity
     @CallSuper
     @Override
     public void onCreate(Bundle icicle) {
+        // Record the time when onCreate is invoked for metric.
+        mStartTime = new Date().getTime();
+
         super.onCreate(icicle);
 
         final Intent intent = getIntent();
 
-        // If startup benchmark is requested by a whitelisted testing package, then close the
-        // activity once idle, and notify the testing activity.
-        if (intent.getBooleanExtra(EXTRA_BENCHMARK, false) &&
-                BENCHMARK_TESTING_PACKAGE.equals(getCallingPackage())) {
-            closeOnIdleForTesting();
-        }
+        addListenerForLaunchCompletion();
 
         setContentView(mLayoutId);
 
@@ -604,12 +604,10 @@ public abstract class BaseActivity extends Activity
         return super.onKeyDown(keyCode, event);
     }
 
-    @VisibleForTesting
     public void addEventListener(EventListener listener) {
         mEventListeners.add(listener);
     }
 
-    @VisibleForTesting
     public void removeEventListener(EventListener listener) {
         mEventListeners.remove(listener);
     }
@@ -673,6 +671,44 @@ public abstract class BaseActivity extends Activity
         return false;
     }
 
+    /**
+     * Closes the activity when it's idle.
+     */
+    private void addListenerForLaunchCompletion() {
+        addEventListener(new EventListener() {
+            @Override
+            public void onDirectoryNavigated(Uri uri) {
+            }
+
+            @Override
+            public void onDirectoryLoaded(Uri uri) {
+                removeEventListener(this);
+                getMainLooper().getQueue().addIdleHandler(new IdleHandler() {
+                    @Override
+                    public boolean queueIdle() {
+                        // If startup benchmark is requested by a whitelisted testing package, then
+                        // close the activity once idle, and notify the testing activity.
+                        if (getIntent().getBooleanExtra(EXTRA_BENCHMARK, false) &&
+                                BENCHMARK_TESTING_PACKAGE.equals(getCallingPackage())) {
+                            setResult(RESULT_OK);
+                            finish();
+                        }
+
+                        Metrics.logStartupMs(
+                                BaseActivity.this, (int) (new Date().getTime() - mStartTime));
+
+                        // Remove the idle handler.
+                        return false;
+                    }
+                });
+                new Handler().post(new Runnable() {
+                    @Override public void run() {
+                    }
+                });
+            }
+        });
+    }
+
     private static final class PickRootTask extends PairedTask<BaseActivity, Void, DocumentInfo> {
         private RootInfo mRoot;
 
@@ -692,33 +728,6 @@ public abstract class BaseActivity extends Activity
                 mOwner.openContainerDocument(result);
             }
         }
-    }
-
-    /**
-     * Closes the activity when it's idle. Used only for tests.
-     */
-    private void closeOnIdleForTesting() {
-        addEventListener(new EventListener() {
-            @Override
-            public void onDirectoryNavigated(Uri uri) {
-            }
-
-            @Override
-            public void onDirectoryLoaded(Uri uri) {
-                getMainLooper().getQueue().addIdleHandler(new IdleHandler() {
-                    @Override
-                    public boolean queueIdle() {
-                        setResult(RESULT_OK);
-                        finish();
-                        return false;
-                    }
-                });
-                new Handler().post(new Runnable() {
-                    @Override public void run() {
-                    }
-                });
-            }
-        });
     }
 
     private static final class HandleRootsChangedTask
