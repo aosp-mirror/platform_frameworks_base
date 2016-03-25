@@ -647,15 +647,15 @@ public class Resources_Delegate {
     static String getResourceName(Resources resources, int resid) throws NotFoundException {
         boolean[] platformOut = new boolean[1];
         Pair<ResourceType, String> resourceInfo = getResourceInfo(resources, resid, platformOut);
-        String namespace;
+        String packageName;
         if (resourceInfo != null) {
             if (platformOut[0]) {
-                namespace = SdkConstants.ANDROID_NS_NAME;
+                packageName = SdkConstants.ANDROID_NS_NAME;
             } else {
-                namespace = resources.mContext.getPackageName();
-                namespace = namespace == null ? SdkConstants.APP_PREFIX : namespace;
+                packageName = resources.mContext.getPackageName();
+                packageName = packageName == null ? SdkConstants.APP_PREFIX : packageName;
             }
-            return namespace + ':' + resourceInfo.getFirst().getName() + '/' +
+            return packageName + ':' + resourceInfo.getFirst().getName() + '/' +
                     resourceInfo.getSecond();
         }
         throwException(resid, null);

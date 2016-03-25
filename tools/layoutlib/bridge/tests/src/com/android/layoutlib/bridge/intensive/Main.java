@@ -29,11 +29,14 @@ import com.android.ide.common.resources.ResourceResolver;
 import com.android.ide.common.resources.configuration.FolderConfiguration;
 import com.android.io.FolderWrapper;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.impl.RenderAction;
 import com.android.layoutlib.bridge.intensive.setup.ConfigGenerator;
 import com.android.layoutlib.bridge.intensive.setup.LayoutLibTestCallback;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
 import com.android.resources.Density;
 import com.android.resources.Navigation;
+import com.android.resources.ResourceType;
 import com.android.utils.ILogger;
 
 import org.junit.AfterClass;
@@ -42,13 +45,15 @@ import org.junit.Test;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -160,13 +165,8 @@ public class Main {
         if (!host.isDirectory()) {
             return null;
         }
-        File[] hosts = host.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File path) {
-                return path.isDirectory() && (path.getName().startsWith("linux-") || path.getName()
-                        .startsWith("darwin-"));
-            }
-        });
+        File[] hosts = host.listFiles(path -> path.isDirectory() &&
+                (path.getName().startsWith("linux-") || path.getName().startsWith("darwin-")));
         for (File hostOut : hosts) {
             String platformDir = getPlatformDirFromHostOut(hostOut);
             if (platformDir != null) {
@@ -184,12 +184,9 @@ public class Main {
         if (!sdkDir.isDirectory()) {
             return null;
         }
-        File[] sdkDirs = sdkDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File path) {
-                // We need to search for $TARGET_PRODUCT (usually, sdk_phone_armv7)
-                return path.isDirectory() && path.getName().startsWith("sdk");
-            }
+        File[] sdkDirs = sdkDir.listFiles(path -> {
+            // We need to search for $TARGET_PRODUCT (usually, sdk_phone_armv7)
+            return path.isDirectory() && path.getName().startsWith("sdk");
         });
         for (File dir : sdkDirs) {
             String platformDir = getPlatformDirFromHostOutSdkSdk(dir);
@@ -201,46 +198,34 @@ public class Main {
     }
 
     private static String getPlatformDirFromHostOutSdkSdk(File sdkDir) {
-        File[] possibleSdks = sdkDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File path) {
-                return path.isDirectory() && path.getName().contains("android-sdk");
-            }
-        });
+        File[] possibleSdks = sdkDir.listFiles(
+                path -> path.isDirectory() && path.getName().contains("android-sdk"));
         for (File possibleSdk : possibleSdks) {
             File platformsDir = new File(possibleSdk, "platforms");
-            File[] platforms = platformsDir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File path) {
-                    return path.isDirectory() && path.getName().startsWith("android-");
-                }
-            });
+            File[] platforms = platformsDir.listFiles(
+                    path -> path.isDirectory() && path.getName().startsWith("android-"));
             if (platforms == null || platforms.length == 0) {
                 continue;
             }
-            Arrays.sort(platforms, new Comparator<File>() {
-                // Codenames before ints. Higher APIs precede lower.
-                @Override
-                public int compare(File o1, File o2) {
-                    final int MAX_VALUE = 1000;
-                    String suffix1 = o1.getName().substring("android-".length());
-                    String suffix2 = o2.getName().substring("android-".length());
-                    int suff1, suff2;
-                    try {
-                        suff1 = Integer.parseInt(suffix1);
-                    } catch (NumberFormatException e) {
-                        suff1 = MAX_VALUE;
-                    }
-                    try {
-                        suff2 = Integer.parseInt(suffix2);
-                    } catch (NumberFormatException e) {
-                        suff2 = MAX_VALUE;
-                    }
-                    if (suff1 != MAX_VALUE || suff2 != MAX_VALUE) {
-                        return suff2 - suff1;
-                    }
-                    return suffix2.compareTo(suffix1);
+            Arrays.sort(platforms, (o1, o2) -> {
+                final int MAX_VALUE = 1000;
+                String suffix1 = o1.getName().substring("android-".length());
+                String suffix2 = o2.getName().substring("android-".length());
+                int suff1, suff2;
+                try {
+                    suff1 = Integer.parseInt(suffix1);
+                } catch (NumberFormatException e) {
+                    suff1 = MAX_VALUE;
                 }
+                try {
+                    suff2 = Integer.parseInt(suffix2);
+                } catch (NumberFormatException e) {
+                    suff2 = MAX_VALUE;
+                }
+                if (suff1 != MAX_VALUE || suff2 != MAX_VALUE) {
+                    return suff2 - suff1;
+                }
+                return suffix2.compareTo(suffix1);
             });
             return platforms[0].getAbsolutePath();
         }
@@ -261,6 +246,7 @@ public class Main {
             return null;
         }
     }
+
     /**
      * Initialize the bridge and the resource maps.
      */
@@ -325,8 +311,7 @@ public class Main {
     @Test
     public void testExpand() throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
-                "expand_vert_layout.xml");
+        LayoutPullParser parser = createLayoutPullParser("expand_vert_layout.xml");
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
@@ -348,8 +333,7 @@ public class Main {
                 .setScreenHeight(300)
                 .setDensity(Density.XHIGH)
                 .setNavigation(Navigation.NONAV);
-        parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
-                "expand_horz_layout.xml");
+        parser = createLayoutPullParser("expand_horz_layout.xml");
         params = getSessionParams(parser, customConfigGenerator,
                 layoutLibCallback, "Theme.Material.Light.NoActionBar.Fullscreen", false,
                 RenderingMode.H_SCROLL, 22);
@@ -361,8 +345,7 @@ public class Main {
     @Test
     public void testVectorAnimation() throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
-                "indeterminate_progressbar.xml");
+        LayoutPullParser parser = createLayoutPullParser("indeterminate_progressbar.xml");
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
@@ -373,8 +356,7 @@ public class Main {
 
         renderAndVerify(params, "animated_vector.png", TimeUnit.SECONDS.toNanos(2));
 
-        parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
-                "indeterminate_progressbar.xml");
+        parser = createLayoutPullParser("indeterminate_progressbar.xml");
         params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
                 layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
                 RenderingMode.V_SCROLL, 22);
@@ -388,8 +370,7 @@ public class Main {
     @Test
     public void testVectorDrawable() throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
-                "vector_drawable.xml");
+        LayoutPullParser parser = createLayoutPullParser("vector_drawable.xml");
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
@@ -405,8 +386,7 @@ public class Main {
     @Test
     public void testScrolling() throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
-                "scrolled.xml");
+        LayoutPullParser parser = createLayoutPullParser("scrolled.xml");
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
@@ -433,6 +413,39 @@ public class Main {
         assertEquals(90, rootLayout.getChildren().get(5).getChildren().get(0).getLeft());
         assertEquals(-270, rootLayout.getChildren().get(5).getChildren().get(0).getBottom());
         assertEquals(690, rootLayout.getChildren().get(5).getChildren().get(0).getRight());
+    }
+
+    @Test
+    public void testGetResourceNameVariants() throws Exception {
+        // Setup
+        SessionParams params = createSessionParams("", ConfigGenerator.NEXUS_4);
+        AssetManager assetManager = AssetManager.getSystem();
+        DisplayMetrics metrics = new DisplayMetrics();
+        Configuration configuration = RenderAction.getConfiguration(params);
+        Resources resources = new Resources(assetManager, metrics, configuration);
+        resources.mLayoutlibCallback = params.getLayoutlibCallback();
+        resources.mContext =
+                new BridgeContext(params.getProjectKey(), metrics, params.getResources(),
+                        params.getAssets(), params.getLayoutlibCallback(), configuration,
+                        params.getTargetSdkVersion(), params.isRtlSupported());
+        // Test
+        assertEquals("android:style/ButtonBar",
+                resources.getResourceName(android.R.style.ButtonBar));
+        assertEquals("android", resources.getResourcePackageName(android.R.style.ButtonBar));
+        assertEquals("ButtonBar", resources.getResourceEntryName(android.R.style.ButtonBar));
+        assertEquals("style", resources.getResourceTypeName(android.R.style.ButtonBar));
+        int id = resources.mLayoutlibCallback.getResourceId(ResourceType.STRING, "app_name");
+        assertEquals("com.android.layoutlib.test.myapplication:string/app_name",
+                resources.getResourceName(id));
+        assertEquals("com.android.layoutlib.test.myapplication",
+                resources.getResourcePackageName(id));
+        assertEquals("string", resources.getResourceTypeName(id));
+        assertEquals("app_name", resources.getResourceEntryName(id));
+    }
+
+    @NonNull
+    private LayoutPullParser createLayoutPullParser(String layoutPath) {
+        return new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutPath);
     }
 
     /**
@@ -505,16 +518,21 @@ public class Main {
     private RenderResult renderAndVerify(String layoutFileName, String goldenFileName,
             ConfigGenerator deviceConfig)
             throws ClassNotFoundException {
+        SessionParams params = createSessionParams(layoutFileName, deviceConfig);
+        return renderAndVerify(params, goldenFileName);
+    }
+
+    private SessionParams createSessionParams(String layoutFileName, ConfigGenerator deviceConfig)
+            throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutFileName);
+        LayoutPullParser parser = createLayoutPullParser(layoutFileName);
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
-        SessionParams params = getSessionParams(parser, deviceConfig,
+        return getSessionParams(parser, deviceConfig,
                 layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
-        return renderAndVerify(params, goldenFileName);
     }
 
     /**

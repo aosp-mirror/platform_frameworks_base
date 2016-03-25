@@ -122,14 +122,13 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getAssets(), mParams.getLayoutlibCallback(), getConfiguration(),
+                mParams.getAssets(), mParams.getLayoutlibCallback(), getConfiguration(mParams),
                 mParams.getTargetSdkVersion(), mParams.isRtlSupported());
 
         setUp();
 
         return SUCCESS.createResult();
     }
-
 
     /**
      * Prepares the scene for action.
@@ -320,10 +319,11 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         }
     }
 
-    private Configuration getConfiguration() {
+    // VisibleForTesting
+    public static Configuration getConfiguration(RenderParams params) {
         Configuration config = new Configuration();
 
-        HardwareConfig hardwareConfig = mParams.getHardwareConfig();
+        HardwareConfig hardwareConfig = params.getHardwareConfig();
 
         ScreenSize screenSize = hardwareConfig.getScreenSize();
         if (screenSize != null) {
@@ -392,7 +392,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         } else {
             config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
         }
-        String locale = getParams().getLocale();
+        String locale = params.getLocale();
         if (locale != null && !locale.isEmpty()) config.locale = new Locale(locale);
 
         // TODO: fill in more config info.
