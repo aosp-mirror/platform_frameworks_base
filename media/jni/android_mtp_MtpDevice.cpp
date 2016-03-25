@@ -42,6 +42,7 @@
 #include "MtpDeviceInfo.h"
 #include "MtpStorageInfo.h"
 #include "MtpObjectInfo.h"
+#include "MtpProperty.h"
 
 using namespace android;
 
@@ -700,6 +701,40 @@ static void android_mtp_MtpDevice_discard_event_request(JNIEnv *env, jobject thi
     device->discardEventRequest(seq);
 }
 
+static jlong android_mtp_MtpDevice_get_object_size_long(
+        JNIEnv *env, jobject thiz, jint handle, jint format) {
+    MtpDevice* const device = get_device_from_object(env, thiz);
+    if (!device) {
+        env->ThrowNew(clazz_io_exception, "Failed to obtain MtpDevice.");
+        return 0;
+    }
+
+    std::unique_ptr<MtpProperty> property(
+            device->getObjectPropDesc(MTP_PROPERTY_OBJECT_SIZE, format));
+    if (!property) {
+        env->ThrowNew(clazz_io_exception, "Failed to obtain property desc.");
+        return 0;
+    }
+
+    if (property->getDataType() != MTP_TYPE_UINT64) {
+        env->ThrowNew(clazz_io_exception, "Unexpected property data type.");
+        return 0;
+    }
+
+    if (!device->getObjectPropValue(handle, property.get())) {
+        env->ThrowNew(clazz_io_exception, "Failed to obtain property value.");
+        return 0;
+    }
+
+    const jlong object_size = static_cast<jlong>(property->getCurrentValue().u.u64);
+    if (object_size < 0) {
+        env->ThrowNew(clazz_io_exception, "Object size is too large to express as jlong.");
+        return 0;
+    }
+
+    return object_size;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -733,6 +768,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_reap_event_request",   "(I)Landroid/mtp/MtpEvent;",
                                             (void *)android_mtp_MtpDevice_reap_event_request},
     {"native_discard_event_request", "(I)V", (void *)android_mtp_MtpDevice_discard_event_request},
+
+    {"native_get_object_size_long", "(II)J", (void *)android_mtp_MtpDevice_get_object_size_long},
 };
 
 int register_android_mtp_MtpDevice(JNIEnv *env)
