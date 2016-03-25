@@ -71,6 +71,7 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
+import android.net.metrics.ConnectivityServiceChangeEvent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -4514,6 +4515,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void makeDefault(NetworkAgentInfo newNetwork) {
         if (DBG) log("Switching to new default network: " + newNetwork);
+        ConnectivityServiceChangeEvent.logEvent(newNetwork.network.netId);
         setupDataActivityTracking(newNetwork);
         try {
             mNetd.setDefaultNetId(newNetwork.network.netId);
@@ -5144,5 +5146,4 @@ public class ConnectivityService extends IConnectivityManager.Stub
             NetworkAgentInfo nai, NetworkRequest defaultRequest) {
         return new NetworkMonitor(context, handler, nai, defaultRequest);
     }
-
 }
