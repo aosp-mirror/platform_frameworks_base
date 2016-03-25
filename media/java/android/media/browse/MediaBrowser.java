@@ -57,8 +57,9 @@ import java.util.Map.Entry;
  * <h3>Standard Extra Data</h3>
  *
  * <p>These are the current standard fields that can be used as extra data via
- * {@link #subscribe(String, Bundle, SubscriptionCallback)}, {@link #unsubscribe(String, Bundle)},
- * and {@link SubscriptionCallback#onChildrenLoaded(String, List, Bundle)}.
+ * {@link #subscribe(String, Bundle, SubscriptionCallback)},
+ * {@link #unsubscribe(String, SubscriptionCallback)}, and
+ * {@link SubscriptionCallback#onChildrenLoaded(String, List, Bundle)}.
  *
  * <ul>
  *     <li> {@link #EXTRA_PAGE}
@@ -383,7 +384,7 @@ public final class MediaBrowser {
     }
 
     /**
-     * Unsubscribes for changes to the children of the specified media id.
+     * Unsubscribes for changes to the children of the specified media id through a callback.
      * <p>
      * The query callback will no longer be invoked for results associated with
      * this id once this method returns.
@@ -391,13 +392,13 @@ public final class MediaBrowser {
      *
      * @param parentId The id of the parent media item whose list of children
      *            will be unsubscribed.
-     * @param options A bundle sent to the media browse service to subscribe.
+     * @param callback A callback sent to the media browse service to subscribe.
      */
-    public void unsubscribe(@NonNull String parentId, @NonNull Bundle options) {
-        if (options == null) {
-            throw new IllegalArgumentException("options are null");
+    public void unsubscribe(@NonNull String parentId, @NonNull SubscriptionCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback is null");
         }
-        unsubscribeInternal(parentId, options);
+        unsubscribeInternal(parentId, callback);
     }
 
     /**
@@ -490,7 +491,7 @@ public final class MediaBrowser {
         }
     }
 
-    private void unsubscribeInternal(String parentId, Bundle options) {
+    private void unsubscribeInternal(String parentId, SubscriptionCallback callback) {
         // Check arguments.
         if (TextUtils.isEmpty(parentId)) {
             throw new IllegalArgumentException("parentId is empty.");
@@ -500,16 +501,21 @@ public final class MediaBrowser {
         Subscription sub = mSubscriptions.get(parentId);
 
         // Tell the service if necessary.
-        if (sub != null && sub.removeCallback(options) && mState == CONNECT_STATE_CONNECTED) {
+        if (mState == CONNECT_STATE_CONNECTED && sub != null) {
             try {
-                // NOTE: Do not call removeSubscriptionWithOptions when options are null. Otherwise,
-                // it will break the action of support library which expects removeSubscription will
-                // be called when options are null.
-                if (options == null) {
+                if (callback == null) {
                     mServiceBinder.removeSubscription(parentId, mServiceCallbacks);
                 } else {
-                    mServiceBinder.removeSubscriptionWithOptions(
-                            parentId, options, mServiceCallbacks);
+                    final List<SubscriptionCallback> callbacks = sub.getCallbacks();
+                    final List<Bundle> optionsList = sub.getOptionsList();
+                    for (int i = callbacks.size() - 1; i >= 0; --i) {
+                        if (callbacks.get(i) == callback) {
+                            mServiceBinder.removeSubscriptionWithOptions(
+                                    parentId, optionsList.get(i), mServiceCallbacks);
+                            callbacks.remove(i);
+                            optionsList.remove(i);
+                        }
+                    }
                 }
             } catch (RemoteException ex) {
                 // Process is crashing. We will disconnect, and upon reconnect we will
@@ -517,7 +523,8 @@ public final class MediaBrowser {
                 Log.d(TAG, "removeSubscription failed with RemoteException parentId=" + parentId);
             }
         }
-        if (sub != null && sub.isEmpty()) {
+
+        if (sub != null && (sub.isEmpty() || callback == null)) {
             mSubscriptions.remove(parentId);
         }
     }
@@ -1117,17 +1124,6 @@ public final class MediaBrowser {
             }
             mCallbacks.add(callback);
             mOptionsList.add(options);
-        }
-
-        public boolean removeCallback(Bundle options) {
-            for (int i = 0; i < mOptionsList.size(); ++i) {
-                if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
-                    mCallbacks.remove(i);
-                    mOptionsList.remove(i);
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }
