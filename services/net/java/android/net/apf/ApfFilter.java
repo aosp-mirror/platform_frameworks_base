@@ -18,6 +18,7 @@ package android.net.apf;
 
 import static android.system.OsConstants.*;
 
+import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.apf.ApfGenerator;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
@@ -136,6 +137,16 @@ public class ApfFilter {
     // NOTE: this must be added to the IPv4 header length in IPV4_HEADER_SIZE_MEMORY_SLOT
     private static final int DHCP_CLIENT_MAC_OFFSET = ETH_HEADER_LEN + UDP_HEADER_LEN + 28;
 
+    private static int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
+    private static final byte[] ARP_IPV4_REQUEST_HEADER = new byte[]{
+            0, 1, // Hardware type: Ethernet (1)
+            8, 0, // Protocol type: IP (0x0800)
+            6,    // Hardware size: 6
+            4,    // Protocol size: 4
+            0, 1  // Opcode: request (1)
+    };
+    private static int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
+
     private final ApfCapabilities mApfCapabilities;
     private final IpManager.Callback mIpManagerCallback;
     private final NetworkInterface mNetworkInterface;
@@ -145,6 +156,9 @@ public class ApfFilter {
     private long mUniqueCounter;
     @GuardedBy("this")
     private boolean mMulticastFilter;
+    // Our IPv4 address, if we have just one, otherwise null.
+    @GuardedBy("this")
+    private byte[] mIPv4Address;
 
     private ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
             IpManager.Callback ipManagerCallback) {
@@ -510,6 +524,33 @@ public class ApfFilter {
     private byte[] mLastInstalledProgram;
 
     /**
+     * Generate filter code to process ARP packets. Execution of this code ends in either the
+     * DROP_LABEL or PASS_LABEL and does not fall off the end.
+     * Preconditions:
+     *  - Packet being filtered is ARP
+     */
+    @GuardedBy("this")
+    private void generateArpFilterLocked(ApfGenerator gen) throws IllegalInstructionException {
+        // Here's a basic summary of what the ARP filter program does:
+        //
+        // if it's not an ARP IPv4 request:
+        //   pass
+        // if it's not a request for our IPv4 address:
+        //   drop
+        // pass
+
+        // if it's not an ARP IPv4 request, pass
+        gen.addLoadImmediate(Register.R0, ARP_HEADER_OFFSET);
+        gen.addJumpIfBytesNotEqual(Register.R0, ARP_IPV4_REQUEST_HEADER, gen.PASS_LABEL);
+        // if it's not a request for our IPv4 address, drop
+        gen.addLoadImmediate(Register.R0, ARP_TARGET_IP_ADDRESS_OFFSET);
+        gen.addJumpIfBytesNotEqual(Register.R0, mIPv4Address, gen.DROP_LABEL);
+
+        // Otherwise, pass
+        gen.addJump(gen.PASS_LABEL);
+    }
+
+    /**
      * Generate filter code to process IPv4 packets. Execution of this code ends in either the
      * DROP_LABEL or PASS_LABEL and does not fall off the end.
      * Preconditions:
@@ -566,7 +607,6 @@ public class ApfFilter {
      * DROP_LABEL or PASS_LABEL, or falls off the end for ICMPv6 packets.
      * Preconditions:
      *  - Packet being filtered is IPv6
-     *  - R1 is initialized to 0
      */
     @GuardedBy("this")
     private void generateIPv6FilterLocked(ApfGenerator gen) throws IllegalInstructionException {
@@ -598,6 +638,7 @@ public class ApfFilter {
     /**
      * Begin generating an APF program to:
      * <ul>
+     * <li>Drop ARP requests not for us, if mIPv4Address is set,
      * <li>Drop IPv4 broadcast packets, except DHCP destined to our MAC,
      * <li>Drop IPv4 multicast packets, if mMulticastFilter,
      * <li>Pass all other IPv4 packets,
@@ -616,16 +657,31 @@ public class ApfFilter {
 
         // Here's a basic summary of what the initial program does:
         //
+        // if it's ARP:
+        //   inesrt ARP filter to drop or pass these appropriately
         // if it's IPv4:
         //   insert IPv4 filter to drop or pass these appropriately
         // if it's not IPv6:
         //   pass
         // insert IPv6 filter to drop, pass, or fall off the end for ICMPv6 packets
 
+        gen.addLoad16(Register.R0, ETH_ETHERTYPE_OFFSET);
+
+        if (mIPv4Address != null) {
+            // Add ARP filters:
+            String skipArpFiltersLabel = "skipArpFilters";
+            // If not ARP, skip ARP filters
+            // NOTE: Relies on R0 containing ethertype.
+            gen.addJumpIfR0NotEquals(ETH_P_ARP, skipArpFiltersLabel);
+            generateArpFilterLocked(gen);
+            gen.defineLabel(skipArpFiltersLabel);
+        }
+
         // Add IPv4 filters:
         String skipIPv4FiltersLabel = "skipIPv4Filters";
-        // If not IPv4, skip IPv4 filters
-        gen.addLoad16(Register.R0, ETH_ETHERTYPE_OFFSET);
+        // NOTE: Relies on R0 containing ethertype. This is safe because if we got here, we did not
+        // execute the ARP filter, since that filter does not fall through, but either drops or
+        // passes.
         gen.addJumpIfR0NotEquals(ETH_P_IP, skipIPv4FiltersLabel);
         // NOTE: Relies on R1 being initialized to 0.
         generateIPv4FilterLocked(gen);
@@ -634,8 +690,8 @@ public class ApfFilter {
         // Add IPv6 filters:
         // If not IPv6, pass
         // NOTE: Relies on R0 containing ethertype. This is safe because if we got here, we did not
-        // execute the IPv4 filter, since that filter does not fall through, but either drops or
-        // passes.
+        // execute the ARP or IPv4 filters, since those filters do not fall through, but either
+        // drop or pass.
         gen.addJumpIfR0NotEquals(ETH_P_IPV6, gen.PASS_LABEL);
         generateIPv6FilterLocked(gen);
         return gen;
@@ -787,10 +843,36 @@ public class ApfFilter {
         }
     }
 
+    // Find the single IPv4 address if there is one, otherwise return null.
+    private static byte[] findIPv4Address(LinkProperties lp) {
+        byte[] ipv4Address = null;
+        for (InetAddress inetAddr : lp.getAddresses()) {
+            byte[] addr = inetAddr.getAddress();
+            if (addr.length != 4) continue;
+            // More than one IPv4 address, abort
+            if (ipv4Address != null && !Arrays.equals(ipv4Address, addr)) return null;
+            ipv4Address = addr;
+        }
+        return ipv4Address;
+    }
+
+    public synchronized void setLinkProperties(LinkProperties lp) {
+        // NOTE: Do not keep a copy of LinkProperties as it would further duplicate state.
+        byte[] ipv4Address = findIPv4Address(lp);
+        // If ipv4Address is the same as mIPv4Address, then there's no change, just return.
+        if (Arrays.equals(ipv4Address, mIPv4Address)) return;
+        // Otherwise update mIPv4Address and install new program.
+        mIPv4Address = ipv4Address;
+        installNewProgramLocked();
+    }
+
     public synchronized void dump(IndentingPrintWriter pw) {
-        pw.println("APF version: " + mApfCapabilities.apfVersionSupported);
-        pw.println("Max program size: " + mApfCapabilities.maximumApfProgramSize);
+        pw.println("APF caps: " + mApfCapabilities);
         pw.println("Receive thread: " + (mReceiveThread != null ? "RUNNING" : "STOPPED"));
+        pw.println("Multicast filtering: " + mMulticastFilter);
+        try {
+            pw.println("IPv4 address: " + InetAddress.getByAddress(mIPv4Address));
+        } catch (UnknownHostException|NullPointerException e) {}
         if (mLastTimeInstalledProgram == 0) {
             pw.println("No program installed.");
             return;

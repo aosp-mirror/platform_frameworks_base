@@ -519,6 +519,7 @@ public class IpManager extends StateMachine {
     }
 
     private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
+        if (mApfFilter != null) mApfFilter.setLinkProperties(newLp);
         switch (delta) {
             case GAINED_PROVISIONING:
                 if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
