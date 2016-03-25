@@ -39,6 +39,11 @@ enum JankType {
     NUM_BUCKETS,
 };
 
+struct SlowFrame {
+    uint16_t whenHours; // When this occurred in CLOCK_MONOTONIC in hours
+    uint16_t frametimeMs; // How long the frame took in ms
+};
+
 // Try to keep as small as possible, should match ASHMEM_SIZE in
 // GraphicsStatsService.java
 struct ProfileData {
@@ -49,6 +54,8 @@ struct ProfileData {
     uint32_t totalFrameCount;
     uint32_t jankFrameCount;
     nsecs_t statStartTime;
+
+    std::array<SlowFrame, 10> slowestFrames;
 };
 
 // TODO: Replace DrawProfiler with this
@@ -71,6 +78,7 @@ public:
 private:
     void freeData();
     void setFrameInterval(nsecs_t frameIntervalNanos);
+    void updateSlowest(const FrameInfo& frame);
 
     static uint32_t findPercentile(const ProfileData* data, int p);
     static void dumpData(const ProfileData* data, int fd);
