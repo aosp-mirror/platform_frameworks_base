@@ -120,6 +120,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskStack mStack = new TaskStack();
     @ViewDebug.ExportedProperty(deepExport=true, prefix="layout_")
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
+    // The stable layout algorithm is only used to calculate the task rect with the stable bounds
+    TaskStackLayoutAlgorithm mStableLayoutAlgorithm;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="scroller_")
     TaskStackViewScroller mStackScroller;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="touch_")
@@ -223,6 +225,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
         mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, this);
+        mStableLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, null);
         mStackScroller = new TaskStackViewScroller(context, this, mLayoutAlgorithm);
         mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
         mAnimationHelper = new TaskStackAnimationHelper(context, this);
@@ -297,6 +300,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     Interpolators.FAST_OUT_SLOW_IN));
         } else {
             mStackScroller.reset();
+            mStableLayoutAlgorithm.reset();
             mLayoutAlgorithm.reset();
         }
 
@@ -1158,6 +1162,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void setSystemInsets(Rect systemInsets) {
         if (!systemInsets.equals(mLayoutAlgorithm.mSystemInsets)) {
+            mStableLayoutAlgorithm.setSystemInsets(systemInsets);
             mLayoutAlgorithm.setSystemInsets(systemInsets);
             requestLayout();
         }
@@ -1186,6 +1191,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Compute the rects in the stack algorithm
+        mStableLayoutAlgorithm.initialize(mStableWindowRect, mStableStackBounds,
+                TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
         mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
         updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
@@ -1225,12 +1232,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         } else {
             mTmpRect.setEmpty();
         }
+        Rect taskRect = mStableLayoutAlgorithm.mTaskRect;
         tv.measure(
-                MeasureSpec.makeMeasureSpec(
-                        mLayoutAlgorithm.mTaskRect.width() + mTmpRect.left + mTmpRect.right,
+                MeasureSpec.makeMeasureSpec(taskRect.width() + mTmpRect.left + mTmpRect.right,
                         MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(
-                        mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom,
+                MeasureSpec.makeMeasureSpec(taskRect.height() + mTmpRect.top + mTmpRect.bottom,
                         MeasureSpec.EXACTLY));
     }
 
@@ -1269,7 +1275,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         } else {
             mTmpRect.setEmpty();
         }
-        Rect taskRect = mLayoutAlgorithm.mTaskRect;
+        Rect taskRect = mStableLayoutAlgorithm.mTaskRect;
         tv.cancelTransformAnimation();
         tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
                 taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
@@ -1908,6 +1914,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
+        mStableLayoutAlgorithm.reloadOnConfigurationChange(getContext());
         mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
         mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
