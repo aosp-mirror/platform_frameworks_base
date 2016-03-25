@@ -105,7 +105,11 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         }
 
         @Override
-        public void onMoveToFullscreen() { }
+        public void onMoveToFullscreen() {
+            // Recents should be dismissed when PIP moves to fullscreen. If not, Recents will
+            // be unnecessarily shown in the scenario: PIP->Fullscreen->PIP.
+            dismissRecentsToLaunchTargetTaskOrHome();
+        }
 
         @Override
         public void onPipResizeAboutToStart() { }
