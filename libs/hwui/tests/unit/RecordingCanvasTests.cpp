@@ -570,36 +570,30 @@ TEST(RecordingCanvas, insertReorderBarrier) {
 
 TEST(RecordingCanvas, refPaint) {
     SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setTextSize(20);
-    paint.setTextAlign(SkPaint::kLeft_Align);
-    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [&paint](RecordingCanvas& canvas) {
         paint.setColor(SK_ColorBLUE);
-        // first three should use same paint
+        // first two should use same paint
         canvas.drawRect(0, 0, 200, 10, paint);
         SkPaint paintCopy(paint);
         canvas.drawRect(0, 10, 200, 20, paintCopy);
-        TestUtils::drawUtf8ToCanvas(&canvas, "helloworld", paint, 50, 25);
 
         // only here do we use different paint ptr
         paint.setColor(SK_ColorRED);
         canvas.drawRect(0, 20, 200, 30, paint);
     });
     auto ops = dl->getOps();
-    ASSERT_EQ(4u, ops.size());
+    ASSERT_EQ(3u, ops.size());
 
-    // first three are the same
+    // first two are the same
     EXPECT_NE(nullptr, ops[0]->paint);
     EXPECT_NE(&paint, ops[0]->paint);
     EXPECT_EQ(ops[0]->paint, ops[1]->paint);
-    EXPECT_EQ(ops[0]->paint, ops[2]->paint);
 
     // last is different, but still copied / non-null
-    EXPECT_NE(nullptr, ops[3]->paint);
-    EXPECT_NE(ops[0]->paint, ops[3]->paint);
-    EXPECT_NE(&paint, ops[3]->paint);
+    EXPECT_NE(nullptr, ops[2]->paint);
+    EXPECT_NE(ops[0]->paint, ops[2]->paint);
+    EXPECT_NE(&paint, ops[2]->paint);
 }
 
 TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
@@ -647,7 +641,7 @@ TEST(RecordingCanvas, drawText) {
         paint.setAntiAlias(true);
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        std::unique_ptr<uint16_t[]> dst = TestUtils::utf8ToUtf16("HELLO");
+        std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
         canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
     });
 
@@ -671,7 +665,7 @@ TEST(RecordingCanvas, drawTextInHighContrast) {
         paint.setAntiAlias(true);
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        std::unique_ptr<uint16_t[]> dst = TestUtils::utf8ToUtf16("HELLO");
+        std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
         canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
     });
 

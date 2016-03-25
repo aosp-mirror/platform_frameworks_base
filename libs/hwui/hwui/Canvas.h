@@ -53,6 +53,7 @@ typedef uint32_t Flags;
 } // namespace SaveFlags
 
 namespace uirenderer {
+class SkiaCanvasProxy;
 namespace VectorDrawable {
 class Tree;
 };
@@ -205,19 +206,6 @@ public:
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) = 0;
 
-    // Text
-    /**
-     * drawText: count is of glyphs
-     * totalAdvance: used to define width of text decorations (underlines, strikethroughs).
-     */
-    virtual void drawGlyphs(const uint16_t* glyphs, const float* positions, int count,
-            const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
-            float totalAdvance) = 0;
-    /** drawTextOnPath: count is of glyphs */
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) = 0;
-
     /**
      * Specifies if the positions passed to ::drawText are absolute or relative
      * to the (x,y) value provided.
@@ -244,6 +232,22 @@ public:
 
 protected:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
+
+    /**
+     * drawText: count is of glyphs
+     * totalAdvance: used to define width of text decorations (underlines, strikethroughs).
+     */
+    virtual void drawGlyphs(const uint16_t* glyphs, const float* positions, int count,
+            const SkPaint& paint, float x, float y,
+            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+            float totalAdvance) = 0;
+    /** drawTextOnPath: count is of glyphs */
+    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+            float hOffset, float vOffset, const SkPaint& paint) = 0;
+
+    friend class DrawTextFunctor;
+    friend class DrawTextOnPathFunctor;
+    friend class uirenderer::SkiaCanvasProxy;
 };
 
 }; // namespace android
