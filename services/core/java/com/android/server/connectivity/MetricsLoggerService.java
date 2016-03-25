@@ -60,7 +60,7 @@ public class MetricsLoggerService extends SystemService {
     private long mLastSentEventTimeMillis = System.currentTimeMillis();
 
     private final void enforceConnectivityInternalPermission() {
-        getContext().enforceCallingPermission(
+        getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "MetricsLoggerService");
     }
