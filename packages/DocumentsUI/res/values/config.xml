@@ -26,4 +26,6 @@
     <bool name="home_root_hidden">true</bool>
     <!-- Indicates if the advanced roots like internal storage should be hidden in the roots list) -->
     <bool name="advanced_roots_hidden">true</bool>
+    <!-- Indicates if search view is taking the whole toolbar space -->
+    <bool name="full_bar_search_view">true</bool>
 </resources>

@@ -146,7 +146,8 @@ public abstract class BaseActivity extends Activity
 
         getMenuInflater().inflate(R.menu.activity, menu);
         mNavigator.update();
-        mSearchManager.install((DocumentsToolbar) findViewById(R.id.toolbar));
+        boolean fullBarSearch = getResources().getBoolean(R.bool.full_bar_search_view);
+        mSearchManager.install((DocumentsToolbar) findViewById(R.id.toolbar), fullBarSearch);
 
         return showMenu;
     }
@@ -378,8 +379,12 @@ public abstract class BaseActivity extends Activity
     public void onSearchChanged(@Nullable String query) {
         // We should not get here if root is not searchable
         assert(canSearchRoot());
-
         reloadSearch(query);
+    }
+
+    @Override
+    public void onSearchFinished() {
+        // Restores menu icons state
         invalidateOptionsMenu();
     }
 
