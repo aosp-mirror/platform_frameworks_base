@@ -16,7 +16,8 @@
 
 package android.view;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
+import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -96,8 +97,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 import java.util.HashSet;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -145,9 +146,6 @@ public final class ViewRootImpl implements ViewParent,
      * a key event, before resetting the counters.
      */
     static final int MAX_TRACKBALL_DELAY = 250;
-
-    private static final int RESIZE_MODE_FREEFORM = 0;
-    private static final int RESIZE_MODE_DOCKED_DIVIDER = 1;
 
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
@@ -233,6 +231,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mIsAnimating;
 
     private boolean mDragResizing;
+    private boolean mInvalidateRootRequested;
     private int mResizeMode;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
@@ -1828,12 +1827,12 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean dragResizing = freeformResizing || dockedResizing;
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
-                        startDragResizing(mPendingBackDropFrame,
-                                mWinFrame.equals(mPendingBackDropFrame), mPendingVisibleInsets,
-                                mPendingStableInsets);
                         mResizeMode = freeformResizing
                                 ? RESIZE_MODE_FREEFORM
                                 : RESIZE_MODE_DOCKED_DIVIDER;
+                        startDragResizing(mPendingBackDropFrame,
+                                mWinFrame.equals(mPendingBackDropFrame), mPendingVisibleInsets,
+                                mPendingStableInsets, mResizeMode);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -2438,6 +2437,11 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public void onHardwarePostDraw(DisplayListCanvas canvas) {
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
+        synchronized (mWindowCallbacks) {
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                mWindowCallbacks.get(i).onPostDraw(canvas);
+            }
+        }
     }
 
     /**
@@ -2675,7 +2679,8 @@ public final class ViewRootImpl implements ViewParent,
         if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) {
             if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
                 // If accessibility focus moved, always invalidate the root.
-                boolean invalidateRoot = accessibilityFocusDirty;
+                boolean invalidateRoot = accessibilityFocusDirty || mInvalidateRootRequested;
+                mInvalidateRootRequested = false;
 
                 // Draw with hardware renderer.
                 mIsAnimating = false;
@@ -2906,6 +2911,14 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         return mAttachInfo.mAccessibilityFocusDrawable;
+    }
+
+    /**
+     * Requests that the root render node is invalidated next time we perform a draw, such that
+     * {@link WindowCallbacks#onPostDraw} gets called.
+     */
+    public void requestInvalidateRootRenderNode() {
+        mInvalidateRootRequested = true;
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
@@ -7090,13 +7103,13 @@ public final class ViewRootImpl implements ViewParent,
      * Start a drag resizing which will inform all listeners that a window resize is taking place.
      */
     private void startDragResizing(Rect initialBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets) {
+            Rect stableInsets, int resizeMode) {
         if (!mDragResizing) {
             mDragResizing = true;
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
                     mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds, fullscreen,
-                            systemInsets, stableInsets);
+                            systemInsets, stableInsets, resizeMode);
                 }
             }
             mFullRedrawNeeded = true;

@@ -157,6 +157,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     InputQueue.Callback mTakeInputQueueCallback;
 
     boolean mIsFloating;
+    private boolean mIsTranslucent;
 
     private LayoutInflater mLayoutInflater;
 
@@ -488,6 +489,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public boolean isFloating() {
         return mIsFloating;
+    }
+
+    public boolean isTranslucent() {
+        return mIsTranslucent;
     }
 
     /**
@@ -2399,6 +2404,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (a.getBoolean(R.styleable.Window_windowActivityTransitions, false)) {
             requestFeature(FEATURE_ACTIVITY_TRANSITIONS);
         }
+
+        mIsTranslucent = a.getBoolean(R.styleable.Window_windowIsTranslucent, false);
 
         final Context context = getContext();
         final int targetSdk = context.getApplicationInfo().targetSdkVersion;
