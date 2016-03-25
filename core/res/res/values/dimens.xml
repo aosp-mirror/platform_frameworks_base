@@ -452,4 +452,6 @@
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
 
     <item type="fraction" name="docked_stack_divider_fixed_ratio">34.15%</item>
+
+    <dimen name="resize_shadow_size">5dp</dimen>
 </resources>
