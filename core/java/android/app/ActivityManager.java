@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -1790,7 +1791,7 @@ public class ActivityManager {
 
         public int taskWidth;
         public int taskHeight;
-        public int screenOrientation;
+        public int screenOrientation = Configuration.ORIENTATION_UNDEFINED;
 
         public TaskThumbnailInfo() {
             // Do nothing
@@ -1807,7 +1808,16 @@ public class ActivityManager {
         public void reset() {
             taskWidth = 0;
             taskHeight = 0;
-            screenOrientation = 0;
+            screenOrientation = Configuration.ORIENTATION_UNDEFINED;
+        }
+
+        /**
+         * Copies from another ThumbnailInfo.
+         */
+        public void copyFrom(TaskThumbnailInfo o) {
+            taskWidth = o.taskWidth;
+            taskHeight = o.taskHeight;
+            screenOrientation = o.screenOrientation;
         }
 
         /** @hide */

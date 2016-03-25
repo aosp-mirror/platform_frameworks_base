@@ -14,28 +14,28 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- The layouts params are calculated in TaskViewHeader.java -->
 <com.android.systemui.recents.views.TaskViewHeader
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/task_view_bar"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/recents_task_view_header_height"
+    android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal">
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/icon"
         android:contentDescription="@string/recents_app_info_button_label"
-        android:layout_width="@dimen/recents_task_view_header_icon_width"
-        android:layout_height="@dimen/recents_task_view_header_icon_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingStart="16dp"
         android:paddingEnd="12dp" />
     <LinearLayout
+        android:id="@+id/title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginStart="56dp"
-        android:layout_marginEnd="56dp"
         android:orientation="vertical">
         <TextView
             android:id="@+id/title"
@@ -67,21 +67,20 @@
     </LinearLayout>
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/move_task"
-        android:layout_width="@dimen/recents_task_view_header_button_width"
-        android:layout_height="@dimen/recents_task_view_header_button_height"
-        android:layout_marginEnd="@dimen/recents_task_view_header_button_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
-        android:padding="16dp"
+        android:padding="@dimen/recents_task_view_header_button_padding"
         android:src="@drawable/star"
         android:background="?android:selectableItemBackground"
         android:alpha="0"
         android:visibility="gone" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/dismiss_task"
-        android:layout_width="@dimen/recents_task_view_header_button_width"
-        android:layout_height="@dimen/recents_task_view_header_button_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
-        android:padding="16dp"
+        android:padding="@dimen/recents_task_view_header_button_padding"
         android:src="@drawable/recents_dismiss_light"
         android:background="?android:selectableItemBackground"
         android:alpha="0"

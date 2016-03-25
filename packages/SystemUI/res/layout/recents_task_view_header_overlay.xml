@@ -13,6 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- The layouts params are calculated in TaskViewHeader.java -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -20,8 +21,8 @@
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/app_icon"
         android:contentDescription="@string/recents_app_info_button_label"
-        android:layout_width="@dimen/recents_task_view_header_icon_width"
-        android:layout_height="@dimen/recents_task_view_header_icon_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
@@ -32,8 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginStart="56dp"
-        android:layout_marginEnd="112dp"
         android:textSize="16sp"
         android:textColor="#ffffffff"
         android:text="@string/recents_empty_message"
@@ -44,10 +43,10 @@
         android:fadingEdge="horizontal" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/app_info"
-        android:layout_width="@dimen/recents_task_view_header_button_width"
-        android:layout_height="@dimen/recents_task_view_header_button_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
-        android:padding="16dp"
+        android:padding="@dimen/recents_task_view_header_button_padding"
         android:background="?android:selectableItemBackground"
         android:src="@drawable/recents_info_light" />
 </FrameLayout>
