@@ -723,6 +723,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
         // Make sure that the recycled bitmap has the correct alpha type.
         mRecycledBitmap->setAlphaType(bitmap->alphaType());
 
+        bitmap->notifyPixelsChanged();
         bitmap->lockPixels();
         mNeedsCopy = false;
 
