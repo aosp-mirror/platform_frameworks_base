@@ -779,11 +779,11 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             }
         }
 
-        if (hasNonDefaults) {
+        if (debug && hasNonDefaults) {
             if (dest.size() == 0) {
-                Slog.w(TAG, "resolveIntent failed: found match, but none with CATEGORY_DEFAULT");
+                Slog.v(TAG, "resolveIntent failed: found match, but none with CATEGORY_DEFAULT");
             } else if (dest.size() > 1) {
-                Slog.w(TAG, "resolveIntent: multiple matches, only some with CATEGORY_DEFAULT");
+                Slog.v(TAG, "resolveIntent: multiple matches, only some with CATEGORY_DEFAULT");
             }
         }
     }
