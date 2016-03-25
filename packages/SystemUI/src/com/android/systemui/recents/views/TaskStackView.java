@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -87,6 +88,8 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,6 +118,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final int LAUNCH_NEXT_SCROLL_INCR_DURATION = 32;
 
     private static final ArraySet<Task.TaskKey> EMPTY_TASK_SET = new ArraySet<>();
+
+    // The actions to perform when resetting to initial state,
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({INITIAL_STATE_UPDATE_NONE, INITIAL_STATE_UPDATE_ALL, INITIAL_STATE_UPDATE_LAYOUT_ONLY})
+    public @interface InitialStateAction {}
+    /** Do not update the stack and layout to the initial state. */
+    private static final int INITIAL_STATE_UPDATE_NONE = 0;
+    /** Update both the stack and layout to the initial state. */
+    private static final int INITIAL_STATE_UPDATE_ALL = 1;
+    /** Update only the layout to the initial state. */
+    private static final int INITIAL_STATE_UPDATE_LAYOUT_ONLY = 2;
 
     LayoutInflater mInflater;
     TaskStack mStack = new TaskStack();
@@ -149,6 +163,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mTaskViewsClipDirty = true;
     @ViewDebug.ExportedProperty(category="recents")
     boolean mAwaitingFirstLayout = true;
+    @ViewDebug.ExportedProperty(category="recents")
+    @InitialStateAction
+    int mInitialState = INITIAL_STATE_UPDATE_ALL;
     @ViewDebug.ExportedProperty(category="recents")
     boolean mInMeasureLayout = false;
     @ViewDebug.ExportedProperty(category="recents")
@@ -307,6 +324,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Since we always animate to the same place in (the initial state), always reset the stack
         // to the initial state when resuming
         mAwaitingFirstLayout = true;
+        mInitialState = INITIAL_STATE_UPDATE_ALL;
         requestLayout();
     }
 
@@ -329,8 +347,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Updates this TaskStackView to the initial state.
      */
-    public void updateToInitialState() {
-        mStackScroller.setStackScrollToInitialState();
+    public void updateToInitialState(boolean scrollToInitialState) {
+        if (scrollToInitialState) {
+            mStackScroller.setStackScrollToInitialState();
+        }
         mLayoutAlgorithm.updateToInitialState(mStack.getStackTasks());
     }
 
@@ -1199,11 +1219,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // If this is the first layout, then scroll to the front of the stack, then update the
         // TaskViews with the stack so that we can lay them out
-        // TODO: The second check is a workaround for wacky layouts that we get while docking via
-        //       long pressing the recents button
-        if (mAwaitingFirstLayout ||
-                (mStackScroller.getStackScroll() == mLayoutAlgorithm.mInitialScrollP)) {
-            updateToInitialState();
+        if (mAwaitingFirstLayout || mInitialState != INITIAL_STATE_UPDATE_NONE) {
+            updateToInitialState(mInitialState != INITIAL_STATE_UPDATE_LAYOUT_ONLY);
+            mInitialState = INITIAL_STATE_UPDATE_NONE;
         }
 
         // Rebind all the views, including the ignore ones
@@ -1916,8 +1934,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(ConfigurationChangedEvent event) {
         mStableLayoutAlgorithm.reloadOnConfigurationChange(getContext());
         mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
-        mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
-                TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
+
+        // Notify the task views of the configuration change so they can reload their resources
+        if (!event.fromMultiWindow) {
+            mTmpTaskViews.clear();
+            mTmpTaskViews.addAll(getTaskViews());
+            mTmpTaskViews.addAll(mViewPool.getViews());
+            int taskViewCount = mTmpTaskViews.size();
+            for (int i = 0; i < taskViewCount; i++) {
+                mTmpTaskViews.get(i).onConfigurationChanged();
+            }
+        }
+
+        // Trigger a new layout and scroll to the initial state
+        mInitialState = event.fromMultiWindow
+                ? INITIAL_STATE_UPDATE_ALL
+                : INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+        requestLayout();
     }
 
     /**

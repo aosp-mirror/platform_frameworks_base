@@ -24,6 +24,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -235,6 +236,13 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         });
         mActionButtonView.setOnClickListener(this);
         mActionButtonTranslationZ = mActionButtonView.getTranslationZ();
+    }
+
+    /**
+     * Update the task view when the configuration changes.
+     */
+    void onConfigurationChanged() {
+        mHeaderView.onConfigurationChanged();
     }
 
     @Override

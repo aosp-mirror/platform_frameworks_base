@@ -708,7 +708,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             TaskStackViewScroller stackScroller = stackView.getScroller();
 
             stackView.updateLayoutAlgorithm(true /* boundScroll */);
-            stackView.updateToInitialState();
+            stackView.updateToInitialState(true /* scrollToInitialState */);
 
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 Task task = tasks.get(i);
@@ -775,7 +775,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         // Get the transform for the running task
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
-        stackView.updateToInitialState();
+        stackView.updateToInitialState(true /* scrollToInitialState */);
         mTmpTransform = stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;

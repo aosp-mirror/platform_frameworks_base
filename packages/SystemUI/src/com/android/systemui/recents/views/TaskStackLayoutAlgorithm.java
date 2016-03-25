@@ -852,7 +852,7 @@ public class TaskStackLayoutAlgorithm {
             // in screen space
             float tmpP = (mMinScrollP - stackScroll) / mNumStackTasks;
             int centerYOffset = (mStackRect.top - mTaskRect.top) +
-                    (mStackRect.height() - mTaskRect.height()) / 2;
+                    (mStackRect.height() - mSystemInsets.bottom - mTaskRect.height()) / 2;
             y = centerYOffset + getYForDeltaP(tmpP, 0);
             z = mMaxTranslationZ;
             dimAlpha = 0f;

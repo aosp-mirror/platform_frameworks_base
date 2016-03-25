@@ -415,13 +415,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Update the nav bar for the current orientation
         updateNavBarScrim(false /* animateNavBarScrim */, AnimationProps.IMMEDIATE);
 
-        EventBus.getDefault().send(new ConfigurationChangedEvent());
+        EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */));
     }
 
     @Override
     public void onMultiWindowChanged(boolean inMultiWindow) {
         super.onMultiWindowChanged(inMultiWindow);
-        EventBus.getDefault().send(new ConfigurationChangedEvent());
+        EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */));
 
         if (mRecentsView != null) {
             // Reload the task stack completely

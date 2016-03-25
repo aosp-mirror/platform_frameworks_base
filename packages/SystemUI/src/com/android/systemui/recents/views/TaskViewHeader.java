@@ -250,25 +250,7 @@ public class TaskViewHeader extends FrameLayout
         mFocusTimerIndicatorStub = (ViewStub) findViewById(R.id.focus_timer_indicator_stub);
         mAppOverlayViewStub = (ViewStub) findViewById(R.id.app_overlay_stub);
 
-        // Update the dimensions of everything in the header. We do this because we need to use
-        // resources for the display, and not the current configuration.
-        Resources res = getResources();
-        mHeaderBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
-                R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height_tablet_land,
-                R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height_tablet_land);
-        mHeaderButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
-                R.dimen.recents_task_view_header_button_padding,
-                R.dimen.recents_task_view_header_button_padding,
-                R.dimen.recents_task_view_header_button_padding,
-                R.dimen.recents_task_view_header_button_padding_tablet_land,
-                R.dimen.recents_task_view_header_button_padding,
-                R.dimen.recents_task_view_header_button_padding_tablet_land);
-        updateLayoutParams(mIconView, findViewById(R.id.title_container), mMoveTaskButton,
-                mDismissButton);
+        onConfigurationChanged();
     }
 
     /**
@@ -300,6 +282,34 @@ public class TaskViewHeader extends FrameLayout
         button.setLayoutParams(lp);
         button.setPadding(mHeaderButtonPadding, mHeaderButtonPadding, mHeaderButtonPadding,
                 mHeaderButtonPadding);
+    }
+
+    /**
+     * Update the header view when the configuration changes.
+     */
+    void onConfigurationChanged() {
+        // Update the dimensions of everything in the header. We do this because we need to use
+        // resources for the display, and not the current configuration.
+        Resources res = getResources();
+        mHeaderBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height_tablet_land);
+        mHeaderButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(res,
+                R.dimen.recents_task_view_header_button_padding,
+                R.dimen.recents_task_view_header_button_padding,
+                R.dimen.recents_task_view_header_button_padding,
+                R.dimen.recents_task_view_header_button_padding_tablet_land,
+                R.dimen.recents_task_view_header_button_padding,
+                R.dimen.recents_task_view_header_button_padding_tablet_land);
+        updateLayoutParams(mIconView, findViewById(R.id.title_container), mMoveTaskButton,
+                mDismissButton);
+        if (mAppOverlayView != null) {
+            updateLayoutParams(mAppIconView, mAppTitleView, null, mAppInfoView);
+        }
     }
 
     @Override

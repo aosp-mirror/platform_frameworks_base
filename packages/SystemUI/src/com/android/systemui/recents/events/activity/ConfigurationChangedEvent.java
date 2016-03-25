@@ -22,5 +22,10 @@ import com.android.systemui.recents.events.EventBus;
  * This is sent when the Recents activity configuration has changed.
  */
 public class ConfigurationChangedEvent extends EventBus.AnimatedEvent {
-    // Simple event
+
+    public final boolean fromMultiWindow;
+
+    public ConfigurationChangedEvent(boolean fromMultiWindow) {
+        this.fromMultiWindow = fromMultiWindow;
+    }
 }
