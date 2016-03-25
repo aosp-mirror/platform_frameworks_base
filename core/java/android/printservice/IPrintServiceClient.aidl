@@ -52,6 +52,15 @@ interface IPrintServiceClient {
      */
     void setStatus(in PrintJobId printJobId, in CharSequence status);
 
+    /**
+     * Set the status of this print job
+     *
+     * @param printJobId The print job to update
+     * @param status The new status as a string resource
+     * @param appPackageName The app package name the string belongs to
+     */
+    void setStatusRes(in PrintJobId printJobId, int status, in CharSequence appPackageName);
+
     void onPrintersAdded(in ParceledListSlice printers);
     void onPrintersRemoved(in ParceledListSlice printerIds);
 

@@ -35,6 +35,20 @@ public class Preconditions {
     }
 
     /**
+     * Ensures that an expression checking an argument is true.
+     *
+     * @param expression the expression to check
+     * @param errorMessage the exception message to use if the check fails; will
+     *     be converted to a string using {@link String#valueOf(Object)}
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(boolean expression, final Object errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(String.valueOf(errorMessage));
+        }
+    }
+
+    /**
      * Ensures that an string reference passed as a parameter to the calling
      * method is not empty.
      *

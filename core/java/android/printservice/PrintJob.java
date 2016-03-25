@@ -20,11 +20,14 @@ import android.annotation.FloatRange;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.content.Context;
 import android.os.RemoteException;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.text.TextUtils;
 import android.util.Log;
+import com.android.internal.util.Preconditions;
 
 /**
  * This class represents a print job from the perspective of a print
@@ -45,7 +48,12 @@ public final class PrintJob {
 
     private PrintJobInfo mCachedInfo;
 
-    PrintJob(@NonNull PrintJobInfo jobInfo, @NonNull IPrintServiceClient client) {
+    /** Context that created the object */
+    private final Context mContext;
+
+    PrintJob(@NonNull Context context, @NonNull PrintJobInfo jobInfo,
+            @NonNull IPrintServiceClient client) {
+        mContext = context;
         mCachedInfo = jobInfo;
         mPrintServiceClient = client;
         mDocument = new PrintDocument(mCachedInfo.getId(), client,
@@ -216,11 +224,10 @@ public final class PrintJob {
     }
 
     /**
-     * Blocks the print job. You should call this method if {@link
-     * #isStarted()} or {@link #isBlocked()} returns true and you need
-     * to block the print job. For example, the user has to add some
-     * paper to continue printing. To resume the print job call {@link
-     * #start()}.
+     * Blocks the print job. You should call this method if {@link #isStarted()} returns true and
+     * you need to block the print job. For example, the user has to add some paper to continue
+     * printing. To resume the print job call {@link #start()}. To change the reason call
+     * {@link #setStatus(CharSequence)}.
      *
      * @param reason The human readable, short, and translated reason why the print job is blocked.
      * @return Whether the job was blocked.
@@ -233,9 +240,7 @@ public final class PrintJob {
         PrintService.throwIfNotCalledOnMainThread();
         PrintJobInfo info = getInfo();
         final int state = info.getState();
-        if (state == PrintJobInfo.STATE_STARTED
-                || (state == PrintJobInfo.STATE_BLOCKED
-                        && !TextUtils.equals(info.getStatus(), reason))) {
+        if (state == PrintJobInfo.STATE_STARTED || state == PrintJobInfo.STATE_BLOCKED) {
             return setState(PrintJobInfo.STATE_BLOCKED, reason);
         }
         return false;
@@ -320,6 +325,9 @@ public final class PrintJob {
     /**
      * Sets the status of this print job. This should be a human readable, short, and translated
      * description of the current state of the print job.
+     * <p />
+     * This overrides any previously set status set via {@link #setStatus(CharSequence)},
+     * {@link #setStatus(int)}, {@link #block(String)}, or {@link #fail(String)},
      *
      * @param status The new status. If null the status will be empty.
      */
@@ -329,6 +337,29 @@ public final class PrintJob {
 
         try {
             mPrintServiceClient.setStatus(mCachedInfo.getId(), status);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting status for job: " + mCachedInfo.getId(), re);
+        }
+    }
+
+    /**
+     * Sets the status of this print job as a string resource.
+     * <p />
+     * This overrides any previously set status set via {@link #setStatus(CharSequence)},
+     * {@link #setStatus(int)}, {@link #block(String)}, or {@link #fail(String)},
+     * <p />
+     * To clear the status use {@link #setStatus(CharSequence) <code>setStatus(null)</code>}
+     *
+     * @param status  The new status as a String resource.
+     */
+    @MainThread
+    public void setStatus(@StringRes int status) {
+        PrintService.throwIfNotCalledOnMainThread();
+        Preconditions.checkArgument(status != 0, "status has to be != 0");
+
+        try {
+            mPrintServiceClient.setStatusRes(mCachedInfo.getId(), status,
+                    mContext.getPackageName());
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error setting status for job: " + mCachedInfo.getId(), re);
         }
