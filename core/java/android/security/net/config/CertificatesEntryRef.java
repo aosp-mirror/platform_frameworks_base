@@ -64,4 +64,8 @@ public final class CertificatesEntryRef {
     public Set<X509Certificate> findAllCertificatesByIssuerAndSignature(X509Certificate cert) {
         return mSource.findAllByIssuerAndSignature(cert);
     }
+
+    public void handleTrustStorageUpdate() {
+        mSource.handleTrustStorageUpdate();
+    }
 }

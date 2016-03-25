@@ -115,4 +115,9 @@ public class ResourceCertificateSource implements CertificateSource {
         }
         return certs;
     }
+
+    @Override
+    public void handleTrustStorageUpdate() {
+        // Nothing to do, resource sources never change.
+    }
 }
