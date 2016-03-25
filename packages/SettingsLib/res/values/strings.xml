@@ -812,4 +812,18 @@
     <!-- HTTP proxy settings. The hint text field for the hostname. -->
     <string name="proxy_hostname_hint" translatable="false">proxy.example.com</string>
 
+    <!-- Description for the screen zoom level that makes interface elements small. [CHAR LIMIT=24] -->
+    <string name="screen_zoom_summary_small">Small</string>
+    <!-- Description for the device's default screen zoom level. [CHAR LIMIT=24] -->
+    <string name="screen_zoom_summary_default">Default</string>
+    <!-- Description for the screen zoom level that makes interface elements large. [CHAR LIMIT=24] -->
+    <string name="screen_zoom_summary_large">Large</string>
+    <!-- Description for the screen zoom level that makes interface elements larger. [CHAR LIMIT=24] -->
+    <string name="screen_zoom_summary_very_large">Larger</string>
+    <!-- Description for the screen zoom level that makes interface elements largest. [CHAR LIMIT=24] -->
+    <string name="screen_zoom_summary_extremely_large">Largest</string>
+    <!-- Description for a custom screen zoom level. This shows the requested display
+         density in raw pixels per inch rather than using a relative description. [CHAR LIMIT=24] -->
+    <string name="screen_zoom_summary_custom">Custom (<xliff:g id="densityDpi" example="160">%d</xliff:g>)</string>
+
 </resources>
