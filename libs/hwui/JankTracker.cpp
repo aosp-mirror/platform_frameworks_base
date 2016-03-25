@@ -21,6 +21,8 @@
 #include <cstdio>
 #include <errno.h>
 #include <inttypes.h>
+#include <limits>
+#include <cmath>
 #include <sys/mman.h>
 
 namespace android {
@@ -202,6 +204,40 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
 
 }
 
+static bool shouldReplace(SlowFrame& existing, SlowFrame& candidate) {
+    if (candidate.whenHours - existing.whenHours >= 24) {
+        // If the old slowframe is over 24 hours older than the candidate,
+        // replace it. It's too stale
+        return true;
+    }
+    if (candidate.frametimeMs > existing.frametimeMs) {
+        return true;
+    }
+    return false;
+}
+
+void JankTracker::updateSlowest(const FrameInfo& frame) {
+    uint16_t durationMs = static_cast<uint16_t>(std::min(
+            ns2ms(frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::IntendedVsync]),
+            static_cast<nsecs_t>(std::numeric_limits<uint16_t>::max())));
+    uint16_t startHours = static_cast<uint16_t>(std::lround(
+            ns2s(frame[FrameInfoIndex::IntendedVsync]) / 3600.0f));
+    SlowFrame* toReplace = nullptr;
+    SlowFrame thisFrame{startHours, durationMs};
+    // First find the best candidate for replacement
+    for (SlowFrame& existing : mData->slowestFrames) {
+        // If we should replace the current data with the replacement candidate,
+        // it means the current data is worse than the replacement candidate
+        if (!toReplace || shouldReplace(existing, *toReplace)) {
+            toReplace = &existing;
+        }
+    }
+    // Now see if we should replace it
+    if (shouldReplace(*toReplace, thisFrame)) {
+        *toReplace = thisFrame;
+    }
+}
+
 void JankTracker::addFrame(const FrameInfo& frame) {
     mData->totalFrameCount++;
     // Fast-path for jank-free frames
@@ -214,6 +250,11 @@ void JankTracker::addFrame(const FrameInfo& frame) {
         mData->frameCounts[framebucket]++;
         return;
     }
+
+    // For slowest frames we are still interested in frames that are otherwise
+    // exempt (such as first-draw). Although those frames don't directly impact
+    // smoothness, they do impact responsiveness.
+    updateSlowest(frame);
 
     if (frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS) {
         return;
@@ -247,6 +288,11 @@ void JankTracker::dumpData(const ProfileData* data, int fd) {
     dprintf(fd, "\n90th percentile: %ums", findPercentile(data, 90));
     dprintf(fd, "\n95th percentile: %ums", findPercentile(data, 95));
     dprintf(fd, "\n99th percentile: %ums", findPercentile(data, 99));
+    dprintf(fd, "\nSlowest frames over last 24h: ");
+    for (auto& slowFrame : data->slowestFrames) {
+        if (!slowFrame.frametimeMs) continue;
+        dprintf(fd, "%ums ", slowFrame.frametimeMs);
+    }
     for (int i = 0; i < NUM_BUCKETS; i++) {
         dprintf(fd, "\nNumber %s: %u", JANK_TYPE_NAMES[i], data->jankTypeCounts[i]);
     }
