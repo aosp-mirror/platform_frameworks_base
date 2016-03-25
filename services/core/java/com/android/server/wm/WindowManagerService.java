@@ -5736,7 +5736,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowEnableCircularEmulatorDisplayOverlay)
                 && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false)
-                && Build.HARDWARE.contains("goldfish")) {
+                && Build.IS_EMULATOR) {
             mH.sendMessage(mH.obtainMessage(H.SHOW_EMULATOR_DISPLAY_OVERLAY));
         }
     }
