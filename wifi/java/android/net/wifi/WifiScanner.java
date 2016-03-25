@@ -277,6 +277,12 @@ public class WifiScanner {
          * non-zero => scan was truncated, so results may not be complete
          */
         private int mFlags;
+        /**
+         * Indicates the buckets that were scanned to generate these results.
+         * This is not relevant to WifiScanner API users and is used internally.
+         * {@hide}
+         */
+        private int mBucketsScanned;
         /** all scan results discovered in this scan, sorted by timestamp in ascending order */
         private ScanResult mResults[];
 
@@ -288,9 +294,18 @@ public class WifiScanner {
             mResults = results;
         }
 
+        /** {@hide} */
+        public ScanData(int id, int flags, int bucketsScanned, ScanResult[] results) {
+            mId = id;
+            mFlags = flags;
+            mBucketsScanned = bucketsScanned;
+            mResults = results;
+        }
+
         public ScanData(ScanData s) {
             mId = s.mId;
             mFlags = s.mFlags;
+            mBucketsScanned = s.mBucketsScanned;
             mResults = new ScanResult[s.mResults.length];
             for (int i = 0; i < s.mResults.length; i++) {
                 ScanResult result = s.mResults[i];
@@ -321,6 +336,7 @@ public class WifiScanner {
             if (mResults != null) {
                 dest.writeInt(mId);
                 dest.writeInt(mFlags);
+                dest.writeInt(mBucketsScanned);
                 dest.writeInt(mResults.length);
                 for (int i = 0; i < mResults.length; i++) {
                     ScanResult result = mResults[i];
@@ -337,12 +353,13 @@ public class WifiScanner {
                     public ScanData createFromParcel(Parcel in) {
                         int id = in.readInt();
                         int flags = in.readInt();
+                        int bucketsScanned = in.readInt();
                         int n = in.readInt();
                         ScanResult results[] = new ScanResult[n];
                         for (int i = 0; i < n; i++) {
                             results[i] = ScanResult.CREATOR.createFromParcel(in);
                         }
-                        return new ScanData(id, flags, results);
+                        return new ScanData(id, flags, bucketsScanned, results);
                     }
 
                     public ScanData[] newArray(int size) {
