@@ -114,4 +114,15 @@ public abstract class ActivityManagerInternal {
      *               values.
      */
     public abstract void notifyAppTransitionStarting(int reason);
+
+    /**
+     * Callback for window manager to let activity manager know that the app transition was
+     * cancelled.
+     */
+    public abstract void notifyAppTransitionCancelled();
+
+    /**
+     * Callback for window manager to let activity manager know that the app transition is finished.
+     */
+    public abstract void notifyAppTransitionFinished();
 }

@@ -202,6 +202,8 @@ import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
 import static android.view.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
@@ -799,7 +801,13 @@ public class WindowManagerService extends IWindowManager.Stub
             = new WindowManagerInternal.AppTransitionListener() {
 
         @Override
+        public void onAppTransitionCancelledLocked() {
+            mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_CANCELLED);
+        }
+
+        @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
+            mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_FINISHED);
             AppWindowToken atoken = findAppWindowToken(token);
             if (atoken == null) {
                 return;
@@ -2921,9 +2929,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         final boolean freeformResizing = win.isDragResizing()
-                && win.getResizeMode() == WindowState.DRAG_RESIZE_MODE_FREEFORM;
+                && win.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
         final boolean dockedResizing = win.isDragResizing()
-                && win.getResizeMode() == WindowState.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+                && win.getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
         result |= freeformResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
         result |= dockedResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
         if (win.isAnimatingWithSavedSurface()) {
@@ -4025,8 +4033,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 wAppAnimator.thumbnail.destroy();
             }
             wAppAnimator.thumbnail = tAppAnimator.thumbnail;
-            wAppAnimator.thumbnailX = tAppAnimator.thumbnailX;
-            wAppAnimator.thumbnailY = tAppAnimator.thumbnailY;
             wAppAnimator.thumbnailLayer = tAppAnimator.thumbnailLayer;
             wAppAnimator.thumbnailAnimation = tAppAnimator.thumbnailAnimation;
             tAppAnimator.thumbnail = null;
@@ -4987,6 +4993,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 task.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }
+        }
+    }
+
+    /**
+     * Puts a specific task into docked drag resizing mode. See {@link DragResizeMode}.
+     *
+     * @param taskId The id of the task to put into drag resize mode.
+     * @param resizing Whether to put the task into drag resize mode.
+     */
+    public void setTaskDockedResizing(int taskId, boolean resizing) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                throw new IllegalArgumentException("setTaskDockedResizing: taskId " + taskId
+                        + " not found.");
+            }
+            task.setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
         }
     }
 
@@ -7695,7 +7718,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
         public static final int NOTIFY_APP_TRANSITION_STARTING = 47;
-        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 48;
+        public static final int NOTIFY_APP_TRANSITION_CANCELLED = 48;
+        public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
+        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -8274,6 +8299,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case NOTIFY_APP_TRANSITION_STARTING: {
                     mAmInternal.notifyAppTransitionStarting(msg.arg1);
+                }
+                break;
+                case NOTIFY_APP_TRANSITION_CANCELLED: {
+                    mAmInternal.notifyAppTransitionCancelled();
+                }
+                break;
+                case NOTIFY_APP_TRANSITION_FINISHED: {
+                    mAmInternal.notifyAppTransitionFinished();
                 }
                 break;
                 case NOTIFY_STARTING_WINDOW_DRAWN: {

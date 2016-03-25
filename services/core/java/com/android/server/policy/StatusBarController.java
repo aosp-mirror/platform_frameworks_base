@@ -29,6 +29,8 @@ import android.view.animation.Interpolator;
 import android.view.animation.TranslateAnimation;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import static android.view.WindowManagerInternal.*;
 
@@ -99,6 +101,20 @@ public class StatusBarController extends BarController {
                         Slog.e(mTag, "RemoteException when app transition is cancelled", e);
                         // re-acquire status bar service next time it is needed.
                         mStatusBarService = null;
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onAppTransitionFinishedLocked(IBinder token) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    StatusBarManagerInternal statusbar = LocalServices.getService(
+                            StatusBarManagerInternal.class);
+                    if (statusbar != null) {
+                        statusbar.appTransitionFinished();
                     }
                 }
             });

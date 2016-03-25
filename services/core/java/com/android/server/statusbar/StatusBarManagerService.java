@@ -214,6 +214,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 } catch (RemoteException ex) {}
             }
         }
+
+        public void appTransitionFinished() {
+            enforceStatusBarService();
+            if (mBar != null) {
+                try {
+                    mBar.appTransitionFinished();
+                } catch (RemoteException ex) {}
+            }
+        }
     };
 
     // ================================================================================

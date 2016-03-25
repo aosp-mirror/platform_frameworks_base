@@ -263,6 +263,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".stackdivider.ForcedResizableInfoActivity"
+            android:theme="@style/ForcedResizableTheme"
+            android:excludeFromRecents="true"
+            android:stateNotNeeded="true"
+            android:exported="false">
+        </activity>
+
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
                   android:process=":screenshot"

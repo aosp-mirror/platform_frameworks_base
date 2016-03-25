@@ -227,6 +227,10 @@ public class WindowLayersController {
         w.mLayer = layer;
         w.mWinAnimator.mAnimLayer = w.mLayer + w.getAnimLayerAdjustment() +
                     getSpecialWindowAnimLayerAdjustment(w);
+        if (w.mAppToken != null && w.mAppToken.mAppAnimator.thumbnailForceAboveLayer > 0
+                && w.mWinAnimator.mAnimLayer > w.mAppToken.mAppAnimator.thumbnailForceAboveLayer) {
+            w.mAppToken.mAppAnimator.thumbnailForceAboveLayer = w.mWinAnimator.mAnimLayer;
+        }
     }
 
     void dump(PrintWriter pw, String s) {
