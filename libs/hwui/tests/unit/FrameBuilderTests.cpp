@@ -344,8 +344,9 @@ RENDERTHREAD_TEST(FrameBuilder, textStyle) {
             EXPECT_TRUE(stroke.contains(fill));
             EXPECT_FALSE(fill.contains(stroke));
 
+            // outset by half the stroke width
             Rect outsetFill(fill);
-            outsetFill.outset(10);
+            outsetFill.outset(5);
             EXPECT_EQ(stroke, outsetFill);
         }
     };

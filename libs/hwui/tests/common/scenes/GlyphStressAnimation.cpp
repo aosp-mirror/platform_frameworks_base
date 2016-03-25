@@ -42,7 +42,7 @@ public:
     }
 
     void doFrame(int frameNr) override {
-        std::unique_ptr<uint16_t[]> text = TestUtils::utf8ToUtf16(
+        std::unique_ptr<uint16_t[]> text = TestUtils::asciiToUtf16(
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
         ssize_t textLength = 26 * 2;
 

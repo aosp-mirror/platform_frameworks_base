@@ -30,6 +30,7 @@ class ANDROID_API Paint : public SkPaint {
 public:
     Paint();
     Paint(const Paint& paint);
+    Paint(const SkPaint& paint);
     ~Paint();
 
     Paint& operator=(const Paint& other);
