@@ -17,12 +17,12 @@
 package com.android.server.display;
 
 import android.content.res.Resources;
-import android.os.Build;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -31,7 +31,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
@@ -391,7 +390,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                             | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
                     if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
-                            || (Build.HARDWARE.contains("goldfish")
+                            || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
