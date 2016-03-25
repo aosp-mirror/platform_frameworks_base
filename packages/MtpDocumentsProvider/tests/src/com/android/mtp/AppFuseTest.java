@@ -56,7 +56,8 @@ public class AppFuseTest extends AndroidTestCase {
                     }
                 });
         appFuse.mount(storageManager);
-        final ParcelFileDescriptor fd = appFuse.openFile(INODE);
+        final ParcelFileDescriptor fd = appFuse.openFile(
+                INODE, ParcelFileDescriptor.MODE_READ_ONLY);
         fd.close();
         appFuse.close();
     }
@@ -67,11 +68,21 @@ public class AppFuseTest extends AndroidTestCase {
         final AppFuse appFuse = new AppFuse("test", new TestCallback());
         appFuse.mount(storageManager);
         try {
-            appFuse.openFile(INODE);
+            appFuse.openFile(INODE, ParcelFileDescriptor.MODE_READ_ONLY);
             fail();
-        } catch (Throwable t) {
-            assertTrue(t instanceof FileNotFoundException);
-        }
+        } catch (FileNotFoundException exp) {}
+        appFuse.close();
+    }
+
+    public void testOpenFile_illegalMode() throws IOException {
+        final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
+        final int INODE = 10;
+        final AppFuse appFuse = new AppFuse("test", new TestCallback());
+        appFuse.mount(storageManager);
+        try {
+            appFuse.openFile(INODE, ParcelFileDescriptor.MODE_READ_WRITE);
+            fail();
+        } catch (IllegalArgumentException exp) {}
         appFuse.close();
     }
 
@@ -105,12 +116,78 @@ public class AppFuseTest extends AndroidTestCase {
                     }
                 });
         appFuse.mount(storageManager);
-        final ParcelFileDescriptor fd = appFuse.openFile(fileInode);
+        final ParcelFileDescriptor fd = appFuse.openFile(
+                fileInode, ParcelFileDescriptor.MODE_READ_ONLY);
         try (final ParcelFileDescriptor.AutoCloseInputStream stream =
                 new ParcelFileDescriptor.AutoCloseInputStream(fd)) {
             final byte[] buffer = new byte[1024];
             final int size = stream.read(buffer, 0, buffer.length);
             assertEquals(5, size);
+        }
+        appFuse.close();
+    }
+
+    public void testWriteFile() throws IOException {
+        final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
+        final int INODE = 10;
+        final byte[] resultBytes = new byte[5];
+        final AppFuse appFuse = new AppFuse(
+                "test",
+                new TestCallback() {
+                    @Override
+                    public long getFileSize(int inode) throws FileNotFoundException {
+                        if (inode != INODE) {
+                            throw new FileNotFoundException();
+                        }
+                        return resultBytes.length;
+                    }
+
+                    @Override
+                    public int writeObjectBytes(int inode, long offset, int size, byte[] bytes) {
+                        for (int i = 0; i < size; i++) {
+                            resultBytes[(int)(offset + i)] = bytes[i];
+                        }
+                        return size;
+                    }
+                });
+        appFuse.mount(storageManager);
+        final ParcelFileDescriptor fd = appFuse.openFile(
+                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY);
+        try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
+            stream.write('a');
+            stream.write('b');
+            stream.write('c');
+            stream.write('d');
+            stream.write('e');
+        }
+        final byte[] BYTES = new byte[] { 'a', 'b', 'c', 'd', 'e' };
+        assertTrue(Arrays.equals(BYTES, resultBytes));
+        appFuse.close();
+    }
+
+    public void testWriteFile_writeError() throws IOException {
+        final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
+        final int INODE = 10;
+        final AppFuse appFuse = new AppFuse(
+                "test",
+                new TestCallback() {
+                    @Override
+                    public long getFileSize(int inode) throws FileNotFoundException {
+                        if (inode != INODE) {
+                            throw new FileNotFoundException();
+                        }
+                        return 5;
+                    }
+                });
+        appFuse.mount(storageManager);
+        final ParcelFileDescriptor fd = appFuse.openFile(
+                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY);
+        try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
+            stream.write('a');
+            fail();
+        } catch (IOException e) {
         }
         appFuse.close();
     }
@@ -123,6 +200,12 @@ public class AppFuseTest extends AndroidTestCase {
 
         @Override
         public long readObjectBytes(int inode, long offset, long size, byte[] bytes)
+                throws IOException {
+            throw new IOException();
+        }
+
+        @Override
+        public int writeObjectBytes(int inode, long offset, int size, byte[] bytes)
                 throws IOException {
             throw new IOException();
         }
