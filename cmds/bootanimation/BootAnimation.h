@@ -76,19 +76,27 @@ private:
             bool playUntilComplete;
             float backgroundColor[3];
             FileMap* audioFile;
+            Animation* animation;
         };
         int fps;
         int width;
         int height;
         Vector<Part> parts;
+        String8 audioConf;
+        String8 fileName;
+        ZipFileRO* zip;
     };
 
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
     status_t initTexture(const Animation::Frame& frame);
     bool android();
-    bool readFile(const char* name, String8& outString);
     bool movie();
     void drawTime(const Texture& clockTex, const int yPos);
+    Animation* loadAnimation(const String8&);
+    bool playAnimation(const Animation&);
+    void releaseAnimation(Animation*) const;
+    bool parseAnimationDesc(Animation&);
+    bool preloadZip(Animation &animation);
 
     void checkExit();
 
@@ -104,8 +112,9 @@ private:
     EGLDisplay  mSurface;
     sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
-    ZipFileRO   *mZip;
     bool        mClockEnabled;
+    String8     mZipFileName;
+    SortedVector<String8> mLoadedFiles;
 };
 
 // ---------------------------------------------------------------------------
