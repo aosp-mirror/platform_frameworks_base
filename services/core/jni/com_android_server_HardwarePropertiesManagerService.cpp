@@ -36,7 +36,8 @@ namespace android {
 enum {
     TEMPERATURE_CURRENT = 0,
     TEMPERATURE_THROTTLING = 1,
-    TEMPERATURE_SHUTDOWN = 2
+    TEMPERATURE_SHUTDOWN = 2,
+    TEMPERATURE_THROTTLING_BELOW_VR_MIN = 3
 };
 
 static struct {
@@ -125,6 +126,13 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
                                     values[length++] = gUndefinedTemperature;
                                 } else {
                                     values[length++] = list[i].shutdown_threshold;
+                                }
+                                break;
+                            case TEMPERATURE_THROTTLING_BELOW_VR_MIN:
+                                if (list[i].vr_throttling_threshold == UNKNOWN_TEMPERATURE) {
+                                    values[length++] = gUndefinedTemperature;
+                                } else {
+                                    values[length++] = list[i].vr_throttling_threshold;
                                 }
                                 break;
                         }
