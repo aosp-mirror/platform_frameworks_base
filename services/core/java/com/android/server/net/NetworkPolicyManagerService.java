@@ -2803,7 +2803,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
         try {
-            mNetworkManager.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
+            mNetworkManager.setUidMeteredNetworkBlacklist(uid, rejectOnQuotaInterfaces);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting uid rules", e);
         } catch (RemoteException e) {
