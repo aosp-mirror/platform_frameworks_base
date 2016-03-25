@@ -20,7 +20,6 @@ import static com.android.server.pm.Installer.DEXOPT_OTA;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_AB_OTA;
 
 import android.content.Context;
 import android.content.pm.IOtaDexopt;
@@ -144,7 +143,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
 
         mPackageDexOptimizer.performDexOpt(nextPackage, null /* ISAs */, false /* useProfiles */,
-                getCompilerFilterForReason(REASON_AB_OTA));
+                getCompilerFilterForReason(PackageManagerService.REASON_AB_OTA));
     }
 
     private void moveAbArtifacts(Installer installer) {

@@ -24,17 +24,6 @@ import dalvik.system.DexFile;
  * Manage (retrieve) mappings from compilation reason to compilation filter.
  */
 class PackageManagerServiceCompilerMapping {
-    // Compilation reasons.
-    public static final int REASON_BOOT = 0;
-    public static final int REASON_INSTALL = 1;
-    public static final int REASON_BACKGROUND_DEXOPT = 2;
-    public static final int REASON_AB_OTA = 3;
-    public static final int REASON_NON_SYSTEM_LIBRARY = 4;
-    public static final int REASON_SHARED_APK = 5;
-    public static final int REASON_FORCED_DEXOPT = 6;
-
-    private static final int REASON_LAST = REASON_FORCED_DEXOPT;
-
     // Names for compilation reasons.
     static final String REASON_STRINGS[] = {
             "boot", "install", "bg-dexopt", "ab-ota", "nsys-library", "shared-apk", "forced-dexopt"
@@ -42,7 +31,7 @@ class PackageManagerServiceCompilerMapping {
 
     // Static block to ensure the strings array is of the right length.
     static {
-        if (REASON_LAST + 1 != REASON_STRINGS.length) {
+        if (PackageManagerService.REASON_LAST + 1 != REASON_STRINGS.length) {
             throw new IllegalStateException("REASON_STRINGS not correct");
         }
     }
@@ -67,8 +56,8 @@ class PackageManagerServiceCompilerMapping {
 
         // Ensure that some reasons are not mapped to profile-guided filters.
         switch (reason) {
-            case REASON_SHARED_APK:
-            case REASON_FORCED_DEXOPT:
+            case PackageManagerService.REASON_SHARED_APK:
+            case PackageManagerService.REASON_FORCED_DEXOPT:
                 if (DexFile.isProfileGuidedCompilerFilter(sysPropValue)) {
                     throw new IllegalStateException("\"" + sysPropValue + "\" is profile-guided, "
                             + "but not allowed for " + REASON_STRINGS[reason]);
@@ -86,7 +75,7 @@ class PackageManagerServiceCompilerMapping {
         // overview. Store the exceptions here.
         RuntimeException toThrow = null;
 
-        for (int reason = 0; reason <= REASON_LAST; reason++) {
+        for (int reason = 0; reason <= PackageManagerService.REASON_LAST; reason++) {
             try {
                 // Check that the system property name is legal.
                 String sysPropName = getSystemPropertyName(reason);

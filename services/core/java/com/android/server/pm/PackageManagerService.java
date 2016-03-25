@@ -94,11 +94,6 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getFullCompilerFilter;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_BOOT;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_FORCED_DEXOPT;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_INSTALL;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_NON_SYSTEM_LIBRARY;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_SHARED_APK;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
@@ -447,6 +442,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         sBrowserIntent.addCategory(Intent.CATEGORY_BROWSABLE);
         sBrowserIntent.setData(Uri.parse("http:"));
     }
+
+    // Compilation reasons.
+    public static final int REASON_BOOT = 0;
+    public static final int REASON_INSTALL = 1;
+    public static final int REASON_BACKGROUND_DEXOPT = 2;
+    public static final int REASON_AB_OTA = 3;
+    public static final int REASON_NON_SYSTEM_LIBRARY = 4;
+    public static final int REASON_SHARED_APK = 5;
+    public static final int REASON_FORCED_DEXOPT = 6;
+
+    public static final int REASON_LAST = REASON_FORCED_DEXOPT;
 
     final ServiceThread mHandlerThread;
 
