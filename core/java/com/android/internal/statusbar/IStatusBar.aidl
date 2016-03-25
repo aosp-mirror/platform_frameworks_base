@@ -88,6 +88,11 @@ oneway interface IStatusBar
      */
     void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
 
+    /**
+     * Notifies the status bar that an app transition is done.
+     */
+    void appTransitionFinished();
+
     void showAssistDisclosure();
     void startAssist(in Bundle args);
 

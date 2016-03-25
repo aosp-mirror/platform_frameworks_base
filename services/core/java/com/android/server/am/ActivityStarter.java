@@ -362,7 +362,7 @@ class ActivityStarter {
 
         boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
                 requestCode, callingPid, callingUid, callingPackage, ignoreTargetSecurity, callerApp,
-                resultRecord, resultStack);
+                resultRecord, resultStack, options);
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
@@ -547,12 +547,18 @@ class ActivityStarter {
         }
 
         if (startedActivityStackId == DOCKED_STACK_ID && prevFocusedStackId == HOME_STACK_ID) {
-            // We launch an activity while being in home stack, which means either launcher or
-            // recents into docked stack. We don't want the launched activity to be alone in a
-            // docked stack, so we want to immediately launch recents too.
-            if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
-            mWindowManager.showRecentApps();
-            return;
+            final ActivityStack homeStack = mSupervisor.getStack(HOME_STACK_ID);
+            final ActivityRecord topActivityHomeStack = homeStack != null
+                    ? homeStack.topRunningActivityLocked() : null;
+            if (topActivityHomeStack == null
+                    || topActivityHomeStack.mActivityType != RECENTS_ACTIVITY_TYPE) {
+                // We launch an activity while being in home stack, which means either launcher or
+                // recents into docked stack. We don't want the launched activity to be alone in a
+                // docked stack, so we want to immediately launch recents too.
+                if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
+                mWindowManager.showRecentApps();
+                return;
+            }
         }
 
         if (startedActivityStackId == PINNED_STACK_ID
@@ -879,6 +885,9 @@ class ActivityStarter {
 
         ActivityRecord intentActivity = getReusableIntentActivity();
 
+        final int preferredLaunchStackId =
+                (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
+
         if (intentActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
             // still needs to be a lock task mode violation since the task gets cleared out and
@@ -938,6 +947,8 @@ class ActivityStarter {
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
                 // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
                 resumeTargetStackIfNeeded();
+                mSupervisor.showNonResizeableDockToastIfNeeded(mStartActivity.task,
+                        preferredLaunchStackId, mTargetStack.mStackId);
                 return START_TASK_TO_FRONT;
             }
         }
@@ -977,6 +988,8 @@ class ActivityStarter {
             }
             top.deliverNewIntentLocked(
                     mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+            mSupervisor.showNonResizeableDockToastIfNeeded(mStartActivity.task,
+                    preferredLaunchStackId, mTargetStack.mStackId);
             return START_DELIVERED_TO_TOP;
         }
 
@@ -1063,8 +1076,6 @@ class ActivityStarter {
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        final int preferredLaunchStackId =
-                (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
         mSupervisor.showNonResizeableDockToastIfNeeded(
                 mStartActivity.task, preferredLaunchStackId, mTargetStack.mStackId);
 
@@ -1297,7 +1308,10 @@ class ActivityStarter {
         // same component, then instead of launching bring that one to the front.
         putIntoExistingTask &= mInTask == null && mStartActivity.resultTo == null;
         ActivityRecord intentActivity = null;
-        if (putIntoExistingTask) {
+        if (mOptions != null && mOptions.getLaunchTaskId() != -1) {
+            final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
+            intentActivity = task != null ? task.getTopActivity() : null;
+        } else if (putIntoExistingTask) {
             // See if there is a task to bring to the front.  If this is a SINGLE_INSTANCE
             // activity, there can be one and only one instance of it in the history, and it is
             // always in its own unique task, so we do a special search.

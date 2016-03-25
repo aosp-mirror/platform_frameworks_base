@@ -77,8 +77,6 @@ public class AppWindowAnimator {
     // requires that the duration of the two animations are the same.
     SurfaceControl thumbnail;
     int thumbnailTransactionSeq;
-    int thumbnailX;
-    int thumbnailY;
     int thumbnailLayer;
     int thumbnailForceAboveLayer;
     Animation thumbnailAnimation;
@@ -254,7 +252,6 @@ public class AppWindowAnimator {
         thumbnailTransformation.clear();
         final long animationFrameTime = getAnimationFrameTime(thumbnailAnimation, currentTime);
         thumbnailAnimation.getTransformation(animationFrameTime, thumbnailTransformation);
-        thumbnailTransformation.getMatrix().preTranslate(thumbnailX, thumbnailY);
 
         ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
@@ -288,6 +285,7 @@ public class AppWindowAnimator {
         }
         thumbnail.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
                 tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
+        thumbnail.setWindowCrop(thumbnailTransformation.getClipRect());
     }
 
     /**
@@ -461,8 +459,6 @@ public class AppWindowAnimator {
         }
         if (thumbnail != null) {
             pw.print(prefix); pw.print("thumbnail="); pw.print(thumbnail);
-                    pw.print(" x="); pw.print(thumbnailX);
-                    pw.print(" y="); pw.print(thumbnailY);
                     pw.print(" layer="); pw.println(thumbnailLayer);
             pw.print(prefix); pw.print("thumbnailAnimation="); pw.println(thumbnailAnimation);
             pw.print(prefix); pw.print("thumbnailTransformation=");

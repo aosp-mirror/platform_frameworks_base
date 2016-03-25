@@ -40,6 +40,18 @@
         <item name="android:windowBackground">@android:color/black</item>
     </style>
 
+    <!-- Theme used for the activity that shows when the system forced an app to be resizable -->
+    <style name="ForcedResizableTheme" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@drawable/forced_resizable_background</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.ForcedResizable</item>
+    </style>
+
+    <style name="Animation.ForcedResizable" parent="@android:style/Animation">
+        <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
+    </style>
+
     <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
     </style>

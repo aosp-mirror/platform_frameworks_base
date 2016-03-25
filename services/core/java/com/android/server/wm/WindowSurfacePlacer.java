@@ -19,6 +19,7 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -31,13 +32,21 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMEN
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerService.H.*;
-import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
-import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.H.DO_TRAVERSAL;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
+import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
+import static com.android.server.wm.WindowManagerService.H.REPORT_WINDOWS_CHANGE;
+import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
+import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
+import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
+import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
+import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
@@ -688,7 +697,8 @@ class WindowSurfacePlacer {
                             w.getTask().mStack.isAdjustedForMinimizedDockedStack();
                     if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                             && !w.isDragResizing() && !adjustedForMinimizedDockedStack
-                            && (task == null || !w.getTask().mStack.getFreezeMovementAnimations())) {
+                            && (task == null || !w.getTask().mStack.getFreezeMovementAnimations())
+                            && !w.mWinAnimator.mLastHidden) {
                         winAnimator.setMoveAnimation(left, top);
                     } else if (w.mAttrs.type  == TYPE_DOCK_DIVIDER &&
                             displayContent.getDockedDividerController().isAdjustingForIme()) {
@@ -705,11 +715,11 @@ class WindowSurfacePlacer {
                         w.mClient.moved(left, top);
                     } catch (RemoteException e) {
                     }
+                    w.mMovedByResize = false;
                 }
 
                 //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
                 w.mContentChanged = false;
-                w.mMovedByResize = false;
 
                 // Moved from updateWindowsAndWallpaperLocked().
                 if (w.mHasSurface) {
@@ -1224,6 +1234,10 @@ class WindowSurfacePlacer {
             if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
                 createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
             }
+            if (mService.mAppTransition.getAppTransition()
+                    == AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS) {
+                appAnimator.startProlongAnimation(PROLONG_ANIMATION_AT_START);
+            }
         }
         return topOpeningApp;
     }
@@ -1562,12 +1576,13 @@ class WindowSurfacePlacer {
                 WindowState win = appToken.findMainWindow();
                 Rect appRect = win != null ? win.getContentFrameLw() :
                         new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
+                Rect insets = win != null ? win.mContentInsets : null;
                 // For the new aspect-scaled transition, we want it to always show
                 // above the animating opening/closing window, and we want to
                 // synchronize its thumbnail surface with the surface for the
                 // open/close animation (only on the way down)
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
-                        thumbnailHeader, taskId);
+                        insets, thumbnailHeader, taskId);
                 openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();
@@ -1582,8 +1597,6 @@ class WindowSurfacePlacer {
             openingAppAnimator.thumbnailLayer = openingLayer;
             openingAppAnimator.thumbnailAnimation = anim;
             mService.mAppTransition.getNextAppTransitionStartRect(taskId, mTmpStartRect);
-            openingAppAnimator.thumbnailX = mTmpStartRect.left;
-            openingAppAnimator.thumbnailY = mTmpStartRect.top;
         } catch (Surface.OutOfResourcesException e) {
             Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w="
                     + dirty.width() + " h=" + dirty.height(), e);

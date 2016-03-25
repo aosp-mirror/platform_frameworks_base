@@ -41,6 +41,7 @@ public class Divider extends SystemUI {
     private DockDividerVisibilityListener mDockDividerVisibilityListener;
     private boolean mVisible = false;
     private boolean mMinimized = false;
+    private ForcedResizableInfoActivityController mForcedResizableController;
 
     @Override
     public void start() {
@@ -52,6 +53,7 @@ public class Divider extends SystemUI {
         mDockDividerVisibilityListener = new DockDividerVisibilityListener();
         SystemServicesProxy ssp = Recents.getSystemServices();
         ssp.registerDockedStackListener(mDockDividerVisibilityListener);
+        mForcedResizableController = new ForcedResizableInfoActivityController(mContext);
     }
 
     @Override
@@ -117,6 +119,15 @@ public class Divider extends SystemUI {
         });
     }
 
+    private void notifyDockedStackExistsChanged(final boolean exists) {
+        mView.post(new Runnable() {
+            @Override
+            public void run() {
+                mForcedResizableController.notifyDockedStackExistsChanged(exists);
+            }
+        });
+    }
+
     class DockDividerVisibilityListener extends IDockedStackListener.Stub {
 
         @Override
@@ -126,6 +137,7 @@ public class Divider extends SystemUI {
 
         @Override
         public void onDockedStackExistsChanged(boolean exists) throws RemoteException {
+            notifyDockedStackExistsChanged(exists);
         }
 
         @Override

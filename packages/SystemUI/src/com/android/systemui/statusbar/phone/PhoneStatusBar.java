@@ -120,6 +120,7 @@ import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
@@ -4310,6 +4311,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void appTransitionCancelled() {
         mIconController.appTransitionCancelled();
+        EventBus.getDefault().send(new AppTransitionFinishedEvent());
     }
 
     @Override
@@ -4323,6 +4325,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mIconPolicy != null) {
             mIconPolicy.appTransitionStarting(startTime, duration);
         }
+    }
+
+    @Override
+    public void appTransitionFinished() {
+        EventBus.getDefault().send(new AppTransitionFinishedEvent());
     }
 
     @Override

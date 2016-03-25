@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
@@ -379,7 +380,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
     private void endDragLocked() {
         mResizing = false;
-        mTask.setDragResizing(false);
+        mTask.setDragResizing(false, DRAG_RESIZE_MODE_FREEFORM);
     }
 
     /** Returns true if the move operation should be ended. */
@@ -409,7 +410,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 bottom = Math.max(top + mMinVisibleHeight, bottom + deltaY);
             }
             mWindowDragBounds.set(left, top, right, bottom);
-            mTask.setDragResizing(true);
+            mTask.setDragResizing(true, DRAG_RESIZE_MODE_FREEFORM);
             return false;
         }
 

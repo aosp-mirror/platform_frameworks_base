@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -28,9 +29,14 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IRemoteCallback;
+import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,9 +44,11 @@ import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
+import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
@@ -52,6 +60,7 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -68,6 +77,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
@@ -484,31 +494,30 @@ public class RecentsView extends FrameLayout {
             event.taskView.setLeftTopRightBottom(taskViewRect.left, taskViewRect.top,
                     taskViewRect.right, taskViewRect.bottom);
 
-            // Remove the task view after it is docked
-            mTaskStackView.updateLayoutAlgorithm(false /* boundScroll */);
-            stackLayout.getStackTransform(event.task, stackScroller.getStackScroll(), tmpTransform,
-                    null);
-            tmpTransform.alpha = 0;
-            tmpTransform.scale = 1f;
-            tmpTransform.rect.set(taskViewRect);
-            mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
-                    new AnimationProps(125, Interpolators.ALPHA_OUT,
-                            new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    // Dock the task and launch it
-                                    SystemServicesProxy ssp = Recents.getSystemServices();
-                                    ssp.startTaskInDockedMode(getContext(), event.taskView,
-                                            event.task.key.id, dockState.createMode);
+            final OnAnimationStartedListener startedListener = new OnAnimationStartedListener() {
+                @Override
+                public void onAnimationStarted() {
+                    EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
+                    mTaskStackView.getStack().removeTask(event.task, AnimationProps.IMMEDIATE,
+                            true /* fromDockGesture */);
+                }
+            };
 
-                                    // Animate the stack accordingly
-                                    AnimationProps stackAnim = new AnimationProps(
-                                            TaskStackView.DEFAULT_SYNC_STACK_DURATION,
-                                            Interpolators.FAST_OUT_SLOW_IN);
-                                    mTaskStackView.getStack().removeTask(event.task, stackAnim,
-                                            true /* fromDockGesture */);
-                                }
-                            }));
+            // Dock the task and launch it
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);
+            final Rect taskRect = getTaskRect(event.taskView);
+            IAppTransitionAnimationSpecsFuture future = mTransitionHelper.getAppTransitionFuture(
+                    new AnimationSpecComposer() {
+                        @Override
+                        public List<AppTransitionAnimationSpec> composeSpecs() {
+                            return mTransitionHelper.composeDockAnimationSpec(
+                                    event.taskView, taskRect);
+                        }
+                    });
+            ssp.overridePendingAppTransitionMultiThumbFuture(future,
+                    mTransitionHelper.wrapStartedListener(startedListener),
+                    true /* scaleUp */);
 
             MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP);
         } else {
@@ -516,6 +525,15 @@ public class RecentsView extends FrameLayout {
             updateVisibleDockRegions(null, true /* isDefaultDockState */, -1,
                     true /* animateAlpha */, false /* animateBounds */);
         }
+    }
+
+    private Rect getTaskRect(TaskView taskView) {
+        int[] location = taskView.getLocationOnScreen();
+        int viewX = location[0];
+        int viewY = location[1];
+        return new Rect(viewX, viewY,
+                (int) (viewX + taskView.getWidth() * taskView.getScaleX()),
+                (int) (viewY + taskView.getHeight() * taskView.getScaleY()));
     }
 
     public final void onBusEvent(DraggingInRecentsEvent event) {
