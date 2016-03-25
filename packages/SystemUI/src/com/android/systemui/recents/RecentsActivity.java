@@ -391,7 +391,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        EventBus.getDefault().post(new ConfigurationChangedEvent());
+        EventBus.getDefault().send(new ConfigurationChangedEvent());
     }
 
     @Override

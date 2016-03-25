@@ -246,8 +246,8 @@ public class RecentsTaskLoadPlan {
 
             if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
                 if (task.icon == null) {
-                    task.icon = loader.getAndUpdateActivityIcon(taskKey, task.taskDescription,
-                            res, true);
+                    task.icon = loader.getAndUpdateActivityIcon(taskKey, task.taskDescription, res,
+                            true);
                 }
             }
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
