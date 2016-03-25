@@ -882,7 +882,12 @@ final class SystemServiceRegistry {
         public final T getService(ContextImpl ctx) {
             synchronized (StaticApplicationContextServiceFetcher.this) {
                 if (mCachedInstance == null) {
-                    mCachedInstance = createService(ctx.getApplicationContext());
+                    Context appContext = ctx.getApplicationContext();
+                    // If the application context is null, we're either in the system process or
+                    // it's the application context very early in app initialization. In both these
+                    // cases, the passed-in ContextImpl will not be freed, so it's safe to pass it
+                    // to the service. http://b/27532714 .
+                    mCachedInstance = createService(appContext != null ? appContext : ctx);
                 }
                 return mCachedInstance;
             }
