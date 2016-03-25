@@ -42,6 +42,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
@@ -54,6 +55,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -102,6 +104,8 @@ public class LauncherAppsService extends SystemService {
 
         private final MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
+        private final Handler mCallbackHandler;
+
         public LauncherAppsImpl(Context context) {
             mContext = context;
             mPm = mContext.getPackageManager();
@@ -109,6 +113,7 @@ public class LauncherAppsService extends SystemService {
             mShortcutServiceInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
+            mCallbackHandler = BackgroundThread.getHandler();
         }
 
         @VisibleForTesting
@@ -165,7 +170,7 @@ public class LauncherAppsService extends SystemService {
          * Register a receiver to watch for package broadcasts
          */
         private void startWatchingPackageBroadcasts() {
-            mPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+            mPackageMonitor.register(mContext, UserHandle.ALL, true, mCallbackHandler);
         }
 
         /**
@@ -550,8 +555,9 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
+        @VisibleForTesting
         void postToPackageMonitorHandler(Runnable r) {
-            mPackageMonitor.getRegisteredHandler().post(r);
+            mCallbackHandler.post(r);
         }
 
         private class MyPackageMonitor extends PackageMonitor implements ShortcutChangeListener {
