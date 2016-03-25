@@ -90,6 +90,17 @@ public final class RemoteConnection {
                 int connectionCapabilities) {}
 
         /**
+         * Indicates that the call properties of this {@code RemoteConnection} have changed.
+         * See {@link #getConnectionProperties()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param connectionProperties The new properties of the {@code RemoteConnection}.
+         */
+        public void onConnectionPropertiesChanged(
+                RemoteConnection connection,
+                int connectionProperties) {}
+
+        /**
          * Invoked when the post-dial sequence in the outgoing {@code Connection} has reached a
          * pause character. This causes the post-dial signals to stop pending user confirmation. An
          * implementation should present this choice to the user and invoke
@@ -588,6 +599,7 @@ public final class RemoteConnection {
     private boolean mRingbackRequested;
     private boolean mConnected;
     private int mConnectionCapabilities;
+    private int mConnectionProperties;
     private int mVideoState;
     private VideoProvider mVideoProvider;
     private boolean mIsVoipAudioMode;
@@ -624,6 +636,7 @@ public final class RemoteConnection {
         mDisconnectCause = connection.getDisconnectCause();
         mRingbackRequested = connection.isRingbackRequested();
         mConnectionCapabilities = connection.getConnectionCapabilities();
+        mConnectionProperties = connection.getConnectionProperties();
         mVideoState = connection.getVideoState();
         mVideoProvider = new RemoteConnection.VideoProvider(connection.getVideoProvider());
         mIsVoipAudioMode = connection.getIsVoipAudioMode();
@@ -716,6 +729,16 @@ public final class RemoteConnection {
      */
     public int getConnectionCapabilities() {
         return mConnectionCapabilities;
+    }
+
+    /**
+     * Obtains the properties of this {@code RemoteConnection}.
+     *
+     * @return A bitmask of the properties of the {@code RemoteConnection}, as defined in the
+     *         {@code PROPERTY_*} constants in class {@link Connection}.
+     */
+    public int getConnectionProperties() {
+        return mConnectionProperties;
     }
 
     /**
@@ -1106,6 +1129,23 @@ public final class RemoteConnection {
                 @Override
                 public void run() {
                     callback.onConnectionCapabilitiesChanged(connection, connectionCapabilities);
+                }
+            });
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void setConnectionProperties(final int connectionProperties) {
+        mConnectionProperties = connectionProperties;
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionPropertiesChanged(connection, connectionProperties);
                 }
             });
         }
