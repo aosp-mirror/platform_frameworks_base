@@ -230,18 +230,18 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-ota-NPC56X-2785955f.zip</a><br>
-      MD5: 36d813350fd660ab751a434782f5523f<br>
-      SHA-1: 2785955fd77310106d2fa9f02f93b595d77b8e72
+      >volantis-ota-NPC56X-2-3fa71d1a.zip</a><br>
+      MD5: 7221f249ab2a48faf7ca4dc275d8f79c<br>
+      SHA-1: 3fa71d1af634db140267133e220038a63e3d1749
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantisg-ota-NPC56X-d93e161c.zip</a><br>
-      MD5: 1fb7d83cd065a962dbed49e72db97dc4<br>
-      SHA-1: d93e161c15503dc641b654f6ef4c1611222bc9fd
+      >volantisg-ota-NPC56X-2-2edd174f.zip</a><br>
+      MD5: aff8190e0522c386d6b2e66908671377<br>
+      SHA-1: 2edd174f9a4d10ba3ed75643aa16a3f635451631
     </td>
   </tr>
 
