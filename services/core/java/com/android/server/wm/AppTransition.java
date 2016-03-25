@@ -881,7 +881,7 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
-            Bitmap thumbnailHeader, final int taskId) {
+            Bitmap thumbnailHeader, final int taskId, int orientation) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -890,12 +890,30 @@ public class AppTransition implements Dump {
 
         float scaleW = appWidth / thumbWidth;
         getNextAppTransitionStartRect(taskId, mTmpRect);
-        final float toY = mTmpRect.height() / 2 * (scaleW - 1f) + appRect.top;
-        final float fromY = mTmpRect.top;
-        final float toX = mTmpRect.width() / 2 * (scaleW - 1f) + appRect.left;
-        final float fromX = mTmpRect.left;
-        final float pivotX = mTmpRect.width() / 2;
-        final float pivotY = mTmpRect.height() / 2;
+        final float fromX;
+        final float fromY;
+        final float toX;
+        final float toY;
+        final float pivotX;
+        final float pivotY;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            fromX = mTmpRect.left;
+            fromY = mTmpRect.top;
+
+            // For the curved translate animation to work, the pivot points needs to be at the
+            // same absolute position as the one from the real surface.
+            toX = mTmpRect.width() / 2 * (scaleW - 1f) + appRect.left;
+            toY = appRect.height() / 2 * (1 - 1 / scaleW) + appRect.top;
+            pivotX = mTmpRect.width() / 2;
+            pivotY = appRect.height() / 2 / scaleW;
+        } else {
+            pivotX = 0;
+            pivotY = 0;
+            fromX = mTmpRect.left;
+            fromY = mTmpRect.top;
+            toX = appRect.left;
+            toY = appRect.top;
+        }
         final long duration = getAspectScaleDuration();
         final Interpolator interpolator = getAspectScaleInterpolator();
         if (mNextAppTransitionScaleUp) {
