@@ -43,6 +43,54 @@ using namespace uirenderer;
         ? (reinterpret_cast<RenderNode*>(renderNodePtr)->setPropertyFieldsDirty(dirtyFlag), true) \
         : false)
 
+static JNIEnv* getenv(JavaVM* vm) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
+    }
+    return env;
+}
+
+static jmethodID gOnRenderNodeDetached;
+
+class RenderNodeContext : public VirtualLightRefBase {
+public:
+    RenderNodeContext(JNIEnv* env, jobject jobjRef) {
+        env->GetJavaVM(&mVm);
+        // This holds a weak ref because otherwise there's a cyclic global ref
+        // with this holding a strong global ref to the view which holds
+        // a strong ref to RenderNode which holds a strong ref to this.
+        mWeakRef = env->NewWeakGlobalRef(jobjRef);
+    }
+
+    virtual ~RenderNodeContext() {
+        JNIEnv* env = getenv(mVm);
+        env->DeleteWeakGlobalRef(mWeakRef);
+    }
+
+    jobject acquireLocalRef(JNIEnv* env) {
+        return env->NewLocalRef(mWeakRef);
+    }
+
+private:
+    JavaVM* mVm;
+    jweak mWeakRef;
+};
+
+// Called by ThreadedRenderer's JNI layer
+void onRenderNodeRemoved(JNIEnv* env, RenderNode* node) {
+    auto context = reinterpret_cast<RenderNodeContext*>(node->getUserContext());
+    if (!context) return;
+    jobject jnode = context->acquireLocalRef(env);
+    if (!jnode) {
+        // The owning node has been GC'd, release the context
+        node->setUserContext(nullptr);
+        return;
+    }
+    env->CallVoidMethod(jnode, gOnRenderNodeDetached);
+    env->DeleteLocalRef(jnode);
+}
+
 // ----------------------------------------------------------------------------
 // DisplayList view properties
 // ----------------------------------------------------------------------------
@@ -59,7 +107,8 @@ static jint android_view_RenderNode_getDebugSize(JNIEnv* env,
     return renderNode->getDebugSize();
 }
 
-static jlong android_view_RenderNode_create(JNIEnv* env, jobject clazz, jstring name) {
+static jlong android_view_RenderNode_create(JNIEnv* env, jobject thiz,
+        jstring name) {
     RenderNode* renderNode = new RenderNode();
     renderNode->incStrong(0);
     if (name != NULL) {
@@ -67,6 +116,7 @@ static jlong android_view_RenderNode_create(JNIEnv* env, jobject clazz, jstring 
         renderNode->setName(textArray);
         env->ReleaseStringUTFChars(name, textArray);
     }
+    renderNode->setUserContext(new RenderNodeContext(env, thiz));
     return reinterpret_cast<jlong>(renderNode);
 }
 
@@ -627,6 +677,9 @@ int register_android_view_RenderNode(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
     gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
             "updateWindowPositionRT", "(JIIII)V");
+    clazz = FindClassOrDie(env, "android/view/RenderNode");
+    gOnRenderNodeDetached = GetMethodIDOrDie(env, clazz,
+            "onRenderNodeDetached", "()V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

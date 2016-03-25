@@ -252,6 +252,7 @@ LOCAL_SRC_FILES += \
     tests/unit/LinearAllocatorTests.cpp \
     tests/unit/MatrixTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
+    tests/unit/RenderNodeTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/StringUtilsTests.cpp \
     tests/unit/TextDropShadowCacheTests.cpp \
