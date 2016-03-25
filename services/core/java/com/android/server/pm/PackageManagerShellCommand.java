@@ -44,7 +44,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ShellCommand;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
@@ -331,12 +330,12 @@ class PackageManagerShellCommand extends ShellCommand {
                 // Use the default mode for background dexopt.
                 targetCompilerFilter =
                         PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerServiceCompilerMapping.REASON_BACKGROUND_DEXOPT);
+                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
             } else if ("reset".equals(compilerFilter)) {
                 // Use the default mode for install.
                 targetCompilerFilter =
                         PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerServiceCompilerMapping.REASON_INSTALL);
+                                PackageManagerService.REASON_INSTALL);
             } else {
                 if (!DexFile.isValidCompilerFilter(compilerFilter)) {
                     pw.println("Error: \"" + compilerFilter +
