@@ -11741,7 +11741,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-   /**
+    /**
      * Utility method to retrieve the inverse of the current mMatrix property.
      * We cache the matrix to avoid recalculating it when transform properties
      * have not changed.
@@ -15626,7 +15626,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_layerType
      */
-    public void setLayerType(int layerType, Paint paint) {
+    public void setLayerType(int layerType, @Nullable Paint paint) {
         if (layerType < LAYER_TYPE_NONE || layerType > LAYER_TYPE_HARDWARE) {
             throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, "
                     + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
@@ -15645,8 +15645,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         mLayerType = layerType;
-        final boolean layerDisabled = (mLayerType == LAYER_TYPE_NONE);
-        mLayerPaint = layerDisabled ? null : (paint == null ? new Paint() : paint);
+        mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : paint;
         mRenderNode.setLayerPaint(mLayerPaint);
 
         // draw() behaves differently if we are on a layer, so we need to
@@ -15680,12 +15679,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setLayerType(int, android.graphics.Paint)
      */
-    public void setLayerPaint(Paint paint) {
+    public void setLayerPaint(@Nullable Paint paint) {
         int layerType = getLayerType();
         if (layerType != LAYER_TYPE_NONE) {
-            mLayerPaint = paint == null ? new Paint() : paint;
+            mLayerPaint = paint;
             if (layerType == LAYER_TYPE_HARDWARE) {
-                if (mRenderNode.setLayerPaint(mLayerPaint)) {
+                if (mRenderNode.setLayerPaint(paint)) {
                     invalidateViewProperty(false, false);
                 }
             } else {
@@ -16855,7 +16854,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
             } else {
                 // use layer paint to draw the bitmap, merging the two alphas, but also restore
-                int layerPaintAlpha = mLayerPaint.getAlpha();
+                int layerPaintAlpha = mLayerPaint != null ? mLayerPaint.getAlpha() : 255;
                 mLayerPaint.setAlpha((int) (alpha * layerPaintAlpha));
                 canvas.drawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
                 mLayerPaint.setAlpha(layerPaintAlpha);
