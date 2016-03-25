@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -37,6 +38,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.systemui.Prefs;
+import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
@@ -70,11 +72,22 @@ public class PipManager {
     public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH = 0x1;
     public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH = 0x2;
 
+    /**
+     * PIPed activity is playing a media and it can be paused.
+     */
+    static final int PLAYBACK_STATE_PLAYING = 0;
+    /**
+     * PIPed activity has a paused media and it can be played.
+     */
+    static final int PLAYBACK_STATE_PAUSED = 1;
+    /**
+     * Users are unable to control PIPed activity's media playback.
+     */
+    static final int PLAYBACK_STATE_UNAVAILABLE = 2;
+
     private static final int CLOSE_PIP_WHEN_MEDIA_SESSION_GONE_TIMEOUT_MS = 3000;
 
     private int mSuspendPipResizingReason;
-
-    private static final float SCALE_FACTOR = 1.1f;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -87,6 +100,7 @@ public class PipManager {
     private Rect mMenuModePipBounds;
     private Rect mRecentsPipBounds;
     private Rect mRecentsFocusedPipBounds;
+    private int mRecentsFocusChangedAnimationDurationMs;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private ComponentName mPipComponentName;
@@ -148,15 +162,13 @@ public class PipManager {
         mPipBounds = Rect.unflattenFromString(res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureBounds));
         mMenuModePipBounds = Rect.unflattenFromString(res.getString(
-                com.android.internal.R.string.config_centeredPictureInPictureBounds));
+                R.string.pip_menu_bounds));
         mRecentsPipBounds = Rect.unflattenFromString(res.getString(
-                com.android.internal.R.string.config_pictureInPictureBoundsInRecents));
-        float scaleBy = (SCALE_FACTOR - 1.0f) / 2;
-        mRecentsFocusedPipBounds = new Rect(
-                (int) (mRecentsPipBounds.left - scaleBy * mRecentsPipBounds.width()),
-                (int) (mRecentsPipBounds.top - scaleBy * mRecentsPipBounds.height()),
-                (int) (mRecentsPipBounds.right + scaleBy * mRecentsPipBounds.width()),
-                (int) (mRecentsPipBounds.bottom + scaleBy * mRecentsPipBounds.height()));
+                R.string.pip_recents_bounds));
+        mRecentsFocusedPipBounds = Rect.unflattenFromString(res.getString(
+                R.string.pip_recents_focused_bounds));
+        mRecentsFocusChangedAnimationDurationMs = res.getInteger(
+                R.integer.recents_tv_pip_focus_anim_duration);
 
         mActivityManager = ActivityManagerNative.getDefault();
         SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
@@ -279,6 +291,7 @@ public class PipManager {
                             mSuspendPipResizingReason);
             return;
         }
+        int animationDurationMs = -1;
         switch (mState) {
             case STATE_NO_PIP:
                 mCurrentPipBounds = null;
@@ -288,6 +301,10 @@ public class PipManager {
                 break;
             case STATE_PIP_OVERLAY:
                 if (mIsRecentsShown) {
+                    if (mCurrentPipBounds == mRecentsFocusedPipBounds
+                            || mCurrentPipBounds == mRecentsFocusedPipBounds) {
+                        animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
+                    }
                     if (mIsPipFocusedInRecent) {
                         mCurrentPipBounds = mRecentsFocusedPipBounds;
                     } else {
@@ -302,7 +319,8 @@ public class PipManager {
                 break;
         }
         try {
-            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds, true, true, true, -1);
+            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
+                    true, true, true, animationDurationMs);
         } catch (RemoteException e) {
             Log.e(TAG, "resizeStack failed", e);
         }
@@ -364,9 +382,17 @@ public class PipManager {
     }
 
     /**
+     * Returns {@code true} if the PIP view in
+     * {@link com.android.systemui.recents.tv.RecentsTvActivity} is focused in Recents.
+     * This API is valid only when {@link isRecentsShown()} returns {@code true}.
+     */
+    boolean isPipViewFocusdInRecents() {
+        return mIsPipFocusedInRecent;
+    }
+
+    /**
      * Shows PIP menu UI by launching {@link PipMenuActivity}. It also locates the pinned
-     * stack to the centered PIP bound {@link com.android.internal.R.string
-     * .config_centeredPictureInPictureBounds}.
+     * stack to the centered PIP bound {@link R.config_centeredPictureInPictureBounds}.
      */
     private void showPipMenu() {
         if (DEBUG) Log.d(TAG, "showPipMenu()");
@@ -476,6 +502,32 @@ public class PipManager {
      */
     MediaController getMediaController() {
         return mPipMediaController;
+    }
+
+    /**
+     * Returns the PIPed activity's playback state.
+     * This returns one of {@link PLAYBACK_STATE_PLAYING}, {@link PLAYBACK_STATE_PAUSED},
+     * or {@link PLAYBACK_STATE_UNAVAILABLE}.
+     */
+    int getPlaybackState() {
+        if (mPipMediaController == null || mPipMediaController.getPlaybackState() == null) {
+            return PLAYBACK_STATE_UNAVAILABLE;
+        }
+        int state = mPipMediaController.getPlaybackState().getState();
+        boolean isPlaying = (state == PlaybackState.STATE_BUFFERING
+                || state == PlaybackState.STATE_CONNECTING
+                || state == PlaybackState.STATE_PLAYING
+                || state == PlaybackState.STATE_FAST_FORWARDING
+                || state == PlaybackState.STATE_REWINDING
+                || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
+                || state == PlaybackState.STATE_SKIPPING_TO_NEXT);
+        long actions = mPipMediaController.getPlaybackState().getActions();
+        if (!isPlaying && ((actions & PlaybackState.ACTION_PLAY) != 0)) {
+            return PLAYBACK_STATE_PAUSED;
+        } else if (isPlaying && ((actions & PlaybackState.ACTION_PAUSE) != 0)) {
+            return PLAYBACK_STATE_PLAYING;
+        }
+        return PLAYBACK_STATE_UNAVAILABLE;
     }
 
     TaskStackListener mTaskStackListener = new TaskStackListener() {
