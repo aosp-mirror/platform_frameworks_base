@@ -1170,7 +1170,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         if (useCheckinFormat) {
-            List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
+            List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.MATCH_ALL);
             if (isRealCheckin) {
                 // For a real checkin, first we want to prefer to use the last complete checkin
                 // file if there is one.
