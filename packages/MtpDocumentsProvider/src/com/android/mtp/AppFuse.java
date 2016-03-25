@@ -38,7 +38,10 @@ public class AppFuse {
      * Max read amount specified at the FUSE kernel implementation.
      * The value is copied from sdcard.c.
      */
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
     static final int MAX_READ = 128 * 1024;
+
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
     static final int MAX_WRITE = 256 * 1024;
 
     private final String mName;
