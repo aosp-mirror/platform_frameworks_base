@@ -1039,6 +1039,15 @@ public final class TvInputInfo implements Parcelable {
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_HIDDEN_INPUTS, builder.toString(), userId);
+
+            // Notify of the TvInputInfo changes.
+            TvInputManager tm = (TvInputManager) context.getSystemService(Context.TV_INPUT_SERVICE);
+            for (String inputId : hiddenInputIds) {
+                TvInputInfo info = tm.getTvInputInfo(inputId);
+                if (info != null) {
+                    tm.updateTvInputInfo(info);
+                }
+            }
         }
 
         /**
@@ -1069,6 +1078,15 @@ public final class TvInputInfo implements Parcelable {
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_CUSTOM_LABELS, builder.toString(), userId);
+
+            // Notify of the TvInputInfo changes.
+            TvInputManager tm = (TvInputManager) context.getSystemService(Context.TV_INPUT_SERVICE);
+            for (String inputId : customLabels.keySet()) {
+                TvInputInfo info = tm.getTvInputInfo(inputId);
+                if (info != null) {
+                    tm.updateTvInputInfo(info);
+                }
+            }
         }
 
         private static void ensureValidField(String value) {
