@@ -355,6 +355,18 @@ public final class MtpDevice {
         }
     }
 
+    /**
+     * Returns object size in 64-bit integer.
+     *
+     * The object size stored in MtpObjectInfo is unsigned 32-bit integer.
+     * The methods reads 64-bit object size from the object property so that it can fetch 4GB+
+     * object size correctly.
+     * @hide
+     */
+    public long getObjectSizeLong(int handle, int format) throws IOException {
+        return native_get_object_size_long(handle, format);
+    }
+
     // used by the JNI code
     private long mNativeContext;
 
@@ -381,4 +393,5 @@ public final class MtpDevice {
     private native int native_submit_event_request();
     private native MtpEvent native_reap_event_request(int handle);
     private native void native_discard_event_request(int handle);
+    private native long native_get_object_size_long(int handle, int format) throws IOException;
 }
