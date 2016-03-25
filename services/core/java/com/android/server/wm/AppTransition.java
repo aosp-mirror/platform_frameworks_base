@@ -46,6 +46,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -943,6 +944,8 @@ public class AppTransition implements Dump {
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = mTmpRect.height();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
+        final int thumbStartX = mTmpRect.left - containingFrame.left;
+        final int thumbStartY = mTmpRect.top - containingFrame.top;
 
         // Used for the ENTER_SCALE_UP and EXIT_SCALE_DOWN transitions
         float scale = 1f;
@@ -954,6 +957,9 @@ public class AppTransition implements Dump {
                     a = createAspectScaledThumbnailEnterFreeformAnimationLocked(
                             containingFrame, surfaceInsets, taskId);
                 } else {
+                    AnimationSet set = new AnimationSet(true);
+
+                    // In portrait, we scale to fit the width
                     mTmpFromClipRect.set(containingFrame);
                     mTmpToClipRect.set(containingFrame);
 
@@ -964,26 +970,40 @@ public class AppTransition implements Dump {
 
                     // Exclude insets region from the source clip.
                     mTmpFromClipRect.inset(contentInsets);
-
-                    // We scale the width and clip to the top/left square
-                    scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                    scaledTopDecor = (int) (scale * contentInsets.top);
-                    int unscaledThumbHeight = (int) (thumbHeight / scale);
-                    mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
-
                     mNextAppTransitionInsets.set(contentInsets);
 
-                    Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
-                            computePivot(mTmpRect.left - containingFrame.left, scale),
-                            computePivot(mTmpRect.top - containingFrame.top, scale));
-                    Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                    Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // We scale the width and clip to the top/left square
+                        scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
+                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
 
-                    AnimationSet set = new AnimationSet(true);
-                    set.addAnimation(clipAnim);
-                    set.addAnimation(scaleAnim);
-                    set.addAnimation(translateAnim);
+                        Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
+                                computePivot(mTmpRect.left - containingFrame.left, scale),
+                                computePivot(mTmpRect.top - containingFrame.top, scale));
+                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+                        Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
+
+                        set.addAnimation(clipAnim);
+                        set.addAnimation(scaleAnim);
+                        set.addAnimation(translateAnim);
+
+                    } else {
+                        // In landscape, we don't scale at all and only crop
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + thumbHeightI;
+                        mTmpFromClipRect.right = mTmpFromClipRect.left + thumbWidthI;
+
+                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+                        Animation translateAnim = new TranslateAnimation(thumbStartX, 0,
+                                thumbStartY - contentInsets.top, 0);
+
+                        set.addAnimation(clipAnim);
+                        set.addAnimation(translateAnim);
+                    }
+
                     a = set;
+                    a.setZAdjustment(Animation.ZORDER_TOP);
                 }
                 break;
             }
@@ -1015,6 +1035,7 @@ public class AppTransition implements Dump {
                     a = createAspectScaledThumbnailExitFreeformAnimationLocked(
                             containingFrame, surfaceInsets, taskId);
                 } else {
+                    AnimationSet set = new AnimationSet(true);
                     mTmpFromClipRect.set(containingFrame);
                     mTmpToClipRect.set(containingFrame);
 
@@ -1025,25 +1046,37 @@ public class AppTransition implements Dump {
 
                     // Exclude insets region from the target clip.
                     mTmpToClipRect.inset(contentInsets);
-
-                    // We scale the width and clip to the top/left square
-                    scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                    scaledTopDecor = (int) (scale * contentInsets.top);
-                    int unscaledThumbHeight = (int) (thumbHeight / scale);
-                    mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
-
                     mNextAppTransitionInsets.set(contentInsets);
 
-                    Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
-                            computePivot(mTmpRect.left - containingFrame.left, scale),
-                            computePivot(mTmpRect.top - containingFrame.top, scale));
-                    Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
-                    Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // We scale the width and clip to the top/left square
+                        scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
+                        scaledTopDecor = (int) (scale * contentInsets.top);
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
 
-                    AnimationSet set = new AnimationSet(true);
-                    set.addAnimation(clipAnim);
-                    set.addAnimation(scaleAnim);
-                    set.addAnimation(translateAnim);
+                        Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
+                                computePivot(mTmpRect.left - containingFrame.left, scale),
+                                computePivot(mTmpRect.top - containingFrame.top, scale));
+                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+                        Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
+
+                        set.addAnimation(clipAnim);
+                        set.addAnimation(scaleAnim);
+                        set.addAnimation(translateAnim);
+
+                    } else {
+                        // In landscape, we don't scale at all and only crop
+                        mTmpToClipRect.bottom = mTmpToClipRect.top + thumbHeightI;
+                        mTmpToClipRect.right = mTmpToClipRect.left + thumbWidthI;
+
+                        Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
+                        Animation translateAnim = new TranslateAnimation(0, thumbStartX, 0,
+                                thumbStartY - contentInsets.top);
+
+                        set.addAnimation(clipAnim);
+                        set.addAnimation(translateAnim);
+                    }
 
                     a = set;
                     a.setZAdjustment(Animation.ZORDER_TOP);

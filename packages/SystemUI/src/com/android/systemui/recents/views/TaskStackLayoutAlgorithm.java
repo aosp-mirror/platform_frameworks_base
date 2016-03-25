@@ -963,11 +963,22 @@ public class TaskStackLayoutAlgorithm {
         }
 
         // Ensure that the new width is at most the smaller display edge size
-        Rect displayRect = Recents.getSystemServices().getDisplayRect();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        Rect displayRect = ssp.getDisplayRect();
         int sideMargin = getScaleForExtent(windowRect, displayRect, mBaseSideMargin, mMinMargin,
                 WIDTH);
-        int targetStackWidth = Math.min(taskStackBounds.width() - 2 * sideMargin,
-                Math.min(displayRect.width(), displayRect.height()));
+        int targetStackWidth = taskStackBounds.width() - 2 * sideMargin;
+        if (ssp.getDisplayOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+            // If we are in landscape, calculate the width of the stack in portrait and ensure that
+            // we are not larger than that size
+            Rect portraitDisplayRect = new Rect(0, 0,
+                    Math.min(displayRect.width(), displayRect.height()),
+                    Math.max(displayRect.width(), displayRect.height()));
+            int portraitSideMargin = getScaleForExtent(portraitDisplayRect, portraitDisplayRect,
+                    mBaseSideMargin, mMinMargin, WIDTH);
+            targetStackWidth = Math.min(targetStackWidth,
+                    portraitDisplayRect.width() - 2 * portraitSideMargin);
+        }
         taskStackBounds.inset((taskStackBounds.width() - targetStackWidth) / 2, 0);
     }
 

@@ -929,7 +929,7 @@ final class ActivityStack {
             // use within SystemUI while keeping memory usage low.
             if (ActivityManagerService.TAKE_FULLSCREEN_SCREENSHOTS) {
                 w = h = -1;
-                scale = 0.5f;
+                scale = mService.mFullscreenThumbnailScale;
             }
             return mWindowManager.screenshotApplications(who.appToken, Display.DEFAULT_DISPLAY,
                     w, h, scale);

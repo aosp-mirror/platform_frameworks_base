@@ -526,6 +526,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
+    public static final float FULLSCREEN_SCREENSHOT_SCALE = 0.6f;
 
     private static native int nativeMigrateToBoost();
     private static native int nativeMigrateFromBoost();
@@ -1491,6 +1492,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /** The dimensions of the thumbnails in the Recents UI. */
     int mThumbnailWidth;
     int mThumbnailHeight;
+    float mFullscreenThumbnailScale;
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
@@ -12592,6 +12594,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
+            mFullscreenThumbnailScale = res.getFraction(
+                    com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
             mDefaultPinnedStackBounds = Rect.unflattenFromString(res.getString(
                     com.android.internal.R.string.config_defaultPictureInPictureBounds));
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(

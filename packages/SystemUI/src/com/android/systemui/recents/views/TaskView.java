@@ -22,6 +22,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Outline;
@@ -128,8 +129,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @ViewDebug.ExportedProperty(category="recents")
     float mDimAlpha;
-    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
-    Paint mDimLayerPaint = new Paint();
     float mActionButtonTranslationZ;
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
@@ -575,9 +574,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     @Override
-    public void onTaskDataLoaded(Task task) {
+    public void onTaskDataLoaded(Task task, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
         // Bind each of the views to the new task data
-        mThumbnailView.rebindToTask(mTask, mIsDisabledInSafeMode);
+        mThumbnailView.rebindToTask(mTask, thumbnailInfo, mIsDisabledInSafeMode);
         mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
         mTaskDataLoaded = true;
     }
