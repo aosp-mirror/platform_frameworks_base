@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.connectivity;
+package android.net.apf;
 
 import static android.system.OsConstants.*;
 
@@ -22,6 +22,7 @@ import android.net.NetworkUtils;
 import android.net.apf.ApfGenerator;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
+import android.net.ip.IpManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
@@ -31,7 +32,6 @@ import android.util.Pair;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.ConnectivityService;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -136,24 +136,27 @@ public class ApfFilter {
     // NOTE: this must be added to the IPv4 header length in IPV4_HEADER_SIZE_MEMORY_SLOT
     private static final int DHCP_CLIENT_MAC_OFFSET = ETH_HEADER_LEN + UDP_HEADER_LEN + 28;
 
-    private final ConnectivityService mConnectivityService;
-    private final NetworkAgentInfo mNai;
+    private final ApfCapabilities mApfCapabilities;
+    private final IpManager.Callback mIpManagerCallback;
+    private final NetworkInterface mNetworkInterface;
+    private byte[] mHardwareAddress;
     private ReceiveThread mReceiveThread;
-    private String mIfaceName;
-    private byte[] mIfaceMac;
     @GuardedBy("this")
     private long mUniqueCounter;
     @GuardedBy("this")
     private boolean mMulticastFilter;
 
-    private ApfFilter(ConnectivityService connectivityService, NetworkAgentInfo nai) {
-        mConnectivityService = connectivityService;
-        mNai = nai;
+    private ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
+            IpManager.Callback ipManagerCallback) {
+        mApfCapabilities = apfCapabilities;
+        mIpManagerCallback = ipManagerCallback;
+        mNetworkInterface = networkInterface;
+
         maybeStartFilter();
     }
 
     private void log(String s) {
-        Log.d(TAG, "(" + mNai.network.netId + "): " + s);
+        Log.d(TAG, "(" + mNetworkInterface.getName() + "): " + s);
     }
 
     @GuardedBy("this")
@@ -166,47 +169,24 @@ public class ApfFilter {
      * filters to ignore useless RAs.
      */
     private void maybeStartFilter() {
-        mIfaceName = mNai.linkProperties.getInterfaceName();
-        if (mIfaceName == null) return;
         FileDescriptor socket;
         try {
-            NetworkInterface networkInterface = NetworkInterface.getByName(mIfaceName);
-            if (networkInterface == null) {
-                Log.e(TAG, "Can't find interface " + mIfaceName);
-                return;
-            }
-            mIfaceMac = networkInterface.getHardwareAddress();
-
+            mHardwareAddress = mNetworkInterface.getHardwareAddress();
             synchronized(this) {
                 // Install basic filters
                 installNewProgramLocked();
             }
-
             socket = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IPV6);
             PacketSocketAddress addr = new PacketSocketAddress((short) ETH_P_IPV6,
-                    networkInterface.getIndex());
+                    mNetworkInterface.getIndex());
             Os.bind(socket, addr);
-            NetworkUtils.attachRaFilter(socket, mNai.networkMisc.apfPacketFormat);
+            NetworkUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error starting filter", e);
             return;
         }
         mReceiveThread = new ReceiveThread(socket);
         mReceiveThread.start();
-    }
-
-    /**
-     * mNai's LinkProperties may have changed, take appropriate action.
-     */
-    public void updateFilter() {
-        // If we're not listening for RAs, try starting.
-        if (mReceiveThread == null) {
-            maybeStartFilter();
-        // If interface name has changed, restart.
-        } else if (!mIfaceName.equals(mNai.linkProperties.getInterfaceName())) {
-            shutdown();
-            maybeStartFilter();
-        }
     }
 
     // Returns seconds since Unix Epoch.
@@ -574,7 +554,7 @@ public class ApfFilter {
         gen.addLoadImmediate(Register.R0, DHCP_CLIENT_MAC_OFFSET);
         // NOTE: Relies on R1 containing IPv4 header offset.
         gen.addAddR1();
-        gen.addJumpIfBytesNotEqual(Register.R0, mIfaceMac, gen.DROP_LABEL);
+        gen.addJumpIfBytesNotEqual(Register.R0, mHardwareAddress, gen.DROP_LABEL);
 
         // Otherwise, pass
         gen.addJump(gen.PASS_LABEL);
@@ -632,7 +612,7 @@ public class ApfFilter {
     private ApfGenerator beginProgramLocked() throws IllegalInstructionException {
         ApfGenerator gen = new ApfGenerator();
         // This is guaranteed to return true because of the check in maybeCreate.
-        gen.setApfVersion(mNai.networkMisc.apfVersionSupported);
+        gen.setApfVersion(mApfCapabilities.apfVersionSupported);
 
         // Here's a basic summary of what the initial program does:
         //
@@ -673,7 +653,7 @@ public class ApfFilter {
             for (Ra ra : mRas) {
                 ra.generateFilterLocked(gen);
                 // Stop if we get too big.
-                if (gen.programLengthOverEstimate() > mNai.networkMisc.maximumApfProgramSize) break;
+                if (gen.programLengthOverEstimate() > mApfCapabilities.maximumApfProgramSize) break;
                 rasToFilter.add(ra);
             }
             // Step 2: Actually generate the program
@@ -694,7 +674,7 @@ public class ApfFilter {
         if (VDBG) {
             hexDump("Installing filter: ", program, program.length);
         }
-        mConnectivityService.pushApfProgramToNetwork(mNai, program);
+        mIpManagerCallback.installPacketFilter(program);
     }
 
     // Install a new filter program if the last installed one will die soon.
@@ -768,26 +748,27 @@ public class ApfFilter {
     }
 
     /**
-     * Install an {@link ApfFilter} on {@code nai} if {@code nai} supports packet
+     * Create an {@link ApfFilter} if {@code apfCapabilities} indicates support for packet
      * filtering using APF programs.
      */
-    public static void maybeInstall(ConnectivityService connectivityService, NetworkAgentInfo nai) {
-        if (nai.networkMisc == null) return;
-        if (nai.networkMisc.apfVersionSupported == 0) return;
-        if (nai.networkMisc.maximumApfProgramSize < 512) {
-            Log.e(TAG, "Unacceptably small APF limit: " + nai.networkMisc.maximumApfProgramSize);
-            return;
+    public static ApfFilter maybeCreate(ApfCapabilities apfCapabilities,
+            NetworkInterface networkInterface, IpManager.Callback ipManagerCallback) {
+        if (apfCapabilities == null || networkInterface == null) return null;
+        if (apfCapabilities.apfVersionSupported == 0) return null;
+        if (apfCapabilities.maximumApfProgramSize < 512) {
+            Log.e(TAG, "Unacceptably small APF limit: " + apfCapabilities.maximumApfProgramSize);
+            return null;
         }
         // For now only support generating programs for Ethernet frames. If this restriction is
         // lifted:
         //   1. the program generator will need its offsets adjusted.
         //   2. the packet filter attached to our packet socket will need its offset adjusted.
-        if (nai.networkMisc.apfPacketFormat != ARPHRD_ETHER) return;
-        if (!new ApfGenerator().setApfVersion(nai.networkMisc.apfVersionSupported)) {
-            Log.e(TAG, "Unsupported APF version: " + nai.networkMisc.apfVersionSupported);
-            return;
+        if (apfCapabilities.apfPacketFormat != ARPHRD_ETHER) return null;
+        if (!new ApfGenerator().setApfVersion(apfCapabilities.apfVersionSupported)) {
+            Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
+            return null;
         }
-        nai.apfFilter = new ApfFilter(connectivityService, nai);
+        return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback);
     }
 
     public synchronized void shutdown() {
@@ -807,8 +788,8 @@ public class ApfFilter {
     }
 
     public synchronized void dump(IndentingPrintWriter pw) {
-        pw.println("APF version: " + mNai.networkMisc.apfVersionSupported);
-        pw.println("Max program size: " + mNai.networkMisc.maximumApfProgramSize);
+        pw.println("APF version: " + mApfCapabilities.apfVersionSupported);
+        pw.println("Max program size: " + mApfCapabilities.maximumApfProgramSize);
         pw.println("Receive thread: " + (mReceiveThread != null ? "RUNNING" : "STOPPED"));
         if (mLastTimeInstalledProgram == 0) {
             pw.println("No program installed.");

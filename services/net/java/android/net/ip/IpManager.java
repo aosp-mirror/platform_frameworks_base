@@ -19,6 +19,8 @@ package android.net.ip;
 import com.android.internal.util.MessageUtils;
 
 import android.content.Context;
+import android.net.apf.ApfCapabilities;
+import android.net.apf.ApfFilter;
 import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -38,10 +40,12 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.net.NetlinkTracker;
 
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -108,6 +112,9 @@ public class IpManager extends StateMachine {
 
         // Called when the IpManager state machine terminates.
         public void onQuit() {}
+
+        // Install an APF program to filter incoming packets.
+        public void installPacketFilter(byte[] filter) {}
     }
 
     public static class WaitForProvisioningCallback extends Callback {
@@ -179,6 +186,11 @@ public class IpManager extends StateMachine {
                 return this;
             }
 
+            public Builder withApfCapabilities(ApfCapabilities apfCapabilities) {
+                mConfig.mApfCapabilities = apfCapabilities;
+                return this;
+            }
+
             public ProvisioningConfiguration build() {
                 return new ProvisioningConfiguration(mConfig);
             }
@@ -187,6 +199,7 @@ public class IpManager extends StateMachine {
         /* package */ boolean mUsingIpReachabilityMonitor = true;
         /* package */ boolean mRequestedPreDhcpAction;
         /* package */ StaticIpConfiguration mStaticIpConfig;
+        /* package */ ApfCapabilities mApfCapabilities;
 
         public ProvisioningConfiguration() {}
 
@@ -194,6 +207,7 @@ public class IpManager extends StateMachine {
             mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
             mRequestedPreDhcpAction = other.mRequestedPreDhcpAction;
             mStaticIpConfig = other.mStaticIpConfig;
+            mApfCapabilities = other.mApfCapabilities;
         }
     }
 
@@ -229,7 +243,7 @@ public class IpManager extends StateMachine {
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
 
-    private int mInterfaceIndex;
+    private NetworkInterface mNetworkInterface;
 
     /**
      * Non-final member variables accessed only from within our StateMachine.
@@ -240,6 +254,7 @@ public class IpManager extends StateMachine {
     private DhcpResults mDhcpResults;
     private String mTcpBufferSizes;
     private ProxyInfo mHttpProxy;
+    private ApfFilter mApfFilter;
 
     /**
      * Member variables accessed both from within the StateMachine thread
@@ -325,7 +340,7 @@ public class IpManager extends StateMachine {
     }
 
     public void startProvisioning(ProvisioningConfiguration req) {
-        getInterfaceIndex();
+        getNetworkInterface();
         sendMessage(CMD_START, new ProvisioningConfiguration(req));
     }
 
@@ -378,6 +393,19 @@ public class IpManager extends StateMachine {
         }
     }
 
+    public void dumpApf(PrintWriter writer) {
+        writer.println("--------------------------------------------------------------------");
+        writer.println("APF dump:");
+        // Thread-unsafe access to mApfFilter but just used for debugging.
+        ApfFilter apfFilter = mApfFilter;
+        if (apfFilter != null) {
+            apfFilter.dump(new IndentingPrintWriter(writer, "  "));
+        } else {
+            writer.println("No apf support");
+        }
+        writer.println("--------------------------------------------------------------------");
+    }
+
 
     /**
      * Internals.
@@ -392,7 +420,7 @@ public class IpManager extends StateMachine {
     protected String getLogRecString(Message msg) {
         final String logLine = String.format(
                 "iface{%s/%d} arg1{%d} arg2{%d} obj{%s}",
-                mInterfaceName, mInterfaceIndex,
+                mInterfaceName, mNetworkInterface == null ? -1 : mNetworkInterface.getIndex(),
                 msg.arg1, msg.arg2, Objects.toString(msg.obj));
         if (VDBG) {
             Log.d(mTag, getWhatToString(msg.what) + " " + logLine);
@@ -400,12 +428,12 @@ public class IpManager extends StateMachine {
         return logLine;
     }
 
-    private void getInterfaceIndex() {
+    private void getNetworkInterface() {
         try {
-            mInterfaceIndex = NetworkInterface.getByName(mInterfaceName).getIndex();
+            mNetworkInterface = NetworkInterface.getByName(mInterfaceName);
         } catch (SocketException | NullPointerException e) {
             // TODO: throw new IllegalStateException.
-            Log.e(mTag, "ALERT: Failed to get interface index: ", e);
+            Log.e(mTag, "ALERT: Failed to get interface object: ", e);
         }
     }
 
@@ -732,6 +760,8 @@ public class IpManager extends StateMachine {
     class StartedState extends State {
         @Override
         public void enter() {
+            mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
+                    mCallback);
             // Set privacy extensions.
             try {
                 mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
@@ -786,6 +816,11 @@ public class IpManager extends StateMachine {
             if (mDhcpClient != null) {
                 mDhcpClient.sendMessage(DhcpClient.CMD_STOP_DHCP);
                 mDhcpClient.doQuit();
+            }
+
+            if (mApfFilter != null) {
+                mApfFilter.shutdown();
+                mApfFilter = null;
             }
 
             resetLinkProperties();
