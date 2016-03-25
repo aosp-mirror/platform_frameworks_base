@@ -4456,7 +4456,8 @@ final class Settings {
             }
         }
 
-        if ((permissionNames != null || dumpAll) && ps.pkg.requestedPermissions != null
+        if ((permissionNames != null || dumpAll) && ps.pkg != null
+                && ps.pkg.requestedPermissions != null
                 && ps.pkg.requestedPermissions.size() > 0) {
             final ArrayList<String> perms = ps.pkg.requestedPermissions;
             pw.print(prefix); pw.println("  requested permissions:");

@@ -30,6 +30,8 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.MutableBoolean;
+import android.util.Pair;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -5317,26 +5319,28 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         if (apps != null) {
-            SparseArray<ArrayList<String>> uids = new SparseArray<ArrayList<String>>();
+            SparseArray<Pair<ArrayList<String>, MutableBoolean>> uids = new SparseArray<>();
             for (int i=0; i<apps.size(); i++) {
                 ApplicationInfo ai = apps.get(i);
-                ArrayList<String> pkgs = uids.get(ai.uid);
+                Pair<ArrayList<String>, MutableBoolean> pkgs = uids.get(
+                        UserHandle.getAppId(ai.uid));
                 if (pkgs == null) {
-                    pkgs = new ArrayList<String>();
-                    uids.put(ai.uid, pkgs);
+                    pkgs = new Pair<>(new ArrayList<String>(), new MutableBoolean(false));
+                    uids.put(UserHandle.getAppId(ai.uid), pkgs);
                 }
-                pkgs.add(ai.packageName);
+                pkgs.first.add(ai.packageName);
             }
             SparseArray<? extends Uid> uidStats = getUidStats();
             final int NU = uidStats.size();
             String[] lineArgs = new String[2];
             for (int i=0; i<NU; i++) {
-                int uid = uidStats.keyAt(i);
-                ArrayList<String> pkgs = uids.get(uid);
-                if (pkgs != null) {
-                    for (int j=0; j<pkgs.size(); j++) {
+                int uid = UserHandle.getAppId(uidStats.keyAt(i));
+                Pair<ArrayList<String>, MutableBoolean> pkgs = uids.get(uid);
+                if (pkgs != null && !pkgs.second.value) {
+                    pkgs.second.value = true;
+                    for (int j=0; j<pkgs.first.size(); j++) {
                         lineArgs[0] = Integer.toString(uid);
-                        lineArgs[1] = pkgs.get(j);
+                        lineArgs[1] = pkgs.first.get(j);
                         dumpLine(pw, 0 /* uid */, "i" /* category */, UID_DATA,
                                 (Object[])lineArgs);
                     }
