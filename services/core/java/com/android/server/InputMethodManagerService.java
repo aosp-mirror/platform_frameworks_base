@@ -215,7 +215,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // Ongoing notification
     private NotificationManager mNotificationManager;
     private KeyguardManager mKeyguardManager;
-    private StatusBarManagerService mStatusBar;
+    private @Nullable StatusBarManagerService mStatusBar;
     private Notification.Builder mImeSwitcherNotification;
     private PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
@@ -1070,7 +1070,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
-                statusBar.setIconVisibility(mSlotIme, false);
+                if (mStatusBar != null) {
+                    mStatusBar.setIconVisibility(mSlotIme, false);
+                }
                 updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
