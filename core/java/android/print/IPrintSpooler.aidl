@@ -61,6 +61,15 @@ oneway interface IPrintSpooler {
     void setStatus(in PrintJobId printJobId, in CharSequence status);
 
     /**
+     * Set the status of this print job
+     *
+     * @param printJobId The print job to update
+     * @param status The new status as a string resource
+     * @param appPackageName App package name the resource belongs to
+     */
+    void setStatusRes(in PrintJobId printJobId, int status, in CharSequence appPackageName);
+
+    /**
      * Handle that a custom icon for a printer was loaded.
      *
      * @param printerId the id of the printer the icon belongs to
