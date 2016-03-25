@@ -166,6 +166,11 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
         bounds.offset(x, y);
     }
 
+    // Set align to left for drawing, as we don't want individual
+    // glyphs centered or right-aligned; the offset above takes
+    // care of all alignment.
+    paint.setTextAlign(Paint::kLeft_Align);
+
     DrawTextFunctor f(layout, this, glyphs.get(), pos.get(),
             paint, x, y, bounds, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);

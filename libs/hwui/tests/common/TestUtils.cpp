@@ -16,6 +16,7 @@
 
 #include "TestUtils.h"
 
+#include "hwui/Paint.h"
 #include "DeferredLayerUpdater.h"
 #include "LayerRenderer.h"
 
@@ -92,53 +93,17 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
     *outTotalAdvance = totalAdvance;
 }
 
-void TestUtils::drawUtf8ToCanvas(TestCanvas* canvas, const char* text,
+
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
         const SkPaint& paint, float x, float y) {
-    // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
-    LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
-            "must use glyph encoding");
-    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
-    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
-
-    std::vector<glyph_t> glyphs;
-    std::vector<float> positions;
-    float totalAdvance;
-    Rect bounds;
-    layoutTextUnscaled(paint, text, &glyphs, &positions, &totalAdvance, &bounds);
-
-    // apply alignment via x parameter (which JNI layer would have done)
-    if (paint.getTextAlign() == SkPaint::kCenter_Align) {
-        x -= totalAdvance / 2;
-    } else if (paint.getTextAlign() == SkPaint::kRight_Align) {
-        x -= totalAdvance;
-    }
-
-    bounds.translate(x, y);
-
-    // Force left alignment, since alignment offset is already baked in
-    SkPaint alignPaintCopy(paint);
-    alignPaintCopy.setTextAlign(SkPaint::kLeft_Align);
-    canvas->drawGlyphs(glyphs.data(), positions.data(), glyphs.size(), alignPaintCopy, x, y,
-                bounds.left, bounds.top, bounds.right, bounds.bottom, totalAdvance);
+    auto utf16 = asciiToUtf16(text);
+    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, 0, paint, nullptr);
 }
 
-void TestUtils::drawUtf8ToCanvas(TestCanvas* canvas, const char* text,
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
         const SkPaint& paint, const SkPath& path) {
-    // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
-    LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
-            "must use glyph encoding");
-    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
-    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
-
-    std::vector<glyph_t> glyphs;
-    while (*text != '\0') {
-        size_t nextIndex = 0;
-        int32_t unichar = utf32_from_utf8_at(text, 4, 0, &nextIndex);
-        text += nextIndex;
-
-        glyphs.push_back(autoCache.getCache()->unicharToGlyph(unichar));
-    }
-    canvas->drawGlyphsOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
+    auto utf16 = asciiToUtf16(text);
+    canvas->drawTextOnPath(utf16.get(), strlen(text), 0, path, 0, 0, paint, nullptr);
 }
 
 void TestUtils::TestTask::run() {
@@ -151,12 +116,13 @@ void TestUtils::TestTask::run() {
     renderState.onGLContextDestroyed();
 }
 
-std::unique_ptr<uint16_t[]> TestUtils::utf8ToUtf16(const char* str) {
-    const size_t strLen = strlen(str);
-    const ssize_t utf16Len = utf8_to_utf16_length((uint8_t*) str, strLen);
-    std::unique_ptr<uint16_t[]> dst(new uint16_t[utf16Len + 1]);
-    utf8_to_utf16((uint8_t*) str, strLen, (char16_t*) dst.get());
-    return dst;
+std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {
+    const int length = strlen(str);
+    std::unique_ptr<uint16_t[]> utf16(new uint16_t[length]);
+    for (int i = 0; i < length; i++) {
+        utf16.get()[i] = str[i];
+    }
+    return utf16;
 }
 
 } /* namespace uirenderer */

@@ -29,6 +29,11 @@ Paint::Paint(const Paint& paint) : SkPaint(paint),
         mHyphenEdit(paint.mHyphenEdit) {
 }
 
+Paint::Paint(const SkPaint& paint) : SkPaint(paint),
+        mLetterSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
+        mFontVariant(VARIANT_DEFAULT) {
+}
+
 Paint::~Paint() {
 }
 
