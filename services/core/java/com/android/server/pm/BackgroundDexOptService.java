@@ -16,8 +16,6 @@
 
 package com.android.server.pm;
 
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.REASON_BACKGROUND_DEXOPT;
-
 import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -26,7 +24,6 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -94,7 +91,7 @@ public class BackgroundDexOptService extends JobService {
                         continue;
                     }
                     if (!pm.performDexOpt(pkg, /* instruction set */ null, /* checkProfiles */ true,
-                            REASON_BACKGROUND_DEXOPT, /* force */ false)) {
+                            PackageManagerService.REASON_BACKGROUND_DEXOPT, /* force */ false)) {
                         // there was a problem running dexopt,
                         // remember this so we do not keep retrying.
                         sFailedPackageNames.add(pkg);
