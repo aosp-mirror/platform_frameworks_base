@@ -272,12 +272,17 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<PermissionInfo> queryPermissionsByGroup(String group, int flags)
             throws NameNotFoundException {
         try {
-            List<PermissionInfo> pi = mPM.queryPermissionsByGroup(group, flags).getList();
-            if (pi != null) {
-                return pi;
+            ParceledListSlice<PermissionInfo> parceledList =
+                    mPM.queryPermissionsByGroup(group, flags);
+            if (parceledList != null) {
+                List<PermissionInfo> pi = parceledList.getList();
+                if (pi != null) {
+                    return pi;
+                }
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -288,7 +293,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public PermissionGroupInfo getPermissionGroupInfo(String name,
-                                                      int flags) throws NameNotFoundException {
+            int flags) throws NameNotFoundException {
         try {
             PermissionGroupInfo pgi = mPM.getPermissionGroupInfo(name, flags);
             if (pgi != null) {
@@ -302,9 +307,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
         try {
-            return mPM.getAllPermissionGroups(flags).getList();
+            ParceledListSlice<PermissionGroupInfo> parceledList =
+                    mPM.getAllPermissionGroups(flags);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -439,9 +450,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public FeatureInfo[] getSystemAvailableFeatures() {
         try {
-            final List<FeatureInfo> list = mPM.getSystemAvailableFeatures().getList();
+            ParceledListSlice<FeatureInfo> parceledList =
+                    mPM.getSystemAvailableFeatures();
+            if (parceledList == null) {
+                return new FeatureInfo[0];
+            }
+            final List<FeatureInfo> list = parceledList.getList();
             final FeatureInfo[] res = new FeatureInfo[list.size()];
             for (int i = 0; i < res.length; i++) {
                 res[i] = list.get(i);
@@ -636,10 +653,15 @@ public class ApplicationPackageManager extends PackageManager {
 
     /** @hide */
     @Override
+    @SuppressWarnings("unchecked")
     public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
         try {
-            ParceledListSlice<PackageInfo> slice = mPM.getInstalledPackages(flags, userId);
-            return slice.getList();
+            ParceledListSlice<PackageInfo> parceledList =
+                    mPM.getInstalledPackages(flags, userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -651,9 +673,12 @@ public class ApplicationPackageManager extends PackageManager {
             String[] permissions, int flags) {
         final int userId = mContext.getUserId();
         try {
-            ParceledListSlice<PackageInfo> slice = mPM.getPackagesHoldingPermissions(
-                    permissions, flags, userId);
-            return slice.getList();
+            ParceledListSlice<PackageInfo> parceledList =
+                    mPM.getPackagesHoldingPermissions(permissions, flags, userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -664,8 +689,12 @@ public class ApplicationPackageManager extends PackageManager {
     public List<ApplicationInfo> getInstalledApplications(int flags) {
         final int userId = mContext.getUserId();
         try {
-            ParceledListSlice<ApplicationInfo> slice = mPM.getInstalledApplications(flags, userId);
-            return slice.getList();
+            ParceledListSlice<ApplicationInfo> parceledList =
+                    mPM.getInstalledApplications(flags, userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -770,20 +799,25 @@ public class ApplicationPackageManager extends PackageManager {
 
     /** @hide Same as above but for a specific user */
     @Override
+    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
-                                                   int flags, int userId) {
+            int flags, int userId) {
         try {
-            return mPM.queryIntentActivities(
-                intent,
-                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                flags,
-                userId).getList();
+            ParceledListSlice<ResolveInfo> parceledList =
+                    mPM.queryIntentActivities(intent,
+                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            flags, userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentActivityOptions(
         ComponentName caller, Intent[] specifics, Intent intent,
         int flags) {
@@ -807,10 +841,13 @@ public class ApplicationPackageManager extends PackageManager {
         }
 
         try {
-            return mPM
-                    .queryIntentActivityOptions(caller, specifics, specificTypes, intent,
-                            intent.resolveTypeIfNeeded(resolver), flags, mContext.getUserId())
-                    .getList();
+            ParceledListSlice<ResolveInfo> parceledList =
+                    mPM.queryIntentActivityOptions(caller, specifics, specificTypes, intent,
+                    intent.resolveTypeIfNeeded(resolver), flags, mContext.getUserId());
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -820,13 +857,17 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, int flags, int userId) {
         try {
-            return mPM.queryIntentReceivers(
-                intent,
-                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                flags,
-                userId).getList();
+            ParceledListSlice<ResolveInfo> parceledList =
+                    mPM.queryIntentReceivers(intent,
+                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            flags,  userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -851,13 +892,17 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
         try {
-            return mPM.queryIntentServices(
-                intent,
-                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                flags,
-                userId).getList();
+            ParceledListSlice<ResolveInfo> parceledList =
+                    mPM.queryIntentServices(intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    flags, userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -869,12 +914,18 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ResolveInfo> queryIntentContentProvidersAsUser(
             Intent intent, int flags, int userId) {
         try {
-            return mPM.queryIntentContentProviders(intent,
-                    intent.resolveTypeIfNeeded(mContext.getContentResolver()), flags, userId)
-                    .getList();
+            ParceledListSlice<ResolveInfo> parceledList =
+                    mPM.queryIntentContentProviders(intent,
+                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            flags, userId);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -901,12 +952,13 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ProviderInfo> queryContentProviders(String processName,
-                                                    int uid, int flags) {
+            int uid, int flags) {
         try {
-            ParceledListSlice<ProviderInfo> slice
-                    = mPM.queryContentProviders(processName, uid, flags);
-            return slice != null ? slice.getList() : null;
+            ParceledListSlice<ProviderInfo> slice =
+                    mPM.queryContentProviders(processName, uid, flags);
+            return slice != null ? slice.getList() : Collections.<ProviderInfo>emptyList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -930,10 +982,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<InstrumentationInfo> queryInstrumentation(
         String targetPackage, int flags) {
         try {
-            return mPM.queryInstrumentation(targetPackage, flags).getList();
+            ParceledListSlice<InstrumentationInfo> parceledList =
+                    mPM.queryInstrumentation(targetPackage, flags);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1575,18 +1633,30 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
         try {
-            return mPM.getIntentFilterVerifications(packageName).getList();
+            ParceledListSlice<IntentFilterVerificationInfo> parceledList =
+                    mPM.getIntentFilterVerifications(packageName);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<IntentFilter> getAllIntentFilters(String packageName) {
         try {
-            return mPM.getAllIntentFilters(packageName).getList();
+            ParceledListSlice<IntentFilter> parceledList =
+                    mPM.getAllIntentFilters(packageName);
+            if (parceledList == null) {
+                return Collections.emptyList();
+            }
+            return parceledList.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
