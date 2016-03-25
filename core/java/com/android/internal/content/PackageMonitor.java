@@ -26,6 +26,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.Preconditions;
 
 import java.util.HashSet;
 
@@ -72,15 +73,17 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     public void register(Context context, Looper thread, UserHandle user,
             boolean externalStorage) {
+        register(context, user, externalStorage,
+                (thread == null) ? BackgroundThread.getHandler() : new Handler(thread));
+    }
+
+    public void register(Context context, UserHandle user,
+        boolean externalStorage, Handler handler) {
         if (mRegisteredContext != null) {
             throw new IllegalStateException("Already registered");
         }
         mRegisteredContext = context;
-        if (thread == null) {
-            mRegisteredHandler = BackgroundThread.getHandler();
-        } else {
-            mRegisteredHandler = new Handler(thread);
-        }
+        mRegisteredHandler = Preconditions.checkNotNull(handler);
         if (user != null) {
             context.registerReceiverAsUser(this, user, sPackageFilt, null, mRegisteredHandler);
             context.registerReceiverAsUser(this, user, sNonDataFilt, null, mRegisteredHandler);
