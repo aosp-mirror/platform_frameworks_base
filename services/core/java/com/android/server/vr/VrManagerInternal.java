@@ -38,6 +38,17 @@ public abstract class VrManagerInternal {
     public abstract boolean isInVrMode();
 
     /**
+     * Return {@code true} if the given package is the currently bound VrListenerService for the
+     * given user.
+     *
+     * @param packageName The package name to check.
+     * @param userId the user ID to check the package name for.
+     *
+     * @return {@code true} if the given package is the currently bound VrListenerService.
+     */
+    public abstract boolean isCurrentVrListener(String packageName, int userId);
+
+    /**
      * Set the current VR mode state.
      *
      * @param enabled {@code true} to enable VR mode.
