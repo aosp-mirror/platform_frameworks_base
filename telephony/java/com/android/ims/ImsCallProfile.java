@@ -201,7 +201,7 @@ public class ImsCallProfile implements Parcelable {
      * "14" vs (int) 14).
      * Note: This is used by {@link com.android.internal.telephony.imsphone.ImsPhoneConnection#
      *      updateWifiStateFromExtras(Bundle)} to determine whether to set the
-     * {@link android.telecom.Connection#CAPABILITY_WIFI} capability on a connection.
+     * {@link android.telecom.Connection#PROPERTY_WIFI} property on a connection.
      */
     public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
 
