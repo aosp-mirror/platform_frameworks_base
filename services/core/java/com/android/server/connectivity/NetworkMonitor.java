@@ -34,6 +34,8 @@ import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.net.metrics.CaptivePortalCheckResultEvent;
+import android.net.metrics.CaptivePortalStateChangeEvent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -297,9 +299,13 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mLingeringState);
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
+                    CaptivePortalStateChangeEvent.logEvent(
+                            CaptivePortalStateChangeEvent.NETWORK_MONITOR_CONNECTED);
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
+                    CaptivePortalStateChangeEvent.logEvent(
+                            CaptivePortalStateChangeEvent.NETWORK_MONITOR_DISCONNECTED);
                     if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
                         mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
                         mLaunchCaptivePortalAppBroadcastReceiver = null;
@@ -349,6 +355,8 @@ public class NetworkMonitor extends StateMachine {
     private class ValidatedState extends State {
         @Override
         public void enter() {
+            CaptivePortalStateChangeEvent.logEvent(
+                   CaptivePortalStateChangeEvent.NETWORK_MONITOR_VALIDATED);
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_VALID, 0, mNetworkAgentInfo));
         }
@@ -457,6 +465,8 @@ public class NetworkMonitor extends StateMachine {
                     // will be unresponsive. isCaptivePortal() could be executed on another Thread
                     // if this is found to cause problems.
                     int httpResponseCode = isCaptivePortal();
+                    CaptivePortalCheckResultEvent.logEvent(mNetworkAgentInfo.network.netId,
+                            httpResponseCode);
                     if (httpResponseCode == 204) {
                         transitionTo(mValidatedState);
                     } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
