@@ -243,13 +243,15 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * Invokes {@link #loadDrawable(Context)} on a background thread
-     * and then runs <code>andThen</code> on the UI thread when finished.
+     * Invokes {@link #loadDrawable(Context)} on a background thread and notifies the <code>
+     * {@link OnDrawableLoadedListener#onDrawableLoaded listener} </code> on the {@code handler}
+     * when finished.
      *
      * @param context {@link Context Context} in which to load the drawable; see
      *                {@link #loadDrawable(Context)}
-     * @param listener a callback to run on the provided
-     * @param handler {@link Handler} on which to run <code>andThen</code>.
+     * @param listener to be {@link OnDrawableLoadedListener#onDrawableLoaded notified} when
+     *                 {@link #loadDrawable(Context)} finished
+     * @param handler {@link Handler} on which to notify the {@code listener}
      */
     public void loadDrawableAsync(Context context, final OnDrawableLoadedListener listener,
             Handler handler) {
