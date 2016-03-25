@@ -138,7 +138,7 @@ public class DhcpClient extends StateMachine {
             MessageUtils.findMessageNames(sMessageClasses);
 
     // DHCP parameters that we request.
-    private static final byte[] REQUESTED_PARAMS = new byte[] {
+    /* package */ static final byte[] REQUESTED_PARAMS = new byte[] {
         DHCP_SUBNET_MASK,
         DHCP_ROUTER,
         DHCP_DNS_SERVER,
@@ -148,6 +148,7 @@ public class DhcpClient extends StateMachine {
         DHCP_LEASE_TIME,
         DHCP_RENEWAL_TIME,
         DHCP_REBINDING_TIME,
+        DHCP_VENDOR_INFO,
     };
 
     // DHCP flag that means "yes, we support unicast."
