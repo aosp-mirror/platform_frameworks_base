@@ -1689,19 +1689,20 @@ public abstract class TvInputService extends Service {
         public abstract void onTune(Uri channelUri);
 
         /**
-         * Called when the application requests to tune to a given channel for TV program recording.
+         * Calls {@link #onTune(Uri)}. Override this method in order to handle domain-specific
+         * features that are only known between certain TV inputs and their clients.
          *
          * <p>The application may call this method before starting or after stopping recording, but
          * not during recording.
          *
-         * <p>The session must call {@link #notifyTuned()} if the tune request was fulfilled, or
+         * <p>The session must call {@link #notifyTuned(Uri)} if the tune request was fulfilled, or
          * {@link #notifyError(int)} otherwise.
          *
          * @param channelUri The URI of a channel.
-         * @param params Extra parameters.
-         * @hide
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
          */
-        @SystemApi
         public void onTune(Uri channelUri, Bundle params) {
             onTune(channelUri);
         }

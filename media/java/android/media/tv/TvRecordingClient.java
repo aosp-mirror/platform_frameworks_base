@@ -91,22 +91,23 @@ public class TvRecordingClient {
      * Tunes to a given channel for TV program recording. The first tune request will create a new
      * recording session for the corresponding TV input and establish a connection between the
      * application and the session. If recording has already started in the current recording
-     * session, this method throws an exception.
+     * session, this method throws an exception. This can be used to provide domain-specific
+     * features that are only known between certain client and their TV inputs.
      *
      * <p>The application may call this method before starting or after stopping recording, but not
      * during recording.
      *
      * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onTuned()} if the tune request was fulfilled, or
+     * {@link RecordingCallback#onTuned(Uri)} if the tune request was fulfilled, or
      * {@link RecordingCallback#onError(int)} otherwise.
      *
      * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
-     * @param params Extra parameters.
+     * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+     *            name, i.e. prefixed with a package name you own, so that different developers will
+     *            not create conflicting keys.
      * @throws IllegalStateException If recording is already started.
-     * @hide
      */
-    @SystemApi
     public void tune(String inputId, Uri channelUri, Bundle params) {
         if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
         if (TextUtils.isEmpty(inputId)) {
