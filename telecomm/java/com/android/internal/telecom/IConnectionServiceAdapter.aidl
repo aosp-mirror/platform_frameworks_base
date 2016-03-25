@@ -55,6 +55,8 @@ oneway interface IConnectionServiceAdapter {
 
     void setConnectionCapabilities(String callId, int connectionCapabilities);
 
+    void setConnectionProperties(String callId, int connectionProperties);
+
     void setIsConferenced(String callId, String conferenceCallId);
 
     void setConferenceMergeFailed(String callId);

@@ -53,6 +53,8 @@ public abstract class Conference extends Conferenceable {
         public void onDestroyed(Conference conference) {}
         public void onConnectionCapabilitiesChanged(
                 Conference conference, int connectionCapabilities) {}
+        public void onConnectionPropertiesChanged(
+                Conference conference, int connectionProperties) {}
         public void onVideoStateChanged(Conference c, int videoState) { }
         public void onVideoProviderChanged(Conference c, Connection.VideoProvider videoProvider) {}
         public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {}
@@ -74,6 +76,7 @@ public abstract class Conference extends Conferenceable {
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
     private int mConnectionCapabilities;
+    private int mConnectionProperties;
     private String mDisconnectMessage;
     private long mConnectTimeMillis = CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
@@ -153,6 +156,16 @@ public abstract class Conference extends Conferenceable {
      */
     public final int getConnectionCapabilities() {
         return mConnectionCapabilities;
+    }
+
+    /**
+     * Returns the properties of the conference. See {@code PROPERTY_*} constants in class
+     * {@link Connection} for valid values.
+     *
+     * @return A bitmask of the properties of the conference call.
+     */
+    public final int getConnectionProperties() {
+        return mConnectionProperties;
     }
 
     /**
@@ -364,7 +377,7 @@ public abstract class Conference extends Conferenceable {
      * Sets the capabilities of a conference. See {@code CAPABILITY_*} constants of class
      * {@link Connection} for valid values.
      *
-     * @param connectionCapabilities A bitmask of the {@code PhoneCapabilities} of the conference call.
+     * @param connectionCapabilities A bitmask of the {@code Capabilities} of the conference call.
      */
     public final void setConnectionCapabilities(int connectionCapabilities) {
         if (connectionCapabilities != mConnectionCapabilities) {
@@ -372,6 +385,22 @@ public abstract class Conference extends Conferenceable {
 
             for (Listener l : mListeners) {
                 l.onConnectionCapabilitiesChanged(this, mConnectionCapabilities);
+            }
+        }
+    }
+
+    /**
+     * Sets the properties of a conference. See {@code PROPERTY_*} constants of class
+     * {@link Connection} for valid values.
+     *
+     * @param connectionProperties A bitmask of the {@code Properties} of the conference call.
+     */
+    public final void setConnectionProperties(int connectionProperties) {
+        if (connectionProperties != mConnectionProperties) {
+            mConnectionProperties = connectionProperties;
+
+            for (Listener l : mListeners) {
+                l.onConnectionPropertiesChanged(this, mConnectionProperties);
             }
         }
     }

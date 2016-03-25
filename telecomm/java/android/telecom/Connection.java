@@ -98,7 +98,7 @@ public abstract class Connection extends Conferenceable {
      * The state of an external connection which is in the process of being pulled from a remote
      * device to the local device.
      * <p>
-     * A connection can only be in this state if the {@link #CAPABILITY_IS_EXTERNAL_CALL} and
+     * A connection can only be in this state if the {@link #PROPERTY_IS_EXTERNAL_CALL} property and
      * {@link #CAPABILITY_CAN_PULL_CALL} capability bits are set on the connection.
      */
     public static final int STATE_PULLING_CALL = 7;
@@ -194,31 +194,28 @@ public abstract class Connection extends Conferenceable {
     public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 0x00002000;
 
     /**
-     * Whether the call is a generic conference, where we do not know the precise state of
-     * participants in the conference (eg. on CDMA).
-     *
+     * Un-used.
      * @hide
      */
-    public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
+    public static final int CAPABILITY_UNUSED_2 = 0x00004000;
 
     /**
-     * Connection is using high definition audio.
+     * Un-used.
      * @hide
      */
-    public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00008000;
+    public static final int CAPABILITY_UNUSED_3 = 0x00008000;
 
     /**
-     * Connection is using WIFI.
+     * Un-used.
      * @hide
      */
-    public static final int CAPABILITY_WIFI = 0x00010000;
+    public static final int CAPABILITY_UNUSED_4 = 0x00010000;
 
     /**
-     * Indicates that the current device callback number should be shown.
-     *
+     * Un-used.
      * @hide
      */
-    public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00020000;
+    public static final int CAPABILITY_UNUSED_5 = 0x00020000;
 
     /**
      * Speed up audio setup for MT call.
@@ -281,32 +278,64 @@ public abstract class Connection extends Conferenceable {
     public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 0x00800000;
 
     /**
+     * When set for an external connection, indicates that this {@code Connection} can be pulled
+     * from a remote device to the current device.
+     * <p>
+     * Should only be set on a {@code Connection} where {@link #PROPERTY_IS_EXTERNAL_CALL}
+     * is set.
+     */
+    public static final int CAPABILITY_CAN_PULL_CALL = 0x01000000;
+
+    //**********************************************************************************************
+    // Next CAPABILITY value: 0x02000000
+    //**********************************************************************************************
+
+    /**
+     * Indicates that the current device callback number should be shown.
+     *
+     * @hide
+     */
+    public static final int PROPERTY_SHOW_CALLBACK_NUMBER = 1<<0;
+
+    /**
+     * Whether the call is a generic conference, where we do not know the precise state of
+     * participants in the conference (eg. on CDMA).
+     *
+     * @hide
+     */
+    public static final int PROPERTY_GENERIC_CONFERENCE = 1<<1;
+
+    /**
+     * Connection is using high definition audio.
+     * @hide
+     */
+    public static final int PROPERTY_HIGH_DEF_AUDIO = 1<<2;
+
+    /**
+     * Connection is using WIFI.
+     * @hide
+     */
+    public static final int PROPERTY_WIFI = 1<<3;
+
+    /**
      * When set, indicates that the {@code Connection} does not actually exist locally for the
      * {@link ConnectionService}.
      * <p>
      * Consider, for example, a scenario where a user has two devices with the same phone number.
      * When a user places a call on one devices, the telephony stack can represent that call on the
      * other device by adding is to the {@link ConnectionService} with the
-     * {@code CAPABILITY_IS_EXTERNAL_CALL} capability set.
+     * {@link #PROPERTY_IS_EXTERNAL_CALL} capability set.
      * <p>
      * An {@link ConnectionService} should not assume that all {@link InCallService}s will handle
      * external connections.  Only those {@link InCallService}s which have the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
      * manifest will see external connections.
      */
-    public static final int CAPABILITY_IS_EXTERNAL_CALL = 0x01000000;
+    public static final int PROPERTY_IS_EXTERNAL_CALL = 1<<4;
 
-    /**
-     * When set for an external connection, indicates that this {@code Connection} can be pulled
-     * from a remote device to the current device.
-     * <p>
-     * Should only be set on a {@code Connection} where {@link #CAPABILITY_IS_EXTERNAL_CALL}
-     * is set.
-     */
-    public static final int CAPABILITY_CAN_PULL_CALL = 0x02000000;
 
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x04000000
+    // Next PROPERTY value: 1<<5
     //**********************************************************************************************
 
     /**
@@ -454,18 +483,6 @@ public abstract class Connection extends Conferenceable {
         if (can(capabilities, CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)) {
             builder.append(" CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO");
         }
-        if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
-            builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
-        }
-        if (can(capabilities, CAPABILITY_WIFI)) {
-            builder.append(" CAPABILITY_WIFI");
-        }
-        if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
-            builder.append(" CAPABILITY_GENERIC_CONFERENCE");
-        }
-        if (can(capabilities, CAPABILITY_SHOW_CALLBACK_NUMBER)) {
-            builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
-        }
         if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
             builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
         }
@@ -481,11 +498,36 @@ public abstract class Connection extends Conferenceable {
         if (can(capabilities, CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)) {
             builder.append(" CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION");
         }
-        if (can(capabilities, CAPABILITY_IS_EXTERNAL_CALL)) {
-            builder.append(" CAPABILITY_IS_EXTERNAL_CALL");
-        }
         if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
             builder.append(" CAPABILITY_CAN_PULL_CALL");
+        }
+
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String propertiesToString(int properties) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[Properties:");
+
+        if (can(properties, PROPERTY_SHOW_CALLBACK_NUMBER)) {
+            builder.append(" PROPERTY_SHOW_CALLBACK_NUMBER");
+        }
+
+        if (can(properties, PROPERTY_HIGH_DEF_AUDIO)) {
+            builder.append(" PROPERTY_HIGH_DEF_AUDIO");
+        }
+
+        if (can(properties, PROPERTY_WIFI)) {
+            builder.append(" PROPERTY_WIFI");
+        }
+
+        if (can(properties, PROPERTY_GENERIC_CONFERENCE)) {
+            builder.append(" PROPERTY_GENERIC_CONFERENCE");
+        }
+
+        if (can(properties, PROPERTY_IS_EXTERNAL_CALL)) {
+            builder.append(" PROPERTY_IS_EXTERNAL_CALL");
         }
 
         builder.append("]");
@@ -505,6 +547,7 @@ public abstract class Connection extends Conferenceable {
         public void onRingbackRequested(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
         public void onConnectionCapabilitiesChanged(Connection c, int capabilities) {}
+        public void onConnectionPropertiesChanged(Connection c, int properties) {}
         public void onVideoProviderChanged(
                 Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
@@ -1175,6 +1218,7 @@ public abstract class Connection extends Conferenceable {
     private int mCallerDisplayNamePresentation;
     private boolean mRingbackRequested = false;
     private int mConnectionCapabilities;
+    private int mConnectionProperties;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
@@ -1439,6 +1483,13 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Returns the connection's properties, as a bit mask of the {@code PROPERTY_*} constants.
+     */
+    public final int getConnectionProperties() {
+        return mConnectionProperties;
+    }
+
+    /**
      * Sets the value of the {@link #getAddress()} property.
      *
      * @param address The new address.
@@ -1630,6 +1681,21 @@ public abstract class Connection extends Conferenceable {
             mConnectionCapabilities = connectionCapabilities;
             for (Listener l : mListeners) {
                 l.onConnectionCapabilitiesChanged(this, mConnectionCapabilities);
+            }
+        }
+    }
+
+    /**
+     * Sets the connection's properties as a bit mask of the {@code PROPERTY_*} constants.
+     *
+     * @param connectionProperties The new connection properties.
+     */
+    public final void setConnectionProperties(int connectionProperties) {
+        checkImmutable();
+        if (mConnectionProperties != connectionProperties) {
+            mConnectionProperties = connectionProperties;
+            for (Listener l : mListeners) {
+                l.onConnectionPropertiesChanged(this, mConnectionProperties);
             }
         }
     }
@@ -2042,10 +2108,10 @@ public abstract class Connection extends Conferenceable {
      * The {@link InCallService} issues a request to pull an external call to the local device via
      * {@link Call#pullExternalCall()}.
      * <p>
-     * For a Connection to be pulled, both the {@link Connection#CAPABILITY_CAN_PULL_CALL} and
-     * {@link Connection#CAPABILITY_IS_EXTERNAL_CALL} capability bits must be set.
+     * For a Connection to be pulled, both the {@link Connection#CAPABILITY_CAN_PULL_CALL}
+     * capability and {@link Connection#PROPERTY_IS_EXTERNAL_CALL} property bits must be set.
      * <p>
-     * For more information on external calls, see {@link Connection#CAPABILITY_IS_EXTERNAL_CALL}.
+     * For more information on external calls, see {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
      */
     public void onPullExternalCall() {}
 
