@@ -209,9 +209,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /** Set of interfaces with active alerts. */
     @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveAlerts = Maps.newHashMap();
-    /** Set of UIDs with active reject rules. */
+    /** Set of UIDs blacklisted on metered networks. */
     @GuardedBy("mQuotaLock")
-    private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
+    private SparseBooleanArray mUidRejectOnMetered = new SparseBooleanArray();
+    /** Set of UIDs whitelisted on metered networks. */
+    @GuardedBy("mQuotaLock")
+    private SparseBooleanArray mUidAllowOnMetered = new SparseBooleanArray();
     /** Set of UIDs with cleartext penalties. */
     @GuardedBy("mQuotaLock")
     private SparseIntArray mUidCleartextPolicy = new SparseIntArray();
@@ -239,6 +242,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mQuotaLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
+
+    @GuardedBy("mQuotaLock")
+    private boolean mDataSaverMode;
 
     private Object mIdleTimerLock = new Object();
     /** Set of interfaces with active idle timers. */
@@ -583,6 +589,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
+
+            setDataSaverModeEnabled(mDataSaverMode);
+
             int size = mActiveQuotas.size();
             if (size > 0) {
                 if (DBG) Slog.d(TAG, "Pushing " + size + " active quota rules");
@@ -603,13 +612,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             }
 
-            size = mUidRejectOnQuota.size();
+            size = mUidRejectOnMetered.size();
             if (size > 0) {
-                if (DBG) Slog.d(TAG, "Pushing " + size + " active UID rules");
-                final SparseBooleanArray uidRejectOnQuota = mUidRejectOnQuota;
-                mUidRejectOnQuota = new SparseBooleanArray();
+                if (DBG) Slog.d(TAG, "Pushing " + size + " UIDs to metered whitelist rules");
+                final SparseBooleanArray uidRejectOnQuota = mUidRejectOnMetered;
+                mUidRejectOnMetered = new SparseBooleanArray();
                 for (int i = 0; i < uidRejectOnQuota.size(); i++) {
-                    setUidNetworkRules(uidRejectOnQuota.keyAt(i), uidRejectOnQuota.valueAt(i));
+                    setUidMeteredNetworkBlacklist(uidRejectOnQuota.keyAt(i),
+                            uidRejectOnQuota.valueAt(i));
+                }
+            }
+
+            size = mUidAllowOnMetered.size();
+            if (size > 0) {
+                if (DBG) Slog.d(TAG, "Pushing " + size + " UIDs to metered blacklist rules");
+                final SparseBooleanArray uidAcceptOnQuota = mUidAllowOnMetered;
+                mUidAllowOnMetered = new SparseBooleanArray();
+                for (int i = 0; i < uidAcceptOnQuota.size(); i++) {
+                    setUidMeteredNetworkWhitelist(uidAcceptOnQuota.keyAt(i),
+                            uidAcceptOnQuota.valueAt(i));
                 }
             }
 
@@ -723,6 +744,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private class NetdCallbackReceiver implements INativeDaemonConnectorCallbacks {
         @Override
         public void onDaemonConnected() {
+            Slog.i(TAG, "onDaemonConnected()");
             // event is dispatched from internal NDC thread, so we prepare the
             // daemon back on main thread.
             if (mConnectedSignal != null) {
@@ -1683,31 +1705,66 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    @Override
-    public void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
+    private void setUidOnMeteredNetworkList(SparseBooleanArray quotaList, int uid,
+            boolean blacklist, boolean enable) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
         if (!mBandwidthControlEnabled) return;
 
+        final String chain = blacklist ? "naughtyapps" : "niceapps";
+        final String suffix = enable ? "add" : "remove";
+
         synchronized (mQuotaLock) {
-            final boolean oldRejectOnQuota = mUidRejectOnQuota.get(uid, false);
-            if (oldRejectOnQuota == rejectOnQuotaInterfaces) {
+            final boolean oldEnable = quotaList.get(uid, false);
+            if (oldEnable == enable) {
                 // TODO: eventually consider throwing
                 return;
             }
 
             try {
-                mConnector.execute("bandwidth",
-                        rejectOnQuotaInterfaces ? "addnaughtyapps" : "removenaughtyapps", uid);
-                if (rejectOnQuotaInterfaces) {
-                    mUidRejectOnQuota.put(uid, true);
+                mConnector.execute("bandwidth", suffix + chain, uid);
+                if (enable) {
+                    quotaList.put(uid, true);
                 } else {
-                    mUidRejectOnQuota.delete(uid);
+                    quotaList.delete(uid);
                 }
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
+            }
+        }
+    }
+
+    @Override
+    public void setUidMeteredNetworkBlacklist(int uid, boolean enable) {
+        setUidOnMeteredNetworkList(mUidRejectOnMetered, uid, true, enable);
+    }
+
+    @Override
+    public void setUidMeteredNetworkWhitelist(int uid, boolean enable) {
+        setUidOnMeteredNetworkList(mUidAllowOnMetered, uid, false, enable);
+    }
+
+    @Override
+    public boolean setDataSaverModeEnabled(boolean enable) {
+        if (DBG) Log.d(TAG, "setDataSaverMode: " + enable);
+        synchronized (mQuotaLock) {
+            if (mDataSaverMode == enable) {
+                Log.w(TAG, "setDataSaverMode(): already " + mDataSaverMode);
+                return true;
+            }
+            try {
+                final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
+                if (changed) {
+                    mDataSaverMode = enable;
+                } else {
+                    Log.w(TAG, "setDataSaverMode(" + enable + "): netd command silently failed");
+                }
+                return changed;
+            } catch (RemoteException e) {
+                Log.w(TAG, "setDataSaverMode(" + enable + "): netd command failed", e);
+                return false;
             }
         }
     }
@@ -2206,29 +2263,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         synchronized (mQuotaLock) {
             pw.print("Active quota ifaces: "); pw.println(mActiveQuotas.toString());
             pw.print("Active alert ifaces: "); pw.println(mActiveAlerts.toString());
-        }
-
-        synchronized (mUidRejectOnQuota) {
-            pw.print("UID reject on quota ifaces: [");
-            final int size = mUidRejectOnQuota.size();
-            for (int i = 0; i < size; i++) {
-                pw.print(mUidRejectOnQuota.keyAt(i));
-                if (i < size - 1) pw.print(",");
-            }
-            pw.println("]");
+            pw.print("Data saver mode: "); pw.println(mDataSaverMode);
+            dumpUidRuleOnQuotaLocked(pw, "blacklist", mUidRejectOnMetered);
+            dumpUidRuleOnQuotaLocked(pw, "whitelist", mUidAllowOnMetered);
         }
 
         synchronized (mUidFirewallRules) {
             dumpUidFirewallRule(pw, "", mUidFirewallRules);
         }
 
-        pw.println("UID firewall standby chain enabled: " +
+        pw.print("UID firewall standby chain enabled: "); pw.println(
                 mFirewallChainStates.get(FIREWALL_CHAIN_STANDBY));
         synchronized (mUidFirewallStandbyRules) {
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_STANDBY, mUidFirewallStandbyRules);
         }
 
-        pw.println("UID firewall dozable chain enabled: " +
+        pw.print("UID firewall dozable chain enabled: "); pw.println(
                 mFirewallChainStates.get(FIREWALL_CHAIN_DOZABLE));
         synchronized (mUidFirewallDozableRules) {
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_DOZABLE, mUidFirewallDozableRules);
@@ -2252,6 +2302,29 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
+        pw.print("Netd service status: " );
+        if (mNetdService == null) {
+            pw.println("disconnected");
+        } else {
+            try {
+                final boolean alive = mNetdService.isAlive();
+                pw.println(alive ? "alive": "dead");
+            } catch (RemoteException e) {
+                pw.println("unreachable");
+            }
+        }
+    }
+
+    private void dumpUidRuleOnQuotaLocked(PrintWriter pw, String name, SparseBooleanArray list) {
+        pw.print("UID bandwith control ");
+        pw.print(name);
+        pw.print(" rule: [");
+        final int size = list.size();
+        for (int i = 0; i < size; i++) {
+            pw.print(list.keyAt(i));
+            if (i < size - 1) pw.print(",");
+        }
+        pw.println("]");
     }
 
     private void dumpUidFirewallRule(PrintWriter pw, String name, SparseIntArray rules) {
