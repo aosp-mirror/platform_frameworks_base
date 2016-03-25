@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.android.systemui.R;
 
@@ -46,9 +47,10 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     private final Handler mHandler = new Handler();
     private View mGuideOverlayView;
     private View mGuideButtonsView;
+    private ImageView mGuideButtonPlayPauseImageView;
     private final Runnable mHideGuideOverlayRunnable = new Runnable() {
         public void run() {
-            mGuideOverlayView.setVisibility(View.INVISIBLE);
+            mGuideOverlayView.setVisibility(View.GONE);
         }
     };
 
@@ -71,6 +73,7 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         setContentView(R.layout.tv_pip_overlay);
         mGuideOverlayView = findViewById(R.id.guide_overlay);
         mGuideButtonsView = findViewById(R.id.guide_buttons);
+        mGuideButtonPlayPauseImageView = (ImageView) findViewById(R.id.guide_button_play_pause);
         mPipManager.addListener(this);
 
         sPipOverlayActivity = this;
@@ -80,12 +83,17 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     protected void onResume() {
         super.onResume();
         // TODO: Implement animation for this
-        if (!mPipManager.isRecentsShown()) {
-            mGuideOverlayView.setVisibility(View.VISIBLE);
-            mGuideButtonsView.setVisibility(View.INVISIBLE);
+        if (mPipManager.isRecentsShown()) {
+            mGuideOverlayView.setVisibility(View.GONE);
+            if (mPipManager.isPipViewFocusdInRecents()) {
+                mGuideButtonsView.setVisibility(View.GONE);
+            } else {
+                mGuideButtonsView.setVisibility(View.VISIBLE);
+                updateGuideButtonsView();
+            }
         } else {
-            mGuideOverlayView.setVisibility(View.INVISIBLE);
-            mGuideButtonsView.setVisibility(View.VISIBLE);
+            mGuideOverlayView.setVisibility(View.VISIBLE);
+            mGuideButtonsView.setVisibility(View.GONE);
         }
         mHandler.removeCallbacks(mHideGuideOverlayRunnable);
         mHandler.postDelayed(mHideGuideOverlayRunnable, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
@@ -134,11 +142,30 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     }
 
     @Override
-    public void onMediaControllerChanged() { }
+    public void onMediaControllerChanged() {
+        updateGuideButtonsView();
+    }
 
     @Override
     public void finish() {
         sPipOverlayActivity = null;
         super.finish();
+    }
+
+    private void updateGuideButtonsView() {
+        switch (mPipManager.getPlaybackState()) {
+            case PipManager.PLAYBACK_STATE_PLAYING:
+                mGuideButtonPlayPauseImageView.setVisibility(View.VISIBLE);
+                mGuideButtonPlayPauseImageView.setImageResource(R.drawable.ic_pause_white_24dp);
+                break;
+            case PipManager.PLAYBACK_STATE_PAUSED:
+                mGuideButtonPlayPauseImageView.setVisibility(View.VISIBLE);
+                mGuideButtonPlayPauseImageView.setImageResource(
+                        R.drawable.ic_play_arrow_white_24dp);
+                break;
+            case PipManager.PLAYBACK_STATE_UNAVAILABLE:
+                mGuideButtonPlayPauseImageView.setVisibility(View.GONE);
+                break;
+        }
     }
 }

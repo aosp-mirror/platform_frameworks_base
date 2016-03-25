@@ -19,8 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
-    android:clipToPadding="false"
-    android:layoutDirection="rtl">
+    android:clipToPadding="false">
     <com.android.systemui.recents.tv.views.TaskStackHorizontalGridView
         android:id="@+id/task_list"
         android:layout_width="wrap_content"
@@ -29,20 +28,21 @@
         android:clipToPadding="false"
         android:descendantFocusability="beforeDescendants"
         android:layout_marginTop="@dimen/recents_tv_gird_row_top_margin"
-        android:focusable="true" />
+        android:focusable="true"
+        android:layoutDirection="rtl" />
+
     <View
         android:id="@+id/pip_shade"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:background="#76000000"/>
+        android:background="#76000000" />
 
-    <!-- Placeholder view to handle key events for PIP when it's focused.
-         Size and positions will be adjusted to comply with the PIP bounds -->
-    <View
-        android:id="@+id/pip"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:focusable="true" />
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="132dp"
+        layout="@layout/tv_pip_controls" />
+
 </com.android.systemui.recents.tv.views.RecentsTvView>
