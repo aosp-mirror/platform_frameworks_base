@@ -202,6 +202,7 @@ public class NotificationPanelView extends PanelView implements
             notifyBarPanelExpansionChanged();
         }
     };
+    private NotificationGroupManager mGroupManager;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -413,6 +414,11 @@ public class NotificationPanelView extends PanelView implements
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
             if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
+                    ((ExpandableNotificationRow) child).getStatusBarNotification());
+            if (suppressedSummary) {
                 continue;
             }
             availableSpace -= child.getMinHeight() + notificationPadding;
@@ -2297,5 +2303,9 @@ public class NotificationPanelView extends PanelView implements
         ActivityManager am = getContext().getSystemService(ActivityManager.class);
         List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
         return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
+    }
+
+    public void setGroupManager(NotificationGroupManager groupManager) {
+        mGroupManager = groupManager;
     }
 }
