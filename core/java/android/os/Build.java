@@ -91,6 +91,12 @@ public class Build {
     /** The name of the hardware (from the kernel command line or /proc). */
     public static final String HARDWARE = getString("ro.hardware");
 
+    /**
+     * Whether this build was for an emulator device.
+     * @hide
+     */
+    public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
+
     /** A hardware serial number, if available.  Alphanumeric only, case-insensitive. */
     public static final String SERIAL = getString("ro.serialno");
 
