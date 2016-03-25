@@ -385,6 +385,7 @@ public final class UsbAlsaManager {
             UsbAudioDevice audioDevice = selectAudioCard(addedCard);
             if (audioDevice != null) {
                 mAudioDevices.put(usbDevice, audioDevice);
+                Slog.i(TAG, "USB Audio Device Added: " + audioDevice);
             }
 
             // look for MIDI devices
@@ -441,6 +442,7 @@ public final class UsbAlsaManager {
         }
 
         UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
+        Slog.i(TAG, "USB Audio Device Removed: " + audioDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasCapture) {
                 notifyDeviceState(audioDevice, false);
