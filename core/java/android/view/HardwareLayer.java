@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -51,8 +52,8 @@ final class HardwareLayer {
      * @param paint The paint used when the layer is drawn into the destination canvas.
      * @see View#setLayerPaint(android.graphics.Paint)
      */
-    public void setLayerPaint(Paint paint) {
-        nSetLayerPaint(mFinalizer.get(), paint.getNativeInstance());
+    public void setLayerPaint(@Nullable Paint paint) {
+        nSetLayerPaint(mFinalizer.get(), paint != null ? paint.getNativeInstance() : 0);
         mRenderer.pushLayerUpdate(this);
     }
 
