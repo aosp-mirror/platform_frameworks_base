@@ -2051,9 +2051,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mDestinationSpinnerAdapter.unregisterDataSetObserver(mPrintersObserver);
         }
 
+        if (mSpoolerProvider != null) {
+            mSpoolerProvider.destroy();
+        }
+
         if (mState != STATE_INITIALIZING) {
             mProgressMessageController.cancel();
-            mSpoolerProvider.destroy();
             mPrintedDocument.finish();
             mPrintedDocument.destroy();
             mPrintPreviewController.destroy(new Runnable() {
