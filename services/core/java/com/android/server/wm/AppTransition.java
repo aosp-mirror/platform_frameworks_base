@@ -996,7 +996,14 @@ public class AppTransition implements Dump {
     private Path createCurvedPath(float fromX, float toX, float fromY, float toY) {
         final Path path = new Path();
         path.moveTo(fromX, fromY);
-        path.cubicTo(fromX, fromY, toX, 0.9f * fromY + 0.1f * toY, toX, toY);
+
+        if (fromY > toY) {
+            // If the object needs to go up, move it in horizontal direction first, then vertical.
+            path.cubicTo(fromX, fromY, toX, 0.9f * fromY + 0.1f * toY, toX, toY);
+        } else {
+            // If the object needs to go down, move it in vertical direction first, then horizontal.
+            path.cubicTo(fromX, fromY, fromX, 0.1f * fromY + 0.9f * toY, toX, toY);
+        }
         return path;
     }
 
@@ -1557,6 +1564,7 @@ public class AppTransition implements Dump {
     int getAppStackClipMode() {
         return mNextAppTransition == TRANSIT_ACTIVITY_RELAUNCH
                 || mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS
+                || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
                 ? STACK_CLIP_NONE
                 : STACK_CLIP_AFTER_ANIM;
     }
