@@ -19,7 +19,6 @@ package com.android.systemui.recents.views;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
@@ -29,10 +28,6 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IRemoteCallback;
-import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.AppTransitionAnimationSpec;
@@ -44,11 +39,9 @@ import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
-import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
@@ -94,8 +87,6 @@ public class RecentsView extends FrameLayout {
     private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
     private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
 
-    private final Handler mHandler;
-
     private TaskStack mStack;
     private TaskStackView mTaskStackView;
     private TextView mStackActionButton;
@@ -133,18 +124,17 @@ public class RecentsView extends FrameLayout {
         setWillNotDraw(false);
 
         SystemServicesProxy ssp = Recents.getSystemServices();
-        mHandler = new Handler();
-        mTransitionHelper = new RecentsTransitionHelper(getContext(), mHandler);
+        mTransitionHelper = new RecentsTransitionHelper(getContext());
         mDividerSize = ssp.getDockedDividerSize(context);
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
 
-        final float cornerRadius = context.getResources().getDimensionPixelSize(
-                R.dimen.recents_task_view_rounded_corners_radius);
         LayoutInflater inflater = LayoutInflater.from(context);
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
-            mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button, this,
-                    false);
+            float cornerRadius = context.getResources().getDimensionPixelSize(
+                    R.dimen.recents_task_view_rounded_corners_radius);
+            mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
+                    this, false);
             mStackActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -166,19 +156,17 @@ public class RecentsView extends FrameLayout {
         setBackground(mBackgroundScrim);
     }
 
-    /** Set/get the bsp root node */
-    public void onResume(boolean isResumingFromVisible, boolean multiWindowChange,
-            TaskStack stack) {
+    /**
+     * Called from RecentsActivity when it is relaunched.
+     */
+    public void onReload(boolean isResumingFromVisible, boolean isTaskStackEmpty) {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
 
-        if (!multiWindowChange &&
-                (mTaskStackView == null || !launchState.launchedReuseTaskStackViews)) {
+        if (mTaskStackView == null) {
             isResumingFromVisible = false;
-            removeView(mTaskStackView);
             mTaskStackView = new TaskStackView(getContext());
             mTaskStackView.setSystemInsets(mSystemInsets);
-            mStack = mTaskStackView.getStack();
             addView(mTaskStackView);
         }
 
@@ -187,9 +175,7 @@ public class RecentsView extends FrameLayout {
         mLastTaskLaunchedWasFreeform = false;
 
         // Update the stack
-        mTaskStackView.onResume(isResumingFromVisible);
-        mTaskStackView.setTasks(stack, isResumingFromVisible /* notifyStackChanges */,
-                true /* relayoutTaskStack */, multiWindowChange);
+        mTaskStackView.onReload(isResumingFromVisible);
 
         if (isResumingFromVisible) {
             // If we are already visible, then restore the background scrim
@@ -199,12 +185,20 @@ public class RecentsView extends FrameLayout {
             // Otherwise, defer until the enter animation completes to animate the scrim alpha with
             // the tasks for the home animation.
             if (launchState.launchedWhileDocking || launchState.launchedFromApp
-                    || mStack.getTaskCount() == 0) {
+                    || isTaskStackEmpty) {
                 mBackgroundScrim.setAlpha((int) (DEFAULT_SCRIM_ALPHA * 255));
             } else {
                 mBackgroundScrim.setAlpha(0);
             }
         }
+    }
+
+    /**
+     * Called from RecentsActivity when the task stack is updated.
+     */
+    public void updateStack(TaskStack stack) {
+        mStack = stack;
+        mTaskStackView.setTasks(stack, true /* allowNotifyStackChanges */);
 
         // Update the top level view's visibilities
         if (stack.getTaskCount() > 0) {
@@ -212,6 +206,13 @@ public class RecentsView extends FrameLayout {
         } else {
             showEmptyView(R.string.recents_empty_message);
         }
+    }
+
+    /**
+     * Returns the current TaskStack.
+     */
+    public TaskStack getStack() {
+        return mStack;
     }
 
     /**

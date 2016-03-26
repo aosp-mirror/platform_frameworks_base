@@ -24,10 +24,13 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import com.android.systemui.recents.*;
+
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivityLaunchState;
+import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.tv.views.TaskCardView;
@@ -101,8 +104,6 @@ public class RecentsTvImpl extends RecentsImpl{
         launchState.launchedFromApp = fromThumbnail;
         launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
-        launchState.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
-        launchState.launchedHasConfigurationChanged = false;
 
         Intent intent = new Intent();
         intent.setClassName(RECENTS_PACKAGE, RECENTS_TV_ACTIVITY);
@@ -115,7 +116,6 @@ public class RecentsTvImpl extends RecentsImpl{
         } else {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
-        mCanReuseTaskStackViews = true;
         EventBus.getDefault().send(new RecentsActivityStartingEvent());
     }
 
