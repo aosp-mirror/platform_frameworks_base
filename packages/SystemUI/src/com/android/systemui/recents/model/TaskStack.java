@@ -220,6 +220,11 @@ public class TaskStack {
          */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
             Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture);
+
+        /**
+         * Notifies when tasks in the stack have been updated.
+         */
+        void onStackTasksUpdated(TaskStack stack);
     }
 
     /**
@@ -560,14 +565,19 @@ public class TaskStack {
         mStackTaskList.set(allTasks);
         mRawTaskList = allTasks;
 
+        // Update the affiliated groupings
+        createAffiliatedGroupings(context);
+
         // Only callback for the newly added tasks after this stack has been updated
         int addedTaskCount = addedTasks.size();
         for (int i = 0; i < addedTaskCount; i++) {
             mCb.onStackTaskAdded(this, addedTasks.get(i));
         }
 
-        // Update the affiliated groupings
-        createAffiliatedGroupings(context);
+        // Notify that the task stack has been updated
+        if (notifyStackChanges) {
+            mCb.onStackTasksUpdated(this);
+        }
     }
 
     /**

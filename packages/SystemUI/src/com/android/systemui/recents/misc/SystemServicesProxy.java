@@ -1064,6 +1064,16 @@ public class SystemServicesProxy {
         }
     }
 
+    /**
+     * Returns whether the device has a transposed nav bar (on the right of the screen) in the
+     * current display orientation.
+     */
+    public boolean hasTransposedNavBar() {
+        Rect insets = new Rect();
+        getStableInsets(insets);
+        return insets.right > 0;
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_ACTIVITY_PINNED = 2;

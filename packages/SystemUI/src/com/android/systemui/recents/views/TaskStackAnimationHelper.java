@@ -152,8 +152,6 @@ public class TaskStackAnimationHelper {
 
             if (hideTask) {
                 tv.setVisibility(View.INVISIBLE);
-            } else if (launchState.launchedHasConfigurationChanged) {
-                // Just load the views as-is
             } else if (launchState.launchedFromApp && !launchState.launchedWhileDocking) {
                 if (task.isLaunchTarget) {
                     tv.onPrepareLaunchTargetForEnterAnimation();
@@ -354,6 +352,12 @@ public class TaskStackAnimationHelper {
 
             if (tv == launchingTaskView) {
                 tv.setClipViewInStack(false);
+                postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv.setClipViewInStack(true);
+                    }
+                });
                 tv.onStartLaunchTargetLaunchAnimation(taskViewExitToAppDuration,
                         screenPinningRequested, postAnimationTrigger);
             } else if (currentTaskOccludesLaunchTarget) {
@@ -386,7 +390,8 @@ public class TaskStackAnimationHelper {
         int taskViewRemoveAnimTranslationXPx = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_remove_anim_translation_x);
 
-        // Disabling clipping with the stack while the view is animating away
+        // Disabling clipping with the stack while the view is animating away, this will get
+        // restored when the task is next picked up from the view pool
         deleteTaskView.setClipViewInStack(false);
 
         // Compose the new animation and transform and star the animation
@@ -395,9 +400,6 @@ public class TaskStackAnimationHelper {
             @Override
             public void onAnimationEnd(Animator animation) {
                 postAnimationTrigger.decrement();
-
-                // Re-enable clipping with the stack (we will reuse this view)
-                deleteTaskView.setClipViewInStack(true);
             }
         });
         postAnimationTrigger.increment();

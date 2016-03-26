@@ -243,11 +243,6 @@ public class TaskViewThumbnail extends View {
     public void updateThumbnailScale() {
         mThumbnailScale = 1f;
         if (mBitmapShader != null) {
-
-            if (mThumbnailInfo != null) {
-                System.out.println(mTask.title + " bounds: " + mThumbnailInfo.taskWidth + "x" + mThumbnailInfo.taskHeight + ", " + mThumbnailInfo.screenOrientation);
-            }
-
             // We consider this a stack task if it is not freeform (ie. has no bounds) or has been
             // dragged into the stack from the freeform workspace
             boolean isStackTask = !mTask.isFreeformTask() || mTask.bounds == null;

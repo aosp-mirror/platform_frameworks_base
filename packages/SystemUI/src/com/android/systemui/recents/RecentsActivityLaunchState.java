@@ -31,8 +31,6 @@ public class RecentsActivityLaunchState {
     public boolean launchedFromApp;
     public boolean launchedFromAppDocked;
     public boolean launchedFromHome;
-    public boolean launchedReuseTaskStackViews;
-    public boolean launchedHasConfigurationChanged;
     public boolean launchedViaDragGesture;
     public boolean launchedWhileDocking;
     public int launchedToTaskId;
@@ -45,7 +43,6 @@ public class RecentsActivityLaunchState {
         launchedFromAppDocked = false;
         launchedToTaskId = -1;
         launchedWithAltTab = false;
-        launchedHasConfigurationChanged = false;
         launchedViaDragGesture = false;
         launchedWhileDocking = false;
     }
@@ -53,10 +50,6 @@ public class RecentsActivityLaunchState {
     /** Called when the configuration has changed, and we want to reset any configuration specific
      * members. */
     public void updateOnConfigurationChange() {
-        // Reset this flag on configuration change to ensure that we recreate new task views
-        launchedReuseTaskStackViews = false;
-        // Set this flag to indicate that the configuration has changed since Recents last launched
-        launchedHasConfigurationChanged = true;
         launchedViaDragGesture = false;
         launchedWhileDocking = false;
     }
