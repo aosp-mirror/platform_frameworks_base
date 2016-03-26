@@ -226,9 +226,9 @@ TEST(RecordingCanvas, drawColor) {
 
     ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
     auto op = *(dl->getOps()[0]);
-    EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+    EXPECT_EQ(RecordedOpId::ColorOp, op.opId);
     EXPECT_EQ(nullptr, op.localClip);
-    EXPECT_TRUE(op.unmappedBounds.contains(Rect(200, 200))) << "Expect recording/clip bounds";
+    EXPECT_TRUE(op.unmappedBounds.isEmpty()) << "Expect undefined recorded bounds";
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {

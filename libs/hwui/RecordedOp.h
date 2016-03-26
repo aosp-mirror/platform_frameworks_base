@@ -90,6 +90,7 @@ class Tree;
         UNMERGEABLE_OP_FN(ArcOp) \
         UNMERGEABLE_OP_FN(BitmapMeshOp) \
         UNMERGEABLE_OP_FN(BitmapRectOp) \
+        UNMERGEABLE_OP_FN(ColorOp) \
         UNMERGEABLE_OP_FN(FunctorOp) \
         UNMERGEABLE_OP_FN(LinesOp) \
         UNMERGEABLE_OP_FN(OvalOp) \
@@ -254,6 +255,16 @@ struct CirclePropsOp : RecordedOp {
     const float* x;
     const float* y;
     const float* radius;
+};
+
+struct ColorOp : RecordedOp {
+    // Note: unbounded op that will fillclip, so no bounds/matrix needed
+    ColorOp(const ClipBase* localClip, int color, SkXfermode::Mode mode)
+            : RecordedOp(RecordedOpId::ColorOp, Rect(), Matrix4::identity(), localClip, nullptr)
+            , color(color)
+            , mode(mode) {}
+    const int color;
+    const SkXfermode::Mode mode;
 };
 
 struct FunctorOp : RecordedOp {

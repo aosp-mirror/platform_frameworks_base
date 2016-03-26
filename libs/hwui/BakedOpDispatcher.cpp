@@ -506,6 +506,22 @@ void BakedOpDispatcher::onBitmapRectOp(BakedOpRenderer& renderer, const BitmapRe
     renderer.renderGlop(state, glop);
 }
 
+void BakedOpDispatcher::onColorOp(BakedOpRenderer& renderer, const ColorOp& op, const BakedOpState& state) {
+    SkPaint paint;
+    paint.setColor(op.color);
+    paint.setXfermodeMode(op.mode);
+
+    Glop glop;
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+            .setRoundRectClipState(state.roundRectClipState)
+            .setMeshUnitQuad()
+            .setFillPaint(paint, state.alpha)
+            .setTransform(Matrix4::identity(), TransformFlags::None)
+            .setModelViewMapUnitToRect(state.computedState.clipState->rect)
+            .build();
+    renderer.renderGlop(state, glop);
+}
+
 void BakedOpDispatcher::onFunctorOp(BakedOpRenderer& renderer, const FunctorOp& op, const BakedOpState& state) {
     renderer.renderFunctor(op, state);
 }

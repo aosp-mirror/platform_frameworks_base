@@ -572,6 +572,12 @@ void FrameBuilder::deferCirclePropsOp(const CirclePropsOp& op) {
     deferOvalOp(*resolvedOp);
 }
 
+void FrameBuilder::deferColorOp(const ColorOp& op) {
+    BakedOpState* bakedState = tryBakeUnboundedOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
+}
+
 void FrameBuilder::deferFunctorOp(const FunctorOp& op) {
     BakedOpState* bakedState = tryBakeUnboundedOpState(op);
     if (!bakedState) return; // quick rejected

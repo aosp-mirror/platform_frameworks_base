@@ -234,10 +234,10 @@ bool RecordingCanvas::clipRegion(const SkRegion* region, SkRegion::Op op) {
 // android/graphics/Canvas draw operations
 // ----------------------------------------------------------------------------
 void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
-    SkPaint paint;
-    paint.setColor(color);
-    paint.setXfermodeMode(mode);
-    drawPaint(paint);
+    addOp(alloc().create_trivial<ColorOp>(
+            getRecordedClip(),
+            color,
+            mode));
 }
 
 void RecordingCanvas::drawPaint(const SkPaint& paint) {
