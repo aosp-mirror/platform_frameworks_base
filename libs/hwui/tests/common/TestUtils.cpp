@@ -44,17 +44,20 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
 
 sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
-        std::function<void(Matrix4*)> transformSetupCallback) {
+        const SkMatrix& transform) {
+    Layer* layer = LayerRenderer::createTextureLayer(renderThread.renderState());
+
+    sp<DeferredLayerUpdater> layerUpdater = new DeferredLayerUpdater(layer);
+    layerUpdater->setSize(width, height);
+    layerUpdater->setTransform(&transform);
+
+    // updateLayer so it's ready to draw
     bool isOpaque = true;
     bool forceFilter = true;
     GLenum renderTarget = GL_TEXTURE_EXTERNAL_OES;
-
-    Layer* layer = LayerRenderer::createTextureLayer(renderThread.renderState());
     LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, forceFilter,
-            renderTarget, Matrix4::identity().data);
-    transformSetupCallback(&(layer->getTransform()));
+    renderTarget, Matrix4::identity().data);
 
-    sp<DeferredLayerUpdater> layerUpdater = new DeferredLayerUpdater(layer);
     return layerUpdater;
 }
 
