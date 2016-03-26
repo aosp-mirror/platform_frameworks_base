@@ -429,6 +429,7 @@ class DisplayContent {
         }
         if (getDockedStackVisibleForUserLocked() != null) {
             mDividerControllerLocked.getTouchRegion(mTmpRect);
+            mTmpRegion.set(mTmpRect);
             mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
         }
         if (mTapDetector != null) {
