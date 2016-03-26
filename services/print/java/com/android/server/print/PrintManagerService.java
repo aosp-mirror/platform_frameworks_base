@@ -129,7 +129,7 @@ public final class PrintManagerService extends SystemService {
                 }
                 resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
                 resolvedPackageName = resolveCallingPackageNameEnforcingSecurity(packageName);
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -151,7 +151,7 @@ public final class PrintManagerService extends SystemService {
                     return null;
                 }
                 resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -176,7 +176,7 @@ public final class PrintManagerService extends SystemService {
                     return null;
                 }
                 resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -197,7 +197,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return null;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -222,7 +222,7 @@ public final class PrintManagerService extends SystemService {
                     return;
                 }
                 resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -247,7 +247,7 @@ public final class PrintManagerService extends SystemService {
                     return;
                 }
                 resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -269,7 +269,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return null;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -303,7 +303,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -325,7 +325,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -347,7 +347,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -373,7 +373,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -394,7 +394,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -415,7 +415,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -436,7 +436,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -457,7 +457,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -481,7 +481,7 @@ public final class PrintManagerService extends SystemService {
                     return;
                 }
                 resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -503,7 +503,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -525,7 +525,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -547,7 +547,7 @@ public final class PrintManagerService extends SystemService {
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
-                userState = getOrCreateUserStateLocked(resolvedUserId);
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -661,7 +661,7 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageModified(String packageName) {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
 
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)
@@ -676,7 +676,7 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+                    UserState userState = getOrCreateUserStateLocked(getChangingUserId(), false);
 
                     synchronized (mLock) {
                         if (hadPrintService(userState, packageName)) {
@@ -695,7 +695,8 @@ public final class PrintManagerService extends SystemService {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
                         // to handle it as the change may affect ongoing print jobs.
-                        UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+                        UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
+                                false);
                         boolean stoppedSomePackages = false;
 
                         List<PrintServiceInfo> enabledServices = userState
@@ -730,7 +731,8 @@ public final class PrintManagerService extends SystemService {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
                     synchronized (mLock) {
                         if (hasPrintService(packageName)) {
-                            UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+                            UserState userState = getOrCreateUserStateLocked(getChangingUserId(),
+                                    false);
                             userState.updateIfNeededLocked();
                         }
                     }
@@ -742,7 +744,7 @@ public final class PrintManagerService extends SystemService {
                     UserHandle.ALL, true);
         }
 
-        private UserState getOrCreateUserStateLocked(int userId) {
+        private UserState getOrCreateUserStateLocked(int userId, boolean lowPriority) {
             if (!mUserManager.isUserUnlocked(userId)) {
                 throw new IllegalStateException(
                         "User " + userId + " must be unlocked for printing to be available");
@@ -750,9 +752,14 @@ public final class PrintManagerService extends SystemService {
 
             UserState userState = mUserStates.get(userId);
             if (userState == null) {
-                userState = new UserState(mContext, userId, mLock);
+                userState = new UserState(mContext, userId, mLock, lowPriority);
                 mUserStates.put(userId, userState);
             }
+
+            if (!lowPriority) {
+                userState.increasePriority();
+            }
+
             return userState;
         }
 
@@ -764,7 +771,7 @@ public final class PrintManagerService extends SystemService {
                 public void run() {
                     UserState userState;
                     synchronized (mLock) {
-                        userState = getOrCreateUserStateLocked(userId);
+                        userState = getOrCreateUserStateLocked(userId, true);
                         userState.updateIfNeededLocked();
                     }
                     // This is the first time we switch to this user after boot, so
