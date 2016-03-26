@@ -117,12 +117,6 @@ public final class NetworkSecurityConfig {
         }
     }
 
-    void onTrustStoreChange() {
-        synchronized (mAnchorsLock) {
-            mAnchors = null;
-        }
-    }
-
     /** @hide */
     public TrustAnchor findTrustAnchorBySubjectAndPublicKey(X509Certificate cert) {
         for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
@@ -152,6 +146,16 @@ public final class NetworkSecurityConfig {
             certs.addAll(ref.findAllCertificatesByIssuerAndSignature(cert));
         }
         return certs;
+    }
+
+    public void handleTrustStorageUpdate() {
+        synchronized (mAnchorsLock) {
+            mAnchors = null;
+            for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
+                ref.handleTrustStorageUpdate();
+            }
+        }
+        getTrustManager().handleTrustStorageUpdate();
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.security.net.config.ApplicationConfig;
@@ -103,5 +104,14 @@ public class NetworkSecurityPolicy {
         Context appContext = context.createPackageContext(packageName, 0);
         ManifestConfigSource source = new ManifestConfigSource(appContext);
         return new ApplicationConfig(source);
+    }
+
+    /**
+     * Handle an update to the system or user certificate stores.
+     * @hide
+     */
+    @TestApi
+    public void handleTrustStorageUpdate() {
+        ApplicationConfig.getDefaultInstance().handleTrustStorageUpdate();
     }
 }
