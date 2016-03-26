@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Nem sikerült átnevezni a dokumentumot"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Egyes fájlokat konvertált a rendszer"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Hozzáférést biztosít a(z) <xliff:g id="APPNAME"><b>^1</b></xliff:g> számára a(z) <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> könyvtárhoz itt: <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Hozzáférést biztosít a(z) <xliff:g id="APPNAME"><b>^1</b></xliff:g> számára az Ön adataihoz, beleértve a következő tárhelyen található képekhez és videókhoz: <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Ne jelenjen meg többé"</string>
     <string name="allow" msgid="7225948811296386551">"Engedélyezés"</string>
     <string name="deny" msgid="2081879885755434506">"Elutasítás"</string>

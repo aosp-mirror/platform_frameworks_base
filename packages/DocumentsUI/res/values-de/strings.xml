@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Dokument konnte nicht umbenannt werden"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Einige Dateien wurden konvertiert"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> Zugriff auf das Verzeichnis <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> auf <xliff:g id="STORAGE"><i>^3</i></xliff:g> geben?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Möchtest du <xliff:g id="APPNAME"><b>^1</b></xliff:g> Zugriff auf deine Daten auf <xliff:g id="STORAGE"><i>^2</i></xliff:g> geben, einschließlich Fotos und Videos?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Nicht mehr fragen"</string>
     <string name="allow" msgid="7225948811296386551">"Zulassen"</string>
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>

@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"დოკუმენტის გადარქმევა ვერ მოხერხდა"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ზოგიერთი ფაილი გარდაქმნილია"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"გსურთ, <xliff:g id="APPNAME"><b>^1</b></xliff:g> სარგებლობდეს <xliff:g id="STORAGE"><i>^3</i></xliff:g>-ის დირექტორიაზე „<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>“ წვდომის უფლებით?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"გსურთ, <xliff:g id="APPNAME"><b>^1</b></xliff:g> სარგებლობდეს <xliff:g id="STORAGE"><i>^2</i></xliff:g>-ზე არსებულ მონაცემებზე, მათ შორის, ფოტოებსა და ვიდეოებზე, წვდომის უფლებით?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"აღარ მკითხოთ"</string>
     <string name="allow" msgid="7225948811296386551">"უფლების მიცემა"</string>
     <string name="deny" msgid="2081879885755434506">"აკრძალვა"</string>

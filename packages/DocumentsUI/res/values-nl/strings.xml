@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Kan naam van document niet wijzigen"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Sommige bestanden zijn geconverteerd"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> toegang verlenen tot de map <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> op <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> toegang verlenen tot je gegevens, waaronder foto\'s en video\'s, op <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Niet meer vragen"</string>
     <string name="allow" msgid="7225948811296386551">"Toestaan"</string>
     <string name="deny" msgid="2081879885755434506">"Weigeren"</string>

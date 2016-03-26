@@ -118,6 +118,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Documentul nu a putut fi redenumit"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Unele fișiere au fost convertite"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Permiteți aplicației <xliff:g id="APPNAME"><b>^1</b></xliff:g> accesul la directorul <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> de pe <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Permiteți aplicației <xliff:g id="APPNAME"><b>^1</b></xliff:g> să vă acceseze datele, inclusiv fotografiile și videoclipurile, de pe <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Nu mai întreba"</string>
     <string name="allow" msgid="7225948811296386551">"Permiteți"</string>
     <string name="deny" msgid="2081879885755434506">"Refuzați"</string>
