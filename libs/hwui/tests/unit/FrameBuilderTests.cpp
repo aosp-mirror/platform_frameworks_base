@@ -387,9 +387,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
     };
 
     auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
-            [](Matrix4* transform) {
-        transform->loadTranslate(5, 5, 0);
-    });
+            SkMatrix::MakeTrans(5, 5));
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
