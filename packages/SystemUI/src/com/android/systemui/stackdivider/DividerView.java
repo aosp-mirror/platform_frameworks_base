@@ -171,6 +171,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     };
 
+    private final Runnable mResetBackgroundRunnable = new Runnable() {
+        @Override
+        public void run() {
+            resetBackground();
+        }
+    };
+
     public DividerView(Context context) {
         super(context);
     }
@@ -519,15 +526,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public void setMinimizedDockStack(boolean minimized) {
         updateDockSide();
         mHandle.setAlpha(minimized ? 0f : 1f);
-        if (mDockSide == WindowManager.DOCKED_TOP) {
+        if (!minimized) {
+            resetBackground();
+        } else if (mDockSide == WindowManager.DOCKED_TOP) {
             mBackground.setPivotY(0);
-            mBackground.setScaleY(minimized ? MINIMIZE_DOCK_SCALE : 1f);
+            mBackground.setScaleY(MINIMIZE_DOCK_SCALE);
         } else if (mDockSide == WindowManager.DOCKED_LEFT
                 || mDockSide == WindowManager.DOCKED_RIGHT) {
             mBackground.setPivotX(mDockSide == WindowManager.DOCKED_LEFT
                     ? 0
                     : mBackground.getWidth());
-            mBackground.setScaleX(minimized ? MINIMIZE_DOCK_SCALE : 1f);
+            mBackground.setScaleX(MINIMIZE_DOCK_SCALE);
         }
     }
 
@@ -550,10 +559,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mBackground.animate()
                     .scaleX(minimized ? MINIMIZE_DOCK_SCALE : 1f);
         }
+        if (!minimized) {
+            mBackground.animate().withEndAction(mResetBackgroundRunnable);
+        }
         mBackground.animate()
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(animDuration)
                 .start();
+    }
+
+    private void resetBackground() {
+        mBackground.setPivotX(mBackground.getWidth() / 2);
+        mBackground.setPivotY(mBackground.getHeight() / 2);
+        mBackground.setScaleX(1f);
+        mBackground.setScaleY(1f);
     }
 
     @Override
