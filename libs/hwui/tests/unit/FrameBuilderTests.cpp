@@ -427,7 +427,31 @@ RENDERTHREAD_TEST(FrameBuilder, functor_reject) {
     EXPECT_EQ(1, renderer.getIndex()) << "Functor should not be rejected";
 }
 
-RENDERTHREAD_TEST(FrameBuilder, renderNode) {
+RENDERTHREAD_TEST(FrameBuilder, deferColorOp_unbounded) {
+    class ColorTestRenderer : public TestRendererBase {
+    public:
+        void onColorOp(const ColorOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(Rect(200, 200), state.computedState.clippedBounds)
+                    << "Color op should be expanded to bounds of surrounding";
+        }
+    };
+
+    auto unclippedColorView = TestUtils::createNode(0, 0, 10, 10,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        props.setClipToBounds(false);
+        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            TestUtils::createSyncedNodeList(unclippedColorView),
+            sLightGeometry, Caches::getInstance());
+    ColorTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex()) << "ColorOp should not be rejected";
+}
+
+TEST(FrameBuilder, renderNode) {
     class RenderNodeTestRenderer : public TestRendererBase {
     public:
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
