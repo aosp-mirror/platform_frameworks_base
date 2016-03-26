@@ -92,37 +92,37 @@ public class CommandQueue extends IStatusBar.Stub {
      * These methods are called back on the main thread.
      */
     public interface Callbacks {
-        public void setIcon(String slot, StatusBarIcon icon);
-        public void removeIcon(String slot);
-        public void disable(int state1, int state2, boolean animate);
-        public void animateExpandNotificationsPanel();
-        public void animateCollapsePanels(int flags);
-        public void animateExpandSettingsPanel(String obj);
-        public void setSystemUiVisibility(int vis, int fullscreenStackVis,
+        void setIcon(String slot, StatusBarIcon icon);
+        void removeIcon(String slot);
+        void disable(int state1, int state2, boolean animate);
+        void animateExpandNotificationsPanel();
+        void animateCollapsePanels(int flags);
+        void animateExpandSettingsPanel(String obj);
+        void setSystemUiVisibility(int vis, int fullscreenStackVis,
                 int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds);
-        public void topAppWindowChanged(boolean visible);
-        public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+        void topAppWindowChanged(boolean visible);
+        void setImeWindowStatus(IBinder token, int vis, int backDisposition,
                 boolean showImeSwitcher);
-        public void showRecentApps(boolean triggeredFromAltTab);
-        public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
-        public void toggleRecentApps();
-        public void toggleSplitScreen();
-        public void preloadRecentApps();
-        public void toggleKeyboardShortcutsMenu(int deviceId);
-        public void cancelPreloadRecentApps();
-        public void setWindowState(int window, int state);
-        public void buzzBeepBlinked();
-        public void notificationLightOff();
-        public void notificationLightPulse(int argb, int onMillis, int offMillis);
-        public void showScreenPinningRequest();
-        public void appTransitionPending();
-        public void appTransitionCancelled();
-        public void appTransitionStarting(long startTime, long duration);
-        public void appTransitionFinished();
-        public void showAssistDisclosure();
-        public void startAssist(Bundle args);
-        public void onCameraLaunchGestureDetected(int source);
-        public void requestTvPictureInPicture();
+        void showRecentApps(boolean triggeredFromAltTab);
+        void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
+        void toggleRecentApps();
+        void toggleSplitScreen();
+        void preloadRecentApps();
+        void toggleKeyboardShortcutsMenu(int deviceId);
+        void cancelPreloadRecentApps();
+        void setWindowState(int window, int state);
+        void buzzBeepBlinked();
+        void notificationLightOff();
+        void notificationLightPulse(int argb, int onMillis, int offMillis);
+        void showScreenPinningRequest();
+        void appTransitionPending();
+        void appTransitionCancelled();
+        void appTransitionStarting(long startTime, long duration);
+        void appTransitionFinished();
+        void showAssistDisclosure();
+        void startAssist(Bundle args);
+        void onCameraLaunchGestureDetected(int source);
+        void requestTvPictureInPicture();
 
         void addQsTile(ComponentName tile);
         void remQsTile(ComponentName tile);
