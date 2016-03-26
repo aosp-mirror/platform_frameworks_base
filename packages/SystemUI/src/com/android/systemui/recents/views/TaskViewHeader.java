@@ -250,6 +250,44 @@ public class TaskViewHeader extends FrameLayout
         mFocusTimerIndicatorStub = (ViewStub) findViewById(R.id.focus_timer_indicator_stub);
         mAppOverlayViewStub = (ViewStub) findViewById(R.id.app_overlay_stub);
 
+        onConfigurationChanged();
+    }
+
+    /**
+     * Programmatically sets the layout params for a header bar layout.  This is necessary because
+     * we can't get resources based on the current configuration, but instead need to get them
+     * based on the device configuration.
+     */
+    private void updateLayoutParams(View icon, View title, View secondaryButton, View button) {
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, mHeaderBarHeight, Gravity.TOP);
+        setLayoutParams(lp);
+        lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.START);
+        icon.setLayoutParams(lp);
+        lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL);
+        lp.setMarginStart(mHeaderBarHeight);
+        lp.rightMargin = mMoveTaskButton != null
+                ? 2 * mHeaderBarHeight
+                : mHeaderBarHeight;
+        title.setLayoutParams(lp);
+        if (secondaryButton != null) {
+            lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.END);
+            lp.setMarginEnd(mHeaderBarHeight);
+            secondaryButton.setLayoutParams(lp);
+            secondaryButton.setPadding(mHeaderButtonPadding, mHeaderButtonPadding,
+                    mHeaderButtonPadding, mHeaderButtonPadding);
+        }
+        lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.END);
+        button.setLayoutParams(lp);
+        button.setPadding(mHeaderButtonPadding, mHeaderButtonPadding, mHeaderButtonPadding,
+                mHeaderButtonPadding);
+    }
+
+    /**
+     * Update the header view when the configuration changes.
+     */
+    void onConfigurationChanged() {
         // Update the dimensions of everything in the header. We do this because we need to use
         // resources for the display, and not the current configuration.
         Resources res = getResources();
@@ -269,37 +307,9 @@ public class TaskViewHeader extends FrameLayout
                 R.dimen.recents_task_view_header_button_padding_tablet_land);
         updateLayoutParams(mIconView, findViewById(R.id.title_container), mMoveTaskButton,
                 mDismissButton);
-    }
-
-    /**
-     * Programmatically sets the layout params for a header bar layout.  This is necessary because
-     * we can't get resources based on the current configuration, but instead need to get them
-     * based on the device configuration.
-     */
-    private void updateLayoutParams(View icon, View title, View secondaryButton, View button) {
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, mHeaderBarHeight, Gravity.TOP);
-        setLayoutParams(lp);
-        lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.START);
-        icon.setLayoutParams(lp);
-        lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL);
-        lp.leftMargin = mHeaderBarHeight;
-        lp.rightMargin = mMoveTaskButton != null
-                ? 2 * mHeaderBarHeight
-                : mHeaderBarHeight;
-        title.setLayoutParams(lp);
-        if (secondaryButton != null) {
-            lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.END);
-            lp.rightMargin = mHeaderBarHeight;
-            secondaryButton.setLayoutParams(lp);
-            secondaryButton.setPadding(mHeaderButtonPadding, mHeaderButtonPadding,
-                    mHeaderButtonPadding, mHeaderButtonPadding);
+        if (mAppOverlayView != null) {
+            updateLayoutParams(mAppIconView, mAppTitleView, null, mAppInfoView);
         }
-        lp = new FrameLayout.LayoutParams(mHeaderBarHeight, mHeaderBarHeight, Gravity.END);
-        button.setLayoutParams(lp);
-        button.setPadding(mHeaderButtonPadding, mHeaderButtonPadding, mHeaderButtonPadding,
-                mHeaderButtonPadding);
     }
 
     @Override

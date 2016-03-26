@@ -82,9 +82,9 @@ public class RecentsTransitionHelper {
         }
     };
 
-    public RecentsTransitionHelper(Context context, Handler handler) {
+    public RecentsTransitionHelper(Context context) {
         mContext = context;
-        mHandler = handler;
+        mHandler = new Handler();
     }
 
     /**

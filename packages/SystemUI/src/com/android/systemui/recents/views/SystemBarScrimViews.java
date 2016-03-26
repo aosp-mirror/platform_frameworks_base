@@ -46,7 +46,7 @@ public class SystemBarScrimViews {
 
     /**
      * Prepares the scrim views for animating when entering Recents. This will be called before
-     * the first draw.
+     * the first draw, unless we are updating the scrim on configuration change.
      */
     public void prepareEnterRecentsAnimation(boolean hasNavBarScrim, boolean animateNavBarScrim) {
         mHasNavBarScrim = hasNavBarScrim;

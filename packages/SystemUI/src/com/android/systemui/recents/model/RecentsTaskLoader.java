@@ -274,7 +274,9 @@ public class RecentsTaskLoader {
             new TaskKeyLruCache.EvictionCallback() {
         @Override
         public void onEntryEvicted(Task.TaskKey key) {
-            mActivityInfoCache.remove(key.getComponent());
+            if (key != null) {
+                mActivityInfoCache.remove(key.getComponent());
+            }
         }
     };
 
