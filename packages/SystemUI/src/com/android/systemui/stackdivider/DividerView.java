@@ -383,13 +383,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 x = (int) event.getRawX();
                 y = (int) event.getRawY();
 
-                if (mMoving && mDockSide != WindowManager.DOCKED_INVALID) {
-                    int position = calculatePosition(x, y);
-                    SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position,
-                            0 /* velocity */, false /* hardDismiss */);
-                    resizeStack(calculatePosition(x, y), snapTarget.position, snapTarget);
-                }
-
                 mVelocityTracker.computeCurrentVelocity(1000);
                 int position = calculatePosition(x, y);
                 stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()
@@ -734,21 +727,22 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mSnapAlgorithm.calculateDismissingFraction(position)));
         SnapTarget dismissTarget = null;
         SnapTarget splitTarget = null;
-        if ((snapTarget.flag == SnapTarget.FLAG_DISMISS_START
-                || snapTarget == mSnapAlgorithm.getFirstSplitTarget())
+        int start = 0;
+        if (position <= mSnapAlgorithm.getLastSplitTarget().position
                 && dockSideTopLeft(dockSide)) {
             dismissTarget = mSnapAlgorithm.getDismissStartTarget();
             splitTarget = mSnapAlgorithm.getFirstSplitTarget();
-        } else if ((snapTarget.flag == SnapTarget.FLAG_DISMISS_END
-                || snapTarget == mSnapAlgorithm.getLastSplitTarget())
+            start = taskPosition;
+        } else if (position >= mSnapAlgorithm.getLastSplitTarget().position
                 && dockSideBottomRight(dockSide)) {
             dismissTarget = mSnapAlgorithm.getDismissEndTarget();
             splitTarget = mSnapAlgorithm.getLastSplitTarget();
+            start = splitTarget.position;
         }
         if (dismissTarget != null && fraction > 0f
                 && isDismissing(splitTarget, position, dockSide)) {
             fraction = calculateParallaxDismissingFraction(fraction, dockSide);
-            int offsetPosition = (int) (taskPosition +
+            int offsetPosition = (int) (start +
                     fraction * (dismissTarget.position - splitTarget.position));
             int width = taskRect.width();
             int height = taskRect.height();
@@ -796,11 +790,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     private int getStackIdForDismissTarget(SnapTarget dismissTarget) {
-        if (dismissTarget.flag == SnapTarget.FLAG_DISMISS_START &&
-                (mDockSide == WindowManager.DOCKED_LEFT || mDockSide == WindowManager.DOCKED_TOP)) {
+        if ((dismissTarget.flag == SnapTarget.FLAG_DISMISS_START && dockSideTopLeft(mDockSide))
+                || (dismissTarget.flag == SnapTarget.FLAG_DISMISS_END
+                        && dockSideBottomRight(mDockSide))) {
             return StackId.DOCKED_STACK_ID;
         } else {
-            return StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+            return StackId.HOME_STACK_ID;
         }
     }
 
