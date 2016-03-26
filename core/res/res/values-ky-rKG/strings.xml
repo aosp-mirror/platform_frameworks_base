@@ -900,8 +900,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s менен түзөтүү"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Төмөнкү менен бөлүшүү"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s менен бөлүшүү"</string>
-    <string name="whichSendToApplication" msgid="8272422260066642057">"Колдонуп жөнөтүү"</string>
-    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s колдонуп жөнөтүү"</string>
+    <string name="whichSendToApplication" msgid="8272422260066642057">"Колдонмо тандаңыз"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s аркылуу жөнөтүү"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Башкы бет колдонмосун тандаңыз"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Башкы бет колдонмосу катары %1$s пайдалануу"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Бул аракет үчүн демейки боюнча колдонулсун."</string>
@@ -1225,8 +1225,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Дагы параметрлер"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <!-- no translation found for storage_internal (3570990907910199483) -->
-    <skip />
+    <string name="storage_internal" msgid="3570990907910199483">"Бөлүшүлгөн ички сактагыч"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-карта"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD карта"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB түзмөк"</string>

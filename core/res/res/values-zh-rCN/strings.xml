@@ -899,7 +899,7 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"使用%1$s编辑"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"分享方式"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"使用%1$s分享"</string>
-    <string name="whichSendToApplication" msgid="8272422260066642057">"通过以下应用发送："</string>
+    <string name="whichSendToApplication" msgid="8272422260066642057">"通过以下应用发送"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"通过1$s发送"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"选择主屏幕应用"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"将“%1$s”设为主屏幕应用"</string>
@@ -1224,8 +1224,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多选项"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s：%2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s - %2$s：%3$s"</string>
-    <!-- no translation found for storage_internal (3570990907910199483) -->
-    <skip />
+    <string name="storage_internal" msgid="3570990907910199483">"内部共享的存储空间"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD卡"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD 卡"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"U 盘"</string>
