@@ -61,7 +61,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -1279,7 +1278,7 @@ public final class ActiveServices {
                         // Before going further -- if this app is not allowed to run in the
                         // background, then at this point we aren't going to let it period.
                         final int allowed = mAm.checkAllowBackgroundLocked(
-                                sInfo.applicationInfo.uid, sInfo.packageName, callingPid);
+                                sInfo.applicationInfo.uid, sInfo.packageName, callingPid, true);
                         if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                             Slog.w(TAG, "Background execution not allowed: service "
                                     + service + " to " + name.flattenToShortString()

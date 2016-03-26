@@ -7535,14 +7535,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public int getAppStartMode(int uid, String packageName) {
         synchronized (this) {
-            return checkAllowBackgroundLocked(uid, packageName, -1);
+            return checkAllowBackgroundLocked(uid, packageName, -1, true);
         }
     }
 
-    int checkAllowBackgroundLocked(int uid, String packageName, int callingPid) {
+    int checkAllowBackgroundLocked(int uid, String packageName, int callingPid,
+            boolean allowWhenForeground) {
         UidRecord uidRec = mActiveUids.get(uid);
         if (!mLenientBackgroundCheck) {
-            if (uidRec == null
+            if (!allowWhenForeground || uidRec == null
                     || uidRec.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
                 if (mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND, uid,
                         packageName) != AppOpsManager.MODE_ALLOWED) {

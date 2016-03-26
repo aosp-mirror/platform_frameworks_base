@@ -50,7 +50,6 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
 import com.android.server.DeviceIdleController;
-import com.android.server.LocalServices;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -563,7 +562,7 @@ public final class BroadcastQueue {
         }
         if (!skip) {
             final int allowed = mService.checkAllowBackgroundLocked(filter.receiverList.uid,
-                    filter.packageName, -1);
+                    filter.packageName, -1, true);
             if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
                 Slog.w(TAG, "Background execution not allowed: receiving "
                         + r.intent
@@ -1102,21 +1101,21 @@ public final class BroadcastQueue {
 
             if (!skip) {
                 final int allowed = mService.checkAllowBackgroundLocked(
-                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, -1);
+                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, -1,
+                        false);
                 if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                     // We won't allow this receiver to be launched if the app has been
-                    // completely disabled from launches, or it is delayed and the broadcast
-                    // was not explicitly sent to it and this would result in a new process
-                    // for it being created.
+                    // completely disabled from launches, or it was not explicitly sent
+                    // to it and the app is in a state that should not receive it
+                    // (depending on how checkAllowBackgroundLocked has determined that).
                     if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
                         Slog.w(TAG, "Background execution disabled: receiving "
                                 + r.intent + " to "
                                 + component.flattenToShortString());
                         skip = true;
-                    }
-                    if (((r.intent.getFlags()&Intent.FLAG_RECEIVER_EXCLUDE_BACKGROUND) != 0)
+                    } else if (((r.intent.getFlags()&Intent.FLAG_RECEIVER_EXCLUDE_BACKGROUND) != 0)
                             || (r.intent.getComponent() == null
-                                && r.intent.getPackage() == null && app == null
+                                && r.intent.getPackage() == null
                                 && ((r.intent.getFlags()
                                         & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0))) {
                         Slog.w(TAG, "Background execution not allowed: receiving "
