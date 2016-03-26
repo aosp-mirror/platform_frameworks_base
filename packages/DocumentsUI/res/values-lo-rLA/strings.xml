@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"ປ່ຽນຊື່ເອກະສານບໍ່ສຳເລັດ"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ປ່ຽນແປງບາງໄຟລ໌ແລ້ວ"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"ອະນຸຍາດສິດເຂົ້າເຖິງໃຫ້ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ເພື່ອເຂົ້າໄດເຣກທໍຣີ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> ຢູ່ <xliff:g id="STORAGE"><i>^3</i></xliff:g> ບໍ?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"ອະນຸມັດໃຫ້ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ເຂົ້າເຖິງຂໍ້ມູນຂອງທ່ານ ເຊິ່ງຮວມເຖິງຮູບພາບ ແລະ ວິດີໂອໃນ <xliff:g id="STORAGE"><i>^2</i></xliff:g> ໄດ້ບໍ?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"ບໍ່ຕ້ອງຖາມຄືນ"</string>
     <string name="allow" msgid="7225948811296386551">"ອະນຸຍາດ"</string>
     <string name="deny" msgid="2081879885755434506">"ປະ​ຕິ​ເສດ"</string>

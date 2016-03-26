@@ -125,6 +125,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Premenovanie dokumentu zlyhalo"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Niektoré súbory boli konvertované"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Udeliť aplikácii <xliff:g id="APPNAME"><b>^1</b></xliff:g> prístup k adresáru <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> v úložisku <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Chcete aplikácii <xliff:g id="APPNAME"><b>^1</b></xliff:g> udeliť prístup k dátam (vrátane fotiek a videí) v úložisku <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Nabudúce sa nepýtať"</string>
     <string name="allow" msgid="7225948811296386551">"Povoliť"</string>
     <string name="deny" msgid="2081879885755434506">"Zamietnuť"</string>

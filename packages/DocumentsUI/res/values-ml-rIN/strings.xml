@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"ഡോക്യുമെന്റിന്റെ പേരുമാറ്റുന്നത് പരാജയപ്പെട്ടു"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ചില ഫയലുകൾ പരിവർത്തനം ചെയ്യപ്പെട്ടു"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="STORAGE"><i>^3</i></xliff:g> സ്റ്റോറേജിലെ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> എന്ന ഡയറക്റ്ററിയിലേക്ക് <xliff:g id="APPNAME"><b>^1</b></xliff:g> ആപ്പിന് ആക്സസ് അനുവദിക്കണോ?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="STORAGE"><i>^2</i></xliff:g> സ്റ്റോറേജിലെ ഫോട്ടോകളും വീഡിയോകളും ഉൾപ്പെടെ, നിങ്ങളുടെ ഡാറ്റയിലേക്ക് <xliff:g id="APPNAME"><b>^1</b></xliff:g> ആപ്പിന് ആക്സസ്സ് അനുവദിക്കണോ?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"വീണ്ടും ആവശ്യപ്പെടരുത്"</string>
     <string name="allow" msgid="7225948811296386551">"അനുവദിക്കുക"</string>
     <string name="deny" msgid="2081879885755434506">"നിരസിക്കുക"</string>
