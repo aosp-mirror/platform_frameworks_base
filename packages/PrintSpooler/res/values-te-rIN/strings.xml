@@ -80,7 +80,6 @@
     <string name="restart" msgid="2472034227037808749">"పునఃప్రారంభించు"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ప్రింటర్‌కు కనెక్షన్ లేదు"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"తెలియదు"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – అందుబాటులో లేదు"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>ని ఉపయోగించాలా?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ పత్రం ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
   <string-array name="color_mode_labels">
@@ -100,5 +99,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"క్షమించండి, అది పని చేయలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"మళ్లీ ప్రయత్నించు"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ఈ ప్రింటర్ ప్రస్తుతం అందుబాటులో లేదు."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"పరిదృశ్యాన్ని ప్రదర్శించడం సాధ్యపడలేదు"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"పరిదృశ్యం సిద్ధమవుతోంది…"</string>
 </resources>

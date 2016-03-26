@@ -80,7 +80,6 @@
     <string name="restart" msgid="2472034227037808749">"પુનઃપ્રારંભ કરો"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"પ્રિન્ટર માટે કોઈ કનેક્શન નથી"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"અજાણ્યું"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – અનુપલબ્ધ"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> નો ઉપયોગ કરીએ?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"તમારો દસ્તાવેજ પ્રિન્ટર સુધીના તેના માર્ગમાં એક અથવા વધુ સર્વર્સથી પસાર થઈ શકે છે."</string>
   <string-array name="color_mode_labels">
@@ -100,5 +99,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"માફ કરશો, તે કામ કરતું નહોતું. ફરીથી પ્રયાસ કરો."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ફરી પ્રયાસ કરો"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"આ પ્રિન્ટર અત્યારે ઉપલબ્ધ નથી."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"પૂર્વાવલોકન પ્રદર્શિત કરી શકતાં નથી"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"પૂર્વાવલોકનની તૈયારી કરી રહ્યું છે..."</string>
 </resources>

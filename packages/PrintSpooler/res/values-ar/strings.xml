@@ -84,7 +84,6 @@
     <string name="restart" msgid="2472034227037808749">"إعادة تشغيل"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"لا يوجد اتصال بالطابعة"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"غير معروف"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – غير متاحة"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"هل تريد استخدام <xliff:g id="SERVICE">%1$s</xliff:g>؟"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"من الممكن أن يمر المستند عبر خادم أو أكثر أثناء إرساله إلى الطابعة."</string>
   <string-array name="color_mode_labels">
@@ -104,5 +103,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"عذرًا، هذا لا يعمل. أعد المحاولة."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"إعادة المحاولة"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"الطابعة ليست متوفرة في الوقت الحالي."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"يتعذر عرض المعاينة."</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"جارٍ تحضير المعاينة…"</string>
 </resources>
