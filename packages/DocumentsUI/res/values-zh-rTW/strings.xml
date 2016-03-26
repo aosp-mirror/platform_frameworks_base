@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"無法重新命名文件"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"部分檔案已轉換成其他格式"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"要允許<xliff:g id="APPNAME"><b>^1</b></xliff:g>存取 <xliff:g id="STORAGE"><i>^3</i></xliff:g>上的「<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>」目錄嗎？"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"要允許「<xliff:g id="APPNAME"><b>^1</b></xliff:g>」存取 <xliff:g id="STORAGE"><i>^2</i></xliff:g>上的資料 (包括相片和影片) 嗎？"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"不要再詢問"</string>
     <string name="allow" msgid="7225948811296386551">"允許"</string>
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>

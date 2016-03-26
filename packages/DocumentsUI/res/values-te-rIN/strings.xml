@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"పత్రం పేరు మార్చడంలో విఫలమైంది"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"కొన్ని పైల్‌లు మార్చబడ్డాయి"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g>కి <xliff:g id="STORAGE"><i>^3</i></xliff:g>లో <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> డైరెక్టరీ ప్రాప్యతను మంజూరు చేయాలా?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="STORAGE"><i>^2</i></xliff:g>లో ఫోటోలు మరియు వీడియోలతో సహా మీ డేటా ప్రాప్యతను <xliff:g id="APPNAME"><b>^1</b></xliff:g>కి మంజూరు చేయాలా?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"మళ్లీ అడగవద్దు"</string>
     <string name="allow" msgid="7225948811296386551">"అనుమతించండి"</string>
     <string name="deny" msgid="2081879885755434506">"తిరస్కరించండి"</string>
