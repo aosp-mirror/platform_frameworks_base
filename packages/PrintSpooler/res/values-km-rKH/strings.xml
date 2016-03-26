@@ -80,7 +80,6 @@
     <string name="restart" msgid="2472034227037808749">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"គ្មាន​​​ការ​ភ្ជាប់​ទៅ​ម៉ាស៊ីន​បោះពុម្ព​"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"មិន​ស្គាល់"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – មិន​អាច​ប្រើ​បាន"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"ប្រើ <xliff:g id="SERVICE">%1$s</xliff:g> ឬ?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"ឯកសាររបស់អ្នកអាចនឹងឆ្លងកាត់ម៉ាស៊ីនមេមួយ ឬច្រើននៅពេលដែលវាធ្វើដំណើរទៅកាន់ម៉ាស៊ីនបោះពុម្ព។"</string>
   <string-array name="color_mode_labels">
@@ -100,5 +99,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"សូម​ទោស វា​មិន​ដំណើរ​ការ​ទេ។ ព្យាយាម​ម្ដងទៀត។"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ព្យាយាម​ម្ដងទៀត"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ឥឡូវ​នេះ ម៉ាស៊ីន​បោះពុម្ព​នេះ​មិន​អាច​ប្រើ​បាន។"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"មិនអាចបង្ហាញការមើលជាមុនបានទេ"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"កំពុង​រៀបចំ​មើល​ជា​មុន…"</string>
 </resources>
