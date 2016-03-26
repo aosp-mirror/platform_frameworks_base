@@ -284,7 +284,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     HotspotControllerImpl mHotspotController;
     RotationLockControllerImpl mRotationLockController;
     UserInfoController mUserInfoController;
-    ZenModeController mZenModeController;
+    protected ZenModeController mZenModeController;
     CastControllerImpl mCastController;
     VolumeComponent mVolumeComponent;
     KeyguardUserSwitcher mKeyguardUserSwitcher;
