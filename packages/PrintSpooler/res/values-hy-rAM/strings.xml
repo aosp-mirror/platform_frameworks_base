@@ -80,7 +80,6 @@
     <string name="restart" msgid="2472034227037808749">"Վերագործարկել"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Տպիչի հետ կապ չկա"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"անհայտ"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> տպիչն անհասանելի է"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"Օգտագործե՞լ <xliff:g id="SERVICE">%1$s</xliff:g>-ը:"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Հնարավոր է՝ փաստաթուղթը մի քանի սերվերներով անցնի մինչ տպվելը:"</string>
   <string-array name="color_mode_labels">
@@ -100,5 +99,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"Չհաջողվեց: Նորից փորձեք:"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Կրկնել"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Տպիչն այս պահին հասանելի չէ:"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"Նախադիտումը հնարավոր չէ"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Նախադիտումը պատրաստվում է…"</string>
 </resources>

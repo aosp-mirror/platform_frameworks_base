@@ -80,7 +80,6 @@
     <string name="restart" msgid="2472034227037808749">"Reiniciar"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Sem conexão com a impressora"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"desconhecido"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – não disponível"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"Usar <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Seu documento pode passar por um ou mais servidores até chegar à impressora."</string>
   <string-array name="color_mode_labels">
@@ -100,5 +99,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"Falhou. Tente novamente."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Tentar novamente"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Esta impressora não está disponível no momento."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"Não é possível exibir a visualização"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Preparando visualização…"</string>
 </resources>
