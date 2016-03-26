@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Det gick inte att byta namn på dokumentet"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Vissa filer konverterades"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Vill du ge <xliff:g id="APPNAME"><b>^1</b></xliff:g> åtkomst till katalogen <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> på <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Vill du ge <xliff:g id="APPNAME"><b>^1</b></xliff:g> åtkomst till din data (inklusive foton och videor) på <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Fråga inte igen"</string>
     <string name="allow" msgid="7225948811296386551">"Tillåt"</string>
     <string name="deny" msgid="2081879885755434506">"Neka"</string>

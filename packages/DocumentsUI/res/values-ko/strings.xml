@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"문서 이름을 변경하지 못했습니다."</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"일부 파일이 변환되었습니다."</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g>이(가) <xliff:g id="STORAGE"><i>^3</i></xliff:g>에서 <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> 디렉토리에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g>에서 사진, 동영상 등 <xliff:g id="STORAGE"><i>^2</i></xliff:g>의 내 데이터에 액세스하도록 허용하시겠습니까?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"다시 묻지 않음"</string>
     <string name="allow" msgid="7225948811296386551">"허용"</string>
     <string name="deny" msgid="2081879885755434506">"거부"</string>

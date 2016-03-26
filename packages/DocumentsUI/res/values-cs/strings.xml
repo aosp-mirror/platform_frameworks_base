@@ -125,6 +125,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Dokument se nepodařilo přejmenovat."</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Některé soubory byly převedeny"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Chcete aplikaci <xliff:g id="APPNAME"><b>^1</b></xliff:g> udělit přístup k adresáři <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> v úložišti <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Chcete aplikaci <xliff:g id="APPNAME"><b>^1</b></xliff:g> udělit přístup ke svým datům v úložišti <xliff:g id="STORAGE"><i>^2</i></xliff:g>, včetně fotek a videí?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Příště se neptat"</string>
     <string name="allow" msgid="7225948811296386551">"Povolit"</string>
     <string name="deny" msgid="2081879885755434506">"Odepřít"</string>

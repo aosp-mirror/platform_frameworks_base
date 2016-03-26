@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"បានបរាជ័យក្នុងការប្តូរឈ្មោះឯកសារ"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ឯកសារមួយចំនួនត្រូវបានបម្លែង"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"ផ្តល់សិទ្ធិឲ្យ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ចូលដំណើរការថត <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> នៅលើ <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"ផ្តល់សិទ្ធិអនុញ្ញាតដល់ <xliff:g id="APPNAME"><b>^1</b></xliff:g> ដើម្បីចូលដំណើរការទិន្នន័យរបស់អ្នក រាប់បញ្ចូលទាំងរូបថត និងវីដេអូ នៅលើ <xliff:g id="STORAGE"><i>^2</i></xliff:g> ឬទេ?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"កុំសួរទៀត"</string>
     <string name="allow" msgid="7225948811296386551">"អនុញ្ញាត​"</string>
     <string name="deny" msgid="2081879885755434506">"បដិសេធ"</string>

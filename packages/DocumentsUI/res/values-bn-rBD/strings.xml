@@ -32,7 +32,7 @@
     <string name="menu_share" msgid="3075149983979628146">"শেয়ার করুন"</string>
     <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"সবগুলি নির্বাচন করুন"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"এতে অনুলিপি করুন…"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"এতে কপি করুন…"</string>
     <string name="menu_move" msgid="1828090633118079817">"এতে সরান..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"নতুন উইন্ডো"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"প্রতিলিপি করুন"</string>
@@ -42,7 +42,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"ফাইলের আকার দেখান"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ফাইলের আকার লুকান"</string>
     <string name="button_select" msgid="527196987259139214">"নির্বাচন করুন"</string>
-    <string name="button_copy" msgid="8706475544635021302">"অনুলিপি করুন"</string>
+    <string name="button_copy" msgid="8706475544635021302">"কপি করুন"</string>
     <string name="button_move" msgid="2202666023104202232">"সরান"</string>
     <string name="button_dismiss" msgid="3714065566893946085">"খারিজ করুন"</string>
     <string name="button_retry" msgid="4392027584153752797">"আবার চেষ্টা করুন"</string>
@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"দস্তাবেজের পুনঃনামকরণ ব্যর্থ হয়েছে৷"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"কিছু ফাইল রূপান্তরিত হয়েছে"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> কে <xliff:g id="STORAGE"><i>^3</i></xliff:g> এ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> সংগ্রহ অ্যাক্সেস করার মঞ্জুরি দিতে চান?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="STORAGE"><i>^2</i></xliff:g> এ থাকা ফটো ও ভিডিওগুলি সমেত <xliff:g id="APPNAME"><b>^1</b></xliff:g> কে আপনার ডেটা অ্যাক্সেস করার অনুমতি দেবেন?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"আর জিজ্ঞাসা করবেন না"</string>
     <string name="allow" msgid="7225948811296386551">"অনুমতি দিন"</string>
     <string name="deny" msgid="2081879885755434506">"আস্বীকার করুন"</string>

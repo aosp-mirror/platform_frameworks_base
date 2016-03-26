@@ -118,6 +118,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Nije uspjelo preimenovanje dokumenta"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Neke od datoteka su pretvorene"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Omogućiti <xliff:g id="APPNAME"><b>^1</b></xliff:g> pristup direktoriju <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> sa <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Želite li odobriti aplikaciji <xliff:g id="APPNAME"><b>^1</b></xliff:g> pristup svojim podacima, uključujući fotografije i video zapise, na <xliff:g id="STORAGE"><i>^2</i></xliff:g> ?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Ne pitaj ponovo"</string>
     <string name="allow" msgid="7225948811296386551">"Dozvoli"</string>
     <string name="deny" msgid="2081879885755434506">"Odbijte"</string>
