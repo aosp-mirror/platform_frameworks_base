@@ -83,6 +83,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final String TAG = "DividerView";
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
+    private static final boolean SWAPPING_ENABLED = false;
 
     /**
      * How much the background gets scaled when we are in the minimized dock state.
@@ -213,12 +214,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mGestureDetector = new GestureDetector(mContext, new SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                updateDockSide();
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                if (mDockSide != WindowManager.DOCKED_INVALID
-                        && !ssp.isRecentsTopMost(ssp.getTopMostTask(), null /* isTopHome */)) {
-                    mWindowManagerProxy.swapTasks();
-                    return true;
+                if (SWAPPING_ENABLED) {
+                    updateDockSide();
+                    SystemServicesProxy ssp = Recents.getSystemServices();
+                    if (mDockSide != WindowManager.DOCKED_INVALID
+                            && !ssp.isRecentsTopMost(ssp.getTopMostTask(), null /* isTopHome */)) {
+                        mWindowManagerProxy.swapTasks();
+                        return true;
+                    }
                 }
                 return false;
             }
