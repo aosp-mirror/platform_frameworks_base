@@ -1262,6 +1262,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         return null;
     }
 
+    @Override
     public void setWallpaperComponentChecked(ComponentName name, String callingPackage) {
         if (isWallpaperSupported(callingPackage) && isWallpaperSettingAllowed(callingPackage)) {
             setWallpaperComponent(name);
@@ -1269,6 +1270,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     // ToDo: Remove this version of the function
+    @Override
     public void setWallpaperComponent(ComponentName name) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
         synchronized (mLock) {
@@ -1281,7 +1283,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             final long ident = Binder.clearCallingIdentity();
             try {
                 wallpaper.imageWallpaperPending = false;
-                bindWallpaperComponentLocked(name, false, true, wallpaper, null);
+                if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
+                    wallpaper.wallpaperId = makeWallpaperIdLocked();
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
