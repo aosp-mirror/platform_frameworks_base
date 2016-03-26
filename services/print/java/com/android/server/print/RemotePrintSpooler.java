@@ -98,6 +98,8 @@ final class RemotePrintSpooler {
 
     private final PrintSpoolerCallbacks mCallbacks;
 
+    private boolean mIsLowPriority;
+
     private IPrintSpooler mRemoteInstance;
 
     private boolean mDestroyed;
@@ -110,15 +112,40 @@ final class RemotePrintSpooler {
         public void onPrintJobStateChanged(PrintJobInfo printJob);
     }
 
-    public RemotePrintSpooler(Context context, int userId,
+    public RemotePrintSpooler(Context context, int userId, boolean lowPriority,
             PrintSpoolerCallbacks callbacks) {
         mContext = context;
         mUserHandle = new UserHandle(userId);
         mCallbacks = callbacks;
+        mIsLowPriority = lowPriority;
         mClient = new PrintSpoolerClient(this);
         mIntent = new Intent();
         mIntent.setComponent(new ComponentName(PrintManager.PRINT_SPOOLER_PACKAGE_NAME,
                 PrintManager.PRINT_SPOOLER_PACKAGE_NAME + ".model.PrintSpoolerService"));
+    }
+
+    public void increasePriority() {
+        if (mIsLowPriority) {
+            mIsLowPriority = false;
+
+            synchronized (mLock) {
+                throwIfDestroyedLocked();
+
+                while (!mCanUnbind) {
+                    try {
+                        mLock.wait();
+                    } catch (InterruptedException e) {
+                        Slog.e(LOG_TAG, "Interrupted while waiting for operation to complete");
+                    }
+                }
+
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Unbinding as previous binding was low priority");
+                }
+
+                unbindLocked();
+            }
+        }
     }
 
     public final List<PrintJobInfo> getPrintJobInfos(ComponentName componentName, int state,
@@ -579,11 +606,18 @@ final class RemotePrintSpooler {
             return;
         }
         if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] bindLocked()");
+            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] bindLocked() " +
+                    (mIsLowPriority ? "low priority" : ""));
         }
 
-        mContext.bindServiceAsUser(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, mUserHandle);
+        int flags;
+        if (mIsLowPriority) {
+            flags = Context.BIND_AUTO_CREATE;
+        } else {
+            flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+        }
+
+        mContext.bindServiceAsUser(mIntent, mServiceConnection, flags, mUserHandle);
 
         final long startMillis = SystemClock.uptimeMillis();
         while (true) {
