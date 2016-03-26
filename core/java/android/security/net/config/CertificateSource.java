@@ -25,4 +25,5 @@ public interface CertificateSource {
     X509Certificate findBySubjectAndPublicKey(X509Certificate cert);
     X509Certificate findByIssuerAndSignature(X509Certificate cert);
     Set<X509Certificate> findAllByIssuerAndSignature(X509Certificate cert);
+    void handleTrustStorageUpdate();
 }

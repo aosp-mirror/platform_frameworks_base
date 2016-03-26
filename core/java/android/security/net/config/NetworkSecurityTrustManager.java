@@ -157,4 +157,11 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
             return mIssuers.clone();
         }
     }
+
+    public void handleTrustStorageUpdate() {
+        synchronized (mIssuersLock) {
+            mIssuers = null;
+            mDelegate.handleTrustStorageUpdate();
+        }
+    }
 }
