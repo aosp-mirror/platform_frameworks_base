@@ -28,11 +28,11 @@
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> দিন"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> দিন <xliff:g id="HOURS">%2$d</xliff:g> ঘন্টা"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> দিন <xliff:g id="HOURS">%2$d</xliff:g> ঘন্টা"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ঘন্টা"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ঘন্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ঘন্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> দিন <xliff:g id="HOURS">%2$d</xliff:g> ঘণ্টা"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> দিন <xliff:g id="HOURS">%2$d</xliff:g> ঘণ্টা"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ঘণ্টা"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ঘণ্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ঘণ্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট"</string>
     <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট <xliff:g id="SECONDS">%2$d</xliff:g> সেকেন্ড"</string>
@@ -829,8 +829,8 @@
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> এ"</string>
     <string name="day" msgid="8144195776058119424">"দিন"</string>
     <string name="days" msgid="4774547661021344602">"দিন"</string>
-    <string name="hour" msgid="2126771916426189481">"ঘন্টা"</string>
-    <string name="hours" msgid="894424005266852993">"ঘন্টা"</string>
+    <string name="hour" msgid="2126771916426189481">"ঘণ্টা"</string>
+    <string name="hours" msgid="894424005266852993">"ঘণ্টা"</string>
     <string name="minute" msgid="9148878657703769868">"মি"</string>
     <string name="minutes" msgid="5646001005827034509">"মিনিট"</string>
     <string name="second" msgid="3184235808021478">"সেকেন্ড"</string>
@@ -848,8 +848,8 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> মিনিট</item>
     </plurals>
     <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ঘন্টা</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ঘন্টা</item>
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ঘণ্টা</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ঘণ্টা</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"ভিডিও সমস্যা"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"এই ভিডিওটি এই ডিভাইসে স্ট্রিমিং করার জন্য বৈধ নয়৷"</string>
@@ -869,7 +869,7 @@
     <string name="paste_as_plain_text" msgid="5427792741908010675">"প্লেইন টেক্সট হিসাবে আটকান"</string>
     <string name="replace" msgid="5781686059063148930">"প্রতিস্থাপন করুন..."</string>
     <string name="delete" msgid="6098684844021697789">"মুছুন"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"URL অনুলিপি করুন"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"URL কপি করুন"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"পাঠ্য নির্বাচন করুন"</string>
     <string name="undo" msgid="7905788502491742328">"পূর্বাবস্থায় ফিরুন"</string>
     <string name="redo" msgid="7759464876566803888">"পুনরায় করুন"</string>
@@ -1192,8 +1192,8 @@
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"বাড়ানোর জন্য উপরের দিকে এবং কমানোর জন্য নীচের দিকে স্লাইড করুন৷"</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"মিনিট বাড়ান"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"মিনিট কমান"</string>
-    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"ঘন্টা বাড়ান"</string>
-    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"ঘন্টা কমান"</string>
+    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"ঘণ্টা বাড়ান"</string>
+    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"ঘণ্টা কমান"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PM সেট করুন"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AM সেট করুন"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"মাস বাড়ান"</string>
@@ -1452,9 +1452,9 @@
     <string name="immersive_cling_description" msgid="3482371193207536040">"প্রস্থান করতে উপর থেকে নীচের দিকে সোয়াইপ করুন"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"বুঝেছি"</string>
     <string name="done_label" msgid="2093726099505892398">"সম্পন্ন হয়েছে"</string>
-    <string name="hour_picker_description" msgid="6698199186859736512">"বৃত্তাকার ঘন্টা নির্বাচকের স্লাইডার"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"বৃত্তাকার ঘণ্টা নির্বাচকের স্লাইডার"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"বৃত্তাকার মিনিট নির্বাচকের স্লাইডার"</string>
-    <string name="select_hours" msgid="6043079511766008245">"ঘন্টা নির্বাচন করুন"</string>
+    <string name="select_hours" msgid="6043079511766008245">"ঘণ্টা নির্বাচন করুন"</string>
     <string name="select_minutes" msgid="3974345615920336087">"মিনিট নির্বাচন করুন"</string>
     <string name="select_day" msgid="7774759604701773332">"মাস এবং দিন নির্বাচন করুন"</string>
     <string name="select_year" msgid="7952052866994196170">"বছর নির্বাচন করুন"</string>
