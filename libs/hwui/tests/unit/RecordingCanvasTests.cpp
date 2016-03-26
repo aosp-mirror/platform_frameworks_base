@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 
+#include <DeferredLayerUpdater.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
 #include <hwui/Paint.h>
@@ -37,6 +38,12 @@ static void playbackOps(const DisplayList& displayList,
             opReceiver(*op);
         }
     }
+}
+
+static void validateSingleOp(std::unique_ptr<DisplayList>& dl,
+        std::function<void(const RecordedOp& op)> opValidator) {
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
+    opValidator(*(dl->getOps()[0]));
 }
 
 TEST(RecordingCanvas, emptyPlayback) {
@@ -282,6 +289,21 @@ TEST(RecordingCanvas, backgroundAndImage) {
         count++;
     });
     ASSERT_EQ(2, count);
+}
+
+RENDERTHREAD_TEST(RecordingCanvas, textureLayer) {
+    auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
+            SkMatrix::MakeTrans(5, 5));
+
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200,
+            [&layerUpdater](RecordingCanvas& canvas) {
+        canvas.drawLayer(layerUpdater.get());
+    });
+
+    validateSingleOp(dl, [] (const RecordedOp& op) {
+        ASSERT_EQ(RecordedOpId::TextureLayerOp, op.opId);
+        ASSERT_TRUE(op.localMatrix.isIdentity()) << "Op must not apply matrix at record time.";
+    });
 }
 
 TEST(RecordingCanvas, saveLayer_simple) {
