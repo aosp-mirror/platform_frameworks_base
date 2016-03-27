@@ -96,6 +96,7 @@ public class UserInfo implements Parcelable {
     public int flags;
     public long creationTime;
     public long lastLoggedInTime;
+    public String lastLoggedInFingerprint;
     public int profileGroupId;
     public int restrictedProfileParentId;
 
@@ -214,6 +215,7 @@ public class UserInfo implements Parcelable {
         serialNumber = orig.serialNumber;
         creationTime = orig.creationTime;
         lastLoggedInTime = orig.lastLoggedInTime;
+        lastLoggedInFingerprint = orig.lastLoggedInFingerprint;
         partial = orig.partial;
         profileGroupId = orig.profileGroupId;
         restrictedProfileParentId = orig.restrictedProfileParentId;
@@ -241,6 +243,7 @@ public class UserInfo implements Parcelable {
         dest.writeInt(serialNumber);
         dest.writeLong(creationTime);
         dest.writeLong(lastLoggedInTime);
+        dest.writeString(lastLoggedInFingerprint);
         dest.writeInt(partial ? 1 : 0);
         dest.writeInt(profileGroupId);
         dest.writeInt(guestToRemove ? 1 : 0);
@@ -265,6 +268,7 @@ public class UserInfo implements Parcelable {
         serialNumber = source.readInt();
         creationTime = source.readLong();
         lastLoggedInTime = source.readLong();
+        lastLoggedInFingerprint = source.readString();
         partial = source.readInt() != 0;
         profileGroupId = source.readInt();
         guestToRemove = source.readInt() != 0;

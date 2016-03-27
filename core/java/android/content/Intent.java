@@ -2856,12 +2856,15 @@ public class Intent implements Parcelable, Cloneable {
             "com.google.android.c2dm.intent.RECEIVE";
 
     /**
-     * Broadcast Action: hook for permforming cleanup after a system update.
+     * Broadcast Action: This is broadcast once when the user is booting after a
+     * system update. It can be used to perform cleanup or upgrades after a
+     * system update.
+     * <p>
+     * This broadcast is sent after the {@link #ACTION_LOCKED_BOOT_COMPLETED}
+     * broadcast but before the {@link #ACTION_BOOT_COMPLETED} broadcast. It's
+     * only sent when the {@link Build#FINGERPRINT} has changed, and it's only
+     * sent to receivers in the system image.
      *
-     * The broadcast is sent when the system is booting, before the
-     * BOOT_COMPLETED broadcast.  It is only sent to receivers in the system
-     * image.  A receiver for this should do its work and then disable itself
-     * so that it does not get run again at the next boot.
      * @hide
      */
     public static final String ACTION_PRE_BOOT_COMPLETED =

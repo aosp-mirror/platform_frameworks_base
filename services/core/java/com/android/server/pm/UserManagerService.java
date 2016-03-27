@@ -20,6 +20,7 @@ package com.android.server.pm;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -37,6 +38,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
@@ -122,6 +124,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_ID = "id";
     private static final String ATTR_CREATION_TIME = "created";
     private static final String ATTR_LAST_LOGGED_IN_TIME = "lastLoggedIn";
+    private static final String ATTR_LAST_LOGGED_IN_FINGERPRINT = "lastLoggedInFingerprint";
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
@@ -379,8 +382,6 @@ public class UserManagerService extends IUserManager.Stub {
                     + " (name=" + ui.name + ")");
             removeUserState(ui.id);
         }
-
-        onUserForeground(UserHandle.USER_SYSTEM);
 
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
@@ -1541,6 +1542,8 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
                     Long.toString(userInfo.lastLoggedInTime));
+            serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
+                    userInfo.lastLoggedInFingerprint);
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
             }
@@ -1671,6 +1674,7 @@ public class UserManagerService extends IUserManager.Stub {
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
+        String lastLoggedInFingerprint = null;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
@@ -1711,6 +1715,8 @@ public class UserManagerService extends IUserManager.Stub {
                 iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
                 creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
                 lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
+                lastLoggedInFingerprint = parser.getAttributeValue(null,
+                        ATTR_LAST_LOGGED_IN_FINGERPRINT);
                 profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
                         UserInfo.NO_PROFILE_GROUP_ID);
                 restrictedProfileParentId = readIntAttribute(parser,
@@ -1763,6 +1769,7 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.serialNumber = serialNumber;
             userInfo.creationTime = creationTime;
             userInfo.lastLoggedInTime = lastLoggedInTime;
+            userInfo.lastLoggedInFingerprint = lastLoggedInFingerprint;
             userInfo.partial = partial;
             userInfo.guestToRemove = guestToRemove;
             userInfo.profileGroupId = profileGroupId;
@@ -2553,7 +2560,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Called right before a user is unlocked. This gives us a chance to prepare
      * app storage.
      */
-    public void onBeforeUnlockUser(int userId) {
+    public void onBeforeUnlockUser(@UserIdInt int userId) {
         final int userSerial = getUserSerialNumber(userId);
         prepareUserStorage(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE);
@@ -2563,17 +2570,19 @@ public class UserManagerService extends IUserManager.Stub {
      * Make a note of the last started time of a user and do some cleanup.
      * @param userId the user that was just foregrounded
      */
-    public void onUserForeground(int userId) {
+    public void onUserLoggedIn(@UserIdInt int userId) {
         UserData userData = getUserDataNoChecks(userId);
         if (userData == null || userData.info.partial) {
             Slog.w(LOG_TAG, "userForeground: unknown user #" + userId);
             return;
         }
-        long now = System.currentTimeMillis();
+
+        final long now = System.currentTimeMillis();
         if (now > EPOCH_PLUS_30_YEARS) {
             userData.info.lastLoggedInTime = now;
-            scheduleWriteUser(userData);
         }
+        userData.info.lastLoggedInFingerprint = Build.FINGERPRINT;
+        scheduleWriteUser(userData);
     }
 
     /**
@@ -2838,6 +2847,8 @@ public class UserManagerService extends IUserManager.Stub {
                         sb.append(" ago");
                         pw.println(sb);
                     }
+                    pw.print("    Last logged in fingerprint: ");
+                    pw.println(userInfo.lastLoggedInFingerprint);
                     pw.print("    Has profile owner: ");
                     pw.println(mIsUserManaged.get(userId));
                     pw.println("    Restrictions:");

@@ -1141,7 +1141,7 @@ public class Am extends BaseCommand {
         int userId = Integer.parseInt(nextArgRequired());
         byte[] token = argToBytes(nextArgRequired());
         byte[] secret = argToBytes(nextArgRequired());
-        boolean success = mAm.unlockUser(userId, token, secret);
+        boolean success = mAm.unlockUser(userId, token, secret, null);
         if (success) {
             System.out.println("Success: user unlocked");
         } else {
