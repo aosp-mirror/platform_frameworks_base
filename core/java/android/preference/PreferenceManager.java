@@ -412,6 +412,41 @@ public class PreferenceManager {
     }
 
     /**
+     * Indicates if the storage location used internally by this class is the
+     * default provided by the hosting {@link Context}.
+     *
+     * @see #setStorageDefault()
+     * @see #setStorageDeviceProtected()
+     */
+    public boolean isStorageDefault() {
+        return mStorage == STORAGE_DEFAULT;
+    }
+
+    /**
+     * Indicates if the storage location used internally by this class is backed
+     * by device-protected storage.
+     *
+     * @see #setStorageDefault()
+     * @see #setStorageDeviceProtected()
+     */
+    public boolean isStorageDeviceProtected() {
+        return mStorage == STORAGE_DEVICE_PROTECTED;
+    }
+
+    /**
+     * Indicates if the storage location used internally by this class is backed
+     * by credential-protected storage.
+     *
+     * @see #setStorageDefault()
+     * @see #setStorageDeviceProtected()
+     * @hide
+     */
+    @SystemApi
+    public boolean isStorageCredentialProtected() {
+        return mStorage == STORAGE_CREDENTIAL_PROTECTED;
+    }
+
+    /**
      * Gets a SharedPreferences instance that preferences managed by this will
      * use.
      * 
