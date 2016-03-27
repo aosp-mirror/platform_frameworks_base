@@ -116,6 +116,7 @@ final class ProcessRecord {
     boolean killed;             // True once we know the process has been killed
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     boolean reportedInteraction;// Whether we have told usage stats about it being an interaction
+    boolean unlocked;           // True when proc was started in user unlocked state
     long interactionEventTime;  // The time we sent the last interaction event
     long fgInteractionTime;     // When we became foreground for interaction purposes
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason

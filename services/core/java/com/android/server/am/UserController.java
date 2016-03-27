@@ -24,6 +24,7 @@ import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.os.Process.SYSTEM_UID;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -37,6 +38,10 @@ import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_M
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_UNLOCK_MSG;
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
+import static com.android.server.am.UserState.STATE_BOOTING;
+import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
+import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKED;
+import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKING;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -53,6 +58,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -77,6 +83,7 @@ import android.util.SparseIntArray;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ProgressReporter;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService;
@@ -86,6 +93,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -219,9 +227,7 @@ final class UserController {
             // consistent developer events. We step into RUNNING_LOCKED here,
             // but we might immediately step into RUNNING below if the user
             // storage is already unlocked.
-            if (uss.state == UserState.STATE_BOOTING) {
-                uss.setState(UserState.STATE_RUNNING_LOCKED);
-
+            if (uss.setState(STATE_BOOTING, STATE_RUNNING_LOCKED)) {
                 Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -236,11 +242,10 @@ final class UserController {
     }
 
     /**
-     * Consider stepping from {@link UserState#STATE_RUNNING_LOCKED} into
-     * {@link UserState#STATE_RUNNING}, which only occurs if the user storage is
-     * actually unlocked.
+     * Step from {@link UserState#STATE_RUNNING_LOCKED} to
+     * {@link UserState#STATE_RUNNING_UNLOCKING}.
      */
-    void finishUserUnlock(UserState uss) {
+    void finishUserUnlocking(final UserState uss, final ProgressReporter progress) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -249,14 +254,58 @@ final class UserController {
             // Only keep marching forward if user is actually unlocked
             if (!isUserKeyUnlocked(userId)) return;
 
-            if (uss.state == UserState.STATE_RUNNING_LOCKED) {
-                uss.setState(UserState.STATE_RUNNING);
-
-                // Give user manager a chance to prepare app storage
+            if (uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
+                // Prepare app storage before we go any further
+                progress.setProgress(5, mService.mContext.getString(R.string.android_start_title));
                 mUserManager.onBeforeUnlockUser(userId);
+                progress.setProgress(20);
 
+                // Send PRE_BOOT broadcasts if fingerprint changed
+                final UserInfo info = getUserInfo(userId);
+                if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
+                    progress.startSegment(80);
+                    new PreBootBroadcaster(mService, userId, progress) {
+                        @Override
+                        public void onFinished() {
+                            finishUserUnlocked(uss, progress);
+                        }
+                    }.sendNext();
+                } else {
+                    finishUserUnlocked(uss, progress);
+                }
+            }
+        }
+    }
+
+    /**
+     * Step from {@link UserState#STATE_RUNNING_UNLOCKING} to
+     * {@link UserState#STATE_RUNNING_UNLOCKED}.
+     */
+    void finishUserUnlocked(UserState uss, ProgressReporter progress) {
+        try {
+            finishUserUnlockedInternal(uss);
+        } finally {
+            progress.finish();
+        }
+    }
+
+    void finishUserUnlockedInternal(UserState uss) {
+        final int userId = uss.mHandle.getIdentifier();
+        synchronized (mService) {
+            // Bail if we ended up with a stale user
+            if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
+
+            // Only keep marching forward if user is actually unlocked
+            if (!isUserKeyUnlocked(userId)) return;
+
+            if (uss.setState(STATE_RUNNING_UNLOCKING, STATE_RUNNING_UNLOCKED)) {
+                // Remember that we logged in
+                mUserManager.onUserLoggedIn(userId);
+
+                // Dispatch unlocked to system services
                 mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
 
+                // Dispatch unlocked to external apps
                 final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
                 unlockedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 unlockedIntent.addFlags(
@@ -769,7 +818,7 @@ final class UserController {
         return result;
     }
 
-    boolean unlockUser(final int userId, byte[] token, byte[] secret) {
+    boolean unlockUser(final int userId, byte[] token, byte[] secret, ProgressReporter progress) {
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: unlockUser() from pid="
@@ -782,7 +831,7 @@ final class UserController {
 
         final long binderToken = Binder.clearCallingIdentity();
         try {
-            return unlockUserCleared(userId, token, secret);
+            return unlockUserCleared(userId, token, secret, progress);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
@@ -796,14 +845,20 @@ final class UserController {
      */
     boolean maybeUnlockUser(final int userId) {
         // Try unlocking storage using empty token
-        return unlockUserCleared(userId, null, null);
+        return unlockUserCleared(userId, null, null, ProgressReporter.NO_OP);
     }
 
-    boolean unlockUserCleared(final int userId, byte[] token, byte[] secret) {
+    boolean unlockUserCleared(final int userId, byte[] token, byte[] secret,
+            ProgressReporter progress) {
         synchronized (mService) {
             // Bail if already running unlocked
             final UserState uss = mStartedUsers.get(userId);
-            if (uss.state == UserState.STATE_RUNNING) return true;
+            switch (uss.state) {
+                case STATE_RUNNING_UNLOCKING:
+                case STATE_RUNNING_UNLOCKED:
+                    progress.finish();
+                    return true;
+            }
         }
 
         if (!isUserKeyUnlocked(userId)) {
@@ -813,13 +868,14 @@ final class UserController {
                 mountService.unlockUserKey(userId, userInfo.serialNumber, token, secret);
             } catch (RemoteException | RuntimeException e) {
                 Slog.w(TAG, "Failed to unlock: " + e.getMessage());
+                progress.finish();
                 return false;
             }
         }
 
         synchronized (mService) {
             final UserState uss = mStartedUsers.get(userId);
-            finishUserUnlock(uss);
+            finishUserUnlocking(uss, progress);
         }
 
         return true;
@@ -971,7 +1027,6 @@ final class UserController {
             mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
-        getUserManager().onUserForeground(newUserId);
         sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
     }
 
@@ -1219,7 +1274,8 @@ final class UserController {
                 unlocked = false;
                 break;
 
-            case UserState.STATE_RUNNING:
+            case UserState.STATE_RUNNING_UNLOCKING:
+            case UserState.STATE_RUNNING_UNLOCKED:
                 unlocked = true;
                 break;
         }
