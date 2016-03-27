@@ -701,6 +701,8 @@ static void android_mtp_MtpDevice_discard_event_request(JNIEnv *env, jobject thi
     device->discardEventRequest(seq);
 }
 
+// Returns object size in 64-bit integer. If the MTP device does not support the property, it
+// throws IOException.
 static jlong android_mtp_MtpDevice_get_object_size_long(
         JNIEnv *env, jobject thiz, jint handle, jint format) {
     MtpDevice* const device = get_device_from_object(env, thiz);
