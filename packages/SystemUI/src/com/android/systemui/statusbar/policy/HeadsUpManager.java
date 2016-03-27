@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -58,7 +59,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
     private static final int TAG_CLICKED_NOTIFICATION = R.id.is_clicked_heads_up_tag;
 
-    private final int mHeadsUpNotificationDecay;
+    private int mHeadsUpNotificationDecay;
     private final int mMinimumDisplayTime;
 
     private final int mTouchAcceptanceDelay;
@@ -121,7 +122,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mDefaultSnoozeLengthMs = resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
         mSnoozeLengthMs = mDefaultSnoozeLengthMs;
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
-        mHeadsUpNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
+        mHeadsUpNotificationDecay = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.HEADS_UP_TIMEOUT,
+                context.getResources().getInteger(R.integer.heads_up_notification_decay),
+                UserHandle.USER_CURRENT);
         mClock = new Clock();
 
         mSnoozeLengthMs = Settings.Global.getInt(context.getContentResolver(),
@@ -668,6 +672,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
 
         public void updateEntry(boolean updatePostTime) {
+            mHeadsUpNotificationDecay = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.HEADS_UP_TIMEOUT,
+                    mContext.getResources().getInteger(R.integer.heads_up_notification_decay),
+                    UserHandle.USER_CURRENT);
             long currentTime = mClock.currentTimeMillis();
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
             if (updatePostTime) {
