@@ -16,6 +16,10 @@
 
 package com.android.internal.view;
 
+import com.android.internal.annotations.GuardedBy;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,6 +27,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -56,11 +61,17 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
+    private static final int DO_REPORT_FINISH = 150;
 
-    private WeakReference<InputConnection> mInputConnection;
+    @GuardedBy("mLock")
+    @Nullable
+    private InputConnection mInputConnection;
 
     private Looper mMainLooper;
     private Handler mH;
+    private Object mLock = new Object();
+    @GuardedBy("mLock")
+    private boolean mFinished = false;
 
     static class SomeArgs {
         Object arg1;
@@ -80,10 +91,23 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         }
     }
     
-    public IInputConnectionWrapper(Looper mainLooper, InputConnection conn) {
-        mInputConnection = new WeakReference<>(conn);
+    public IInputConnectionWrapper(Looper mainLooper, @NonNull InputConnection inputConnection) {
+        mInputConnection = inputConnection;
         mMainLooper = mainLooper;
         mH = new MyHandler(mMainLooper);
+    }
+
+    @Nullable
+    public InputConnection getInputConnection() {
+        synchronized (mLock) {
+            return mInputConnection;
+        }
+    }
+
+    protected boolean isFinished() {
+        synchronized (mLock) {
+            return mFinished;
+        }
     }
 
     abstract protected boolean isActive();
@@ -198,6 +222,10 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 seq, callback));
     }
 
+    public void reportFinish() {
+        dispatchMessage(obtainMessage(DO_REPORT_FINISH));
+    }
+
     void dispatchMessage(Message msg) {
         // If we are calling this from the main thread, then we can call
         // right through.  Otherwise, we need to send the message to the
@@ -210,13 +238,13 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         
         mH.sendMessage(msg);
     }
-    
+
     void executeMessage(Message msg) {
         switch (msg.what) {
             case DO_GET_TEXT_AFTER_CURSOR: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    InputConnection ic = mInputConnection.get();
+                    InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
                         args.callback.setTextAfterCursor(null, args.seq);
@@ -232,7 +260,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             case DO_GET_TEXT_BEFORE_CURSOR: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    InputConnection ic = mInputConnection.get();
+                    InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
                         args.callback.setTextBeforeCursor(null, args.seq);
@@ -248,7 +276,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             case DO_GET_SELECTED_TEXT: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    InputConnection ic = mInputConnection.get();
+                    InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getSelectedText on inactive InputConnection");
                         args.callback.setSelectedText(null, args.seq);
@@ -264,7 +292,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             case DO_GET_CURSOR_CAPS_MODE: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    InputConnection ic = mInputConnection.get();
+                    InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
                         args.callback.setCursorCapsMode(0, args.seq);
@@ -280,7 +308,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             case DO_GET_EXTRACTED_TEXT: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    InputConnection ic = mInputConnection.get();
+                    InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "getExtractedText on inactive InputConnection");
                         args.callback.setExtractedText(null, args.seq);
@@ -294,7 +322,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_COMMIT_TEXT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "commitText on inactive InputConnection");
                     return;
@@ -304,7 +332,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_SET_SELECTION: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "setSelection on inactive InputConnection");
                     return;
@@ -313,7 +341,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_PERFORM_EDITOR_ACTION: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "performEditorAction on inactive InputConnection");
                     return;
@@ -322,7 +350,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_PERFORM_CONTEXT_MENU_ACTION: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "performContextMenuAction on inactive InputConnection");
                     return;
@@ -331,7 +359,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_COMMIT_COMPLETION: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "commitCompletion on inactive InputConnection");
                     return;
@@ -340,7 +368,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_COMMIT_CORRECTION: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "commitCorrection on inactive InputConnection");
                     return;
@@ -349,7 +377,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_SET_COMPOSING_TEXT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "setComposingText on inactive InputConnection");
                     return;
@@ -359,7 +387,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_SET_COMPOSING_REGION: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "setComposingRegion on inactive InputConnection");
                     return;
@@ -368,7 +396,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_FINISH_COMPOSING_TEXT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 // Note we do NOT check isActive() here, because this is safe
                 // for an IME to call at any time, and we need to allow it
                 // through to clean up our state after the IME has switched to
@@ -381,7 +409,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_SEND_KEY_EVENT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "sendKeyEvent on inactive InputConnection");
                     return;
@@ -391,7 +419,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_CLEAR_META_KEY_STATES: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "clearMetaKeyStates on inactive InputConnection");
                     return;
@@ -400,7 +428,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_DELETE_SURROUNDING_TEXT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "deleteSurroundingText on inactive InputConnection");
                     return;
@@ -409,7 +437,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "deleteSurroundingTextInCodePoints on inactive InputConnection");
                     return;
@@ -418,7 +446,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_BEGIN_BATCH_EDIT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "beginBatchEdit on inactive InputConnection");
                     return;
@@ -427,7 +455,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_END_BATCH_EDIT: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "endBatchEdit on inactive InputConnection");
                     return;
@@ -436,7 +464,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_REPORT_FULLSCREEN_MODE: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null) {
                     Log.w(TAG, "reportFullscreenMode on inexistent InputConnection");
                     return;
@@ -447,7 +475,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_PERFORM_PRIVATE_COMMAND: {
-                InputConnection ic = mInputConnection.get();
+                InputConnection ic = getInputConnection();
                 if (ic == null || !isActive()) {
                     Log.w(TAG, "performPrivateCommand on inactive InputConnection");
                     return;
@@ -460,7 +488,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
-                    InputConnection ic = mInputConnection.get();
+                    InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
                         args.callback.setRequestUpdateCursorAnchorInfoResult(false, args.seq);
@@ -470,6 +498,37 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                             ic.requestCursorUpdates(msg.arg1), args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling requestCursorAnchorInfo", e);
+                }
+                return;
+            }
+            case DO_REPORT_FINISH: {
+                // Note that we do not need to worry about race condition here, because 1) mFinished
+                // is updated only inside this block, and 2) the code here is running on a Handler
+                // hence we assume multiple DO_REPORT_FINISH messages will not be handled at the
+                // same time.
+                if (isFinished()) {
+                    return;
+                }
+                try {
+                    InputConnection ic = getInputConnection();
+                    // Note we do NOT check isActive() here, because this is safe
+                    // for an IME to call at any time, and we need to allow it
+                    // through to clean up our state after the IME has switched to
+                    // another client.
+                    if (ic == null) {
+                        return;
+                    }
+                    ic.finishComposingText();
+                    // TODO: Make reportFinish() public method of InputConnection to remove this
+                    // check.
+                    if (ic instanceof BaseInputConnection) {
+                        ((BaseInputConnection) ic).reportFinish();
+                    }
+                } finally {
+                    synchronized (mLock) {
+                        mInputConnection = null;
+                        mFinished = true;
+                    }
                 }
                 return;
             }
