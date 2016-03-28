@@ -41,6 +41,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toolbar;
 import com.android.settingslib.R;
+import com.android.settingslib.applications.InterestingConfigChanges;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ public class SettingsDrawerActivity extends Activity {
 
     private static List<DashboardCategory> sDashboardCategories;
     private static HashMap<Pair<String, String>, Tile> sTileCache;
+    private static InterestingConfigChanges sConfigTracker;
 
     private final PackageReceiver mPackageReceiver = new PackageReceiver();
     private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
@@ -208,6 +210,7 @@ public class SettingsDrawerActivity extends Activity {
     public List<DashboardCategory> getDashboardCategories() {
         if (sDashboardCategories == null) {
             sTileCache = new HashMap<>();
+            sConfigTracker = new InterestingConfigChanges();
             sDashboardCategories = TileUtils.getCategories(this, sTileCache);
         }
         return sDashboardCategories;
@@ -267,6 +270,9 @@ public class SettingsDrawerActivity extends Activity {
     private class CategoriesUpdater extends AsyncTask<Void, Void, List<DashboardCategory>> {
         @Override
         protected List<DashboardCategory> doInBackground(Void... params) {
+            if (sConfigTracker.applyNewConfig(getResources())) {
+                sTileCache.clear();
+            }
             return TileUtils.getCategories(SettingsDrawerActivity.this, sTileCache);
         }
 
