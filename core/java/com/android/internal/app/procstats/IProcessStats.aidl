@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package com.android.internal.app.procstats;
 
 import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
 
 interface IProcessStats {
     byte[] getCurrentStats(out List<ParcelFileDescriptor> historic);
