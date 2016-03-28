@@ -2904,7 +2904,9 @@
     <string name="dlg_ok">OK</string>
 
     <!-- USB_PREFERENCES: Notification for when the user connected to the charger only.  This is the title -->
-    <string name="usb_charging_notification_title">USB for charging</string>
+    <string name="usb_charging_notification_title">USB charging this device</string>
+    <!-- USB_PREFERENCES: Notification for when the user connects the phone to supply power to attached device.  This is the title -->
+    <string name="usb_supplying_notification_title">USB supplying power to attached device</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MTP mode.  This is the title -->
     <string name="usb_mtp_notification_title">USB for file transfer</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in PTP mode.  This is the title -->
