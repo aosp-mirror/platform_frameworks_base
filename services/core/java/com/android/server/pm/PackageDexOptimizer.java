@@ -138,9 +138,8 @@ class PackageDexOptimizer {
         boolean isProfileGuidedFilter = DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter);
         // If any part of the app is used by other apps, we cannot use profile-guided
         // compilation.
-        // TODO: This needs to be refactored to be also checked when the target mode is
-        //       profile-guided.
-        if (isProfileGuidedFilter) {
+        // Skip the check for forward locked packages since they don't share their code.
+        if (isProfileGuidedFilter && !pkg.isForwardLocked()) {
             for (String path : paths) {
                 if (isUsedByOtherApps(path)) {
                     checkProfiles = false;
