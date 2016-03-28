@@ -318,12 +318,17 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
         posArray = pointStorage.get();
     }
 
-    // compute conservative bounds
-    // NOTE: We could call the faster paint.getFontBounds for a less accurate,
-    //       but even more conservative bounds if this  is too slow.
+    // Compute conservative bounds.  If the content has already been processed
+    // by Minikin then it had already computed these bounds.  Unfortunately,
+    // there is no way to capture those bounds as part of the Skia drawPosText
+    // API so we need to do that computation again here.
     SkRect bounds;
-    glyphs.paint.measureText(glyphs.glyphIDs, glyphs.count << 1, &bounds);
-    bounds.offset(x, y);
+    for (int i = 0; i < glyphs.count; i++) {
+        SkRect glyphBounds;
+        glyphs.paint.measureText(&glyphs.glyphIDs[i], sizeof(uint16_t), &glyphBounds);
+        glyphBounds.offset(pos[i].fX, pos[i].fY);
+        bounds.join(glyphBounds);
+    }
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     mCanvas->drawGlyphs(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,

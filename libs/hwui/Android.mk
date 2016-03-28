@@ -265,7 +265,8 @@ ifeq (true, $(HWUI_NEW_OPS))
         tests/unit/FrameBuilderTests.cpp \
         tests/unit/LeakCheckTests.cpp \
         tests/unit/OpDumperTests.cpp \
-        tests/unit/RecordingCanvasTests.cpp
+        tests/unit/RecordingCanvasTests.cpp \
+        tests/unit/SkiaCanvasTests.cpp
 endif
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
