@@ -1120,7 +1120,7 @@ public class AudioTrack implements AudioRouting
      * <p> See also {@link AudioManager#getProperty(String)} for key
      * {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
      * @return current size in frames of the <code>AudioTrack</code> buffer.
-     * @throws IllegalStateException
+     * @throws IllegalStateException if track is not initialized.
      */
     public int getBufferSizeInFrames() {
         return native_get_buffer_size_frames();
@@ -1147,7 +1147,7 @@ public class AudioTrack implements AudioRouting
      * @param bufferSizeInFrames requested buffer size
      * @return the actual buffer size in frames or an error code,
      *    {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
-     * @throws IllegalStateException
+     * @throws IllegalStateException if track is not initialized.
      */
     public int setBufferSizeInFrames(int bufferSizeInFrames) {
         if (mDataLoadMode == MODE_STATIC || mState == STATE_UNINITIALIZED) {
@@ -1176,7 +1176,7 @@ public class AudioTrack implements AudioRouting
      *  <p> See also {@link AudioManager#getProperty(String)} for key
      *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
      *  @return maximum size in frames of the <code>AudioTrack</code> buffer.
-     *  @throws IllegalStateException
+     *  @throws IllegalStateException if track is not initialized.
      */
     public int getBufferCapacityInFrames() {
         return native_get_buffer_capacity_frames();
