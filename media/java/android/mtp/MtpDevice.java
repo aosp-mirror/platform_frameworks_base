@@ -358,9 +358,10 @@ public final class MtpDevice {
     /**
      * Returns object size in 64-bit integer.
      *
-     * The object size stored in MtpObjectInfo is unsigned 32-bit integer.
-     * The methods reads 64-bit object size from the object property so that it can fetch 4GB+
-     * object size correctly.
+     * Though MtpObjectInfo#getCompressedSize returns the object size in 32-bit unsigned integer,
+     * this method returns the object size in 64-bit integer from the object property. Thus it can
+     * fetch 4GB+ object size correctly. If the device does not support objectSize property, it
+     * throws IOException.
      * @hide
      */
     public long getObjectSizeLong(int handle, int format) throws IOException {
