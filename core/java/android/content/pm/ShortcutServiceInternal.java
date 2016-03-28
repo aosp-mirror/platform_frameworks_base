@@ -40,28 +40,37 @@ public abstract class ShortcutServiceInternal {
     }
 
     public abstract List<ShortcutInfo>
-            getShortcuts(@NonNull String callingPackage, long changedSince,
+            getShortcuts(int launcherUserId,
+            @NonNull String callingPackage, long changedSince,
             @Nullable String packageName, @Nullable ComponentName componentName,
             @ShortcutQuery.QueryFlags int flags,
             int userId);
 
     public abstract List<ShortcutInfo>
-            getShortcutInfo(@NonNull String callingPackage,
+            getShortcutInfo(int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @Nullable List<String> ids, int userId);
 
-    public abstract void pinShortcuts(@NonNull String callingPackage, @NonNull String packageName,
+
+    public abstract boolean
+            isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,
+            @NonNull String packageName, @NonNull String id, int userId);
+
+    public abstract void pinShortcuts(int launcherUserId,
+            @NonNull String callingPackage, @NonNull String packageName,
             @NonNull List<String> shortcutIds, int userId);
 
-    public abstract Intent createShortcutIntent(@NonNull String callingPackage,
+    public abstract Intent createShortcutIntent(int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
 
-    public abstract int getShortcutIconResId(@NonNull String callingPackage,
+    public abstract int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
             @NonNull ShortcutInfo shortcut, int userId);
 
-    public abstract ParcelFileDescriptor getShortcutIconFd(@NonNull String callingPackage,
+    public abstract ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
+            @NonNull String callingPackage,
             @NonNull ShortcutInfo shortcut, int userId);
 
-    public abstract boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId);
+    public abstract boolean hasShortcutHostPermission(int launcherUserId,
+            @NonNull String callingPackage);
 }

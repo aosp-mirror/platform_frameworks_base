@@ -335,40 +335,40 @@ public class LauncherAppsService extends SystemService {
             verifyCallingPackage(callingPackage);
             ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
 
-            if (!mShortcutServiceInternal.hasShortcutHostPermission(callingPackage,
-                    user.getIdentifier())) {
+            if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
+                    callingPackage)) {
                 throw new SecurityException("Caller can't access shortcut information");
             }
         }
 
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
-                String packageName, ComponentName componentName, int flags, UserHandle user)
-                throws RemoteException {
+                String packageName, ComponentName componentName, int flags, UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
 
             return new ParceledListSlice<>(
-                    mShortcutServiceInternal.getShortcuts(callingPackage, changedSince, packageName,
-                    componentName, flags, user.getIdentifier()));
+                    mShortcutServiceInternal.getShortcuts(getCallingUserId(),
+                            callingPackage, changedSince, packageName,
+                            componentName, flags, user.getIdentifier()));
         }
 
         @Override
         public ParceledListSlice getShortcutInfo(String callingPackage, String packageName,
-                List<String> ids, UserHandle user) throws RemoteException {
+                List<String> ids, UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
 
             return new ParceledListSlice<>(
-                    mShortcutServiceInternal.getShortcutInfo(callingPackage, packageName,
-                    ids, user.getIdentifier()));
+                    mShortcutServiceInternal.getShortcutInfo(getCallingUserId(),
+                            callingPackage, packageName, ids, user.getIdentifier()));
         }
 
         @Override
         public void pinShortcuts(String callingPackage, String packageName, List<String> ids,
-                UserHandle user) throws RemoteException {
+                UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
 
-            mShortcutServiceInternal.pinShortcuts(callingPackage, packageName,
-                    ids, user.getIdentifier());
+            mShortcutServiceInternal.pinShortcuts(getCallingUserId(),
+                    callingPackage, packageName, ids, user.getIdentifier());
         }
 
         @Override
@@ -376,8 +376,8 @@ public class LauncherAppsService extends SystemService {
                 UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
 
-            return mShortcutServiceInternal.getShortcutIconResId(callingPackage, shortcut,
-                    user.getIdentifier());
+            return mShortcutServiceInternal.getShortcutIconResId(getCallingUserId(),
+                    callingPackage, shortcut, user.getIdentifier());
         }
 
         @Override
@@ -385,25 +385,31 @@ public class LauncherAppsService extends SystemService {
                 UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
 
-            return mShortcutServiceInternal.getShortcutIconFd(callingPackage, shortcut,
-                    user.getIdentifier());
+            return mShortcutServiceInternal.getShortcutIconFd(getCallingUserId(),
+                    callingPackage, shortcut, user.getIdentifier());
         }
 
         @Override
-        public boolean hasShortcutHostPermission(String callingPackage) throws RemoteException {
+        public boolean hasShortcutHostPermission(String callingPackage) {
             verifyCallingPackage(callingPackage);
-            return mShortcutServiceInternal.hasShortcutHostPermission(callingPackage,
-                    getCallingUserId());
+            return mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
+                    callingPackage);
         }
 
         @Override
         public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
-                Rect sourceBounds, Bundle startActivityOptions, UserHandle user)
-                throws RemoteException {
-            ensureShortcutPermission(callingPackage, user);
+                Rect sourceBounds, Bundle startActivityOptions, UserHandle user) {
+            verifyCallingPackage(callingPackage);
+            ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
 
-            final Intent intent = mShortcutServiceInternal.createShortcutIntent(callingPackage,
-                    packageName, shortcutId, user.getIdentifier());
+            // Even without the permission, pinned shortcuts are always launchable.
+            if (!mShortcutServiceInternal.isPinnedByCaller(getCallingUserId(),
+                    callingPackage, packageName, shortcutId, user.getIdentifier())) {
+                ensureShortcutPermission(callingPackage, user);
+            }
+
+            final Intent intent = mShortcutServiceInternal.createShortcutIntent(getCallingUserId(),
+                    callingPackage, packageName, shortcutId, user.getIdentifier());
             if (intent == null) {
                 return false;
             }
@@ -713,9 +719,11 @@ public class LauncherAppsService extends SystemService {
                     BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
                     if (!isEnabledProfileOf(user, cookie.user, "onShortcutChanged")) continue;
 
+                    final int launcherUserId = cookie.user.getIdentifier();
+
                     // Make sure the caller has the permission.
-                    if (!mShortcutServiceInternal.hasShortcutHostPermission(cookie.packageName,
-                            cookie.user.getIdentifier())) {
+                    if (!mShortcutServiceInternal.hasShortcutHostPermission(
+                            launcherUserId, cookie.packageName)) {
                         continue;
                     }
                     // Each launcher has a different set of pinned shortcuts, so we need to do a
@@ -723,8 +731,9 @@ public class LauncherAppsService extends SystemService {
                     // (As of now, only one launcher has the permission at a time, so it's bit
                     // moot, but we may change the permission model eventually.)
                     final List<ShortcutInfo> list =
-                            mShortcutServiceInternal.getShortcuts(cookie.packageName,
-                            /* changedSince= */ 0, packageName, /* component= */ null,
+                            mShortcutServiceInternal.getShortcuts(launcherUserId,
+                                    cookie.packageName,
+                                    /* changedSince= */ 0, packageName, /* component= */ null,
                                     ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
                                     | ShortcutQuery.FLAG_GET_PINNED
                                     | ShortcutQuery.FLAG_GET_DYNAMIC

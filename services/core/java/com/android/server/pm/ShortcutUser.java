@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
+
 import libcore.util.Objects;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -41,14 +43,48 @@ class ShortcutUser {
 
     private static final String ATTR_VALUE = "value";
 
+    static final class PackageWithUser {
+        final int userId;
+        final String packageName;
+
+        private PackageWithUser(int userId, String packageName) {
+            this.userId = userId;
+            this.packageName = Preconditions.checkNotNull(packageName);
+        }
+
+        public static PackageWithUser of(int launcherUserId, String packageName) {
+            return new PackageWithUser(launcherUserId, packageName);
+        }
+
+        @Override
+        public int hashCode() {
+            return packageName.hashCode() ^ userId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof PackageWithUser)) {
+                return false;
+            }
+            final PackageWithUser that = (PackageWithUser) obj;
+
+            return userId == that.userId && packageName.equals(that.packageName);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("{Launcher: %d, %s}", userId, packageName);
+        }
+    }
+
     @UserIdInt
     final int mUserId;
 
     private final ArrayMap<String, ShortcutPackage> mPackages = new ArrayMap<>();
 
-    private final ArrayMap<String, ShortcutLauncher> mLaunchers = new ArrayMap<>();
+    private final ArrayMap<PackageWithUser, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
-    private final ArrayMap<String, ShortcutPackageInfo> mPackageInfos = new ArrayMap<>();
+    private final ArrayMap<PackageWithUser, ShortcutPackageInfo> mPackageInfos = new ArrayMap<>();
 
     private ComponentName mLauncherComponent;
 
@@ -60,12 +96,39 @@ class ShortcutUser {
         return mPackages;
     }
 
-    public ArrayMap<String, ShortcutLauncher> getLaunchers() {
+    public ArrayMap<PackageWithUser, ShortcutLauncher> getAllLaunchers() {
         return mLaunchers;
     }
 
-    public ArrayMap<String, ShortcutPackageInfo> getPackageInfos() {
+    public ShortcutLauncher getLauncher(@UserIdInt int userId, @NonNull String packageName) {
+        return mLaunchers.get(PackageWithUser.of(userId, packageName));
+    }
+
+    public void addLauncher(ShortcutLauncher launcher) {
+        mLaunchers.put(PackageWithUser.of(launcher.getUserId(), launcher.getPackageName()),
+                launcher);
+    }
+
+    public ShortcutLauncher removeLauncher(
+            @UserIdInt int userId, @NonNull String packageName) {
+        return mLaunchers.remove(PackageWithUser.of(userId, packageName));
+    }
+
+    public ArrayMap<PackageWithUser, ShortcutPackageInfo> getAllPackageInfos() {
         return mPackageInfos;
+    }
+
+    public ShortcutPackageInfo getPackageInfo(@UserIdInt int userId, @NonNull String packageName) {
+        return mPackageInfos.get(PackageWithUser.of(userId, packageName));
+    }
+
+    public void addPackageInfo(ShortcutPackageInfo spi) {
+        mPackageInfos.put(PackageWithUser.of(spi.getUserId(), spi.getPackageName()), spi);
+    }
+
+    public ShortcutPackageInfo removePackageInfo(
+            @UserIdInt int userId, @NonNull String packageName) {
+        return mPackageInfos.remove(PackageWithUser.of(userId, packageName));
     }
 
     public ShortcutPackage getPackageShortcuts(@NonNull String packageName) {
@@ -77,17 +140,20 @@ class ShortcutUser {
         return ret;
     }
 
-    public ShortcutLauncher getLauncherShortcuts(@NonNull String packageName) {
-        ShortcutLauncher ret = mLaunchers.get(packageName);
+    public ShortcutLauncher getLauncherShortcuts(@NonNull String packageName,
+            @UserIdInt int launcherUserId) {
+        final PackageWithUser key = PackageWithUser.of(launcherUserId, packageName);
+        ShortcutLauncher ret = mLaunchers.get(key);
         if (ret == null) {
-            ret = new ShortcutLauncher(mUserId, packageName);
-            mLaunchers.put(packageName, ret);
+            ret = new ShortcutLauncher(mUserId, packageName, launcherUserId);
+            mLaunchers.put(key, ret);
         }
         return ret;
     }
 
     public void ensurePackageInfo(ShortcutService s, String packageName, @UserIdInt int userId) {
-        final ShortcutPackageInfo existing = mPackageInfos.get(packageName);
+        final PackageWithUser key = PackageWithUser.of(userId, packageName);
+        final ShortcutPackageInfo existing = mPackageInfos.get(key);
 
         if (existing != null) {
             return;
@@ -97,7 +163,7 @@ class ShortcutUser {
         }
         final ShortcutPackageInfo newSpi = ShortcutPackageInfo.generateForInstalledPackage(
                 s, packageName, userId);
-        mPackageInfos.put(packageName, newSpi);
+        mPackageInfos.put(key, newSpi);
         s.scheduleSaveUser(mUserId);
     }
 
@@ -166,18 +232,12 @@ class ShortcutUser {
                 }
 
                 case ShortcutLauncher.TAG_ROOT: {
-                    final ShortcutLauncher shortcuts =
-                            ShortcutLauncher.loadFromXml(parser, userId);
-
-                    ret.getLaunchers().put(shortcuts.getPackageName(), shortcuts);
+                    ret.addLauncher(ShortcutLauncher.loadFromXml(parser, userId));
                     continue;
                 }
 
                 case ShortcutPackageInfo.TAG_ROOT: {
-                    final ShortcutPackageInfo pi =
-                            ShortcutPackageInfo.loadFromXml(parser);
-
-                    ret.getPackageInfos().put(pi.getPackageName(), pi);
+                    ret.addPackageInfo(ShortcutPackageInfo.loadFromXml(parser, userId));
                     continue;
                 }
             }
