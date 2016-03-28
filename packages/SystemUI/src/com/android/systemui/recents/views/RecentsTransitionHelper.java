@@ -186,7 +186,7 @@ public class RecentsTransitionHelper {
             ActivityOptions opts, IAppTransitionAnimationSpecsFuture transitionFuture,
             final ActivityOptions.OnAnimationStartedListener animStartedListener) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.startActivityFromRecents(mContext, task.key.id, task.title, opts)) {
+        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts)) {
             // Keep track of the index of the task launch
             int taskIndexFromFront = 0;
             int taskIndex = stack.indexOfStackTask(task);

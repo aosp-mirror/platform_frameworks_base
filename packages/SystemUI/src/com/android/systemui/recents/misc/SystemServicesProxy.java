@@ -18,6 +18,7 @@ package com.android.systemui.recents.misc;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
@@ -77,6 +78,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
+import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.recents.model.ThumbnailData;
 
@@ -284,7 +286,7 @@ public class SystemServicesProxy {
         int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
         List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
                 ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
-                ActivityManager.RECENT_INGORE_DOCKED_STACK_TASKS |
+                ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK |
                 ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                 ActivityManager.RECENT_INCLUDE_PROFILES |
@@ -962,11 +964,20 @@ public class SystemServicesProxy {
     }
 
     /** Starts an activity from recents. */
-    public boolean startActivityFromRecents(Context context, int taskId, String taskName,
+    public boolean startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
             ActivityOptions options) {
         if (mIam != null) {
             try {
-                mIam.startActivityFromRecents(taskId, options == null ? null : options.toBundle());
+                if (taskKey.stackId == DOCKED_STACK_ID) {
+                    // We show non-visible docked tasks in Recents, but we always want to launch
+                    // them in the fullscreen stack.
+                    if (options == null) {
+                        options = ActivityOptions.makeBasic();
+                    }
+                    options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
+                }
+                mIam.startActivityFromRecents(
+                        taskKey.id, options == null ? null : options.toBundle());
                 return true;
             } catch (Exception e) {
                 Log.e(TAG, context.getString(R.string.recents_launch_error_message, taskName), e);
