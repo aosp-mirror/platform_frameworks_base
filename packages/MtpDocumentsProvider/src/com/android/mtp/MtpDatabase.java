@@ -372,12 +372,16 @@ class MtpDatabase {
      * newly added and never mapped with existing ones.
      * @param parentDocumentId
      * @param info
+     * @param size Object size. info#getCompressedSize() will be ignored because it does not contain
+     *     object size more than 4GB.
      * @return Document ID of added document.
      */
     String putNewDocument(
-            int deviceId, String parentDocumentId, int[] operationsSupported, MtpObjectInfo info) {
+            int deviceId, String parentDocumentId, int[] operationsSupported, MtpObjectInfo info,
+            long size) {
         final ContentValues values = new ContentValues();
-        getObjectDocumentValues(values, deviceId, parentDocumentId, operationsSupported, info);
+        getObjectDocumentValues(
+                values, deviceId, parentDocumentId, operationsSupported, info, size);
         mDatabase.beginTransaction();
         try {
             final long id = mDatabase.insert(TABLE_DOCUMENTS, null, values);
@@ -586,9 +590,9 @@ class MtpDatabase {
     }
 
     void updateObject(String documentId, int deviceId, String parentId, int[] operationsSupported,
-                      MtpObjectInfo info) {
+                      MtpObjectInfo info, Long size) {
         final ContentValues values = new ContentValues();
-        getObjectDocumentValues(values, deviceId, parentId, operationsSupported, info);
+        getObjectDocumentValues(values, deviceId, parentId, operationsSupported, info, size);
 
         mDatabase.beginTransaction();
         try {
@@ -811,11 +815,12 @@ class MtpDatabase {
      * @param values {@link ContentValues} that receives values.
      * @param deviceId Device ID of the object.
      * @param parentId Parent document ID of the object.
-     * @param info MTP object info.
+     * @param info MTP object info. getCompressedSize will be ignored.
+     * @param size 64-bit size of documents. Negative value is regarded as unknown size.
      */
     static void getObjectDocumentValues(
             ContentValues values, int deviceId, String parentId,
-            int[] operationsSupported, MtpObjectInfo info) {
+            int[] operationsSupported, MtpObjectInfo info, long size) {
         values.clear();
         final String mimeType = getMimeType(info);
         values.put(COLUMN_DEVICE_ID, deviceId);
@@ -834,7 +839,11 @@ class MtpDatabase {
         values.put(Document.COLUMN_FLAGS, getDocumentFlags(
                 operationsSupported, mimeType, info.getThumbCompressedSizeLong(),
                 info.getProtectionStatus(), DOCUMENT_TYPE_OBJECT));
-        values.put(Document.COLUMN_SIZE, info.getCompressedSizeLong());
+        if (size >= 0) {
+            values.put(Document.COLUMN_SIZE, size);
+        } else {
+            values.putNull(Document.COLUMN_SIZE);
+        }
     }
 
     private static String getMimeType(MtpObjectInfo info) {

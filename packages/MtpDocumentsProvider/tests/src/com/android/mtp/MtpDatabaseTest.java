@@ -200,7 +200,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(101, "image.jpg", MtpConstants.FORMAT_EXIF_JPEG, 2 * 1024 * 1024),
                 createDocument(102, "music.mp3", MtpConstants.FORMAT_MP3, 3 * 1024 * 1024)
-        });
+        }, new long[] { 1024L, 2L * 1024L * 1024L, 3L * 1024L * 1024L});
 
         final Cursor cursor = mDatabase.queryChildDocuments(COLUMN_NAMES, "2");
         assertEquals(3, cursor.getCount());
@@ -273,7 +273,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.getMapper().putChildDocuments(0, "2", new int[0], new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024)
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         try (final Cursor cursor =
@@ -290,7 +290,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 MtpConstants.OPERATION_SEND_OBJECT_INFO,
         }, new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024)
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         try (final Cursor cursor =
@@ -306,7 +306,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 MtpConstants.OPERATION_DELETE_OBJECT
         }, new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024)
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         try (final Cursor cursor =
@@ -395,7 +395,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(101, "image.jpg", MtpConstants.FORMAT_EXIF_JPEG, 2 * 1024 * 1024),
                 createDocument(102, "music.mp3", MtpConstants.FORMAT_MP3, 3 * 1024 * 1024)
-        });
+        }, new long[] { 1024L, 2L * 1024L * 1024L, 3L * 1024L * 1024L});
         mDatabase.getMapper().clearMapping();
 
         addTestDevice();
@@ -412,7 +412,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(203, "video.mp4", MtpConstants.FORMAT_MP4_CONTAINER, 1024),
-        });
+        }, new long[] { 1024L, 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         {
@@ -545,7 +545,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(50, "A", MtpConstants.FORMAT_ASSOCIATION, 0),
                 createDocument(51, "B", MtpConstants.FORMAT_ASSOCIATION, 0),
-        });
+        }, new long[] { 0L, 0L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         // Put note.txt in each directory.
@@ -553,10 +553,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("4");
         mDatabase.getMapper().putChildDocuments(0, "3", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().putChildDocuments(0, "4", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(101, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L });
 
         // Clear mapping.
         mDatabase.getMapper().clearMapping();
@@ -568,7 +568,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(50, "A", MtpConstants.FORMAT_ASSOCIATION, 0),
                 createDocument(51, "B", MtpConstants.FORMAT_ASSOCIATION, 0),
-        });
+        }, new long[] { 0L, 0L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         // Add note.txt in each directory again.
@@ -576,10 +576,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("4");
         mDatabase.getMapper().putChildDocuments(0, "3", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().putChildDocuments(0, "4", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(201, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("3");
         mDatabase.getMapper().stopAddingDocuments("4");
 
@@ -860,7 +860,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         assertEquals("2", mDatabase.getParentIdentifier("3").mDocumentId);
@@ -873,13 +873,13 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "dir", MtpConstants.FORMAT_ASSOCIATION, 1024),
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         mDatabase.getMapper().startAddingDocuments("3");
         mDatabase.getMapper().putChildDocuments(0, "3", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L });
         mDatabase.getMapper().stopAddingDocuments("3");
 
         mDatabase.deleteDocument("3");
@@ -909,7 +909,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 "3",
                 mDatabase.putNewDocument(
                         0, "2", OPERATIONS_SUPPORTED,
-                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024)));
+                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
+                        1024L));
 
         {
             final Cursor cursor =
@@ -928,7 +929,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.putNewDocument(
                 0, "2", OPERATIONS_SUPPORTED,
-                createDocument(201, "note.txt", MtpConstants.FORMAT_TEXT, 1024));
+                createDocument(201, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
+                1024L);
         mDatabase.getMapper().stopAddingDocuments("2");
 
         {
@@ -1045,7 +1047,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(100, "apple.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(101, "orange.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L, 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         // Disconnect the device.
@@ -1064,7 +1066,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(100, "apple.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(101, "orange.txt", MtpConstants.FORMAT_TEXT, 1024),
-        });
+        }, new long[] { 1024L, 1024L });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         try (final Cursor cursor = mDatabase.queryChildDocuments(
@@ -1093,7 +1095,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             createDocument(102, "unknown.mp4", MtpConstants.FORMAT_MPEG, 1000),
             createDocument(103, "inconsistent.txt", MtpConstants.FORMAT_MPEG, 1000),
             createDocument(104, "noext", MtpConstants.FORMAT_UNDEFINED, 1000),
-        });
+        }, new long[] { 1000L, 1000L, 1000L, 1000L, 1000L });
         mDatabase.getMapper().stopAddingDocuments("2");
         try (final Cursor cursor = mDatabase.queryChildDocuments(
                 strings(COLUMN_DISPLAY_NAME,  COLUMN_MIME_TYPE),
