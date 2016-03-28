@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.ColorInt;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -228,6 +229,11 @@ public class RemoteViews implements Parcelable, Filter {
 
         public boolean onClickHandler(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
+            return onClickHandler(view, pendingIntent, fillInIntent, StackId.INVALID_STACK_ID);
+        }
+
+        public boolean onClickHandler(View view, PendingIntent pendingIntent,
+                Intent fillInIntent, int launchStackId) {
             try {
                 // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                 Context context = view.getContext();
@@ -238,6 +244,10 @@ public class RemoteViews implements Parcelable, Filter {
                     opts = ActivityOptions.makeScaleUpAnimation(view,
                             0, 0,
                             view.getMeasuredWidth(), view.getMeasuredHeight());
+                }
+
+                if (launchStackId != StackId.INVALID_STACK_ID) {
+                    opts.setLaunchStackId(launchStackId);
                 }
                 context.startIntentSender(
                         pendingIntent.getIntentSender(), fillInIntent,

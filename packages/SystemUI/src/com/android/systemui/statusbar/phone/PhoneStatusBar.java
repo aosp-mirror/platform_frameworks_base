@@ -21,7 +21,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -3091,8 +3093,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             null, mContext.getBasePackageName(),
                             intent,
                             intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                            null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null,
-                            UserHandle.CURRENT.getIdentifier());
+                            null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
+                            getActivityOptions(), UserHandle.CURRENT.getIdentifier());
                 } catch (RemoteException e) {
                     Log.w(TAG, "Unable to start activity", e);
                 }
