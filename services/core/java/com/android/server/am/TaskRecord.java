@@ -72,8 +72,6 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELIST
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -254,9 +252,10 @@ final class TaskRecord {
     // The information is persisted and used to determine the appropriate stack to launch the
     // task into on restore.
     Rect mLastNonFullscreenBounds = null;
-    // Minimal size for width/height of this task when it's resizeable. -1 means it should use the
-    // default minimal size.
-    final int mMinimalSize;
+    // Minimal width and height of this task when it's resizeable. -1 means it should use the
+    // default minimal width/height.
+    int mMinimalWidth;
+    int mMinimalHeight;
 
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
@@ -281,7 +280,7 @@ final class TaskRecord {
         mCallingUid = info.applicationInfo.uid;
         mCallingPackage = info.packageName;
         setIntent(_intent, info);
-        mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
+        setMinDimensions(info);
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -301,6 +300,7 @@ final class TaskRecord {
         mCallingUid = info.applicationInfo.uid;
         mCallingPackage = info.packageName;
         setIntent(_intent, info);
+        setMinDimensions(info);
 
         taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         isPersistable = true;
@@ -311,7 +311,6 @@ final class TaskRecord {
         taskType = APPLICATION_ACTIVITY_TYPE;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         lastTaskDescription = _taskDescription;
-        mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
     }
 
     private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
@@ -365,7 +364,7 @@ final class TaskRecord {
         mResizeMode = resizeMode;
         mPrivileged = privileged;
         ActivityInfo info = (mActivities.size() > 0) ? mActivities.get(0).info : null;
-        mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
+        setMinDimensions(info);
     }
 
     void touchActiveTime() {
@@ -469,6 +468,17 @@ final class TaskRecord {
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
+    }
+
+    /** Sets the original minimal width and height. */
+    private void setMinDimensions(ActivityInfo info) {
+        if (info != null && info.windowLayout != null) {
+            mMinimalWidth = info.windowLayout.minimalWidth;
+            mMinimalHeight = info.windowLayout.minimalHeight;
+        } else {
+            mMinimalWidth = -1;
+            mMinimalHeight = -1;
+        }
     }
 
     /**
@@ -1342,35 +1352,41 @@ final class TaskRecord {
         if (bounds == null) {
             return;
         }
-        int minimalSize = mMinimalSize;
+        int minimalWidth = mMinimalWidth;
+        int minimalHeight = mMinimalHeight;
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
-        if (minimalSize == -1 && stack.mStackId != PINNED_STACK_ID) {
-            minimalSize = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
+        if (stack.mStackId != PINNED_STACK_ID) {
+            if (minimalWidth == -1) {
+                minimalWidth = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
+            }
+            if (minimalHeight == -1) {
+                minimalHeight = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
+            }
         }
-        final boolean adjustWidth = minimalSize > bounds.width();
-        final boolean adjustHeight = minimalSize > bounds.height();
+        final boolean adjustWidth = minimalWidth > bounds.width();
+        final boolean adjustHeight = minimalHeight > bounds.height();
         if (!(adjustWidth || adjustHeight)) {
             return;
         }
 
         if (adjustWidth) {
             if (mBounds != null && bounds.right == mBounds.right) {
-                bounds.left = bounds.right - minimalSize;
+                bounds.left = bounds.right - minimalWidth;
             } else {
                 // Either left bounds match, or neither match, or the previous bounds were
                 // fullscreen and we default to keeping left.
-                bounds.right = bounds.left + minimalSize;
+                bounds.right = bounds.left + minimalWidth;
             }
         }
         if (adjustHeight) {
             if (mBounds != null && bounds.bottom == mBounds.bottom) {
-                bounds.top = bounds.bottom - minimalSize;
+                bounds.top = bounds.bottom - minimalHeight;
             } else {
                 // Either top bounds match, or neither match, or the previous bounds were
                 // fullscreen and we default to keeping top.
-                bounds.bottom = bounds.top + minimalSize;
+                bounds.bottom = bounds.top + minimalHeight;
             }
         }
     }

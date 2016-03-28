@@ -2262,13 +2262,20 @@
         <!-- Where to initially position the activity inside the available space. Uses constants
              defined in {@link android.view.Gravity}. -->
         <attr name="gravity" />
+        <!-- Minimal width of the activity.
+
+         <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
+         activities launched in the task. That is if the root activity of a task set minimal width,
+         then the system will set the same minimal width on all other activities in the task. It
+         will also ignore any other minimal width attributes of non-root activities. -->
+        <attr name="minimalWidth" format="dimension" />
         <!-- Minimal height of the activity.
 
          <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
-         activities launched in the task. That is if the root activity of a task set minimal size,
-         then the system will set the same minimal size on all other activities in the task. It will
-         also ignore any other minimal size attributes of non-root activities. -->
-        <attr name="minimalSize" format="dimension" />
+         activities launched in the task. That is if the root activity of a task set minimal height,
+         then the system will set the same minimal height on all other activities in the task. It
+         will also ignore any other minimal height attributes of non-root activities. -->
+        <attr name="minimalHeight" format="dimension" />
     </declare-styleable>
 
 </resources>
