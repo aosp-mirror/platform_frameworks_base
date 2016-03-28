@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS এর দ্বারা সেট করা অবস্থান"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"অবস্থান অনুরোধ সক্রিয় রয়েছে"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"সমস্ত বিজ্ঞপ্তি সাফ করুন৷"</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>টি"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"বিজ্ঞপ্তির সেটিংস"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> সেটিংস"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"স্ক্রীন স্বয়ংক্রিয়ভাবে ঘুরে যাবে৷"</string>
@@ -310,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"অনুসন্ধান"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> শুরু করা যায়নি৷"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"নিরাপদ মোডে <xliff:g id="APP">%s</xliff:g> অক্ষম করা হয়েছে৷"</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"ইতিহাস"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"সাফ করুন"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"সবকিছু সাফ করুন"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"এই অ্যাপ্লিকেশানটি মাল্টি-উইন্ডো সমর্থন করে না"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"অ্যাপ্লিকেশানগুলি মাল্টি-উইন্ডো সমর্থন করে না"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
@@ -480,8 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"বিজ্ঞপ্তি তালিকার শীর্ষে দেখানো হয় এবং স্ক্রীনের উপরে প্রদর্শিত এবং শব্দ করার মঞ্জুরি দেয়"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
     <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> বিজ্ঞপ্তির নিয়ন্ত্রণগুলি"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"রঙ এবং চেহারা"</string>
     <string name="night_mode" msgid="3540405868248625488">"রাতের মোড"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"প্রদর্শন ক্যালিব্রেট করুন"</string>
@@ -501,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"চার্জ করার সময় ব্যাটারি সেভার উপলব্ধ নয়"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ব্যাটারি সেভার"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"কার্য-সম্পাদনা ও পশ্চাদপট ডেটাকে কমিয়ে দেয়"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> বোতাম"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"হোম"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"ফিরুন"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"উপরে"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"নীচে"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"বাম"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"ডান"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"কেন্দ্র"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"ট্যাব"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"স্পেস"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"এন্টার"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"ব্যাকস্পেস"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"প্লে/বিরতি"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"থামান"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"পরবর্তী"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"পূর্ববর্তী"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"পেছনের দিকে যান"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"দ্রুত ফরওয়ার্ড"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"পেজ আপ"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"পেজ ডাউন"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"মুছুন"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"হোম"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"শেষ"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"ঢোকান"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"সংখ্যা লক"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"সংখ্যাপ্যাড <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"সিস্টেম"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"হোম"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"সাম্প্রতিকগুলি"</string>
@@ -544,8 +567,8 @@
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা করুন"</string>
     <string name="tuner_time" msgid="6572217313285536011">"সময়"</string>
   <string-array name="clock_options">
-    <item msgid="5965318737560463480">"ঘন্টা, মিনিট, এবং সেকেন্ড দেখান"</item>
-    <item msgid="1427801730816895300">"ঘন্টা এবং মিনিট দেখান (ডিফল্ট)"</item>
+    <item msgid="5965318737560463480">"ঘণ্টা, মিনিট, এবং সেকেন্ড দেখান"</item>
+    <item msgid="1427801730816895300">"ঘণ্টা এবং মিনিট দেখান (ডিফল্ট)"</item>
     <item msgid="3830170141562534721">"এই আইকনটি দেখাবেন না"</item>
   </string-array>
   <string-array name="battery_options">
@@ -559,4 +582,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"উপরে সরান"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"বাঁয়ে সরান"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ডানে সরান"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

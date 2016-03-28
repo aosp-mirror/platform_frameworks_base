@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS боюнча аныкталган жайгашуу"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Жайгаштыруу талаптары иштелүүдө"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Бардык эскертмелерди тазалоо."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Эскертме жөндөөлөрү"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> жөндөөлөрү"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран автоматтык түрдө бурулат."</string>
@@ -310,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"издөө"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> баштай алган жок."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> коопсуз режиминде өчүрүлдү."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Таржымал"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Тазалоо"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Баарын тазалоо"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Бул колдонмодо бир нече терезе режими колдоого алынбайт"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Колдонмодо бир нече терезе режими колдоого алынбайт"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Туурасынан бөлүү"</string>
@@ -480,8 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Эскертмелер тизмесинин эң башында көрсөтүлүп, үн менен коштолуп, экранга чыгарылсын"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
     <string name="notification_done" msgid="5279426047273930175">"Аткарылды"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> эскертмесин көзөмөлдөө каражаттары"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Түсү жана көрүнүшү"</string>
     <string name="night_mode" msgid="3540405868248625488">"Түнкү режим"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Дисплейди калибрлөө"</string>
@@ -501,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Батареяны үнөмдөгүч түзмөк кубатталып жатканда иштебейт"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батареяны үнөмдөгүч"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Иштин майнаптуулугун начарлатып, фондук дайындарды чектейт"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> баскычы"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Башкы бет"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Артка"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Өйдө"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Төмөн"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Солго"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Оңго"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Экрандын ортосунда"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Өтмөк"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Боштук"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Киргизүү"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Артка өчүрүү"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Ойнотуу/Тындыруу"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Токтотуу"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Кийинки"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Мурунку"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Артка түрүү"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Алдыга түрүү"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Бир бет жогору"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Бир бет төмөн"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Жок кылуу"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Башкы бет"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Бүтүрүү"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Салуу"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Тутум"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Башкы бет"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Акыркылар"</string>
@@ -560,4 +583,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Жогору жылдыруу"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Солго жылдыруу"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Оңго жылдыруу"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

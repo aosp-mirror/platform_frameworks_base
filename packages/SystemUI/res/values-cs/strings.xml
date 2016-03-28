@@ -311,8 +311,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"vyhledat"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikaci <xliff:g id="APP">%s</xliff:g> nelze spustit."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikace <xliff:g id="APP">%s</xliff:g> je v nouzovém režimu zakázána."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Historie"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Vymazat"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Vymazat vše"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Tato aplikace režim v několika oknech nepodporuje"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikace režim v několika oknech nepodporuje"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Vodorovné rozdělení"</string>
@@ -501,6 +500,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Spořič baterie při nabíjení není k dispozici."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Spořič baterie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Omezuje výkon a data na pozadí"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Tlačítko <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Zpět"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Nahoru"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Dolů"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Vlevo"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Vpravo"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Střed"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulátor"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Mezerník"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Přehrát/Pozastavit"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Zastavit"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Další"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Předchozí"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Přetočit zpět"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Přetočit vpřed"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Delete"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Home"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"End"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"<xliff:g id="NAME">%1$s</xliff:g> na numerické klávesnici"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Systém"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Plocha"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Poslední"</string>
@@ -559,4 +584,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Přesunout nahoru"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Přesunout vlevo"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Přesunout vpravo"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>
