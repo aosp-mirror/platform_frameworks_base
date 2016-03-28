@@ -126,10 +126,14 @@ final class TaskRecord {
     private static final String ATTR_RESIZE_MODE = "resize_mode";
     private static final String ATTR_PRIVILEGED = "privileged";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
+    private static final String ATTR_MINIMAL_WIDTH = "minimal_width";
+    private static final String ATTR_MINIMAL_HEIGHT = "minimal_height";
+
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
     static final int INVALID_TASK_ID = -1;
+    static final int INVALID_MINIMAL_SIZE = -1;
 
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
@@ -323,7 +327,7 @@ final class TaskRecord {
             TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
             int resizeMode, boolean privileged, boolean _realActivitySuspended,
-            boolean userSetupComplete) {
+            boolean userSetupComplete, int minimalWidth, int minimalHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -363,8 +367,8 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeMode = resizeMode;
         mPrivileged = privileged;
-        ActivityInfo info = (mActivities.size() > 0) ? mActivities.get(0).info : null;
-        setMinDimensions(info);
+        mMinimalWidth = minimalWidth;
+        mMinimalHeight = minimalHeight;
     }
 
     void touchActiveTime() {
@@ -476,8 +480,8 @@ final class TaskRecord {
             mMinimalWidth = info.windowLayout.minimalWidth;
             mMinimalHeight = info.windowLayout.minimalHeight;
         } else {
-            mMinimalWidth = -1;
-            mMinimalHeight = -1;
+            mMinimalWidth = INVALID_MINIMAL_SIZE;
+            mMinimalHeight = INVALID_MINIMAL_SIZE;
         }
     }
 
@@ -1146,6 +1150,8 @@ final class TaskRecord {
             out.attribute(
                     null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
         }
+        out.attribute(null, ATTR_MINIMAL_WIDTH, String.valueOf(mMinimalWidth));
+        out.attribute(null, ATTR_MINIMAL_HEIGHT, String.valueOf(mMinimalHeight));
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -1210,6 +1216,8 @@ final class TaskRecord {
         int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
         boolean privileged = false;
         Rect bounds = null;
+        int minimalWidth = INVALID_MINIMAL_SIZE;
+        int minimalHeight = INVALID_MINIMAL_SIZE;
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -1277,6 +1285,10 @@ final class TaskRecord {
                 privileged = Boolean.valueOf(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
                 bounds = Rect.unflattenFromString(attrValue);
+            } else if (ATTR_MINIMAL_WIDTH.equals(attrName)) {
+                minimalWidth = Integer.valueOf(attrValue);
+            } else if (ATTR_MINIMAL_HEIGHT.equals(attrName)) {
+                minimalHeight = Integer.valueOf(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -1337,7 +1349,7 @@ final class TaskRecord {
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
                 taskAffiliationColor, callingUid, callingPackage, resizeMode, privileged,
-                realActivitySuspended, userSetupComplete);
+                realActivitySuspended, userSetupComplete, minimalWidth, minimalHeight);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
@@ -1358,10 +1370,10 @@ final class TaskRecord {
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
         if (stack.mStackId != PINNED_STACK_ID) {
-            if (minimalWidth == -1) {
+            if (minimalWidth == INVALID_MINIMAL_SIZE) {
                 minimalWidth = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
             }
-            if (minimalHeight == -1) {
+            if (minimalHeight == INVALID_MINIMAL_SIZE) {
                 minimalHeight = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
             }
         }
