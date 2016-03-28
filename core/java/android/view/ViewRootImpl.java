@@ -85,6 +85,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
@@ -154,7 +155,12 @@ public final class ViewRootImpl implements ViewParent,
 
     static final ArrayList<ComponentCallbacks> sConfigCallbacks = new ArrayList();
 
-    final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList();
+    /**
+     * This list must only be modified by the main thread, so a lock is only needed when changing
+     * the list or when accessing the list from a non-main thread.
+     */
+    @GuardedBy("mWindowCallbacks")
+    final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList<>();
     final Context mContext;
     final IWindowSession mWindowSession;
     final Display mDisplay;
@@ -2437,10 +2443,8 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public void onHardwarePostDraw(DisplayListCanvas canvas) {
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
-        synchronized (mWindowCallbacks) {
-            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                mWindowCallbacks.get(i).onPostDraw(canvas);
-            }
+        for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+            mWindowCallbacks.get(i).onPostDraw(canvas);
         }
     }
 
@@ -7092,11 +7096,9 @@ public final class ViewRootImpl implements ViewParent,
             Rect stableInsets, int resizeMode) {
         if (!mDragResizing) {
             mDragResizing = true;
-            synchronized (mWindowCallbacks) {
-                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds, fullscreen,
-                            systemInsets, stableInsets, resizeMode);
-                }
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds, fullscreen,
+                        systemInsets, stableInsets, resizeMode);
             }
             mFullRedrawNeeded = true;
         }
@@ -7108,10 +7110,8 @@ public final class ViewRootImpl implements ViewParent,
     private void endDragResizing() {
         if (mDragResizing) {
             mDragResizing = false;
-            synchronized (mWindowCallbacks) {
-                for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowDragResizeEnd();
-                }
+            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+                mWindowCallbacks.get(i).onWindowDragResizeEnd();
             }
             mFullRedrawNeeded = true;
         }
@@ -7119,13 +7119,11 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean updateContentDrawBounds() {
         boolean updated = false;
-        synchronized (mWindowCallbacks) {
-            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                updated |= mWindowCallbacks.get(i).onContentDrawn(
-                        mWindowAttributes.surfaceInsets.left,
-                        mWindowAttributes.surfaceInsets.top,
-                        mWidth, mHeight);
-            }
+        for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+            updated |= mWindowCallbacks.get(i).onContentDrawn(
+                    mWindowAttributes.surfaceInsets.left,
+                    mWindowAttributes.surfaceInsets.top,
+                    mWidth, mHeight);
         }
         return updated | (mDragResizing && mReportNextDraw);
     }
@@ -7134,10 +7132,8 @@ public final class ViewRootImpl implements ViewParent,
         if (mReportNextDraw) {
             mWindowDrawCountDown = new CountDownLatch(mWindowCallbacks.size());
         }
-        synchronized (mWindowCallbacks) {
-            for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
-            }
+        for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
+            mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
         }
     }
 
