@@ -309,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"keresés"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nem lehet elindítani a következőt: <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"A(z) <xliff:g id="APP">%s</xliff:g> csökkentett módban ki van kapcsolva."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Előzmények"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Törlés"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Összes törlése"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ez az alkalmazás nem támogatja a többablakos nézetet"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Az alkalmazás nem támogatja a többablakos nézetet"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Osztott vízszintes"</string>
@@ -499,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akkumulátorkímélő mód"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> gomb"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Kezdőképernyő"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Vissza"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Fel"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Le"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Balra"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Jobbra"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Középre"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Szóköz"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Visszatörlés"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Lejátszás/szünet"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Leállítás"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Következő"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Előző"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Visszatekerés"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Gyors előretekerés"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Delete"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Kezdőképernyő"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"End"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numerikus: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Rendszer"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Otthon"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Legutóbbiak"</string>
@@ -557,4 +582,5 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Mozgatás felfelé"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mozgatás balra"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mozgatás jobbra"</string>
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Lehet, hogy az alkalmazás nem működik többablakos nézetben"</string>
 </resources>

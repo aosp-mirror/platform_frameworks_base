@@ -26,6 +26,5 @@
     <string name="pip_hold_home" msgid="340086535668778109">"Κρατήστε το πλήκτρο "<b>"HOME"</b>" πατημένο για έλεγχο του PIP"</string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"Πιέστε παρατεταμένα το κουμπί HOME, για να ελέγξετε τη λειτουργία PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Κατάλαβα"</string>
-    <!-- no translation found for recents_tv_dismiss (3555093879593377731) -->
-    <skip />
+    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Παράβλεψη"</string>
 </resources>

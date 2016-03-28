@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS அமைத்த இருப்பிடம்"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"இருப்பிடக் கோரிக்கைகள் இயக்கப்பட்டன"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"எல்லா அறிவிப்புகளையும் அழி."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"அறிவிப்பு அமைப்புகள்"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> அமைப்புகள்"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"திரை தானாகச் சுழலும்."</string>
@@ -310,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"தேடு"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>ஐத் தொடங்க முடியவில்லை."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"பாதுகாப்புப் பயன்முறையில் <xliff:g id="APP">%s</xliff:g> முடக்கப்பட்டது."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"வரலாறு"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"அழி"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"அனைத்தையும் அழி"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"இந்தப் பயன்பாடு பல சாளர அம்சத்தை ஆதரிக்கவில்லை"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"பயன்பாடு பல சாளர அம்சத்தை ஆதரிக்காது"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"கிடைமட்டமாகப் பிரி"</string>
@@ -480,8 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"அறிவிப்புகள் பட்டியலின் மேற்பகுதியில், சில வினாடிகளுக்கு ஒலியுடன் திரையில் காட்டு"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"மேலும் அமைப்புகள்"</string>
     <string name="notification_done" msgid="5279426047273930175">"முடிந்தது"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"வண்ணமும் தோற்றமும்"</string>
     <string name="night_mode" msgid="3540405868248625488">"இரவுப் பயன்முறை"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"திரையை அளவுத்திருத்தம் செய்"</string>
@@ -501,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"பேட்டரி சேமிப்பான்"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"செயல்திறனையும் பின்புலத்தில் தரவு செயலாக்கப்படுவதையும் குறைக்கும்"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> பொத்தான்"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"ஹோம்"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"பேக்"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"மேலே"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"கீழே"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"இடது"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"வலது"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"நடு"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"டேப்"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"ஸ்பேஸ்"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"என்டர்"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"பேக்ஸ்பேஸ்"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"பிளே/பாஸ்"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"ஸ்டாப்"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"நெக்ஸ்ட்"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"ப்ரீவியஸ்"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"ரீவைன்ட்"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"ஃபாஸ்ட் பார்வேர்டு"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"பேஜ் அப்"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"பேஜ் டவுன்"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"டெலிட்"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"ஹோம்"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"என்ட்"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"இன்சர்ட்"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"நம்பர் லாக்"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"நம்பர் பேடு <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"முறைமை"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"முகப்பு"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"சமீபத்தியவை"</string>
@@ -559,4 +582,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"மேலே நகர்த்து"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"இடப்புறம் நகர்த்து"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"வலப்புறம் நகர்த்து"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>
