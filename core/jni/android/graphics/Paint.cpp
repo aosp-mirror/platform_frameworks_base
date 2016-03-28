@@ -823,7 +823,7 @@ namespace PaintGlue {
     static jfloat doRunAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
-        if (offset == count) {
+        if (offset == start + count) {
             return MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
                     bufSize, nullptr);
         }
