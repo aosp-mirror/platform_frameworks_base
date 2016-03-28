@@ -106,7 +106,7 @@ class CarNavigationBarController {
 
         String category = getPackageCategory(packageName);
         if (mFacetCategoryMap.containsKey(category)) {
-            int index = mFacetCategoryMap.get(packageName);
+            int index = mFacetCategoryMap.get(category);
             mFacetHasMultipleAppsCache.put(index, facetHasMultiplePackages(index));
         }
     }
