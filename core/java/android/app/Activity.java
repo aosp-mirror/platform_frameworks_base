@@ -1249,7 +1249,7 @@ public class Activity extends ContextThemeWrapper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
-        mActivityTransitionState.onResume();
+        mActivityTransitionState.onResume(this, isTopOfTask());
         mCalled = true;
     }
 

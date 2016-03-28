@@ -244,6 +244,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
+    public boolean isWaitingForRemoteExit() {
+        return mIsReturning && mResultReceiver != null;
+    }
+
     /**
      * This is called onResume. If an Activity is resuming and the transitions
      * haven't started yet, force the views to appear. This is likely to be
@@ -288,6 +292,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             cancelPendingTransitions();
         }
         mAreViewsReady = true;
+        if (mResultReceiver != null) {
+            mResultReceiver.send(MSG_CANCEL, null);
+            mResultReceiver = null;
+        }
     }
 
     private void cancel() {
