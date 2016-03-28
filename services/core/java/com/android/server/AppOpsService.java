@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1645,7 +1644,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         int userId = UserHandle.USER_SYSTEM;
         String packageName;
         String opStr;
+        String modeStr;
         int op;
+        int mode;
         int packageUid;
 
         Shell(IAppOpsService iface, AppOpsService internal) {
@@ -1679,6 +1680,59 @@ public class AppOpsService extends IAppOpsService.Stub {
                 err.println("Error: " + e.getMessage());
                 return -1;
             }
+        }
+
+        int strModeToMode(String modeStr, PrintWriter err) {
+            switch (modeStr) {
+                case "allow":
+                    return AppOpsManager.MODE_ALLOWED;
+                case "deny":
+                    return AppOpsManager.MODE_ERRORED;
+                case "ignore":
+                    return AppOpsManager.MODE_IGNORED;
+                case "default":
+                    return AppOpsManager.MODE_DEFAULT;
+            }
+            try {
+                return Integer.parseInt(modeStr);
+            } catch (NumberFormatException e) {
+            }
+            err.println("Error: Mode " + modeStr + " is not valid");
+            return -1;
+        }
+
+        int parseUserOpMode(int defMode, PrintWriter err) throws RemoteException {
+            userId = UserHandle.USER_CURRENT;
+            opStr = null;
+            modeStr = null;
+            for (String argument; (argument = getNextArg()) != null;) {
+                if ("--user".equals(argument)) {
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                } else {
+                    if (opStr == null) {
+                        opStr = argument;
+                    } else if (modeStr == null) {
+                        modeStr = argument;
+                        break;
+                    }
+                }
+            }
+            if (opStr == null) {
+                err.println("Error: Operation not specified.");
+                return -1;
+            }
+            op = strOpToOp(opStr, err);
+            if (op < 0) {
+                return -1;
+            }
+            if (modeStr != null) {
+                if ((mode=strModeToMode(modeStr, err)) < 0) {
+                    return -1;
+                }
+            } else {
+                mode = defMode;
+            }
+            return 0;
         }
 
         int parseUserPackageOp(boolean reqOp, PrintWriter err) throws RemoteException {
@@ -1742,6 +1796,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Set the mode for a particular application and operation.");
         pw.println("  get [--user <USER_ID>] <PACKAGE> [<OP>]");
         pw.println("    Return the mode for a particular application and optional operation.");
+        pw.println("  query-op [--user <USER_ID>] <OP> [<MODE>]");
+        pw.println("    Print all packages that currently have the given op in the given mode.");
         pw.println("  reset [--user <USER_ID>] [<PACKAGE>]");
         pw.println("    Reset the given application or all applications to default modes.");
         pw.println("  write-settings");
@@ -1775,23 +1831,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         return -1;
                     }
 
-                    final int mode;
-                    switch (modeStr) {
-                        case "allow":
-                            mode = AppOpsManager.MODE_ALLOWED;
-                            break;
-                        case "deny":
-                            mode = AppOpsManager.MODE_ERRORED;
-                            break;
-                        case "ignore":
-                            mode = AppOpsManager.MODE_IGNORED;
-                            break;
-                        case "default":
-                            mode = AppOpsManager.MODE_DEFAULT;
-                            break;
-                        default:
-                            err.println("Error: Mode " + modeStr + " is not valid,");
-                            return -1;
+                    final int mode = shell.strModeToMode(modeStr, err);
+                    if (mode < 0) {
+                        return -1;
                     }
 
                     shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName, mode);
@@ -1852,6 +1894,34 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 TimeUtils.formatDuration(ent.getDuration(), pw);
                             }
                             pw.println();
+                        }
+                    }
+                    return 0;
+                }
+                case "query-op": {
+                    int res = shell.parseUserOpMode(AppOpsManager.MODE_IGNORED, err);
+                    if (res < 0) {
+                        return res;
+                    }
+                    List<AppOpsManager.PackageOps> ops = shell.mInterface.getPackagesForOps(
+                            new int[] {shell.op});
+                    if (ops == null || ops.size() <= 0) {
+                        pw.println("No operations.");
+                        return 0;
+                    }
+                    for (int i=0; i<ops.size(); i++) {
+                        final AppOpsManager.PackageOps pkg = ops.get(i);
+                        boolean hasMatch = false;
+                        final List<AppOpsManager.OpEntry> entries = ops.get(i).getOps();
+                        for (int j=0; j<entries.size(); j++) {
+                            AppOpsManager.OpEntry ent = entries.get(j);
+                            if (ent.getOp() == shell.op && ent.getMode() == shell.mode) {
+                                hasMatch = true;
+                                break;
+                            }
+                        }
+                        if (hasMatch) {
+                            pw.println(pkg.getPackageName());
                         }
                     }
                     return 0;
