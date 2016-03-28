@@ -23,7 +23,9 @@ import android.os.Bundle;
 import android.provider.DocumentsContract.Root;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -36,10 +38,12 @@ import com.android.documentsui.model.RootInfo;
  * Manages searching UI behavior.
  */
 final class SearchViewManager implements
-        SearchView.OnCloseListener, OnQueryTextListener, OnClickListener, OnFocusChangeListener {
+        SearchView.OnCloseListener, OnQueryTextListener, OnClickListener, OnFocusChangeListener,
+        OnActionExpandListener {
 
     public interface SearchManagerListener {
         void onSearchChanged(@Nullable String query);
+        void onSearchFinished();
     }
 
     public static final String TAG = "SearchManger";
@@ -48,10 +52,11 @@ final class SearchViewManager implements
     private boolean mSearchExpanded;
     private String mCurrentSearch;
     private boolean mIgnoreNextClose;
+    private boolean mFullBar;
 
     private DocumentsToolbar mActionBar;
-    private MenuItem mMenu;
-    private SearchView mView;
+    private MenuItem mMenuItem;
+    private SearchView mSearchView;
 
     public SearchViewManager(SearchManagerListener listener, @Nullable Bundle savedState) {
         mListener = listener;
@@ -62,45 +67,61 @@ final class SearchViewManager implements
         mListener = listener;
     }
 
-    public void install(DocumentsToolbar actionBar) {
-        // assert(mActionBar == null);
-
+    public void install(DocumentsToolbar actionBar, boolean isFullBarSearch) {
         mActionBar = actionBar;
-        mMenu = actionBar.getSearchMenu();
-        mView = (SearchView) mMenu.getActionView();
+        mMenuItem = actionBar.getSearchMenu();
+        mSearchView = (SearchView) mMenuItem.getActionView();
 
-        mView.setOnQueryTextListener(this);
-        mView.setOnCloseListener(this);
-        mView.setOnSearchClickListener(this);
-        mView.setOnQueryTextFocusChangeListener(this);
+        mSearchView.setOnQueryTextListener(this);
+        mSearchView.setOnCloseListener(this);
+        mSearchView.setOnSearchClickListener(this);
+        mSearchView.setOnQueryTextFocusChangeListener(this);
+
+        mFullBar = isFullBarSearch;
+        if (mFullBar) {
+            mMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW
+                    | MenuItem.SHOW_AS_ACTION_ALWAYS);
+            mMenuItem.setOnActionExpandListener(this);
+        }
 
         restoreSearch();
+    }
+
+    /**
+     * Used to hide menu icons, when the search is being restored. Needed because search restoration
+     * is done before onPrepareOptionsMenu(Menu menu) that is overriding the icons visibility.
+     */
+    public void updateMenu() {
+        if (isSearching() && mFullBar) {
+            Menu menu = mActionBar.getMenu();
+            menu.setGroupVisible(R.id.group_hide_when_searching, false);
+        }
     }
 
     /**
      * @param root Info about the current directory.
      */
     void update(RootInfo root) {
-        if (mMenu == null) {
+        if (mMenuItem == null) {
             if (DEBUG) Log.d(TAG, "update called before Search MenuItem installed.");
             return;
         }
 
         if (mCurrentSearch != null) {
-            mMenu.expandActionView();
+            mMenuItem.expandActionView();
 
-            mView.setIconified(false);
-            mView.clearFocus();
-            mView.setQuery(mCurrentSearch, false);
+            mSearchView.setIconified(false);
+            mSearchView.clearFocus();
+            mSearchView.setQuery(mCurrentSearch, false);
         } else {
-            mView.clearFocus();
-            if (!mView.isIconified()) {
+            mSearchView.clearFocus();
+            if (!mSearchView.isIconified()) {
                 mIgnoreNextClose = true;
-                mView.setIconified(true);
+                mSearchView.setIconified(true);
             }
 
-            if (mMenu.isActionViewExpanded()) {
-                mMenu.collapseActionView();
+            if (mMenuItem.isActionViewExpanded()) {
+                mMenuItem.collapseActionView();
             }
         }
 
@@ -109,7 +130,7 @@ final class SearchViewManager implements
     }
 
     void showMenu(boolean visible) {
-        if (mMenu == null) {
+        if (mMenuItem == null) {
             if (DEBUG) Log.d(TAG, "showMenu called before Search MenuItem installed.");
             return;
         }
@@ -118,7 +139,7 @@ final class SearchViewManager implements
             mCurrentSearch = null;
         }
 
-        mMenu.setVisible(visible);
+        mMenuItem.setVisible(visible);
     }
 
     /**
@@ -129,46 +150,46 @@ final class SearchViewManager implements
     boolean cancelSearch() {
         if (isExpanded() || isSearching()) {
             // If the query string is not empty search view won't get iconified
-            mView.setQuery("", false);
-            // Causes calling onClose(). onClose() is triggering directory content update.
-            mView.setIconified(true);
+            mSearchView.setQuery("", false);
+
+            if (mFullBar) {
+               onClose();
+            } else {
+                // Causes calling onClose(). onClose() is triggering directory content update.
+                mSearchView.setIconified(true);
+            }
             return true;
         }
         return false;
     }
 
+    /**
+     * Sets search view into the searching state. Used to restore state after device orientation
+     * change.
+     */
     private void restoreSearch() {
         if (isSearching()) {
+            if(mFullBar) {
+                mMenuItem.expandActionView();
+            } else {
+                mSearchView.setIconified(false);
+            }
             onSearchExpanded();
-            mView.setIconified(false);
-            mView.setQuery(mCurrentSearch, false);
-            mView.clearFocus();
+            mSearchView.setQuery(mCurrentSearch, false);
+            mSearchView.clearFocus();
         }
     }
 
     private void onSearchExpanded() {
         mSearchExpanded = true;
-    }
-
-    boolean isSearching() {
-        return mCurrentSearch != null;
-    }
-
-    boolean isExpanded() {
-        return mSearchExpanded;
+        if(mFullBar) {
+            Menu menu = mActionBar.getMenu();
+            menu.setGroupVisible(R.id.group_hide_when_searching, false);
+        }
     }
 
     /**
-     * Called when owning activity is saving state to be used to restore state during creation.
-     * @param state Bundle to save state too
-     */
-    public void onSaveInstanceState(Bundle state) {
-        state.putString(Shared.EXTRA_QUERY, mCurrentSearch);
-    }
-
-    /**
-     * Clears the search. Clears the SearchView background color. Triggers refreshing of the
-     * directory content.
+     * Clears the search. Triggers refreshing of the directory content.
      * @return True if the default behavior of clearing/dismissing SearchView should be overridden.
      *         False otherwise.
      */
@@ -187,13 +208,26 @@ final class SearchViewManager implements
                 mListener.onSearchChanged(mCurrentSearch);
             }
         }
+
+        if(mFullBar) {
+            mMenuItem.collapseActionView();
+        }
+        mListener.onSearchFinished();
+
         return false;
     }
 
     /**
-     * Sets mSearchExpanded. Called when search icon is clicked to start search. Used to detect when
-     * the view expanded instead of onMenuItemActionExpand, because SearchView has showAsAction set
-     * to always and onMenuItemAction* methods are not called.
+     * Called when owning activity is saving state to be used to restore state during creation.
+     * @param state Bundle to save state too
+     */
+    public void onSaveInstanceState(Bundle state) {
+        state.putString(Shared.EXTRA_QUERY, mCurrentSearch);
+    }
+
+    /**
+     * Sets mSearchExpanded. Called when search icon is clicked to start search for both search view
+     * modes.
      */
     @Override
     public void onClick(View v) {
@@ -203,19 +237,22 @@ final class SearchViewManager implements
     @Override
     public boolean onQueryTextSubmit(String query) {
         mCurrentSearch = query;
-        mView.clearFocus();
+        mSearchView.clearFocus();
         if (mListener != null) {
             mListener.onSearchChanged(mCurrentSearch);
         }
         return true;
     }
 
+    /**
+     * Used to detect and handle back button pressed event when search is expanded.
+     */
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
             if (mCurrentSearch == null) {
-                mView.setIconified(true);
-            } else if (TextUtils.isEmpty(mView.getQuery())) {
+                mSearchView.setIconified(true);
+            } else if (TextUtils.isEmpty(mSearchView.getQuery())) {
                 cancelSearch();
             }
         }
@@ -226,8 +263,34 @@ final class SearchViewManager implements
         return false;
     }
 
+    @Override
+    public boolean onMenuItemActionCollapse(MenuItem item) {
+        Menu menu = mActionBar.getMenu();
+        menu.setGroupVisible(R.id.group_hide_when_searching, true);
+
+        // Handles case when search view is collapsed by using the arrow on the left of the bar
+        if (isExpanded() || isSearching()) {
+            cancelSearch();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemActionExpand(MenuItem item) {
+        return true;
+    }
+
     String getCurrentSearch() {
         return mCurrentSearch;
+    }
+
+    boolean isSearching() {
+        return mCurrentSearch != null;
+    }
+
+    boolean isExpanded() {
+        return mSearchExpanded;
     }
 
 }
