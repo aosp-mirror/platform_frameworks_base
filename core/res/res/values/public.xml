@@ -2665,7 +2665,6 @@
     <public type="attr" name="defaultWidth" />
     <public type="attr" name="defaultHeight" />
     <public type="attr" name="minimalWidth" />
-    <public type="attr" name="minimalHeight" />
     <public type="attr" name="resizeableActivity" />
     <public type="attr" name="supportsPictureInPicture" />
     <public type="attr" name="titleMargin" />
@@ -2710,6 +2709,7 @@
     <public type="attr" name="fillType" />
     <public type="attr" name="popupEnterTransition" />
     <public type="attr" name="popupExitTransition" />
+    <public type="attr" name="minimalHeight" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
