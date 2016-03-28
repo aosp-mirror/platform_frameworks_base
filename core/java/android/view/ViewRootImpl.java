@@ -3300,7 +3300,6 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_APP_VISIBILITY = 8;
     private final static int MSG_DISPATCH_GET_NEW_SURFACE = 9;
     private final static int MSG_DISPATCH_KEY_FROM_IME = 11;
-    private final static int MSG_FINISH_INPUT_CONNECTION = 12;
     private final static int MSG_CHECK_FOCUS = 13;
     private final static int MSG_CLOSE_SYSTEM_DIALOGS = 14;
     private final static int MSG_DISPATCH_DRAG_EVENT = 15;
@@ -3340,8 +3339,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_GET_NEW_SURFACE";
                 case MSG_DISPATCH_KEY_FROM_IME:
                     return "MSG_DISPATCH_KEY_FROM_IME";
-                case MSG_FINISH_INPUT_CONNECTION:
-                    return "MSG_FINISH_INPUT_CONNECTION";
                 case MSG_CHECK_FOCUS:
                     return "MSG_CHECK_FOCUS";
                 case MSG_CLOSE_SYSTEM_DIALOGS:
@@ -3561,12 +3558,6 @@ public final class ViewRootImpl implements ViewParent,
                             ~KeyEvent.FLAG_FROM_SYSTEM);
                 }
                 enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
-            } break;
-            case MSG_FINISH_INPUT_CONNECTION: {
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    imm.reportFinishInputConnection((InputConnection)msg.obj);
-                }
             } break;
             case MSG_CHECK_FOCUS: {
                 InputMethodManager imm = InputMethodManager.peekInstance();
@@ -5876,11 +5867,6 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mHardwareRenderer = null;
             mAttachInfo.mHardwareAccelerated = false;
         }
-    }
-
-    public void dispatchFinishInputConnection(InputConnection connection) {
-        Message msg = mHandler.obtainMessage(MSG_FINISH_INPUT_CONNECTION, connection);
-        mHandler.sendMessage(msg);
     }
 
     public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
