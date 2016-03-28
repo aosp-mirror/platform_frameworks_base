@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Launcher information used by {@link ShortcutService}.
  */
-class ShortcutLauncher {
+class ShortcutLauncher implements ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "launcher-pins";
@@ -44,10 +44,10 @@ class ShortcutLauncher {
     private static final String ATTR_PACKAGE_NAME = "package-name";
 
     @UserIdInt
-    final int mUserId;
+    private final int mUserId;
 
     @NonNull
-    final String mPackageName;
+    private final String mPackageName;
 
     /**
      * Package name -> IDs.
@@ -57,6 +57,16 @@ class ShortcutLauncher {
     ShortcutLauncher(@UserIdInt int userId, @NonNull String packageName) {
         mUserId = userId;
         mPackageName = packageName;
+    }
+
+    @UserIdInt
+    public int getUserId() {
+        return mUserId;
+    }
+
+    @NonNull
+    public String getPackageName() {
+        return mPackageName;
     }
 
     public void pinShortcuts(@NonNull ShortcutService s, @NonNull String packageName,
@@ -103,7 +113,7 @@ class ShortcutLauncher {
     /**
      * Persist.
      */
-    public void saveToXml(XmlSerializer out) throws IOException {
+    public void saveToXml(XmlSerializer out, boolean forBackup) throws IOException {
         final int size = mPinnedShortcuts.size();
         if (size == 0) {
             return; // Nothing to write.
@@ -190,7 +200,7 @@ class ShortcutLauncher {
 
             for (int j = 0; j < idSize; j++) {
                 pw.print(prefix);
-                pw.print("    ");
+                pw.print("    Pinned: ");
                 pw.print(ids.valueAt(j));
                 pw.println();
             }

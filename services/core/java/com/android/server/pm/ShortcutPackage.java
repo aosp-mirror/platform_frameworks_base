@@ -41,7 +41,7 @@ import java.util.function.Predicate;
 /**
  * Package information used by {@link ShortcutService}.
  */
-class ShortcutPackage {
+class ShortcutPackage implements ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "package";
@@ -64,10 +64,10 @@ class ShortcutPackage {
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
 
     @UserIdInt
-    final int mUserId;
+    private final int mUserId;
 
     @NonNull
-    final String mPackageName;
+    private final String mPackageName;
 
     /**
      * All the shortcuts from the package, keyed on IDs.
@@ -92,6 +92,16 @@ class ShortcutPackage {
     ShortcutPackage(int userId, String packageName) {
         mUserId = userId;
         mPackageName = packageName;
+    }
+
+    @UserIdInt
+    public int getUserId() {
+        return mUserId;
+    }
+
+    @NonNull
+    public String getPackageName() {
+        return mPackageName;
     }
 
     @Nullable
@@ -381,7 +391,8 @@ class ShortcutPackage {
         pw.println(")");
     }
 
-    public void saveToXml(@NonNull XmlSerializer out) throws IOException, XmlPullParserException {
+    public void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
+            throws IOException, XmlPullParserException {
         final int size = mShortcuts.size();
 
         if (size == 0 && mApiCallCount == 0) {
@@ -396,14 +407,19 @@ class ShortcutPackage {
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
 
         for (int j = 0; j < size; j++) {
-            saveShortcut(out, mShortcuts.valueAt(j));
+            saveShortcut(out, mShortcuts.valueAt(j), forBackup);
         }
 
         out.endTag(null, TAG_ROOT);
     }
 
-    private static void saveShortcut(XmlSerializer out, ShortcutInfo si)
+    private static void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup)
             throws IOException, XmlPullParserException {
+        if (forBackup) {
+            if (!si.isPinned()) {
+                return; // Backup only pinned icons.
+            }
+        }
         out.startTag(null, TAG_SHORTCUT);
         ShortcutService.writeAttr(out, ATTR_ID, si.getId());
         // writeAttr(out, "package", si.getPackageName()); // not needed
@@ -414,9 +430,17 @@ class ShortcutPackage {
         ShortcutService.writeAttr(out, ATTR_WEIGHT, si.getWeight());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
                 si.getLastChangedTimestamp());
-        ShortcutService.writeAttr(out, ATTR_FLAGS, si.getFlags());
-        ShortcutService.writeAttr(out, ATTR_ICON_RES, si.getIconResourceId());
-        ShortcutService.writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
+        if (forBackup) {
+            // Don't write icon information.  Also drop the dynamic flag.
+            ShortcutService.writeAttr(out, ATTR_FLAGS,
+                    si.getFlags() &
+                            ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
+                            | ShortcutInfo.FLAG_DYNAMIC));
+        } else {
+            ShortcutService.writeAttr(out, ATTR_FLAGS, si.getFlags());
+            ShortcutService.writeAttr(out, ATTR_ICON_RES, si.getIconResourceId());
+            ShortcutService.writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
+        }
 
         ShortcutService.writeTagExtra(out, TAG_INTENT_EXTRAS,
                 si.getIntentPersistableExtras());
