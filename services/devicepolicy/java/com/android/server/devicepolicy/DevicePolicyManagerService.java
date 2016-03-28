@@ -4868,10 +4868,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // we start using it for different purposes.
         ensureCallerPackage(callerPackage);
 
+        final ApplicationInfo ai;
+        try {
+            ai = mContext.getPackageManager().getApplicationInfo(callerPackage, 0);
+        } catch (NameNotFoundException e) {
+            throw new SecurityException(e);
+        }
+
+        boolean legacyApp = false;
+        if (ai.targetSdkVersion <= Build.VERSION_CODES.M) {
+            legacyApp = true;
+        } else if ("com.google.android.apps.enterprise.dmagent".equals(ai.packageName)
+                && ai.versionCode == 697) {
+            // TODO: remove this once a new prebuilt is dropped
+            legacyApp = true;
+        }
+
         final int rawStatus = getEncryptionStatus();
-        if ((rawStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER)
-                && (callerPackage != null)
-                && (getTargetSdk(callerPackage, userHandle) <= VERSION_CODES.M)) {
+        if ((rawStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER) && legacyApp) {
             return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
         }
         return rawStatus;
