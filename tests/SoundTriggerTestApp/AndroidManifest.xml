@@ -2,7 +2,7 @@
         package="com.android.test.soundtrigger">
 
     <uses-permission android:name="android.permission.MANAGE_SOUND_TRIGGER" />
-    <uses-permission android:name="android.permission.WAKE_LOCk" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application>
         <activity
             android:name="TestSoundTriggerActivity"
