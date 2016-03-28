@@ -87,7 +87,7 @@ public class UpdateEngine {
     }
 
     @SystemApi
-    public boolean bind(final UpdateEngineCallback callback, final Handler handler) throws RemoteException {
+    public boolean bind(final UpdateEngineCallback callback, final Handler handler) {
         IUpdateEngineCallback updateEngineCallback = new IUpdateEngineCallback.Stub() {
             @Override
             public void onStatusUpdate(final int status, final float percent) {
@@ -118,31 +118,60 @@ public class UpdateEngine {
             }
         };
 
-        return mUpdateEngine.bind(updateEngineCallback);
+        try {
+            return mUpdateEngine.bind(updateEngineCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @SystemApi
-    public boolean bind(final UpdateEngineCallback callback) throws RemoteException {
+    public boolean bind(final UpdateEngineCallback callback) {
         return bind(callback, null);
     }
 
     @SystemApi
-    public void applyPayload(String url, long offset, long size, String[] headerKeyValuePairs) throws RemoteException {
-        mUpdateEngine.applyPayload(url, offset, size, headerKeyValuePairs);
+    public void applyPayload(String url, long offset, long size, String[] headerKeyValuePairs) {
+        try {
+            mUpdateEngine.applyPayload(url, offset, size, headerKeyValuePairs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @SystemApi
-    public void cancel() throws RemoteException {
-        mUpdateEngine.cancel();
+    public void cancel() {
+        try {
+            mUpdateEngine.cancel();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @SystemApi
-    public void suspend() throws RemoteException {
-        mUpdateEngine.suspend();
+    public void suspend() {
+        try {
+            mUpdateEngine.suspend();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @SystemApi
-    public void resume() throws RemoteException {
-        mUpdateEngine.resume();
+    public void resume() {
+        try {
+            mUpdateEngine.resume();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @SystemApi
+    public void resetStatus() {
+        try {
+            mUpdateEngine.resetStatus();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }
