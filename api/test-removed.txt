@@ -136,6 +136,15 @@ package android.os {
 
 }
 
+package android.os.storage {
+
+  public class StorageManager {
+    method public android.os.storage.StorageVolume getPrimaryVolume();
+    method public android.os.storage.StorageVolume[] getVolumeList();
+  }
+
+}
+
 package android.preference {
 
   public class PreferenceManager {

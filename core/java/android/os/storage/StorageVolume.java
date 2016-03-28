@@ -65,8 +65,8 @@ import java.io.File;
  * broad access to all files contained on a storage device.
  * </ul>
  *
- * <p>It can be obtained through {@link StorageManager#getVolumeList()} and
- * {@link StorageManager#getPrimaryVolume()} and also as an extra in some broadcasts
+ * <p>It can be obtained through {@link StorageManager#getStorageVolumes()} and
+ * {@link StorageManager#getPrimaryStorageVolume()} and also as an extra in some broadcasts
  * (see {@link #EXTRA_STORAGE_VOLUME}).
  *
  * <p>
