@@ -34,6 +34,7 @@ TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         static const char* text = "testing text bounds";
 
         // draw text directly into Recording canvas
