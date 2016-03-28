@@ -832,7 +832,7 @@ public final class InputMethodManager {
     void finishInputLocked() {
         mNextServedView = null;
         if (mServedView != null) {
-            if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
+            if (DEBUG) Log.v(TAG, "FINISH INPUT: mServedView=" + dumpViewInfo(mServedView));
             if (mCurrentTextBoxAttribute != null) {
                 try {
                     mService.finishInput(mClient);
@@ -1141,10 +1141,10 @@ public final class InputMethodManager {
         final View view;
         synchronized (mH) {
             view = mServedView;
-            
+
             // Make sure we have a window token for the served view.
             if (DEBUG) {
-                Log.v(TAG, "Starting input: view=" + view +
+                Log.v(TAG, "Starting input: view=" + dumpViewInfo(view) +
                         " reason=" + InputMethodClient.getStartInputReason(startInputReason));
             }
             if (view == null) {
@@ -1152,7 +1152,7 @@ public final class InputMethodManager {
                 return false;
             }
         }
-        
+
         // Now we need to get an input connection from the served view.
         // This is complicated in a couple ways: we can't be holding our lock
         // when calling out to the view, and we need to make sure we call into
@@ -1197,9 +1197,10 @@ public final class InputMethodManager {
             // changed.
             if (mServedView != view || !mServedConnecting) {
                 // Something else happened, so abort.
-                if (DEBUG) Log.v(TAG, 
-                        "Starting input: finished by someone else (view="
-                        + mServedView + " conn=" + mServedConnecting + ")");
+                if (DEBUG) Log.v(TAG,
+                        "Starting input: finished by someone else. view=" + dumpViewInfo(view)
+                        + " mServedView=" + dumpViewInfo(mServedView)
+                        + " mServedConnecting=" + mServedConnecting);
                 return false;
             }
 
@@ -1243,7 +1244,7 @@ public final class InputMethodManager {
             mServedInputConnectionWrapper = servedContext;
 
             try {
-                if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
+                if (DEBUG) Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
                         + ic + " tba=" + tba + " controlFlags=#"
                         + Integer.toHexString(controlFlags));
                 final InputBindResult res = mService.startInputOrWindowGainedFocus(
@@ -1309,7 +1310,7 @@ public final class InputMethodManager {
     }
 
     void focusInLocked(View view) {
-        if (DEBUG) Log.v(TAG, "focusIn: " + view);
+        if (DEBUG) Log.v(TAG, "focusIn: " + dumpViewInfo(view));
 
         if (mCurRootView != view.getRootView()) {
             // This is a request from a window that isn't in the window with
@@ -1328,9 +1329,8 @@ public final class InputMethodManager {
      */
     public void focusOut(View view) {
         synchronized (mH) {
-            if (DEBUG) Log.v(TAG, "focusOut: " + view
-                    + " mServedView=" + mServedView
-                    + " winFocus=" + view.hasWindowFocus());
+            if (DEBUG) Log.v(TAG, "focusOut: view=" + dumpViewInfo(view)
+                    + " mServedView=" + dumpViewInfo(mServedView));
             if (mServedView != view) {
                 // The following code would auto-hide the IME if we end up
                 // with no more views with focus.  This can happen, however,
@@ -1351,9 +1351,8 @@ public final class InputMethodManager {
      */
     public void onViewDetachedFromWindow(View view) {
         synchronized (mH) {
-            if (DEBUG) Log.v(TAG, "onViewDetachedFromWindow: " + view
-                    + " mServedView=" + mServedView
-                    + " hasWindowFocus=" + view.hasWindowFocus());
+            if (DEBUG) Log.v(TAG, "onViewDetachedFromWindow: view=" + dumpViewInfo(view)
+                    + " mServedView=" + dumpViewInfo(mServedView));
             if (mServedView == view && view.hasWindowFocus()) {
                 mNextServedView = null;
                 scheduleCheckFocusLocked(view);
@@ -2310,5 +2309,17 @@ public final class InputMethodManager {
                 recyclePendingEventLocked(this);
             }
         }
+    }
+
+    private static String dumpViewInfo(@Nullable final View view) {
+        if (view == null) {
+            return "null";
+        }
+        final StringBuilder sb = new StringBuilder();
+        sb.append(view);
+        sb.append(",focus=" + view.hasFocus());
+        sb.append(",windowFocus=" + view.hasWindowFocus());
+        sb.append(",window=" + view.getWindowToken());
+        return sb.toString();
     }
 }
