@@ -113,15 +113,17 @@ static auto SCENES = {
 };
 
 void BM_FrameBuilder_defer_scene(benchmark::State& state) {
-    const char* sceneName = *(SCENES.begin() + state.range_x());
-    state.SetLabel(sceneName);
-    auto nodes = getSyncedSceneNodes(sceneName);
-    while (state.KeepRunning()) {
-        FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
-                SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
-                nodes, sLightGeometry, Caches::getInstance());
-        benchmark::DoNotOptimize(&frameBuilder);
-    }
+    TestUtils::runOnRenderThread([&state](RenderThread& thread) {
+        const char* sceneName = *(SCENES.begin() + state.range_x());
+        state.SetLabel(sceneName);
+        auto nodes = getSyncedSceneNodes(sceneName);
+        while (state.KeepRunning()) {
+            FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
+                    SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
+                    nodes, sLightGeometry, Caches::getInstance());
+            benchmark::DoNotOptimize(&frameBuilder);
+        }
+    });
 }
 BENCHMARK(BM_FrameBuilder_defer_scene)->DenseRange(0, SCENES.size() - 1);
 
