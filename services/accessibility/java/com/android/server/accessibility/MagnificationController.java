@@ -111,12 +111,18 @@ class MagnificationController {
     public void register() {
         mScreenStateObserver.register();
         mWindowStateObserver.register();
+
+        // Obtain initial state.
+        mWindowStateObserver.getRegions(mMagnifiedRegion, mAvailableRegion);
+        mMagnifiedRegion.getBounds(mMagnifiedBounds);
     }
 
     /**
      * Unregisters magnification-related observers.
      */
     public void unregister() {
+        mSpecAnimationBridge.cancel();
+
         mScreenStateObserver.unregister();
         mWindowStateObserver.unregister();
     }
@@ -149,8 +155,10 @@ class MagnificationController {
             final float offsetY = sentSpec.offsetY;
 
             // Compute the new center and update spec as needed.
-            final float centerX = (mMagnifiedBounds.width() / 2.0f - offsetX) / scale;
-            final float centerY = (mMagnifiedBounds.height() / 2.0f - offsetY) / scale;
+            final float centerX = (mMagnifiedBounds.width() / 2.0f
+                    + mMagnifiedBounds.left - offsetX) / scale;
+            final float centerY = (mMagnifiedBounds.height() / 2.0f
+                    + mMagnifiedBounds.top - offsetY) / scale;
             if (updateSpec) {
                 setScaleAndCenter(scale, centerX, centerY, false);
             } else {
@@ -246,7 +254,8 @@ class MagnificationController {
      */
     public float getCenterX() {
         synchronized (mLock) {
-            return  (mMagnifiedBounds.width() / 2.0f - getOffsetX()) / getScale();
+            return  (mMagnifiedBounds.width() / 2.0f
+                    + mMagnifiedBounds.left - getOffsetX()) / getScale();
         }
     }
 
@@ -268,7 +277,8 @@ class MagnificationController {
      */
     public float getCenterY() {
         synchronized (mLock) {
-            return (mMagnifiedBounds.height() / 2.0f - getOffsetY()) / getScale();
+            return (mMagnifiedBounds.height() / 2.0f
+                    + mMagnifiedBounds.top - getOffsetY()) / getScale();
         }
     }
 
@@ -471,18 +481,25 @@ class MagnificationController {
      *         otherwise
      */
     private boolean updateMagnificationSpecLocked(float scale, float centerX, float centerY) {
+        // Handle defaults.
+        if (Float.isNaN(centerX)) {
+            centerX = getCenterX();
+        }
+        if (Float.isNaN(centerY)) {
+            centerY = getCenterY();
+        }
+        if (Float.isNaN(scale)) {
+            scale = getScale();
+        }
+
+        // Ensure requested center is within the available region.
         if (!availableRegionContains(centerX, centerY)) {
             return false;
         }
 
-        boolean changed = false;
-
+        // Compute changes.
         final MagnificationSpec currSpec = mCurrentMagnificationSpec;
-
-        // Handle scale.
-        if (Float.isNaN(scale)) {
-            scale = getScale();
-        }
+        boolean changed = false;
 
         final float normScale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
         if (Float.compare(currSpec.scale, normScale) != 0) {
@@ -490,24 +507,16 @@ class MagnificationController {
             changed = true;
         }
 
-        // Handle X offset.
-        if (Float.isNaN(centerX)) {
-            centerX = getCenterX();
-        }
-
-        final float nonNormOffsetX = mMagnifiedBounds.width() / 2.0f - centerX * scale;
+        final float nonNormOffsetX = mMagnifiedBounds.width() / 2.0f
+                + mMagnifiedBounds.left - centerX * scale;
         final float offsetX = MathUtils.constrain(nonNormOffsetX, getMinOffsetXLocked(), 0);
         if (Float.compare(currSpec.offsetX, offsetX) != 0) {
             currSpec.offsetX = offsetX;
             changed = true;
         }
 
-        // Handle Y offset.
-        if (Float.isNaN(centerY)) {
-            centerY = getCenterY();
-        }
-
-        final float nonNormOffsetY = mMagnifiedBounds.height() / 2.0f - centerY * scale;
+        final float nonNormOffsetY = mMagnifiedBounds.height() / 2.0f
+                + mMagnifiedBounds.top - centerY * scale;
         final float offsetY = MathUtils.constrain(nonNormOffsetY, getMinOffsetYLocked(), 0);
         if (Float.compare(currSpec.offsetY, offsetY) != 0) {
             currSpec.offsetY = offsetY;
@@ -661,6 +670,12 @@ class MagnificationController {
             mTransformationAnimator.setInterpolator(new DecelerateInterpolator(2.5f));
         }
 
+        public void cancel() {
+            if (mTransformationAnimator != null && mTransformationAnimator.isRunning()) {
+                mTransformationAnimator.cancel();
+            }
+        }
+
         public void updateSentSpec(MagnificationSpec spec, boolean animate) {
             if (Thread.currentThread().getId() == mMainThreadId) {
                 // Already on the main thread, don't bother proxying.
@@ -811,9 +826,6 @@ class MagnificationController {
         private static final int MESSAGE_ON_USER_CONTEXT_CHANGED = 3;
         private static final int MESSAGE_ON_ROTATION_CHANGED = 4;
 
-        private final Rect mTempRect = new Rect();
-        private final Rect mTempRect1 = new Rect();
-
         private final MagnificationController mController;
         private final WindowManagerInternal mWindowManager;
         private final Handler mHandler;
@@ -882,6 +894,10 @@ class MagnificationController {
 
         private void handleOnUserContextChanged() {
             mController.resetIfNeeded(true);
+        }
+
+        public void getRegions(@NonNull Region outMagnified, @NonNull Region outAvailable) {
+            mWindowManager.getMagnificationRegions(outMagnified, outAvailable);
         }
 
         private class CallbackHandler extends Handler {
