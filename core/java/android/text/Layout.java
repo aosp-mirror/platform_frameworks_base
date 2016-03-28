@@ -799,6 +799,31 @@ public abstract class Layout {
         return false;
     }
 
+    /**
+     * Returns the range of the run that the character at offset belongs to.
+     * @param offset the offset
+     * @return The range of the run
+     * @hide
+     */
+    public long getRunRange(int offset) {
+        int line = getLineForOffset(offset);
+        Directions dirs = getLineDirections(line);
+        if (dirs == DIRS_ALL_LEFT_TO_RIGHT || dirs == DIRS_ALL_RIGHT_TO_LEFT) {
+            return TextUtils.packRangeInLong(0, getLineEnd(line));
+        }
+        int[] runs = dirs.mDirections;
+        int lineStart = getLineStart(line);
+        for (int i = 0; i < runs.length; i += 2) {
+            int start = lineStart + runs[i];
+            int limit = start + (runs[i+1] & RUN_LENGTH_MASK);
+            if (offset >= start && offset < limit) {
+                return TextUtils.packRangeInLong(start, limit);
+            }
+        }
+        // Should happen only if the offset is "out of bounds"
+        return TextUtils.packRangeInLong(0, getLineEnd(line));
+    }
+
     private boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
@@ -884,6 +909,10 @@ public abstract class Layout {
     public float getSecondaryHorizontal(int offset, boolean clamped) {
         boolean trailing = primaryIsTrailingPrevious(offset);
         return getHorizontal(offset, !trailing, clamped);
+    }
+
+    private float getHorizontal(int offset, boolean primary) {
+        return primary ? getPrimaryHorizontal(offset) : getSecondaryHorizontal(offset);
     }
 
     private float getHorizontal(int offset, boolean trailing, boolean clamped) {
@@ -1114,6 +1143,20 @@ public abstract class Layout {
      * closest to the specified horizontal position.
      */
     public int getOffsetForHorizontal(int line, float horiz) {
+        return getOffsetForHorizontal(line, horiz, true);
+    }
+
+    /**
+     * Get the character offset on the specified line whose position is
+     * closest to the specified horizontal position.
+     *
+     * @param line the line used to find the closest offset
+     * @param horiz the horizontal position used to find the closest offset
+     * @param primary whether to use the primary position or secondary position to find the offset
+     *
+     * @hide
+     */
+    public int getOffsetForHorizontal(int line, float horiz, boolean primary) {
         // TODO: use Paint.getOffsetForAdvance to avoid binary search
         final int lineEndOffset = getLineEnd(line);
         final int lineStartOffset = getLineStart(line);
@@ -1133,7 +1176,7 @@ public abstract class Layout {
                     !isRtlCharAt(lineEndOffset - 1)) + lineStartOffset;
         }
         int best = lineStartOffset;
-        float bestdist = Math.abs(getPrimaryHorizontal(best) - horiz);
+        float bestdist = Math.abs(getHorizontal(best, primary) - horiz);
 
         for (int i = 0; i < dirs.mDirections.length; i += 2) {
             int here = lineStartOffset + dirs.mDirections[i];
@@ -1149,7 +1192,7 @@ public abstract class Layout {
                 guess = (high + low) / 2;
                 int adguess = getOffsetAtStartOf(guess);
 
-                if (getPrimaryHorizontal(adguess) * swap >= horiz * swap)
+                if (getHorizontal(adguess, primary) * swap >= horiz * swap)
                     high = guess;
                 else
                     low = guess;
@@ -1162,9 +1205,9 @@ public abstract class Layout {
                 int aft = tl.getOffsetToLeftRightOf(low - lineStartOffset, isRtl) + lineStartOffset;
                 low = tl.getOffsetToLeftRightOf(aft - lineStartOffset, !isRtl) + lineStartOffset;
                 if (low >= here && low < there) {
-                    float dist = Math.abs(getPrimaryHorizontal(low) - horiz);
+                    float dist = Math.abs(getHorizontal(low, primary) - horiz);
                     if (aft < there) {
-                        float other = Math.abs(getPrimaryHorizontal(aft) - horiz);
+                        float other = Math.abs(getHorizontal(aft, primary) - horiz);
 
                         if (other < dist) {
                             dist = other;
@@ -1179,7 +1222,7 @@ public abstract class Layout {
                 }
             }
 
-            float dist = Math.abs(getPrimaryHorizontal(here) - horiz);
+            float dist = Math.abs(getHorizontal(here, primary) - horiz);
 
             if (dist < bestdist) {
                 bestdist = dist;
@@ -1187,7 +1230,7 @@ public abstract class Layout {
             }
         }
 
-        float dist = Math.abs(getPrimaryHorizontal(max) - horiz);
+        float dist = Math.abs(getHorizontal(max, primary) - horiz);
 
         if (dist <= bestdist) {
             bestdist = dist;

@@ -4034,14 +4034,17 @@ public class Editor {
                 // Don't update drawable during dragging.
                 return;
             }
+            final Layout layout = mTextView.getLayout();
+            if (layout == null) {
+                return;
+            }
             final int offset = getCurrentCursorOffset();
-            final boolean isRtlCharAtOffset = mTextView.getLayout().isRtlCharAt(offset);
+            final boolean isRtlCharAtOffset = isAtRtlRun(layout, offset);
             final Drawable oldDrawable = mDrawable;
             mDrawable = isRtlCharAtOffset ? mDrawableRtl : mDrawableLtr;
             mHotspotX = getHotspotX(mDrawable, isRtlCharAtOffset);
             mHorizontalGravity = getHorizontalGravity(isRtlCharAtOffset);
-            final Layout layout = mTextView.getLayout();
-            if (layout != null && oldDrawable != mDrawable && isShowing()) {
+            if (oldDrawable != mDrawable && isShowing()) {
                 // Update popup window position.
                 mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX -
                         getHorizontalOffset() + getCursorOffset();
@@ -4154,6 +4157,19 @@ public class Editor {
 
         public abstract void updatePosition(float x, float y);
 
+        protected boolean isAtRtlRun(@NonNull Layout layout, int offset) {
+            return layout.isRtlCharAt(offset);
+        }
+
+        @VisibleForTesting
+        public float getHorizontal(@NonNull Layout layout, int offset) {
+            return layout.getPrimaryHorizontal(offset);
+        }
+
+        protected int getOffsetAtCoordinate(@NonNull Layout layout, int line, float x) {
+            return mTextView.getOffsetAtCoordinate(line, x);
+        }
+
         protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
             // A HandleView relies on the layout, which may be nulled by external methods
             Layout layout = mTextView.getLayout();
@@ -4194,7 +4210,7 @@ public class Editor {
          * @return The clamped horizontal position for the cursor.
          */
         int getCursorHorizontalPosition(Layout layout, int offset) {
-            return (int) (layout.getPrimaryHorizontal(offset) - 0.5f);
+            return (int) (getHorizontal(layout, offset) - 0.5f);
         }
 
         public void updatePosition(int parentPositionX, int parentPositionY,
@@ -4427,7 +4443,7 @@ public class Editor {
         int getCursorHorizontalPosition(Layout layout, int offset) {
             final Drawable drawable = mCursorCount > 0 ? mCursorDrawable[0] : null;
             if (drawable != null) {
-                final float horizontal = layout.getPrimaryHorizontal(offset);
+                final float horizontal = getHorizontal(layout, offset);
                 return clampHorizontalPosition(drawable, horizontal) + mTempRect.left;
             }
             return super.getCursorHorizontalPosition(layout, offset);
@@ -4499,10 +4515,10 @@ public class Editor {
                     mPreviousLineTouched = mTextView.getLineAtCoordinate(y);
                 }
                 int currLine = getCurrentLineAdjustedForSlop(layout, mPreviousLineTouched, y);
-                offset = mTextView.getOffsetAtCoordinate(currLine, x);
+                offset = getOffsetAtCoordinate(layout, currLine, x);
                 mPreviousLineTouched = currLine;
             } else {
-                offset = mTextView.getOffsetForPosition(x, y);
+                offset = -1;
             }
             positionAtCursorOffset(offset, false);
             if (mTextActionMode != null) {
@@ -4612,14 +4628,14 @@ public class Editor {
             final int anotherHandleOffset =
                     isStartHandle() ? mTextView.getSelectionEnd() : mTextView.getSelectionStart();
             int currLine = getCurrentLineAdjustedForSlop(layout, mPreviousLineTouched, y);
-            int initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
+            int initialOffset = getOffsetAtCoordinate(layout, currLine, x);
 
             if (isStartHandle() && initialOffset >= anotherHandleOffset
                     || !isStartHandle() && initialOffset <= anotherHandleOffset) {
                 // Handles have crossed, bound it to the first selected line and
                 // adjust by word / char as normal.
                 currLine = layout.getLineForOffset(anotherHandleOffset);
-                initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
+                initialOffset = getOffsetAtCoordinate(layout, currLine, x);
             }
 
             int offset = initialOffset;
@@ -4631,8 +4647,8 @@ public class Editor {
             }
 
             final int currentOffset = getCurrentCursorOffset();
-            final boolean rtlAtCurrentOffset = layout.isRtlCharAt(currentOffset);
-            final boolean atRtl = layout.isRtlCharAt(offset);
+            final boolean rtlAtCurrentOffset = isAtRtlRun(layout, currentOffset);
+            final boolean atRtl = isAtRtlRun(layout, offset);
             final boolean isLvlBoundary = layout.isLevelBoundary(offset);
 
             // We can't determine if the user is expanding or shrinking the selection if they're
@@ -4689,14 +4705,15 @@ public class Editor {
 
             if (isExpanding) {
                 // User is increasing the selection.
-                final boolean snapToWord = !mInWord
-                        || (isStartHandle() ? currLine < mPrevLine : currLine > mPrevLine);
+                int wordBoundary = isStartHandle() ? wordStart : wordEnd;
+                final boolean snapToWord = (!mInWord
+                        || (isStartHandle() ? currLine < mPrevLine : currLine > mPrevLine))
+                                && atRtl == isAtRtlRun(layout, wordBoundary);
                 if (snapToWord) {
                     // Sometimes words can be broken across lines (Chinese, hyphenation).
                     // We still snap to the word boundary but we only use the letters on the
                     // current line to determine if the user is far enough into the word to snap.
-                    int wordBoundary = isStartHandle() ? wordStart : wordEnd;
-                    if (layout != null && layout.getLineForOffset(wordBoundary) != currLine) {
+                    if (layout.getLineForOffset(wordBoundary) != currLine) {
                         wordBoundary = isStartHandle() ?
                                 layout.getLineStart(currLine) : layout.getLineEnd(currLine);
                     }
@@ -4717,9 +4734,9 @@ public class Editor {
                         offset = mPreviousOffset;
                     }
                 }
-                if (layout != null && (isStartHandle() && offset < initialOffset)
+                if ((isStartHandle() && offset < initialOffset)
                         || (!isStartHandle() && offset > initialOffset)) {
-                    final float adjustedX = layout.getPrimaryHorizontal(offset);
+                    final float adjustedX = getHorizontal(layout, offset);
                     mTouchWordDelta =
                             mTextView.convertToLocalHorizontalCoordinate(x) - adjustedX;
                 } else {
@@ -4728,7 +4745,7 @@ public class Editor {
                 positionCursor = true;
             } else {
                 final int adjustedOffset =
-                        mTextView.getOffsetAtCoordinate(currLine, x - mTouchWordDelta);
+                        getOffsetAtCoordinate(layout, currLine, x - mTouchWordDelta);
                 final boolean shrinking = isStartHandle()
                         ? adjustedOffset > mPreviousOffset || currLine > mPrevLine
                         : adjustedOffset < mPreviousOffset || currLine < mPrevLine;
@@ -4737,9 +4754,9 @@ public class Editor {
                     if (currLine != mPrevLine) {
                         // We're on a different line, so we'll snap to word boundaries.
                         offset = isStartHandle() ? wordStart : wordEnd;
-                        if (layout != null && (isStartHandle() && offset < initialOffset)
+                        if ((isStartHandle() && offset < initialOffset)
                                 || (!isStartHandle() && offset > initialOffset)) {
-                            final float adjustedX = layout.getPrimaryHorizontal(offset);
+                            final float adjustedX = getHorizontal(layout, offset);
                             mTouchWordDelta =
                                     mTextView.convertToLocalHorizontalCoordinate(x) - adjustedX;
                         } else {
@@ -4754,7 +4771,7 @@ public class Editor {
                     // Handle has jumped to the word boundary, and the user is moving
                     // their finger towards the handle, the delta should be updated.
                     mTouchWordDelta = mTextView.convertToLocalHorizontalCoordinate(x) -
-                            layout.getPrimaryHorizontal(mPreviousOffset);
+                            getHorizontal(layout, mPreviousOffset);
                 }
             }
 
@@ -4792,9 +4809,32 @@ public class Editor {
                     isStartHandle() ? mTextView.getSelectionEnd() : mTextView.getSelectionStart();
             if ((isStartHandle() && offset >= anotherHandleOffset)
                     || (!isStartHandle() && offset <= anotherHandleOffset)) {
+                mTouchWordDelta = 0.0f;
+                final Layout layout = mTextView.getLayout();
+                if (layout != null && offset != anotherHandleOffset) {
+                    final float horiz = getHorizontal(layout, offset);
+                    final float anotherHandleHoriz = getHorizontal(layout, anotherHandleOffset,
+                            !isStartHandle());
+                    final float currentHoriz = getHorizontal(layout, mPreviousOffset);
+                    if (currentHoriz < anotherHandleHoriz && horiz < anotherHandleHoriz
+                            || currentHoriz > anotherHandleHoriz && horiz > anotherHandleHoriz) {
+                        // This handle passes another one as it crossed a direction boundary.
+                        // Don't minimize the selection, but keep the handle at the run boundary.
+                        final int currentOffset = getCurrentCursorOffset();
+                        final int offsetToGetRunRange = isStartHandle() ?
+                                currentOffset : Math.max(currentOffset - 1, 0);
+                        final long range = layout.getRunRange(offsetToGetRunRange);
+                        if (isStartHandle()) {
+                            offset = TextUtils.unpackRangeStartFromLong(range);
+                        } else {
+                            offset = TextUtils.unpackRangeEndFromLong(range);
+                        }
+                        positionAtCursorOffset(offset, false);
+                        return;
+                    }
+                }
                 // Handles can not cross and selection is at least one character.
                 offset = getNextCursorOffset(anotherHandleOffset, !isStartHandle());
-                mTouchWordDelta = 0.0f;
             }
             positionAtCursorOffset(offset, false);
         }
@@ -4811,6 +4851,49 @@ public class Editor {
                 nearEdge = x < leftEdge + mTextViewEdgeSlop;
             }
             return nearEdge;
+        }
+
+        @Override
+        protected boolean isAtRtlRun(@NonNull Layout layout, int offset) {
+            final int offsetToCheck = isStartHandle() ? offset : Math.max(offset - 1, 0);
+            return layout.isRtlCharAt(offsetToCheck);
+        }
+
+        @Override
+        public float getHorizontal(@NonNull Layout layout, int offset) {
+            return getHorizontal(layout, offset, isStartHandle());
+        }
+
+        private float getHorizontal(@NonNull Layout layout, int offset, boolean startHandle) {
+            final int line = layout.getLineForOffset(offset);
+            final int offsetToCheck = startHandle ? offset : Math.max(offset - 1, 0);
+            final boolean isRtlChar = layout.isRtlCharAt(offsetToCheck);
+            final boolean isRtlParagraph = layout.getParagraphDirection(line) == -1;
+            return (isRtlChar == isRtlParagraph) ?
+                    layout.getPrimaryHorizontal(offset) : layout.getSecondaryHorizontal(offset);
+        }
+
+        @Override
+        protected int getOffsetAtCoordinate(@NonNull Layout layout, int line, float x) {
+            final int primaryOffset = layout.getOffsetForHorizontal(line, x, true);
+            if (!layout.isLevelBoundary(primaryOffset)) {
+                return primaryOffset;
+            }
+            final int secondaryOffset = layout.getOffsetForHorizontal(line, x, false);
+            final int currentOffset = getCurrentCursorOffset();
+            final int primaryDiff = Math.abs(primaryOffset - currentOffset);
+            final int secondaryDiff = Math.abs(secondaryOffset - currentOffset);
+            if (primaryDiff < secondaryDiff) {
+                return primaryOffset;
+            } else if (primaryDiff > secondaryDiff) {
+                return secondaryOffset;
+            } else {
+                final int offsetToCheck = isStartHandle() ?
+                        currentOffset : Math.max(currentOffset - 1, 0);
+                final boolean isRtlChar = layout.isRtlCharAt(offsetToCheck);
+                final boolean isRtlParagraph = layout.getParagraphDirection(line) == -1;
+                return isRtlChar == isRtlParagraph ? primaryOffset : secondaryOffset;
+            }
         }
     }
 
