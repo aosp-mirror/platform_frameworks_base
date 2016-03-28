@@ -1798,7 +1798,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // WM resizeTask must be done after the task is moved to the correct stack,
                     // because Task's setBounds() also updates dim layer's bounds, but that has
                     // dependency on the stack.
-                    mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig,
+                    mWindowManager.resizeTask(task.taskId, task.mBounds, task.mOverrideConfig,
                             false /* relayout */, false /* forced */);
                 }
             }
