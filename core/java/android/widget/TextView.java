@@ -17,6 +17,7 @@
 package android.widget;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+
 import android.R;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -3115,10 +3116,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Returns the font feature settings. The format is the same as the CSS
+     * font-feature-settings attribute:
+     * <a href="http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings">
+     *     http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings</a>
+     *
      * @return the currently set font feature settings.  Default is null.
      *
      * @see #setFontFeatureSettings(String)
-     * @see Paint#setFontFeatureSettings
+     * @see Paint#setFontFeatureSettings(String) Paint.setFontFeatureSettings(String)
      */
     @Nullable
     public String getFontFeatureSettings() {
@@ -3182,13 +3188,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets font feature settings.  The format is the same as the CSS
+     * Sets font feature settings. The format is the same as the CSS
      * font-feature-settings attribute:
-     * http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings
+     * <a href="http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings">
+     *     http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings</a>
      *
      * @param fontFeatureSettings font feature settings represented as CSS compatible string
+     *
      * @see #getFontFeatureSettings()
-     * @see Paint#getFontFeatureSettings
+     * @see Paint#getFontFeatureSettings() Paint.getFontFeatureSettings()
      *
      * @attr ref android.R.styleable#TextView_fontFeatureSettings
      */
