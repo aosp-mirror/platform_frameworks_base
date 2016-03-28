@@ -192,7 +192,7 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
 
     public static ShortcutPackageInfo generateForInstalledPackage(
             ShortcutService s, String packageName, @UserIdInt int userId) {
-        final PackageInfo pi = s.getPackageInfo(packageName, userId, /*signature=*/ true);
+        final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, userId);
         if (pi.signatures == null || pi.signatures.length == 0) {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
@@ -204,7 +204,7 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
     }
 
     public void refreshAndSave(ShortcutService s, @UserIdInt int userId) {
-        final PackageInfo pi = s.getPackageInfo(mPackageName, userId, /*getSignatures=*/ true);
+        final PackageInfo pi = s.getPackageInfoWithSignatures(mPackageName, userId);
         if (pi == null) {
             Slog.w(TAG, "Package not found: " + mPackageName);
             return;

@@ -260,6 +260,11 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     private List<Integer> mDirtyUserIds = new ArrayList<>();
 
+    private static final int PACKAGE_MATCH_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE
+            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+            | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+
     public ShortcutService(Context context) {
         this(context, BackgroundThread.get().getLooper());
     }
@@ -1053,19 +1058,6 @@ public class ShortcutService extends IShortcutService.Stub {
         throw new SecurityException("Caller UID= doesn't own " + packageName);
     }
 
-    // Test overrides it.
-    int injectGetPackageUid(@NonNull String packageName, @UserIdInt int userId) {
-        try {
-            return mContext.getPackageManager().getPackageUidAsUser(packageName,
-                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                    userId);
-        } catch (NameNotFoundException e) {
-            return -1;
-        }
-    }
-
     void postToHandler(Runnable r) {
         mHandler.post(r);
     }
@@ -1711,8 +1703,10 @@ public class ShortcutService extends IShortcutService.Stub {
             gonePackages = ArrayUtils.add(gonePackages, info.getPackageName());
         }
         if (gonePackages != null) {
-            for (int i = gonePackages.size() - 1; i >= 0; i--) {
-                handlePackageGone(gonePackages.get(i), userId);
+            synchronized (mLock) {
+                for (int i = gonePackages.size() - 1; i >= 0; i--) {
+                    cleanUpPackageLocked(gonePackages.get(i), userId);
+                }
             }
         }
     }
@@ -1733,10 +1727,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
-        final PackageInfo pi = getPackageInfo(packageName, userId);
-        if (pi == null) {
-            Slog.w(TAG, "Package not found: " + packageName);
-            return;
+        if (DEBUG) {
+            Slog.d(TAG, String.format("handlePackageUpdateFinished: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
             final ShortcutPackageInfo spi =
@@ -1756,33 +1748,28 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    private void handlePackageGone(String packageName, @UserIdInt int userId) {
-        if (DEBUG) {
-            Slog.d(TAG, String.format("handlePackageGone: %s user=%d", packageName, userId));
-        }
-        synchronized (mLock) {
-            cleanUpPackageLocked(packageName, userId);
-        }
-    }
-
     // === Backup & restore ===
 
-    PackageInfo getPackageInfo(String packageName, @UserIdInt int userId) {
-        return getPackageInfo(packageName, userId, /*getSignatures=*/ false);
+    PackageInfo getPackageInfoWithSignatures(String packageName, @UserIdInt int userId) {
+        return injectPackageInfo(packageName, userId, true);
     }
 
-    PackageInfo getPackageInfo(String packageName, @UserIdInt int userId,
-            boolean getSignatures) {
-        return injectPackageInfo(packageName, userId, getSignatures);
+    int injectGetPackageUid(@NonNull String packageName, @UserIdInt int userId) {
+        try {
+            return mIPackageManager.getPackageUid(packageName, PACKAGE_MATCH_FLAGS
+                    , userId);
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+            Slog.wtf(TAG, "RemoteException", e);
+            return -1;
+        }
     }
 
     @VisibleForTesting
     PackageInfo injectPackageInfo(String packageName, @UserIdInt int userId,
             boolean getSignatures) {
         try {
-            return mIPackageManager.getPackageInfo(packageName,
-                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+            return mIPackageManager.getPackageInfo(packageName, PACKAGE_MATCH_FLAGS
                     | (getSignatures ? PackageManager.GET_SIGNATURES : 0)
                     , userId);
         } catch (RemoteException e) {
@@ -1792,14 +1779,28 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @VisibleForTesting
+    ApplicationInfo injectApplicationInfo(String packageName, @UserIdInt int userId) {
+        try {
+            return mIPackageManager.getApplicationInfo(packageName, PACKAGE_MATCH_FLAGS, userId);
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+            Slog.wtf(TAG, "RemoteException", e);
+            return null;
+        }
+    }
+
+    private boolean isApplicationFlagSet(String packageName, int userId, int flags) {
+        final ApplicationInfo ai = injectApplicationInfo(packageName, userId);
+        return (ai != null) && ((ai.flags & flags) == flags);
+    }
+
     boolean shouldBackupApp(String packageName, int userId) {
-        final PackageInfo pi = getPackageInfo(packageName, userId);
-        return (pi != null) &&
-                ((pi.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0);
+        return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_ALLOW_BACKUP);
     }
 
     private boolean isPackageInstalled(String packageName, int userId) {
-        return getPackageInfo(packageName, userId) != null;
+        return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_INSTALLED);
     }
 
     // === Dump ===
