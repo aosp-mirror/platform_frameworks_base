@@ -947,8 +947,6 @@ class ActivityStarter {
                 // We didn't do anything...  but it was needed (a.k.a., client don't use that
                 // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
                 resumeTargetStackIfNeeded();
-                mSupervisor.showNonResizeableDockToastIfNeeded(mStartActivity.task,
-                        preferredLaunchStackId, mTargetStack.mStackId);
                 return START_TASK_TO_FRONT;
             }
         }
@@ -989,7 +987,7 @@ class ActivityStarter {
             top.deliverNewIntentLocked(
                     mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
             mSupervisor.showNonResizeableDockToastIfNeeded(mStartActivity.task,
-                    preferredLaunchStackId, mTargetStack.mStackId);
+                    preferredLaunchStackId, topStack.mStackId);
             return START_DELIVERED_TO_TOP;
         }
 
