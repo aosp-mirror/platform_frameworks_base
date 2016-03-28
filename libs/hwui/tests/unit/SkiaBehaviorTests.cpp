@@ -41,3 +41,10 @@ TEST(SkiaBehavior, CreateBitmapShader1x1) {
     EXPECT_EQ(SkShader::kRepeat_TileMode, xy[1]);
     EXPECT_EQ(origBitmap.pixelRef(), bitmap.pixelRef());
 }
+
+TEST(SkiaBehavior, genIds) {
+    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    uint32_t genId = bitmap.getGenerationID();
+    bitmap.notifyPixelsChanged();
+    EXPECT_NE(genId, bitmap.getGenerationID());
+}
