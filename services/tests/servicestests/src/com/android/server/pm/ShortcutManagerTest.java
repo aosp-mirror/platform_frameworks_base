@@ -261,6 +261,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        ApplicationInfo injectApplicationInfo(String packageName, @UserIdInt int userId) {
+            PackageInfo pi = injectPackageInfo(packageName, userId, /* getSignatures= */ false);
+            return pi != null ? pi.applicationInfo : null;
+        }
+
+        @Override
         void postToHandler(Runnable r) {
             final long token = mContext.injectClearCallingIdentity();
             super.postToHandler(r);
@@ -473,6 +479,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         pi.packageName = packageName;
         pi.applicationInfo = new ApplicationInfo();
         pi.applicationInfo.uid = uid;
+        pi.applicationInfo.flags = ApplicationInfo.FLAG_INSTALLED
+                | ApplicationInfo.FLAG_ALLOW_BACKUP;
         pi.versionCode = version;
         pi.signatures = genSignatures(signatures);
 
