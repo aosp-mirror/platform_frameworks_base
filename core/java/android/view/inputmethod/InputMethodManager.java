@@ -493,12 +493,7 @@ public final class InputMethodManager {
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.
                         if (mServedView != null && mServedView.hasWindowFocus()) {
-                            // Please note that this handler thread could be different
-                            // from a thread that created mServedView. That could happen
-                            // the current activity is running in the system process.
-                            // In that case, we really should not call
-                            // mServedInputConnectionWrapper.finishComposingText().
-                            if (checkFocusNoStartInput(mHasBeenInactive, false)) {
+                            if (checkFocusNoStartInput(mHasBeenInactive)) {
                                 final int reason = active ?
                                         InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS :
                                         InputMethodClient.START_INPUT_REASON_DEACTIVATED_BY_IMMS;
@@ -1372,12 +1367,12 @@ public final class InputMethodManager {
      * @hide
      */
     public void checkFocus() {
-        if (checkFocusNoStartInput(false, true)) {
+        if (checkFocusNoStartInput(false)) {
             startInputInner(InputMethodClient.START_INPUT_REASON_CHECK_FOCUS, null, 0, 0, 0);
         }
     }
 
-    private boolean checkFocusNoStartInput(boolean forceNewFocus, boolean finishComposingText) {
+    private boolean checkFocusNoStartInput(boolean forceNewFocus) {
         // This is called a lot, so short-circuit before locking.
         if (mServedView == mNextServedView && !forceNewFocus) {
             return false;
@@ -1411,7 +1406,7 @@ public final class InputMethodManager {
             mServedConnecting = true;
         }
 
-        if (finishComposingText && ic != null) {
+        if (ic != null) {
             ic.finishComposingText();
         }
 
@@ -1457,7 +1452,7 @@ public final class InputMethodManager {
             controlFlags |= CONTROL_WINDOW_FIRST;
         }
         
-        if (checkFocusNoStartInput(forceNewFocus, true)) {
+        if (checkFocusNoStartInput(forceNewFocus)) {
             // We need to restart input on the current focus view.  This
             // should be done in conjunction with telling the system service
             // about the window gaining focus, to help make the transition
