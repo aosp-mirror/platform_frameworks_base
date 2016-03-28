@@ -767,7 +767,11 @@ public class ActivityInfo extends ComponentInfo
      */
     public int lockTaskLaunchMode;
 
-    public Layout layout;
+    /**
+     * Information about desired position and size of activity on the display when
+     * it is first started.
+     */
+    public WindowLayout windowLayout;
 
     public ActivityInfo() {
     }
@@ -788,7 +792,7 @@ public class ActivityInfo extends ComponentInfo
         parentActivityName = orig.parentActivityName;
         maxRecents = orig.maxRecents;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
-        layout = orig.layout;
+        windowLayout = orig.windowLayout;
         resizeMode = orig.resizeMode;
     }
 
@@ -886,10 +890,10 @@ public class ActivityInfo extends ComponentInfo
             pw.println(prefix + "lockTaskLaunchMode="
                     + lockTaskLaunchModeToString(lockTaskLaunchMode));
         }
-        if (layout != null) {
-            pw.println(prefix + "defaultLayout=" + layout.width + "|"
-                    + layout.widthFraction + ", " + layout.height + "|"
-                    + layout.heightFraction + ", " + layout.gravity);
+        if (windowLayout != null) {
+            pw.println(prefix + "windowLayout=" + windowLayout.width + "|"
+                    + windowLayout.widthFraction + ", " + windowLayout.height + "|"
+                    + windowLayout.heightFraction + ", " + windowLayout.gravity);
         }
         pw.println(prefix + "resizeMode=" + resizeModeToString(resizeMode));
         super.dumpBack(pw, prefix, flags);
@@ -922,14 +926,15 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
         dest.writeInt(lockTaskLaunchMode);
-        if (layout != null) {
+        if (windowLayout != null) {
             dest.writeInt(1);
-            dest.writeInt(layout.width);
-            dest.writeFloat(layout.widthFraction);
-            dest.writeInt(layout.height);
-            dest.writeFloat(layout.heightFraction);
-            dest.writeInt(layout.gravity);
-            dest.writeInt(layout.minimalSize);
+            dest.writeInt(windowLayout.width);
+            dest.writeFloat(windowLayout.widthFraction);
+            dest.writeInt(windowLayout.height);
+            dest.writeFloat(windowLayout.heightFraction);
+            dest.writeInt(windowLayout.gravity);
+            dest.writeInt(windowLayout.minimalWidth);
+            dest.writeInt(windowLayout.minimalHeight);
         } else {
             dest.writeInt(0);
         }
@@ -964,36 +969,107 @@ public class ActivityInfo extends ComponentInfo
         maxRecents = source.readInt();
         lockTaskLaunchMode = source.readInt();
         if (source.readInt() == 1) {
-            layout = new Layout(source);
+            windowLayout = new WindowLayout(source);
         }
         resizeMode = source.readInt();
     }
 
-    public static final class Layout {
-        public Layout(int width, float widthFraction, int height, float heightFraction, int gravity,
-                int minimalSize) {
+    /**
+     * Contains information about position and size of the activity on the display.
+     *
+     * Used in freeform mode to set desired position when activity is first launched.
+     * It describes how big the activity wants to be in both width and height,
+     * the minimal allowed size, and the gravity to be applied.
+     *
+     * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
+     * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
+     * @attr ref android.R.styleable#AndroidManifestLayout_gravity
+     * @attr ref android.R.styleable#AndroidManifestLayout_minimalWidth
+     * @attr ref android.R.styleable#AndroidManifestLayout_minimalHeight
+     */
+    public static final class WindowLayout {
+        public WindowLayout(int width, float widthFraction, int height, float heightFraction, int gravity,
+                int minimalWidth, int minimalHeight) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
             this.heightFraction = heightFraction;
             this.gravity = gravity;
-            this.minimalSize = minimalSize;
+            this.minimalWidth = minimalWidth;
+            this.minimalHeight = minimalHeight;
         }
 
-        Layout(Parcel source) {
+        WindowLayout(Parcel source) {
             width = source.readInt();
             widthFraction = source.readFloat();
             height = source.readInt();
             heightFraction = source.readFloat();
             gravity = source.readInt();
-            minimalSize = source.readInt();
+            minimalWidth = source.readInt();
+            minimalHeight = source.readInt();
         }
 
+        /**
+         * Width of activity in pixels.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
+         */
         public final int width;
+
+        /**
+         * Width of activity as a fraction of available display width.
+         * If both {@link #width} and this value are set this one will be preferred.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
+         */
         public final float widthFraction;
+
+        /**
+         * Height of activity in pixels.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
+         */
         public final int height;
+
+        /**
+         * Height of activity as a fraction of available display height.
+         * If both {@link #height} and this value are set this one will be preferred.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
+         */
         public final float heightFraction;
+
+        /**
+         * Gravity of activity.
+         * Currently {@link android.view.Gravity#TOP}, {@link android.view.Gravity#BOTTOM},
+         * {@link android.view.Gravity#LEFT} and {@link android.view.Gravity#RIGHT} are supported.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_gravity
+         */
         public final int gravity;
-        public final int minimalSize;
+
+        /**
+         * Minimal width of activity in pixels to be able to display its content.
+         *
+         * <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
+         * activities launched in the task. That is if the root activity of a task set minimal
+         * width, then the system will set the same minimal width on all other activities in the
+         * task. It will also ignore any other minimal width attributes of non-root activities.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_minimalWidth
+         */
+        public final int minimalWidth;
+
+        /**
+         * Minimal height of activity in pixels to be able to display its content.
+         *
+         * <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
+         * activities launched in the task. That is if the root activity of a task set minimal
+         * height, then the system will set the same minimal height on all other activities in the
+         * task. It will also ignore any other minimal height attributes of non-root activities.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_minimalHeight
+         */
+        public final int minimalHeight;
     }
 }

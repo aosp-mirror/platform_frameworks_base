@@ -2664,7 +2664,8 @@
     <public type="attr" name="subMenuArrow" />
     <public type="attr" name="defaultWidth" />
     <public type="attr" name="defaultHeight" />
-    <public type="attr" name="minimalSize" />
+    <public type="attr" name="minimalWidth" />
+    <public type="attr" name="minimalHeight" />
     <public type="attr" name="resizeableActivity" />
     <public type="attr" name="supportsPictureInPicture" />
     <public type="attr" name="titleMargin" />

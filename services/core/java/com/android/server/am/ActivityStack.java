@@ -4932,18 +4932,18 @@ final class ActivityStack {
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
-        if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.isResizeable()
+        if (!layoutTaskInStack(task, info.windowLayout) && mBounds != null && task.isResizeable()
                 && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
         }
         return task;
     }
 
-    boolean layoutTaskInStack(TaskRecord task, ActivityInfo.Layout layout) {
+    boolean layoutTaskInStack(TaskRecord task, ActivityInfo.WindowLayout windowLayout) {
         if (mTaskPositioner == null) {
             return false;
         }
-        mTaskPositioner.updateDefaultBounds(task, mTaskHistory, layout);
+        mTaskPositioner.updateDefaultBounds(task, mTaskHistory, windowLayout);
         return true;
     }
 

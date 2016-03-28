@@ -109,22 +109,22 @@ class LaunchingTaskPositioner {
      *
      * @param task Task for which we want to find bounds that won't collide with other.
      * @param tasks Existing tasks with which we don't want to collide.
-     * @param layout Optional information from the client about how it would like to be sized
+     * @param windowLayout Optional information from the client about how it would like to be sized
      *                      and positioned.
      */
     void updateDefaultBounds(TaskRecord task, ArrayList<TaskRecord> tasks,
-            @Nullable ActivityInfo.Layout layout) {
+            @Nullable ActivityInfo.WindowLayout windowLayout) {
         if (!mDefaultStartBoundsConfigurationSet) {
             return;
         }
-        if (layout == null) {
+        if (windowLayout == null) {
             positionCenter(task, tasks, mDefaultFreeformWidth, mDefaultFreeformHeight);
             return;
         }
-        int width = getFinalWidth(layout);
-        int height = getFinalHeight(layout);
-        int verticalGravity = layout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
-        int horizontalGravity = layout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+        int width = getFinalWidth(windowLayout);
+        int height = getFinalHeight(windowLayout);
+        int verticalGravity = windowLayout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+        int horizontalGravity = windowLayout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (verticalGravity == Gravity.TOP) {
             if (horizontalGravity == Gravity.RIGHT) {
                 positionTopRight(task, tasks, width, height);
@@ -140,30 +140,30 @@ class LaunchingTaskPositioner {
         } else {
             // Some fancy gravity setting that we don't support yet. We just put the activity in the
             // center.
-            Slog.w(TAG, "Received unsupported gravity: " + layout.gravity
+            Slog.w(TAG, "Received unsupported gravity: " + windowLayout.gravity
                     + ", positioning in the center instead.");
             positionCenter(task, tasks, width, height);
         }
     }
 
-    private int getFinalWidth(ActivityInfo.Layout layout) {
+    private int getFinalWidth(ActivityInfo.WindowLayout windowLayout) {
         int width = mDefaultFreeformWidth;
-        if (layout.width > 0) {
-            width = layout.width;
+        if (windowLayout.width > 0) {
+            width = windowLayout.width;
         }
-        if (layout.widthFraction > 0) {
-            width = (int) (mAvailableRect.width() * layout.widthFraction);
+        if (windowLayout.widthFraction > 0) {
+            width = (int) (mAvailableRect.width() * windowLayout.widthFraction);
         }
         return width;
     }
 
-    private int getFinalHeight(ActivityInfo.Layout layout) {
+    private int getFinalHeight(ActivityInfo.WindowLayout windowLayout) {
         int height = mDefaultFreeformHeight;
-        if (layout.height > 0) {
-            height = layout.height;
+        if (windowLayout.height > 0) {
+            height = windowLayout.height;
         }
-        if (layout.heightFraction > 0) {
-            height = (int) (mAvailableRect.height() * layout.heightFraction);
+        if (windowLayout.heightFraction > 0) {
+            height = (int) (mAvailableRect.height() * windowLayout.heightFraction);
         }
         return height;
     }
