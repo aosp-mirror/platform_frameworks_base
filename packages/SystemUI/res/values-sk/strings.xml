@@ -238,8 +238,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavená pomocou GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Žiadosti o polohu sú aktívne"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazať všetky upozornenia."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Nastavenia upozornení"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Nastavenia aplikácie <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka sa automaticky otočí."</string>
@@ -312,8 +311,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"hľadať"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikáciu <xliff:g id="APP">%s</xliff:g> sa nepodarilo spustiť"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikácia <xliff:g id="APP">%s</xliff:g> je v núdzovom režime zakázaná."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"História"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Vymazať"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Vymazať všetko"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Táto aplikácia nepodporuje režim viacerých okien"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikácia nepodporuje režim viacerých okien"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Rozdeliť vodorovné"</string>
@@ -482,8 +480,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Zobrazovať v hornej časti zoznamu upozornení, zobrazovať cez obrazovku a povoliť zvukový signál"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Ďalšie nastavenia"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Ovládacie prvky pre upozornenia z aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Farba a vzhľad"</string>
     <string name="night_mode" msgid="3540405868248625488">"Nočný režim"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Kalibrovať obrazovku"</string>
@@ -503,6 +500,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Počas nabíjania nie je Šetrič batérie k dispozícii"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Šetrič batérie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Obmedzí výkonnosť a údaje na pozadí"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Tlačidlo <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Domov"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Späť"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Nahor"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Nadol"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Doľava"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Doprava"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Do stredu"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulátor"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Medzerník"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Prehrať/pozastaviť"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Zastaviť"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Nasledujúce"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Predchádzajúce"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Pretočiť späť"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Pretočiť dopredu"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Posunúť o stranu vyššie"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Posunúť o stranu nižšie"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Odstrániť"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Domov"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Ukončiť"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Vložiť"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Číselná klávesnica <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Systém"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Domovská stránka"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nedávne"</string>
@@ -561,4 +584,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Posunúť nahor"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Posunúť doľava"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Posunúť doprava"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

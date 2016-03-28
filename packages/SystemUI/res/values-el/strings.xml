@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ρύθμιση τοποθεσίας με GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Τα αιτήματα τοποθεσίας έχουν ενεργοποιηθεί"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Εκκαθάριση όλων των ειδοποιήσεων."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ρυθμίσεις ειδοποιήσεων"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Ρυθμίσεις <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Θα γίνεται αυτόματη περιστροφή της οθόνης."</string>
@@ -310,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"αναζήτηση"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Δεν ήταν δυνατή η εκκίνηση της εφαρμογής <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> έχει απενεργοποιηθεί στην ασφαλή λειτουργία."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Ιστορικό"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Εκκαθάριση"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Διαγραφή όλων"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Η εφαρμογή αυτή δεν υποστηρίζει τη λειτουργία πολλαπλών παραθύρων"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Η εφαρμογή δεν υποστηρίζει τη λειτουργία πολλαπλών παραθύρων"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
@@ -480,8 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Να εμφανίζονται στην κορυφή της λίστας ειδοποιήσεων, να προβάλλονται στην οθόνη και να επιτρέπεται ο ήχος"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Περισσότερες ρυθμίσεις"</string>
     <string name="notification_done" msgid="5279426047273930175">"Τέλος"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Στοιχεία ελέγχου κοινοποίησης <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Χρώμα και εμφάνιση"</string>
     <string name="night_mode" msgid="3540405868248625488">"Νυχτερινή λειτουργία"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Βαθμονόμηση οθόνης"</string>
@@ -501,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Η εξοικονόμηση μπαταρίας δεν είναι διαθέσιμη κατά τη διάρκεια της φόρτισης"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Εξοικονόμηση μπαταρίας"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Μειώνει την απόδοση και τα δεδομένα παρασκηνίου"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Κουμπί <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Πίσω"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Πάνω"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Κάτω"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Αριστερά"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Δεξιά"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Κέντρο"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Πλήκτρο διαστήματος"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Αναπαραγωγή/Παύση"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Διακοπή"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Επόμενο"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Προηγούμενο"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Επαναφορά"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Γρήγορη προώθηση"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Προηγούμενη σελίδα"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Επόμενη σελίδα"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Delete"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Home"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Λήξη"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Αριθμητικό πληκτρολόγιο <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Σύστημα"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Αρχική οθόνη"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Πρόσφατα"</string>
@@ -559,4 +582,5 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Μετακίνηση προς τα επάνω"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Μετακίνηση αριστερά"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Μετακίνηση δεξιά"</string>
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Η εφαρμογή ενδέχεται να μη λειτουργεί με τη λειτουργία πολλαπλών παραθύρων"</string>
 </resources>

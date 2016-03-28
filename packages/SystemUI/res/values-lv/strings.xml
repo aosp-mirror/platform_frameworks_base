@@ -310,8 +310,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Meklēt"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nevarēja palaist lietotni <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Lietotne <xliff:g id="APP">%s</xliff:g> ir atspējota drošajā režīmā."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Vēsture"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Notīrīt"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Notīrīt visu"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Šajā lietotnē netiek atbalstīts vairāku logu režīms."</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Lietotnē netiek atbalstīts vairāku logu režīms"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontāls dalījums"</string>
@@ -500,6 +499,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumulatora jaudas taupīšanas režīms uzlādes laikā nav pieejams."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumulatora jaudas taupīšanas režīms"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Samazina veiktspēju un fona datus."</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Poga <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Sākumvietas taustiņš"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Atpakaļ"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Uz augšu"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Uz leju"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Pa kreisi"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Pa labi"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centrā"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulēšanas taustiņš"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Atstarpe"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Ievadīšanas taustiņš"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Atpakaļatkāpes taustiņš"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Atskaņot/apturēt"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Apturēt"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Nākamais"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Iepriekšējais"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Attīt atpakaļ"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Pārtīt uz priekšu"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Lapa uz augšu"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Lapa uz leju"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Dzēšanas taustiņš"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Sākumvietas taustiņš"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Beigvietas taustiņš"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Ievietošanas taustiņš"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Ciparslēga taustiņš"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Cipartastatūra <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Sistēma"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Sākums"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Pēdējie"</string>
@@ -558,4 +583,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Pārvietot uz augšu"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Pārvietot pa kreisi"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Pārvietot pa labi"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

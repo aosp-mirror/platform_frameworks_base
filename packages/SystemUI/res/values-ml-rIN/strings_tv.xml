@@ -26,6 +26,5 @@
     <string name="pip_hold_home" msgid="340086535668778109">"PIP നിയന്ത്രിക്കാൻ "<b>"ഹോം"</b>" പിടിക്കുക"</string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP നിയന്ത്രിക്കാൻ ഹോം ബട്ടൺ അമർത്തിപ്പിടിക്കുക"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"മനസ്സിലായി"</string>
-    <!-- no translation found for recents_tv_dismiss (3555093879593377731) -->
-    <skip />
+    <string name="recents_tv_dismiss" msgid="3555093879593377731">"ഡിസ്മിസ് ചെയ്യുക"</string>
 </resources>

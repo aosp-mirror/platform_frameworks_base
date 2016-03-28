@@ -237,8 +237,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija utvrđena GPS signalom"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktiviran je zahtjev za lokaciju"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Uklanjanje svih obavještenja."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Postavke obavještenja"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Postavke aplikacije <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran će se automatski rotirati."</string>
@@ -311,8 +310,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pretraga"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikacija <xliff:g id="APP">%s</xliff:g> nije pokrenuta."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> je onemogućena u sigurnom načinu rada."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Historija"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Obriši"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Obriši sve"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ova aplikacija ne podržava rad sa više prozora"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikacija ne podržava rad sa više prozora"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podjela po horizontali"</string>
@@ -481,8 +479,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Prikaži na vrhu liste obavještenja, kratko prikaži na ekranu i dozvoli zvuk"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrole <xliff:g id="APP_NAME">%1$s</xliff:g> obavještenja"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Boja i izgled"</string>
     <string name="night_mode" msgid="3540405868248625488">"Noćni način rada"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Kalibracija zaslona"</string>
@@ -502,6 +499,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ušteda baterije je isključena prilikom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ušteda baterije"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Ograničava rad i prijenos podataka u pozadini"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Dugme <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Tipka za početak"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Nazad"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Gore"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Dolje"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Lijevo"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Desno"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Sredina"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulator"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Razmaknica"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Tipka za novi red"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Tipka za brisanje"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Pokreni/pauziraj"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Zaustavi"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Sljedeće"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Prethodno"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Premotaj"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Ubrzaj"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Tipka Page Up"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Tipka Page Down"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Tipka za brisanje"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Tipka za početak"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Kraj"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Tipka za umetanje"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Tipka Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numerička tastatura <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Sistem"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Početak"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nedavni ekrani"</string>
@@ -561,4 +584,5 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Pomjeri gore"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Pomjeri lijevo"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Pomjeri desno"</string>
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Aplikacija možda neće raditi s višestrukim prozorom"</string>
 </resources>

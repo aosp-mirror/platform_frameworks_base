@@ -26,6 +26,5 @@
     <string name="pip_hold_home" msgid="340086535668778109">"‏לחץ לחיצה ארוכה על "<b>"דף הבית"</b>" כדי לשלוט ב-PIP"</string>
     <string name="pip_onboarding_description" msgid="2882896641362814195">"‏לחץ לחיצה ממושכת על לחצן דף הבית כדי לשלוט ב-PIP"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"הבנתי"</string>
-    <!-- no translation found for recents_tv_dismiss (3555093879593377731) -->
-    <skip />
+    <string name="recents_tv_dismiss" msgid="3555093879593377731">"דחה"</string>
 </resources>
