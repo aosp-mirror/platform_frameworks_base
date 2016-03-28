@@ -76,7 +76,7 @@ import static android.system.OsConstants.*;
  * <li>If necessary, modify the returned {@link Camera.Parameters} object and call
  * {@link #setParameters(Camera.Parameters)}.
  *
- * <li>If desired, call {@link #setDisplayOrientation(int)}.
+ * <li>Call {@link #setDisplayOrientation(int)} to ensure correct orientation of preview.
  *
  * <li><b>Important</b>: Pass a fully initialized {@link SurfaceHolder} to
  * {@link #setPreviewDisplay(SurfaceHolder)}.  Without a surface, the camera
@@ -1511,9 +1511,15 @@ public class Camera {
      * <p>Starting from API level 14, this method can be called when preview is
      * active.
      *
+     * <p><b>Note: </b>Before API level 24, the default value for orientation is 0. Starting in
+     * API level 24, the default orientation will be such that applications in forced-landscape mode
+     * will have correct preview orientation, which may be either a default of 0 or
+     * 180. Applications that operate in portrait mode or allow for changing orientation must still
+     * call this method after each orientation change to ensure correct preview display in all
+     * cases.</p>
+     *
      * @param degrees the angle that the picture will be rotated clockwise.
-     *                Valid values are 0, 90, 180, and 270. The starting
-     *                position is 0 (landscape).
+     *                Valid values are 0, 90, 180, and 270.
      * @see #setPreviewDisplay(SurfaceHolder)
      */
     public native final void setDisplayOrientation(int degrees);
