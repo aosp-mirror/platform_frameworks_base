@@ -136,6 +136,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         updateResources();
     }
 
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        updateResources();
+    }
+
     private void updateResources() {
         FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
         FontSizeUtils.updateFontSize(mEmergencyOnly, R.dimen.qs_emergency_calls_only_text_size);
@@ -175,6 +181,20 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 .addFloat(mMultiUserSwitch, "alpha", 0, 1)
                 .setStartDelay(QSAnimator.EXPANDED_TILE_DELAY)
                 .build();
+
+        final boolean isRtl = isLayoutRtl();
+        if (isRtl && mDateTimeGroup.getWidth() == 0) {
+            mDateTimeGroup.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    mDateTimeGroup.setPivotX(getWidth());
+                    mDateTimeGroup.removeOnLayoutChangeListener(this);
+                }
+            });
+        } else {
+            mDateTimeGroup.setPivotX(isRtl ? mDateTimeGroup.getWidth() : 0);
+        }
     }
 
     @Override

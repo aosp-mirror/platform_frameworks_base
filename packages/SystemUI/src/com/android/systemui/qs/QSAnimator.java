@@ -80,6 +80,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
     }
 
+    public void onRtlChanged() {
+        updateAnimators();
+    }
+
     public void setOnKeyguard(boolean onKeyguard) {
         mOnKeyguard = onKeyguard;
         if (mOnKeyguard) {
@@ -231,7 +235,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     private void getRelativePositionInt(int[] loc1, View view, View parent) {
         if(view == parent || view == null) return;
-        loc1[0] += view.getLeft();
+        loc1[0] += view.getX();
         loc1[1] += view.getTop();
         getRelativePositionInt(loc1, (View) view.getParent(), parent);
     }
@@ -297,7 +301,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
-        updateAnimators();
+        mQsPanel.post(mUpdateAnimators);
     }
 
     @Override
