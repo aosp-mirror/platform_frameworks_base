@@ -1410,10 +1410,10 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_HOME_STACK_TASKS = 0x0008;
 
     /**
-     * Ignores all tasks that are on the docked stack.
+     * Ignores the top task in the docked stack.
      * @hide
      */
-    public static final int RECENT_INGORE_DOCKED_STACK_TASKS = 0x0010;
+    public static final int RECENT_INGORE_DOCKED_STACK_TOP_TASK = 0x0010;
 
     /**
      * Ignores all tasks that are on the pinned stack.
