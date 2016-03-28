@@ -1494,9 +1494,14 @@ public class Paint {
     }
 
     /**
-     * Get font feature settings.  Default is null.
+     * Returns the font feature settings. The format is the same as the CSS
+     * font-feature-settings attribute:
+     * <a href="http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings">
+     *     http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings</a>
      *
-     * @return the paint's currently set font feature settings.
+     * @return the paint's currently set font feature settings. Default is null.
+     *
+     * @see #setFontFeatureSettings(String)
      */
     public String getFontFeatureSettings() {
         return mFontFeatureSettings;
@@ -1506,7 +1511,10 @@ public class Paint {
      * Set font feature settings.
      *
      * The format is the same as the CSS font-feature-settings attribute:
-     * http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings
+     * <a href="http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings">
+     *     http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings</a>
+     *
+     * @see #getFontFeatureSettings()
      *
      * @param settings the font feature settings string to use, may be null.
      */
