@@ -102,8 +102,7 @@ handle searches. The dialog can also provide search suggestions while the user t
 you can place anywhere in your layout. By default, the search widget behaves like a standard {@link
 android.widget.EditText} widget and doesn't do anything, but you can configure it so that the
 Android system handles all input events, delivers queries to the appropriate activity, and provides
-search suggestions (just like the search dialog). However, the search widget is available only in
-Android 3.0 (API Level 11) and higher.
+search suggestions (just like the search dialog).
 
 <p class="note"><strong>Note:</strong> If you want, you can handle all user input into the
 search widget yourself, using various callback methods and listeners. This document, however,
@@ -376,30 +375,13 @@ for an a complete demonstration of how to search an SQLite database and use an
 
 <h2 id="SearchDialog">Using the Search Dialog</h2>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-  <h2>Should I use the search dialog or the widget?</h2>
-  <p>The answer depends mostly on whether you are developing for Android 3.0 (API Level 11 or
-higher), because the {@link android.widget.SearchView} widget was introduced in Android 3.0. So,
-if you are developing your application for a version of Android lower than 3.0, the search widget is
-not an option and you should use the search dialog to implement your search interface.</p>
-  <p>If you <em>are</em> developing for Android 3.0 or higher, then the decision depends more on
-your needs. In most cases, we recommend that you use the search widget as an "action view" in the
-Action Bar. However, it might not be an option for you to put the search
-widget in the Action Bar for some reason (perhaps there's not enough space or you don't use the
-Action Bar). So, you might instead want to put the search widget somewhere in your activity layout.
-And if all else fails, you can still use the search dialog if you prefer to keep the search box
-hidden. In fact, you might want to offer both the dialog and the widget in some cases. For more
-information about the widget, skip to <a href="#UsingSearchWidget">Using the Search Widget</a>.</p>
-</div>
-</div>
 
 <p>The search dialog provides a floating search box at the top of the screen, with the application
 icon on the left. The search dialog can provide search suggestions as the user types and, when
 the user executes a search, the system sends the search query to a
 searchable activity that performs the search. However, if you are developing
 your application for devices running Android 3.0, you should consider using the search widget
-instead (see the side box).</p>
+instead (see <a href="#UsingSearchWidget">Using the Search Widget</a> section).</p>
 
 <p>The search dialog is always hidden by default, until the user activates it. Your application
 can activate the search dialog by calling {@link
@@ -685,13 +667,13 @@ layout). For example, figure 2 shows the search widget in the app bar.</p>
 
 <p>The search widget provides the same functionality as the search dialog. It starts the appropriate
 activity when the user executes a search, and it can provide search suggestions and perform voice
-search.</p>
+search. If it's not an option for you to put the search widget in the Action Bar, you can instead
+put the search widget somewhere in your activity layout.</p>
 
 <p class="note"><strong>Note:</strong> When you use the search widget as an action view, you
 still might need to support using the search dialog, for cases in which the search widget does
 not fit in the Action Bar. See the following section about <a href="#UsingBoth">Using both
 the widget and the dialog</a>.</p>
-
 
 <h3 id="ConfiguringWidget">Configuring the search widget</h3>
 
