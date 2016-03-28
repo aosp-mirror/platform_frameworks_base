@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
@@ -249,31 +250,34 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runCompile() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        boolean useJitProfiles = false;
+        boolean checkProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
         boolean forceCompilation = false;
         boolean allPackages = false;
         boolean clearProfileData = false;
         String compilerFilter = null;
         String compilationReason = null;
+        String checkProfilesRaw = null;
 
         if (peekNextArg() == null) {
             // No arguments, show help.
             pw.println("Usage: cmd package compile [-c] [-f] [--reset] [-m mode] " +
                     "[-r reason] [-a|pkg]");
             pw.println();
-            pw.println("  -c         Clear profile data");
-            pw.println("  -f         Force compilation");
-            pw.println("  --reset    Reset package");
-            pw.println("  -m mode    Compilation mode, one of the dex2oat compiler filters");
-            pw.println("               verify-none");
-            pw.println("               verify-at-runtime");
-            pw.println("               verify-profile");
-            pw.println("               interpret-only");
-            pw.println("               space-profile");
-            pw.println("               space");
-            pw.println("               speed-profile");
-            pw.println("               speed");
-            pw.println("               everything");
+            pw.println("  -c                Clear profile data");
+            pw.println("  -f                Force compilation");
+            pw.println("  --check-prof val  Look at profiles when doing dexopt.");
+            pw.println("                    Overrides dalvik.vm.usejitprofiles to true of false");
+            pw.println("  --reset           Reset package");
+            pw.println("  -m mode           Compilation mode, one of the dex2oat compiler filters");
+            pw.println("                      verify-none");
+            pw.println("                      verify-at-runtime");
+            pw.println("                      verify-profile");
+            pw.println("                      interpret-only");
+            pw.println("                      space-profile");
+            pw.println("                      space");
+            pw.println("                      speed-profile");
+            pw.println("                      speed");
+            pw.println("                      everything");
             pw.println("  -r reason  Compiler reason, one of the package manager reasons");
             for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
                 pw.println("               " +
@@ -301,6 +305,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "-r":
                     compilationReason = getNextArgRequired();
                     break;
+                case "-check-prof":
+                    checkProfilesRaw = getNextArgRequired();
+                    break;
                 case "--reset":
                     forceCompilation = true;
                     clearProfileData = true;
@@ -309,6 +316,17 @@ class PackageManagerShellCommand extends ShellCommand {
                 default:
                     pw.println("Error: Unknown option: " + opt);
                     return 1;
+            }
+        }
+
+        if (checkProfilesRaw != null) {
+            if ("true".equals(checkProfilesRaw)) {
+                checkProfiles = true;
+            } else if ("false".equals(checkProfilesRaw)) {
+                checkProfiles = false;
+            } else {
+                pw.println("Invalid value for \"--check-prof\". Expected \"true\" or \"false\".");
+                return 1;
             }
         }
 
@@ -381,7 +399,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
 
             boolean result = mInterface.performDexOptMode(packageName, null /* instructionSet */,
-                    useJitProfiles, targetCompilerFilter, forceCompilation);
+                    checkProfiles, targetCompilerFilter, forceCompilation);
             if (!result) {
                 failedPackages.add(packageName);
             }
