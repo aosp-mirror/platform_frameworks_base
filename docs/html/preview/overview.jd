@@ -324,8 +324,8 @@ Android N</a> has
   <li> Documentation of new APIs, including an <a
   href="{@docRoot}preview/api-overview.html">API Overview</a>, downloadable
   <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API
-  Reference</a>, and detailed developer guides on key features such as add
-  here, and others.
+  Reference</a>, and detailed developer guides on key features such as
+  multi-window support, bundled notifications, multi-locale support, and others.
   <li> <a href="{@docRoot}preview/samples.html">Sample code</a> that
   demonstrates how to support permissions and other new features.
   <li> <a href="{@docRoot}preview/support.html#release-notes">Release notes</a>
