@@ -32,7 +32,9 @@ import android.provider.DocumentsProvider;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -46,11 +48,21 @@ public class StressProvider extends DocumentsProvider {
     // Empty root.
     public static final String STRESS_ROOT_0_ID = "STRESS_ROOT_0";
 
-    // Root with thousands of items.
+    // Root with thousands of directories.
     public static final String STRESS_ROOT_1_ID = "STRESS_ROOT_1";
+
+    // Root with hundreds of files.
+    public static final String STRESS_ROOT_2_ID = "STRESS_ROOT_2";
 
     private static final String STRESS_ROOT_0_DOC_ID = "STRESS_ROOT_0_DOC";
     private static final String STRESS_ROOT_1_DOC_ID = "STRESS_ROOT_1_DOC";
+    private static final String STRESS_ROOT_2_DOC_ID = "STRESS_ROOT_2_DOC";
+
+    private static final int STRESS_ROOT_1_ITEMS = 10000;
+    private static final int STRESS_ROOT_2_ITEMS = 300;
+
+    private static final String MIME_TYPE_IMAGE = "image/jpeg";
+    private static final long REFERENCE_TIMESTAMP = 1459159369359L;
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
@@ -62,7 +74,12 @@ public class StressProvider extends DocumentsProvider {
     };
 
     private String mAuthority = DEFAULT_AUTHORITY;
-    private ArrayList<String> mIds = new ArrayList<>();
+
+    // Map from a root document id to children document ids.
+    private Map<String, ArrayList<StubDocument>> mChildDocuments = new HashMap<>();
+
+    private Map<String, StubDocument> mDocuments = new HashMap<>();
+    private Map<String, StubRoot> mRoots = new HashMap<>();
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -72,20 +89,41 @@ public class StressProvider extends DocumentsProvider {
 
     @Override
     public boolean onCreate() {
-        mIds = new ArrayList();
-        for (int i = 0; i < 10000; i++) {
-            mIds.add(createRandomId(i));
+        StubDocument document;
+
+        ArrayList<StubDocument> children = new ArrayList<StubDocument>();
+        mChildDocuments.put(STRESS_ROOT_1_DOC_ID, children);
+        for (int i = 0; i < STRESS_ROOT_1_ITEMS; i++) {
+            document = StubDocument.createDirectory(i);
+            mDocuments.put(document.id, document);
+            children.add(document);
         }
-        mIds.add(STRESS_ROOT_0_DOC_ID);
-        mIds.add(STRESS_ROOT_1_DOC_ID);
+
+        children = new ArrayList<StubDocument>();
+        mChildDocuments.put(STRESS_ROOT_2_DOC_ID, children);
+        for (int i = 0; i < STRESS_ROOT_2_ITEMS; i++) {
+            document = StubDocument.createFile(STRESS_ROOT_1_ITEMS + i);
+            mDocuments.put(document.id, document);
+            children.add(document);
+        }
+
+        mRoots.put(STRESS_ROOT_0_ID, new StubRoot(STRESS_ROOT_0_ID, STRESS_ROOT_0_DOC_ID));
+        mRoots.put(STRESS_ROOT_1_ID, new StubRoot(STRESS_ROOT_1_ID, STRESS_ROOT_1_DOC_ID));
+        mRoots.put(STRESS_ROOT_2_ID, new StubRoot(STRESS_ROOT_2_ID, STRESS_ROOT_2_DOC_ID));
+
+        mDocuments.put(STRESS_ROOT_0_DOC_ID, StubDocument.createDirectory(STRESS_ROOT_0_DOC_ID));
+        mDocuments.put(STRESS_ROOT_1_DOC_ID, StubDocument.createDirectory(STRESS_ROOT_1_DOC_ID));
+        mDocuments.put(STRESS_ROOT_2_DOC_ID, StubDocument.createDirectory(STRESS_ROOT_2_DOC_ID));
+
         return true;
     }
 
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(DEFAULT_ROOT_PROJECTION);
-        includeRoot(result, STRESS_ROOT_0_ID, STRESS_ROOT_0_DOC_ID);
-        includeRoot(result, STRESS_ROOT_1_ID, STRESS_ROOT_1_DOC_ID);
+        for (StubRoot root : mRoots.values()) {
+            includeRoot(result, root);
+        }
         return result;
     }
 
@@ -93,57 +131,112 @@ public class StressProvider extends DocumentsProvider {
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(DEFAULT_DOCUMENT_PROJECTION);
-        includeDocument(result, documentId);
+        final StubDocument document = mDocuments.get(documentId);
+        includeDocument(result, document);
         return result;
     }
 
     @Override
-    public Cursor queryChildDocuments(String parentDocumentId, String[] projection, String sortOrder)
+    public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+            String sortOrder)
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(DEFAULT_DOCUMENT_PROJECTION);
-        if (STRESS_ROOT_1_DOC_ID.equals(parentDocumentId)) {
-            for (String id : mIds) {
-                includeDocument(result, id);
+        final ArrayList<StubDocument> childDocuments = mChildDocuments.get(parentDocumentId);
+        if (childDocuments != null) {
+            for (StubDocument document : childDocuments) {
+                includeDocument(result, document);
             }
         }
         return result;
     }
 
     @Override
-    public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
+    public ParcelFileDescriptor openDocument(String docId, String mode,
+            CancellationSignal signal)
             throws FileNotFoundException {
         throw new UnsupportedOperationException();
     }
 
-    private void includeRoot(MatrixCursor result, String rootId, String docId) {
+    private void includeRoot(MatrixCursor result, StubRoot root) {
         final RowBuilder row = result.newRow();
-        row.add(Root.COLUMN_ROOT_ID, rootId);
+        row.add(Root.COLUMN_ROOT_ID, root.id);
         row.add(Root.COLUMN_FLAGS, 0);
-        row.add(Root.COLUMN_TITLE, rootId);
-        row.add(Root.COLUMN_DOCUMENT_ID, docId);
+        row.add(Root.COLUMN_TITLE, root.id);
+        row.add(Root.COLUMN_DOCUMENT_ID, root.documentId);
     }
 
-    private void includeDocument(MatrixCursor result, String id) {
+    private void includeDocument(MatrixCursor result, StubDocument document) {
         final RowBuilder row = result.newRow();
-        row.add(Document.COLUMN_DOCUMENT_ID, id);
-        row.add(Document.COLUMN_DISPLAY_NAME, id);
-        row.add(Document.COLUMN_SIZE, 0);
-        row.add(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
+        row.add(Document.COLUMN_DOCUMENT_ID, document.id);
+        row.add(Document.COLUMN_DISPLAY_NAME, document.id);
+        row.add(Document.COLUMN_SIZE, document.size);
+        row.add(Document.COLUMN_MIME_TYPE, document.mimeType);
         row.add(Document.COLUMN_FLAGS, 0);
-        row.add(Document.COLUMN_LAST_MODIFIED, null);
+        row.add(Document.COLUMN_LAST_MODIFIED, document.lastModified);
     }
 
-    private static String getDocumentIdForFile(File file) {
+    private static String getStubDocumentIdForFile(File file) {
         return file.getAbsolutePath();
     }
 
-    private String createRandomId(int index) {
-        final Random random = new Random(index);
-        final StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 20; i++) {
-            builder.append((char) (random.nextInt(96) + 32));
+    private static class StubDocument {
+        final String mimeType;
+        final String id;
+        final int size;
+        final long lastModified;
+
+        private StubDocument(String mimeType, String id, int size, long lastModified) {
+            this.mimeType = mimeType;
+            this.id = id;
+            this.size = size;
+            this.lastModified = lastModified;
         }
-        builder.append(index);  // Append a number to guarantee uniqueness.
-        return builder.toString();
+
+        public static StubDocument createDirectory(int index) {
+            return new StubDocument(
+                    DocumentsContract.Document.MIME_TYPE_DIR, createRandomId(index), 0,
+                    createRandomTime(index));
+        }
+
+        public static StubDocument createDirectory(String id) {
+            return new StubDocument(DocumentsContract.Document.MIME_TYPE_DIR, id, 0, 0);
+        }
+
+        public static StubDocument createFile(int index) {
+            return new StubDocument(
+                    MIME_TYPE_IMAGE, createRandomId(index), createRandomSize(index),
+                    createRandomTime(index));
+        }
+
+        private static String createRandomId(int index) {
+            final Random random = new Random(index);
+            final StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < 20; i++) {
+                builder.append((char) (random.nextInt(96) + 32));
+            }
+            builder.append(index);  // Append a number to guarantee uniqueness.
+            return builder.toString();
+        }
+
+        private static int createRandomSize(int index) {
+            final Random random = new Random(index);
+            return random.nextInt(1024 * 1024 * 100);  // Up to 100 MB.
+        }
+
+        private static long createRandomTime(int index) {
+            final Random random = new Random(index);
+            // Up to 30 days backwards from REFERENCE_TIMESTAMP.
+            return REFERENCE_TIMESTAMP - random.nextLong() % 1000L * 60 * 60 * 24 * 30;
+        }
+    }
+
+    private static class StubRoot {
+        final String id;
+        final String documentId;
+
+        public StubRoot(String id, String documentId) {
+            this.id = id;
+            this.documentId = documentId;
+        }
     }
 }
