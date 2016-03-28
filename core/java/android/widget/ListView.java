@@ -16,15 +16,14 @@
 
 package android.widget;
 
-import android.annotation.Nullable;
-import android.os.Bundle;
-import android.os.Trace;
+import com.google.android.collect.Lists;
+
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
-import com.google.android.collect.Lists;
 
 import android.annotation.IdRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -33,6 +32,8 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
@@ -1106,20 +1107,63 @@ public class ListView extends AbsListView {
     }
 
     private class FocusSelector implements Runnable {
+        // the selector is waiting to set selection on the list view
+        private static final int STATE_SET_SELECTION = 1;
+        // the selector set the selection on the list view, waiting for a layoutChildren pass
+        private static final int STATE_WAIT_FOR_LAYOUT = 2;
+        // the selector's selection has been honored and it is waiting to request focus on the
+        // target child.
+        private static final int STATE_REQUEST_FOCUS = 3;
+
+        private int mAction;
         private int mPosition;
         private int mPositionTop;
-        
-        public FocusSelector setup(int position, int top) {
+
+        FocusSelector setupForSetSelection(int position, int top) {
             mPosition = position;
             mPositionTop = top;
+            mAction = STATE_SET_SELECTION;
             return this;
         }
-        
+
         public void run() {
-            setSelectionFromTop(mPosition, mPositionTop);
+            if (mAction == STATE_SET_SELECTION) {
+                setSelectionFromTop(mPosition, mPositionTop);
+                mAction = STATE_WAIT_FOR_LAYOUT;
+            } else if (mAction == STATE_REQUEST_FOCUS) {
+                final int childIndex = mPosition - mFirstPosition;
+                final View child = getChildAt(childIndex);
+                if (child != null) {
+                    child.requestFocus();
+                }
+                mAction = -1;
+            }
+        }
+
+        @Nullable Runnable setupFocusIfValid(int position) {
+            if (mAction != STATE_WAIT_FOR_LAYOUT || position != mPosition) {
+                return null;
+            }
+            mAction = STATE_REQUEST_FOCUS;
+            return this;
+        }
+
+        void onLayoutComplete() {
+            if (mAction == STATE_WAIT_FOR_LAYOUT) {
+                mAction = -1;
+            }
         }
     }
-    
+
+    @Override
+    protected void onDetachedFromWindow() {
+        if (mFocusSelector != null) {
+            removeCallbacks(mFocusSelector);
+            mFocusSelector = null;
+        }
+        super.onDetachedFromWindow();
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (getChildCount() > 0) {
@@ -1132,7 +1176,7 @@ public class ListView extends AbsListView {
                 if (mFocusSelector == null) {
                     mFocusSelector = new FocusSelector();
                 }
-                post(mFocusSelector.setup(childPosition, top));
+                post(mFocusSelector.setupForSetSelection(childPosition, top));
             }
         }
         super.onSizeChanged(w, h, oldw, oldh);
@@ -1672,7 +1716,21 @@ public class ListView extends AbsListView {
                 adjustViewsUpOrDown();
                 break;
             case LAYOUT_SPECIFIC:
-                sel = fillSpecific(reconcileSelectedPosition(), mSpecificTop);
+                final int selectedPosition = reconcileSelectedPosition();
+                sel = fillSpecific(selectedPosition, mSpecificTop);
+                /**
+                 * When ListView is resized, FocusSelector requests an async selection for the
+                 * previously focused item to make sure it is still visible. If the item is not
+                 * selectable, it won't regain focus so instead we call FocusSelector
+                 * to directly request focus on the view after it is visible.
+                 */
+                if (sel == null && mFocusSelector != null) {
+                    final Runnable focusRunnable = mFocusSelector
+                            .setupFocusIfValid(selectedPosition);
+                    if (focusRunnable != null) {
+                        post(focusRunnable);
+                    }
+                }
                 break;
             case LAYOUT_MOVE_SELECTION:
                 sel = moveSelection(oldSel, newSel, delta, childrenTop, childrenBottom);
@@ -1812,6 +1870,9 @@ public class ListView extends AbsListView {
 
             invokeOnItemScrollListener();
         } finally {
+            if (mFocusSelector != null) {
+                mFocusSelector.onLayoutComplete();
+            }
             if (!blockLayoutRequests) {
                 mBlockLayoutRequests = false;
             }
