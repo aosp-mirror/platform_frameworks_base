@@ -322,6 +322,11 @@ public class WifiScanner {
             return mFlags;
         }
 
+        /** {@hide} */
+        public int getBucketsScanned() {
+            return mBucketsScanned;
+        }
+
         public ScanResult[] getResults() {
             return mResults;
         }
