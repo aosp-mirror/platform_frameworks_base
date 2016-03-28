@@ -576,15 +576,9 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
 
     // Note that the backing layer has *not* yet been updated, so don't trust
     // its width, height, transform, etc...!
-    Matrix4 totalTransform(*(mState.currentSnapshot()->transform));
-    if (layerHandle->getTransform()) {
-        Matrix4 layerTransform(*layerHandle->getTransform());
-        totalTransform.multiply(layerTransform);
-    }
-
     addOp(alloc().create_trivial<TextureLayerOp>(
             Rect(layerHandle->getWidth(), layerHandle->getHeight()),
-            totalTransform,
+            *(mState.currentSnapshot()->transform),
             getRecordedClip(),
             layerHandle->backingLayer()));
 }

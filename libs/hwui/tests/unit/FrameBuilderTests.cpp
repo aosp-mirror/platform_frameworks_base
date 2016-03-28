@@ -372,8 +372,8 @@ RENDERTHREAD_TEST(FrameBuilder, textStyle) {
     EXPECT_EQ(3, renderer.getIndex()) << "Expect 3 ops";
 }
 
-RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
-    class TextureLayerTestRenderer : public TestRendererBase {
+RENDERTHREAD_TEST(FrameBuilder, textureLayer_clipLocalMatrix) {
+    class TextureLayerClipLocalMatrixTestRenderer : public TestRendererBase {
     public:
         void onTextureLayerOp(const TextureLayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(0, mIndex++);
@@ -398,9 +398,54 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
-    TextureLayerTestRenderer renderer;
+    TextureLayerClipLocalMatrixTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex());
+}
+
+RENDERTHREAD_TEST(FrameBuilder, textureLayer_combineMatrices) {
+    class TextureLayerCombineMatricesTestRenderer : public TestRendererBase {
+    public:
+        void onTextureLayerOp(const TextureLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+
+            Matrix4 expected;
+            expected.loadTranslate(35, 45, 0);
+            EXPECT_MATRIX_APPROX_EQ(expected, state.computedState.transform);
+        }
+    };
+
+    auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
+            SkMatrix::MakeTrans(5, 5));
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.translate(30, 40);
+        canvas.drawLayer(layerUpdater.get());
+        canvas.restore();
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
+    TextureLayerCombineMatricesTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex());
+}
+
+RENDERTHREAD_TEST(FrameBuilder, textureLayer_reject) {
+    auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
+            SkMatrix::MakeTrans(5, 5));
+    layerUpdater->backingLayer()->setRenderTarget(GL_NONE); // Should be rejected
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.drawLayer(layerUpdater.get());
+    });
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
+    FailRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
 }
 
 RENDERTHREAD_TEST(FrameBuilder, functor_reject) {
