@@ -142,7 +142,10 @@ public class Allocation extends BaseObj {
             }
             return Element.DataType.FLOAT_64;
         }
-        return null;
+
+        throw new RSIllegalArgumentException("Parameter of type " + cmp.getSimpleName() +
+            "[] is not compatible with data type " + mType.mElement.mType.name() +
+            " of allocation");
     }
 
 
