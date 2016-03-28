@@ -294,6 +294,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
     }
 
+    public abstract CharSequence getTileLabel();
+
     protected final class H extends Handler {
         private static final int ADD_CALLBACK = 1;
         private static final int CLICK = 2;

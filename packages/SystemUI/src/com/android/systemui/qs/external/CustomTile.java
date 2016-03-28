@@ -221,6 +221,11 @@ public class CustomTile extends QSTile<QSTile.State> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return getState().label;
+    }
+
+    @Override
     protected void handleUpdateState(State state, Object arg) {
         Drawable drawable = mTile.getIcon().loadDrawable(mContext);
         int tileState = mTile.getState();

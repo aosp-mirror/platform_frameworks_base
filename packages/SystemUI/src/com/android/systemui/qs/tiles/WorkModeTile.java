@@ -82,6 +82,11 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_work_mode_label);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;

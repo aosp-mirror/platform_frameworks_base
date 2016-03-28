@@ -80,6 +80,11 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return getState().label;
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (mController == null) return;
         final boolean rotationLocked = arg != null ? (Boolean) arg

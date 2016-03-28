@@ -106,6 +106,11 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.battery);
+    }
+
+    @Override
     protected void handleUpdateState(State state, Object arg) {
         int level = (arg != null) ? (Integer) arg : mLevel;
         String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
