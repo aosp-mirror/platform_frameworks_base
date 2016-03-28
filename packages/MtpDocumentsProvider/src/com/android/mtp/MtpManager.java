@@ -229,6 +229,11 @@ class MtpManager {
         return device.readEvent(signal);
     }
 
+    long getObjectSizeLong(int deviceId, int objectHandle, int format) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        return device.getObjectSizeLong(objectHandle, format);
+    }
+
     private synchronized MtpDevice getDevice(int deviceId) throws IOException {
         final MtpDevice device = mDevices.get(deviceId);
         if (device == null) {

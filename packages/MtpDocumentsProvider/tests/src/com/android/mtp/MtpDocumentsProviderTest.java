@@ -708,6 +708,33 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         } catch (UnsupportedOperationException exception) {}
     }
 
+    public void testObjectSizeLong() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
+        mMtpManager.setObjectSizeLong(0, 100, MtpConstants.FORMAT_EXIF_JPEG, 0x400000000L);
+        setupDocuments(
+                0,
+                0,
+                MtpManager.OBJECT_HANDLE_ROOT_CHILDREN,
+                "1",
+                new MtpObjectInfo[] {
+                        new MtpObjectInfo.Builder()
+                                .setObjectHandle(100)
+                                .setFormat(MtpConstants.FORMAT_EXIF_JPEG)
+                                .setName("image.jpg")
+                                .setCompressedSize(0xffffffffl)
+                                .build()
+                });
+
+        final Cursor cursor = mProvider.queryDocument("3", new String[] {
+                DocumentsContract.Document.COLUMN_SIZE
+        });
+        assertEquals(1, cursor.getCount());
+
+        cursor.moveToNext();
+        assertEquals(0x400000000L, cursor.getLong(0));
+    }
+
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();
