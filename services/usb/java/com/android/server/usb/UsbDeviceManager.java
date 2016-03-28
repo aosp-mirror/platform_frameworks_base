@@ -780,7 +780,7 @@ public class UsbDeviceManager {
                     || ("0".equals(SystemProperties.get("persist.charging.notify")))) return;
             int id = 0;
             Resources r = mContext.getResources();
-            if (mConnected || mHostConnected) {
+            if (mConnected) {
                 if (!mUsbDataUnlocked) {
                     id = com.android.internal.R.string.usb_charging_notification_title;
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
@@ -798,6 +798,8 @@ public class UsbDeviceManager {
                 } else {
                     id = com.android.internal.R.string.usb_charging_notification_title;
                 }
+            } else if (mHostConnected) {
+                id = com.android.internal.R.string.usb_supplying_notification_title;
             }
             if (id != mUsbNotificationId) {
                 // clear notification if title needs changing
