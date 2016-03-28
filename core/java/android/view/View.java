@@ -16855,9 +16855,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 // use layer paint to draw the bitmap, merging the two alphas, but also restore
                 int layerPaintAlpha = mLayerPaint != null ? mLayerPaint.getAlpha() : 255;
-                mLayerPaint.setAlpha((int) (alpha * layerPaintAlpha));
+                if (mLayerPaint == null && alpha < 1) {
+                    mLayerPaint = new Paint();
+                    mLayerPaint.setAlpha((int) (alpha * layerPaintAlpha));
+                }
                 canvas.drawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
-                mLayerPaint.setAlpha(layerPaintAlpha);
+                if (mLayerPaint != null) {
+                    mLayerPaint.setAlpha(layerPaintAlpha);
+                }
             }
         }
 
