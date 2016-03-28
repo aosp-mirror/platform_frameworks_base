@@ -144,6 +144,8 @@ public class AppFuse {
             return mCallback.getFileSize(inode);
         } catch (FileNotFoundException e) {
             return -OsConstants.ENOENT;
+        } catch (UnsupportedOperationException e) {
+            return -OsConstants.ENOTSUP;
         }
     }
 
