@@ -267,9 +267,12 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
 
         // The contract is that if we already have a valid,
         // result the we have to deliver it immediately.
-        if (!mPrinters.isEmpty()) {
-            deliverResult(new ArrayList<>(mPrinters));
-        }
+        (new Handler(Looper.getMainLooper())).post(new Runnable() {
+            @Override public void run() {
+                deliverResult(new ArrayList<>(mPrinters));
+            }
+        });
+
         // Always load the data to ensure discovery period is
         // started and to make sure obsolete printers are updated.
         onForceLoad();
