@@ -1871,7 +1871,6 @@ final class ActivityStack {
             // appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(r);
             mStackSupervisor.mGoingToSleepActivities.remove(r);
-            mStackSupervisor.mWaitingVisibleActivities.remove(r);
         } catch (Exception e) {
             // Just skip on any failure; we'll make it
             // visible when it next restarts.
