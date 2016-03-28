@@ -109,7 +109,7 @@ public class RecentsTvView extends FrameLayout {
             Task task = mTaskStackHorizontalView.getFocusedTask();
             if (task != null) {
                 SystemServicesProxy ssp = Recents.getSystemServices();
-                ssp.startActivityFromRecents(getContext(), task.key.id, task.title, null);
+                ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
                 return true;
             }
         }
@@ -123,7 +123,7 @@ public class RecentsTvView extends FrameLayout {
             Task task = stack.getLaunchTarget();
             if (task != null) {
                 SystemServicesProxy ssp = Recents.getSystemServices();
-                ssp.startActivityFromRecents(getContext(), task.key.id, task.title, null);
+                ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
                 return true;
             }
         }
@@ -140,7 +140,7 @@ public class RecentsTvView extends FrameLayout {
                 TaskCardView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
                     SystemServicesProxy ssp = Recents.getSystemServices();
-                    ssp.startActivityFromRecents(getContext(), task.key.id, task.title, null);
+                    ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
                     return true;
                 }
             }

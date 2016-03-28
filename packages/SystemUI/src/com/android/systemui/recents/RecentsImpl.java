@@ -438,7 +438,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         // Launch the task
-        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.title, launchOpts);
+        ssp.startActivityFromRecents(mContext, toTask.key, toTask.title, launchOpts);
     }
 
     /**
@@ -510,7 +510,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         MetricsLogger.count(mContext, "overview_affiliated_task_launch", 1);
 
         // Launch the task
-        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.title, launchOpts);
+        ssp.startActivityFromRecents(mContext, toTask.key, toTask.title, launchOpts);
     }
 
     public void showNextAffiliatedTask() {

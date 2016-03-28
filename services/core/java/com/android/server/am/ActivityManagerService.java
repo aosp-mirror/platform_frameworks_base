@@ -8845,10 +8845,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                             continue;
                         }
                     }
-                    if ((flags & ActivityManager.RECENT_INGORE_DOCKED_STACK_TASKS) != 0) {
-                        if (tr.stack != null && tr.stack.isDockedStack()) {
+                    if ((flags & ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK) != 0) {
+                        final ActivityStack stack = tr.stack;
+                        if (stack != null && stack.isDockedStack() && stack.topTask() == tr) {
                             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
-                                    "Skipping, docked stack task: " + tr);
+                                    "Skipping, top task in docked stack: " + tr);
                             continue;
                         }
                     }
