@@ -76,6 +76,11 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.airplane_mode);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer)arg : mSetting.getValue();
         final boolean airplaneMode = value != 0;

@@ -73,6 +73,11 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return getState().label;
+    }
+
+    @Override
     protected void handleUpdateState(State state, Object arg) {
         final Pair<String, Drawable> p = arg != null ? (Pair<String, Drawable>) arg : mLastUpdate;
         if (p != null) {
