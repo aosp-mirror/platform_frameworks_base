@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import libcore.util.Objects;
 
@@ -47,6 +48,8 @@ class ShortcutUser {
 
     private final ArrayMap<String, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
+    private final ArrayMap<String, ShortcutPackageInfo> mPackageInfos = new ArrayMap<>();
+
     private ComponentName mLauncherComponent;
 
     public ShortcutUser(int userId) {
@@ -59,6 +62,10 @@ class ShortcutUser {
 
     public ArrayMap<String, ShortcutLauncher> getLaunchers() {
         return mLaunchers;
+    }
+
+    public ArrayMap<String, ShortcutPackageInfo> getPackageInfos() {
+        return mPackageInfos;
     }
 
     public ShortcutPackage getPackageShortcuts(@NonNull String packageName) {
@@ -79,23 +86,56 @@ class ShortcutUser {
         return ret;
     }
 
-    public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+    public void ensurePackageInfo(ShortcutService s, String packageName, @UserIdInt int userId) {
+        final ShortcutPackageInfo existing = mPackageInfos.get(packageName);
+
+        if (existing != null) {
+            return;
+        }
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format("Fetching package info: %s user=%d", packageName, userId));
+        }
+        final ShortcutPackageInfo newSpi = ShortcutPackageInfo.generateForInstalledPackage(
+                s, packageName, userId);
+        mPackageInfos.put(packageName, newSpi);
+        s.scheduleSaveUser(mUserId);
+    }
+
+    public void saveToXml(ShortcutService s, XmlSerializer out, boolean forBackup)
+            throws IOException, XmlPullParserException {
         out.startTag(null, TAG_ROOT);
 
         ShortcutService.writeTagValue(out, TAG_LAUNCHER,
                 mLauncherComponent);
 
-        final int lsize = mLaunchers.size();
-        for (int i = 0; i < lsize; i++) {
-            mLaunchers.valueAt(i).saveToXml(out);
+        {
+            final int size = mPackageInfos.size();
+            for (int i = 0; i < size; i++) {
+                saveShortcutPackageItem(s, out, mPackageInfos.valueAt(i), forBackup);
+            }
         }
-
-        final int psize = mPackages.size();
-        for (int i = 0; i < psize; i++) {
-            mPackages.valueAt(i).saveToXml(out);
+        {
+            final int size = mLaunchers.size();
+            for (int i = 0; i < size; i++) {
+                saveShortcutPackageItem(s, out, mLaunchers.valueAt(i), forBackup);
+            }
+        }
+        {
+            final int size = mPackages.size();
+            for (int i = 0; i < size; i++) {
+                saveShortcutPackageItem(s, out, mPackages.valueAt(i), forBackup);
+            }
         }
 
         out.endTag(null, TAG_ROOT);
+    }
+
+    private void saveShortcutPackageItem(ShortcutService s, XmlSerializer out,
+            ShortcutPackageItem spi, boolean forBackup) throws IOException, XmlPullParserException {
+        if (forBackup && !s.shouldBackupApp(spi.getPackageName(), mUserId)) {
+            return; // Don't save.
+        }
+        spi.saveToXml(out, forBackup);
     }
 
     public static ShortcutUser loadFromXml(XmlPullParser parser, int userId)
@@ -121,7 +161,7 @@ class ShortcutUser {
                     final ShortcutPackage shortcuts = ShortcutPackage.loadFromXml(parser, userId);
 
                     // Don't use addShortcut(), we don't need to save the icon.
-                    ret.getPackages().put(shortcuts.mPackageName, shortcuts);
+                    ret.getPackages().put(shortcuts.getPackageName(), shortcuts);
                     continue;
                 }
 
@@ -129,7 +169,15 @@ class ShortcutUser {
                     final ShortcutLauncher shortcuts =
                             ShortcutLauncher.loadFromXml(parser, userId);
 
-                    ret.getLaunchers().put(shortcuts.mPackageName, shortcuts);
+                    ret.getLaunchers().put(shortcuts.getPackageName(), shortcuts);
+                    continue;
+                }
+
+                case ShortcutPackageInfo.TAG_ROOT: {
+                    final ShortcutPackageInfo pi =
+                            ShortcutPackageInfo.loadFromXml(parser);
+
+                    ret.getPackageInfos().put(pi.getPackageName(), pi);
                     continue;
                 }
             }
@@ -174,6 +222,10 @@ class ShortcutUser {
 
         for (int i = 0; i < mPackages.size(); i++) {
             mPackages.valueAt(i).dump(s, pw, prefix + "  ");
+        }
+
+        for (int i = 0; i < mPackageInfos.size(); i++) {
+            mPackageInfos.valueAt(i).dump(s, pw, prefix + "  ");
         }
     }
 }
