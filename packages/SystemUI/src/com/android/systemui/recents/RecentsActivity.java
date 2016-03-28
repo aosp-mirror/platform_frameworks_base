@@ -274,6 +274,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         });
 
+        // Set the window background
+        getWindow().setBackgroundDrawable(mRecentsView.getBackgroundScrim());
+
         // Create the home intent runnable
         mHomeIntent = new Intent(Intent.ACTION_MAIN, null);
         mHomeIntent.addCategory(Intent.CATEGORY_HOME);

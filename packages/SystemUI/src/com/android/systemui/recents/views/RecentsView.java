@@ -63,8 +63,6 @@ import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
-import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
-import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -105,7 +103,8 @@ public class RecentsView extends FrameLayout {
     private Rect mSystemInsets = new Rect();
     private int mDividerSize;
 
-    private ColorDrawable mBackgroundScrim = new ColorDrawable(Color.BLACK);
+    private Drawable mBackgroundScrim = new ColorDrawable(
+            Color.argb((int) (DEFAULT_SCRIM_ALPHA * 255), 0, 0, 0)).mutate();
     private Animator mBackgroundScrimAnimator;
 
     private RecentsTransitionHelper mTransitionHelper;
@@ -159,8 +158,6 @@ public class RecentsView extends FrameLayout {
         }
         mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
-
-        setBackground(mBackgroundScrim);
     }
 
     /**
@@ -186,14 +183,14 @@ public class RecentsView extends FrameLayout {
 
         if (isResumingFromVisible) {
             // If we are already visible, then restore the background scrim
-            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, DEFAULT_UPDATE_SCRIM_DURATION);
+            animateBackgroundScrim(1f, DEFAULT_UPDATE_SCRIM_DURATION);
         } else {
             // If we are already occluded by the app, then set the final background scrim alpha now.
             // Otherwise, defer until the enter animation completes to animate the scrim alpha with
             // the tasks for the home animation.
             if (launchState.launchedViaDockGesture || launchState.launchedFromApp
                     || isTaskStackEmpty) {
-                mBackgroundScrim.setAlpha((int) (DEFAULT_SCRIM_ALPHA * 255));
+                mBackgroundScrim.setAlpha(255);
             } else {
                 mBackgroundScrim.setAlpha(0);
             }
@@ -220,6 +217,13 @@ public class RecentsView extends FrameLayout {
      */
     public TaskStack getStack() {
         return mStack;
+    }
+
+    /*
+     * Returns the window background scrim.
+     */
+    public Drawable getBackgroundScrim() {
+        return mBackgroundScrim;
     }
 
     /**
@@ -573,17 +577,9 @@ public class RecentsView extends FrameLayout {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (!launchState.launchedViaDockGesture && !launchState.launchedFromApp
                 && mStack.getTaskCount() > 0) {
-            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA,
+            animateBackgroundScrim(1f,
                     TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
         }
-    }
-
-    public final void onBusEvent(UpdateBackgroundScrimEvent event) {
-        animateBackgroundScrim(event.alpha, DEFAULT_UPDATE_SCRIM_DURATION);
-    }
-
-    public final void onBusEvent(ResetBackgroundScrimEvent event) {
-        animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, DEFAULT_UPDATE_SCRIM_DURATION);
     }
 
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
