@@ -16,10 +16,7 @@
 
 package com.android.mtp;
 
-import android.database.Cursor;
-import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract.Document;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
@@ -64,64 +61,6 @@ public class PipeManagerTest extends AndroidTestCase {
                 mtpManager,
                 new Identifier(0, 0, 1, null, MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT));
         assertDescriptorError(descriptor);
-    }
-
-    public void testWriteDocument_basic() throws Exception {
-        TestUtil.addTestDevice(mDatabase);
-        TestUtil.addTestStorage(mDatabase, "1");
-
-        final MtpObjectInfo info =
-                new MtpObjectInfo.Builder().setObjectHandle(1).setName("note.txt").build();
-        mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(
-                0, "2", TestUtil.OPERATIONS_SUPPORTED,
-                new MtpObjectInfo[] { info },
-                new long[] { 0L });
-        mDatabase.getMapper().stopAddingDocuments("2");
-        // Create a placeholder file which should be replaced by a real file later.
-        mtpManager.setObjectInfo(0, info);
-
-        // Upload testing bytes.
-        final ParcelFileDescriptor descriptor = mPipeManager.writeDocument(
-                getContext(),
-                mtpManager,
-                new Identifier(0, 0, 1, "2", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT),
-                TestUtil.OPERATIONS_SUPPORTED);
-        final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
-                new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
-        outputStream.write(HELLO_BYTES, 0, HELLO_BYTES.length);
-        outputStream.close();
-        mExecutor.shutdown();
-        assertTrue(mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS));
-
-        // Check if the placeholder file is removed.
-        try {
-            mtpManager.getObjectInfo(0, 1);
-            fail();  // The placeholder file has not been deleted.
-        } catch (IOException e) {
-            // Expected error, as the file is gone.
-        }
-
-        // Confirm that the target file is created.
-        final MtpObjectInfo targetDocument = mtpManager.getObjectInfo(
-                0, TestMtpManager.CREATED_DOCUMENT_HANDLE);
-        assertTrue(targetDocument != null);
-
-        // Confirm the object handle is updated.
-        try (final Cursor cursor = mDatabase.queryDocument(
-                "2", new String[] { MtpDatabaseConstants.COLUMN_OBJECT_HANDLE })) {
-            assertEquals(1, cursor.getCount());
-            cursor.moveToNext();
-            assertEquals(TestMtpManager.CREATED_DOCUMENT_HANDLE, cursor.getInt(0));
-        }
-
-        // Verify uploaded bytes.
-        final byte[] uploadedBytes = mtpManager.getImportFileBytes(
-                0, TestMtpManager.CREATED_DOCUMENT_HANDLE);
-        assertEquals(HELLO_BYTES.length, uploadedBytes.length);
-        for (int i = 0; i < HELLO_BYTES.length; i++) {
-            assertEquals(HELLO_BYTES[i], uploadedBytes[i]);
-        }
     }
 
     public void testReadThumbnail_basic() throws Exception {

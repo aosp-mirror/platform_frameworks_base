@@ -20,6 +20,7 @@ import android.annotation.WorkerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
+import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
@@ -33,6 +34,8 @@ public class AppFuse {
     static {
         System.loadLibrary("appfuse_jni");
     }
+
+    private static final boolean DEBUG = false;
 
     /**
      * Max read amount specified at the FUSE kernel implementation.
@@ -94,7 +97,8 @@ public class AppFuse {
     public ParcelFileDescriptor openFile(int i, int mode) throws FileNotFoundException {
         Preconditions.checkArgument(
                 mode == ParcelFileDescriptor.MODE_READ_ONLY ||
-                mode == ParcelFileDescriptor.MODE_WRITE_ONLY);
+                mode == (ParcelFileDescriptor.MODE_WRITE_ONLY |
+                         ParcelFileDescriptor.MODE_TRUNCATE));
         return ParcelFileDescriptor.open(new File(
                 getMountPoint(),
                 Integer.toString(i)),
@@ -127,6 +131,7 @@ public class AppFuse {
 
         /**
          * Handles writing bytes for the give inode.
+         * @param fileHandle
          * @param inode
          * @param offset Offset for file bytes.
          * @param size Size for file bytes.
@@ -134,7 +139,23 @@ public class AppFuse {
          * @return Number of read bytes. Must not be negative.
          * @throws IOException
          */
-        int writeObjectBytes(int inode, long offset, int size, byte[] bytes) throws IOException;
+        int writeObjectBytes(long fileHandle, int inode, long offset, int size, byte[] bytes)
+                throws IOException, ErrnoException;
+
+        /**
+         * Flushes bytes for file handle.
+         * @param fileHandle
+         * @throws IOException
+         * @throws ErrnoException
+         */
+        void flushFileHandle(long fileHandle) throws IOException, ErrnoException;
+
+        /**
+         * Closes file handle.
+         * @param fileHandle
+         * @throws IOException
+         */
+        void closeFileHandle(long fileHandle) throws IOException, ErrnoException;
     }
 
     @UsedByNative("com_android_mtp_AppFuse.cpp")
@@ -142,10 +163,8 @@ public class AppFuse {
     private long getFileSize(int inode) {
         try {
             return mCallback.getFileSize(inode);
-        } catch (FileNotFoundException e) {
-            return -OsConstants.ENOENT;
-        } catch (UnsupportedOperationException e) {
-            return -OsConstants.ENOTSUP;
+        } catch (Exception error) {
+            return -getErrnoFromException(error);
         }
     }
 
@@ -159,20 +178,62 @@ public class AppFuse {
             // It's OK to share the same mBuffer among requests because the requests are processed
             // by AppFuseMessageThread sequentially.
             return mCallback.readObjectBytes(inode, offset, size, mBuffer);
-        } catch (IOException e) {
-            return -OsConstants.EIO;
-        } catch (UnsupportedOperationException e) {
-            return -OsConstants.ENOTSUP;
+        } catch (Exception error) {
+            return -getErrnoFromException(error);
         }
     }
 
     @UsedByNative("com_android_mtp_AppFuse.cpp")
     @WorkerThread
-    private /* unsgined */ int writeObjectBytes(int inode,
+    private /* unsgined */ int writeObjectBytes(long fileHandler,
+                                                int inode,
                                                 /* unsigned */ long offset,
                                                 /* unsigned */ int size,
-                                                byte[] bytes) throws IOException {
-        return mCallback.writeObjectBytes(inode, offset, size, bytes);
+                                                byte[] bytes) {
+        try {
+            return mCallback.writeObjectBytes(fileHandler, inode, offset, size, bytes);
+        } catch (Exception error) {
+            return -getErrnoFromException(error);
+        }
+    }
+
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
+    @WorkerThread
+    private int flushFileHandle(long fileHandle) {
+        try {
+            mCallback.flushFileHandle(fileHandle);
+            return 0;
+        } catch (Exception error) {
+            return -getErrnoFromException(error);
+        }
+    }
+
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
+    @WorkerThread
+    private int closeFileHandle(long fileHandle) {
+        try {
+            mCallback.closeFileHandle(fileHandle);
+            return 0;
+        } catch (Exception error) {
+            return -getErrnoFromException(error);
+        }
+    }
+
+    private static int getErrnoFromException(Exception error) {
+        if (DEBUG) {
+            Log.e(MtpDocumentsProvider.TAG, "AppFuse callbacks", error);
+        }
+        if (error instanceof FileNotFoundException) {
+            return OsConstants.ENOENT;
+        } else if (error instanceof IOException) {
+            return OsConstants.EIO;
+        } else if (error instanceof UnsupportedOperationException) {
+            return OsConstants.ENOTSUP;
+        } else if (error instanceof IllegalArgumentException) {
+            return OsConstants.EINVAL;
+        } else {
+            return OsConstants.EIO;
+        }
     }
 
     private native boolean native_start_app_fuse_loop(int fd);

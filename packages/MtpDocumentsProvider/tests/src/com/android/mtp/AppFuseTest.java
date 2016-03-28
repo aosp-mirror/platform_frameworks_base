@@ -23,6 +23,8 @@ import android.system.Os;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -143,7 +145,8 @@ public class AppFuseTest extends AndroidTestCase {
                     }
 
                     @Override
-                    public int writeObjectBytes(int inode, long offset, int size, byte[] bytes) {
+                    public int writeObjectBytes(
+                            long fileHandle, int inode, long offset, int size, byte[] bytes) {
                         for (int i = 0; i < size; i++) {
                             resultBytes[(int)(offset + i)] = bytes[i];
                         }
@@ -152,7 +155,7 @@ public class AppFuseTest extends AndroidTestCase {
                 });
         appFuse.mount(storageManager);
         final ParcelFileDescriptor fd = appFuse.openFile(
-                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY);
+                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_TRUNCATE);
         try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
                 new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
             stream.write('a');
@@ -182,12 +185,52 @@ public class AppFuseTest extends AndroidTestCase {
                 });
         appFuse.mount(storageManager);
         final ParcelFileDescriptor fd = appFuse.openFile(
-                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY);
+                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_TRUNCATE);
         try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
                 new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
             stream.write('a');
             fail();
         } catch (IOException e) {
+        }
+        appFuse.close();
+    }
+
+    public void testWriteFile_flushError() throws IOException {
+        final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
+        final int INODE = 10;
+        final AppFuse appFuse = new AppFuse(
+                "test",
+                new TestCallback() {
+                    @Override
+                    public long getFileSize(int inode) throws FileNotFoundException {
+                        if (inode != INODE) {
+                            throw new FileNotFoundException();
+                        }
+                        return 5;
+                    }
+
+                    @Override
+                    public int writeObjectBytes(
+                            long fileHandle, int inode, long offset, int size, byte[] bytes) {
+                        return size;
+                    }
+
+                    @Override
+                    public void flushFileHandle(long fileHandle) throws IOException {
+                        throw new IOException();
+                    }
+                });
+        appFuse.mount(storageManager);
+        final ParcelFileDescriptor fd = appFuse.openFile(
+                INODE, ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_TRUNCATE);
+        try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
+            stream.write('a');
+            try {
+                IoUtils.close(fd.getFileDescriptor());
+                fail();
+            } catch (IOException e) {
+            }
         }
         appFuse.close();
     }
@@ -205,9 +248,15 @@ public class AppFuseTest extends AndroidTestCase {
         }
 
         @Override
-        public int writeObjectBytes(int inode, long offset, int size, byte[] bytes)
+        public int writeObjectBytes(long fileHandle, int inode, long offset, int size, byte[] bytes)
                 throws IOException {
             throw new IOException();
         }
+
+        @Override
+        public void flushFileHandle(long fileHandle) throws IOException {}
+
+        @Override
+        public void closeFileHandle(long fileHandle) {}
     }
 }

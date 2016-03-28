@@ -45,6 +45,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -451,7 +453,7 @@ class CopyJob extends Job {
         ParcelFileDescriptor srcFile = null;
         ParcelFileDescriptor dstFile = null;
         InputStream in = null;
-        OutputStream out = null;
+        ParcelFileDescriptor.AutoCloseOutputStream out = null;
         boolean success = false;
 
         try {
@@ -502,6 +504,8 @@ class CopyJob extends Job {
                     makeCopyProgress(len);
                 }
 
+                // Need to invoke IoUtils.close explicitly to avoid from ignoring errors at flush.
+                IoUtils.close(dstFile.getFileDescriptor());
                 srcFile.checkError();
             } catch (IOException e) {
                 throw new ResourceException(
