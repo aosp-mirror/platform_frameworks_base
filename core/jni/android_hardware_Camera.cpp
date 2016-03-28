@@ -567,6 +567,45 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
 
     // save context in opaque field
     env->SetLongField(thiz, fields.context, (jlong)context.get());
+
+    // Update default display orientation in case the sensor is reverse-landscape
+    CameraInfo cameraInfo;
+    status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
+    if (rc != NO_ERROR) {
+        return rc;
+    }
+    int defaultOrientation = 0;
+    switch (cameraInfo.orientation) {
+        case 0:
+            break;
+        case 90:
+            if (cameraInfo.facing == CAMERA_FACING_FRONT) {
+                defaultOrientation = 180;
+            }
+            break;
+        case 180:
+            defaultOrientation = 180;
+            break;
+        case 270:
+            if (cameraInfo.facing != CAMERA_FACING_FRONT) {
+                defaultOrientation = 180;
+            }
+            break;
+        default:
+            ALOGE("Unexpected camera orientation %d!", cameraInfo.orientation);
+            break;
+    }
+    if (defaultOrientation != 0) {
+        ALOGV("Setting default display orientation to %d", defaultOrientation);
+        rc = camera->sendCommand(CAMERA_CMD_SET_DISPLAY_ORIENTATION,
+                defaultOrientation, 0);
+        if (rc != NO_ERROR) {
+            ALOGE("Unable to update default orientation: %s (%d)",
+                    strerror(-rc), rc);
+            return rc;
+        }
+    }
+
     return NO_ERROR;
 }
 
