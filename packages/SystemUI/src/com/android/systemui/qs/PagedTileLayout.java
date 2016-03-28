@@ -36,7 +36,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             @Override
             public void onPageSelected(int position) {
                 if (mPageIndicator == null) return;
-                mPageIndicator.setLocation(position);
                 if (mPageListener != null) {
                     mPageListener.onPageChanged(position == 0);
                 }
