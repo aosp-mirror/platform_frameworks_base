@@ -18362,9 +18362,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int j = 0; j < activitiesSize; j++) {
                 final ActivityRecord r = app.activities.get(j);
                 if (r.app != app) {
-                    Slog.w(TAG, "Wtf, activity " + r + " in proc activity list not using proc "
-                            + app + "?!? Using " + r.app + " instead.");
-                    continue;
+                    Log.wtf(TAG, "Found activity " + r + " in proc activity list using " + r.app
+                            + " instead of expected " + app);
+                    if (r.app == null || (r.app.uid == app.uid)) {
+                        // Only fix things up when they look sane
+                        r.app = app;
+                    } else {
+                        continue;
+                    }
                 }
                 if (r.visible) {
                     // App has a visible activity; only upgrade adjustment.
