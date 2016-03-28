@@ -385,6 +385,51 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     @SmallTest
+    public void testSelectionHandles_bidi() throws Exception {
+        final String text = "abc \u0621\u0622\u0623 def";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        assertNoSelectionHandles();
+
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('\u0622')));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .check(matches(isDisplayed()));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .check(matches(isDisplayed()));
+
+        onView(withId(R.id.textview)).check(hasSelection("\u0621\u0622\u0623"));
+
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('f')));
+        onView(withId(R.id.textview)).check(hasSelection("\u0621\u0622\u0623"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasSelection("\u0621\u0622\u0623"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('\u0623') + 1,
+                        false));
+        onView(withId(R.id.textview)).check(hasSelection("\u0623"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('\u0621'),
+                        false));
+        onView(withId(R.id.textview)).check(hasSelection("\u0621\u0622\u0623"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasSelection("abc \u0621\u0622\u0623"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.length()));
+        onView(withId(R.id.textview)).check(hasSelection("abc \u0621\u0622\u0623 def"));
+    }
+
+    @SmallTest
     public void testSelectionHandles_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n" + "opqr";
         onView(withId(R.id.textview)).perform(click());
