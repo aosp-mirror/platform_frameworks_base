@@ -43,7 +43,8 @@ import android.os.TransactionTooLargeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
@@ -480,7 +481,7 @@ public final class ActiveServices {
 
     ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
             boolean callerFg, boolean addToStarting) throws TransactionTooLargeException {
-        ProcessStats.ServiceState stracker = r.getTracker();
+        ServiceState stracker = r.getTracker();
         if (stracker != null) {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
         }
@@ -932,7 +933,7 @@ public final class ActiveServices {
                 s.lastActivity = SystemClock.uptimeMillis();
                 if (!s.hasAutoCreateConnections()) {
                     // This is the first binding, let the tracker know.
-                    ProcessStats.ServiceState stracker = s.getTracker();
+                    ServiceState stracker = s.getTracker();
                     if (stracker != null) {
                         stracker.setBound(true, mAm.mProcessStats.getMemFactorLocked(),
                                 s.lastActivity);
@@ -1365,7 +1366,7 @@ public final class ActiveServices {
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
             r.executeFg = fg;
-            ProcessStats.ServiceState stracker = r.getTracker();
+            ServiceState stracker = r.getTracker();
             if (stracker != null) {
                 stracker.setExecuting(true, mAm.mProcessStats.getMemFactorLocked(), now);
             }

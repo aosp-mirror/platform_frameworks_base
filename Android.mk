@@ -300,7 +300,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IAssistScreenshotReceiver.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IEphemeralResolver.aidl \
-	core/java/com/android/internal/app/IProcessStats.aidl \
 	core/java/com/android/internal/app/ISoundTriggerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionSessionShowCallback.aidl \
@@ -308,6 +307,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IVoiceInteractorCallback.aidl \
 	core/java/com/android/internal/app/IVoiceInteractorRequest.aidl \
 	core/java/com/android/internal/app/IMediaContainerService.aidl \
+	core/java/com/android/internal/app/procstats/IProcessStats.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
