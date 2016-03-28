@@ -97,7 +97,10 @@ private:
         paint.setTextAlign(SkPaint::kCenter_Align);
         paint.setTextSize(size / 2);
         char charToShow = 'A' + (rand() % 26);
-        canvas.drawText(&charToShow, 1, size / 2, /*approximate centering*/ size * 0.7, paint);
+        const SkPoint pos[] = {{
+                SkIntToScalar(size / 2),
+                /*approximate centering*/ SkFloatToScalar(size * 0.7f)}};
+        canvas.drawPosText(&charToShow, 1, pos, paint);
         return bitmap;
     }
 
