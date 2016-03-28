@@ -91,6 +91,7 @@ public final class WindowInsets {
         mWindowDecorInsetsConsumed = src.mWindowDecorInsetsConsumed;
         mStableInsetsConsumed = src.mStableInsetsConsumed;
         mIsRound = src.mIsRound;
+        mAlwaysConsumeNavBar = src.mAlwaysConsumeNavBar;
     }
 
     /** @hide */
