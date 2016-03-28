@@ -183,6 +183,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private boolean mLastHasBottomStableInset = false;
     private boolean mLastHasRightStableInset = false;
     private int mLastWindowFlags = 0;
+    private boolean mLastShouldAlwaysConsumeNavBar = false;
 
     private int mRootScrollY = 0;
 
@@ -996,6 +997,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 boolean hasRightStableInset = insets.getStableInsetRight() != 0;
                 disallowAnimate |= (hasRightStableInset != mLastHasRightStableInset);
                 mLastHasRightStableInset = hasRightStableInset;
+                mLastShouldAlwaysConsumeNavBar = insets.shouldAlwaysConsumeNavBar();
             }
 
             boolean navBarToRightEdge = isNavBarToRightEdge(mLastBottomInset, mLastRightInset);
@@ -1016,12 +1018,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
         // to ensure that the rest of the view hierarchy doesn't notice it, unless they've
         // explicitly asked for it.
-
         boolean consumingNavBar =
                 (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
-                || (insets != null && insets.shouldAlwaysConsumeNavBar());
+                || mLastShouldAlwaysConsumeNavBar;
 
         // If we didn't request fullscreen layout, but we still got it because of the
         // mForceWindowDrawsStatusBarBackground flag, also consume top inset.

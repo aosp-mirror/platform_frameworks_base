@@ -6299,8 +6299,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean isNavBarForcedShownLw(WindowState windowState) {
-        return mForceShowSystemBars
-                && !windowState.getFrameLw().equals(windowState.getDisplayFrameLw());
+        return mForceShowSystemBars;
     }
 
     @Override
