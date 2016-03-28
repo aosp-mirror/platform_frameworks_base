@@ -46,6 +46,7 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
         const SkMatrix& transform) {
     Layer* layer = LayerRenderer::createTextureLayer(renderThread.renderState());
+    layer->getTransform().load(transform);
 
     sp<DeferredLayerUpdater> layerUpdater = new DeferredLayerUpdater(layer);
     layerUpdater->setSize(width, height);

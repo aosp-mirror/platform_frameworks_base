@@ -419,6 +419,14 @@ struct TextureLayerOp : RecordedOp {
     TextureLayerOp(BASE_PARAMS_PAINTLESS, Layer* layer)
             : SUPER_PAINTLESS(TextureLayerOp)
             , layer(layer) {}
+
+    // Copy an existing TextureLayerOp, replacing the underlying matrix
+    TextureLayerOp(const TextureLayerOp& op, const Matrix4& replacementMatrix)
+            : RecordedOp(RecordedOpId::TextureLayerOp, op.unmappedBounds, replacementMatrix,
+                    op.localClip, op.paint)
+            , layer(op.layer) {
+
+    }
     Layer* layer;
 };
 
