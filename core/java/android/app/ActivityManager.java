@@ -31,7 +31,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
 import android.util.Log;
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 
