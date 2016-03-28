@@ -1579,14 +1579,6 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.UNINSTALL_ALL_USERS";
 
     /**
-     * Specified when the uninstall confirmation dialog is not required to be shown.
-     * Use with {@link #ACTION_UNINSTALL_PACKAGE}
-     * @hide
-     */
-    public static final String EXTRA_SKIP_UNINSTALL_CONFIRMATION =
-            "android.intent.extra.SKIP_UNINSTALL_CONFIRMATION";
-
-    /**
      * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
      * describing the last run version of the platform that was setup.
      * @hide
