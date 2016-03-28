@@ -2912,36 +2912,57 @@ class MountService extends IMountService.Stub
     @Override
     public StorageVolume[] getVolumeList(int uid, String packageName, int flags) {
         final int userId = UserHandle.getUserId(uid);
+
         final boolean forWrite = (flags & StorageManager.FLAG_FOR_WRITE) != 0;
+        final boolean realState = (flags & StorageManager.FLAG_REAL_STATE) != 0;
+        final boolean includeInvisible = (flags & StorageManager.FLAG_INCLUDE_INVISIBLE) != 0;
 
-        boolean reportUnmounted = false;
-        boolean foundPrimary = false;
-
-        final long identity = Binder.clearCallingIdentity();
+        final boolean userKeyUnlocked;
+        final boolean storagePermission;
+        final long token = Binder.clearCallingIdentity();
         try {
-            if (!mMountServiceInternal.hasExternalStorage(uid, packageName)) {
-                reportUnmounted = true;
-            }
-            if (!isUserKeyUnlocked(userId)) {
-                reportUnmounted = true;
-            }
+            userKeyUnlocked = isUserKeyUnlocked(userId);
+            storagePermission = mMountServiceInternal.hasExternalStorage(uid, packageName);
         } finally {
-            Binder.restoreCallingIdentity(identity);
+            Binder.restoreCallingIdentity(token);
         }
+
+        boolean foundPrimary = false;
 
         final ArrayList<StorageVolume> res = new ArrayList<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
-                if (forWrite ? vol.isVisibleForWrite(userId) : vol.isVisibleForRead(userId)) {
-                    final StorageVolume userVol = vol.buildStorageVolume(mContext, userId,
-                            reportUnmounted);
-                    if (vol.isPrimary()) {
-                        res.add(0, userVol);
-                        foundPrimary = true;
-                    } else {
-                        res.add(userVol);
-                    }
+                switch (vol.getType()) {
+                    case VolumeInfo.TYPE_PUBLIC:
+                    case VolumeInfo.TYPE_EMULATED:
+                        break;
+                    default:
+                        continue;
+                }
+
+                boolean match = false;
+                if (forWrite) {
+                    match = vol.isVisibleForWrite(userId);
+                } else {
+                    match = vol.isVisibleForRead(userId) || includeInvisible;
+                }
+                if (!match) continue;
+
+                boolean reportUnmounted = false;
+                if ((vol.getType() == VolumeInfo.TYPE_EMULATED) && !userKeyUnlocked) {
+                    reportUnmounted = true;
+                } else if (!storagePermission && !realState) {
+                    reportUnmounted = true;
+                }
+
+                final StorageVolume userVol = vol.buildStorageVolume(mContext, userId,
+                        reportUnmounted);
+                if (vol.isPrimary()) {
+                    res.add(0, userVol);
+                    foundPrimary = true;
+                } else {
+                    res.add(userVol);
                 }
             }
         }

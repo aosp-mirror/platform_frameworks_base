@@ -34,8 +34,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
-import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -101,6 +102,10 @@ public class StorageManager {
 
     /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 8;
+    /** {@hide} */
+    public static final int FLAG_REAL_STATE = 1 << 9;
+    /** {@hide} */
+    public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -859,11 +864,31 @@ public class StorageManager {
     }
 
     /**
-     * Gets the list of shared/external storage volumes available to the current user.
+     * Return the list of shared/external storage volumes available to the
+     * current user. This includes both the primary shared storage device and
+     * any attached external volumes including SD cards and USB drives.
      *
-     * <p>It always contains the primary storage volume, plus any additional external volume(s)
-     * available in the device, such as SD cards or attached USB drives.
+     * @see Environment#getExternalStorageDirectory()
+     * @see StorageVolume#createAccessIntent(String)
      */
+    public @NonNull List<StorageVolume> getStorageVolumes() {
+        final ArrayList<StorageVolume> res = new ArrayList<>();
+        Collections.addAll(res,
+                getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE));
+        return res;
+    }
+
+    /**
+     * Return the primary shared/external storage volume available to the
+     * current user. This volume is the same storage device returned by
+     * {@link Environment#getExternalStorageDirectory()} and
+     * {@link Context#getExternalFilesDir(String)}.
+     */
+    public @NonNull StorageVolume getPrimaryStorageVolume() {
+        return getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
+    }
+
+    /** @removed */
     public @NonNull StorageVolume[] getVolumeList() {
         return getVolumeList(mContext.getUserId(), 0);
     }
@@ -912,9 +937,7 @@ public class StorageManager {
         return paths;
     }
 
-    /**
-     * Gets the primary shared/external storage volume available to the current user.
-     */
+    /** @removed */
     public @NonNull StorageVolume getPrimaryVolume() {
         return getPrimaryVolume(getVolumeList());
     }
