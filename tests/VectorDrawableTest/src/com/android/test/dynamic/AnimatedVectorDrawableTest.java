@@ -43,33 +43,37 @@ public class AnimatedVectorDrawableTest extends Activity implements View.OnClick
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final int[] layerTypes = {View.LAYER_TYPE_SOFTWARE, View.LAYER_TYPE_HARDWARE};
         super.onCreate(savedInstanceState);
 
         ScrollView scrollView = new ScrollView(this);
         GridLayout container = new GridLayout(this);
         scrollView.addView(container);
-        container.setColumnCount(1);
+        container.setColumnCount(2);
 
         for (int i = 0; i < icon.length; i++) {
-            Button button = new Button(this);
-            button.setWidth(400);
-            button.setHeight(400);
-            button.setBackgroundResource(icon[i]);
-            AnimatedVectorDrawable d = (AnimatedVectorDrawable) button.getBackground();
-            d.registerAnimationCallback(new Animatable2.AnimationCallback() {
-                @Override
-                public void onAnimationStart(Drawable drawable) {
-                    Log.v(LOGCAT, "Animator start");
-                }
+            for (int j = 0; j < layerTypes.length; j++) {
+                Button button = new Button(this);
+                button.setWidth(400);
+                button.setHeight(400);
+                button.setLayerType(layerTypes[j], null);
+                button.setBackgroundResource(icon[i]);
+                AnimatedVectorDrawable d = (AnimatedVectorDrawable) button.getBackground();
+                d.registerAnimationCallback(new Animatable2.AnimationCallback() {
+                    @Override
+                    public void onAnimationStart(Drawable drawable) {
+                        Log.v(LOGCAT, "Animator start");
+                    }
 
-                @Override
-                public void onAnimationEnd(Drawable drawable) {
+                    @Override
+                    public void onAnimationEnd(Drawable drawable) {
                         Log.v(LOGCAT, "Animator end");
-                }
-            });
+                    }
+                });
 
-            container.addView(button);
-            button.setOnClickListener(this);
+                container.addView(button);
+                button.setOnClickListener(this);
+            }
         }
 
         setContentView(scrollView);
