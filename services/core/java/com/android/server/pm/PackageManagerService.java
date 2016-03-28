@@ -2906,6 +2906,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new SecurityException("Package " + packageName + " was not found!");
             }
 
+            if (!ps.getInstalled(userId)) {
+                throw new SecurityException(
+                        "Package " + packageName + " was not installed for user " + userId + "!");
+            }
+
             if (mSafeMode && !ps.isSystem()) {
                 throw new SecurityException("Package " + packageName + " not a system app!");
             }
@@ -13147,6 +13152,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageParser.Package oldPackage;
         final String pkgName = pkg.packageName;
         final int[] allUsers;
+        final boolean weFroze;
 
         // First find the old package info and check signatures
         synchronized(mPackages) {
@@ -13179,8 +13185,32 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // In case of rollback, remember per-user/profile install state
             allUsers = sUserManager.getUserIds();
+
+            // Mark the app as frozen to prevent launching during the upgrade
+            // process, and then kill all running instances
+            if (!ps.frozen) {
+                ps.frozen = true;
+                weFroze = true;
+            } else {
+                weFroze = false;
+            }
         }
 
+        try {
+            replacePackageDirtyLI(pkg, oldPackage, parseFlags, scanFlags, user, allUsers,
+                    installerPackageName, res);
+        } finally {
+            // Regardless of success or failure of upgrade steps above, always
+            // unfreeze the package if we froze it
+            if (weFroze) {
+                unfreezePackage(pkgName);
+            }
+        }
+    }
+
+    private void replacePackageDirtyLI(PackageParser.Package pkg, PackageParser.Package oldPackage,
+            int parseFlags, int scanFlags, UserHandle user, int[] allUsers,
+            String installerPackageName, PackageInstalledInfo res) {
         // Update what is removed
         res.removedInfo = new PackageRemovedInfo();
         res.removedInfo.uid = oldPackage.applicationInfo.uid;
