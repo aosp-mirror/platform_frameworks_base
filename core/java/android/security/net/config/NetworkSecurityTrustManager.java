@@ -20,6 +20,7 @@ import com.android.org.conscrypt.TrustManagerImpl;
 
 import android.util.ArrayMap;
 import java.io.IOException;
+import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
@@ -29,14 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.X509ExtendedTrustManager;
 
 /**
- * {@link X509TrustManager} that implements the trust anchor and pinning for a
+ * {@link X509ExtendedTrustManager} that implements the trust anchor and pinning for a
  * given {@link NetworkSecurityConfig}.
  * @hide
  */
-public class NetworkSecurityTrustManager implements X509TrustManager {
+public class NetworkSecurityTrustManager extends X509ExtendedTrustManager {
     // TODO: Replace this with a general X509TrustManager and use duck-typing.
     private final TrustManagerImpl mDelegate;
     private final NetworkSecurityConfig mNetworkSecurityConfig;
@@ -68,9 +70,37 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
     }
 
     @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType, Socket socket)
+            throws CertificateException {
+        mDelegate.checkClientTrusted(certs, authType, socket);
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType, SSLEngine engine)
+            throws CertificateException {
+        mDelegate.checkClientTrusted(certs, authType, engine);
+    }
+
+    @Override
     public void checkServerTrusted(X509Certificate[] certs, String authType)
             throws CertificateException {
-        checkServerTrusted(certs, authType, null);
+        checkServerTrusted(certs, authType, (String) null);
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType, Socket socket)
+            throws CertificateException {
+        List<X509Certificate> trustedChain =
+                mDelegate.getTrustedChainForServer(certs, authType, socket);
+        checkPins(trustedChain);
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType, SSLEngine engine)
+            throws CertificateException {
+        List<X509Certificate> trustedChain =
+                mDelegate.getTrustedChainForServer(certs, authType, engine);
+        checkPins(trustedChain);
     }
 
     /**
