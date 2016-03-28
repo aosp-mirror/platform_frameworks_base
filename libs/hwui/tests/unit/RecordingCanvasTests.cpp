@@ -596,6 +596,15 @@ TEST(RecordingCanvas, refPaint) {
     EXPECT_NE(&paint, ops[2]->paint);
 }
 
+TEST(RecordingCanvas, refBitmap) {
+    SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
+        canvas.drawBitmap(bitmap, 0, 0, nullptr);
+    });
+    auto& bitmaps = dl->getBitmapResources();
+    EXPECT_EQ(1u, bitmaps.size());
+}
+
 TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
     SkBitmap bitmap = TestUtils::createSkBitmap(100, 100);
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [&bitmap](RecordingCanvas& canvas) {
