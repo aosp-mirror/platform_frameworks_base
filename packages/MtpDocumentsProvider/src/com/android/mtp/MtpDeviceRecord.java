@@ -56,8 +56,15 @@ class MtpDeviceRecord {
     }
 
     static boolean isPartialReadSupported(@Nullable int[] supportedList, long fileSize) {
-        return fileSize <= 0xffffffffl &&
-                 isSupported(supportedList, MtpConstants.OPERATION_GET_PARTIAL_OBJECT);
+        if (isSupported(supportedList, MtpConstants.OPERATION_GET_PARTIAL_OBJECT_64)) {
+            return true;
+        }
+        if (0 <= fileSize &&
+                fileSize <= 0xffffffffL &&
+                isSupported(supportedList, MtpConstants.OPERATION_GET_PARTIAL_OBJECT)) {
+            return true;
+        }
+        return false;
     }
 
     static boolean isWritingSupported(@Nullable int[] supportedList) {

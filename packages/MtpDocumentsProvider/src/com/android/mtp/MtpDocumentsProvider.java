@@ -234,11 +234,14 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final MtpDeviceRecord device = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
             switch (mode) {
                 case "r":
-                    final long fileSize = getFileSize(documentId);
+                    long fileSize;
+                    try {
+                        fileSize = getFileSize(documentId);
+                    } catch (UnsupportedOperationException exception) {
+                        fileSize = -1;
+                    }
                     // MTP getPartialObject operation does not support files that are larger than
                     // 4GB. Fallback to non-seekable file descriptor.
-                    // TODO: Use getPartialObject64 for MTP devices that support Android vendor
-                    // extension.
                     if (MtpDeviceRecord.isPartialReadSupported(
                             device.operationsSupported, fileSize)) {
                         return mAppFuse.openFile(
@@ -543,6 +546,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 MtpDatabase.strings(Document.COLUMN_SIZE, Document.COLUMN_DISPLAY_NAME));
         try {
             if (cursor.moveToNext()) {
+                if (cursor.isNull(0)) {
+                    throw new UnsupportedOperationException();
+                }
                 return cursor.getLong(0);
             } else {
                 throw new FileNotFoundException();
@@ -594,12 +600,20 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 int inode, long offset, long size, byte[] buffer) throws IOException {
             final Identifier identifier = mDatabase.createIdentifier(Integer.toString(inode));
             final MtpDeviceRecord record = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
-            if (MtpDeviceRecord.isPartialReadSupported(record.operationsSupported, offset)) {
+
+            if (MtpDeviceRecord.isSupported(
+                    record.operationsSupported, MtpConstants.OPERATION_GET_PARTIAL_OBJECT_64)) {
+                return mMtpManager.getPartialObject64(
+                        identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
+            }
+
+            if (0 <= offset && offset <= 0xffffffffL && MtpDeviceRecord.isSupported(
+                    record.operationsSupported, MtpConstants.OPERATION_GET_PARTIAL_OBJECT)) {
                 return mMtpManager.getPartialObject(
                         identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
-            } else {
-                throw new UnsupportedOperationException();
             }
+
+            throw new UnsupportedOperationException();
         }
 
         @Override
