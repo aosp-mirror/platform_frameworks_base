@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -340,13 +341,46 @@ class DocumentLoader implements AutoCloseable {
                     Log.e(MtpDocumentsProvider.TAG, "Failed to load object info", error);
                 }
             }
+            final long[] objectSizeList = new long[infoList.size()];
+            for (int i = 0; i < infoList.size(); i++) {
+                final MtpObjectInfo info = infoList.get(i);
+                // Compressed size is 32-bit unsigned integer but getCompressedSize returns the
+                // value in Java int (signed 32-bit integer). Use getCompressedSizeLong instead
+                // to get the value in Java long.
+                if (info.getCompressedSizeLong() != 0xffffffffl) {
+                    objectSizeList[i] = info.getCompressedSizeLong();
+                    continue;
+                }
+
+                if (!MtpDeviceRecord.isSupported(
+                        mOperationsSupported,
+                        MtpConstants.OPERATION_GET_OBJECT_PROP_DESC) ||
+                        !MtpDeviceRecord.isSupported(
+                                mOperationsSupported,
+                                MtpConstants.OPERATION_GET_OBJECT_PROP_VALUE)) {
+                    objectSizeList[i] = -1;
+                    continue;
+                }
+
+                // Object size is more than 4GB.
+                try {
+                    objectSizeList[i] = mManager.getObjectSizeLong(
+                            mIdentifier.mDeviceId,
+                            info.getObjectHandle(),
+                            info.getFormat());
+                } catch (IOException error) {
+                    Log.e(MtpDocumentsProvider.TAG, "Failed to get object size property.", error);
+                    objectSizeList[i] = -1;
+                }
+            }
             synchronized (this) {
                 try {
                     mDatabase.getMapper().putChildDocuments(
                             mIdentifier.mDeviceId,
                             mIdentifier.mDocumentId,
                             mOperationsSupported,
-                            infoList.toArray(new MtpObjectInfo[infoList.size()]));
+                            infoList.toArray(new MtpObjectInfo[infoList.size()]),
+                            objectSizeList);
                 } catch (FileNotFoundException error) {
                     // Looks like the parent document information is removed.
                     // Adding documents has already cancelled in Mapper so we don't need to invoke

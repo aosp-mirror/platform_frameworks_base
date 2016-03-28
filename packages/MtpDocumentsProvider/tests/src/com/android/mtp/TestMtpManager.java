@@ -39,6 +39,7 @@ public class TestMtpManager extends MtpManager {
     private final Map<String, int[]> mObjectHandles = new HashMap<>();
     private final Map<String, byte[]> mThumbnailBytes = new HashMap<>();
     private final Map<String, byte[]> mImportFileBytes = new HashMap<>();
+    private final Map<String, Long> mObjectSizeLongs = new HashMap<>();
 
     TestMtpManager(Context context) {
         super(context);
@@ -66,6 +67,10 @@ public class TestMtpManager extends MtpManager {
 
     void setThumbnail(int deviceId, int objectHandle, byte[] bytes) {
         mThumbnailBytes.put(pack(deviceId, objectHandle), bytes);
+    }
+
+    void setObjectSizeLong(int deviceId, int objectHandle, int format, long value) {
+        mObjectSizeLongs.put(pack(deviceId, objectHandle, format), value);
     }
 
     @Override
@@ -213,5 +218,15 @@ public class TestMtpManager extends MtpManager {
             i++;
         }
         return i;
+    }
+
+    @Override
+    long getObjectSizeLong(int deviceId, int objectHandle, int format) throws IOException {
+        final String key = pack(deviceId, objectHandle, format);
+        if (mObjectSizeLongs.containsKey(key)) {
+            return mObjectSizeLongs.get(key);
+        } else {
+            throw new IOException();
+        }
     }
 }

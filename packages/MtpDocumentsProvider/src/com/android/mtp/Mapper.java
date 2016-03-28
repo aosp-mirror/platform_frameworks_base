@@ -128,16 +128,27 @@ class Mapper {
      * @param deviceId Device ID
      * @param parentId Parent document ID.
      * @param documents List of document information.
+     * @param documentSizes 64-bit size of documents. MtpObjectInfo#getComporessedSize will be
+     *     ignored because it does not contain 4GB> object size. Can be -1 if the size is unknown.
      * @throws FileNotFoundException
      */
     synchronized void putChildDocuments(
-            int deviceId, String parentId, int[] operationsSupported, MtpObjectInfo[] documents)
+            int deviceId, String parentId,
+            int[] operationsSupported,
+            MtpObjectInfo[] documents,
+            long[] documentSizes)
             throws FileNotFoundException {
+        assert documents.length == documentSizes.length;
         final ContentValues[] valuesList = new ContentValues[documents.length];
         for (int i = 0; i < documents.length; i++) {
             valuesList[i] = new ContentValues();
             MtpDatabase.getObjectDocumentValues(
-                    valuesList[i], deviceId, parentId, operationsSupported, documents[i]);
+                    valuesList[i],
+                    deviceId,
+                    parentId,
+                    operationsSupported,
+                    documents[i],
+                    documentSizes[i]);
         }
         putDocuments(
                 parentId,

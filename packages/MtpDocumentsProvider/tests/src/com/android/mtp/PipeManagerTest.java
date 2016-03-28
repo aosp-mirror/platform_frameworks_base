@@ -75,7 +75,8 @@ public class PipeManagerTest extends AndroidTestCase {
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.getMapper().putChildDocuments(
                 0, "2", TestUtil.OPERATIONS_SUPPORTED,
-                new MtpObjectInfo[] { info });
+                new MtpObjectInfo[] { info },
+                new long[] { 0L });
         mDatabase.getMapper().stopAddingDocuments("2");
         // Create a placeholder file which should be replaced by a real file later.
         mtpManager.setObjectInfo(0, info);
