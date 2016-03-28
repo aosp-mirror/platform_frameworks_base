@@ -16,24 +16,28 @@
 
 package android.security.net.config;
 
+import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.X509ExtendedTrustManager;
 
 /**
- * {@link X509TrustManager} based on an {@link ApplicationConfig}.
+ * {@link X509ExtendedTrustManager} based on an {@link ApplicationConfig}.
  *
- * <p>This {@code X509TrustManager} delegates to the specific trust manager for the hostname
- * being used for the connection (See {@link ApplicationConfig#getConfigForHostname(String)} and
+ * <p>This trust manager delegates to the specific trust manager for the hostname being used for
+ * the connection (See {@link ApplicationConfig#getConfigForHostname(String)} and
  * {@link NetworkSecurityTrustManager}).</p>
  *
  * Note that if the {@code ApplicationConfig} has per-domain configurations the hostname aware
  * {@link #checkServerTrusted(X509Certificate[], String String)} must be used instead of the normal
  * non-aware call.
  * @hide */
-public class RootTrustManager implements X509TrustManager {
+public class RootTrustManager extends X509ExtendedTrustManager {
     private final ApplicationConfig mConfig;
 
     public RootTrustManager(ApplicationConfig config) {
@@ -50,6 +54,54 @@ public class RootTrustManager implements X509TrustManager {
         // only for use in checking server trust not client trust.
         NetworkSecurityConfig config = mConfig.getConfigForHostname("");
         config.getTrustManager().checkClientTrusted(chain, authType);
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType, Socket socket)
+            throws CertificateException {
+        // Use the default configuration for all client authentication. Domain specific configs are
+        // only for use in checking server trust not client trust.
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        config.getTrustManager().checkClientTrusted(certs, authType, socket);
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] certs, String authType, SSLEngine engine)
+            throws CertificateException {
+        // Use the default configuration for all client authentication. Domain specific configs are
+        // only for use in checking server trust not client trust.
+        NetworkSecurityConfig config = mConfig.getConfigForHostname("");
+        config.getTrustManager().checkClientTrusted(certs, authType, engine);
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType, Socket socket)
+            throws CertificateException {
+        if (socket instanceof SSLSocket) {
+            SSLSocket sslSocket = (SSLSocket) socket;
+            SSLSession session = sslSocket.getHandshakeSession();
+            if (session == null) {
+                throw new CertificateException("Not in handshake; no session available");
+            }
+            String host = session.getPeerHost();
+            NetworkSecurityConfig config = mConfig.getConfigForHostname(host);
+            config.getTrustManager().checkServerTrusted(certs, authType, socket);
+        } else {
+            // Not an SSLSocket, use the hostname unaware checkServerTrusted.
+            checkServerTrusted(certs, authType);
+        }
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] certs, String authType, SSLEngine engine)
+            throws CertificateException {
+        SSLSession session = engine.getHandshakeSession();
+        if (session == null) {
+            throw new CertificateException("Not in handshake; no session available");
+        }
+        String host = session.getPeerHost();
+        NetworkSecurityConfig config = mConfig.getConfigForHostname(host);
+        config.getTrustManager().checkServerTrusted(certs, authType, engine);
     }
 
     @Override
