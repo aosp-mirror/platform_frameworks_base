@@ -153,6 +153,8 @@ public final class SystemServer {
             "com.android.server.MountService$Lifecycle";
     private static final String SEARCH_MANAGER_SERVICE_CLASS =
             "com.android.server.search.SearchManagerService$Lifecycle";
+    private static final String THERMAL_OBSERVER_CLASS =
+            "com.google.android.clockwork.ThermalObserver";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -959,7 +961,7 @@ public final class SystemServer {
 
                 if (context.getPackageManager().hasSystemFeature
                         (PackageManager.FEATURE_WATCH)) {
-                    mSystemServiceManager.startService(ThermalObserver.class);
+                    mSystemServiceManager.startService(THERMAL_OBSERVER_CLASS);
                 }
             }
 
