@@ -1198,6 +1198,8 @@ public abstract class Drawable {
 
     /**
      * Inflate this Drawable from an XML resource optionally styled by a theme.
+     * This can't be called more than once for each Drawable. Note that framework may have called
+     * this once to create the Drawable instance from XML resource.
      *
      * @param r Resources used to resolve attribute values
      * @param parser XML parser from which to inflate this Drawable
