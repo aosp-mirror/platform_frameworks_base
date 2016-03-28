@@ -55097,6 +55097,10 @@ package java.util {
     method public static int hashCode(float[]);
     method public static int hashCode(double[]);
     method public static int hashCode(java.lang.Object[]);
+    method public static void parallelSetAll(T[], java.util.function.IntFunction<? extends T>);
+    method public static void parallelSetAll(int[], java.util.function.IntUnaryOperator);
+    method public static void parallelSetAll(long[], java.util.function.IntToLongFunction);
+    method public static void parallelSetAll(double[], java.util.function.IntToDoubleFunction);
     method public static void parallelSort(byte[]);
     method public static void parallelSort(byte[], int, int);
     method public static void parallelSort(char[]);
