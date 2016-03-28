@@ -201,6 +201,8 @@ public class FilesActivity extends BaseActivity {
         newWindow.setVisible(true);
 
         Menus.disableHiddenItems(menu, pasteFromCb);
+        // It hides icon if searching in progress
+        mSearchManager.updateMenu();
         return true;
     }
 
