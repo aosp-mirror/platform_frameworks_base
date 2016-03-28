@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"በ GPS የተዘጋጀ ሥፍራ"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"የአካባቢ ጥያቄዎች ነቅተዋል"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ሁሉንም ማሳወቂያዎች አጽዳ"</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"የማሳወቂያ ቅንብሮች"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"የ<xliff:g id="APP_NAME">%s</xliff:g> ቅንብሮች"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ማያ ገጽ በራስ ሰር ይዞራል።"</string>
@@ -310,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ፈልግ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>ን መጀመር አልተቻለም።"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> በጥንቃቄ ሁነታ ውስጥ ታግዷል።"</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"ታሪክ"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ጥረግ"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ሁሉንም አጽዳ"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"ይህ መተግበሪያ ብዝሃ-መስኮትን አይደግፍም"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"መተግበሪያው ብዝሃ-መስኮትን አይደግፍም"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"አግድም ክፈል"</string>
@@ -480,8 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"በማሳወቂያዎች ዝርዝር አናት ላይ አሳይ፣ ወደ ማያ ገጹ አሳይና ድምፅ ፍቀድ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ተጨማሪ ቅንብሮች"</string>
     <string name="notification_done" msgid="5279426047273930175">"ተከናውኗል"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ ቁጥጥሮች"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"ቀለም እና መልክ"</string>
     <string name="night_mode" msgid="3540405868248625488">"የሌሊት ሁነታ"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"ማሳያን ይለኩ"</string>
@@ -501,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ኃይል በሚሞላበት ጊዜ ባትሪ ቆጣቢ አይገኝም"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ባትሪ ቆጣቢ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"አፈጻጸምን እና የጀርባ ውሂብን ይቀንሳል"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"አዝራር <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"መነሻ"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"ተመለስ"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"ላይ"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"ወደታች"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"ግራ"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"ቀኝ"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"መሃል"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"ትር"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"ክፍተት"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"አስገባ"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"የኋሊት መደምሰሻ"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"አጫውት/ለአፍታ አቁም"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"አቁም"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"ቀጣይ"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"ቀዳሚ"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"ወደኋላ አጠንጥን"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"በፍጥነት አሳልፍ"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"ገጽ ወደ ላይ"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"ገጽ ወደ ታች"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"ሰርዝ"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"መነሻ"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"መጨረሻ"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"አስገባ"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"የቁጥር ሰሌዳ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"ሥርዓት"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"መነሻ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"የቅርብ ጊዜዎቹ"</string>
@@ -560,4 +583,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ወደ ላይ ሂድ"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ወደ ግራ ሂድ"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ወደ ቀኝ ሂድ"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

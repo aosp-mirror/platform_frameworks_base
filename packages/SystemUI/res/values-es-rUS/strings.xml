@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"La ubicación se estableció por GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Eliminar todas las notificaciones"</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Configuración de notificaciones"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Configuración de <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
@@ -304,14 +303,13 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modo de trabajo"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"No hay elementos recientes"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Borraste todo"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Todo borrado"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Información de la aplicación"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"Fijar pantalla"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"buscar"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"No se pudo iniciar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> está inhabilitada en modo seguro."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Historial"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Borrar"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Borrar todo"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Esta app no es compatible con el modo multiventana"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"La app no es compatible con el modo multiventana"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"División horizontal"</string>
@@ -480,8 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Mostrar en la parte superior de la lista de notificaciones, ver en la pantalla y permitir sonidos"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Más opciones de configuración"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Controles de notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Color y apariencia"</string>
     <string name="night_mode" msgid="3540405868248625488">"Modo nocturno"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Calibrar pantalla"</string>
@@ -501,6 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ahorro de batería no está disponible durante la carga"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ahorro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce el rendimiento y el uso de datos en segundo plano"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Página principal"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Atrás"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Arriba"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Abajo"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Izquierda"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Derecha"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centro"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulación"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Espacio"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Ingresar"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Retroceso"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Reproducir/pausar"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Detener"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Siguiente"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Anterior"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Retroceder"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Avanzar rápido"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Página anterior"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Página siguiente"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Borrar"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Página principal"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Finalizar"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insertar"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Bloqueo numérico"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Teclado numérico <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Sistema"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Pantalla principal"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recientes"</string>
@@ -559,4 +582,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Mover hacia arriba"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mover a la izquierda"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mover a la derecha"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

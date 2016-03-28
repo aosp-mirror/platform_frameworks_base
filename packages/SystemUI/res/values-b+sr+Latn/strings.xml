@@ -237,8 +237,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokaciju je podesio GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Ima aktivnih zahteva za lokaciju"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Obriši sva obaveštenja."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"i još <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Podešavanja obaveštenja"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Podešavanja za <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran će se automatski rotirati."</string>
@@ -311,8 +310,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pretraži"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Pokretanje aplikacije <xliff:g id="APP">%s</xliff:g> nije uspelo."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacija <xliff:g id="APP">%s</xliff:g> je onemogućena u bezbednom režimu."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Istorija"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Obriši"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Obriši sve"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ova aplikacija ne podržava režim sa više prozora"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikacija ne podržava režim sa više prozora"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podeli horizontalno"</string>
@@ -481,8 +479,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Prikazuju se u vrhu liste obaveštenja, nakratko se prikazuju na ekranu i emituju zvuk"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Još podešavanja"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrole obaveštenja za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Boja i izgled"</string>
     <string name="night_mode" msgid="3540405868248625488">"Noćni režim"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Kalibrišite ekran"</string>
@@ -502,6 +499,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ušteda baterije nije dostupna tokom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ušteda baterije"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Smanjuje performanse i pozadinske podatke"</string>
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"Dugme <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Taster Početna"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Taster Nazad"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Taster sa strelicom nagore"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Taster sa strelicom nadole"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Taster sa strelicom nalevo"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Taster sa strelicom nadesno"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Taster sa centralnom strelicom"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulator"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Taster za razmak"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Taster za brisanje unazad"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Taster za reprodukciju/pauziranje"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Taster za zaustavljanje"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Taster Sledeća"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Taster Prethodna"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Taster za premotavanje unazad"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Taster za premotavanje unapred"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Taster za stranicu nagore"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Taster za stranicu nadole"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Taster za brisanje"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Taster Početna"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Taster za kraj"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Taster za umetanje"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Taster <xliff:g id="NAME">%1$s</xliff:g> na numeričkoj tastaturi"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Sistem"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Početni"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nedavni sadržaj"</string>
@@ -560,4 +583,6 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Pomeri nagore"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Pomeri ulevo"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Pomeri udesno"</string>
+    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
+    <skip />
 </resources>

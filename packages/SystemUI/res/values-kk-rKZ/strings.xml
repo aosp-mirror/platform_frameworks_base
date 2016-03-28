@@ -236,8 +236,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Орын GPS арқылы орнатылған"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Орын өтініштері қосылған"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Барлық хабарларды жойыңыз."</string>
-    <!-- no translation found for notification_group_overflow_indicator (1863231301642314183) -->
-    <skip />
+    <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Хабарландыру параметрлері"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> параметрлері"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран автоматты түрде бұрылады."</string>
@@ -310,8 +309,8 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"іздеу"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> іске қосу мүмкін болмады."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> қауіпсіз режимде өшіріледі."</string>
-    <string name="recents_history_button_label" msgid="5153358867807604821">"Тарих"</string>
-    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Тазалау"</string>
+    <!-- no translation found for recents_stack_action_button_label (6593727103310426253) -->
+    <skip />
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Бұл қолданба көп терезені қолдамайды"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Қолданба көп терезені қолдамайды"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
@@ -480,8 +479,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Хабарландырулар тізімінің жоғарғы жағында көрсету, экранда көрсету және дыбысқа рұқсат ету"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
-    <!-- no translation found for notification_gear_accessibility (94429150213089611) -->
-    <skip />
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларды басқару элементтері"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Түс және сыртқы түрі"</string>
     <string name="night_mode" msgid="3540405868248625488">"Түнгі режим"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Дисплейді калибрлеу"</string>
@@ -501,6 +499,58 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Өнімділікті және фондық деректерді азайтады"</string>
+    <!-- no translation found for keyboard_key_button_template (6230056639734377300) -->
+    <skip />
+    <!-- no translation found for keyboard_key_home (2243500072071305073) -->
+    <skip />
+    <!-- no translation found for keyboard_key_back (2337450286042721351) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_up (5584144111755734686) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_down (7331518671788337815) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_left (1346446024676962251) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_right (3317323247127515341) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_center (2566737770049304658) -->
+    <skip />
+    <!-- no translation found for keyboard_key_tab (3871485650463164476) -->
+    <skip />
+    <!-- no translation found for keyboard_key_space (2499861316311153293) -->
+    <skip />
+    <!-- no translation found for keyboard_key_enter (5739632123216118137) -->
+    <skip />
+    <!-- no translation found for keyboard_key_backspace (1559580097512385854) -->
+    <skip />
+    <!-- no translation found for keyboard_key_media_play_pause (3861975717393887428) -->
+    <skip />
+    <!-- no translation found for keyboard_key_media_stop (2859963958595908962) -->
+    <skip />
+    <!-- no translation found for keyboard_key_media_next (1894394911630345607) -->
+    <skip />
+    <!-- no translation found for keyboard_key_media_previous (4256072387192967261) -->
+    <skip />
+    <!-- no translation found for keyboard_key_media_rewind (2654808213360820186) -->
+    <skip />
+    <!-- no translation found for keyboard_key_media_fast_forward (3849417047738200605) -->
+    <skip />
+    <!-- no translation found for keyboard_key_page_up (5654098530106845603) -->
+    <skip />
+    <!-- no translation found for keyboard_key_page_down (8720502083731906136) -->
+    <skip />
+    <!-- no translation found for keyboard_key_forward_del (1391451334716490176) -->
+    <skip />
+    <!-- no translation found for keyboard_key_move_home (2765693292069487486) -->
+    <skip />
+    <!-- no translation found for keyboard_key_move_end (5901174332047975247) -->
+    <skip />
+    <!-- no translation found for keyboard_key_insert (8530501581636082614) -->
+    <skip />
+    <!-- no translation found for keyboard_key_num_lock (5052537581246772117) -->
+    <skip />
+    <!-- no translation found for keyboard_key_numpad_template (8729216555174634026) -->
+    <skip />
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Жүйе"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Негізгі бет"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Жақындағылар"</string>
@@ -559,4 +609,5 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Жоғары қарай жылжыту"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Солға жылжыту"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Оңға жылжыту"</string>
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Қолданба көп тереземен жұмыс істемеуі мүмкін"</string>
 </resources>
