@@ -444,13 +444,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     // Compilation reasons.
-    public static final int REASON_BOOT = 0;
-    public static final int REASON_INSTALL = 1;
-    public static final int REASON_BACKGROUND_DEXOPT = 2;
-    public static final int REASON_AB_OTA = 3;
-    public static final int REASON_NON_SYSTEM_LIBRARY = 4;
-    public static final int REASON_SHARED_APK = 5;
-    public static final int REASON_FORCED_DEXOPT = 6;
+    public static final int REASON_FIRST_BOOT = 0;
+    public static final int REASON_BOOT = 1;
+    public static final int REASON_INSTALL = 2;
+    public static final int REASON_BACKGROUND_DEXOPT = 3;
+    public static final int REASON_AB_OTA = 4;
+    public static final int REASON_NON_SYSTEM_LIBRARY = 5;
+    public static final int REASON_SHARED_APK = 6;
+    public static final int REASON_FORCED_DEXOPT = 7;
 
     public static final int REASON_LAST = REASON_FORCED_DEXOPT;
 
@@ -473,6 +474,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
     final boolean mIsUpgrade;
+    final boolean mIsPreNUpgrade;
 
     /** The location for ASEC container files on internal storage. */
     final String mAsecInternalPath;
@@ -2206,6 +2208,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final VersionInfo ver = mSettings.getInternalVersion();
             mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
@@ -2221,6 +2224,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+
+            // When upgrading form pre-N, we need to handle package extraction like first boot,
+            // as there is no profiling data available.
+            mIsPreNUpgrade = ver.sdkVersion <= Build.VERSION_CODES.M;
 
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
@@ -6916,10 +6923,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void extractPackagesIfNeeded() {
         enforceSystemOrRoot("Only the system can request package extraction");
 
-        // Extract pacakges only if profile-guided compilation is enabled because
-        // otherwise BackgroundDexOptService will not dexopt them later.
-        boolean prunedCache = VMRuntime.didPruneDalvikCache();
-        if (!isUpgrade() && !prunedCache) {
+        // We need to re-extract after an OTA.
+        boolean causeUpgrade = isUpgrade();
+
+        // First boot or factory reset.
+        // Note: we also handle devices that are upgrading to N right now as if it is their
+        //       first boot, as they do not have profile data.
+        boolean causeFirstBoot = isFirstBoot() || mIsPreNUpgrade;
+
+        // We need to re-extract after a pruned cache, as AoT-ed files will be out of date.
+        boolean causePrunedCache = VMRuntime.didPruneDalvikCache();
+
+        if (!causeUpgrade && !causeFirstBoot && !causePrunedCache) {
             return;
         }
 
@@ -6951,7 +6966,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // and would have to be patched (would be SELF_PATCHOAT, which is deprecated).
                 // Instead, force the extraction in this case.
                 performDexOpt(pkg.packageName, null /* instructionSet */,
-                         false /* checkProfiles */, REASON_BOOT, prunedCache);
+                         false /* checkProfiles */,
+                         causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
+                         causePrunedCache);
             }
         }
     }
