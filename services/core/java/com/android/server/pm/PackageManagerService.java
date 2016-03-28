@@ -2225,9 +2225,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            // When upgrading form pre-N, we need to handle package extraction like first boot,
+            // When upgrading from pre-N, we need to handle package extraction like first boot,
             // as there is no profiling data available.
-            mIsPreNUpgrade = ver.sdkVersion <= Build.VERSION_CODES.M;
+            mIsPreNUpgrade = !mSettings.isNWorkDone();
+            mSettings.setNWorkDone();
 
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
