@@ -3089,10 +3089,14 @@ final class ActivityStack {
             return false;
         }
 
-        if (stack.isHomeStack()) {
+        final ActivityRecord top = stack.topRunningActivityLocked();
+
+        if (stack.isHomeStack() && (top == null || !top.visible)) {
+            // If we will be focusing on the home stack next and its current top activity isn't
+            // visible, then use the task return to value to determine the home task to display next.
             return mStackSupervisor.moveHomeStackTaskToTop(taskToReturnTo, reason);
         }
-        return mService.setFocusedActivityLocked(stack.topRunningActivityLocked(), myReason);
+        return mService.setFocusedActivityLocked(top, myReason);
     }
 
     final void stopActivityLocked(ActivityRecord r) {
