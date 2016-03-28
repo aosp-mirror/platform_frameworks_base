@@ -2777,11 +2777,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int insets = mWindowManagerFuncs.getDockedDividerInsetsLw();
 
         // If the divider is behind the navigation bar, don't animate.
-        if (mNavigationBar != null
+        final Rect frame = win.getFrameLw();
+        final boolean behindNavBar = mNavigationBar != null
                 && ((mNavigationBarOnBottom
-                        && win.getFrameLw().top + insets >= mNavigationBar.getFrameLw().top)
+                        && frame.top + insets >= mNavigationBar.getFrameLw().top)
                 || (!mNavigationBarOnBottom
-                        && win.getFrameLw().left + insets >= mNavigationBar.getFrameLw().left))) {
+                        && frame.left + insets >= mNavigationBar.getFrameLw().left));
+        final boolean landscape = frame.height() > frame.width();
+        final boolean offscreenLandscape = landscape && (frame.right - insets <= 0
+                || frame.left + insets >= win.getDisplayFrameLw().right);
+        final boolean offscreenPortrait = !landscape && (frame.top - insets <= 0
+                || frame.bottom + insets >= win.getDisplayFrameLw().bottom);
+        final boolean offscreen = offscreenLandscape || offscreenPortrait;
+        if (behindNavBar || offscreen) {
             return 0;
         }
         if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
