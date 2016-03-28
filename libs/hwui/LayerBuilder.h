@@ -100,9 +100,7 @@ public:
         return mBatches.empty();
     }
 
-    void clear() {
-        mBatches.clear();
-    }
+    void clear();
 
     void dump() const;
 
@@ -117,6 +115,7 @@ public:
     // list of deferred CopyFromLayer ops, to be deferred upon encountering EndUnclippedLayerOps
     std::vector<BakedOpState*> activeUnclippedSaveLayers;
 private:
+    void onDeferOp(LinearAllocator& allocator, const BakedOpState* bakedState);
     void flushLayerClears(LinearAllocator& allocator);
 
     std::vector<BatchBase*> mBatches;

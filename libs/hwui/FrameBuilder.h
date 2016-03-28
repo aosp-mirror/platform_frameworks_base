@@ -201,7 +201,7 @@ private:
         return mAllocator.create<SkPath>();
     }
 
-    const BakedOpState* deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
+    BakedOpState* deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
             BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
 
     /**
