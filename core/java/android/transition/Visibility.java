@@ -84,6 +84,7 @@ public abstract class Visibility extends Transition {
     }
 
     private int mMode = MODE_IN | MODE_OUT;
+    private boolean mSuppressLayout = true;
 
     public Visibility() {}
 
@@ -95,6 +96,15 @@ public abstract class Visibility extends Transition {
         if (mode != 0) {
             setMode(mode);
         }
+    }
+
+    /**
+     * This tells the Visibility transition to suppress layout during the transition and release
+     * the suppression after the transition.
+     * @hide
+     */
+    public void setSuppressLayout(boolean suppress) {
+        this.mSuppressLayout = suppress;
     }
 
     /**
@@ -428,7 +438,7 @@ public abstract class Visibility extends Transition {
             Animator animator = onDisappear(sceneRoot, viewToKeep, startValues, endValues);
             if (animator != null) {
                 DisappearListener disappearListener = new DisappearListener(viewToKeep,
-                        finalVisibility);
+                        finalVisibility, mSuppressLayout);
                 animator.addListener(disappearListener);
                 animator.addPauseListener(disappearListener);
                 addListener(disappearListener);
@@ -483,14 +493,16 @@ public abstract class Visibility extends Transition {
         private final View mView;
         private final int mFinalVisibility;
         private final ViewGroup mParent;
+        private final boolean mSuppressLayout;
 
         private boolean mLayoutSuppressed;
         boolean mCanceled = false;
 
-        public DisappearListener(View view, int finalVisibility) {
+        public DisappearListener(View view, int finalVisibility, boolean suppressLayout) {
             this.mView = view;
             this.mFinalVisibility = finalVisibility;
             this.mParent = (ViewGroup) view.getParent();
+            this.mSuppressLayout = suppressLayout;
             // Prevent a layout from including mView in its calculation.
             suppressLayout(true);
         }
@@ -555,7 +567,7 @@ public abstract class Visibility extends Transition {
         }
 
         private void suppressLayout(boolean suppress) {
-            if (mLayoutSuppressed != suppress && mParent != null) {
+            if (mSuppressLayout && mLayoutSuppressed != suppress && mParent != null) {
                 mLayoutSuppressed = suppress;
                 mParent.suppressLayout(suppress);
             }
