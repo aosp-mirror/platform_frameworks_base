@@ -106,6 +106,8 @@ import java.util.List;
  * @attr ref android.R.styleable#Toolbar_contentInsetLeft
  * @attr ref android.R.styleable#Toolbar_contentInsetRight
  * @attr ref android.R.styleable#Toolbar_contentInsetStart
+ * @attr ref android.R.styleable#Toolbar_contentInsetStartWithNavigation
+ * @attr ref android.R.styleable#Toolbar_contentInsetEndWithActions
  * @attr ref android.R.styleable#Toolbar_gravity
  * @attr ref android.R.styleable#Toolbar_logo
  * @attr ref android.R.styleable#Toolbar_logoDescription
@@ -159,6 +161,8 @@ public class Toolbar extends ViewGroup {
     private int mTitleMarginBottom;
 
     private final RtlSpacingHelper mContentInsets = new RtlSpacingHelper();
+    private int mContentInsetStartWithNavigation;
+    private int mContentInsetEndWithActions;
 
     private int mGravity = Gravity.START | Gravity.CENTER_VERTICAL;
 
@@ -271,6 +275,11 @@ public class Toolbar extends ViewGroup {
                 contentInsetEnd != RtlSpacingHelper.UNDEFINED) {
             mContentInsets.setRelative(contentInsetStart, contentInsetEnd);
         }
+
+        mContentInsetStartWithNavigation = a.getDimensionPixelOffset(
+                R.styleable.Toolbar_contentInsetStartWithNavigation, RtlSpacingHelper.UNDEFINED);
+        mContentInsetEndWithActions = a.getDimensionPixelOffset(
+                R.styleable.Toolbar_contentInsetEndWithActions, RtlSpacingHelper.UNDEFINED);
 
         mCollapseIcon = a.getDrawable(R.styleable.Toolbar_collapseIcon);
         mCollapseDescription = a.getText(R.styleable.Toolbar_collapseContentDescription);
@@ -1055,7 +1064,7 @@ public class Toolbar extends ViewGroup {
     }
 
     /**
-     * Set the content insets for this toolbar relative to layout direction.
+     * Sets the content insets for this toolbar relative to layout direction.
      *
      * <p>The content inset affects the valid area for Toolbar content other than
      * the navigation button and menu. Insets define the minimum margin for these components
@@ -1069,13 +1078,15 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetEnd()
      * @see #getContentInsetLeft()
      * @see #getContentInsetRight()
+     * @attr ref android.R.styleable#Toolbar_contentInsetEnd
+     * @attr ref android.R.styleable#Toolbar_contentInsetStart
      */
     public void setContentInsetsRelative(int contentInsetStart, int contentInsetEnd) {
         mContentInsets.setRelative(contentInsetStart, contentInsetEnd);
     }
 
     /**
-     * Get the starting content inset for this toolbar.
+     * Gets the starting content inset for this toolbar.
      *
      * <p>The content inset affects the valid area for Toolbar content other than
      * the navigation button and menu. Insets define the minimum margin for these components
@@ -1088,13 +1099,14 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetEnd()
      * @see #getContentInsetLeft()
      * @see #getContentInsetRight()
+     * @attr ref android.R.styleable#Toolbar_contentInsetStart
      */
     public int getContentInsetStart() {
         return mContentInsets.getStart();
     }
 
     /**
-     * Get the ending content inset for this toolbar.
+     * Gets the ending content inset for this toolbar.
      *
      * <p>The content inset affects the valid area for Toolbar content other than
      * the navigation button and menu. Insets define the minimum margin for these components
@@ -1107,13 +1119,14 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetStart()
      * @see #getContentInsetLeft()
      * @see #getContentInsetRight()
+     * @attr ref android.R.styleable#Toolbar_contentInsetEnd
      */
     public int getContentInsetEnd() {
         return mContentInsets.getEnd();
     }
 
     /**
-     * Set the content insets for this toolbar.
+     * Sets the content insets for this toolbar.
      *
      * <p>The content inset affects the valid area for Toolbar content other than
      * the navigation button and menu. Insets define the minimum margin for these components
@@ -1127,13 +1140,15 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetEnd()
      * @see #getContentInsetLeft()
      * @see #getContentInsetRight()
+     * @attr ref android.R.styleable#Toolbar_contentInsetLeft
+     * @attr ref android.R.styleable#Toolbar_contentInsetRight
      */
     public void setContentInsetsAbsolute(int contentInsetLeft, int contentInsetRight) {
         mContentInsets.setAbsolute(contentInsetLeft, contentInsetRight);
     }
 
     /**
-     * Get the left content inset for this toolbar.
+     * Gets the left content inset for this toolbar.
      *
      * <p>The content inset affects the valid area for Toolbar content other than
      * the navigation button and menu. Insets define the minimum margin for these components
@@ -1146,13 +1161,14 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetStart()
      * @see #getContentInsetEnd()
      * @see #getContentInsetRight()
+     * @attr ref android.R.styleable#Toolbar_contentInsetLeft
      */
     public int getContentInsetLeft() {
         return mContentInsets.getLeft();
     }
 
     /**
-     * Get the right content inset for this toolbar.
+     * Gets the right content inset for this toolbar.
      *
      * <p>The content inset affects the valid area for Toolbar content other than
      * the navigation button and menu. Insets define the minimum margin for these components
@@ -1165,9 +1181,158 @@ public class Toolbar extends ViewGroup {
      * @see #getContentInsetStart()
      * @see #getContentInsetEnd()
      * @see #getContentInsetLeft()
+     * @attr ref android.R.styleable#Toolbar_contentInsetRight
      */
     public int getContentInsetRight() {
         return mContentInsets.getRight();
+    }
+
+    /**
+     * Gets the start content inset to use when a navigation button is present.
+     *
+     * <p>Different content insets are often called for when additional buttons are present
+     * in the toolbar, as well as at different toolbar sizes. The larger value of
+     * {@link #getContentInsetStart()} and this value will be used during layout.</p>
+     *
+     * @return the start content inset used when a navigation icon has been set in pixels
+     *
+     * @see #setContentInsetStartWithNavigation(int)
+     * @attr ref android.R.styleable#Toolbar_contentInsetStartWithNavigation
+     */
+    public int getContentInsetStartWithNavigation() {
+        return mContentInsetStartWithNavigation != RtlSpacingHelper.UNDEFINED
+                ? mContentInsetStartWithNavigation
+                : getContentInsetStart();
+    }
+
+    /**
+     * Sets the start content inset to use when a navigation button is present.
+     *
+     * <p>Different content insets are often called for when additional buttons are present
+     * in the toolbar, as well as at different toolbar sizes. The larger value of
+     * {@link #getContentInsetStart()} and this value will be used during layout.</p>
+     *
+     * @param insetStartWithNavigation the inset to use when a navigation icon has been set
+     *                                 in pixels
+     *
+     * @see #getContentInsetStartWithNavigation()
+     * @attr ref android.R.styleable#Toolbar_contentInsetStartWithNavigation
+     */
+    public void setContentInsetStartWithNavigation(int insetStartWithNavigation) {
+        if (insetStartWithNavigation < 0) {
+            insetStartWithNavigation = RtlSpacingHelper.UNDEFINED;
+        }
+        if (insetStartWithNavigation != mContentInsetStartWithNavigation) {
+            mContentInsetStartWithNavigation = insetStartWithNavigation;
+            if (getNavigationIcon() != null) {
+                requestLayout();
+            }
+        }
+    }
+
+    /**
+     * Gets the end content inset to use when action buttons are present.
+     *
+     * <p>Different content insets are often called for when additional buttons are present
+     * in the toolbar, as well as at different toolbar sizes. The larger value of
+     * {@link #getContentInsetEnd()} and this value will be used during layout.</p>
+     *
+     * @return the end content inset used when a menu has been set in pixels
+     *
+     * @see #setContentInsetEndWithActions(int)
+     * @attr ref android.R.styleable#Toolbar_contentInsetEndWithActions
+     */
+    public int getContentInsetEndWithActions() {
+        return mContentInsetEndWithActions != RtlSpacingHelper.UNDEFINED
+                ? mContentInsetEndWithActions
+                : getContentInsetEnd();
+    }
+
+    /**
+     * Sets the start content inset to use when action buttons are present.
+     *
+     * <p>Different content insets are often called for when additional buttons are present
+     * in the toolbar, as well as at different toolbar sizes. The larger value of
+     * {@link #getContentInsetEnd()} and this value will be used during layout.</p>
+     *
+     * @param insetEndWithActions the inset to use when a menu has been set in pixels
+     *
+     * @see #setContentInsetEndWithActions(int)
+     * @attr ref android.R.styleable#Toolbar_contentInsetEndWithActions
+     */
+    public void setContentInsetEndWithActions(int insetEndWithActions) {
+        if (insetEndWithActions < 0) {
+            insetEndWithActions = RtlSpacingHelper.UNDEFINED;
+        }
+        if (insetEndWithActions != mContentInsetEndWithActions) {
+            mContentInsetEndWithActions = insetEndWithActions;
+            if (getNavigationIcon() != null) {
+                requestLayout();
+            }
+        }
+    }
+
+    /**
+     * Gets the content inset that will be used on the starting side of the bar in the current
+     * toolbar configuration.
+     *
+     * @return the current content inset start in pixels
+     *
+     * @see #getContentInsetStartWithNavigation()
+     */
+    public int getCurrentContentInsetStart() {
+        return getNavigationIcon() != null
+                ? Math.max(getContentInsetStart(), Math.max(mContentInsetStartWithNavigation, 0))
+                : getContentInsetStart();
+    }
+
+    /**
+     * Gets the content inset that will be used on the ending side of the bar in the current
+     * toolbar configuration.
+     *
+     * @return the current content inset end in pixels
+     *
+     * @see #getContentInsetEndWithActions()
+     */
+    public int getCurrentContentInsetEnd() {
+        boolean hasActions = false;
+        if (mMenuView != null) {
+            final MenuBuilder mb = mMenuView.peekMenu();
+            hasActions = mb != null && mb.hasVisibleItems();
+        }
+        return hasActions
+                ? Math.max(getContentInsetEnd(), Math.max(mContentInsetEndWithActions, 0))
+                : getContentInsetEnd();
+    }
+
+    /**
+     * Gets the content inset that will be used on the left side of the bar in the current
+     * toolbar configuration.
+     *
+     * @return the current content inset left in pixels
+     *
+     * @see #getContentInsetStartWithNavigation()
+     * @see #getContentInsetEndWithActions()
+     */
+    public int getCurrentContentInsetLeft() {
+        return isLayoutRtl()
+                ? getCurrentContentInsetEnd()
+                : getCurrentContentInsetStart();
+    }
+
+    /**
+     * Gets the content inset that will be used on the right side of the bar in the current
+     * toolbar configuration.
+     *
+     * @return the current content inset right in pixels
+     *
+     * @see #getContentInsetStartWithNavigation()
+     * @see #getContentInsetEndWithActions()
+     */
+    public int getCurrentContentInsetRight() {
+        return isLayoutRtl()
+                ? getCurrentContentInsetStart()
+                : getCurrentContentInsetEnd();
     }
 
     private void ensureNavButtonView() {
@@ -1406,7 +1571,7 @@ public class Toolbar extends ViewGroup {
             childState = combineMeasuredStates(childState, mCollapseButtonView.getMeasuredState());
         }
 
-        final int contentInsetStart = getContentInsetStart();
+        final int contentInsetStart = getCurrentContentInsetStart();
         width += Math.max(contentInsetStart, navWidth);
         collapsingMargins[marginStartIndex] = Math.max(0, contentInsetStart - navWidth);
 
@@ -1420,7 +1585,7 @@ public class Toolbar extends ViewGroup {
             childState = combineMeasuredStates(childState, mMenuView.getMeasuredState());
         }
 
-        final int contentInsetEnd = getContentInsetEnd();
+        final int contentInsetEnd = getCurrentContentInsetEnd();
         width += Math.max(contentInsetEnd, menuWidth);
         collapsingMargins[marginEndIndex] = Math.max(0, contentInsetEnd - menuWidth);
 
@@ -1543,10 +1708,12 @@ public class Toolbar extends ViewGroup {
             }
         }
 
-        collapsingMargins[0] = Math.max(0, getContentInsetLeft() - left);
-        collapsingMargins[1] = Math.max(0, getContentInsetRight() - (width - paddingRight - right));
-        left = Math.max(left, getContentInsetLeft());
-        right = Math.min(right, width - paddingRight - getContentInsetRight());
+        final int contentInsetLeft = getCurrentContentInsetLeft();
+        final int contentInsetRight = getCurrentContentInsetRight();
+        collapsingMargins[0] = Math.max(0, contentInsetLeft - left);
+        collapsingMargins[1] = Math.max(0, contentInsetRight - (width - paddingRight - right));
+        left = Math.max(left, contentInsetLeft);
+        right = Math.min(right, width - paddingRight - contentInsetRight);
 
         if (shouldLayout(mExpandedActionView)) {
             if (isRtl) {
