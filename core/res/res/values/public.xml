@@ -2710,6 +2710,7 @@
     <public type="attr" name="popupEnterTransition" />
     <public type="attr" name="popupExitTransition" />
     <public type="attr" name="minimalHeight" />
+    <public type="attr" name="forceHasOverlappingRendering" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
