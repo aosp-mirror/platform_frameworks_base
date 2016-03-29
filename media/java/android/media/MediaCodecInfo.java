@@ -2666,12 +2666,13 @@ public final class MediaCodecInfo {
         public static final int HEVCHighTierLevel62 = 0x2000000;
 
         // from OMX_VIDEO_DOLBYVISIONPROFILETYPE
-        public static final int DolbyVisionProfileDvavDer = 0x1;
-        public static final int DolbyVisionProfileDvavDen = 0x2;
-        public static final int DolbyVisionProfileDvheDer = 0x3;
-        public static final int DolbyVisionProfileDvheDen = 0x4;
-        public static final int DolbyVisionProfileDvheDtr = 0x5;
-        public static final int DolbyVisionProfileDvheStn = 0x6;
+        public static final int DolbyVisionProfileDvavPer = 0x1;
+        public static final int DolbyVisionProfileDvavPen = 0x2;
+        public static final int DolbyVisionProfileDvheDer = 0x4;
+        public static final int DolbyVisionProfileDvheDen = 0x8;
+        public static final int DolbyVisionProfileDvheDtr = 0x10;
+        public static final int DolbyVisionProfileDvheStn = 0x20;
+        public static final int DolbyVisionProfileDvheDth = 0x40;
 
         // from OMX_VIDEO_DOLBYVISIONLEVELTYPE
         public static final int DolbyVisionLevelHd24    = 0x1;
