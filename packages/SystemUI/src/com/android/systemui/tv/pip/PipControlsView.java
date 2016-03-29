@@ -143,7 +143,9 @@ public class PipControlsView extends LinearLayout implements PipManager.Listener
             @Override
             public void onClick(View v) {
                 mPipManager.closePip();
-                mListener.onClosed();
+                if (mListener != null) {
+                    mListener.onClosed();
+                }
             }
         });
         mCloseButtonView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
