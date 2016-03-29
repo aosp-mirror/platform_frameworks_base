@@ -19,6 +19,9 @@ package android.net.metrics;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * {@hide}
+ */
 public class IpReachabilityMonitorMessageEvent extends IpConnectivityEvent
     implements Parcelable {
     public static final String TAG = "IpReachabilityMonitorMessageEvent";
