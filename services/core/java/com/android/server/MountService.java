@@ -165,6 +165,7 @@ class MountService extends IMountService.Stub
         public void onStart() {
             mMountService = new MountService(getContext());
             publishBinderService("mount", mMountService);
+            mMountService.start();
         }
 
         @Override
@@ -430,8 +431,12 @@ class MountService extends IMountService.Stub
         = { "password", "default", "pattern", "pin" };
 
     private final Context mContext;
+
     private final NativeDaemonConnector mConnector;
     private final NativeDaemonConnector mCryptConnector;
+
+    private final Thread mConnectorThread;
+    private final Thread mCryptConnectorThread;
 
     private volatile boolean mSystemReady = false;
     private volatile boolean mBootCompleted = false;
@@ -1494,17 +1499,13 @@ class MountService extends IMountService.Stub
                 null);
         mConnector.setDebug(true);
         mConnector.setWarnIfHeld(mLock);
-
-        Thread thread = new Thread(mConnector, VOLD_TAG);
-        thread.start();
+        mConnectorThread = new Thread(mConnector, VOLD_TAG);
 
         // Reuse parameters from first connector since they are tested and safe
         mCryptConnector = new NativeDaemonConnector(this, "cryptd",
                 MAX_CONTAINERS * 2, CRYPTD_TAG, 25, null);
         mCryptConnector.setDebug(true);
-
-        Thread crypt_thread = new Thread(mCryptConnector, CRYPTD_TAG);
-        crypt_thread.start();
+        mCryptConnectorThread = new Thread(mCryptConnector, CRYPTD_TAG);
 
         final IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_ADDED);
@@ -1519,6 +1520,11 @@ class MountService extends IMountService.Stub
         if (WATCHDOG_ENABLE) {
             Watchdog.getInstance().addMonitor(this);
         }
+    }
+
+    private void start() {
+        mConnectorThread.start();
+        mCryptConnectorThread.start();
     }
 
     private void systemReady() {
