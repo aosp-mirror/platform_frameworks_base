@@ -236,6 +236,21 @@ void LayerBuilder::deferLayerClear(const Rect& rect) {
     mClearRects.push_back(rect);
 }
 
+void LayerBuilder::onDeferOp(LinearAllocator& allocator, const BakedOpState* bakedState) {
+    if (bakedState->op->opId != RecordedOpId::CopyToLayerOp) {
+        // First non-CopyToLayer, so stop stashing up layer clears for unclipped save layers,
+        // and issue them together in one draw.
+        flushLayerClears(allocator);
+
+        if (CC_UNLIKELY(activeUnclippedSaveLayers.empty()
+                && bakedState->computedState.opaqueOverClippedBounds
+                && bakedState->computedState.clippedBounds.contains(repaintRect))) {
+            // discard all deferred drawing ops, since new one will occlude them
+            clear();
+        }
+    }
+}
+
 void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
     if (CC_UNLIKELY(!mClearRects.empty())) {
         const int vertCount = mClearRects.size() * 4;
@@ -270,11 +285,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
 
 void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator,
         BakedOpState* op, batchid_t batchId) {
-    if (batchId != OpBatchType::CopyToLayer) {
-        // if first op after one or more unclipped saveLayers, flush the layer clears
-        flushLayerClears(allocator);
-    }
-
+    onDeferOp(allocator, op);
     OpBatch* targetBatch = mBatchLookup[batchId];
 
     size_t insertBatchIndex = mBatches.size();
@@ -295,10 +306,7 @@ void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator,
 
 void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
         BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
-    if (batchId != OpBatchType::CopyToLayer) {
-        // if first op after one or more unclipped saveLayers, flush the layer clears
-        flushLayerClears(allocator);
-    }
+    onDeferOp(allocator, op);
     MergingOpBatch* targetBatch = nullptr;
 
     // Try to merge with any existing batch with same mergeId
@@ -345,6 +353,14 @@ void LayerBuilder::replayBakedOpsImpl(void* arg,
                 unmergedReceivers[op->op->opId](arg, *op);
             }
         }
+    }
+}
+
+void LayerBuilder::clear() {
+    mBatches.clear();
+    for (int i = 0; i < OpBatchType::Count; i++) {
+        mBatchLookup[i] = nullptr;
+        mMergingBatchLookup[i].clear();
     }
 }
 

@@ -216,6 +216,80 @@ RENDERTHREAD_TEST(FrameBuilder, simpleBatching) {
             << "Expect number of ops = 2 * loop count";
 }
 
+RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_rects) {
+    class AvoidOverdrawRectsTestRenderer : public TestRendererBase {
+    public:
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(mIndex++, 0) << "Should be one rect";
+            EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds)
+                    << "Last rect should occlude others.";
+        }
+    };
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.drawRect(10, 10, 190, 190, SkPaint());
+    });
+
+    // Damage (and therefore clip) is same as last draw, subset of renderable area.
+    // This means last op occludes other contents, and they'll be rejected to avoid overdraw.
+    SkRect damageRect = SkRect::MakeLTRB(10, 10, 190, 190);
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, damageRect, 200, 200,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
+
+    EXPECT_EQ(3u, node->getDisplayList()->getOps().size())
+            << "Recording must not have rejected ops, in order for this test to be valid";
+
+    AvoidOverdrawRectsTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex()) << "Expect exactly one op";
+}
+
+RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
+    static SkBitmap opaqueBitmap = TestUtils::createSkBitmap(50, 50,
+            SkColorType::kRGB_565_SkColorType);
+    static SkBitmap transpBitmap = TestUtils::createSkBitmap(50, 50,
+            SkColorType::kAlpha_8_SkColorType);
+    class AvoidOverdrawBitmapsTestRenderer : public TestRendererBase {
+    public:
+        void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+            EXPECT_LT(mIndex++, 2) << "Should be two bitmaps";
+            switch(mIndex++) {
+            case 0:
+                EXPECT_EQ(opaqueBitmap.pixelRef(), op.bitmap->pixelRef());
+                break;
+            case 1:
+                EXPECT_EQ(transpBitmap.pixelRef(), op.bitmap->pixelRef());
+                break;
+            default:
+                ADD_FAILURE() << "Only two ops expected.";
+            }
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 50, 50,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.drawRect(0, 0, 50, 50, SkPaint());
+        canvas.drawRect(0, 0, 50, 50, SkPaint());
+        canvas.drawBitmap(transpBitmap, 0, 0, nullptr);
+
+        // only the below draws should remain, since they're
+        canvas.drawBitmap(opaqueBitmap, 0, 0, nullptr);
+        canvas.drawBitmap(transpBitmap, 0, 0, nullptr);
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(50, 50), 50, 50,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
+
+    EXPECT_EQ(5u, node->getDisplayList()->getOps().size())
+            << "Recording must not have rejected ops, in order for this test to be valid";
+
+    AvoidOverdrawBitmapsTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex()) << "Expect exactly one op";
+}
+
 RENDERTHREAD_TEST(FrameBuilder, clippedMerging) {
     class ClippedMergingTestRenderer : public TestRendererBase {
     public:

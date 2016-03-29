@@ -93,6 +93,7 @@ public:
     Rect clippedBounds;
     int clipSideFlags = 0;
     const SkPath* localProjectionPathMask = nullptr;
+    bool opaqueOverClippedBounds = false;
 };
 
 /**
@@ -103,23 +104,10 @@ public:
 class BakedOpState {
 public:
     static BakedOpState* tryConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp) {
-        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-        BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
-                allocator, snapshot, recordedOp, false);
-        if (bakedState->computedState.clippedBounds.isEmpty()) {
-            // bounds are empty, so op is rejected
-            allocator.rewindIfLastAlloc(bakedState);
-            return nullptr;
-        }
-        return bakedState;
-    }
+            Snapshot& snapshot, const RecordedOp& recordedOp);
 
     static BakedOpState* tryConstructUnbounded(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp) {
-        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-        return allocator.create_trivial<BakedOpState>(allocator, snapshot, recordedOp);
-    }
+            Snapshot& snapshot, const RecordedOp& recordedOp);
 
     enum class StrokeBehavior {
         // stroking is forced, regardless of style on paint (such as for lines)
@@ -129,35 +117,16 @@ public:
     };
 
     static BakedOpState* tryStrokeableOpConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior) {
-        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-        bool expandForStroke = (strokeBehavior == StrokeBehavior::StyleDefined)
-                ? (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style)
-                : true;
-
-        BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
-                allocator, snapshot, recordedOp, expandForStroke);
-        if (bakedState->computedState.clippedBounds.isEmpty()) {
-            // bounds are empty, so op is rejected
-            // NOTE: this won't succeed if a clip was allocated
-            allocator.rewindIfLastAlloc(bakedState);
-            return nullptr;
-        }
-        return bakedState;
-    }
+            Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior);
 
     static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator,
-            Snapshot& snapshot, const ShadowOp* shadowOpPtr) {
-        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-
-        // clip isn't empty, so construct the op
-        return allocator.create_trivial<BakedOpState>(allocator, snapshot, shadowOpPtr);
-    }
+            Snapshot& snapshot, const ShadowOp* shadowOpPtr);
 
     static BakedOpState* directConstruct(LinearAllocator& allocator,
-            const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp) {
-        return allocator.create_trivial<BakedOpState>(clip, dstRect, recordedOp);
-    }
+            const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp);
+
+    // Set opaqueOverClippedBounds. If this method isn't called, the op is assumed translucent.
+    void setupOpacity(const SkPaint* paint);
 
     // computed state:
     ResolvedRenderState computedState;
