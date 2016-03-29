@@ -693,15 +693,13 @@ class WindowSurfacePlacer {
                     // currently animating... let's do something.
                     final int left = w.mFrame.left;
                     final int top = w.mFrame.top;
-                    final boolean adjustedForMinimizedDockedStack = w.getTask() != null &&
-                            w.getTask().mStack.isAdjustedForMinimizedDockedStack();
+                    final boolean adjustedForMinimizedDockOrIme = task != null
+                                && (task.mStack.isAdjustedForMinimizedDockedStack()
+                                    || task.mStack.isAdjustedForIme());
                     if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                            && !w.isDragResizing() && !adjustedForMinimizedDockedStack
+                            && !w.isDragResizing() && !adjustedForMinimizedDockOrIme
                             && (task == null || !w.getTask().mStack.getFreezeMovementAnimations())
                             && !w.mWinAnimator.mLastHidden) {
-                        winAnimator.setMoveAnimation(left, top);
-                    } else if (w.mAttrs.type  == TYPE_DOCK_DIVIDER &&
-                            displayContent.getDockedDividerController().isAdjustingForIme()) {
                         winAnimator.setMoveAnimation(left, top);
                     }
 
@@ -818,8 +816,6 @@ class WindowSurfacePlacer {
 
                 mService.updateResizingWindows(w);
             }
-
-            displayContent.getDockedDividerController().setAdjustingForIme(false);
 
             mService.mDisplayManagerInternal.setDisplayProperties(displayId,
                     mDisplayHasContent,
