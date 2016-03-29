@@ -356,8 +356,6 @@ void Font::measure(const SkPaint* paint, const glyph_t* glyphs,
 }
 
 void Font::precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs) {
-    ATRACE_NAME("Precache Glyphs");
-
     if (numGlyphs == 0 || glyphs == nullptr) {
         return;
     }
