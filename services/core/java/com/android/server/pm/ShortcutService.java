@@ -31,7 +31,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
@@ -78,6 +77,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import libcore.io.IoUtils;
 
@@ -104,14 +104,9 @@ import java.util.function.Predicate;
  *
  * - Default launcher check does take a few ms.  Worth caching.
  *
- * - Allow non-default launcher to start pinned shortcuts. (but not dynamic.)
+ * - Don't backup launcher from different profile.
  *
- * - Extract the user/package/launcher classes to their own files.  Maybe rename so they all have
- *   the same "Shortcut" prefix.
- *
- * - Listen to PACKAGE_*, remove orphan info, update timestamp for icon res
- *   -> Need to scan all packages when a user starts too.
- *   -> Clear data -> remove all dynamic?  but not the pinned?
+ * - Clear data -> remove all dynamic?  but not the pinned?
  *
  * - Scan and remove orphan bitmaps (just in case).
  *
@@ -455,16 +450,24 @@ public class ShortcutService extends IShortcutService.Stub {
         return (int) parseLongAttribute(parser, attribute);
     }
 
+    static int parseIntAttribute(XmlPullParser parser, String attribute, int def) {
+        return (int) parseLongAttribute(parser, attribute, def);
+    }
+
     static long parseLongAttribute(XmlPullParser parser, String attribute) {
+        return parseLongAttribute(parser, attribute, 0);
+    }
+
+    static long parseLongAttribute(XmlPullParser parser, String attribute, long def) {
         final String value = parseStringAttribute(parser, attribute);
         if (TextUtils.isEmpty(value)) {
-            return 0;
+            return def;
         }
         try {
             return Long.parseLong(value);
         } catch (NumberFormatException e) {
             Slog.e(TAG, "Error parsing long " + value);
-            return 0;
+            return def;
         }
     }
 
@@ -825,8 +828,8 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     @NonNull
     ShortcutLauncher getLauncherShortcuts(
-            @NonNull String packageName, @UserIdInt int userId) {
-        return getUserShortcutsLocked(userId).getLauncherShortcuts(packageName);
+            @NonNull String packageName, @UserIdInt int userId, @UserIdInt int launcherUserId) {
+        return getUserShortcutsLocked(userId).getLauncherShortcuts(packageName, launcherUserId);
     }
 
     // === Caller validation ===
@@ -1324,8 +1327,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
-        getPackageShortcutsLocked(packageName, userId).findAll(this, ret, query, cloneFlags,
-                /* callingLauncher= */ null);
+        getPackageShortcutsLocked(packageName, userId).findAll(this, ret, query, cloneFlags);
 
         return new ParceledListSlice<>(ret);
     }
@@ -1463,22 +1465,26 @@ public class ShortcutService extends IShortcutService.Stub {
     // === House keeping ===
 
     @VisibleForTesting
-    void cleanUpPackageLocked(String packageName, int userId) {
-        final boolean wasUserLoaded = isUserLoadedLocked(userId);
+    void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId) {
+        final boolean wasUserLoaded = isUserLoadedLocked(owningUserId);
 
-        final ShortcutUser mUser = getUserShortcutsLocked(userId);
+        final ShortcutUser mUser = getUserShortcutsLocked(owningUserId);
         boolean doNotify = false;
 
         // First, remove the package from the package list (if the package is a publisher).
-        if (mUser.getPackages().remove(packageName) != null) {
-            doNotify = true;
+        if (packageUserId == owningUserId) {
+            if (mUser.getPackages().remove(packageName) != null) {
+                doNotify = true;
+            }
         }
+
         // Also remove from the launcher list (if the package is a launcher).
-        mUser.getLaunchers().remove(packageName);
+        mUser.removeLauncher(packageUserId, packageName);
 
         // Then remove pinned shortcuts from all launchers.
-        for (int i = mUser.getLaunchers().size() - 1; i >= 0; i--) {
-            mUser.getLaunchers().valueAt(i).cleanUpPackage(packageName);
+        final ArrayMap<PackageWithUser, ShortcutLauncher> launchers = mUser.getAllLaunchers();
+        for (int i = launchers.size() - 1; i >= 0; i--) {
+            launchers.valueAt(i).cleanUpPackage(packageName);
         }
         // Now there may be orphan shortcuts because we removed pinned shortucts at the previous
         // step.  Remove them too.
@@ -1487,17 +1493,17 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         // Remove the package info too.
-        mUser.getPackageInfos().remove(packageName);
+        mUser.removePackageInfo(packageUserId, packageName);
 
-        scheduleSaveUser(userId);
+        scheduleSaveUser(owningUserId);
 
         if (doNotify) {
-            notifyListeners(packageName, userId);
+            notifyListeners(packageName, owningUserId);
         }
 
         if (!wasUserLoaded) {
             // Note this will execute the scheduled save.
-            unloadUserLocked(userId);
+            unloadUserLocked(owningUserId);
         }
     }
 
@@ -1506,7 +1512,7 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     private class LocalService extends ShortcutServiceInternal {
         @Override
-        public List<ShortcutInfo> getShortcuts(
+        public List<ShortcutInfo> getShortcuts(int launcherUserId,
                 @NonNull String callingPackage, long changedSince,
                 @Nullable String packageName, @Nullable ComponentName componentName,
                 int queryFlags, int userId) {
@@ -1518,14 +1524,14 @@ public class ShortcutService extends IShortcutService.Stub {
 
             synchronized (mLock) {
                 if (packageName != null) {
-                    getShortcutsInnerLocked(
+                    getShortcutsInnerLocked(launcherUserId,
                             callingPackage, packageName, changedSince,
                             componentName, queryFlags, userId, ret, cloneFlag);
                 } else {
                     final ArrayMap<String, ShortcutPackage> packages =
                             getUserShortcutsLocked(userId).getPackages();
                     for (int i = packages.size() - 1; i >= 0; i--) {
-                        getShortcutsInnerLocked(
+                        getShortcutsInnerLocked(launcherUserId,
                                 callingPackage, packages.keyAt(i), changedSince,
                                 componentName, queryFlags, userId, ret, cloneFlag);
                     }
@@ -1534,7 +1540,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return ret;
         }
 
-        private void getShortcutsInnerLocked(@NonNull String callingPackage,
+        private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,
                 @Nullable String packageName,long changedSince,
                 @Nullable ComponentName componentName, int queryFlags,
                 int userId, ArrayList<ShortcutInfo> ret, int cloneFlag) {
@@ -1554,11 +1560,11 @@ public class ShortcutService extends IShortcutService.Stub {
                                 ((queryFlags & ShortcutQuery.FLAG_GET_PINNED) != 0)
                                         && si.isPinned();
                         return matchDynamic || matchPinned;
-                    }, cloneFlag, callingPackage);
+                    }, cloneFlag, callingPackage, launcherUserId);
         }
 
         @Override
-        public List<ShortcutInfo> getShortcutInfo(
+        public List<ShortcutInfo> getShortcutInfo(int launcherUserId,
                 @NonNull String callingPackage,
                 @NonNull String packageName, @Nullable List<String> ids, int userId) {
             // Calling permission must be checked by LauncherAppsImpl.
@@ -1570,13 +1576,41 @@ public class ShortcutService extends IShortcutService.Stub {
                 getPackageShortcutsLocked(packageName, userId).findAll(
                         ShortcutService.this, ret,
                         (ShortcutInfo si) -> idSet.contains(si.getId()),
-                        ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER, callingPackage);
+                        ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER, callingPackage, launcherUserId);
             }
             return ret;
         }
 
         @Override
-        public void pinShortcuts(@NonNull String callingPackage, @NonNull String packageName,
+        public boolean isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId) {
+            Preconditions.checkStringNotEmpty(packageName, "packageName");
+            Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
+
+            synchronized (mLock) {
+                final ShortcutInfo si = getShortcutInfoLocked(
+                        launcherUserId, callingPackage, packageName, shortcutId, userId);
+                return si != null && si.isPinned();
+            }
+        }
+
+        public ShortcutInfo getShortcutInfoLocked(
+                int launcherUserId, @NonNull String callingPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId) {
+            Preconditions.checkStringNotEmpty(packageName, "packageName");
+            Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
+
+            final ArrayList<ShortcutInfo> list = new ArrayList<>(1);
+            getPackageShortcutsLocked(packageName, userId).findAll(
+                    ShortcutService.this, list,
+                    (ShortcutInfo si) -> shortcutId.equals(si.getId()),
+                    /* clone flags=*/ 0, callingPackage, launcherUserId);
+            return list.size() == 0 ? null : list.get(0);
+        }
+
+        @Override
+        public void pinShortcuts(int launcherUserId,
+                @NonNull String callingPackage, @NonNull String packageName,
                 @NonNull List<String> shortcutIds, int userId) {
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName");
@@ -1584,26 +1618,31 @@ public class ShortcutService extends IShortcutService.Stub {
 
             synchronized (mLock) {
                 getUserShortcutsLocked(userId).ensurePackageInfo(
-                        ShortcutService.this, callingPackage, userId);
+                        ShortcutService.this, callingPackage, launcherUserId);
 
-                getLauncherShortcuts(callingPackage, userId).pinShortcuts(
+                getLauncherShortcuts(callingPackage, userId, launcherUserId).pinShortcuts(
                         ShortcutService.this, packageName, shortcutIds);
             }
             userPackageChanged(packageName, userId);
         }
 
         @Override
-        public Intent createShortcutIntent(@NonNull String callingPackage,
+        public Intent createShortcutIntent(int launcherUserId,
+                @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName can't be empty");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId can't be empty");
 
             synchronized (mLock) {
-                final ShortcutInfo fullShortcut =
-                        getPackageShortcutsLocked(packageName, userId)
-                        .findShortcutById(shortcutId);
-                return fullShortcut == null ? null : fullShortcut.getIntent();
+                // Make sure the shortcut is actually visible to the launcher.
+                final ShortcutInfo si = getShortcutInfoLocked(
+                        launcherUserId, callingPackage, packageName, shortcutId, userId);
+                // "si == null" should suffice here, but check the flags too just to make sure.
+                if (si == null || !(si.isDynamic() || si.isPinned())) {
+                    return null;
+                }
+                return si.getIntent();
             }
         }
 
@@ -1615,7 +1654,8 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public int getShortcutIconResId(@NonNull String callingPackage,
+        public int getShortcutIconResId(int launcherUserId,
+                @NonNull String callingPackage,
                 @NonNull ShortcutInfo shortcut, int userId) {
             Preconditions.checkNotNull(shortcut, "shortcut");
 
@@ -1628,7 +1668,8 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public ParcelFileDescriptor getShortcutIconFd(@NonNull String callingPackage,
+        public ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
+                @NonNull String callingPackage,
                 @NonNull ShortcutInfo shortcutIn, int userId) {
             Preconditions.checkNotNull(shortcutIn, "shortcut");
 
@@ -1654,8 +1695,9 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
-            return ShortcutService.this.hasShortcutHostPermission(callingPackage, userId);
+        public boolean hasShortcutHostPermission(int launcherUserId,
+                @NonNull String callingPackage) {
+            return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId);
         }
     }
 
@@ -1684,28 +1726,31 @@ public class ShortcutService extends IShortcutService.Stub {
      * Called when a user is unlocked.  Check all known packages still exist, and otherwise
      * perform cleanup.
      */
-    private void cleanupGonePackages(@UserIdInt int userId) {
+    @VisibleForTesting
+    void cleanupGonePackages(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "cleanupGonePackages() userId=" + userId);
         }
-        ArrayList<String> gonePackages = null;
+        ArrayList<PackageWithUser> gonePackages = null;
 
-        final ShortcutUser user = getUserShortcutsLocked(userId);
-        final ArrayMap<String, ShortcutPackageInfo> infos = user.getPackageInfos();
-        for (int i = infos.size() -1; i >= 0; i--) {
-            final ShortcutPackageInfo info = infos.valueAt(i);
-            if (info.isShadow()) {
-                continue;
+        synchronized (mLock) {
+            final ShortcutUser user = getUserShortcutsLocked(userId);
+            final ArrayMap<PackageWithUser, ShortcutPackageInfo> infos = user.getAllPackageInfos();
+            for (int i = infos.size() -1; i >= 0; i--) {
+                final ShortcutPackageInfo info = infos.valueAt(i);
+                if (info.isShadow()) {
+                    continue;
+                }
+                if (isPackageInstalled(info.getPackageName(), info.getUserId())) {
+                    continue;
+                }
+                gonePackages = ArrayUtils.add(gonePackages,
+                        PackageWithUser.of(info.getUserId(), info.getPackageName()));
             }
-            if (isPackageInstalled(info.getPackageName(), userId)) {
-                continue;
-            }
-            gonePackages = ArrayUtils.add(gonePackages, info.getPackageName());
-        }
-        if (gonePackages != null) {
-            synchronized (mLock) {
+            if (gonePackages != null) {
                 for (int i = gonePackages.size() - 1; i >= 0; i--) {
-                    cleanUpPackageLocked(gonePackages.get(i), userId);
+                    final PackageWithUser pu = gonePackages.get(i);
+                    cleanUpPackageLocked(pu.packageName, userId, pu.userId);
                 }
             }
         }
@@ -1716,9 +1761,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("handlePackageAdded: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
-            final ArrayMap<String, ShortcutPackageInfo> infos =
-                    getUserShortcutsLocked(userId).getPackageInfos();
-            final ShortcutPackageInfo existing = infos.get(packageName);
+            final ShortcutPackageInfo existing = getUserShortcutsLocked(userId)
+                    .getPackageInfo(userId, packageName);
 
             if (existing != null && existing.isShadow()) {
                 Slog.w(TAG, "handlePackageAdded: TODO Restore not implemented");
@@ -1732,7 +1776,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         synchronized (mLock) {
             final ShortcutPackageInfo spi =
-                    getUserShortcutsLocked(userId).getPackageInfos().get(packageName);
+                    getUserShortcutsLocked(userId).getPackageInfo(userId, packageName);
             if (spi != null) {
                 spi.refreshAndSave(this, userId);
             }
@@ -1744,7 +1788,7 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("handlePackageRemoved: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
-            cleanUpPackageLocked(packageName, userId);
+            cleanUpPackageLocked(packageName, userId, userId);
         }
     }
 
@@ -2161,11 +2205,16 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     ShortcutPackageInfo getPackageInfoForTest(String packageName, int userId) {
+        return getPackageInfoForTest(packageName, userId, userId);
+    }
+
+    @VisibleForTesting
+    ShortcutPackageInfo getPackageInfoForTest(String packageName, int userId, int packageUserId) {
         synchronized (mLock) {
             final ShortcutUser user = mUsers.get(userId);
             if (user == null) return null;
 
-            return user.getPackageInfos().get(packageName);
+            return user.getPackageInfo(packageUserId, packageName);
         }
     }
 }
