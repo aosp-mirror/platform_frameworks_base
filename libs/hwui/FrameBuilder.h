@@ -137,12 +137,14 @@ public:
         }
 
         GL_CHECKPOINT(MODERATE);
-        const LayerBuilder& fbo0 = *(mLayerBuilders[0]);
-        renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
-        GL_CHECKPOINT(MODERATE);
-        fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
-        GL_CHECKPOINT(MODERATE);
-        renderer.endFrame(fbo0.repaintRect);
+        if (CC_LIKELY(mDrawFbo0)) {
+            const LayerBuilder& fbo0 = *(mLayerBuilders[0]);
+            renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
+            GL_CHECKPOINT(MODERATE);
+            fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
+            GL_CHECKPOINT(MODERATE);
+            renderer.endFrame(fbo0.repaintRect);
+        }
     }
 
     void dump() const {
@@ -239,6 +241,8 @@ private:
 
     // contains single-frame objects, such as BakedOpStates, LayerBuilders, Batches
     LinearAllocator mAllocator;
+
+    const bool mDrawFbo0;
 };
 
 }; // namespace uirenderer
