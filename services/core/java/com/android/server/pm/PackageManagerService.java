@@ -1981,7 +1981,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                         try {
                             int dexoptNeeded = DexFile.getDexOptNeeded(lib, dexCodeInstructionSet,
-                                    DexFile.COMPILATION_TYPE_FULL);
+                                    "speed", false);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                                 alreadyDexOpted.add(lib);
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
@@ -2032,7 +2032,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         try {
                             int dexoptNeeded = DexFile.getDexOptNeeded(path, dexCodeInstructionSet,
-                                    DexFile.COMPILATION_TYPE_FULL);
+                                    "speed", false);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                                 mInstaller.dexopt(path, Process.SYSTEM_UID, dexCodeInstructionSet,
                                         dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/);

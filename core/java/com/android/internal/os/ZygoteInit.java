@@ -484,7 +484,7 @@ public class ZygoteInit {
         try {
             for (String classPathElement : classPathElements) {
                 final int dexoptNeeded = DexFile.getDexOptNeeded(
-                        classPathElement, instructionSet, DexFile.COMPILATION_TYPE_FULL);
+                        classPathElement, instructionSet, "speed", false /* newProfile */);
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                     installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
                             dexoptNeeded, 0 /*dexFlags*/);
