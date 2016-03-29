@@ -240,7 +240,10 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
             mTreeObserver = null;
         }
         mShownAnchorView.removeOnAttachStateChangeListener(mAttachStateChangeListener);
-        mOnDismissListener.onDismiss();
+
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
+        }
     }
 
     @Override
@@ -264,6 +267,13 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
                     mShownAnchorView, mOverflowOnly, mPopupStyleAttr, mPopupStyleRes);
             subPopup.setPresenterCallback(mPresenterCallback);
             subPopup.setForceShowIcon(mAdapter.getForceShowIcon());
+
+            // Pass responsibility for handling onDismiss to the submenu.
+            subPopup.setOnDismissListener(mOnDismissListener);
+            mOnDismissListener = null;
+
+            // Close this menu popup to make room for the submenu popup.
+            dismiss();
 
             // Show the new sub-menu popup at the same location as this popup.
             if (subPopup.tryShow(mXOffset, mYOffset)) {
