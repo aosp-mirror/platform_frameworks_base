@@ -43,4 +43,9 @@ public class ApfCapabilities {
         this.maximumApfProgramSize = maximumApfProgramSize;
         this.apfPacketFormat = apfPacketFormat;
     }
+
+    public String toString() {
+        return String.format("%s{version: %d, maxSize: %d format: %d}", getClass().getSimpleName(),
+                apfVersionSupported, maximumApfProgramSize, apfPacketFormat);
+    }
 }
