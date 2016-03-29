@@ -103,7 +103,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
 
     // Brightness animation ramp rate in brightness units per second.
-    private static final int BRIGHTNESS_RAMP_RATE_FAST = 200;
     private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
 
     private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
@@ -244,6 +243,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mAppliedDimming;
     private boolean mAppliedLowPower;
 
+    // Brightness ramp rate fast.
+    private final int mBrightnessRampRateFast;
+
     // The controller for the automatic brightness level.
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
@@ -302,6 +304,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
+
+        mBrightnessRampRateFast = resources.getInteger(
+                com.android.internal.R.integer.config_brightness_ramp_rate_fast);
 
         int lightSensorRate = resources.getInteger(
                 com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
@@ -686,7 +691,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (!mPendingScreenOff) {
             if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
                 animateScreenBrightness(brightness,
-                        slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+                        slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : mBrightnessRampRateFast);
             } else {
                 animateScreenBrightness(brightness, 0);
             }
