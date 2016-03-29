@@ -35,11 +35,11 @@ public class SegmentedButtons extends LinearLayout {
     private static final Typeface MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
 
     private final Context mContext;
-    private final LayoutInflater mInflater;
+    protected final LayoutInflater mInflater;
     private final SpTexts mSpTexts;
 
     private Callback mCallback;
-    private Object mSelectedValue;
+    protected Object mSelectedValue;
 
     public SegmentedButtons(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,13 +65,21 @@ public class SegmentedButtons extends LinearLayout {
             final Object tag = c.getTag();
             final boolean selected = Objects.equals(mSelectedValue, tag);
             c.setSelected(selected);
-            c.setTypeface(selected ? MEDIUM : REGULAR);
+            setSelectedStyle(c, selected);
         }
         fireOnSelected(fromClick);
     }
 
+    protected void setSelectedStyle(TextView textView, boolean selected) {
+        textView.setTypeface(selected ? MEDIUM : REGULAR);
+    }
+
+    public Button inflateButton() {
+        return (Button) mInflater.inflate(R.layout.segmented_button, this, false);
+    }
+
     public void addButton(int labelResId, int contentDescriptionResId, Object value) {
-        final Button b = (Button) mInflater.inflate(R.layout.segmented_button, this, false);
+        final Button b = inflateButton();
         b.setTag(LABEL_RES_KEY, labelResId);
         b.setText(labelResId);
         b.setContentDescription(getResources().getString(contentDescriptionResId));
