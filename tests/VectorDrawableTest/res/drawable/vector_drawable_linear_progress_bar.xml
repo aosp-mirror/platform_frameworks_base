@@ -17,7 +17,7 @@
     android:height="4dp"
     android:viewportHeight="4"
     android:viewportWidth="360"
-    android:width="360dp" >
+    android:width="36dp" >
 
     <group
         android:name="linear_indeterminate"
