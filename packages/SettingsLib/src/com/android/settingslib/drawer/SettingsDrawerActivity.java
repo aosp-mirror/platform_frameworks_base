@@ -155,8 +155,10 @@ public class SettingsDrawerActivity extends Activity {
             mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
             updateDrawer();
         } else {
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            mDrawerLayout = null;
+            if (mDrawerLayout != null) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                mDrawerLayout = null;
+            }
         }
     }
 
