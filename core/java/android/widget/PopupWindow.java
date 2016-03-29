@@ -173,9 +173,6 @@ public class PopupWindow {
     private int mHeight = LayoutParams.WRAP_CONTENT;
     private int mLastHeight;
 
-    private int mPopupWidth;
-    private int mPopupHeight;
-
     private float mElevation;
 
     private Drawable mBackground;
@@ -1298,8 +1295,6 @@ public class PopupWindow {
 
         mPopupViewInitialLayoutDirectionInherited =
                 (mContentView.getRawLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT);
-        mPopupWidth = p.width;
-        mPopupHeight = p.height;
     }
 
     /**
@@ -2006,7 +2001,7 @@ public class PopupWindow {
      * @param height the new height, must be >= 0 or -1 to ignore
      */
     public void update(View anchor, int width, int height) {
-        update(anchor, false, 0, 0, true, width, height);
+        update(anchor, false, 0, 0, width, height);
     }
 
     /**
@@ -2026,11 +2021,11 @@ public class PopupWindow {
      * @param height the new height, must be >= 0 or -1 to ignore
      */
     public void update(View anchor, int xoff, int yoff, int width, int height) {
-        update(anchor, true, xoff, yoff, true, width, height);
+        update(anchor, true, xoff, yoff, width, height);
     }
 
     private void update(View anchor, boolean updateLocation, int xoff, int yoff,
-            boolean updateDimension, int width, int height) {
+            int width, int height) {
 
         if (!isShowing() || mContentView == null) {
             return;
@@ -2055,13 +2050,13 @@ public class PopupWindow {
         final int oldX = p.x;
         final int oldY = p.y;
 
-        if (updateDimension) {
-            if (width == -1) {
-                width = mPopupWidth;
-            }
-            if (height == -1) {
-                height = mPopupHeight;
-            }
+        // If an explicit width/height has not specified, use the most recent
+        // explicitly specified value (either from setWidth/Height or update).
+        if (width == -1) {
+            width = mWidth;
+        }
+        if (height == -1) {
+            height = mHeight;
         }
 
         final boolean aboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
