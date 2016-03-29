@@ -18,6 +18,7 @@ package android.printservice;
 
 import android.annotation.NonNull;
 import android.content.pm.ParceledListSlice;
+import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
@@ -412,11 +413,13 @@ public abstract class PrinterDiscoverySession {
      * service.
      *
      * @param printerId The printer to icon belongs to.
+     * @param cancellationSignal Signal used to cancel the request
      * @param callback Callback for returning the icon to the print spooler.
      *
      * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
      */
     public void onRequestCustomPrinterIcon(@NonNull PrinterId printerId,
+            @NonNull CancellationSignal cancellationSignal,
             @NonNull CustomPrinterIconCallback callback) {
     }
 
@@ -533,7 +536,7 @@ public abstract class PrinterDiscoverySession {
         if (!mIsDestroyed && mObserver != null) {
             CustomPrinterIconCallback callback = new CustomPrinterIconCallback(printerId,
                     mObserver);
-            onRequestCustomPrinterIcon(printerId, callback);
+            onRequestCustomPrinterIcon(printerId, new CancellationSignal(), callback);
         }
     }
 
