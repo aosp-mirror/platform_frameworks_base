@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.res.TypedArray;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -42,6 +43,7 @@ public class SuggestionsPopupWindowTest extends ActivityInstrumentationTestCase2
     }
 
     @SmallTest
+    @Suppress
     public void testTextAppearanceInSuggestionsPopup() {
         final Activity activity = getActivity();
 
