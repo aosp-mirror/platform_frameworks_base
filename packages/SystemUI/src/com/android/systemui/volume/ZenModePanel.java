@@ -86,7 +86,7 @@ public class ZenModePanel extends LinearLayout {
             = new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
 
     private final Context mContext;
-    private final LayoutInflater mInflater;
+    protected final LayoutInflater mInflater;
     private final H mHandler = new H();
     private final ZenPrefs mPrefs;
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
@@ -100,7 +100,7 @@ public class ZenModePanel extends LinearLayout {
     private TextView mZenIntroductionMessage;
     private View mZenIntroductionConfirm;
     private TextView mZenIntroductionCustomize;
-    private LinearLayout mZenConditions;
+    protected LinearLayout mZenConditions;
     private TextView mZenAlarmWarning;
 
     private Callback mCallback;
@@ -304,14 +304,18 @@ public class ZenModePanel extends LinearLayout {
         }
     }
 
+    protected void addZenConditions(int count) {
+        for (int i = 0; i < count; i++) {
+            mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
+        }
+    }
+
     public void init(ZenModeController controller) {
         mController = controller;
         mCountdownConditionSupported = mController.isCountdownConditionSupported();
         final int countdownDelta = mCountdownConditionSupported ? COUNTDOWN_CONDITION_COUNT : 0;
         final int minConditions = 1 /*forever*/ + countdownDelta;
-        for (int i = 0; i < minConditions; i++) {
-            mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
-        }
+        addZenConditions(minConditions);
         mSessionZen = getSelectedZen(-1);
         handleUpdateManualRule(mController.getManualRule());
         if (DEBUG) Log.d(mTag, "init mExitCondition=" + mExitCondition);
