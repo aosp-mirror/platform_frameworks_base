@@ -938,6 +938,15 @@ public class WifiConfiguration implements Parcelable {
         private boolean mSeenInLastQualifiedNetworkSelection;
 
         /**
+         * Boolean indicating if we have ever successfully connected to this network.
+         *
+         * This value will be set to true upon a successful connection.
+         * This value will be set to false if a previous value was not stored in the config or if
+         * the credentials are updated (ex. a password change).
+         */
+        private boolean mHasEverConnected;
+
+        /**
          * set whether this network is visible in latest Qualified Network Selection
          * @param seen value set to candidate
          */
@@ -1027,7 +1036,18 @@ public class WifiConfiguration implements Parcelable {
             return QUALITY_NETWORK_SELECTION_STATUS[mStatus];
         }
 
-        private NetworkSelectionStatus() {};
+        public void setHasEverConnected(boolean value) {
+            mHasEverConnected = value;
+        }
+
+        public boolean getHasEverConnected() {
+            return mHasEverConnected;
+        }
+
+        private NetworkSelectionStatus() {
+            // previously stored configs will not have this parameter, so we default to false.
+            mHasEverConnected = false;
+        };
 
         /**
          * @param reason specific error reason
@@ -1226,6 +1246,7 @@ public class WifiConfiguration implements Parcelable {
             mNetworkSelectionBSSID = source.mNetworkSelectionBSSID;
             setConnectChoice(source.getConnectChoice());
             setConnectChoiceTimestamp(source.getConnectChoiceTimestamp());
+            setHasEverConnected(source.getHasEverConnected());
         }
 
         public void writeToParcel(Parcel dest) {
@@ -1244,6 +1265,7 @@ public class WifiConfiguration implements Parcelable {
             } else {
                 dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
             }
+            dest.writeInt(getHasEverConnected() ? 1 : 0);
         }
 
         public void readFromParcel(Parcel in) {
@@ -1262,6 +1284,7 @@ public class WifiConfiguration implements Parcelable {
                 setConnectChoice(null);
                 setConnectChoiceTimestamp(INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP);
             }
+            setHasEverConnected(in.readInt() != 0);
         }
     }
 
@@ -1389,6 +1412,8 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(" connect choice set time: ").append(mNetworkSelectionStatus
                     .getConnectChoiceTimestamp());
         }
+        sbuf.append(" hasEverConnected: ")
+                .append(mNetworkSelectionStatus.getHasEverConnected()).append("\n");
 
         if (this.numAssociation > 0) {
             sbuf.append(" numAssociation ").append(this.numAssociation).append("\n");
