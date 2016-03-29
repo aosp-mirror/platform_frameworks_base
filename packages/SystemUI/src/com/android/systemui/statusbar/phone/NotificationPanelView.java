@@ -789,8 +789,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean isInQsArea(float x, float y) {
-        return (x >= mQsContainer.getX() && x <= mQsContainer.getX() + mQsContainer.getWidth()) &&
-                (y <= mNotificationStackScroller.getBottomMostNotificationBottom()
+        return (x >= mQsDensityContainer.getX()
+                && x <= mQsDensityContainer.getX() + mQsDensityContainer.getWidth())
+                && (y <= mNotificationStackScroller.getBottomMostNotificationBottom()
                 || y <= mQsContainer.getY() + mQsContainer.getHeight());
     }
 
@@ -1337,7 +1338,8 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         View header = mKeyguardShowing ? mKeyguardStatusBar : mQsContainer.getHeader();
-        boolean onHeader = x >= header.getX() && x <= header.getX() + header.getWidth()
+        boolean onHeader = x >= mQsDensityContainer.getX()
+                && x <= mQsDensityContainer.getX() + mQsDensityContainer.getWidth()
                 && y >= header.getTop() && y <= header.getBottom();
         if (mQsExpanded) {
             return onHeader || (yDiff < 0 && isInQsArea(x, y));
