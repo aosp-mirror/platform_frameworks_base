@@ -17,7 +17,6 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -41,7 +40,7 @@ import java.util.function.Predicate;
 /**
  * Package information used by {@link ShortcutService}.
  */
-class ShortcutPackage implements ShortcutPackageItem {
+class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "package";
@@ -63,12 +62,6 @@ class ShortcutPackage implements ShortcutPackageItem {
     private static final String ATTR_ICON_RES = "icon-res";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
 
-    @UserIdInt
-    private final int mUserId;
-
-    @NonNull
-    private final String mPackageName;
-
     /**
      * All the shortcuts from the package, keyed on IDs.
      */
@@ -89,19 +82,18 @@ class ShortcutPackage implements ShortcutPackageItem {
      */
     private long mLastResetTime;
 
-    ShortcutPackage(int userId, String packageName) {
-        mUserId = userId;
-        mPackageName = packageName;
+    public ShortcutPackage(int packageUserId, String packageName, ShortcutPackageInfo spi) {
+        super(packageUserId, packageName, spi != null ? spi : ShortcutPackageInfo.newEmpty());
     }
 
-    @UserIdInt
-    public int getUserId() {
-        return mUserId;
+    public ShortcutPackage(int packageUserId, String packageName) {
+        this(packageUserId, packageName, null);
     }
 
-    @NonNull
-    public String getPackageName() {
-        return mPackageName;
+    @Override
+    public int getOwnerUserId() {
+        // For packages, always owner user == package user.
+        return getPackageUserId();
     }
 
     /**
@@ -116,7 +108,7 @@ class ShortcutPackage implements ShortcutPackageItem {
             @NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
-            s.removeIcon(mUserId, shortcut);
+            s.removeIcon(getPackageUserId(), shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED);
         }
         return shortcut;
@@ -124,7 +116,7 @@ class ShortcutPackage implements ShortcutPackageItem {
 
     void addShortcut(@NonNull ShortcutService s, @NonNull ShortcutInfo newShortcut) {
         deleteShortcut(s, newShortcut.getId());
-        s.saveIconAndFixUpShortcut(mUserId, newShortcut);
+        s.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
         mShortcuts.put(newShortcut.getId(), newShortcut);
     }
 
@@ -233,11 +225,12 @@ class ShortcutPackage implements ShortcutPackageItem {
 
         // Then, for the pinned set for each launcher, set the pin flag one by one.
         final ArrayMap<ShortcutUser.PackageWithUser, ShortcutLauncher> launchers =
-                s.getUserShortcutsLocked(mUserId).getAllLaunchers();
+                s.getUserShortcutsLocked(getPackageUserId()).getAllLaunchers();
 
         for (int l = launchers.size() - 1; l >= 0; l--) {
             final ShortcutLauncher launcherShortcuts = launchers.valueAt(l);
-            final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(mPackageName);
+            final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
+                    getPackageName());
 
             if (pinned == null || pinned.size() == 0) {
                 continue;
@@ -321,8 +314,8 @@ class ShortcutPackage implements ShortcutPackageItem {
 
         // Set of pinned shortcuts by the calling launcher.
         final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
-                : s.getLauncherShortcuts(callingLauncher, mUserId, launcherUserId)
-                    .getPinnedShortcutIds(mPackageName);
+                : s.getLauncherShortcuts(callingLauncher, getPackageUserId(), launcherUserId)
+                    .getPinnedShortcutIds(getPackageName());
 
         for (int i = 0; i < mShortcuts.size(); i++) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
@@ -362,7 +355,7 @@ class ShortcutPackage implements ShortcutPackageItem {
 
         pw.print(prefix);
         pw.print("Package: ");
-        pw.print(mPackageName);
+        pw.print(getPackageName());
         pw.println();
 
         pw.print(prefix);
@@ -378,6 +371,9 @@ class ShortcutPackage implements ShortcutPackageItem {
         pw.print(mLastResetTime);
         pw.print("] ");
         pw.print(s.formatTime(mLastResetTime));
+        pw.println();
+
+        getPackageInfo().dump(s, pw, prefix + "  ");
         pw.println();
 
         pw.println("      Shortcuts:");
@@ -406,6 +402,7 @@ class ShortcutPackage implements ShortcutPackageItem {
         pw.println(")");
     }
 
+    @Override
     public void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         final int size = mShortcuts.size();
@@ -416,10 +413,11 @@ class ShortcutPackage implements ShortcutPackageItem {
 
         out.startTag(null, TAG_ROOT);
 
-        ShortcutService.writeAttr(out, ATTR_NAME, mPackageName);
+        ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
         ShortcutService.writeAttr(out, ATTR_DYNAMIC_COUNT, mDynamicShortcutCount);
         ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
+        getPackageInfo().saveToXml(out);
 
         for (int j = 0; j < size; j++) {
             saveShortcut(out, mShortcuts.valueAt(j), forBackup);
@@ -464,13 +462,14 @@ class ShortcutPackage implements ShortcutPackageItem {
         out.endTag(null, TAG_SHORTCUT);
     }
 
-    public static ShortcutPackage loadFromXml(XmlPullParser parser, int userId)
+    public static ShortcutPackage loadFromXml(ShortcutService s, XmlPullParser parser,
+            int ownerUserId, boolean fromBackup)
             throws IOException, XmlPullParserException {
 
         final String packageName = ShortcutService.parseStringAttribute(parser,
                 ATTR_NAME);
 
-        final ShortcutPackage ret = new ShortcutPackage(userId, packageName);
+        final ShortcutPackage ret = new ShortcutPackage(ownerUserId, packageName);
 
         ret.mDynamicShortcutCount =
                 ShortcutService.parseIntAttribute(parser, ATTR_DYNAMIC_COUNT);
@@ -478,6 +477,7 @@ class ShortcutPackage implements ShortcutPackageItem {
                 ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
         ret.mLastResetTime =
                 ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
+        ShortcutPackageInfo spi = null;
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -488,15 +488,23 @@ class ShortcutPackage implements ShortcutPackageItem {
             }
             final int depth = parser.getDepth();
             final String tag = parser.getName();
-            switch (tag) {
-                case TAG_SHORTCUT:
-                    final ShortcutInfo si = parseShortcut(parser, packageName);
+            if (depth == outerDepth + 1) {
+                switch (tag) {
+                    case ShortcutPackageInfo.TAG_ROOT:
+                        spi = ShortcutPackageInfo.loadFromXml(parser);
+                        continue;
+                    case TAG_SHORTCUT:
+                        final ShortcutInfo si = parseShortcut(parser, packageName);
 
-                    // Don't use addShortcut(), we don't need to save the icon.
-                    ret.mShortcuts.put(si.getId(), si);
-                    continue;
+                        // Don't use addShortcut(), we don't need to save the icon.
+                        ret.mShortcuts.put(si.getId(), si);
+                        continue;
+                }
             }
-            throw ShortcutService.throwForInvalidTag(depth, tag);
+            ShortcutService.warnForInvalidTag(depth, tag);
+        }
+        if (spi != null) {
+            ret.replacePackageInfo(spi);
         }
         return ret;
     }
@@ -522,8 +530,7 @@ class ShortcutPackage implements ShortcutPackageItem {
         title = ShortcutService.parseStringAttribute(parser, ATTR_TITLE);
         intent = ShortcutService.parseIntentAttribute(parser, ATTR_INTENT);
         weight = (int) ShortcutService.parseLongAttribute(parser, ATTR_WEIGHT);
-        lastChangedTimestamp = (int) ShortcutService.parseLongAttribute(parser,
-                ATTR_TIMESTAMP);
+        lastChangedTimestamp = ShortcutService.parseLongAttribute(parser, ATTR_TIMESTAMP);
         flags = (int) ShortcutService.parseLongAttribute(parser, ATTR_FLAGS);
         iconRes = (int) ShortcutService.parseLongAttribute(parser, ATTR_ICON_RES);
         bitmapPath = ShortcutService.parseStringAttribute(parser, ATTR_BITMAP_PATH);
