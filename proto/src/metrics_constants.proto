@@ -2020,6 +2020,33 @@ message MetricsEvent {
     // Logged when a user dismisses all task in overview
     OVERVIEW_DISMISS_ALL = 357;
 
+    // Quick Settings -> Edit
+    QS_EDIT = 358;
+
+    // Quick Settings -> Edit -> Overflow -> Reset
+    ACTION_QS_EDIT_RESET = 359;
+
+    // QS -> Edit - Drag a tile out of the active tiles.
+    // The _SPEC contains either the spec of the tile or
+    // the package of the 3rd party app in the PKG field.
+    ACTION_QS_EDIT_REMOVE_SPEC = 360;
+    ACTION_QS_EDIT_REMOVE = 361;
+
+    // QS -> Edit - Drag a tile into the active tiles.
+    // The _SPEC contains either the spec of the tile or
+    // the package of the 3rd party app in the PKG field.
+    ACTION_QS_EDIT_ADD_SPEC = 362;
+    ACTION_QS_EDIT_ADD = 363;
+
+    // QS -> Edit - Drag a tile within the active tiles.
+    // The _SPEC contains either the spec of the tile or
+    // the package of the 3rd party app in the PKG field.
+    ACTION_QS_EDIT_MOVE_SPEC = 364;
+    ACTION_QS_EDIT_MOVE = 365;
+
+    // Long-press on a QS tile. Tile spec in package field.
+    ACTION_QS_LONG_PRESS = 366;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }

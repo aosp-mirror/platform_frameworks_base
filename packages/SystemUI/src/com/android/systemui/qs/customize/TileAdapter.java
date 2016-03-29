@@ -16,6 +16,7 @@ package com.android.systemui.qs.customize;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
@@ -36,12 +37,15 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -304,17 +308,38 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         notifyItemMoved(from, to);
         CharSequence announcement;
         if (to >= mDividerIndex) {
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE_SPEC,
+                    strip(mTiles.get(to)));
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE,
+                    from);
             announcement = mContext.getString(R.string.accessibility_qs_edit_tile_removed,
                     fromLabel);
         } else if (from >= mDividerIndex) {
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_ADD_SPEC,
+                    strip(mTiles.get(to)));
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_ADD,
+                    to);
             announcement = mContext.getString(R.string.accessibility_qs_edit_tile_added,
                     fromLabel, (to + 1));
         } else {
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_MOVE_SPEC,
+                    strip(mTiles.get(to)));
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_MOVE,
+                    to);
             announcement = mContext.getString(R.string.accessibility_qs_edit_tile_moved,
                     fromLabel, (to + 1));
         }
         v.announceForAccessibility(announcement);
         return true;
+    }
+
+    private String strip(TileInfo tileInfo) {
+        String spec = tileInfo.spec;
+        if (spec.startsWith(CustomTile.PREFIX)) {
+            ComponentName component = CustomTile.getComponentFromSpec(spec);
+            return component.getPackageName();
+        }
+        return spec;
     }
 
     private <T> void move(int from, int to, List<T> list) {
