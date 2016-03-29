@@ -663,13 +663,18 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             @Override
             public void run() {
                 final Bitmap transitionBitmap = drawThumbnailTransitionBitmap(toTask, toTransform);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mThumbnailTransitionBitmapCache = transitionBitmap;
-                        mThumbnailTransitionBitmapCacheKey = toTask;
-                    }
-                });
+                if (transitionBitmap != null) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mThumbnailTransitionBitmapCache = transitionBitmap;
+                            mThumbnailTransitionBitmapCacheKey = toTask;
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "Could not load thumbnail for task: " + toTask + " at transform: " +
+                            toTransform);
+                }
             }
         });
     }
@@ -774,7 +779,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Get the transform for the running task
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
         stackView.updateToInitialState(true /* scrollToInitialState */);
-        mTmpTransform = stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
+        stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;
     }
