@@ -57,6 +57,10 @@ public class NetworkPolicyManager {
     public static final int RULE_REJECT_METERED = 1;
     /** Reject traffic on all networks. */
     public static final int RULE_REJECT_ALL = 2;
+    /** Allow traffic on metered networks. */
+    public static final int RULE_ALLOW_METERED = 3;
+    /** Temporarily allow traffic on metered networks because app is on foreground. */
+    public static final int RULE_TEMPORARY_ALLOW_METERED = 4;
 
     public static final int FIREWALL_RULE_DEFAULT = 0;
     public static final int FIREWALL_RULE_ALLOW = 1;
