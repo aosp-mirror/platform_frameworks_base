@@ -104,6 +104,9 @@ class ShortcutPackage implements ShortcutPackageItem {
         return mPackageName;
     }
 
+    /**
+     * Note this does *not* provide a correct view to the calling launcher.
+     */
     @Nullable
     public ShortcutInfo findShortcutById(String id) {
         return mShortcuts.get(id);
@@ -229,8 +232,8 @@ class ShortcutPackage implements ShortcutPackageItem {
         }
 
         // Then, for the pinned set for each launcher, set the pin flag one by one.
-        final ArrayMap<String, ShortcutLauncher> launchers =
-                s.getUserShortcutsLocked(mUserId).getLaunchers();
+        final ArrayMap<ShortcutUser.PackageWithUser, ShortcutLauncher> launchers =
+                s.getUserShortcutsLocked(mUserId).getAllLaunchers();
 
         for (int l = launchers.size() - 1; l >= 0; l--) {
             final ShortcutLauncher launcherShortcuts = launchers.valueAt(l);
@@ -301,12 +304,24 @@ class ShortcutPackage implements ShortcutPackageItem {
      * Find all shortcuts that match {@code query}.
      */
     public void findAll(@NonNull ShortcutService s, @NonNull List<ShortcutInfo> result,
+            @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
+        findAll(s, result, query, cloneFlag, null, 0);
+    }
+
+    /**
+     * Find all shortcuts that match {@code query}.
+     *
+     * This will also provide a "view" for each launcher -- a non-dynamic shortcut that's not pinned
+     * by the calling launcher will not be included in the result, and also "isPinned" will be
+     * adjusted for the caller too.
+     */
+    public void findAll(@NonNull ShortcutService s, @NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
-            @Nullable String callingLauncher) {
+            @Nullable String callingLauncher, int launcherUserId) {
 
         // Set of pinned shortcuts by the calling launcher.
         final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
-                : s.getLauncherShortcuts(callingLauncher, mUserId)
+                : s.getLauncherShortcuts(callingLauncher, mUserId, launcherUserId)
                     .getPinnedShortcutIds(mPackageName);
 
         for (int i = 0; i < mShortcuts.size(); i++) {

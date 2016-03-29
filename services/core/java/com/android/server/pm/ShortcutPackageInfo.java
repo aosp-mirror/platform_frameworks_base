@@ -48,6 +48,7 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "package-info";
+    private static final String ATTR_USER_ID = "user";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_SHADOW = "shadow";
@@ -55,11 +56,8 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
     private static final String TAG_SIGNATURE = "signature";
     private static final String ATTR_SIGNATURE_HASH = "hash";
 
-    public interface ShortcutPackageInfoHolder {
-        ShortcutPackageInfo getShortcutPackageInfo();
-    }
-
     private final String mPackageName;
+    private final int mUserId;
 
     /**
      * When true, this package information was restored from the previous device, and the app hasn't
@@ -69,17 +67,22 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
     private int mVersionCode;
     private ArrayList<byte[]> mSigHashes;
 
-    private ShortcutPackageInfo(String packageName, int versionCode, ArrayList<byte[]> sigHashes,
-            boolean isShadow) {
+    private ShortcutPackageInfo(String packageName, int userId,
+            int versionCode, ArrayList<byte[]> sigHashes, boolean isShadow) {
+        mPackageName = Preconditions.checkNotNull(packageName);
+        mUserId = userId;
         mVersionCode = versionCode;
         mIsShadow = isShadow;
         mSigHashes = sigHashes;
-        mPackageName = Preconditions.checkNotNull(packageName);
     }
 
     @NonNull
     public String getPackageName() {
         return mPackageName;
+    }
+
+    public int getUserId() {
+        return mUserId;
     }
 
     public boolean isShadow() {
@@ -197,7 +200,7 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
         }
-        final ShortcutPackageInfo ret = new ShortcutPackageInfo(packageName, pi.versionCode,
+        final ShortcutPackageInfo ret = new ShortcutPackageInfo(packageName, userId, pi.versionCode,
                 hashSignatureArray(pi.signatures), /* shadow=*/ false);
 
         return ret;
@@ -221,6 +224,7 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
         out.startTag(null, TAG_ROOT);
 
         ShortcutService.writeAttr(out, ATTR_NAME, mPackageName);
+        ShortcutService.writeAttr(out, ATTR_USER_ID, mUserId);
         ShortcutService.writeAttr(out, ATTR_VERSION, mVersionCode);
         ShortcutService.writeAttr(out, ATTR_SHADOW, mIsShadow);
 
@@ -232,10 +236,11 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
         out.endTag(null, TAG_ROOT);
     }
 
-    public static ShortcutPackageInfo loadFromXml(XmlPullParser parser)
+    public static ShortcutPackageInfo loadFromXml(XmlPullParser parser, int ownerUserId)
             throws IOException, XmlPullParserException {
 
         final String packageName = ShortcutService.parseStringAttribute(parser, ATTR_NAME);
+        final int userId = ShortcutService.parseIntAttribute(parser, ATTR_USER_ID, ownerUserId);
         final int versionCode = ShortcutService.parseIntAttribute(parser, ATTR_VERSION);
         final boolean shadow = ShortcutService.parseBooleanAttribute(parser, ATTR_SHADOW);
 
@@ -261,7 +266,7 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
             }
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
-        return new ShortcutPackageInfo(packageName, versionCode, hashes, shadow);
+        return new ShortcutPackageInfo(packageName, userId, versionCode, hashes, shadow);
     }
 
     public void dump(ShortcutService s, PrintWriter pw, String prefix) {
@@ -270,6 +275,11 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
         pw.print(prefix);
         pw.print("PackageInfo: ");
         pw.print(mPackageName);
+        pw.println();
+
+        pw.print(prefix);
+        pw.print("  User: ");
+        pw.print(mUserId);
         pw.println();
 
         pw.print(prefix);
