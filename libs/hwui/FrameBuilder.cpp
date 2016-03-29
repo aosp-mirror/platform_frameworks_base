@@ -481,12 +481,17 @@ void FrameBuilder::deferRenderNodeOp(const RenderNodeOp& op) {
  * Defers an unmergeable, strokeable op, accounting correctly
  * for paint's style on the bounds being computed.
  */
-const BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
+BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
         BakedOpState::StrokeBehavior strokeBehavior) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
             mAllocator, *mCanvasState.writableSnapshot(), op, strokeBehavior);
     if (!bakedState) return nullptr; // quick rejected
+
+    if (op.opId == RecordedOpId::RectOp && op.paint->getStyle() != SkPaint::kStroke_Style) {
+        bakedState->setupOpacity(op.paint);
+    }
+
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
     return bakedState;
 }
@@ -516,6 +521,7 @@ static bool hasMergeableClip(const BakedOpState& state) {
 void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
+    bakedState->setupOpacity(op.paint);
 
     // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
     // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
