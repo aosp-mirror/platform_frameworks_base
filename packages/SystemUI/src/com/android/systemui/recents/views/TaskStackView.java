@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -60,8 +61,8 @@ import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
-import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
+import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
@@ -116,8 +117,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     private static final int LAUNCH_NEXT_SCROLL_BASE_DURATION = 216;
     private static final int LAUNCH_NEXT_SCROLL_INCR_DURATION = 32;
-
-    private static final ArraySet<Task.TaskKey> EMPTY_TASK_SET = new ArraySet<>();
 
     // The actions to perform when resetting to initial state,
     @Retention(RetentionPolicy.SOURCE)
@@ -598,17 +597,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (tv == null) {
                 tv = mViewPool.pickUpViewFromPool(task, task);
                 if (task.isFreeformTask()) {
-                    tv.updateViewPropertiesToTaskTransform(transform, AnimationProps.IMMEDIATE,
-                            mRequestUpdateClippingListener);
+                    updateTaskViewToTransform(tv, transform, AnimationProps.IMMEDIATE);
                 } else {
                     if (transform.rect.top <= mLayoutAlgorithm.mStackRect.top) {
-                        tv.updateViewPropertiesToTaskTransform(
-                                mLayoutAlgorithm.getBackOfStackTransform(),
-                                AnimationProps.IMMEDIATE, mRequestUpdateClippingListener);
+                        updateTaskViewToTransform(tv, mLayoutAlgorithm.getBackOfStackTransform(),
+                                AnimationProps.IMMEDIATE);
                     } else {
-                        tv.updateViewPropertiesToTaskTransform(
-                                mLayoutAlgorithm.getFrontOfStackTransform(),
-                                AnimationProps.IMMEDIATE, mRequestUpdateClippingListener);
+                        updateTaskViewToTransform(tv, mLayoutAlgorithm.getFrontOfStackTransform(),
+                                AnimationProps.IMMEDIATE);
                     }
                 }
             } else {
@@ -1215,7 +1211,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
         mLayoutAlgorithm.initialize(mWindowRect, mStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
-        updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
+        updateLayoutAlgorithm(false /* boundScroll */, mIgnoreTasks);
 
         // If this is the first layout, then scroll to the front of the stack, then update the
         // TaskViews with the stack so that we can lay them out
@@ -1225,7 +1221,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Rebind all the views, including the ignore ones
-        bindVisibleTaskViews(mStackScroller.getStackScroll(), EMPTY_TASK_SET,
+        bindVisibleTaskViews(mStackScroller.getStackScroll(), mIgnoreTasks,
                 false /* ignoreTaskOverrides */);
 
         // Measure each of the TaskViews
@@ -1266,7 +1262,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTmpTaskViews.addAll(mViewPool.getViews());
         int taskViewCount = mTmpTaskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
-            layoutTaskView(mTmpTaskViews.get(i));
+            layoutTaskView(changed, mTmpTaskViews.get(i));
         }
 
         if (changed) {
@@ -1274,8 +1270,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mStackScroller.boundScroll();
             }
         }
+
         // Relayout all of the task views including the ignored ones
-        relayoutTaskViews(AnimationProps.IMMEDIATE, EMPTY_TASK_SET);
+        relayoutTaskViews(AnimationProps.IMMEDIATE, mIgnoreTasks);
         clipTaskViews();
 
         if (mAwaitingFirstLayout || !mEnterAnimationComplete) {
@@ -1287,16 +1284,21 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Lays out a TaskView.
      */
-    private void layoutTaskView(TaskView tv) {
-        if (tv.getBackground() != null) {
-            tv.getBackground().getPadding(mTmpRect);
+    private void layoutTaskView(boolean changed, TaskView tv) {
+        if (changed) {
+            if (tv.getBackground() != null) {
+                tv.getBackground().getPadding(mTmpRect);
+            } else {
+                mTmpRect.setEmpty();
+            }
+            Rect taskRect = mStableLayoutAlgorithm.mTaskRect;
+            tv.cancelTransformAnimation();
+            tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
+                    taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
         } else {
-            mTmpRect.setEmpty();
+            // If the layout has not changed, then just lay it out again in-place
+            tv.layout(tv.getLeft(), tv.getTop(), tv.getRight(), tv.getBottom());
         }
-        Rect taskRect = mStableLayoutAlgorithm.mTaskRect;
-        tv.cancelTransformAnimation();
-        tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
-                taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
     }
 
     /** Handler for the first layout. */
@@ -1509,7 +1511,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
                 addViewInLayout(tv, insertIndex, params, true /* preventRequestLayout */);
                 measureTaskView(tv);
-                layoutTaskView(tv);
+                layoutTaskView(true /* changed */, tv);
             }
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
