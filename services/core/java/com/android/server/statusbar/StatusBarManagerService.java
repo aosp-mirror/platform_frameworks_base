@@ -319,7 +319,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
      */
     @Override
     public void disable2(int what, IBinder token, String pkg) {
-        disableForUser(what, token, pkg, mCurrentUserId);
+        disable2ForUser(what, token, pkg, mCurrentUserId);
     }
 
     /**
