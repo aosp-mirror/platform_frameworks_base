@@ -3411,17 +3411,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets whether the movement method will automatically be set to {@link LinkMovementMethod}
-     * after {@link #setText} or {@link #append} is called. The movement method is set if one of the
-     * following is true:
-     * <ul>
-     * <li>{@link #setAutoLinkMask} has been set to nonzero and links are detected in
-     * {@link #setText} or {@link #append}.
-     * <li>The input for {@link #setText} or {@link #append} contains a {@link ClickableSpan}.
-     * </ul>
-     *
-     * <p>This function does not have an immediate effect, movement method will be set only after a
-     * call to {@link #setText} or {@link #append}. The default is true.</p>
+     * Sets whether the movement method will automatically be set to
+     * {@link LinkMovementMethod} if {@link #setAutoLinkMask} has been
+     * set to nonzero and links are detected in {@link #setText}.
+     * The default is true.
      *
      * @attr ref android.R.styleable#TextView_linksClickable
      */
@@ -3431,14 +3424,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns whether the movement method will automatically be set to {@link LinkMovementMethod}
-     * after {@link #setText} or {@link #append} is called.
-     *
-     * See {@link #setLinksClickable} for details.
-     *
-     * <p>The default is true.</p>
-     *
-     * @see #setLinksClickable
+     * Returns whether the movement method will automatically be set to
+     * {@link LinkMovementMethod} if {@link #setAutoLinkMask} has been
+     * set to nonzero and links are detected in {@link #setText}.
+     * The default is true.
      *
      * @attr ref android.R.styleable#TextView_linksClickable
      */
@@ -4032,19 +4021,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         ((Editable) mText).append(text, start, end);
 
-        boolean hasClickableSpans = false;
         if (mAutoLinkMask != 0) {
-            hasClickableSpans = Linkify.addLinks((Spannable) mText, mAutoLinkMask);
-        } else if (mLinksClickable && text instanceof Spanned) {
-            ClickableSpan[] clickableSpans =
-                    ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
-            hasClickableSpans = clickableSpans != null && clickableSpans.length > 0;
-        }
-
-        // Do not change the movement method for text that supports text selection as it
-        // would prevent an arbitrary cursor displacement.
-        if (hasClickableSpans && mLinksClickable && !textCanBeSelected()) {
-            setMovementMethod(LinkMovementMethod.getInstance());
+            boolean linksWereAdded = Linkify.addLinks((Spannable) mText, mAutoLinkMask);
+            // Do not change the movement method for text that support text selection as it
+            // would prevent an arbitrary cursor displacement.
+            if (linksWereAdded && mLinksClickable && !textCanBeSelected()) {
+                setMovementMethod(LinkMovementMethod.getInstance());
+            }
         }
     }
 
@@ -4397,7 +4380,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             text = TextUtils.stringOrSpannedString(text);
         }
 
-        boolean hasClickableSpans = false;
         if (mAutoLinkMask != 0) {
             Spannable s2;
 
@@ -4407,32 +4389,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 s2 = mSpannableFactory.newSpannable(text);
             }
 
-            hasClickableSpans = Linkify.addLinks(s2, mAutoLinkMask);
-            if (hasClickableSpans) {
+            if (Linkify.addLinks(s2, mAutoLinkMask)) {
                 text = s2;
-            }
-        } else if (mLinksClickable && text instanceof Spanned) {
-            ClickableSpan[] clickableSpans =
-                    ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
-            hasClickableSpans = clickableSpans != null && clickableSpans.length > 0;
-            if (hasClickableSpans && !(text instanceof Spannable)) {
-                text = mSpannableFactory.newSpannable(text);
-            }
-        }
+                type = (type == BufferType.EDITABLE) ? BufferType.EDITABLE : BufferType.SPANNABLE;
 
-        if (hasClickableSpans) {
-            type = (type == BufferType.EDITABLE) ? BufferType.EDITABLE : BufferType.SPANNABLE;
-            /*
-             * We must go ahead and set the text before changing the
-             * movement method, because setMovementMethod() may call
-             * setText() again to try to upgrade the buffer type.
-             */
-            mText = text;
+                /*
+                 * We must go ahead and set the text before changing the
+                 * movement method, because setMovementMethod() may call
+                 * setText() again to try to upgrade the buffer type.
+                 */
+                mText = text;
 
-            // Do not change the movement method for text that supports text selection as it
-            // would prevent an arbitrary cursor displacement.
-            if (mLinksClickable && !textCanBeSelected()) {
-                setMovementMethod(LinkMovementMethod.getInstance());
+                // Do not change the movement method for text that support text selection as it
+                // would prevent an arbitrary cursor displacement.
+                if (mLinksClickable && !textCanBeSelected()) {
+                    setMovementMethod(LinkMovementMethod.getInstance());
+                }
             }
         }
 
