@@ -80,12 +80,4 @@ public class RecentsConfiguration {
     public RecentsActivityLaunchState getLaunchState() {
         return mLaunchState;
     }
-
-    /**
-     * Called when the configuration has changed, and we want to reset any configuration specific
-     * members.
-     */
-    public void updateOnConfigurationChange() {
-        mLaunchState.updateOnConfigurationChange();
-    }
 }

@@ -43,7 +43,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.EventBus.Event;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ForcedResizableEvent;
@@ -208,7 +207,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public void onConfigurationChanged() {
         reloadHeaderBarLayout();
         updateHeaderBarLayout(null /* stack */);
-        Recents.getConfiguration().updateOnConfigurationChange();
     }
 
     /**
@@ -852,13 +850,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Update the launch state
         launchState.launchedFromHome = false;
         launchState.launchedFromApp = mLaunchedWhileDocking;
+        launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
-        launchState.launchedFromAppDocked = mLaunchedWhileDocking;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
         launchState.launchedNumVisibleTasks = stackVr.numVisibleTasks;
         launchState.launchedNumVisibleThumbnails = stackVr.numVisibleThumbnails;
         launchState.launchedViaDragGesture = mDraggingInRecents;
-        launchState.launchedWhileDocking = mLaunchedWhileDocking;
 
         if (!animate) {
             startRecentsActivity(ActivityOptions.makeCustomAnimation(mContext, -1, -1));

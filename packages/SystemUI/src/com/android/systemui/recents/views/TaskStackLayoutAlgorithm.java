@@ -552,7 +552,7 @@ public class TaskStackLayoutAlgorithm {
             mMaxScrollP = Math.max(mMinScrollP, (mNumStackTasks - 1) -
                     Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
             boolean scrollToFront = launchState.launchedFromHome ||
-                    launchState.launchedFromAppDocked;
+                    launchState.launchedViaDockGesture;
             if (scrollToFront) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
                 mInitialNormX = null;
