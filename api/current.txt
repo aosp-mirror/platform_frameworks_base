@@ -55012,6 +55012,7 @@ package java.util {
     method public void forEach(java.util.function.Consumer<? super E>);
     method public E get(int);
     method public boolean removeIf(java.util.function.Predicate<? super E>);
+    method public void replaceAll(java.util.function.UnaryOperator<E>);
     method public int size();
     method public void sort(java.util.Comparator<? super E>);
     method public java.util.Spliterator<E> spliterator();
@@ -55837,9 +55838,11 @@ package java.util {
     method public abstract boolean remove(java.lang.Object);
     method public abstract E remove(int);
     method public abstract boolean removeAll(java.util.Collection<?>);
+    method public default void replaceAll(java.util.function.UnaryOperator<E>);
     method public abstract boolean retainAll(java.util.Collection<?>);
     method public abstract E set(int, E);
     method public abstract int size();
+    method public default void sort(java.util.Comparator<? super E>);
     method public abstract java.util.List<E> subList(int, int);
     method public abstract java.lang.Object[] toArray();
     method public abstract T[] toArray(T[]);
@@ -56754,9 +56757,11 @@ package java.util {
     method public synchronized boolean removeElement(java.lang.Object);
     method public synchronized void removeElementAt(int);
     method public synchronized boolean removeIf(java.util.function.Predicate<? super E>);
+    method public synchronized void replaceAll(java.util.function.UnaryOperator<E>);
     method public synchronized void setElementAt(E, int);
     method public synchronized void setSize(int);
     method public synchronized int size();
+    method public synchronized void sort(java.util.Comparator<? super E>);
     method public java.util.Spliterator<E> spliterator();
     method public synchronized void trimToSize();
     field protected int capacityIncrement;
@@ -57222,6 +57227,7 @@ package java.util.concurrent {
     method public java.lang.Object clone();
     method public boolean contains(java.lang.Object);
     method public boolean containsAll(java.util.Collection<?>);
+    method public void forEach(java.util.function.Consumer<? super E>);
     method public E get(int);
     method public int indexOf(E, int);
     method public int indexOf(java.lang.Object);
