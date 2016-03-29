@@ -5920,6 +5920,9 @@ public class Activity extends ContextThemeWrapper
      * @return true if this is the topmost, non-finishing activity in its task.
      */
     private boolean isTopOfTask() {
+        if (mToken == null || mWindow == null || !mWindowAdded) {
+            return false;
+        }
         try {
             return ActivityManagerNative.getDefault().isTopOfTask(mToken);
         } catch (RemoteException e) {
