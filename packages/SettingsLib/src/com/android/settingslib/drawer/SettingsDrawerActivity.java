@@ -38,8 +38,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toolbar;
+
 import com.android.settingslib.R;
 import com.android.settingslib.applications.InterestingConfigChanges;
 
@@ -62,6 +64,7 @@ public class SettingsDrawerActivity extends Activity {
     private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
 
     private SettingsDrawerAdapter mDrawerAdapter;
+    private FrameLayout mContentHeaderContainer;
     private DrawerLayout mDrawerLayout;
     private boolean mShowingMenu;
 
@@ -78,6 +81,7 @@ public class SettingsDrawerActivity extends Activity {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
         super.setContentView(R.layout.settings_with_drawer);
+        mContentHeaderContainer = (FrameLayout) findViewById(R.id.content_header_container);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
@@ -171,6 +175,13 @@ public class SettingsDrawerActivity extends Activity {
     public void closeDrawer() {
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
+        }
+    }
+
+    public void setContentHeaderView(View headerView) {
+        mContentHeaderContainer.removeAllViews();
+        if (headerView != null) {
+            mContentHeaderContainer.addView(headerView);
         }
     }
 
