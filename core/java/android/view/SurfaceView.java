@@ -490,7 +490,7 @@ public class SurfaceView extends View {
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                               ;
-                if (!creating && !force && !mUpdateWindowNeeded) {
+                if (!creating && !force && !mUpdateWindowNeeded && !sizeChanged) {
                     mLayout.privateFlags |=
                             WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY;
                 } else {
@@ -584,18 +584,6 @@ public class SurfaceView extends View {
 
                     mSurface.transferFrom(mNewSurface);
                     if (visible && mSurface.isValid()) {
-                        // We set SCALING_MODE_NO_SCALE_CROP to allow the WindowManager
-                        // to update our Surface crop without requiring a new buffer from
-                        // us. In the default mode of SCALING_MODE_FREEZE, surface geometry
-                        // state (which includes crop) is only applied when a buffer
-                        // with appropriate geometry is available. During drag resize
-                        // it is quite frequent that a matching buffer will not be available
-                        // (because we are constantly being resized and have fallen behind).
-                        // However in such situations the WindowManager still needs to be able
-                        // to update our crop to ensure we stay within the bounds of the containing
-                        // window.
-                        mSurface.setScalingMode(Surface.SCALING_MODE_NO_SCALE_CROP);
-
                         if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
                             mSurfaceCreated = true;
                             mIsCreating = true;
@@ -666,7 +654,6 @@ public class SurfaceView extends View {
                             mLocation[0], mLocation[1]));
                     mSession.repositionChild(mWindow, mWindowSpaceLeft, mWindowSpaceTop,
                             mLocation[0], mLocation[1],
-                            mWindowSpaceWidth, mWindowSpaceHeight,
                             -1, mWinFrame);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Exception from relayout", ex);
@@ -703,7 +690,6 @@ public class SurfaceView extends View {
             }
             // Just using mRTLastReportedPosition as a dummy rect here
             session.repositionChild(window, left, top, right, bottom,
-                    mWindowSpaceWidth, mWindowSpaceHeight,
                     frameNumber,
                     mRTLastReportedPosition);
             // Now overwrite mRTLastReportedPosition with our values
