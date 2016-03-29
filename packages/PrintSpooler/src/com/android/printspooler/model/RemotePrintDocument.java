@@ -178,6 +178,8 @@ public final class RemotePrintDocument {
         }
         if (mState == STATE_FAILED) {
             Log.w(LOG_TAG, "Failed before start.");
+        } else if (mState == STATE_DESTROYED) {
+            Log.w(LOG_TAG, "Destroyed before start.");
         } else {
             if (mState != STATE_INITIAL) {
                 throw new IllegalStateException("Cannot start in state:" + stateToString(mState));
@@ -267,7 +269,7 @@ public final class RemotePrintDocument {
         }
         if (mState != STATE_STARTED && mState != STATE_UPDATED
                 && mState != STATE_FAILED && mState != STATE_CANCELING
-                && mState != STATE_CANCELED) {
+                && mState != STATE_CANCELED && mState != STATE_DESTROYED) {
             throw new IllegalStateException("Cannot finish in state:"
                     + stateToString(mState));
         }
