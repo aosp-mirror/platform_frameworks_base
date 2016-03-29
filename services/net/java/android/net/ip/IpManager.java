@@ -45,6 +45,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.net.NetlinkTracker;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -210,6 +211,8 @@ public class IpManager extends StateMachine {
             mApfCapabilities = other.mApfCapabilities;
         }
     }
+
+    public static final String DUMP_ARG = "ipmanager";
 
     private static final int CMD_STOP = 1;
     private static final int CMD_START = 2;
@@ -393,17 +396,18 @@ public class IpManager extends StateMachine {
         }
     }
 
-    public void dumpApf(PrintWriter writer) {
-        writer.println("--------------------------------------------------------------------");
-        writer.println("APF dump:");
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+        pw.println("APF dump:");
+        pw.increaseIndent();
         // Thread-unsafe access to mApfFilter but just used for debugging.
         ApfFilter apfFilter = mApfFilter;
         if (apfFilter != null) {
-            apfFilter.dump(new IndentingPrintWriter(writer, "  "));
+            apfFilter.dump(pw);
         } else {
-            writer.println("No apf support");
+            pw.println("No apf support");
         }
-        writer.println("--------------------------------------------------------------------");
+        pw.decreaseIndent();
     }
 
 
