@@ -575,4 +575,10 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService service)
         throws RemoteException {}
+
+    @Override
+    public void createWallpaperInputConsumer(InputChannel inputChannel) throws RemoteException {}
+
+    @Override
+    public void removeWallpaperInputConsumer() throws RemoteException {}
 }
