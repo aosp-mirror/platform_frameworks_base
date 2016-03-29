@@ -1818,7 +1818,7 @@ public class BackupManagerService {
             File initSentinel = new File(stateDir, INIT_SENTINEL_FILE_NAME);
             if (initSentinel.exists()) {
                 synchronized (mQueueLock) {
-                    mPendingInits.add(transportName);
+                    mPendingInits.add(name);
 
                     // TODO: pick a better starting time than now + 1 minute
                     long delay = 1000 * 60; // one minute, in milliseconds
@@ -2314,6 +2314,25 @@ public class BackupManagerService {
             }
             return transport;
         }
+    }
+
+    // What name is this transport registered under...?
+    private String getTransportName(IBackupTransport transport) {
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "Searching for transport name of " + transport);
+        }
+        synchronized (mTransports) {
+            final int N = mTransports.size();
+            for (int i = 0; i < N; i++) {
+                if (mTransports.valueAt(i).equals(transport)) {
+                    if (MORE_DEBUG) {
+                        Slog.v(TAG, "  Name found: " + mTransports.keyAt(i));
+                    }
+                    return mTransports.keyAt(i);
+                }
+            }
+        }
+        return null;
     }
 
     // fire off a backup agent, blocking until it attaches or times out
@@ -2921,7 +2940,15 @@ public class BackupManagerService {
                     if (MORE_DEBUG) Slog.d(TAG, "Server requires init; rerunning");
                     addBackupTrace("init required; rerunning");
                     try {
-                        mPendingInits.add(mTransport.transportDirName());
+                        final String name = getTransportName(mTransport);
+                        if (name != null) {
+                            mPendingInits.add(name);
+                        } else {
+                            if (DEBUG) {
+                                Slog.w(TAG, "Couldn't find name of transport " + mTransport
+                                        + " for init");
+                            }
+                        }
                     } catch (Exception e) {
                         Slog.w(TAG, "Failed to query transport name heading for init", e);
                         // swallow it and proceed; we don't rely on this
