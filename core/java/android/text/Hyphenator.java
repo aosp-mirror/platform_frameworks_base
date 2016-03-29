@@ -152,6 +152,9 @@ public class Hyphenator {
         {"en-UM", "en-US"}, // English (United States Minor Outlying Islands)
         {"en-VI", "en-US"}, // English (Virgin Islands)
 
+        // All English locales other than those falling back to en-US are mapped to en-GB.
+        {"en", "en-GB"},
+
         // For German, we're assuming the 1996 (and later) orthography by default.
         {"de", "de-1996"},
         // Liechtenstein uses the Swiss hyphenation rules for the 1901 orthography.
@@ -159,6 +162,9 @@ public class Hyphenator {
 
         // Norwegian is very probably Norwegian Bokmål.
         {"no", "nb"},
+
+        // Use mn-Cyrl. According to CLDR's likelySubtags.xml, mn is most likely to be mn-Cyrl.
+        {"mn", "mn-Cyrl"}, // Mongolian
 
         // Fall back to Ethiopic script for languages likely to be written in Ethiopic.
         // Data is from CLDR's likelySubtags.xml.
@@ -182,15 +188,36 @@ public class Hyphenator {
 
         // TODO: replace this with a discovery-based method that looks into /system/usr/hyphen-data
         String[] availableLanguages = {
+            "as",
+            "bn",
+            "cy",
+            "da",
             "de-1901", "de-1996", "de-CH-1901",
-            "en-US",
+            "en-GB", "en-US",
             "es",
+            "et",
+            "eu",
+            "fr",
+            "ga",
+            "gu",
+            "hi",
+            "hr",
             "hu",
             "hy",
+            "kn",
+            "ml",
+            "mn-Cyrl",
+            "mr",
             "nb",
             "nn",
+            "or",
+            "pa",
             "pt",
-            "und-Ethi"
+            "sl",
+            "ta",
+            "te",
+            "tk",
+            "und-Ethi",
         };
         for (int i = 0; i < availableLanguages.length; i++) {
             String languageTag = availableLanguages[i];
