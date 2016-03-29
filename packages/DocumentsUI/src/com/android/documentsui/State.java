@@ -43,10 +43,19 @@ public class State implements android.os.Parcelable {
 
     private static final String TAG = "State";
 
+    @IntDef(flag = true, value = {
+            ACTION_BROWSE,
+            ACTION_PICK_COPY_DESTINATION,
+            ACTION_OPEN,
+            ACTION_CREATE,
+            ACTION_GET_CONTENT,
+            ACTION_OPEN_TREE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActionType {}
     // File manager and related private picking activity.
     public static final int ACTION_BROWSE = 1;
     public static final int ACTION_PICK_COPY_DESTINATION = 2;
-
     // All public picking activities
     public static final int ACTION_OPEN = 3;
     public static final int ACTION_CREATE = 4;
@@ -69,7 +78,7 @@ public class State implements android.os.Parcelable {
     public static final int SORT_ORDER_LAST_MODIFIED = 2;
     public static final int SORT_ORDER_SIZE = 3;
 
-    public int action;
+    public @ActionType int action;
     public String[] acceptMimes;
 
     /** Derived from local preferences */

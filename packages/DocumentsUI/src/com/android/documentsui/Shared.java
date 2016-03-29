@@ -22,6 +22,11 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.view.WindowManager;
+
+import com.android.documentsui.State.ActionType;
+
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
+
 import android.app.AlertDialog;
 
 import java.text.Collator;
@@ -179,8 +184,9 @@ public final class Shared {
     /*
      * Indicates if the advanced roots should be hidden.
      */
-    public static boolean areAdvancedRootsHidden(Context context) {
-        return context.getResources().getBoolean(R.bool.advanced_roots_hidden);
+    public static boolean areAdvancedRootsHidden(Context context, State state) {
+        return context.getResources().getBoolean(R.bool.advanced_roots_hidden)
+                && state.action != ACTION_OPEN_TREE;
     }
 
 }

@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -117,7 +118,7 @@ public class RootsFragment extends Fragment {
 
                 Intent handlerAppIntent = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new RootsAdapter(context, result, handlerAppIntent);
+                mAdapter = new RootsAdapter(context, result, handlerAppIntent, state);
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -308,8 +309,8 @@ public class RootsFragment extends Fragment {
          * @param handlerAppIntent When not null, apps capable of handling the original
          *     intent will be included in list of roots (in special section at bottom).
          */
-        public RootsAdapter(
-                Context context, Collection<RootInfo> roots, @Nullable Intent handlerAppIntent) {
+        public RootsAdapter(Context context, Collection<RootInfo> roots,
+                @Nullable Intent handlerAppIntent, State state) {
             super(context, 0);
 
             final List<RootItem> libraries = new ArrayList<>();
@@ -320,7 +321,8 @@ public class RootsFragment extends Fragment {
 
                 if (root.isHome() && Shared.isHomeRootHidden(context)) {
                     continue;
-                } else if (root.isAdvanced() && Shared.areAdvancedRootsHidden(context)) {
+                } else if (root.isAdvanced()
+                        && Shared.areAdvancedRootsHidden(context, state)) {
                     continue;
                 } else if (root.isLibrary()) {
                     if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
