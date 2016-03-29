@@ -90,6 +90,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     private RecentsPackageMonitor mPackageMonitor;
     private long mLastTabKeyEventTime;
+    private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
@@ -266,6 +267,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 
+        mLastOrientation = getResources().getConfiguration().orientation;
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
         mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
             @Override
@@ -418,13 +420,18 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Update the nav bar for the current orientation
         updateNavBarScrim(false /* animateNavBarScrim */, AnimationProps.IMMEDIATE);
 
-        EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */));
+        // Notify of the config change
+        int newOrientation = getResources().getConfiguration().orientation;
+        EventBus.getDefault().send(new ConfigurationChangedEvent(false /* fromMultiWindow */,
+                (mLastOrientation != newOrientation)));
+        mLastOrientation = newOrientation;
     }
 
     @Override
     public void onMultiWindowChanged(boolean inMultiWindow) {
         super.onMultiWindowChanged(inMultiWindow);
-        EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */));
+        EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
+                false /* fromOrientationChange */));
 
         if (mRecentsView != null) {
             // Reload the task stack completely

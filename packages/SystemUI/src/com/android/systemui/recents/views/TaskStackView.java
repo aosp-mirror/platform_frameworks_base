@@ -1999,10 +1999,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
 
-        // Trigger a new layout and scroll to the initial state
-        mInitialState = event.fromMultiWindow
-                ? INITIAL_STATE_UPDATE_ALL
-                : INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+        // Trigger a new layout and update to the initial state if necessary
+        if (event.fromMultiWindow) {
+            mInitialState = INITIAL_STATE_UPDATE_ALL;
+        } else if (event.fromOrientationChange) {
+            mInitialState = INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+        }
         requestLayout();
     }
 
