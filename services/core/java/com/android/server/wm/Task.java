@@ -498,7 +498,15 @@ class Task implements DimLayer.DimLayerUser {
                 return;
             }
 
-            out.set(mBounds);
+            if (!mFullscreen) {
+                // When minimizing the docked stack when going home, we don't adjust the task bounds
+                // so we need to intersect the task bounds with the stack bounds here.
+                mStack.getBounds(mTmpRect);
+                mTmpRect.intersect(mBounds);
+                out.set(mTmpRect);
+            } else {
+                out.set(mBounds);
+            }
             return;
         }
 
