@@ -2429,7 +2429,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                     1             PFLAG3_SCROLL_INDICATOR_START
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
-     *            1111111                PFLAG3_POINTER_ICON_MASK
+     *                  1                PFLAG3_POINTER_ICON_NULL
+     *                 1                 PFLAG3_POINTER_ICON_VALUE_START
+     *           11111111                PFLAG3_POINTER_ICON_MASK
+     *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
+     *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      * |-------|-------|-------|-------|
      */
 
@@ -2517,8 +2521,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * when this view can scroll in the end direction.
      */
     static final int PFLAG3_SCROLL_INDICATOR_END = 0x2000;
-
-    /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
 
@@ -2649,6 +2651,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The base value for other pointer icon shapes.
      */
     private static final int PFLAG3_POINTER_ICON_VALUE_START = 2 << PFLAG3_POINTER_ICON_LSHIFT;
+
+    /**
+     * Whether this view has rendered elements that overlap (see {@link
+     * #hasOverlappingRendering()}, {@link #forceHasOverlappingRendering(boolean)}, and
+     * {@link #getHasOverlappingRendering()} ). The value in this bit is only valid when
+     * PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED has been set. Otherwise, the value is
+     * determined by whatever {@link #hasOverlappingRendering()} returns.
+     */
+    private static final int PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE = 0x800000;
+
+    /**
+     * Whether {@link #forceHasOverlappingRendering(boolean)} has been called. When true, value
+     * in PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE is valid.
+     */
+    private static final int PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED = 0x1000000;
+
+    /* End of masks for mPrivateFlags3 */
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -4516,6 +4535,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         }
                     }
                     break;
+                case R.styleable.View_forceHasOverlappingRendering:
+                    if (a.peekValue(attr) != null) {
+                        forceHasOverlappingRendering(a.getBoolean(attr, true));
+                    }
+                    break;
+
             }
         }
 
@@ -12116,6 +12141,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets the behavior for overlapping rendering for this view (see {@link
+     * #hasOverlappingRendering()} for more details on this behavior). Calling this method
+     * is an alternative to overriding {@link #hasOverlappingRendering()} in a subclass,
+     * providing the value which is then used internally. That is, when {@link
+     * #forceHasOverlappingRendering(boolean)} is called, the value of {@link
+     * #hasOverlappingRendering()} is ignored and the value passed into this method is used
+     * instead.
+     *
+     * @param hasOverlappingRendering The value for overlapping rendering to be used internally
+     * instead of that returned by {@link #hasOverlappingRendering()}.
+     *
+     * @attr ref android.R.styleable#View_forceHasOverlappingRendering
+     */
+    public void forceHasOverlappingRendering(boolean hasOverlappingRendering) {
+        mPrivateFlags3 |= PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED;
+        if (hasOverlappingRendering) {
+            mPrivateFlags3 |= PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE;
+        } else {
+            mPrivateFlags3 &= ~PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE;
+        }
+    }
+
+    /**
+     * Returns the value for overlapping rendering that is used internally. This is either
+     * the value passed into {@link #forceHasOverlappingRendering(boolean)}, if called, or
+     * the return value of {@link #hasOverlappingRendering()}, otherwise.
+     *
+     * @return The value for overlapping rendering being used internally.
+     */
+    public final boolean getHasOverlappingRendering() {
+        return (mPrivateFlags3 & PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED) != 0 ?
+                (mPrivateFlags3 & PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE) != 0 :
+                hasOverlappingRendering();
+    }
+
+    /**
      * Returns whether this View has content which overlaps.
      *
      * <p>This function, intended to be overridden by specific View types, is an optimization when
@@ -12130,6 +12191,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>The current implementation of the saveLayer and saveLayerAlpha methods in {@link Canvas}
      * necessitates that a View return true if it uses the methods internally without passing the
      * {@link Canvas#CLIP_TO_LAYER_SAVE_FLAG}.</p>
+     *
+     * <p><strong>Note:</strong> The return value of this method is ignored if {@link
+     * #forceHasOverlappingRendering(boolean)} has been called on this view.</p>
      *
      * @return true if the content in this view might overlap, false otherwise.
      */
@@ -16566,7 +16630,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     void setDisplayListProperties(RenderNode renderNode) {
         if (renderNode != null) {
-            renderNode.setHasOverlappingRendering(hasOverlappingRendering());
+            renderNode.setHasOverlappingRendering(getHasOverlappingRendering());
             renderNode.setClipToBounds(mParent instanceof ViewGroup
                     && ((ViewGroup) mParent).getClipChildren());
 
