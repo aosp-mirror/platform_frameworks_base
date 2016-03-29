@@ -7380,8 +7380,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowState imeWin = mInputMethodWindow;
         final TaskStack focusedStack =
                 mCurrentFocus != null ? mCurrentFocus.getStack() : null;
+        final boolean dockVisible = isStackVisibleLocked(DOCKED_STACK_ID);
         if (imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
-                && isStackVisibleLocked(DOCKED_STACK_ID)
+                && dockVisible
                 && focusedStack != null
                 && focusedStack.getDockSide() == DOCKED_BOTTOM){
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
@@ -7391,12 +7392,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     stack.setAdjustedForIme(imeWin);
                 }
             }
+            displayContent.mDividerControllerLocked.setAdjustedForIme(true, true);
         } else {
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 final TaskStack stack = stacks.get(i);
-                stack.resetAdjustedForIme();
+                stack.resetAdjustedForIme(!dockVisible);
             }
+            displayContent.mDividerControllerLocked.setAdjustedForIme(false, dockVisible);
         }
     }
 

@@ -41,6 +41,8 @@ import android.view.animation.Interpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
 
+import java.util.ArrayList;
+
 /**
  * Keeps information about the docked stack divider.
  */
@@ -87,7 +89,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private final DimLayer mDimLayer;
 
     private boolean mMinimizedDock;
-    private boolean mAnimating;
+    private boolean mAnimatingForMinimizedDockedStack;
     private boolean mAnimationStarted;
     private long mAnimationStartTime;
     private float mAnimationStart;
@@ -96,7 +98,8 @@ public class DockedStackDividerController implements DimLayerUser {
     private final Interpolator mMinimizedDockInterpolator;
     private float mMaximizeMeetFraction;
     private final Rect mTouchRegion = new Rect();
-    private boolean mAdjustingForIme;
+    private boolean mAnimatingForIme;
+    private boolean mAdjustedForIme;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -174,12 +177,11 @@ public class DockedStackDividerController implements DimLayerUser {
         return mLastVisibility;
     }
 
-    void setAdjustingForIme(boolean adjusting) {
-        mAdjustingForIme = adjusting;
-    }
-
-    boolean isAdjustingForIme() {
-        return mAdjustingForIme;
+    void setAdjustedForIme(boolean adjusted, boolean animate) {
+        if (mAdjustedForIme != adjusted) {
+            mAnimatingForIme = animate;
+            mAdjustedForIme = adjusted;
+        }
     }
 
     void positionDockedStackedDivider(Rect frame) {
@@ -342,6 +344,7 @@ public class DockedStackDividerController implements DimLayerUser {
         }
 
         mMinimizedDock = minimizedDock;
+        mAnimatingForIme = false;
         if (minimizedDock) {
             if (animate) {
                 startAdjustAnimation(0f, 1f);
@@ -358,7 +361,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private void startAdjustAnimation(float from, float to) {
-        mAnimating = true;
+        mAnimatingForMinimizedDockedStack = true;
         mAnimationStarted = false;
         mAnimationStart = from;
         mAnimationTarget = to;
@@ -380,10 +383,45 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     public boolean animate(long now) {
-        if (!mAnimating) {
+        if (mAnimatingForMinimizedDockedStack) {
+            return animateForMinimizedDockedStack(now);
+        } else if (mAnimatingForIme) {
+            return animateForIme();
+        } else {
             return false;
         }
+    }
 
+    private boolean animateForIme() {
+        boolean updated = false;
+        boolean animating = false;
+
+        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
+        for (int i = stacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = stacks.get(i);
+            if (stack != null && stack.isAdjustedForIme()) {
+                updated |= stack.updateAdjustForIme();
+                animating |= stack.isAnimatingForIme();
+            }
+        }
+
+        if (updated) {
+            mService.mWindowPlacerLocked.performSurfacePlacement();
+        }
+
+        if (!animating) {
+            mAnimatingForIme = false;
+            for (int i = stacks.size() - 1; i >= 0; --i) {
+                final TaskStack stack = stacks.get(i);
+                if (stack != null) {
+                    stack.clearImeGoingAway();
+                }
+            }
+        }
+        return animating;
+    }
+
+    private boolean animateForMinimizedDockedStack(long now) {
         final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         if (!mAnimationStarted) {
             mAnimationStarted = true;
@@ -406,7 +444,7 @@ public class DockedStackDividerController implements DimLayerUser {
             }
         }
         if (t >= 1.0f) {
-            mAnimating = false;
+            mAnimatingForMinimizedDockedStack = false;
             return false;
         } else {
             return true;
