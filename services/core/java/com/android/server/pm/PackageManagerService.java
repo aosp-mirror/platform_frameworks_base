@@ -106,6 +106,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -458,6 +459,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     final ServiceThread mHandlerThread;
 
     final PackageHandler mHandler;
+
+    private final ProcessLoggingHandler mProcessLoggingHandler;
 
     /**
      * Messages for {@link #mHandler} that need to wait for system ready before
@@ -1712,6 +1715,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Send installed broadcasts if the install/update is not ephemeral
             if (!isEphemeral(res.pkg)) {
+                mProcessLoggingHandler.invalidateProcessLoggingBaseApkHash(res.pkg.baseCodePath);
+
                 // Send added for users that see the package for the first time
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/, null /*targetPackage*/,
@@ -2096,6 +2101,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
             mHandlerThread.start();
             mHandler = new PackageHandler(mHandlerThread.getLooper());
+            mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             File dataDir = Environment.getDataDirectory();
@@ -19466,5 +19472,27 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized (mPackages) {
             return new ArrayList<>(mPackages.values());
         }
+    }
+
+    /**
+     * Logs process start information (including base APK hash) to the security log.
+     * @hide
+     */
+    public void logAppProcessStartIfNeeded(String processName, int uid, String seinfo,
+            String apkFile, int pid) {
+        if (!SecurityLog.isLoggingEnabled()) {
+            return;
+        }
+        Bundle data = new Bundle();
+        data.putLong("startTimestamp", System.currentTimeMillis());
+        data.putString("processName", processName);
+        data.putInt("uid", uid);
+        data.putString("seinfo", seinfo);
+        data.putString("apkFile", apkFile);
+        data.putInt("pid", pid);
+        Message msg = mProcessLoggingHandler.obtainMessage(
+                ProcessLoggingHandler.LOG_APP_PROCESS_START_MSG);
+        msg.setData(data);
+        mProcessLoggingHandler.sendMessage(msg);
     }
 }
