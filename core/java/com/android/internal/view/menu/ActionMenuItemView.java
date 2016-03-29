@@ -346,16 +346,6 @@ public class ActionMenuItemView extends TextView
             }
             return false;
         }
-
-        @Override
-        protected boolean onForwardingStopped() {
-            final ShowableListMenu popup = getPopup();
-            if (popup != null) {
-                popup.dismiss();
-                return true;
-            }
-            return false;
-        }
     }
 
     public static abstract class PopupCallback {
