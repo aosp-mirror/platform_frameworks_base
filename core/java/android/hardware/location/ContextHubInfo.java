@@ -37,12 +37,34 @@ public class ContextHubInfo {
     private float mStoppedPowerDrawMw;
     private float mSleepPowerDrawMw;
     private float mPeakPowerDrawMw;
+    private int mMaxPacketLengthBytes;
 
     private int[] mSupportedSensors;
 
     private MemoryRegion[] mMemoryRegions;
 
     public ContextHubInfo() {
+    }
+
+    /**
+     * returns the maximum number of bytes that can be sent per message to the hub
+     *
+     * @return int - maximum bytes that can be transmitted in a
+     *         single packet
+     */
+    public int getMaxPacketLengthBytes() {
+        return mMaxPacketLengthBytes;
+    }
+
+    /**
+     * set the context hub unique identifer
+     *
+     * @param bytes - Maximum number of bytes per message
+     *
+     * @hide
+     */
+    public void setMaxPacketLenBytes(int bytes) {
+        mMaxPacketLengthBytes = bytes;
     }
 
     /**
