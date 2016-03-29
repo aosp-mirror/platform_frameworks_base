@@ -1488,7 +1488,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
     final UiHandler mUiHandler;
-    final ProcessStartLogger mProcessStartLogger;
 
     PackageManagerInternal mPackageManagerInt;
 
@@ -2459,8 +2458,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
         mUiHandler = new UiHandler();
-
-        mProcessStartLogger = new ProcessStartLogger();
 
         mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "foreground", BROADCAST_FG_TIMEOUT, false);
@@ -3594,7 +3591,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.processName, hostingType,
                     hostingNameStr != null ? hostingNameStr : "");
 
-            mProcessStartLogger.logIfNeededLocked(app, startResult);
+            try {
+                AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
+                        app.info.seinfo, app.info.sourceDir, startResult.pid);
+            } catch (RemoteException ex) {
+                // Ignore
+            }
 
             if (app.persistent) {
                 Watchdog.getInstance().processStarted(app.processName, startResult.pid);
@@ -6536,8 +6538,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }, dumpheapFilter);
-
-        mProcessStartLogger.registerListener(mContext);
 
         // Let system services know.
         mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);
