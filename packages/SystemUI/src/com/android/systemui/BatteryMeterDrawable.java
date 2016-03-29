@@ -452,7 +452,7 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         boolean pctOpaque = false;
         float pctX = 0, pctY = 0;
         String pctText = null;
-        if (!mPluggedIn && level > mCriticalLevel && mShowPercent) {
+        if (!mPluggedIn && !mPowerSaveEnabled && level > mCriticalLevel && mShowPercent) {
             mTextPaint.setColor(getColorForLevel(level));
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
@@ -480,7 +480,7 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mShapePath.op(mClipPath, Path.Op.INTERSECT);
         c.drawPath(mShapePath, mBatteryPaint);
 
-        if (!mPluggedIn) {
+        if (!mPluggedIn && !mPowerSaveEnabled) {
             if (level <= mCriticalLevel) {
                 // draw the warning text
                 final float x = mWidth * 0.5f;
