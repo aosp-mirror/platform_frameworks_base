@@ -2196,7 +2196,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void removeUserState(final int userHandle) {
-        mContext.getSystemService(StorageManager.class).destroyUserKey(userHandle);
+        try {
+            mContext.getSystemService(StorageManager.class).destroyUserKey(userHandle);
+        } catch (IllegalStateException e) {
+            // This may be simply because the user was partially created.
+            Slog.i(LOG_TAG,
+                "Destroying key for user " + userHandle + " failed, continuing anyway", e);
+        }
         // Cleanup package manager settings
         mPm.cleanUpUser(this, userHandle);
 
