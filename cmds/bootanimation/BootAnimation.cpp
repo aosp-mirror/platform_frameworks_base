@@ -18,6 +18,9 @@
 #define LOG_TAG "BootAnimation"
 
 #include <stdint.h>
+#include <sys/inotify.h>
+#include <sys/poll.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
 #include <fcntl.h>
@@ -57,23 +60,29 @@
 #include "BootAnimation.h"
 #include "AudioPlayer.h"
 
-#define OEM_BOOTANIMATION_FILE "/oem/media/bootanimation.zip"
-#define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
-#define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
-#define EXIT_PROP_NAME "service.bootanim.exit"
-
 namespace android {
 
+static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
+static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
+static const char SYSTEM_ENCRYPTED_BOOTANIMATION_FILE[] = "/system/media/bootanimation-encrypted.zip";
+static const char SYSTEM_DATA_DIR_PATH[] = "/data/system";
+static const char SYSTEM_TIME_DIR_NAME[] = "time";
+static const char SYSTEM_TIME_DIR_PATH[] = "/data/system/time";
+static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
+static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/system/time/last_time_change";
+static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
+static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/system/time/time_is_accurate";
+static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const int ANIM_ENTRY_NAME_MAX = 256;
 
 // ---------------------------------------------------------------------------
 
-BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true) {
+BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
+        mTimeCheckThread(NULL) {
     mSession = new SurfaceComposerClient();
 }
 
-BootAnimation::~BootAnimation() {
-}
+BootAnimation::~BootAnimation() {}
 
 void BootAnimation::onFirstRef() {
     status_t err = mSession->linkToComposerDeath(this);
@@ -638,10 +647,20 @@ bool BootAnimation::preloadZip(Animation& animation)
 
 bool BootAnimation::movie()
 {
-
     Animation* animation = loadAnimation(mZipFileName);
     if (animation == NULL)
         return false;
+
+    bool anyPartHasClock = false;
+    for (size_t i=0; i < animation->parts.size(); i++) {
+        if(animation->parts[i].clockPosY >= 0) {
+            anyPartHasClock = true;
+            break;
+        }
+    }
+    if (!anyPartHasClock) {
+        mClockEnabled = false;
+    }
 
     // Blend required to draw time on top of animation frames.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -664,7 +683,18 @@ bool BootAnimation::movie()
         mClockEnabled = clockTextureInitialized;
     }
 
+    if (mClockEnabled && !updateIsTimeAccurate()) {
+        mTimeCheckThread = new TimeCheckThread(this);
+        mTimeCheckThread->run("BootAnimation::TimeCheckThread", PRIORITY_NORMAL);
+    }
+
     playAnimation(*animation);
+
+    if (mTimeCheckThread != NULL) {
+        mTimeCheckThread->requestExit();
+        mTimeCheckThread = NULL;
+    }
+
     releaseAnimation(animation);
 
     if (clockTextureInitialized) {
@@ -745,7 +775,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
                 // which is equivalent to mHeight - (yc + animation.height)
                 glDrawTexiOES(xc, mHeight - (yc + animation.height),
                               0, animation.width, animation.height);
-                if (mClockEnabled && part.clockPosY >= 0) {
+                if (mClockEnabled && mTimeIsAccurate && part.clockPosY >= 0) {
                     drawTime(mClock, part.clockPosY);
                 }
 
@@ -824,6 +854,132 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
     mLoadedFiles.remove(fn);
     return animation;
 }
+
+bool BootAnimation::updateIsTimeAccurate() {
+    static constexpr long long MAX_TIME_IN_PAST =   60000LL * 60LL * 24LL * 30LL;  // 30 days
+    static constexpr long long MAX_TIME_IN_FUTURE = 60000LL * 90LL;  // 90 minutes
+
+    if (mTimeIsAccurate) {
+        return true;
+    }
+
+    struct stat statResult;
+    if(stat(ACCURATE_TIME_FLAG_FILE_PATH, &statResult) == 0) {
+        mTimeIsAccurate = true;
+        return true;
+    }
+
+    FILE* file = fopen(LAST_TIME_CHANGED_FILE_PATH, "r");
+    if (file != NULL) {
+      long long lastChangedTime = 0;
+      fscanf(file, "%lld", &lastChangedTime);
+      fclose(file);
+      if (lastChangedTime > 0) {
+        struct timespec now;
+        clock_gettime(CLOCK_REALTIME, &now);
+        // Match the Java timestamp format
+        long long rtcNow = (now.tv_sec * 1000LL) + (now.tv_nsec / 1000000LL);
+        if (lastChangedTime > rtcNow - MAX_TIME_IN_PAST
+            && lastChangedTime < rtcNow + MAX_TIME_IN_FUTURE) {
+            mTimeIsAccurate = true;
+        }
+      }
+    }
+
+    return mTimeIsAccurate;
+}
+
+BootAnimation::TimeCheckThread::TimeCheckThread(BootAnimation* bootAnimation) : Thread(false),
+    mInotifyFd(-1), mSystemWd(-1), mTimeWd(-1), mBootAnimation(bootAnimation) {}
+
+BootAnimation::TimeCheckThread::~TimeCheckThread() {
+    // mInotifyFd may be -1 but that's ok since we're not at risk of attempting to close a valid FD.
+    close(mInotifyFd);
+}
+
+bool BootAnimation::TimeCheckThread::threadLoop() {
+    bool shouldLoop = doThreadLoop() && !mBootAnimation->mTimeIsAccurate
+        && mBootAnimation->mClockEnabled;
+    if (!shouldLoop) {
+        close(mInotifyFd);
+        mInotifyFd = -1;
+    }
+    return shouldLoop;
+}
+
+bool BootAnimation::TimeCheckThread::doThreadLoop() {
+    static constexpr int BUFF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1));
+
+    // Poll instead of doing a blocking read so the Thread can exit if requested.
+    struct pollfd pfd = { mInotifyFd, POLLIN, 0 };
+    ssize_t pollResult = poll(&pfd, 1, 1000);
+
+    if (pollResult == 0) {
+        return true;
+    } else if (pollResult < 0) {
+        ALOGE("Could not poll inotify events");
+        return false;
+    }
+
+    char buff[BUFF_LEN] __attribute__ ((aligned(__alignof__(struct inotify_event))));;
+    ssize_t length = read(mInotifyFd, buff, BUFF_LEN);
+    if (length == 0) {
+        return true;
+    } else if (length < 0) {
+        ALOGE("Could not read inotify events");
+        return false;
+    }
+
+    const struct inotify_event *event;
+    for (char* ptr = buff; ptr < buff + length; ptr += sizeof(struct inotify_event) + event->len) {
+        event = (const struct inotify_event *) ptr;
+        if (event->wd == mSystemWd && strcmp(SYSTEM_TIME_DIR_NAME, event->name) == 0) {
+            addTimeDirWatch();
+        } else if (event->wd == mTimeWd && (strcmp(LAST_TIME_CHANGED_FILE_NAME, event->name) == 0
+                || strcmp(ACCURATE_TIME_FLAG_FILE_NAME, event->name) == 0)) {
+            return !mBootAnimation->updateIsTimeAccurate();
+        }
+    }
+
+    return true;
+}
+
+void BootAnimation::TimeCheckThread::addTimeDirWatch() {
+        mTimeWd = inotify_add_watch(mInotifyFd, SYSTEM_TIME_DIR_PATH,
+                IN_CLOSE_WRITE | IN_MOVED_TO | IN_ATTRIB);
+        if (mTimeWd > 0) {
+            // No need to watch for the time directory to be created if it already exists
+            inotify_rm_watch(mInotifyFd, mSystemWd);
+            mSystemWd = -1;
+        }
+}
+
+status_t BootAnimation::TimeCheckThread::readyToRun() {
+    mInotifyFd = inotify_init();
+    if (mInotifyFd < 0) {
+        ALOGE("Could not initialize inotify fd");
+        return NO_INIT;
+    }
+
+    mSystemWd = inotify_add_watch(mInotifyFd, SYSTEM_DATA_DIR_PATH, IN_CREATE | IN_ATTRIB);
+    if (mSystemWd < 0) {
+        close(mInotifyFd);
+        mInotifyFd = -1;
+        ALOGE("Could not add watch for %s", SYSTEM_DATA_DIR_PATH);
+        return NO_INIT;
+    }
+
+    addTimeDirWatch();
+
+    if (mBootAnimation->updateIsTimeAccurate()) {
+        close(mInotifyFd);
+        mInotifyFd = -1;
+        return ALREADY_EXISTS;
+    }
+
+    return NO_ERROR;
+}
+
 // ---------------------------------------------------------------------------
 
 }

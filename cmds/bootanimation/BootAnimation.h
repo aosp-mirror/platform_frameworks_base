@@ -51,6 +51,24 @@ private:
     virtual void        onFirstRef();
     virtual void        binderDied(const wp<IBinder>& who);
 
+    bool                updateIsTimeAccurate();
+
+    class TimeCheckThread : public Thread {
+    public:
+        TimeCheckThread(BootAnimation* bootAnimation);
+        virtual ~TimeCheckThread();
+    private:
+        virtual status_t    readyToRun();
+        virtual bool        threadLoop();
+        bool                doThreadLoop();
+        void                addTimeDirWatch();
+
+        int mInotifyFd;
+        int mSystemWd;
+        int mTimeWd;
+        BootAnimation* mBootAnimation;
+    };
+
     struct Texture {
         GLint   w;
         GLint   h;
@@ -113,8 +131,10 @@ private:
     sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
     bool        mClockEnabled;
+    bool        mTimeIsAccurate;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
+    sp<TimeCheckThread> mTimeCheckThread;
 };
 
 // ---------------------------------------------------------------------------
