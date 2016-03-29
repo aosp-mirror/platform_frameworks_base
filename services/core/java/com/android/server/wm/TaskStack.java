@@ -55,6 +55,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
     // If the stack should be resized to fullscreen.
     private static final boolean FULLSCREEN = true;
 
+    // When we have a top-bottom split screen, we shift the bottom stack up to accommodate
+    // the IME window. The static flag below controls whether to run animation when the
+    // IME window goes away.
+    private static final boolean ANIMATE_IME_GOING_AWAY = false;
+
     /** Unique identifier */
     final int mStackId;
 
@@ -107,6 +112,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private final Rect mLastContentBounds = new Rect();
     private final Rect mTmpAdjustedBounds = new Rect();
     private boolean mAdjustedForIme;
+    private boolean mImeGoingAway;
     private WindowState mImeWin;
     private float mMinimizeAmount;
     private final int mDockedStackMinimizeThickness;
@@ -796,19 +802,54 @@ public class TaskStack implements DimLayer.DimLayerUser,
     void setAdjustedForIme(WindowState imeWin) {
         mAdjustedForIme = true;
         mImeWin = imeWin;
-        if (updateAdjustedBounds()) {
-            getDisplayContent().mDividerControllerLocked.setAdjustingForIme(true);
+        mImeGoingAway = false;
+    }
+
+    boolean isAdjustedForIme() {
+        return mAdjustedForIme || mImeGoingAway;
+    }
+    void clearImeGoingAway() {
+        mImeGoingAway = false;
+    }
+
+    boolean isAnimatingForIme() {
+        return mImeWin != null && mImeWin.isAnimatingLw();
+    }
+
+    /**
+     * Update the stack's bounds (crop or position) according to the IME window's
+     * current position. When IME window is animated, the bottom stack is animated
+     * together to track the IME window's current position, and the top stack is
+     * cropped as necessary.
+     *
+     * @return true if a traversal should be performed after the adjustment.
+     */
+    boolean updateAdjustForIme() {
+        boolean stopped = false;
+        if (mImeGoingAway && (!ANIMATE_IME_GOING_AWAY || !isAnimatingForIme())) {
+            mImeWin = null;
+            mAdjustedForIme = false;
+            stopped = true;
         }
+        // Make sure to run a traversal when the animation stops so that the stack
+        // is moved to its final position.
+        return updateAdjustedBounds() || stopped;
     }
 
     /**
      * Resets the adjustment after it got adjusted for the IME.
+     * @param adjustBoundsNow if true, reset and update the bounds immediately and forget about
+     *                        animations; otherwise, set flag and animates the window away together
+     *                        with IME window.
      */
-    void resetAdjustedForIme() {
-        mAdjustedForIme = false;
-        mImeWin = null;
-        if (updateAdjustedBounds()) {
-            getDisplayContent().mDividerControllerLocked.setAdjustingForIme(true);
+    void resetAdjustedForIme(boolean adjustBoundsNow) {
+        if (adjustBoundsNow) {
+            mImeWin = null;
+            mAdjustedForIme = false;
+            mImeGoingAway = false;
+            updateAdjustedBounds();
+        } else {
+            mImeGoingAway |= mAdjustedForIme;
         }
     }
 
@@ -843,6 +884,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
         getDisplayContent().getContentRect(displayContentRect);
         contentBounds.set(displayContentRect);
         int imeTop = Math.max(imeWin.getDisplayFrameLw().top, contentBounds.top);
+
+        // if IME window is animating, get its actual vertical shown position (but no smaller than
+        // the final target vertical position)
+        if (imeWin.isAnimatingLw()) {
+            imeTop = Math.max(imeTop, imeWin.getShownPositionLw().y);
+        }
         imeTop += imeWin.getGivenContentInsetsLw().top;
         if (contentBounds.bottom > imeTop) {
             contentBounds.bottom = imeTop;
