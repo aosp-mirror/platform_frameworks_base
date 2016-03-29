@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import com.android.documentsui.State.ActionType;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
@@ -502,7 +503,7 @@ public final class Metrics {
      * @param name The name of the histogram.
      * @param bucket The bucket to increment.
      */
-    private static void logHistogram(Context context, String name, int bucket) {
+    private static void logHistogram(Context context, String name, @ActionType int bucket) {
         if (DEBUG) Log.d(TAG, name + ": " + bucket);
         MetricsLogger.histogram(context, name, bucket);
     }
