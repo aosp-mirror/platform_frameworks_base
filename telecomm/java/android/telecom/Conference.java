@@ -694,7 +694,7 @@ public abstract class Conference extends Conferenceable {
         if (mPreviousExtraKeys != null) {
             List<String> toRemove = new ArrayList<String>();
             for (String oldKey : mPreviousExtraKeys) {
-                if (!extras.containsKey(oldKey)) {
+                if (extras == null || !extras.containsKey(oldKey)) {
                     toRemove.add(oldKey);
                 }
             }
@@ -710,7 +710,9 @@ public abstract class Conference extends Conferenceable {
             mPreviousExtraKeys = new ArraySet<String>();
         }
         mPreviousExtraKeys.clear();
-        mPreviousExtraKeys.addAll(extras.keySet());
+        if (extras != null) {
+            mPreviousExtraKeys.addAll(extras.keySet());
+        }
     }
 
     /**
