@@ -10725,6 +10725,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void getMagnificationRegions(@NonNull Region outMagnified,
+                @NonNull Region outAvailable) {
+            synchronized (mWindowMap) {
+                if (mAccessibilityController != null) {
+                    mAccessibilityController.getMagnificationRegionsLocked(
+                            outMagnified, outAvailable);
+                } else {
+                    throw new IllegalStateException("Magnification callbacks not set!");
+                }
+            }
+        }
+
+        @Override
         public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
             synchronized (mWindowMap) {
                 WindowState windowState = mWindowMap.get(windowToken);

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -155,6 +156,15 @@ public abstract class WindowManagerInternal {
      * @see #setMagnificationCallbacks(MagnificationCallbacks)
      */
     public abstract void setMagnificationSpec(MagnificationSpec spec);
+
+    /**
+     * Obtains the magnified and available regions.
+     *
+     * @param outMagnified the currently magnified region
+     * @param outAvailable the region available for magnification
+     */
+    public abstract void getMagnificationRegions(@NonNull Region outMagnified,
+            @NonNull Region outAvailable);
 
     /**
      * Gets the magnification and translation applied to a window given its token.
