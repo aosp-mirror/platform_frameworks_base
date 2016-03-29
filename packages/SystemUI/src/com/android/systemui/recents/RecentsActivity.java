@@ -338,7 +338,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mRecentsView.updateStack(stack);
 
         // Update the nav bar scrim, but defer the animation until the enter-window event
-        boolean animateNavBarScrim = !launchState.launchedWhileDocking;
+        boolean animateNavBarScrim = !launchState.launchedViaDockGesture;
         updateNavBarScrim(animateNavBarScrim, null);
 
         // If this is a new instance relaunched by AM, without going through the normal mechanisms,

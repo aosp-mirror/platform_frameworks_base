@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.RectF;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -152,30 +151,26 @@ public class TaskStackAnimationHelper {
 
             if (hideTask) {
                 tv.setVisibility(View.INVISIBLE);
-            } else if (launchState.launchedFromApp && !launchState.launchedWhileDocking) {
+            } else if (launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
                 if (task.isLaunchTarget) {
                     tv.onPrepareLaunchTargetForEnterAnimation();
                 } else if (currentTaskOccludesLaunchTarget) {
                     // Move the task view slightly lower so we can animate it in
-                    RectF bounds = new RectF(mTmpTransform.rect);
-                    bounds.offset(0, taskViewAffiliateGroupEnterOffset);
+                    mTmpTransform.rect.offset(0, taskViewAffiliateGroupEnterOffset);
+                    mTmpTransform.alpha = 0f;
+                    mStackView.updateTaskViewToTransform(tv, mTmpTransform,
+                            AnimationProps.IMMEDIATE);
                     tv.setClipViewInStack(false);
-                    tv.setAlpha(0f);
-                    tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top,
-                            (int) bounds.right, (int) bounds.bottom);
                 }
             } else if (launchState.launchedFromHome) {
                 // Move the task view off screen (below) so we can animate it in
-                RectF bounds = new RectF(mTmpTransform.rect);
-                bounds.offset(0, offscreenYOffset);
-                tv.setAlpha(0f);
-                tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
-                        (int) bounds.bottom);
-            } else if (launchState.launchedWhileDocking) {
-                RectF bounds = new RectF(mTmpTransform.rect);
-                bounds.offset(0, launchedWhileDockingOffset);
-                tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
-                        (int) bounds.bottom);
+                mTmpTransform.rect.offset(0, offscreenYOffset);
+                mTmpTransform.alpha = 0f;
+                mStackView.updateTaskViewToTransform(tv, mTmpTransform, AnimationProps.IMMEDIATE);
+            } else if (launchState.launchedViaDockGesture) {
+                mTmpTransform.rect.offset(0, launchedWhileDockingOffset);
+                mTmpTransform.alpha = 0f;
+                mStackView.updateTaskViewToTransform(tv, mTmpTransform, AnimationProps.IMMEDIATE);
             }
         }
     }
@@ -223,7 +218,7 @@ public class TaskStackAnimationHelper {
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
 
-            if (launchState.launchedFromApp && !launchState.launchedWhileDocking) {
+            if (launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
                 if (task.isLaunchTarget) {
                     tv.onStartLaunchTargetEnterAnimation(mTmpTransform,
                             taskViewEnterFromAppDuration, mStackView.mScreenPinningEnabled,
@@ -262,7 +257,7 @@ public class TaskStackAnimationHelper {
                 if (i == taskViewCount - 1) {
                     tv.onStartFrontTaskEnterAnimation(mStackView.mScreenPinningEnabled);
                 }
-            } else if (launchState.launchedWhileDocking) {
+            } else if (launchState.launchedViaDockGesture) {
                 // Animate the tasks up
                 AnimationProps taskAnimation = new AnimationProps()
                         .setDuration(AnimationProps.BOUNDS, (int) (ENTER_WHILE_DOCKING_DURATION +
