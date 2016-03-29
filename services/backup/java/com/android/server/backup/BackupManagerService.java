@@ -7617,77 +7617,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // ----- Restore handling -----
 
-    // new style: we only store the SHA-1 hashes of each sig, not the full block
-    static boolean signaturesMatch(ArrayList<byte[]> storedSigHashes, PackageInfo target) {
-        if (target == null) {
-            return false;
-        }
-
-        // If the target resides on the system partition, we allow it to restore
-        // data from the like-named package in a restore set even if the signatures
-        // do not match.  (Unlike general applications, those flashed to the system
-        // partition will be signed with the device's platform certificate, so on
-        // different phones the same system app will have different signatures.)
-        if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            if (MORE_DEBUG) Slog.v(TAG, "System app " + target.packageName + " - skipping sig check");
-            return true;
-        }
-
-        // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // !!! TODO: is this the right policy?
-        Signature[] deviceSigs = target.signatures;
-        if (MORE_DEBUG) Slog.v(TAG, "signaturesMatch(): stored=" + storedSigHashes
-                + " device=" + deviceSigs);
-        if ((storedSigHashes == null || storedSigHashes.size() == 0)
-                && (deviceSigs == null || deviceSigs.length == 0)) {
-            return true;
-        }
-        if (storedSigHashes == null || deviceSigs == null) {
-            return false;
-        }
-
-        // !!! TODO: this demands that every stored signature match one
-        // that is present on device, and does not demand the converse.
-        // Is this this right policy?
-        final int nStored = storedSigHashes.size();
-        final int nDevice = deviceSigs.length;
-
-        // hash each on-device signature
-        ArrayList<byte[]> deviceHashes = new ArrayList<byte[]>(nDevice);
-        for (int i = 0; i < nDevice; i++) {
-            deviceHashes.add(hashSignature(deviceSigs[i]));
-        }
-
-        // now ensure that each stored sig (hash) matches an on-device sig (hash)
-        for (int n = 0; n < nStored; n++) {
-            boolean match = false;
-            final byte[] storedHash = storedSigHashes.get(n);
-            for (int i = 0; i < nDevice; i++) {
-                if (Arrays.equals(storedHash, deviceHashes.get(i))) {
-                    match = true;
-                    break;
-                }
-            }
-            // match is false when no on-device sig matched one of the stored ones
-            if (!match) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    static byte[] hashSignature(Signature sig) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(sig.toByteArray());
-            return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            Slog.w(TAG, "No SHA-256 algorithm found!");
-        }
-        return null;
-    }
-
     // Old style: directly match the stored vs on device signature blocks
     static boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
         if (target == null) {
@@ -8200,7 +8129,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             Metadata metaInfo = mPmAgent.getRestoredMetadata(packageName);
-            if (!signaturesMatch(metaInfo.sigHashes, mCurrentPackage)) {
+            if (!BackupUtils.signaturesMatch(metaInfo.sigHashes, mCurrentPackage)) {
                 Slog.w(TAG, "Signature mismatch restoring " + packageName);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                         "Signature mismatch");
