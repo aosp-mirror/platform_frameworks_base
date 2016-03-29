@@ -118,6 +118,9 @@ public class ShortcutInfo implements Parcelable {
     @NonNull
     private String mTitle;
 
+    @Nullable
+    private String mText;
+
     /**
      * Intent *with extras removed*.
      */
@@ -157,6 +160,7 @@ public class ShortcutInfo implements Parcelable {
         mActivityComponent = b.mActivityComponent;
         mIcon = b.mIcon;
         mTitle = b.mTitle;
+        mText = b.mText;
         mIntent = b.mIntent;
         if (mIntent != null) {
             final Bundle intentExtras = mIntent.getExtras();
@@ -176,6 +180,7 @@ public class ShortcutInfo implements Parcelable {
      * @hide
      */
     public void enforceMandatoryFields() {
+        Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
         Preconditions.checkStringNotEmpty(mTitle, "Shortcut title must be provided");
         Preconditions.checkNotNull(mIntent, "Shortcut Intent must be provided");
     }
@@ -195,16 +200,17 @@ public class ShortcutInfo implements Parcelable {
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
                 mBitmapPath = source.mBitmapPath;
+                mIconResourceId = source.mIconResourceId;
             }
 
             mTitle = source.mTitle;
+            mText = source.mText;
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
                 mIntent = source.mIntent;
                 mIntentPersistableExtras = source.mIntentPersistableExtras;
             }
             mWeight = source.mWeight;
             mExtras = source.mExtras;
-            mIconResourceId = source.mIconResourceId;
         } else {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
@@ -243,6 +249,9 @@ public class ShortcutInfo implements Parcelable {
         }
         if (source.mTitle != null) {
             mTitle = source.mTitle;
+        }
+        if (source.mText != null) {
+            mText = source.mText;
         }
         if (source.mIntent != null) {
             mIntent = source.mIntent;
@@ -305,6 +314,8 @@ public class ShortcutInfo implements Parcelable {
 
         private String mTitle;
 
+        private String mText;
+
         private Intent mIntent;
 
         private int mWeight;
@@ -364,6 +375,15 @@ public class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setTitle(@NonNull String title) {
             mTitle = Preconditions.checkStringNotEmpty(title, "title");
+            return this;
+        }
+
+        /**
+         * Sets the text of a shortcut.  This is an optional field.
+         */
+        @NonNull
+        public Builder setText(@NonNull String text) {
+            mText = Preconditions.checkStringNotEmpty(text, "text");
             return this;
         }
 
@@ -454,6 +474,14 @@ public class ShortcutInfo implements Parcelable {
     @Nullable
     public String getTitle() {
         return mTitle;
+    }
+
+    /**
+     * Return the shortcut text.
+     */
+    @Nullable
+    public String getText() {
+        return mText;
     }
 
     /**
@@ -630,6 +658,7 @@ public class ShortcutInfo implements Parcelable {
         mActivityComponent = source.readParcelable(cl);
         mIcon = source.readParcelable(cl);
         mTitle = source.readString();
+        mText = source.readString();
         mIntent = source.readParcelable(cl);
         mIntentPersistableExtras = source.readParcelable(cl);
         mWeight = source.readInt();
@@ -647,6 +676,7 @@ public class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mActivityComponent, flags);
         dest.writeParcelable(mIcon, flags);
         dest.writeString(mTitle);
+        dest.writeString(mText);
         dest.writeParcelable(mIntent, flags);
         dest.writeParcelable(mIntentPersistableExtras, flags);
         dest.writeInt(mWeight);
@@ -708,6 +738,9 @@ public class ShortcutInfo implements Parcelable {
         sb.append(", title=");
         sb.append(secure ? "***" : mTitle);
 
+        sb.append(", text=");
+        sb.append(secure ? "***" : mText);
+
         sb.append(", icon=");
         sb.append(mIcon);
 
@@ -744,7 +777,8 @@ public class ShortcutInfo implements Parcelable {
 
     /** @hide */
     public ShortcutInfo(String id, String packageName, ComponentName activityComponent,
-            Icon icon, String title, Intent intent, PersistableBundle intentPersistableExtras,
+            Icon icon, String title, String text, Intent intent,
+            PersistableBundle intentPersistableExtras,
             int weight, PersistableBundle extras, long lastChangedTimestamp,
             int flags, int iconResId, String bitmapPath) {
         mId = id;
@@ -752,6 +786,7 @@ public class ShortcutInfo implements Parcelable {
         mActivityComponent = activityComponent;
         mIcon = icon;
         mTitle = title;
+        mText = text;
         mIntent = intent;
         mIntentPersistableExtras = intentPersistableExtras;
         mWeight = weight;

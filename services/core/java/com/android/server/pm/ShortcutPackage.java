@@ -55,6 +55,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_ID = "id";
     private static final String ATTR_ACTIVITY = "activity";
     private static final String ATTR_TITLE = "title";
+    private static final String ATTR_TEXT = "text";
     private static final String ATTR_INTENT = "intent";
     private static final String ATTR_WEIGHT = "weight";
     private static final String ATTR_TIMESTAMP = "timestamp";
@@ -439,6 +440,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_ACTIVITY, si.getActivityComponent());
         // writeAttr(out, "icon", si.getIcon());  // We don't save it.
         ShortcutService.writeAttr(out, ATTR_TITLE, si.getTitle());
+        ShortcutService.writeAttr(out, ATTR_TEXT, si.getText());
         ShortcutService.writeAttr(out, ATTR_INTENT, si.getIntentNoExtras());
         ShortcutService.writeAttr(out, ATTR_WEIGHT, si.getWeight());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
@@ -515,6 +517,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         ComponentName activityComponent;
         // Icon icon;
         String title;
+        String text;
         Intent intent;
         PersistableBundle intentPersistableExtras = null;
         int weight;
@@ -528,6 +531,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         activityComponent = ShortcutService.parseComponentNameAttribute(parser,
                 ATTR_ACTIVITY);
         title = ShortcutService.parseStringAttribute(parser, ATTR_TITLE);
+        text = ShortcutService.parseStringAttribute(parser, ATTR_TEXT);
         intent = ShortcutService.parseIntentAttribute(parser, ATTR_INTENT);
         weight = (int) ShortcutService.parseLongAttribute(parser, ATTR_WEIGHT);
         lastChangedTimestamp = ShortcutService.parseLongAttribute(parser, ATTR_TIMESTAMP);
@@ -559,7 +563,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
         return new ShortcutInfo(
-                id, packageName, activityComponent, /* icon =*/ null, title, intent,
+                id, packageName, activityComponent, /* icon =*/ null, title, text, intent,
                 intentPersistableExtras, weight, extras, lastChangedTimestamp, flags,
                 iconRes, bitmapPath);
     }
