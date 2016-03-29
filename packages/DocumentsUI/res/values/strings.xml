@@ -220,6 +220,12 @@
         <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
     </plurals>
 
+    <!-- Label text showing user how many items are being dragged. Can be one or more elements. -->
+    <plurals name="elements_dragged">
+        <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> item</item>
+        <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> items</item>
+    </plurals>
+
     <!-- Dialog text shown to users when asking if they want to delete a file (a confirmation) -->
     <string name="delete_filename_confirmation_message">Delete \"<xliff:g id="name" example="cat.jpg">%1$s</xliff:g>\"?</string>
     <!-- Dialog text shown to users when asking if they want to delete a folder (a confirmation) -->
