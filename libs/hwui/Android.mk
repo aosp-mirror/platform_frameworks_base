@@ -324,6 +324,7 @@ LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
     tests/microbench/main.cpp \
     tests/microbench/DisplayListCanvasBench.cpp \
+    tests/microbench/FontBench.cpp \
     tests/microbench/LinearAllocatorBench.cpp \
     tests/microbench/PathParserBench.cpp \
     tests/microbench/ShadowBench.cpp \
