@@ -44,6 +44,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Spinner;
 
 import com.android.documentsui.SearchViewManager.SearchManagerListener;
@@ -98,6 +99,8 @@ public abstract class BaseActivity extends Activity
     @CallSuper
     @Override
     public void onCreate(Bundle icicle) {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
         // Record the time when onCreate is invoked for metric.
         mStartTime = new Date().getTime();
 
