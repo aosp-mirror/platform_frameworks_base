@@ -29,12 +29,30 @@ import java.util.HashMap;
  */
 public class ContextHubService extends IContextHubService.Stub {
 
+    public static final String CONTEXTHUB_SERVICE = "contexthub_service";
+
     private static final String TAG = "ContextHubService";
     private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
     private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
             + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
 
-    public static final String CONTEXTHUB_SERVICE = "contexthub_service";
+
+    public static final int ANY_HUB             = -1;
+    public static final int MSG_LOAD_NANO_APP   = 5;
+    public static final int MSG_UNLOAD_NANO_APP = 2;
+
+    private static final String PRE_LOADED_GENERIC_UNKNOWN = "Preloaded app, unknown";
+    private static final String PRE_LOADED_APP_NAME = PRE_LOADED_GENERIC_UNKNOWN;
+    private static final String PRE_LOADED_APP_PUBLISHER = PRE_LOADED_GENERIC_UNKNOWN;
+    private static final int PRE_LOADED_APP_MEM_REQ = 0;
+
+    private static final int MSG_HEADER_SIZE = 4;
+    private static final int MSG_FIELD_TYPE = 0;
+    private static final int MSG_FIELD_VERSION = 1;
+    private static final int MSG_FIELD_HUB_HANDLE = 2;
+    private static final int MSG_FIELD_APP_INSTANCE = 3;
+
+    private static final int OS_APP_INSTANCE = -1;
 
     private final Context mContext;
 
@@ -42,44 +60,27 @@ public class ContextHubService extends IContextHubService.Stub {
     private ContextHubInfo[] mContextHubInfo;
     private IContextHubCallback mCallback;
 
+    private native int nativeSendMessage(int[] header, byte[] data);
+    private native ContextHubInfo[] nativeInitialize();
+
+
     public ContextHubService(Context context) {
         mContext = context;
         mContextHubInfo = nativeInitialize();
+        mNanoAppHash = new HashMap<Integer, NanoAppInstanceInfo>();
 
         for (int i = 0; i < mContextHubInfo.length; i++) {
-            Log.v(TAG, "ContextHub[" + i + "] id: " + mContextHubInfo[i].getId()
+            Log.d(TAG, "ContextHub[" + i + "] id: " + mContextHubInfo[i].getId()
                   + ", name:  " + mContextHubInfo[i].getName());
         }
     }
 
-    private native int nativeSendMessage(int[] header, byte[] data);
-    private native ContextHubInfo[] nativeInitialize();
-
     @Override
-    public int registerCallback(IContextHubCallback callback) throws RemoteException{
+    public int registerCallback(IContextHubCallback callback) throws RemoteException {
         checkPermissions();
-        mCallback = callback;
-        return 0;
-    }
-
-
-    private int onMessageReceipt(int[] header, byte[] data) {
-        if (mCallback != null) {
-            // TODO : Defend against unexpected header sizes
-            //        Add abstraction for magic numbers
-            //        onMessageRecipt should pass the right arguments
-            ContextHubMessage msg = new ContextHubMessage(header[0], header[1], data);
-
-            try {
-                mCallback.onMessageReceipt(0, 0, msg);
-            } catch (Exception e) {
-                Log.e(TAG, "Exception " + e + " when calling remote callback");
-                return -1;
-            }
-        } else {
-            Log.d(TAG, "Message Callback is NULL");
+        synchronized(this) {
+          mCallback = callback;
         }
-
         return 0;
     }
 
@@ -118,14 +119,17 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         // Call Native interface here
-        int[] msgHeader = new int[8];
-        msgHeader[0] = contextHubHandle;
-        msgHeader[1] = app.getAppId();
-        msgHeader[2] = app.getAppVersion();
-        msgHeader[3] = ContextHubManager.MSG_LOAD_NANO_APP;
-        msgHeader[4] = 0; // Loading hints
+        int[] msgHeader = new int[MSG_HEADER_SIZE];
+        msgHeader[MSG_FIELD_HUB_HANDLE] = contextHubHandle;
+        msgHeader[MSG_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
+        msgHeader[MSG_FIELD_VERSION] = 0;
+        msgHeader[MSG_FIELD_TYPE] = MSG_LOAD_NANO_APP;
 
-        return nativeSendMessage(msgHeader, app.getAppBinary());
+        if (nativeSendMessage(msgHeader, app.getAppBinary()) != 0) {
+            return -1;
+        }
+        // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
+        return 0;
     }
 
     @Override
@@ -137,12 +141,18 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         // Call Native interface here
-        int[] msgHeader = new int[8];
-        msgHeader[0] = info.getContexthubId();
-        msgHeader[1] = ContextHubManager.MSG_UNLOAD_NANO_APP;
-        msgHeader[2] = info.getHandle();
+        int[] msgHeader = new int[MSG_HEADER_SIZE];
+        msgHeader[MSG_FIELD_HUB_HANDLE] = ANY_HUB;
+        msgHeader[MSG_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
+        msgHeader[MSG_FIELD_VERSION] = 0;
+        msgHeader[MSG_FIELD_TYPE] = MSG_UNLOAD_NANO_APP;
 
-        return nativeSendMessage(msgHeader, null);
+        if(nativeSendMessage(msgHeader, null) != 0) {
+            return -1;
+        }
+
+        // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
+        return 0;
     }
 
     @Override
@@ -166,7 +176,7 @@ public class ContextHubService extends IContextHubService.Stub {
         for(Integer nanoAppInstance : mNanoAppHash.keySet()) {
             NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstance);
 
-            if(filter.testMatch(info)){
+            if (filter.testMatch(info)){
                 foundInstances.add(nanoAppInstance);
             }
         }
@@ -183,12 +193,12 @@ public class ContextHubService extends IContextHubService.Stub {
     public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage msg)
             throws RemoteException {
         checkPermissions();
-        int[] msgHeader = new int[8];
-        msgHeader[0] = ContextHubManager.MSG_DATA_SEND;
-        msgHeader[1] = hubHandle;
-        msgHeader[2] = nanoAppHandle;
-        msgHeader[3] = msg.getMsgType();
-        msgHeader[4] = msg.getVersion();
+
+        int[] msgHeader = new int[MSG_HEADER_SIZE];
+        msgHeader[MSG_FIELD_HUB_HANDLE] = hubHandle;
+        msgHeader[MSG_FIELD_APP_INSTANCE] = nanoAppHandle;
+        msgHeader[MSG_FIELD_VERSION] = msg.getVersion();
+        msgHeader[MSG_FIELD_TYPE] = msg.getMsgType();
 
         return nativeSendMessage(msgHeader, msg.getData());
     }
@@ -196,5 +206,52 @@ public class ContextHubService extends IContextHubService.Stub {
     private void checkPermissions() {
         mContext.enforceCallingPermission(HARDWARE_PERMISSION, ENFORCE_HW_PERMISSION_MESSAGE);
     }
-}
 
+    private int onMessageReceipt(int[] header, byte[] data) {
+        if (header == null || data == null || header.length < MSG_HEADER_SIZE) {
+            return  -1;
+        }
+
+        synchronized(this) {
+            if (mCallback != null) {
+                ContextHubMessage msg = new ContextHubMessage(header[MSG_FIELD_TYPE],
+                        header[MSG_FIELD_VERSION],
+                        data);
+
+                try {
+                    mCallback.onMessageReceipt(header[MSG_FIELD_HUB_HANDLE],
+                            header[MSG_FIELD_APP_INSTANCE],
+                            msg);
+                } catch (Exception e) {
+                    Log.w(TAG, "Exception " + e + " when calling remote callback");
+                    return -1;
+                }
+            } else {
+                Log.d(TAG, "Message Callback is NULL");
+            }
+        }
+
+        return 0;
+    }
+
+    private int addAppInstance(int hubHandle, int appInstanceHandle, long appId, int appVersion) {
+        // App Id encodes vendor & version
+        NanoAppInstanceInfo appInfo = new NanoAppInstanceInfo();
+
+        appInfo.setAppId(appId);
+        appInfo.setAppVersion(appVersion);
+        appInfo.setName(PRE_LOADED_APP_NAME);
+        appInfo.setContexthubId(hubHandle);
+        appInfo.setHandle(appInstanceHandle);
+        appInfo.setPublisher(PRE_LOADED_APP_PUBLISHER);
+        appInfo.setNeededExecMemBytes(PRE_LOADED_APP_MEM_REQ);
+        appInfo.setNeededReadMemBytes(PRE_LOADED_APP_MEM_REQ);
+        appInfo.setNeededWriteMemBytes(PRE_LOADED_APP_MEM_REQ);
+
+        mNanoAppHash.put(appInstanceHandle, appInfo);
+        Log.d(TAG, "Added app instance " + appInstanceHandle + " with id " + appId
+              + " version " + appVersion);
+
+        return 0;
+    }
+}
