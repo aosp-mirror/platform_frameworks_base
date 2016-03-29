@@ -146,7 +146,7 @@ final class PackageDexOptimizer {
                 } else {
                     try {
                         dexoptNeeded = DexFile.getDexOptNeeded(path,
-                                dexCodeInstructionSet, DexFile.COMPILATION_TYPE_FULL);
+                                dexCodeInstructionSet, "speed-profile", useJit);
                     } catch (IOException ioe) {
                         Slog.w(TAG, "IOException reading apk: " + path, ioe);
                         return DEX_OPT_FAILED;
