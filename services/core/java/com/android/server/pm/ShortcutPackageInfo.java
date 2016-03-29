@@ -15,14 +15,11 @@
  */
 package com.android.server.pm;
 
-import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.Signature;
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
+import com.android.server.backup.BackupUtils;
 
 import libcore.io.Base64;
 import libcore.util.HexEncoding;
@@ -33,31 +30,20 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Package information used by {@link android.content.pm.ShortcutManager} for backup / restore.
- *
- * TODO: The methods about signature hashes are copied from BackupManagerService, which is not
- * visible here.  Unify the code.
  */
-class ShortcutPackageInfo implements ShortcutPackageItem {
+class ShortcutPackageInfo {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "package-info";
-    private static final String ATTR_USER_ID = "user";
-    private static final String ATTR_NAME = "name";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_SHADOW = "shadow";
 
     private static final String TAG_SIGNATURE = "signature";
     private static final String ATTR_SIGNATURE_HASH = "hash";
-
-    private final String mPackageName;
-    private final int mUserId;
 
     /**
      * When true, this package information was restored from the previous device, and the app hasn't
@@ -67,22 +53,14 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
     private int mVersionCode;
     private ArrayList<byte[]> mSigHashes;
 
-    private ShortcutPackageInfo(String packageName, int userId,
-            int versionCode, ArrayList<byte[]> sigHashes, boolean isShadow) {
-        mPackageName = Preconditions.checkNotNull(packageName);
-        mUserId = userId;
+    private ShortcutPackageInfo(int versionCode, ArrayList<byte[]> sigHashes, boolean isShadow) {
         mVersionCode = versionCode;
         mIsShadow = isShadow;
         mSigHashes = sigHashes;
     }
 
-    @NonNull
-    public String getPackageName() {
-        return mPackageName;
-    }
-
-    public int getUserId() {
-        return mUserId;
+    public static ShortcutPackageInfo newEmpty() {
+        return new ShortcutPackageInfo(0, new ArrayList<>(0), /* isShadow */ false);
     }
 
     public boolean isShadow() {
@@ -101,92 +79,13 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
         return mVersionCode;
     }
 
-    private static byte[] hashSignature(Signature sig) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(sig.toByteArray());
-            return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            Slog.w(TAG, "No SHA-256 algorithm found!");
-        }
-        return null;
-    }
-
-    private static ArrayList<byte[]> hashSignatureArray(Signature[] sigs) {
-        if (sigs == null) {
-            return null;
-        }
-
-        ArrayList<byte[]> hashes = new ArrayList<byte[]>(sigs.length);
-        for (Signature s : sigs) {
-            hashes.add(hashSignature(s));
-        }
-        return hashes;
-    }
-
-    private static boolean signaturesMatch(ArrayList<byte[]> storedSigHashes, PackageInfo target) {
-        if (target == null) {
-            return false;
-        }
-
-        // If the target resides on the system partition, we allow it to restore
-        // data from the like-named package in a restore set even if the signatures
-        // do not match.  (Unlike general applications, those flashed to the system
-        // partition will be signed with the device's platform certificate, so on
-        // different phones the same system app will have different signatures.)
-        if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            return true;
-        }
-
-        // Allow unsigned apps, but not signed on one device and unsigned on the other
-        // !!! TODO: is this the right policy?
-        Signature[] deviceSigs = target.signatures;
-        if ((storedSigHashes == null || storedSigHashes.size() == 0)
-                && (deviceSigs == null || deviceSigs.length == 0)) {
-            return true;
-        }
-        if (storedSigHashes == null || deviceSigs == null) {
-            return false;
-        }
-
-        // !!! TODO: this demands that every stored signature match one
-        // that is present on device, and does not demand the converse.
-        // Is this this right policy?
-        final int nStored = storedSigHashes.size();
-        final int nDevice = deviceSigs.length;
-
-        // hash each on-device signature
-        ArrayList<byte[]> deviceHashes = new ArrayList<byte[]>(nDevice);
-        for (int i = 0; i < nDevice; i++) {
-            deviceHashes.add(hashSignature(deviceSigs[i]));
-        }
-
-        // now ensure that each stored sig (hash) matches an on-device sig (hash)
-        for (int n = 0; n < nStored; n++) {
-            boolean match = false;
-            final byte[] storedHash = storedSigHashes.get(n);
-            for (int i = 0; i < nDevice; i++) {
-                if (Arrays.equals(storedHash, deviceHashes.get(i))) {
-                    match = true;
-                    break;
-                }
-            }
-            // match is false when no on-device sig matched one of the stored ones
-            if (!match) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public boolean canRestoreTo(PackageInfo target) {
         if (target.versionCode < mVersionCode) {
             Slog.w(TAG, String.format("Package current version %d < backed up version %d",
                     target.versionCode, mVersionCode));
             return false;
         }
-        if (!signaturesMatch(mSigHashes, target)) {
+        if (!BackupUtils.signaturesMatch(mSigHashes, target)) {
             Slog.w(TAG, "Package signature mismtach");
             return false;
         }
@@ -194,37 +93,34 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
     }
 
     public static ShortcutPackageInfo generateForInstalledPackage(
-            ShortcutService s, String packageName, @UserIdInt int userId) {
-        final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, userId);
+            ShortcutService s, String packageName, @UserIdInt int packageUserId) {
+        final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, packageUserId);
         if (pi.signatures == null || pi.signatures.length == 0) {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
         }
-        final ShortcutPackageInfo ret = new ShortcutPackageInfo(packageName, userId, pi.versionCode,
-                hashSignatureArray(pi.signatures), /* shadow=*/ false);
+        final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.versionCode,
+                BackupUtils.hashSignatureArray(pi.signatures), /* shadow=*/ false);
 
         return ret;
     }
 
-    public void refreshAndSave(ShortcutService s, @UserIdInt int userId) {
-        final PackageInfo pi = s.getPackageInfoWithSignatures(mPackageName, userId);
+    public void refresh(ShortcutService s, ShortcutPackageItem pkg) {
+        // Note use mUserId here, rather than userId.
+        final PackageInfo pi = s.getPackageInfoWithSignatures(
+                pkg.getPackageName(), pkg.getPackageUserId());
         if (pi == null) {
-            Slog.w(TAG, "Package not found: " + mPackageName);
+            Slog.w(TAG, "Package not found: " + pkg.getPackageName());
             return;
         }
         mVersionCode = pi.versionCode;
-        mSigHashes = hashSignatureArray(pi.signatures);
-
-        s.scheduleSaveUser(userId);
+        mSigHashes = BackupUtils.hashSignatureArray(pi.signatures);
     }
 
-    public void saveToXml(XmlSerializer out, boolean forBackup)
-            throws IOException, XmlPullParserException {
+    public void saveToXml(XmlSerializer out) throws IOException {
 
         out.startTag(null, TAG_ROOT);
 
-        ShortcutService.writeAttr(out, ATTR_NAME, mPackageName);
-        ShortcutService.writeAttr(out, ATTR_USER_ID, mUserId);
         ShortcutService.writeAttr(out, ATTR_VERSION, mVersionCode);
         ShortcutService.writeAttr(out, ATTR_SHADOW, mIsShadow);
 
@@ -236,11 +132,9 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
         out.endTag(null, TAG_ROOT);
     }
 
-    public static ShortcutPackageInfo loadFromXml(XmlPullParser parser, int ownerUserId)
+    public static ShortcutPackageInfo loadFromXml(XmlPullParser parser)
             throws IOException, XmlPullParserException {
 
-        final String packageName = ShortcutService.parseStringAttribute(parser, ATTR_NAME);
-        final int userId = ShortcutService.parseIntAttribute(parser, ATTR_USER_ID, ownerUserId);
         final int versionCode = ShortcutService.parseIntAttribute(parser, ATTR_VERSION);
         final boolean shadow = ShortcutService.parseBooleanAttribute(parser, ATTR_SHADOW);
 
@@ -256,31 +150,27 @@ class ShortcutPackageInfo implements ShortcutPackageItem {
             }
             final int depth = parser.getDepth();
             final String tag = parser.getName();
-            switch (tag) {
-                case TAG_SIGNATURE: {
-                    final String hash = ShortcutService.parseStringAttribute(
-                            parser, ATTR_SIGNATURE_HASH);
-                    hashes.add(Base64.decode(hash.getBytes()));
-                    continue;
+
+            if (depth == outerDepth + 1) {
+                switch (tag) {
+                    case TAG_SIGNATURE: {
+                        final String hash = ShortcutService.parseStringAttribute(
+                                parser, ATTR_SIGNATURE_HASH);
+                        hashes.add(Base64.decode(hash.getBytes()));
+                        continue;
+                    }
                 }
             }
-            throw ShortcutService.throwForInvalidTag(depth, tag);
+            ShortcutService.warnForInvalidTag(depth, tag);
         }
-        return new ShortcutPackageInfo(packageName, userId, versionCode, hashes, shadow);
+        return new ShortcutPackageInfo(versionCode, hashes, shadow);
     }
 
     public void dump(ShortcutService s, PrintWriter pw, String prefix) {
         pw.println();
 
         pw.print(prefix);
-        pw.print("PackageInfo: ");
-        pw.print(mPackageName);
-        pw.println();
-
-        pw.print(prefix);
-        pw.print("  User: ");
-        pw.print(mUserId);
-        pw.println();
+        pw.println("PackageInfo:");
 
         pw.print(prefix);
         pw.print("  IsShadow: ");

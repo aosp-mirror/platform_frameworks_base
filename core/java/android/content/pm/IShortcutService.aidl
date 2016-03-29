@@ -47,4 +47,8 @@ interface IShortcutService {
     int getIconMaxDimensions(String packageName, int userId);
 
     void resetThrottling(); // system only API for developer opsions
+
+    byte[] getBackupPayload(int user);
+
+    void applyRestore(in byte[] payload, int user);
 }

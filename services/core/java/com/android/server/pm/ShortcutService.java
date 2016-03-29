@@ -72,7 +72,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -85,6 +84,10 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -92,6 +95,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -103,8 +107,6 @@ import java.util.function.Predicate;
  * TODO:
  *
  * - Default launcher check does take a few ms.  Worth caching.
- *
- * - Don't backup launcher from different profile.
  *
  * - Clear data -> remove all dynamic?  but not the pinned?
  *
@@ -633,29 +635,43 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         path.mkdirs();
         final AtomicFile file = new AtomicFile(path);
-        FileOutputStream outs = null;
+        FileOutputStream os = null;
         try {
-            outs = file.startWrite();
+            os = file.startWrite();
 
-            // Write to XML
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(outs, StandardCharsets.UTF_8.name());
-            out.startDocument(null, true);
+            saveUserInternalLocked(userId, os, /* forBackup= */ false);
 
-            getUserShortcutsLocked(userId).saveToXml(this, out, /* forBackup= */ false);
-
-            out.endDocument();
-
-            // Close.
-            file.finishWrite(outs);
-        } catch (IOException|XmlPullParserException e) {
+            file.finishWrite(os);
+        } catch (XmlPullParserException|IOException e) {
             Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
-            file.failWrite(outs);
+            file.failWrite(os);
         }
+    }
+
+    private void saveUserInternalLocked(@UserIdInt int userId, OutputStream os,
+            boolean forBackup) throws IOException, XmlPullParserException {
+
+        final BufferedOutputStream bos = new BufferedOutputStream(os);
+
+        // Write to XML
+        XmlSerializer out = new FastXmlSerializer();
+        out.setOutput(bos, StandardCharsets.UTF_8.name());
+        out.startDocument(null, true);
+
+        getUserShortcutsLocked(userId).saveToXml(this, out, forBackup);
+
+        out.endDocument();
+
+        bos.flush();
+        os.flush();
     }
 
     static IOException throwForInvalidTag(int depth, String tag) throws IOException {
         throw new IOException(String.format("Invalid tag '%s' found at depth %d", tag, depth));
+    }
+
+    static void warnForInvalidTag(int depth, String tag) throws IOException {
+        Slog.w(TAG, String.format("Invalid tag '%s' found at depth %d", tag, depth));
     }
 
     @Nullable
@@ -675,36 +691,44 @@ public class ShortcutService extends IShortcutService.Stub {
             }
             return null;
         }
-        ShortcutUser ret = null;
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, StandardCharsets.UTF_8.name());
-
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                final int depth = parser.getDepth();
-
-                final String tag = parser.getName();
-                if (DEBUG_LOAD) {
-                    Slog.d(TAG, String.format("depth=%d type=%d name=%s",
-                            depth, type, tag));
-                }
-                if ((depth == 1) && ShortcutUser.TAG_ROOT.equals(tag)) {
-                    ret = ShortcutUser.loadFromXml(parser, userId);
-                    continue;
-                }
-                throwForInvalidTag(depth, tag);
-            }
-            return ret;
+            return loadUserInternal(userId, in, /* forBackup= */ false);
         } catch (IOException|XmlPullParserException e) {
             Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
             return null;
         } finally {
             IoUtils.closeQuietly(in);
         }
+    }
+
+    private ShortcutUser loadUserInternal(@UserIdInt int userId, InputStream is,
+            boolean fromBackup) throws XmlPullParserException, IOException {
+
+        final BufferedInputStream bis = new BufferedInputStream(is);
+
+        ShortcutUser ret = null;
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(bis, StandardCharsets.UTF_8.name());
+
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            final int depth = parser.getDepth();
+
+            final String tag = parser.getName();
+            if (DEBUG_LOAD) {
+                Slog.d(TAG, String.format("depth=%d type=%d name=%s",
+                        depth, type, tag));
+            }
+            if ((depth == 1) && ShortcutUser.TAG_ROOT.equals(tag)) {
+                ret = ShortcutUser.loadFromXml(this, parser, userId, fromBackup);
+                continue;
+            }
+            throwForInvalidTag(depth, tag);
+        }
+        return ret;
     }
 
     private void scheduleSaveBaseState() {
@@ -1042,6 +1066,10 @@ public class ShortcutService extends IShortcutService.Stub {
         Preconditions.checkState(isCallerShell(), "Caller must be shell");
     }
 
+    private void enforceSystem() {
+        Preconditions.checkState(isCallerSystem(), "Caller must be system");
+    }
+
     private void verifyCaller(@NonNull String packageName, @UserIdInt int userId) {
         Preconditions.checkStringNotEmpty(packageName, "packageName");
 
@@ -1182,9 +1210,9 @@ public class ShortcutService extends IShortcutService.Stub {
         final int size = newShortcuts.size();
 
         synchronized (mLock) {
-            getUserShortcutsLocked(userId).ensurePackageInfo(this, packageName, userId);
-
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+
+            ps.ensureNotShadowAndSave(this);
 
             // Throttling.
             if (!ps.tryApiCall(this)) {
@@ -1219,9 +1247,9 @@ public class ShortcutService extends IShortcutService.Stub {
         final int size = newShortcuts.size();
 
         synchronized (mLock) {
-            getUserShortcutsLocked(userId).ensurePackageInfo(this, packageName, userId);
-
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+
+            ps.ensureNotShadowAndSave(this);
 
             // Throttling.
             if (!ps.tryApiCall(this)) {
@@ -1258,9 +1286,9 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
-            getUserShortcutsLocked(userId).ensurePackageInfo(this, packageName, userId);
-
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+
+            ps.ensureNotShadowAndSave(this);
 
             // Throttling.
             if (!ps.tryApiCall(this)) {
@@ -1466,6 +1494,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId) {
+
+        // TODO Don't remove shadow packages' information.
+
         final boolean wasUserLoaded = isUserLoadedLocked(owningUserId);
 
         final ShortcutUser mUser = getUserShortcutsLocked(owningUserId);
@@ -1491,9 +1522,6 @@ public class ShortcutService extends IShortcutService.Stub {
         for (int i = mUser.getPackages().size() - 1; i >= 0; i--) {
             mUser.getPackages().valueAt(i).refreshPinnedFlags(this);
         }
-
-        // Remove the package info too.
-        mUser.removePackageInfo(packageUserId, packageName);
 
         scheduleSaveUser(owningUserId);
 
@@ -1617,11 +1645,13 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
             synchronized (mLock) {
-                getUserShortcutsLocked(userId).ensurePackageInfo(
-                        ShortcutService.this, callingPackage, launcherUserId);
+                final ShortcutLauncher launcher =
+                        getLauncherShortcuts(callingPackage, userId, launcherUserId);
 
-                getLauncherShortcuts(callingPackage, userId, launcherUserId).pinShortcuts(
-                        ShortcutService.this, packageName, shortcutIds);
+                launcher.ensureNotShadowAndSave(ShortcutService.this);
+
+                launcher.pinShortcuts(
+                        ShortcutService.this, userId, packageName, shortcutIds);
             }
             userPackageChanged(packageName, userId);
         }
@@ -1731,23 +1761,21 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
             Slog.d(TAG, "cleanupGonePackages() userId=" + userId);
         }
-        ArrayList<PackageWithUser> gonePackages = null;
+        final ArrayList<PackageWithUser> gonePackages = new ArrayList<>();
 
         synchronized (mLock) {
             final ShortcutUser user = getUserShortcutsLocked(userId);
-            final ArrayMap<PackageWithUser, ShortcutPackageInfo> infos = user.getAllPackageInfos();
-            for (int i = infos.size() -1; i >= 0; i--) {
-                final ShortcutPackageInfo info = infos.valueAt(i);
-                if (info.isShadow()) {
-                    continue;
+
+            user.forAllPackageItems(spi -> {
+                if (spi.getPackageInfo().isShadow()) {
+                    return; // Don't delete shadow information.
                 }
-                if (isPackageInstalled(info.getPackageName(), info.getUserId())) {
-                    continue;
+                if (isPackageInstalled(spi.getPackageName(), spi.getPackageUserId())) {
+                    return;
                 }
-                gonePackages = ArrayUtils.add(gonePackages,
-                        PackageWithUser.of(info.getUserId(), info.getPackageName()));
-            }
-            if (gonePackages != null) {
+                gonePackages.add(PackageWithUser.of(spi));
+            });
+            if (gonePackages.size() > 0) {
                 for (int i = gonePackages.size() - 1; i >= 0; i--) {
                     final PackageWithUser pu = gonePackages.get(i);
                     cleanUpPackageLocked(pu.packageName, userId, pu.userId);
@@ -1761,25 +1789,18 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("handlePackageAdded: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
-            final ShortcutPackageInfo existing = getUserShortcutsLocked(userId)
-                    .getPackageInfo(userId, packageName);
-
-            if (existing != null && existing.isShadow()) {
-                Slog.w(TAG, "handlePackageAdded: TODO Restore not implemented");
-            }
+            getUserShortcutsLocked(userId).unshadowPackage(this, packageName, userId);
         }
     }
 
     private void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
         if (DEBUG) {
-            Slog.d(TAG, String.format("handlePackageUpdateFinished: %s user=%d", packageName, userId));
+            Slog.d(TAG, String.format("handlePackageUpdateFinished: %s user=%d",
+                    packageName, userId));
         }
+
         synchronized (mLock) {
-            final ShortcutPackageInfo spi =
-                    getUserShortcutsLocked(userId).getPackageInfo(userId, packageName);
-            if (spi != null) {
-                spi.refreshAndSave(this, userId);
-            }
+            getUserShortcutsLocked(userId).unshadowPackage(this, packageName, userId);
         }
     }
 
@@ -1792,13 +1813,14 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    // === Backup & restore ===
+    // === PackageManager interaction ===
 
     PackageInfo getPackageInfoWithSignatures(String packageName, @UserIdInt int userId) {
         return injectPackageInfo(packageName, userId, true);
     }
 
     int injectGetPackageUid(@NonNull String packageName, @UserIdInt int userId) {
+        final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getPackageUid(packageName, PACKAGE_MATCH_FLAGS
                     , userId);
@@ -1806,12 +1828,15 @@ public class ShortcutService extends IShortcutService.Stub {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
             return -1;
+        } finally {
+            injectRestoreCallingIdentity(token);
         }
     }
 
     @VisibleForTesting
     PackageInfo injectPackageInfo(String packageName, @UserIdInt int userId,
             boolean getSignatures) {
+        final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getPackageInfo(packageName, PACKAGE_MATCH_FLAGS
                     | (getSignatures ? PackageManager.GET_SIGNATURES : 0)
@@ -1820,17 +1845,22 @@ public class ShortcutService extends IShortcutService.Stub {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
             return null;
+        } finally {
+            injectRestoreCallingIdentity(token);
         }
     }
 
     @VisibleForTesting
     ApplicationInfo injectApplicationInfo(String packageName, @UserIdInt int userId) {
+        final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getApplicationInfo(packageName, PACKAGE_MATCH_FLAGS, userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
             return null;
+        } finally {
+            injectRestoreCallingIdentity(token);
         }
     }
 
@@ -1839,12 +1869,61 @@ public class ShortcutService extends IShortcutService.Stub {
         return (ai != null) && ((ai.flags & flags) == flags);
     }
 
+    private boolean isPackageInstalled(String packageName, int userId) {
+        return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_INSTALLED);
+    }
+
+    // === Backup & restore ===
+
     boolean shouldBackupApp(String packageName, int userId) {
         return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_ALLOW_BACKUP);
     }
 
-    private boolean isPackageInstalled(String packageName, int userId) {
-        return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_INSTALLED);
+    @Override
+    public byte[] getBackupPayload(@UserIdInt int userId) throws RemoteException {
+        enforceSystem();
+        if (DEBUG) {
+            Slog.d(TAG, "Backing up user " + userId);
+        }
+        synchronized (mLock) {
+            final ShortcutUser user = getUserShortcutsLocked(userId);
+            if (user == null) {
+                Slog.w(TAG, "Can't backup: user not found: id=" + userId);
+                return null;
+            }
+
+            user.forAllPackageItems(spi -> spi.refreshPackageInfoAndSave(this));
+
+            // Then save.
+            final ByteArrayOutputStream os = new ByteArrayOutputStream(32 * 1024);
+            try {
+                saveUserInternalLocked(userId, os, /* forBackup */ true);
+            } catch (XmlPullParserException|IOException e) {
+                // Shouldn't happen.
+                Slog.w(TAG, "Backup failed.", e);
+                return null;
+            }
+            return os.toByteArray();
+        }
+    }
+
+    @Override
+    public void applyRestore(byte[] payload, @UserIdInt int userId) throws RemoteException {
+        enforceSystem();
+        if (DEBUG) {
+            Slog.d(TAG, "Restoring user " + userId);
+        }
+        final ShortcutUser user;
+        final ByteArrayInputStream is = new ByteArrayInputStream(payload);
+        try {
+            user = loadUserInternal(userId, is, /* fromBackup */ true);
+        } catch (XmlPullParserException|IOException e) {
+            Slog.w(TAG, "Restoration failed.", e);
+            return;
+        }
+        synchronized (mLock) {
+            mUsers.put(userId, user);
+        }
     }
 
     // === Dump ===
@@ -2200,21 +2279,6 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
-        }
-    }
-
-    @VisibleForTesting
-    ShortcutPackageInfo getPackageInfoForTest(String packageName, int userId) {
-        return getPackageInfoForTest(packageName, userId, userId);
-    }
-
-    @VisibleForTesting
-    ShortcutPackageInfo getPackageInfoForTest(String packageName, int userId, int packageUserId) {
-        synchronized (mLock) {
-            final ShortcutUser user = mUsers.get(userId);
-            if (user == null) return null;
-
-            return user.getPackageInfo(packageUserId, packageName);
         }
     }
 }
