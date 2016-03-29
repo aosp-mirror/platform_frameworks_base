@@ -41,6 +41,8 @@
     <dimen name="action_bar_default_padding_end_material">0dp</dimen>
     <!-- Default content inset of an action bar. -->
     <dimen name="action_bar_content_inset_material">16dp</dimen>
+    <!-- Default content inset of an action bar when a navigation button is present. -->
+    <dimen name="action_bar_content_inset_with_nav">72dp</dimen>
     <!-- Vertical padding around action bar icons. -->
     <dimen name="action_bar_icon_vertical_padding_material">16dp</dimen>
     <!-- Top margin for action bar subtitles -->
