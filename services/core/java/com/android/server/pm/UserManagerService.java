@@ -31,7 +31,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -924,11 +923,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
         // Don't call them within the mRestrictionsLock.
         synchronized (mPackagesLock) {
-            if (globalChanged) {
-                writeUserListLP();
-            }
             if (localChanged) {
                 writeUserLP(getUserDataNoChecks(userId));
+            }
+            if (globalChanged) {
+                writeUserListLP();
             }
         }
 
@@ -1491,8 +1490,8 @@ public class UserManagerService extends IUserManager.Stub {
         updateUserIds();
         initDefaultGuestRestrictions();
 
-        writeUserListLP();
         writeUserLP(userData);
+        writeUserListLP();
     }
 
     private String getOwnerName() {
@@ -1542,8 +1541,10 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
                     Long.toString(userInfo.lastLoggedInTime));
-            serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
-                    userInfo.lastLoggedInFingerprint);
+            if (userInfo.lastLoggedInFingerprint != null) {
+                serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
+                        userInfo.lastLoggedInFingerprint);
+            }
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
             }
@@ -1599,7 +1600,7 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endDocument();
             userFile.finishWrite(fos);
         } catch (Exception ioe) {
-            Slog.e(LOG_TAG, "Error writing user info " + userData.info.id + "\n" + ioe);
+            Slog.e(LOG_TAG, "Error writing user info " + userData.info.id, ioe);
             userFile.failWrite(fos);
         }
     }
@@ -1944,6 +1945,7 @@ public class UserManagerService extends IUserManager.Stub {
                     userData.info = userInfo;
                     mUsers.put(userId, userData);
                 }
+                writeUserLP(userData);
                 writeUserListLP();
                 if (parent != null) {
                     if (isManagedProfile) {
@@ -2217,13 +2219,13 @@ public class UserManagerService extends IUserManager.Stub {
             mCachedEffectiveUserRestrictions.remove(userHandle);
             mDevicePolicyLocalUserRestrictions.remove(userHandle);
         }
-        // Remove user file
-        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
-        userFile.delete();
         // Update the user list
         synchronized (mPackagesLock) {
             writeUserListLP();
         }
+        // Remove user file
+        AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
+        userFile.delete();
         updateUserIds();
         File userDir = Environment.getUserSystemDirectory(userHandle);
         File renamedUserDir = Environment.getUserSystemDirectory(UserHandle.USER_NULL - userHandle);
