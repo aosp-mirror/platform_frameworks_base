@@ -244,7 +244,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     int64_t totalDuration =
             frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::IntendedVsync];
     uint32_t framebucket = frameCountIndexForFrameTime(
-            totalDuration, mData->frameCounts.size());
+            totalDuration, mData->frameCounts.size() - 1);
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
         mData->frameCounts[framebucket]++;
