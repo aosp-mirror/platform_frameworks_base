@@ -167,7 +167,7 @@ public class DirectoryListBot extends BaseBot {
         return true;
     }
 
-    private UiObject findDocumentsList() {
+    public UiObject findDocumentsList() {
         return findObject(
                 "com.android.documentsui:id/container_directory",
                 DIR_LIST_ID);
