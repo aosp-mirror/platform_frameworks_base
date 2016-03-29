@@ -16,12 +16,16 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Arrays;
 
-/** @hide */
+/**
+ * @hide
+ */
+@SystemApi
 public final class WebViewProviderInfo implements Parcelable {
 
     public WebViewProviderInfo(String packageName, String description,
