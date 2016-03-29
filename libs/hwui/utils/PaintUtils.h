@@ -67,6 +67,21 @@ public:
                 && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
     }
 
+    static bool isOpaquePaint(const SkPaint* paint) {
+        if (!paint) return true; // default (paintless) behavior is SrcOver, black
+
+        if (paint->getAlpha() != 0xFF
+                || PaintUtils::isBlendedShader(paint->getShader())
+                || PaintUtils::isBlendedColorFilter(paint->getColorFilter())) {
+            return false;
+        }
+
+        // Only let simple srcOver / src blending modes declare opaque, since behavior is clear.
+        SkXfermode::Mode mode = getXfermode(paint->getXfermode());
+        return mode == SkXfermode::Mode::kSrcOver_Mode
+                || mode == SkXfermode::Mode::kSrc_Mode;
+    }
+
     static bool isBlendedShader(const SkShader* shader) {
         if (shader == nullptr) {
             return false;

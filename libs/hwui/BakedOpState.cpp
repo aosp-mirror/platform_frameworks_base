@@ -108,5 +108,63 @@ ResolvedRenderState::ResolvedRenderState(const ClipRect* clipRect, const Rect& d
     clippedBounds.doIntersect(clipRect->rect);
 }
 
+BakedOpState* BakedOpState::tryConstruct(LinearAllocator& allocator,
+        Snapshot& snapshot, const RecordedOp& recordedOp) {
+    if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
+    BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
+            allocator, snapshot, recordedOp, false);
+    if (bakedState->computedState.clippedBounds.isEmpty()) {
+        // bounds are empty, so op is rejected
+        allocator.rewindIfLastAlloc(bakedState);
+        return nullptr;
+    }
+    return bakedState;
+}
+
+BakedOpState* BakedOpState::tryConstructUnbounded(LinearAllocator& allocator,
+        Snapshot& snapshot, const RecordedOp& recordedOp) {
+    if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
+    return allocator.create_trivial<BakedOpState>(allocator, snapshot, recordedOp);
+}
+
+BakedOpState* BakedOpState::tryStrokeableOpConstruct(LinearAllocator& allocator,
+        Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior) {
+    if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
+    bool expandForStroke = (strokeBehavior == StrokeBehavior::StyleDefined)
+            ? (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style)
+            : true;
+
+    BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
+           allocator, snapshot, recordedOp, expandForStroke);
+    if (bakedState->computedState.clippedBounds.isEmpty()) {
+        // bounds are empty, so op is rejected
+        // NOTE: this won't succeed if a clip was allocated
+        allocator.rewindIfLastAlloc(bakedState);
+        return nullptr;
+    }
+    return bakedState;
+}
+
+BakedOpState* BakedOpState::tryShadowOpConstruct(LinearAllocator& allocator,
+        Snapshot& snapshot, const ShadowOp* shadowOpPtr) {
+    if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
+
+    // clip isn't empty, so construct the op
+    return allocator.create_trivial<BakedOpState>(allocator, snapshot, shadowOpPtr);
+}
+
+BakedOpState* BakedOpState::directConstruct(LinearAllocator& allocator,
+        const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp) {
+    return allocator.create_trivial<BakedOpState>(clip, dstRect, recordedOp);
+}
+
+void BakedOpState::setupOpacity(const SkPaint* paint) {
+    computedState.opaqueOverClippedBounds = computedState.transform.isSimple()
+            && computedState.clipState->mode == ClipMode::Rectangle
+            && MathUtils::areEqual(alpha, 1.0f)
+            && !roundRectClipState
+            && PaintUtils::isOpaquePaint(paint);
+}
+
 } // namespace uirenderer
 } // namespace android
