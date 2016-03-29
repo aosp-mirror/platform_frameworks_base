@@ -944,6 +944,7 @@ please see styles_device_defaults.xml.
         <item name="homeLayout">@layout/action_bar_home_material</item>
         <item name="gravity">center_vertical</item>
         <item name="contentInsetStart">@dimen/action_bar_content_inset_material</item>
+        <item name="contentInsetStartWithNavigation">@dimen/action_bar_content_inset_with_nav</item>
         <item name="contentInsetEnd">@dimen/action_bar_content_inset_material</item>
         <item name="elevation">@dimen/action_bar_elevation_material</item>
         <item name="popupTheme">?attr/actionBarPopupTheme</item>

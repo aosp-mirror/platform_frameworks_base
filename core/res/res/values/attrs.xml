@@ -7644,6 +7644,12 @@ i
         <!-- Minimum inset for content views within a bar. Navigation buttons and
              menu views are excepted. Only valid for some themes and configurations. -->
         <attr name="contentInsetRight" format="dimension" />
+        <!-- Minimum inset for content views within a bar when a navigation button
+             is present, such as the Up button. Only valid for some themes and configurations. -->
+        <attr name="contentInsetStartWithNavigation" format="dimension" />
+        <!-- Minimum inset for content views within a bar when actions from a menu
+             are present. Only valid for some themes and configurations. -->
+        <attr name="contentInsetEndWithActions" format="dimension" />
         <!-- Elevation for the action bar itself -->
         <attr name="elevation" />
         <!-- Reference to a theme that should be used to inflate popups
@@ -8011,6 +8017,8 @@ i
         <attr name="contentInsetEnd" />
         <attr name="contentInsetLeft" />
         <attr name="contentInsetRight" />
+        <attr name="contentInsetStartWithNavigation" />
+        <attr name="contentInsetEndWithActions" />
         <attr name="maxButtonHeight" format="dimension" />
         <attr name="navigationButtonStyle" format="reference" />
         <attr name="buttonGravity">
