@@ -4870,8 +4870,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final ApplicationInfo ai;
         try {
-            ai = mContext.getPackageManager().getApplicationInfo(callerPackage, 0);
-        } catch (NameNotFoundException e) {
+            ai = mIPackageManager.getApplicationInfo(callerPackage, 0, userHandle);
+        } catch (RemoteException e) {
             throw new SecurityException(e);
         }
 
@@ -4880,7 +4880,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             legacyApp = true;
         } else if ("com.google.android.apps.enterprise.dmagent".equals(ai.packageName)
                 && ai.versionCode == 697) {
-            // TODO: remove this once a new prebuilt is dropped
+            // TODO: STOPSHIP remove this (revert ag/895987) once a new prebuilt is dropped
             legacyApp = true;
         }
 
