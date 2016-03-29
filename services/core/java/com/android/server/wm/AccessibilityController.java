@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -119,6 +120,12 @@ final class AccessibilityController {
         }
         if (mWindowsForAccessibilityObserver != null) {
             mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
+        }
+    }
+
+    public void getMagnificationRegionsLocked(Region outMagnified, Region outAvailable) {
+        if (mDisplayMagnifier != null) {
+            mDisplayMagnifier.getMagnificationRegionsLocked(outMagnified, outAvailable);
         }
     }
 
@@ -392,6 +399,10 @@ final class AccessibilityController {
             return spec;
         }
 
+        public void getMagnificationRegionsLocked(Region outMagnified, Region outAvailable) {
+            mMagnifedViewport.getBoundsLocked(outMagnified, outAvailable);
+        }
+
         public void destroyLocked() {
             mMagnifedViewport.destroyWindow();
         }
@@ -413,6 +424,7 @@ final class AccessibilityController {
             private final Matrix mTempMatrix = new Matrix();
 
             private final Region mMagnifiedBounds = new Region();
+            private final Region mAvailableBounds = new Region();
             private final Region mOldMagnifiedBounds = new Region();
             private final Region mOldAvailableBounds = new Region();
 
@@ -450,6 +462,12 @@ final class AccessibilityController {
                 recomputeBoundsLocked();
             }
 
+            public void getBoundsLocked(@NonNull Region outMagnified,
+                    @NonNull Region outAvailable) {
+                outMagnified.set(mMagnifiedBounds);
+                outAvailable.set(mAvailableBounds);
+            }
+
             public void updateMagnificationSpecLocked(MagnificationSpec spec) {
                 if (spec != null) {
                     mMagnificationSpec.initialize(spec.scale, spec.offsetX, spec.offsetY);
@@ -469,14 +487,11 @@ final class AccessibilityController {
                 final int screenWidth = mTempPoint.x;
                 final int screenHeight = mTempPoint.y;
 
-                Region magnifiedBounds = mMagnifiedBounds;
-                magnifiedBounds.set(0, 0, 0, 0);
-
-                Region availableBounds = mTempRegion1;
-                availableBounds.set(0, 0, screenWidth, screenHeight);
+                mMagnifiedBounds.set(0, 0, 0, 0);
+                mAvailableBounds.set(0, 0, screenWidth, screenHeight);
 
                 if (mCircularPath != null) {
-                    availableBounds.setPath(mCircularPath, availableBounds);
+                    mAvailableBounds.setPath(mCircularPath, mAvailableBounds);
                 }
 
                 Region nonMagnifiedBounds = mTempRegion4;
@@ -505,8 +520,8 @@ final class AccessibilityController {
                         matrix.mapRect(windowFrame);
                         windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
                                 (int) windowFrame.right, (int) windowFrame.bottom);
-                        magnifiedBounds.op(windowBounds, Region.Op.UNION);
-                        magnifiedBounds.op(availableBounds, Region.Op.INTERSECT);
+                        mMagnifiedBounds.op(windowBounds, Region.Op.UNION);
+                        mMagnifiedBounds.op(mAvailableBounds, Region.Op.INTERSECT);
                     } else {
                         Region touchableRegion = mTempRegion3;
                         windowState.getTouchableRegion(touchableRegion);
@@ -518,12 +533,12 @@ final class AccessibilityController {
                         windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
                                 (int) windowFrame.right, (int) windowFrame.bottom);
                         nonMagnifiedBounds.op(windowBounds, Region.Op.UNION);
-                        windowBounds.op(magnifiedBounds, Region.Op.DIFFERENCE);
-                        availableBounds.op(windowBounds, Region.Op.DIFFERENCE);
+                        windowBounds.op(mMagnifiedBounds, Region.Op.DIFFERENCE);
+                        mAvailableBounds.op(windowBounds, Region.Op.DIFFERENCE);
                     }
 
                     Region accountedBounds = mTempRegion2;
-                    accountedBounds.set(magnifiedBounds);
+                    accountedBounds.set(mMagnifiedBounds);
                     accountedBounds.op(nonMagnifiedBounds, Region.Op.UNION);
                     accountedBounds.op(0, 0, screenWidth, screenHeight, Region.Op.INTERSECT);
 
@@ -539,15 +554,15 @@ final class AccessibilityController {
 
                 visibleWindows.clear();
 
-                magnifiedBounds.op(mDrawBorderInset, mDrawBorderInset,
+                mMagnifiedBounds.op(mDrawBorderInset, mDrawBorderInset,
                         screenWidth - mDrawBorderInset, screenHeight - mDrawBorderInset,
                         Region.Op.INTERSECT);
 
-                final boolean magnifiedChanged = !mOldMagnifiedBounds.equals(magnifiedBounds);
-                final boolean availableChanged = !mOldAvailableBounds.equals(availableBounds);
+                final boolean magnifiedChanged = !mOldMagnifiedBounds.equals(mMagnifiedBounds);
+                final boolean availableChanged = !mOldAvailableBounds.equals(mAvailableBounds);
                 if (magnifiedChanged || availableChanged) {
                     if (magnifiedChanged) {
-                        mWindow.setBounds(magnifiedBounds);
+                        mWindow.setBounds(mMagnifiedBounds);
                         Rect dirtyRect = mTempRect1;
                         if (mFullRedrawNeeded) {
                             mFullRedrawNeeded = false;
@@ -557,23 +572,23 @@ final class AccessibilityController {
                             mWindow.invalidate(dirtyRect);
                         } else {
                             Region dirtyRegion = mTempRegion3;
-                            dirtyRegion.set(magnifiedBounds);
+                            dirtyRegion.set(mMagnifiedBounds);
                             dirtyRegion.op(mOldMagnifiedBounds, Region.Op.UNION);
                             dirtyRegion.op(nonMagnifiedBounds, Region.Op.INTERSECT);
                             dirtyRegion.getBounds(dirtyRect);
                             mWindow.invalidate(dirtyRect);
                         }
 
-                        mOldMagnifiedBounds.set(magnifiedBounds);
+                        mOldMagnifiedBounds.set(mMagnifiedBounds);
                     }
 
                     if (availableChanged) {
-                        mOldAvailableBounds.set(availableBounds);
+                        mOldAvailableBounds.set(mAvailableBounds);
                     }
 
                     final SomeArgs args = SomeArgs.obtain();
-                    args.arg1 = Region.obtain(magnifiedBounds);
-                    args.arg2 = Region.obtain(availableBounds);
+                    args.arg1 = Region.obtain(mMagnifiedBounds);
+                    args.arg2 = Region.obtain(mAvailableBounds);
                     mHandler.obtainMessage(
                             MyHandler.MESSAGE_NOTIFY_MAGNIFIED_BOUNDS_CHANGED, args).sendToTarget();
                 }
