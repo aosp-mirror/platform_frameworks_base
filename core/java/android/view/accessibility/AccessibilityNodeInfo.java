@@ -2926,8 +2926,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = other.mInputType;
         mLiveRegion = other.mLiveRegion;
         mDrawingOrderInParent = other.mDrawingOrderInParent;
-        if (other.mExtras != null && !other.mExtras.isEmpty()) {
-            getExtras().putAll(other.mExtras);
+        if (other.mExtras != null) {
+            mExtras = new Bundle(other.mExtras);
+        } else {
+            mExtras = null;
         }
         mRangeInfo = (other.mRangeInfo != null)
                 ? RangeInfo.obtain(other.mRangeInfo) : null;
@@ -3006,7 +3008,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         mDrawingOrderInParent = parcel.readInt();
 
         if (parcel.readInt() == 1) {
-            getExtras().putAll(parcel.readBundle());
+            mExtras = parcel.readBundle();
+        } else {
+            mExtras = null;
         }
 
         if (parcel.readInt() == 1) {
@@ -3073,9 +3077,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionEnd = UNDEFINED_SELECTION_INDEX;
         mInputType = InputType.TYPE_NULL;
         mLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE;
-        if (mExtras != null) {
-            mExtras.clear();
-        }
+        mExtras = null;
         if (mRangeInfo != null) {
             mRangeInfo.recycle();
             mRangeInfo = null;
