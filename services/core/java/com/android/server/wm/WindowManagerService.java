@@ -407,6 +407,11 @@ public class WindowManagerService extends IWindowManager.Stub
     InputConsumerImpl mInputConsumer;
 
     /**
+     * The input consumer added to the window manager before all wallpaper windows.
+     */
+    InputConsumerImpl mWallpaperInputConsumer;
+
+    /**
      * Windows that are being resized.  Used so we can tell the client about
      * the resize after closing the transaction in which we resized the
      * underlying surface.
@@ -9624,13 +9629,37 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private static final class HideNavInputConsumer extends InputConsumerImpl
+            implements WindowManagerPolicy.InputConsumer {
+        private final InputEventReceiver mInputEventReceiver;
+
+        HideNavInputConsumer(WindowManagerService service, Looper looper,
+                             InputEventReceiver.Factory inputEventReceiverFactory) {
+            super(service, "input consumer", null);
+            mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
+                    mClientChannel, looper);
+        }
+
+        @Override
+        public void dismiss() {
+            if (mService.removeInputConsumer()) {
+                synchronized (mService.mWindowMap) {
+                    mInputEventReceiver.dispose();
+                    disposeChannelsLw();
+                }
+            }
+        }
+    }
+
     @Override
-    public InputConsumerImpl addInputConsumer(Looper looper,
+    public WindowManagerPolicy.InputConsumer addInputConsumer(Looper looper,
             InputEventReceiver.Factory inputEventReceiverFactory) {
         synchronized (mWindowMap) {
-            mInputConsumer = new InputConsumerImpl(this, looper, inputEventReceiverFactory);
+            HideNavInputConsumer inputConsumerImpl = new HideNavInputConsumer(
+                    this, looper, inputEventReceiverFactory);
+            mInputConsumer = inputConsumerImpl;
             mInputMonitor.updateInputWindowsLw(true);
-            return mInputConsumer;
+            return inputConsumerImpl;
         }
     }
 
@@ -9642,6 +9671,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 return true;
             }
             return false;
+        }
+    }
+
+    public void createWallpaperInputConsumer(InputChannel inputChannel) {
+        synchronized (mWindowMap) {
+            mWallpaperInputConsumer = new InputConsumerImpl(this, "wallpaper input", inputChannel);
+            mWallpaperInputConsumer.mWindowHandle.hasWallpaper = true;
+            mInputMonitor.updateInputWindowsLw(true);
+        }
+    }
+
+    public void removeWallpaperInputConsumer() {
+        synchronized (mWindowMap) {
+            if (mWallpaperInputConsumer != null) {
+                mWallpaperInputConsumer.disposeChannelsLw();
+                mWallpaperInputConsumer = null;
+                mInputMonitor.updateInputWindowsLw(true);
+            }
         }
     }
 
