@@ -316,6 +316,12 @@ interface IPackageManager {
     int getApplicationEnabledSetting(in String packageName, int userId);
 
     /**
+     * Logs process start information (including APK hash) to the security log.
+     */
+    void logAppProcessStartIfNeeded(String processName, int uid, String seinfo, String apkFile,
+            int pid);
+
+    /**
      * As per {@link android.content.pm.PackageManager#flushPackageRestrictionsAsUser}.
      */
     void flushPackageRestrictionsAsUser(in int userId);
