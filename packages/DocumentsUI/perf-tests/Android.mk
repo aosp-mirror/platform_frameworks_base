@@ -2,8 +2,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
-#LOCAL_SDK_VERSION := current
 
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     $(call all-java-files-under, ../tests/src/com/android/documentsui/bots) \
     ../tests/src/com/android/documentsui/ActivityTest.java \
