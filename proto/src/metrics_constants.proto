@@ -2047,6 +2047,39 @@ message MetricsEvent {
     // Long-press on a QS tile. Tile spec in package field.
     ACTION_QS_LONG_PRESS = 366;
 
+    // OPEN: SUW Welcome Screen -> Vision Settings
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY = 367;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gesture
+    // ACTION: New magnification gesture configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 368;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Font size
+    // ACTION: New font size is chosen
+    //  SUBTYPE: 0 is small, 1 is default, 2 is large, 3 is largest
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_FONT_SIZE = 369;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Display size
+    // ACTION: New display size is chosen
+    //  SUBTYPE: 0 is small, 1 is default, 2 is large, 3 is larger, 4 is largest
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_DISPLAY_SIZE = 370;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> TalkBack
+    // ACTION: New screen reader configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SCREEN_READER = 371;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
