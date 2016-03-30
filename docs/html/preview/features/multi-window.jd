@@ -162,7 +162,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   whether your app's activities support multi-window display. You can set
   attributes in your manifest to control both size and layout.
   A root activity's attribute settings apply to all activities
-  within its task stack.
+  within its task stack. For example, if the root activity has
+  <code>android:resizeableActivity</code> set to true, then all activities
+  in the task stack are resizeable.
 </p>
 
 <p class="note">
