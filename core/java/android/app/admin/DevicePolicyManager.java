@@ -5919,7 +5919,7 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner of a managed profile to set the color used for customization. This
      * color is used as background color of the confirm credentials screen for that user. The
-     * default color is {@link android.graphics.Color#GRAY}.
+     * default color is teal (#00796B).
      * <p>
      * The confirm credentials screen can be created using
      * {@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent}.
