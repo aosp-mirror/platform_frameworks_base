@@ -15,6 +15,8 @@
  */
 #include "JankTracker.h"
 
+#include "Properties.h"
+
 #include <algorithm>
 #include <cutils/ashmem.h>
 #include <cutils/log.h>
@@ -76,6 +78,11 @@ static const uint32_t kBucketMinThreshold = 7;
 static const uint32_t kBucket2msIntervals = 32;
 // If a frame is > this, start counting in increments of 4ms
 static const uint32_t kBucket4msIntervals = 48;
+
+// For testing purposes to try and eliminate test infra overhead we will
+// consider any unknown delay of frame start as part of the test infrastructure
+// and filter it out of the frame profile data
+static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 
 // This will be called every frame, performance sensitive
 // Uses bit twiddling to avoid branching while achieving the packing desired
@@ -242,7 +249,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     mData->totalFrameCount++;
     // Fast-path for jank-free frames
     int64_t totalDuration =
-            frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::IntendedVsync];
+            frame[FrameInfoIndex::FrameCompleted] - frame[sFrameStart];
     uint32_t framebucket = frameCountIndexForFrameTime(
             totalDuration, mData->frameCounts.size() - 1);
     // Keep the fast path as fast as possible.
@@ -280,6 +287,9 @@ void JankTracker::dumpBuffer(const void* buffer, size_t bufsize, int fd) {
 }
 
 void JankTracker::dumpData(const ProfileData* data, int fd) {
+    if (sFrameStart != FrameInfoIndex::IntendedVsync) {
+        dprintf(fd, "\nNote: Data has been filtered!");
+    }
     dprintf(fd, "\nStats since: %" PRIu64 "ns", data->statStartTime);
     dprintf(fd, "\nTotal frames rendered: %u", data->totalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", data->jankFrameCount,
@@ -305,6 +315,9 @@ void JankTracker::reset() {
     mData->totalFrameCount = 0;
     mData->jankFrameCount = 0;
     mData->statStartTime = systemTime(CLOCK_MONOTONIC);
+    sFrameStart = Properties::filterOutTestOverhead
+            ? FrameInfoIndex::HandleInputStart
+            : FrameInfoIndex::IntendedVsync;
 }
 
 uint32_t JankTracker::findPercentile(const ProfileData* data, int percentile) {
