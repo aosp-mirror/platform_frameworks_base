@@ -161,8 +161,8 @@ public class WallpaperManager {
 
     /** @hide */
     @IntDef(flag = true, value = {
-            FLAG_SET_SYSTEM,
-            FLAG_SET_LOCK
+            FLAG_SYSTEM,
+            FLAG_LOCK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SetWallpaperFlags {}
@@ -170,12 +170,12 @@ public class WallpaperManager {
     /**
      * Flag: use the supplied imagery as the general system wallpaper.
      */
-    public static final int FLAG_SET_SYSTEM = 1 << 0;
+    public static final int FLAG_SYSTEM = 1 << 0;
 
     /**
      * Flag: use the supplied imagery as the lock-screen wallpaper.
      */
-    public static final int FLAG_SET_LOCK = 1 << 1;
+    public static final int FLAG_LOCK = 1 << 1;
 
     private final Context mContext;
 
@@ -336,7 +336,7 @@ public class WallpaperManager {
 
             try {
                 Bundle params = new Bundle();
-                ParcelFileDescriptor fd = mService.getWallpaper(this, FLAG_SET_SYSTEM,
+                ParcelFileDescriptor fd = mService.getWallpaper(this, FLAG_SYSTEM,
                         params, userId);
                 if (fd != null) {
                     try {
@@ -663,11 +663,18 @@ public class WallpaperManager {
 
     /**
      * Get an open, readable file descriptor to the given wallpaper image file.
-     * The callee is resopnsible for closing the fd when done ingesting the file.
+     * The caller is responsible for closing the file descriptor when done ingesting the file.
      *
      * <p>If no lock-specific wallpaper has been configured for the given user, then
-     * this method will return {@code null} when requesting {@link #FLAG_SET_LOCK} rather than
+     * this method will return {@code null} when requesting {@link #FLAG_LOCK} rather than
      * returning the system wallpaper's image file.
+     *
+     * @param which The wallpaper whose image file is to be retrieved.  Must be a single
+     *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}.
+     *
+     * @see #FLAG_LOCK
+     * @see #FLAG_SYSTEM
      */
     public ParcelFileDescriptor getWallpaperFile(int which) {
         return getWallpaperFile(which, mContext.getUserId());
@@ -677,10 +684,19 @@ public class WallpaperManager {
      * Version of {@link #getWallpaperFile(int)} that can access the wallpaper data
      * for a given user.  The caller must hold the INTERACT_ACROSS_USERS_FULL
      * permission to access another user's wallpaper data.
+     *
+     * @param which The wallpaper whose image file is to be retrieved.  Must be a single
+     *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}.
+     * @param userId The user or profile whose imagery is to be retrieved
+     *
+     * @see #FLAG_LOCK
+     * @see #FLAG_SYSTEM
+     *
      * @hide
      */
     public ParcelFileDescriptor getWallpaperFile(int which, int userId) {
-        if (which != FLAG_SET_SYSTEM && which != FLAG_SET_LOCK) {
+        if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must request exactly one kind of wallpaper");
         }
 
@@ -730,8 +746,8 @@ public class WallpaperManager {
      * such wallpaper configured, returns a negative number.
      *
      * @param which The wallpaper whose ID is to be returned.  Must be a single
-     *     defined kind of wallpaper, either {@link #FLAG_SET_SYSTEM} or
-     *     {@link #FLAG_SET_LOCK}.
+     *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or
+     *     {@link #FLAG_LOCK}.
      * @return The positive numeric ID of the current wallpaper of the given kind,
      *     or a negative value if no such wallpaper is configured.
      */
@@ -823,24 +839,24 @@ public class WallpaperManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @param resid The bitmap to save.
+     * @param resid The resource ID of the bitmap to be used as the wallpaper image
      *
      * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
     public void setResource(@RawRes int resid) throws IOException {
-        setResource(resid, FLAG_SET_SYSTEM);
+        setResource(resid, FLAG_SYSTEM);
     }
 
     /**
-     * Version of {@link #setResource(int)} that takes an optional Bundle for returning
-     * metadata about the operation to the caller.
+     * Version of {@link #setResource(int)} that allows the caller to specify which
+     * of the supported wallpaper categories to set.
      *
-     * @param resid
-     * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @param resid The resource ID of the bitmap to be used as the wallpaper image
+     * @param which Flags indicating which wallpaper(s) to configure with the new imagery
      *
-     * @see #FLAG_SET_LOCK
-     * @see #FLAG_SET_SYSTEM
+     * @see #FLAG_LOCK
+     * @see #FLAG_SYSTEM
      *
      * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
      *
@@ -934,10 +950,9 @@ public class WallpaperManager {
      */
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint, boolean allowBackup)
             throws IOException {
-        return setBitmap(fullImage, visibleCropHint, allowBackup, FLAG_SET_SYSTEM);
+        return setBitmap(fullImage, visibleCropHint, allowBackup, FLAG_SYSTEM);
     }
 
-    /**
     /**
      * Version of {@link #setBitmap(Bitmap, Rect, boolean)} that allows the caller
      * to specify which of the supported wallpaper categories to set.
@@ -951,8 +966,8 @@ public class WallpaperManager {
      *     image for restore to a future device; {@code false} otherwise.
      * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
      *
-     * @see #FLAG_SET_LOCK
-     * @see #FLAG_SET_SYSTEM
+     * @see #FLAG_LOCK
+     * @see #FLAG_SYSTEM
      *
      * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
      *
@@ -1054,7 +1069,7 @@ public class WallpaperManager {
      */
     public int setStream(InputStream bitmapData, Rect visibleCropHint, boolean allowBackup)
             throws IOException {
-        return setStream(bitmapData, visibleCropHint, allowBackup, FLAG_SET_SYSTEM);
+        return setStream(bitmapData, visibleCropHint, allowBackup, FLAG_SYSTEM);
     }
 
     /**
@@ -1070,8 +1085,8 @@ public class WallpaperManager {
      *     image for restore to a future device; {@code false} otherwise.
      * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
      *
-     * @see #FLAG_SET_LOCK
-     * @see #FLAG_SET_SYSTEM
+     * @see #FLAG_LOCK
+     * @see #FLAG_SYSTEM
      *
      * @throws IOException
      */
@@ -1287,7 +1302,7 @@ public class WallpaperManager {
      */
     @SystemApi
     public void clearWallpaper() {
-        clearWallpaper(FLAG_SET_SYSTEM, mContext.getUserId());
+        clearWallpaper(FLAG_SYSTEM, mContext.getUserId());
     }
 
     /**
@@ -1467,20 +1482,20 @@ public class WallpaperManager {
 
     /**
      * Remove one or more currently set wallpapers, reverting to the system default
-     * display for each one.  If {@link #FLAG_SET_SYSTEM} is set in the {@code which}
+     * display for each one.  If {@link #FLAG_SYSTEM} is set in the {@code which}
      * parameter, the intent {@link Intent#ACTION_WALLPAPER_CHANGED} will be broadcast
      * upon success.
      *
-     * @param which A bitwise combination of {@link #FLAG_SET_SYSTEM} or
-     *   {@link #FLAG_SET_LOCK}
+     * @param which A bitwise combination of {@link #FLAG_SYSTEM} or
+     *   {@link #FLAG_LOCK}
      * @throws IOException If an error occurs reverting to the built-in wallpaper.
      */
     public void clear(int which) throws IOException {
-        if ((which & FLAG_SET_SYSTEM) != 0) {
+        if ((which & FLAG_SYSTEM) != 0) {
             clear();
         }
-        if ((which & FLAG_SET_LOCK) != 0) {
-            clearWallpaper(FLAG_SET_LOCK, mContext.getUserId());
+        if ((which & FLAG_LOCK) != 0) {
+            clearWallpaper(FLAG_LOCK, mContext.getUserId());
         }
     }
 
