@@ -1715,8 +1715,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // exists in the IME switcher dialog.  Might be OK to remove this condition once
             // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
             return true;
+        } else if ((visibility & InputMethodService.IME_VISIBLE) == 0) {
+            return false;
         }
-        if ((visibility & InputMethodService.IME_VISIBLE) == 0) return false;
 
         List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
         final int N = imis.size();
