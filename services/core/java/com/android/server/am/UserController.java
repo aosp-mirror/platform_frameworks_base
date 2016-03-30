@@ -434,35 +434,17 @@ final class UserController {
                 stoppingIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 stoppingIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 stoppingIntent.putExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, true);
-                final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
-                // This is the result receiver for the final shutdown broadcast.
-                final IIntentReceiver shutdownReceiver = new IIntentReceiver.Stub() {
-                    @Override
-                    public void performReceive(Intent intent, int resultCode, String data,
-                            Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                        finishUserStop(uss);
-                    }
-                };
                 // This is the result receiver for the initial stopping broadcast.
                 final IIntentReceiver stoppingReceiver = new IIntentReceiver.Stub() {
                     @Override
                     public void performReceive(Intent intent, int resultCode, String data,
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                        // On to the next.
-                        synchronized (mService) {
-                            if (uss.state != UserState.STATE_STOPPING) {
-                                // Whoops, we are being started back up.  Abort, abort!
-                                return;
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                finishUserStopping(userId, uss);
                             }
-                            uss.setState(UserState.STATE_SHUTDOWN);
-                        }
-                        mService.mBatteryStatsService.noteEvent(
-                                BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
-                                Integer.toString(userId), userId);
-                        mService.mSystemServiceManager.stopUser(userId);
-                        mService.broadcastIntentLocked(null, null, shutdownIntent,
-                                null, shutdownReceiver, 0, null, null, null, AppOpsManager.OP_NONE,
-                                null, true, false, MY_PID, SYSTEM_UID, userId);
+                        });
                     }
                 };
                 // Kick things off.
@@ -476,7 +458,45 @@ final class UserController {
         }
     }
 
-    void finishUserStop(UserState uss) {
+    void finishUserStopping(final int userId, final UserState uss) {
+        // On to the next.
+        final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
+        // This is the result receiver for the final shutdown broadcast.
+        final IIntentReceiver shutdownReceiver = new IIntentReceiver.Stub() {
+            @Override
+            public void performReceive(Intent intent, int resultCode, String data,
+                    Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        finishUserStopped(uss);
+                    }
+                });
+            }
+        };
+
+        synchronized (mService) {
+            if (uss.state != UserState.STATE_STOPPING) {
+                // Whoops, we are being started back up.  Abort, abort!
+                return;
+            }
+            uss.setState(UserState.STATE_SHUTDOWN);
+        }
+
+        mService.mBatteryStatsService.noteEvent(
+                BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
+                Integer.toString(userId), userId);
+        mService.mSystemServiceManager.stopUser(userId);
+
+        synchronized (mService) {
+            mService.broadcastIntentLocked(null, null, shutdownIntent,
+                    null, shutdownReceiver, 0, null, null, null,
+                    AppOpsManager.OP_NONE,
+                    null, true, false, MY_PID, SYSTEM_UID, userId);
+        }
+    }
+
+    void finishUserStopped(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         boolean stopped;
         ArrayList<IStopUserCallback> callbacks;
@@ -765,10 +785,17 @@ final class UserController {
                         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         mService.broadcastIntentLocked(null, null, intent, null,
                                 new IIntentReceiver.Stub() {
+                                    @Override
                                     public void performReceive(Intent intent, int resultCode,
                                             String data, Bundle extras, boolean ordered,
                                             boolean sticky, int sendingUser) {
-                                        onUserInitialized(uss, foreground, oldUserId, userId);
+                                        mHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                onUserInitialized(uss, foreground,
+                                                        oldUserId, userId);
+                                            }
+                                        });
                                     }
                                 }, 0, null, null, null, AppOpsManager.OP_NONE,
                                 null, true, false, MY_PID, SYSTEM_UID, userId);
