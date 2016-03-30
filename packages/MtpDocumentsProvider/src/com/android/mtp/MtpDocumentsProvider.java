@@ -17,6 +17,7 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.UriPermission;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -38,11 +39,16 @@ import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -82,6 +88,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private MtpDatabase mDatabase;
     private AppFuse mAppFuse;
     private ServiceIntentSender mIntentSender;
+    private Context mContext;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -93,6 +100,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public boolean onCreate() {
         sSingleton = this;
+        mContext = getContext();
         mResources = getContext().getResources();
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
@@ -137,12 +145,14 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     @VisibleForTesting
     boolean onCreateForTesting(
+            Context context,
             Resources resources,
             MtpManager mtpManager,
             ContentResolver resolver,
             MtpDatabase database,
             StorageManager storageManager,
             ServiceIntentSender intentSender) {
+        mContext = context;
         mResources = resources;
         mMtpManager = mtpManager;
         mResolver = resolver;
@@ -232,43 +242,43 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             openDevice(identifier.mDeviceId);
             final MtpDeviceRecord device = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
-            switch (mode) {
-                case "r":
-                    long fileSize;
-                    try {
-                        fileSize = getFileSize(documentId);
-                    } catch (UnsupportedOperationException exception) {
-                        fileSize = -1;
-                    }
-                    // MTP getPartialObject operation does not support files that are larger than
-                    // 4GB. Fallback to non-seekable file descriptor.
-                    if (MtpDeviceRecord.isPartialReadSupported(
-                            device.operationsSupported, fileSize)) {
-                        return mAppFuse.openFile(
-                                Integer.parseInt(documentId), ParcelFileDescriptor.MODE_READ_ONLY);
-                    } else {
-                        return getPipeManager(identifier).readDocument(mMtpManager, identifier);
-                    }
-                case "w":
-                    // TODO: Clear the parent document loader task (if exists) and call notify
-                    // when writing is completed.
-                    if (MtpDeviceRecord.isWritingSupported(device.operationsSupported)) {
-                        return getPipeManager(identifier).writeDocument(
-                                getContext(), mMtpManager, identifier, device.operationsSupported);
-                    } else {
-                        throw new UnsupportedOperationException(
-                                "The device does not support writing operation.");
-                    }
-                case "rw":
-                    // TODO: Add support for "rw" mode.
+            // Turn off MODE_CREATE because openDocument does not allow to create new files.
+            final int modeFlag =
+                    ParcelFileDescriptor.parseMode(mode) & ~ParcelFileDescriptor.MODE_CREATE;
+            if ((modeFlag & ParcelFileDescriptor.MODE_READ_ONLY) != 0) {
+                long fileSize;
+                try {
+                    fileSize = getFileSize(documentId);
+                } catch (UnsupportedOperationException exception) {
+                    fileSize = -1;
+                }
+                if (MtpDeviceRecord.isPartialReadSupported(
+                        device.operationsSupported, fileSize)) {
+                    return mAppFuse.openFile(Integer.parseInt(documentId), modeFlag);
+                } else {
+                    // If getPartialObject{|64} are not supported for the device, returns
+                    // non-seekable pipe FD instead.
+                    return getPipeManager(identifier).readDocument(mMtpManager, identifier);
+                }
+            } else if ((modeFlag & ParcelFileDescriptor.MODE_WRITE_ONLY) != 0) {
+                // TODO: Clear the parent document loader task (if exists) and call notify
+                // when writing is completed.
+                if (MtpDeviceRecord.isWritingSupported(device.operationsSupported)) {
+                    return mAppFuse.openFile(Integer.parseInt(documentId), modeFlag);
+                } else {
                     throw new UnsupportedOperationException(
-                            "The provider does not support 'rw' mode.");
-                default:
-                    throw new IllegalArgumentException("Unknown mode for openDocument: " + mode);
+                            "The device does not support writing operation.");
+                }
+            } else {
+                // TODO: Add support for "rw" mode.
+                throw new UnsupportedOperationException("The provider does not support 'rw' mode.");
             }
+        } catch (FileNotFoundException | RuntimeException error) {
+            Log.e(MtpDocumentsProvider.TAG, "openDocument", error);
+            throw error;
         } catch (IOException error) {
             Log.e(MtpDocumentsProvider.TAG, "openDocument", error);
-            throw new FileNotFoundException(error.getMessage());
+            throw new IllegalStateException(error);
         }
     }
 
@@ -595,6 +605,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     private class AppFuseCallback implements AppFuse.Callback {
+        private final Map<Long, MtpFileWriter> mWriters = new HashMap<>();
+
+        @Override
+        public long getFileSize(int inode) throws FileNotFoundException {
+            return MtpDocumentsProvider.this.getFileSize(String.valueOf(inode));
+        }
+
         @Override
         public long readObjectBytes(
                 int inode, long offset, long size, byte[] buffer) throws IOException {
@@ -617,15 +634,43 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
 
         @Override
-        public long getFileSize(int inode) throws FileNotFoundException {
-            return MtpDocumentsProvider.this.getFileSize(String.valueOf(inode));
+        public int writeObjectBytes(
+                long fileHandle, int inode, long offset, int size, byte[] bytes)
+                throws IOException, ErrnoException {
+            final MtpFileWriter writer;
+            if (mWriters.containsKey(fileHandle)) {
+                writer = mWriters.get(fileHandle);
+            } else {
+                writer = new MtpFileWriter(mContext, String.valueOf(inode));
+                mWriters.put(fileHandle, writer);
+            }
+            return writer.write(offset, size, bytes);
         }
 
         @Override
-        public int writeObjectBytes(int inode, long offset, int size, byte[] bytes)
-                throws IOException {
-            // TODO: Implement it.
-            throw new IOException();
+        public void flushFileHandle(long fileHandle) throws IOException, ErrnoException {
+            final MtpFileWriter writer = mWriters.get(fileHandle);
+            if (writer == null) {
+                // File handle for reading.
+                return;
+            }
+            final MtpDeviceRecord device = getDeviceToolkit(
+                    mDatabase.createIdentifier(writer.getDocumentId()).mDeviceId).mDeviceRecord;
+            writer.flush(mMtpManager, mDatabase, device.operationsSupported);
+        }
+
+        @Override
+        public void closeFileHandle(long fileHandle) throws IOException, ErrnoException {
+            final MtpFileWriter writer = mWriters.get(fileHandle);
+            if (writer == null) {
+                // File handle for reading.
+                return;
+            }
+            try {
+                writer.close();
+            } finally {
+                mWriters.remove(fileHandle);
+            }
         }
     }
 }

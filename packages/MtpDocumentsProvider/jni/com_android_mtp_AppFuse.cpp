@@ -52,6 +52,8 @@ static jclass app_fuse_class;
 static jmethodID app_fuse_get_file_size;
 static jmethodID app_fuse_read_object_bytes;
 static jmethodID app_fuse_write_object_bytes;
+static jmethodID app_fuse_flush_file_handle;
+static jmethodID app_fuse_close_file_handle;
 static jfieldID app_fuse_buffer;
 
 // NOTE:
@@ -307,7 +309,8 @@ private:
         const uint32_t size = in->size;
         const void* const buffer = reinterpret_cast<const uint8_t*>(in) + sizeof(fuse_write_in);
         uint32_t written_size;
-        const int result = write_object_bytes(it->second, offset, size, buffer, &written_size);
+        const int result = write_object_bytes(
+                in->fh, it->second, offset, size, buffer, &written_size);
         if (result < 0) {
             return result;
         }
@@ -320,13 +323,13 @@ private:
                             const fuse_release_in* in,
                             FuseResponse<void>* /* out */) {
         handles_.erase(in->fh);
-        return 0;
+        return env_->CallIntMethod(self_, app_fuse_close_file_handle, file_handle_to_jlong(in->fh));
     }
 
     int handle_fuse_flush(const fuse_in_header& /* header */,
-                          const void* /* in */,
+                          const fuse_flush_in* in,
                           FuseResponse<void>* /* out */) {
-        return 0;
+        return env_->CallIntMethod(self_, app_fuse_flush_file_handle, file_handle_to_jlong(in->fh));
     }
 
     template <typename T, typename S>
@@ -382,8 +385,10 @@ private:
         return read_size;
     }
 
-    int write_object_bytes(int inode, uint64_t offset, uint32_t size, const void* buffer,
-                           uint32_t* written_size) {
+    int write_object_bytes(uint64_t handle, int inode, uint64_t offset, uint32_t size,
+                           const void* buffer, uint32_t* written_size) {
+        static_assert(sizeof(uint64_t) <= sizeof(jlong),
+                      "jlong must be able to express any uint64_t values");
         ScopedLocalRef<jbyteArray> array(
                 env_,
                 static_cast<jbyteArray>(env_->GetObjectField(self_, app_fuse_buffer)));
@@ -394,13 +399,26 @@ private:
             }
             memcpy(bytes.get(), buffer, size);
         }
-        *written_size = env_->CallIntMethod(
-                self_, app_fuse_write_object_bytes, inode, offset, size, array.get());
-        if (env_->ExceptionCheck()) {
-            env_->ExceptionClear();
-            return -EIO;
+        const int result = env_->CallIntMethod(
+                self_,
+                app_fuse_write_object_bytes,
+                file_handle_to_jlong(handle),
+                inode,
+                offset,
+                size,
+                array.get());
+        if (result < 0) {
+            return result;
         }
+        *written_size = result;
         return 0;
+    }
+
+    static jlong file_handle_to_jlong(uint64_t handle) {
+        static_assert(
+                sizeof(uint64_t) <= sizeof(jlong),
+                "jlong must be able to express any uint64_t values");
+        return static_cast<jlong>(handle);
     }
 
     static void fuse_reply(int fd, int unique, int reply_code, void* reply_data,
@@ -511,15 +529,21 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
         return -1;
     }
 
-    app_fuse_buffer = env->GetFieldID(app_fuse_class, "mBuffer", "[B");
-    if (app_fuse_buffer == nullptr) {
-        ALOGE("Can't find mBuffer");
+    app_fuse_write_object_bytes = env->GetMethodID(app_fuse_class, "writeObjectBytes", "(JIJI[B)I");
+    if (app_fuse_write_object_bytes == nullptr) {
+        ALOGE("Can't find writeObjectBytes");
         return -1;
     }
 
-    app_fuse_write_object_bytes = env->GetMethodID(app_fuse_class, "writeObjectBytes", "(IJI[B)I");
-    if (app_fuse_write_object_bytes == nullptr) {
-        ALOGE("Can't find getWriteObjectBytes");
+    app_fuse_flush_file_handle = env->GetMethodID(app_fuse_class, "flushFileHandle", "(J)I");
+    if (app_fuse_flush_file_handle == nullptr) {
+        ALOGE("Can't find flushFileHandle");
+        return -1;
+    }
+
+    app_fuse_close_file_handle = env->GetMethodID(app_fuse_class, "closeFileHandle", "(J)I");
+    if (app_fuse_close_file_handle == nullptr) {
+        ALOGE("Can't find closeFileHandle");
         return -1;
     }
 
