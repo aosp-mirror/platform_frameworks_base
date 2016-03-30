@@ -283,7 +283,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -315,7 +315,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -354,7 +354,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -393,13 +393,13 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet1 = new NetworkIdentitySet();
         identSet1.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveIfaces.put(TEST_IFACE, identSet1);
 
         NetworkIdentitySet identSet2 = new NetworkIdentitySet();
         identSet2.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_2, null /* networkId */, false /* roaming */));
+                IMSI_2, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveIfaces.put(TEST_IFACE2, identSet2);
 
         // Baseline
@@ -441,7 +441,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -481,7 +481,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -521,7 +521,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -561,7 +561,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -601,7 +601,7 @@ public class NetworkStatsObserversTest extends TestCase {
         NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */));
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline

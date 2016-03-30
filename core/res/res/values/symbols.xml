@@ -1130,7 +1130,6 @@
   <java-symbol type="plurals" name="pinpuk_attempts" />
 
   <java-symbol type="array" name="carrier_properties" />
-  <java-symbol type="array" name="config_data_usage_network_types" />
   <java-symbol type="array" name="config_sms_enabled_locking_shift_tables" />
   <java-symbol type="array" name="config_sms_enabled_single_shift_tables" />
   <java-symbol type="array" name="config_twoDigitNumberPattern" />

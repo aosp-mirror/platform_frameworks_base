@@ -55,19 +55,22 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     final String mSubscriberId;
     final String mNetworkId;
     final boolean mRoaming;
+    final boolean mMetered;
 
     public NetworkIdentity(
-            int type, int subType, String subscriberId, String networkId, boolean roaming) {
+            int type, int subType, String subscriberId, String networkId, boolean roaming,
+            boolean metered) {
         mType = type;
         mSubType = COMBINE_SUBTYPE_ENABLED ? SUBTYPE_COMBINED : subType;
         mSubscriberId = subscriberId;
         mNetworkId = networkId;
         mRoaming = roaming;
+        mMetered = metered;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mSubType, mSubscriberId, mNetworkId, mRoaming);
+        return Objects.hash(mType, mSubType, mSubscriberId, mNetworkId, mRoaming, mMetered);
     }
 
     @Override
@@ -76,7 +79,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
             final NetworkIdentity ident = (NetworkIdentity) obj;
             return mType == ident.mType && mSubType == ident.mSubType && mRoaming == ident.mRoaming
                     && Objects.equals(mSubscriberId, ident.mSubscriberId)
-                    && Objects.equals(mNetworkId, ident.mNetworkId);
+                    && Objects.equals(mNetworkId, ident.mNetworkId)
+                    && mMetered == ident.mMetered;
         }
         return false;
     }
@@ -102,6 +106,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         if (mRoaming) {
             builder.append(", ROAMING");
         }
+        builder.append(", metered=").append(mMetered);
         return builder.append("}").toString();
     }
 
@@ -123,6 +128,10 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
     public boolean getRoaming() {
         return mRoaming;
+    }
+
+    public boolean getMetered() {
+        return mMetered;
     }
 
     /**
@@ -162,6 +171,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         String subscriberId = null;
         String networkId = null;
         boolean roaming = false;
+        boolean metered = false;
 
         if (isNetworkTypeMobile(type)) {
             if (state.subscriberId == null) {
@@ -170,6 +180,9 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
             subscriberId = state.subscriberId;
             roaming = state.networkInfo.isRoaming();
+
+            metered = !state.networkCapabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
 
         } else if (type == TYPE_WIFI) {
             if (state.networkId != null) {
@@ -182,7 +195,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
             }
         }
 
-        return new NetworkIdentity(type, subType, subscriberId, networkId, roaming);
+        return new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered);
     }
 
     @Override
@@ -199,6 +212,9 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
         if (res == 0) {
             res = Boolean.compare(mRoaming, another.mRoaming);
+        }
+        if (res == 0) {
+            res = Boolean.compare(mMetered, another.mMetered);
         }
         return res;
     }
