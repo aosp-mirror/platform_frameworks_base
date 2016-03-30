@@ -7253,9 +7253,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void deleteProfilesLI(PackageParser.Package pkg, boolean destroy) {
         try {
             if (destroy) {
-                mInstaller.clearAppProfiles(pkg.packageName);
-            } else {
                 mInstaller.destroyAppProfiles(pkg.packageName);
+            } else {
+                mInstaller.clearAppProfiles(pkg.packageName);
             }
         } catch (InstallerException ex) {
             Log.e(TAG, "Could not delete profiles for package " + pkg.packageName);
@@ -14527,7 +14527,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             res = deletePackageLI(packageName, removeForUser, true, allUsers,
                     flags | REMOVE_CHATTY, info, true, null);
-            deleteProfilesLI(packageName, /*destroy*/ true);
             synchronized (mPackages) {
                 if (res) {
                     mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPs.pkg);
