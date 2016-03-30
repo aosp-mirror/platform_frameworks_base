@@ -654,8 +654,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String shortSupportMessage = null;
         String longSupportMessage = null;
 
-        // Background color of confirm credentials screen. Default: gray.
-        static final int DEF_ORGANIZATION_COLOR = Color.GRAY;
+        // Background color of confirm credentials screen. Default: teal.
+        static final int DEF_ORGANIZATION_COLOR = Color.parseColor("#00796B");
         int organizationColor = DEF_ORGANIZATION_COLOR;
 
         // Default title of confirm credentials screen
