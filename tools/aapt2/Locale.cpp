@@ -268,10 +268,6 @@ void LocaleValue::writeTo(ResTable_config* out) const {
 
     if (script[0]) {
         memcpy(out->localeScript, script, sizeof(out->localeScript));
-        out->localeScriptWasComputed = false;
-    } else {
-        out->computeScript();
-        out->localeScriptWasComputed = true;
     }
 
     if (variant[0]) {
