@@ -261,4 +261,12 @@ public class InputConnectionWrapper implements InputConnection {
     public Handler getHandler() {
         return mTarget.getHandler();
     }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    public void closeConnection() {
+        mTarget.closeConnection();
+    }
 }

@@ -83,13 +83,9 @@ public class EditableInputConnection extends BaseInputConnection {
         return false;
     }
 
-    /**
-     * @hide
-     */
     @Override
-    public void reportFinish() {
-        super.reportFinish();
-
+    public void closeConnection() {
+        super.closeConnection();
         synchronized(this) {
             while (mBatchEditNesting > 0) {
                 endBatchEdit();

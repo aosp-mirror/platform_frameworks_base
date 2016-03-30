@@ -544,7 +544,7 @@ public final class InputMethodManager {
                 // reportFinish() will take effect.
                 return;
             }
-            reportFinish();
+            closeConnection();
         }
 
         @Override

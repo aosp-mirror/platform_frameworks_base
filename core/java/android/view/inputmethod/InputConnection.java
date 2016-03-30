@@ -45,6 +45,8 @@ import android.view.KeyEvent;
  *     was introduced in {@link android.os.Build.VERSION_CODES#N}.</li>
  *     <li>{@link #getHandler()}}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#N}.</li>
+ *     <li>{@link #closeConnection()}}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#N}.</li>
  * </ul>
  *
  * <h3>Implementing an IME or an editor</h3>
@@ -820,4 +822,18 @@ public interface InputConnection {
      * @return {@code null} to use the default {@link Handler}.
      */
     public Handler getHandler();
+
+    /**
+     * Called by the system up to only once to notify that the system is about to invalidate
+     * connection between the input method and the application.
+     *
+     * <p><strong>Editor authors</strong>: You can clear all the nested batch edit right now and
+     * you no longer need to handle subsequent callbacks on this connection, including
+     * {@link #beginBatchEdit()}}.  Note that although the system tries to call this method whenever
+     * possible, there may be a chance that this method is not called in some exceptional
+     * situations.</p>
+     *
+     * <p>Note: This does nothing when called from input methods.</p>
+     */
+    public void closeConnection();
 }
