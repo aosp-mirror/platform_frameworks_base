@@ -19,6 +19,9 @@ package android.net.metrics;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * {@hide}
+ */
 public class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
     public static final String TAG = "DhcpClientEvent";
 
