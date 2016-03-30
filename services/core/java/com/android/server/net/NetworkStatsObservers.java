@@ -81,8 +81,6 @@ class NetworkStatsObservers {
      */
     public DataUsageRequest register(DataUsageRequest inputRequest, Messenger messenger,
                 IBinder binder, int callingUid, @NetworkStatsAccess.Level int accessLevel) {
-        checkVisibilityUids(callingUid, accessLevel, inputRequest.uids);
-
         DataUsageRequest request = buildRequest(inputRequest);
         RequestInfo requestInfo = buildRequestInfo(request, messenger, binder, callingUid,
                 accessLevel);
@@ -211,14 +209,13 @@ class NetworkStatsObservers {
                     + ". Overriding to a safer default of " + thresholdInBytes + " bytes");
         }
         return new DataUsageRequest(mNextDataUsageRequestId.incrementAndGet(),
-                request.templates, request.uids, thresholdInBytes);
+                request.template, thresholdInBytes);
     }
 
     private RequestInfo buildRequestInfo(DataUsageRequest request,
                 Messenger messenger, IBinder binder, int callingUid,
                 @NetworkStatsAccess.Level int accessLevel) {
-        if (accessLevel <= NetworkStatsAccess.Level.USER
-                || request.uids != null && request.uids.length > 0) {
+        if (accessLevel <= NetworkStatsAccess.Level.USER) {
             return new UserUsageRequestInfo(this, request, messenger, binder, callingUid,
                     accessLevel);
         } else {
@@ -226,19 +223,6 @@ class NetworkStatsObservers {
             checkArgument(accessLevel >= NetworkStatsAccess.Level.DEVICESUMMARY);
             return new NetworkUsageRequestInfo(this, request, messenger, binder, callingUid,
                     accessLevel);
-        }
-    }
-
-    private void checkVisibilityUids(int callingUid, @NetworkStatsAccess.Level int accessLevel,
-                int[] uids) {
-        if (uids == null) {
-            return;
-        }
-        for (int i = 0; i < uids.length; i++) {
-            if (!NetworkStatsAccess.isAccessibleToUser(uids[i], callingUid, accessLevel)) {
-                throw new SecurityException("Caller " + callingUid + " cannot monitor network stats"
-                        + " for uid " + uids[i] + " with accessLevel " + accessLevel);
-            }
         }
     }
 
@@ -359,15 +343,13 @@ class NetworkStatsObservers {
 
         @Override
         protected boolean checkStats() {
-            for (int i = 0; i < mRequest.templates.length; i++) {
-                long bytesSoFar = getTotalBytesForNetwork(mRequest.templates[i]);
-                if (LOGV) {
-                    Slog.v(TAG, bytesSoFar + " bytes so far since notification for "
-                            + mRequest.templates[i]);
-                }
-                if (bytesSoFar > mRequest.thresholdInBytes) {
-                    return true;
-                }
+            long bytesSoFar = getTotalBytesForNetwork(mRequest.template);
+            if (LOGV) {
+                Slog.v(TAG, bytesSoFar + " bytes so far since notification for "
+                        + mRequest.template);
+            }
+            if (bytesSoFar > mRequest.thresholdInBytes) {
+                return true;
             }
             return false;
         }
@@ -405,20 +387,17 @@ class NetworkStatsObservers {
 
         @Override
         protected boolean checkStats() {
-            int[] uidsToMonitor = getUidsToMonitor();
+            int[] uidsToMonitor = mCollection.getRelevantUids(mAccessLevel, mCallingUid);
 
-            for (int i = 0; i < mRequest.templates.length; i++) {
-                for (int j = 0; j < uidsToMonitor.length; j++) {
-                    long bytesSoFar = getTotalBytesForNetworkUid(mRequest.templates[i],
-                            uidsToMonitor[j]);
+            for (int i = 0; i < uidsToMonitor.length; i++) {
+                long bytesSoFar = getTotalBytesForNetworkUid(mRequest.template, uidsToMonitor[i]);
 
-                    if (LOGV) {
-                        Slog.v(TAG, bytesSoFar + " bytes so far since notification for "
-                                + mRequest.templates[i] + " for uid=" + uidsToMonitor[j]);
-                    }
-                    if (bytesSoFar > mRequest.thresholdInBytes) {
-                        return true;
-                    }
+                if (LOGV) {
+                    Slog.v(TAG, bytesSoFar + " bytes so far since notification for "
+                            + mRequest.template + " for uid=" + uidsToMonitor[i]);
+                }
+                if (bytesSoFar > mRequest.thresholdInBytes) {
+                    return true;
                 }
             }
             return false;
@@ -452,21 +431,6 @@ class NetworkStatsObservers {
                 }
                 return 0;
             }
-        }
-
-        private int[] getUidsToMonitor() {
-            if (mRequest.uids == null || mRequest.uids.length == 0) {
-                return mCollection.getRelevantUids(mAccessLevel, mCallingUid);
-            }
-            // Pick only uids from the request that are currently accessible to the user
-            IntArray accessibleUids = new IntArray(mRequest.uids.length);
-            for (int i = 0; i < mRequest.uids.length; i++) {
-                int uid = mRequest.uids[i];
-                if (NetworkStatsAccess.isAccessibleToUser(uid, mCallingUid, mAccessLevel)) {
-                    accessibleUids.add(uid);
-                }
-            }
-            return accessibleUids.toArray();
         }
     }
 
