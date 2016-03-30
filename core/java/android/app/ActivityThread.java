@@ -1284,15 +1284,15 @@ public final class ActivityThread {
         }
 
         @Override
-        public void scheduleMultiWindowChanged(IBinder token, boolean inMultiWindow)
+        public void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode)
                 throws RemoteException {
-            sendMessage(H.MULTI_WINDOW_CHANGED, token, inMultiWindow ? 1 : 0);
+            sendMessage(H.MULTI_WINDOW_MODE_CHANGED, token, isInMultiWindowMode ? 1 : 0);
         }
 
         @Override
-        public void schedulePictureInPictureChanged(IBinder token, boolean inPip)
+        public void schedulePictureInPictureModeChanged(IBinder token, boolean isInPipMode)
                 throws RemoteException {
-            sendMessage(H.PICTURE_IN_PICTURE_CHANGED, token, inPip ? 1 : 0);
+            sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, token, isInPipMode ? 1 : 0);
         }
 
         @Override
@@ -1364,8 +1364,8 @@ public final class ActivityThread {
         public static final int ENTER_ANIMATION_COMPLETE = 149;
         public static final int START_BINDER_TRACKING = 150;
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
-        public static final int MULTI_WINDOW_CHANGED = 152;
-        public static final int PICTURE_IN_PICTURE_CHANGED = 153;
+        public static final int MULTI_WINDOW_MODE_CHANGED = 152;
+        public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
 
         String codeToString(int code) {
@@ -1420,8 +1420,8 @@ public final class ActivityThread {
                     case CANCEL_VISIBLE_BEHIND: return "CANCEL_VISIBLE_BEHIND";
                     case BACKGROUND_VISIBLE_BEHIND_CHANGED: return "BACKGROUND_VISIBLE_BEHIND_CHANGED";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
-                    case MULTI_WINDOW_CHANGED: return "MULTI_WINDOW_CHANGED";
-                    case PICTURE_IN_PICTURE_CHANGED: return "PICTURE_IN_PICTURE_CHANGED";
+                    case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
+                    case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
                 }
             }
@@ -1666,11 +1666,11 @@ public final class ActivityThread {
                 case STOP_BINDER_TRACKING_AND_DUMP:
                     handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
                     break;
-                case MULTI_WINDOW_CHANGED:
-                    handleMultiWindowChanged((IBinder) msg.obj, msg.arg1 == 1);
+                case MULTI_WINDOW_MODE_CHANGED:
+                    handleMultiWindowModeChanged((IBinder) msg.obj, msg.arg1 == 1);
                     break;
-                case PICTURE_IN_PICTURE_CHANGED:
-                    handlePictureInPictureChanged((IBinder) msg.obj, msg.arg1 == 1);
+                case PICTURE_IN_PICTURE_MODE_CHANGED:
+                    handlePictureInPictureModeChanged((IBinder) msg.obj, msg.arg1 == 1);
                     break;
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
@@ -2924,17 +2924,17 @@ public final class ActivityThread {
         }
     }
 
-    private void handleMultiWindowChanged(IBinder token, boolean inMultiWindow) {
+    private void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onMultiWindowChanged(inMultiWindow);
+            r.activity.onMultiWindowModeChanged(isInMultiWindowMode);
         }
     }
 
-    private void handlePictureInPictureChanged(IBinder token, boolean inPip) {
+    private void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onPictureInPictureChanged(inPip);
+            r.activity.onPictureInPictureModeChanged(isInPipMode);
         }
     }
 

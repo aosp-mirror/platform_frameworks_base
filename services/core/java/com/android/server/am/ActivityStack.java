@@ -4986,7 +4986,7 @@ final class ActivityStack {
 
     private void postAddTask(TaskRecord task, ActivityStack prevStack) {
         if (prevStack != null) {
-            mStackSupervisor.scheduleReportPictureInPictureChangedIfNeeded(task, prevStack);
+            mStackSupervisor.scheduleReportPictureInPictureModeChangedIfNeeded(task, prevStack);
         } else if (task.voiceSession != null) {
             try {
                 task.voiceSession.taskStarted(task.intent, task.taskId);
@@ -5045,7 +5045,7 @@ final class ActivityStack {
         r.setTask(task, null);
         task.addActivityToTop(r);
         setAppTask(r, task);
-        mStackSupervisor.scheduleReportPictureInPictureChangedIfNeeded(task, prevStack);
+        mStackSupervisor.scheduleReportPictureInPictureModeChangedIfNeeded(task, prevStack);
         moveToFrontAndResumeStateIfNeeded(r, wasFocused, wasResumed, "moveActivityToStack");
         if (wasResumed) {
             prevStack.mResumedActivity = null;

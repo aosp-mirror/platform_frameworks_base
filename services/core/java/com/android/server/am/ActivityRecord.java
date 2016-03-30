@@ -23,7 +23,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_THUMBNAILS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
@@ -452,24 +451,24 @@ final class ActivityRecord {
         }
     }
 
-    void scheduleMultiWindowChanged() {
+    void scheduleMultiWindowModeChanged() {
         if (task == null || task.stack == null || app == null || app.thread == null) {
             return;
         }
         try {
             // An activity is considered to be in multi-window mode if its task isn't fullscreen.
-            app.thread.scheduleMultiWindowChanged(appToken, !task.mFullscreen);
+            app.thread.scheduleMultiWindowModeChanged(appToken, !task.mFullscreen);
         } catch (Exception e) {
             // If process died, I don't care.
         }
     }
 
-    void schedulePictureInPictureChanged() {
+    void schedulePictureInPictureModeChanged() {
         if (task == null || task.stack == null || app == null || app.thread == null) {
             return;
         }
         try {
-            app.thread.schedulePictureInPictureChanged(
+            app.thread.schedulePictureInPictureModeChanged(
                     appToken, task.stack.mStackId == PINNED_STACK_ID);
         } catch (Exception e) {
             // If process died, no one cares.

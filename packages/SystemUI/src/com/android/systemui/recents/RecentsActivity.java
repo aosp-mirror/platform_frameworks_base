@@ -428,8 +428,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
-    public void onMultiWindowChanged(boolean inMultiWindow) {
-        super.onMultiWindowChanged(inMultiWindow);
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode);
         EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
                 false /* fromOrientationChange */));
 
@@ -449,7 +449,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             mRecentsView.updateStack(loadPlan.getTaskStack());
         }
 
-        EventBus.getDefault().send(new MultiWindowStateChangedEvent(inMultiWindow));
+        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode));
     }
 
     @Override
