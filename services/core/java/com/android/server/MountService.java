@@ -1231,7 +1231,8 @@ class MountService extends IMountService.Stub
         }
 
         final Intent intent = new Intent(DiskInfo.ACTION_DISK_SCANNED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.id);
         intent.putExtra(DiskInfo.EXTRA_VOLUME_COUNT, volumeCount);
         mHandler.obtainMessage(H_INTERNAL_BROADCAST, intent).sendToTarget();
@@ -1347,7 +1348,8 @@ class MountService extends IMountService.Stub
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_STATE, newState);
             intent.putExtra(VolumeRecord.EXTRA_FS_UUID, vol.fsUuid);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
             mHandler.obtainMessage(H_INTERNAL_BROADCAST, intent).sendToTarget();
         }
 
