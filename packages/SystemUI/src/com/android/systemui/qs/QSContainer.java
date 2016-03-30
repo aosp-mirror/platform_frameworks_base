@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -43,6 +44,7 @@ public class QSContainer extends FrameLayout {
     private static final boolean DEBUG = false;
 
     private final Point mSizePoint = new Point();
+    private final Rect mQsBounds = new Rect();
 
     private int mHeightOverride = -1;
     private QSPanel mQSPanel;
@@ -226,6 +228,12 @@ public class QSContainer extends FrameLayout {
         mQSDetail.setFullyExpanded(expansion == 1);
         mQSAnimator.setPosition(expansion);
         updateBottom();
+
+        // Set bounds on the QS panel so it doesn't run over the header.
+        mQsBounds.top = (int) (mQSPanel.getHeight() * (1 - expansion));
+        mQsBounds.right = mQSPanel.getWidth();
+        mQsBounds.bottom = mQSPanel.getHeight();
+        mQSPanel.setClipBounds(mQsBounds);
     }
 
     public void animateHeaderSlidingIn(long delay) {
