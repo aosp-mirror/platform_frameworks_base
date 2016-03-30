@@ -14,11 +14,13 @@
 
 package com.android.systemui.qs;
 
+import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import org.mockito.Mockito;
 
+@SmallTest
 public class TouchAnimatorTests extends SysuiTestCase {
 
     private Listener mTouchListener;
