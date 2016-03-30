@@ -20,6 +20,9 @@ import android.net.ConnectivityMetricsLogger;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * {@hide}
+ */
 public class IpConnectivityEvent implements Parcelable {
     // IPRM = IpReachabilityMonitor
     // DHCP = DhcpClient
