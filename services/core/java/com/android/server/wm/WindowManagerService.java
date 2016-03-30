@@ -2531,7 +2531,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void repositionChild(Session session, IWindow client,
             int left, int top, int right, int bottom,
-            int requestedWidth, int requestedHeight,
             long deferTransactionUntilFrame, Rect outFrame) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "repositionChild");
         long origId = Binder.clearCallingIdentity();
@@ -2547,7 +2546,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             "repositionChild called but window is not"
                             + "attached to a parent win=" + win);
                 }
-                win.setRequestedSize(requestedWidth, requestedHeight);
 
                 win.mAttrs.x = left;
                 win.mAttrs.y = top;

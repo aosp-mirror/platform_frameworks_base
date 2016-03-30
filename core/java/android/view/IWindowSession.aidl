@@ -116,14 +116,11 @@ interface IWindowSession {
      *  @param top The new top position
      *  @param right The new right position
      *  @param bottom The new bottom position
-     *  @param requestedWidth The new requested width
-     *  @param requestedHeight The new requested height
      *  @param deferTransactionUntilFrame Frame number from our parent (attached) to
      *  defer this action until.
      *  @param outFrame Rect in which is placed the new position/size on screen.
      */
     void repositionChild(IWindow childWindow, int left, int top, int right, int bottom,
-            int requestedWidth, int requestedHeight,
             long deferTransactionUntilFrame, out Rect outFrame);
 
     /*
