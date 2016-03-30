@@ -6968,10 +6968,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // If the cache was pruned, any compiled odex files will likely be out of date
                 // and would have to be patched (would be SELF_PATCHOAT, which is deprecated).
                 // Instead, force the extraction in this case.
-                performDexOpt(pkg.packageName, null /* instructionSet */,
-                         false /* checkProfiles */,
-                         causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
-                         causePrunedCache);
+                performDexOpt(pkg.packageName,
+                        null /* instructionSet */,
+                        false /* checkProfiles */,
+                        causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
+                        false /* force */);
             }
         }
     }
