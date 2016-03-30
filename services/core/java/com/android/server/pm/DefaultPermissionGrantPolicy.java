@@ -597,6 +597,16 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(emergencyInfoPckg, PHONE_PERMISSIONS, true, userId);
             }
 
+            // NFC Tag viewer
+            Intent nfcTagIntent = new Intent(Intent.ACTION_VIEW);
+            nfcTagIntent.setType("vnd.android.cursor.item/ndef_msg");
+            PackageParser.Package nfcTagPkg = getDefaultSystemHandlerActivityPackageLPr(
+                    nfcTagIntent, userId);
+            if (nfcTagPkg != null
+                    && doesPackageSupportRuntimePermissions(nfcTagPkg)) {
+                grantRuntimePermissionsLPw(nfcTagPkg, CONTACTS_PERMISSIONS, false, userId);
+                grantRuntimePermissionsLPw(nfcTagPkg, PHONE_PERMISSIONS, false, userId);
+            }
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
         }
     }
