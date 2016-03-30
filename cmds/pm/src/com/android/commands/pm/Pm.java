@@ -930,7 +930,7 @@ public final class Pm {
                 // In non-split user mode, userId can only be SYSTEM
                 int parentUserId = userId >= 0 ? userId : UserHandle.USER_SYSTEM;
                 info = mUm.createRestrictedProfile(name, parentUserId);
-                mAm.addSharedAccountsFromParentUser(userId, parentUserId);
+                mAm.addSharedAccountsFromParentUser(parentUserId, userId);
             } else if (userId < 0) {
                 info = mUm.createUser(name, flags);
             } else {
