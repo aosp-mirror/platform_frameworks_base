@@ -2281,6 +2281,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (restrictions == null || restrictions.isEmpty()) {
                 cleanAppRestrictionsForPackage(packageName, userId);
             } else {
+                restrictions.setDefusable(true);
                 // Write the restrictions to XML
                 writeApplicationRestrictionsLP(packageName, restrictions, userId);
             }
