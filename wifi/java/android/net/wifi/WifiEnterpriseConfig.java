@@ -437,6 +437,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         switch (eapMethod) {
             /** Valid methods */
             case Eap.TLS:
+            case Eap.UNAUTH_TLS:
                 setPhase2Method(Phase2.NONE);
                 /* fall through */
             case Eap.PEAP:
