@@ -73,6 +73,11 @@ public final class InputConnectionInspector {
          * {@link android.os.Build.VERSION_CODES#N} and later.
          */
         int GET_HANDLER = 1 << 5;
+        /**
+         * {@link InputConnection#closeConnection()}} is available in
+         * {@link android.os.Build.VERSION_CODES#N} and later.
+         */
+        int CLOSE_CONNECTION = 1 << 6;
     }
 
     private static final Map<Class, Integer> sMissingMethodsMap = Collections.synchronizedMap(
@@ -118,6 +123,9 @@ public final class InputConnectionInspector {
         }
         if (!hasGetHandler(clazz)) {
             flags |= MissingMethodFlags.GET_HANDLER;
+        }
+        if (!hasCloseConnection(clazz)) {
+            flags |= MissingMethodFlags.CLOSE_CONNECTION;
         }
         sMissingMethodsMap.put(clazz, flags);
         return flags;
@@ -178,6 +186,15 @@ public final class InputConnectionInspector {
         }
     }
 
+    private static boolean hasCloseConnection(@NonNull final Class clazz) {
+        try {
+            final Method method = clazz.getMethod("closeConnection");
+            return !Modifier.isAbstract(method.getModifiers());
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
     public static String getMissingMethodFlagsAsString(@MissingMethodFlags final int flags) {
         final StringBuilder sb = new StringBuilder();
         boolean isEmpty = true;
@@ -218,6 +235,12 @@ public final class InputConnectionInspector {
                 sb.append(",");
             }
             sb.append("getHandler()");
+        }
+        if ((flags & MissingMethodFlags.CLOSE_CONNECTION) != 0) {
+            if (!isEmpty) {
+                sb.append(",");
+            }
+            sb.append("closeConnection()");
         }
         return sb.toString();
     }

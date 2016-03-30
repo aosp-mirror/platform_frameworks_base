@@ -27,13 +27,12 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-
-import java.lang.ref.WeakReference;
+import android.view.inputmethod.InputConnectionInspector;
+import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 
 public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     static final String TAG = "IInputConnectionWrapper";
@@ -61,7 +60,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
-    private static final int DO_REPORT_FINISH = 150;
+    private static final int DO_CLOSE_CONNECTION = 150;
 
     @GuardedBy("mLock")
     @Nullable
@@ -222,8 +221,8 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 seq, callback));
     }
 
-    public void reportFinish() {
-        dispatchMessage(obtainMessage(DO_REPORT_FINISH));
+    public void closeConnection() {
+        dispatchMessage(obtainMessage(DO_CLOSE_CONNECTION));
     }
 
     void dispatchMessage(Message msg) {
@@ -501,10 +500,10 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_REPORT_FINISH: {
+            case DO_CLOSE_CONNECTION: {
                 // Note that we do not need to worry about race condition here, because 1) mFinished
                 // is updated only inside this block, and 2) the code here is running on a Handler
-                // hence we assume multiple DO_REPORT_FINISH messages will not be handled at the
+                // hence we assume multiple DO_CLOSE_CONNECTION messages will not be handled at the
                 // same time.
                 if (isFinished()) {
                     return;
@@ -518,11 +517,10 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     if (ic == null) {
                         return;
                     }
-                    ic.finishComposingText();
-                    // TODO: Make reportFinish() public method of InputConnection to remove this
-                    // check.
-                    if (ic instanceof BaseInputConnection) {
-                        ((BaseInputConnection) ic).reportFinish();
+                    @MissingMethodFlags
+                    final int missingMethods = InputConnectionInspector.getMissingMethodFlags(ic);
+                    if ((missingMethods & MissingMethodFlags.CLOSE_CONNECTION) == 0) {
+                        ic.closeConnection();
                     }
                 } finally {
                     synchronized (mLock) {

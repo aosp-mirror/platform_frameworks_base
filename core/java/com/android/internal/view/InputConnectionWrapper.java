@@ -487,6 +487,10 @@ public class InputConnectionWrapper implements InputConnection {
         return null;
     }
 
+    public void closeConnection() {
+        // Nothing should happen when called from input method.
+    }
+
     private boolean isMethodMissing(@MissingMethodFlags final int methodFlag) {
         return (mMissingMethods & methodFlag) == methodFlag;
     }

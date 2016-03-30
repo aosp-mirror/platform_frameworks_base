@@ -5937,6 +5937,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public Handler getHandler() {
             return getTarget().getHandler();
         }
+
+        @Override
+        public void closeConnection() {
+            getTarget().closeConnection();
+        }
     }
 
     /**
