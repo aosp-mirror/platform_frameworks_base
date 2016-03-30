@@ -72,6 +72,7 @@ import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
+import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
@@ -1322,7 +1323,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Update the stack action button visibility
-        if (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+        if (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                mStack.getTaskCount() > 0) {
             EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
         } else {
             EventBus.getDefault().send(new HideStackActionButtonEvent());
@@ -1444,6 +1446,26 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     ? R.string.recents_empty_message
                     : R.string.recents_empty_message_dismissed_all));
         }
+    }
+
+    @Override
+    public void onStackTasksRemoved(TaskStack stack) {
+        // Reset the focused task
+        resetFocusedTask(getFocusedTask());
+
+        // Return all the views to the pool
+        List<TaskView> taskViews = new ArrayList<>();
+        taskViews.addAll(getTaskViews());
+        for (int i = taskViews.size() - 1; i >= 0; i--) {
+            mViewPool.returnViewToPool(taskViews.get(i));
+        }
+
+        // Remove all the ignore tasks
+        mIgnoreTasks.clear();
+
+        // If there are no remaining tasks, then just close recents
+        EventBus.getDefault().send(new AllTaskViewsDismissedEvent(
+                R.string.recents_empty_message_dismissed_all));
     }
 
     @Override
@@ -1597,7 +1619,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         if (mEnterAnimationComplete) {
             if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
-                    curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
+                    curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                    mStack.getTaskCount() > 0) {
                 EventBus.getDefault().send(new ShowStackActionButtonEvent(true /* translate */));
             } else if (prevScroll < HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     curScroll >= HIDE_STACK_ACTION_BUTTON_SCROLL_THRESHOLD) {
@@ -1705,14 +1728,42 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    public final void onBusEvent(final DismissTaskViewEvent event) {
+    public final void onBusEvent(DismissTaskViewEvent event) {
         // For visible children, defer removing the task until after the animation
-        mAnimationHelper.startDeleteTaskAnimation(event.task, event.taskView,
-                event.getAnimationTrigger());
+        mAnimationHelper.startDeleteTaskAnimation(event.taskView, event.getAnimationTrigger());
+    }
+
+    public final void onBusEvent(final DismissAllTaskViewsEvent event) {
+        // Keep track of the tasks which will have their data removed
+        ArrayList<Task> tasks = new ArrayList<>(mStack.getStackTasks());
+        mAnimationHelper.startDeleteAllTasksAnimation(getTaskViews(), event.getAnimationTrigger());
+        event.addPostAnimationCallback(new Runnable() {
+            @Override
+            public void run() {
+                // Announce for accessibility
+                announceForAccessibility(getContext().getString(
+                        R.string.accessibility_recents_all_items_dismissed));
+
+                // Remove all tasks and delete the task data for all tasks
+                mStack.removeAllTasks();
+                for (int i = tasks.size() - 1; i >= 0; i--) {
+                    EventBus.getDefault().send(new DeleteTaskDataEvent(tasks.get(i)));
+                }
+
+                MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_DISMISS_ALL);
+            }
+        });
+
     }
 
     public final void onBusEvent(TaskViewDismissedEvent event) {
-        removeTaskViewFromStack(event.taskView, event.task);
+        // Announce for accessibility
+        announceForAccessibility(getContext().getString(
+                R.string.accessibility_recents_item_dismissed, event.task.title));
+
+        // Remove the task from the stack
+        mStack.removeTask(event.task, new AnimationProps(DEFAULT_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN), false /* fromDockGesture */);
         EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
 
         MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_DISMISS,
@@ -1948,25 +1999,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
 
-        // Trigger a new layout and scroll to the initial state
-        mInitialState = event.fromMultiWindow
-                ? INITIAL_STATE_UPDATE_ALL
-                : INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+        // Trigger a new layout and update to the initial state if necessary
+        if (event.fromMultiWindow) {
+            mInitialState = INITIAL_STATE_UPDATE_ALL;
+        } else if (event.fromOrientationChange) {
+            mInitialState = INITIAL_STATE_UPDATE_LAYOUT_ONLY;
+        }
         requestLayout();
-    }
-
-    /**
-     * Removes the task from the stack, and updates the focus to the next task in the stack if the
-     * removed TaskView was focused.
-     */
-    private void removeTaskViewFromStack(TaskView tv, Task task) {
-        // Announce for accessibility
-        tv.announceForAccessibility(getContext().getString(
-                R.string.accessibility_recents_item_dismissed, task.title));
-
-        // Remove the task from the stack
-        mStack.removeTask(task, new AnimationProps(DEFAULT_SYNC_STACK_DURATION,
-                Interpolators.FAST_OUT_SLOW_IN), false /* fromDockGesture */);
     }
 
     /**

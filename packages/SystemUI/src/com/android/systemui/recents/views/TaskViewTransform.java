@@ -226,4 +226,9 @@ public class TaskViewTransform {
         v.getViewBounds().setClipBottom(0);
         v.setLeftTopRightBottom(0, 0, 0, 0);
     }
+
+    @Override
+    public String toString() {
+        return "R: " + rect + " V: " + visible;
+    }
 }

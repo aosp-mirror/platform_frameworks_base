@@ -574,10 +574,12 @@
     <dimen name="recents_layout_bottom_margin">16dp</dimen>
     <dimen name="recents_layout_side_margin_phone">16dp</dimen>
     <dimen name="recents_layout_side_margin_tablet">48dp</dimen>
+    <dimen name="recents_layout_side_margin_tablet_docked">16dp</dimen>
     <dimen name="recents_layout_side_margin_tablet_xlarge">64dp</dimen>
+    <dimen name="recents_layout_side_margin_tablet_xlarge_docked">16dp</dimen>
 
     <!-- The height between the top margin and the top of the focused task. -->
-    <dimen name="recents_layout_top_peek_size">56dp</dimen>
+    <dimen name="recents_layout_top_peek_size">48dp</dimen>
     <!-- The height between the bottom margin and the top of task in front of the focused task. -->
     <dimen name="recents_layout_bottom_peek_size">56dp</dimen>
 

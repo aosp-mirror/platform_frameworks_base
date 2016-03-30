@@ -24,6 +24,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
+import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
@@ -99,6 +100,16 @@ public class SystemBarScrimViews {
      * going home).
      */
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
+        if (mHasNavBarScrim) {
+            AnimationProps animation = new AnimationProps()
+                    .setDuration(AnimationProps.BOUNDS,
+                            TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION)
+                    .setInterpolator(AnimationProps.BOUNDS, Interpolators.FAST_OUT_SLOW_IN);
+            animateNavBarScrimVisibility(false, animation);
+        }
+    }
+
+    public final void onBusEvent(DismissAllTaskViewsEvent event) {
         if (mHasNavBarScrim) {
             AnimationProps animation = new AnimationProps()
                     .setDuration(AnimationProps.BOUNDS,
