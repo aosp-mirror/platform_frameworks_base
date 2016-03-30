@@ -6926,8 +6926,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void extractPackagesIfNeeded() {
-        enforceSystemOrRoot("Only the system can request package extraction");
+    public void updatePackagesIfNeeded() {
+        enforceSystemOrRoot("Only the system can request package update");
 
         // We need to re-extract after an OTA.
         boolean causeUpgrade = isUpgrade();
@@ -6956,15 +6956,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (DEBUG_DEXOPT) {
                 Log.i(TAG, "Extracting app " + curr + " of " + total + ": " + pkg.packageName);
-            }
-
-            if (!isFirstBoot()) {
-                try {
-                    ActivityManagerNative.getDefault().showBootMessage(
-                            mContext.getResources().getString(R.string.android_upgrading_apk,
-                                    curr, total), true);
-                } catch (RemoteException e) {
-                }
             }
 
             if (PackageDexOptimizer.canOptimizePackage(pkg)) {
