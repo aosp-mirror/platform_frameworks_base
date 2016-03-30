@@ -108,7 +108,7 @@ public class DeviceIdleController extends SystemService
 
     private static final boolean COMPRESS_TIME = false;
 
-    private static final int EVENT_BUFFER_SIZE = 40;
+    private static final int EVENT_BUFFER_SIZE = 100;
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
@@ -192,6 +192,7 @@ public class DeviceIdleController extends SystemService
     private long mNextAlarmTime;
     private long mNextIdlePendingDelay;
     private long mNextIdleDelay;
+    private long mNextLightIdleDelay;
     private long mNextLightAlarmTime;
     private long mCurIdleBudget;
     private long mMaintenanceStartTime;
@@ -353,6 +354,8 @@ public class DeviceIdleController extends SystemService
         }
     };
 
+    private boolean mMaintenanceMinCheckScheduled;
+
     private final BroadcastReceiver mIdleStartedDoneReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             decActiveIdleOps();
@@ -477,7 +480,11 @@ public class DeviceIdleController extends SystemService
      */
     private final class Constants extends ContentObserver {
         // Key names stored in the settings value.
+        private static final String KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT
+                = "light_after_inactive_to";
         private static final String KEY_LIGHT_IDLE_TIMEOUT = "light_idle_to";
+        private static final String KEY_LIGHT_IDLE_FACTOR = "light_idle_factor";
+        private static final String KEY_LIGHT_MAX_IDLE_TIMEOUT = "light_max_idle_to";
         private static final String KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET
                 = "light_idle_maintenance_min_budget";
         private static final String KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET
@@ -505,12 +512,33 @@ public class DeviceIdleController extends SystemService
                 "sms_temp_app_whitelist_duration";
 
         /**
-         * This is the time, after becoming inactive, that we will start going
-         * in to light-weight idle mode.
+         * This is the time, after becoming inactive, that we go in to the first
+         * light-weight idle mode.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT
+         */
+        public long LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT;
+
+        /**
+         * This is the initial time that we will run in idle maintenance mode.
          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_LIGHT_IDLE_TIMEOUT
          */
         public long LIGHT_IDLE_TIMEOUT;
+
+        /**
+         * Scaling factor to apply to the light idle mode time each time we complete a cycle.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_LIGHT_IDLE_FACTOR
+         */
+        public float LIGHT_IDLE_FACTOR;
+
+        /**
+         * This is the maximum time we will run in idle maintenence mode.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_LIGHT_MAX_IDLE_TIMEOUT
+         */
+        public long LIGHT_MAX_IDLE_TIMEOUT;
 
         /**
          * This is the minimum amount of time we want to make available for maintenance mode
@@ -716,7 +744,14 @@ public class DeviceIdleController extends SystemService
                     Slog.e(TAG, "Bad device idle settings", e);
                 }
 
+                LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = mParser.getLong(
+                        KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT,
+                        !COMPRESS_TIME ? 5 * 60 * 1000L : 15 * 1000L);
                 LIGHT_IDLE_TIMEOUT = mParser.getLong(KEY_LIGHT_IDLE_TIMEOUT,
+                        !COMPRESS_TIME ? 5 * 60 * 1000L : 15 * 1000L);
+                LIGHT_IDLE_FACTOR = mParser.getFloat(KEY_LIGHT_IDLE_FACTOR,
+                        2f);
+                LIGHT_MAX_IDLE_TIMEOUT = mParser.getLong(KEY_LIGHT_MAX_IDLE_TIMEOUT,
                         !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L);
                 LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = mParser.getLong(
                         KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET,
@@ -770,8 +805,20 @@ public class DeviceIdleController extends SystemService
         void dump(PrintWriter pw) {
             pw.println("  Settings:");
 
+            pw.print("    "); pw.print(KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT); pw.print("=");
+            TimeUtils.formatDuration(LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT, pw);
+            pw.println();
+
             pw.print("    "); pw.print(KEY_LIGHT_IDLE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(LIGHT_IDLE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_IDLE_FACTOR); pw.print("=");
+            pw.print(LIGHT_IDLE_FACTOR);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_MAX_IDLE_TIMEOUT); pw.print("=");
+            TimeUtils.formatDuration(LIGHT_MAX_IDLE_TIMEOUT, pw);
             pw.println();
 
             pw.print("    "); pw.print(KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET); pw.print("=");
@@ -1640,7 +1687,10 @@ public class DeviceIdleController extends SystemService
             mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
             mCurIdleBudget = 0;
             mMaintenanceStartTime = 0;
-            mAlarmManager.cancel(mMaintenanceMinCheckListener);
+            if (mMaintenanceMinCheckScheduled) {
+                mAlarmManager.cancel(mMaintenanceMinCheckListener);
+                mMaintenanceMinCheckScheduled = false;
+            }
             resetIdleManagementLocked();
             resetLightIdleManagementLocked();
             addEvent(EVENT_NORMAL);
@@ -1663,7 +1713,7 @@ public class DeviceIdleController extends SystemService
                 mLightState = LIGHT_STATE_INACTIVE;
                 if (DEBUG) Slog.d(TAG, "Moved from LIGHT_STATE_ACTIVE to LIGHT_STATE_INACTIVE");
                 resetLightIdleManagementLocked();
-                scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_TIMEOUT);
+                scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT);
                 EventLogTags.writeDeviceIdleLight(mLightState, "no activity");
             }
         }
@@ -1672,6 +1722,7 @@ public class DeviceIdleController extends SystemService
     void resetIdleManagementLocked() {
         mNextIdlePendingDelay = 0;
         mNextIdleDelay = 0;
+        mNextLightIdleDelay = 0;
         cancelAlarmLocked();
         cancelLocatingLocked();
         stopMonitoringMotionLocked();
@@ -1704,6 +1755,8 @@ public class DeviceIdleController extends SystemService
         switch (mLightState) {
             case LIGHT_STATE_INACTIVE:
                 mCurIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
+                // Reset the upcoming idle delays.
+                mNextLightIdleDelay = mConstants.LIGHT_IDLE_TIMEOUT;
                 mMaintenanceStartTime = 0;
             case LIGHT_STATE_IDLE_MAINTENANCE:
                 if (mMaintenanceStartTime != 0) {
@@ -1717,13 +1770,21 @@ public class DeviceIdleController extends SystemService
                     }
                 }
                 mMaintenanceStartTime = 0;
-                scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_TIMEOUT);
+                scheduleLightAlarmLocked(mNextLightIdleDelay);
+                mNextLightIdleDelay = Math.min(mConstants.LIGHT_MAX_IDLE_TIMEOUT,
+                        (long)(mNextLightIdleDelay * mConstants.LIGHT_IDLE_FACTOR));
+                if (mNextLightIdleDelay < mConstants.LIGHT_IDLE_TIMEOUT) {
+                    mNextLightIdleDelay = mConstants.LIGHT_IDLE_TIMEOUT;
+                }
                 if (DEBUG) Slog.d(TAG, "Moved to LIGHT_STATE_IDLE.");
                 mLightState = LIGHT_STATE_IDLE;
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 addEvent(EVENT_LIGHT_IDLE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
-                mAlarmManager.cancel(mMaintenanceMinCheckListener);
+                if (mMaintenanceMinCheckScheduled) {
+                    mAlarmManager.cancel(mMaintenanceMinCheckListener);
+                    mMaintenanceMinCheckScheduled = false;
+                }
                 break;
             case LIGHT_STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
@@ -1744,6 +1805,7 @@ public class DeviceIdleController extends SystemService
                 mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
                         mMaintenanceStartTime + mConstants.MIN_LIGHT_MAINTENANCE_TIME,
                         "DeviceIdleController.maint-check", mMaintenanceMinCheckListener, mHandler);
+                mMaintenanceMinCheckScheduled = true;
                 break;
         }
     }
@@ -1820,6 +1882,7 @@ public class DeviceIdleController extends SystemService
                 cancelAlarmLocked();
                 cancelLocatingLocked();
                 mAnyMotionDetector.stop();
+
             case STATE_IDLE_MAINTENANCE:
                 scheduleAlarmLocked(mNextIdleDelay, true);
                 if (DEBUG) Slog.d(TAG, "Moved to STATE_IDLE. Next alarm in " + mNextIdleDelay +
@@ -1827,6 +1890,9 @@ public class DeviceIdleController extends SystemService
                 mNextIdleDelay = (long)(mNextIdleDelay * mConstants.IDLE_FACTOR);
                 if (DEBUG) Slog.d(TAG, "Setting mNextIdleDelay = " + mNextIdleDelay);
                 mNextIdleDelay = Math.min(mNextIdleDelay, mConstants.MAX_IDLE_TIMEOUT);
+                if (mNextIdleDelay < mConstants.IDLE_TIMEOUT) {
+                    mNextIdleDelay = mConstants.IDLE_TIMEOUT;
+                }
                 mState = STATE_IDLE;
                 if (mLightState != LIGHT_STATE_OVERRIDE) {
                     mLightState = LIGHT_STATE_OVERRIDE;
@@ -1835,7 +1901,10 @@ public class DeviceIdleController extends SystemService
                 EventLogTags.writeDeviceIdle(mState, reason);
                 addEvent(EVENT_DEEP_IDLE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
-                mAlarmManager.cancel(mMaintenanceMinCheckListener);
+                if (mMaintenanceMinCheckScheduled) {
+                    mAlarmManager.cancel(mMaintenanceMinCheckListener);
+                    mMaintenanceMinCheckScheduled = false;
+                }
                 break;
             case STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
@@ -1846,6 +1915,9 @@ public class DeviceIdleController extends SystemService
                 mMaintenanceStartTime = SystemClock.elapsedRealtime();
                 mNextIdlePendingDelay = Math.min(mConstants.MAX_IDLE_PENDING_TIMEOUT,
                         (long)(mNextIdlePendingDelay * mConstants.IDLE_PENDING_FACTOR));
+                if (mNextIdlePendingDelay < mConstants.IDLE_PENDING_TIMEOUT) {
+                    mNextIdlePendingDelay = mConstants.IDLE_PENDING_TIMEOUT;
+                }
                 mState = STATE_IDLE_MAINTENANCE;
                 EventLogTags.writeDeviceIdle(mState, reason);
                 addEvent(EVENT_DEEP_MAINTENANCE);
@@ -1853,6 +1925,7 @@ public class DeviceIdleController extends SystemService
                 mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
                         mMaintenanceStartTime + mConstants.MIN_DEEP_MAINTENANCE_TIME,
                         "DeviceIdleController.maint-check", mMaintenanceMinCheckListener, mHandler);
+                mMaintenanceMinCheckScheduled = true;
                 break;
         }
     }
@@ -2735,6 +2808,11 @@ public class DeviceIdleController extends SystemService
                 TimeUtils.formatDuration(mNextIdleDelay, pw);
                 pw.println();
             }
+            if (mNextLightIdleDelay != 0) {
+                pw.print("  mNextIdleDelay=");
+                TimeUtils.formatDuration(mNextLightIdleDelay, pw);
+                pw.println();
+            }
             if (mNextLightAlarmTime != 0) {
                 pw.print("  mNextLightAlarmTime=");
                 TimeUtils.formatDuration(mNextLightAlarmTime, SystemClock.elapsedRealtime(), pw);
@@ -2749,6 +2827,10 @@ public class DeviceIdleController extends SystemService
                 pw.print("  mMaintenanceStartTime=");
                 TimeUtils.formatDuration(mMaintenanceStartTime, SystemClock.elapsedRealtime(), pw);
                 pw.println();
+            }
+            if (mMaintenanceMinCheckScheduled) {
+                pw.print("  mMaintenanceMinCheckScheduled=");
+                pw.println(mMaintenanceMinCheckScheduled);
             }
             if (mJobsActive) {
                 pw.print("  mJobsActive="); pw.println(mJobsActive);
