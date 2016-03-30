@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import com.android.internal.R;
+import com.android.internal.widget.ExploreByTouchHelper;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -44,13 +47,12 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
-import com.android.internal.R;
-import com.android.internal.widget.ExploreByTouchHelper;
-
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
+
+import libcore.icu.LocaleData;
 
 /**
  * A calendar-like view displaying a specified month and the appropriate selectable day numbers
@@ -66,7 +68,6 @@ class SimpleMonthView extends View {
     private static final int DEFAULT_WEEK_START = Calendar.SUNDAY;
 
     private static final String MONTH_YEAR_FORMAT = "MMMMy";
-    private static final String DAY_OF_WEEK_FORMAT = "EEEEE";
 
     private static final int SELECTED_HIGHLIGHT_ALPHA = 0xB0;
 
@@ -80,6 +81,7 @@ class SimpleMonthView extends View {
     private final Paint mDayHighlightPaint = new Paint();
     private final Paint mDayHighlightSelectorPaint = new Paint();
 
+    /** Array of single-character weekday labels ordered by column index. */
     private final String[] mDayOfWeekLabels = new String[7];
 
     private final Calendar mCalendar;
@@ -120,7 +122,7 @@ class SimpleMonthView extends View {
      */
     private int mToday = DEFAULT_SELECTED_DAY;
 
-    /** The first day of the week (ex. Calendar.SUNDAY). */
+    /** The first day of the week (ex. Calendar.SUNDAY) indexed from one. */
     private int mWeekStart = DEFAULT_WEEK_START;
 
     /** The number of days (ex. 28) in the current month. */
@@ -199,13 +201,11 @@ class SimpleMonthView extends View {
             Log.d(LOG_TAG, "mWeekStart => " + mWeekStart);
         }
 
-        final Calendar calendar = Calendar.getInstance(mLocale);
-        calendar.setFirstDayOfWeek(mWeekStart);
-
-        final SimpleDateFormat formatter = new SimpleDateFormat(DAY_OF_WEEK_FORMAT, mLocale);
-        for (int i = 0; i < 7; i++) {
-            calendar.set(Calendar.DAY_OF_WEEK, i);
-            mDayOfWeekLabels[i] = formatter.format(calendar.getTime());
+        // Use tiny (e.g. single-character) weekday names from ICU. The indices
+        // for this list correspond to Calendar days, e.g. SUNDAY is index 1.
+        final String[] tinyWeekdayNames = LocaleData.get(mLocale).tinyWeekdayNames;
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
+            mDayOfWeekLabels[i] = tinyWeekdayNames[(mWeekStart + i - 1) % DAYS_IN_WEEK + 1];
         }
 
         if (DEBUG_WRONG_DATE) {
@@ -662,8 +662,7 @@ class SimpleMonthView extends View {
                 colCenterRtl = colCenter;
             }
 
-            final int dayOfWeek = (col + mWeekStart) % DAYS_IN_WEEK;
-            final String label = mDayOfWeekLabels[dayOfWeek];
+            final String label = mDayOfWeekLabels[col];
             canvas.drawText(label, colCenterRtl, rowCenter - halfLineHeight, p);
         }
     }
@@ -813,6 +812,11 @@ class SimpleMonthView extends View {
      */
     void setMonthParams(int selectedDay, int month, int year, int weekStart, int enabledDayStart,
             int enabledDayEnd) {
+        if (DEBUG_WRONG_DATE) {
+            Log.d(LOG_TAG, "setMonthParams(" + selectedDay + ", " + month + ", " + year + ", "
+                    + weekStart + ", " + enabledDayStart + ", " + enabledDayEnd + ")");
+        }
+
         mActivatedDay = selectedDay;
 
         if (isValidMonth(month)) {
@@ -849,6 +853,14 @@ class SimpleMonthView extends View {
         mTouchHelper.invalidateRoot();
 
         updateMonthYearLabel();
+
+        if (DEBUG_WRONG_DATE) {
+            Log.d(LOG_TAG, "mMonth = " + mMonth);
+            Log.d(LOG_TAG, "mDayOfWeekStart = " + mDayOfWeekStart);
+            Log.d(LOG_TAG, "mWeekStart = " + mWeekStart);
+            Log.d(LOG_TAG, "mDaysInMonth = " + mDaysInMonth);
+            Log.d(LOG_TAG, "mToday = " + mToday);
+        }
     }
 
     private static int getDaysInMonth(int month, int year) {
