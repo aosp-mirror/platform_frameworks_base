@@ -66,7 +66,7 @@ public class ResourcesManager {
                 }
             };
 
-    private String[] mSystemLocales = {};
+    private String[] mSystemLocales = null;
     private final HashSet<String> mNonSystemLocales = new HashSet<>();
     private boolean mHasNonSystemLocales = false;
 
@@ -431,7 +431,7 @@ public class ResourcesManager {
         final boolean findSystemLocales;
         final boolean hasNonSystemLocales;
         synchronized (this) {
-            findSystemLocales = (mSystemLocales.length == 0);
+            findSystemLocales = (mSystemLocales == null || mSystemLocales.length == 0);
             hasNonSystemLocales = mHasNonSystemLocales;
 
             if (DEBUG) {
@@ -483,7 +483,7 @@ public class ResourcesManager {
                 LocaleList.isPseudoLocalesOnly(nonSystemLocales);
 
         synchronized (this) {
-            if (mSystemLocales.length == 0) {
+            if (mSystemLocales == null || mSystemLocales.length == 0) {
                 mSystemLocales = systemLocales;
             }
             mNonSystemLocales.addAll(Arrays.asList(nonSystemLocales));
@@ -552,6 +552,9 @@ public class ResourcesManager {
     }
 
     /* package */ void setDefaultLocalesLocked(@NonNull LocaleList locales) {
+        if (mSystemLocales == null) {
+            throw new RuntimeException("ResourcesManager is not ready to negotiate locales.");
+        }
         final int bestLocale;
         if (mHasNonSystemLocales) {
             bestLocale = locales.getFirstMatchIndexWithEnglishSupported(mNonSystemLocales);
