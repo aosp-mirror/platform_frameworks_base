@@ -146,10 +146,14 @@ public final class Metrics {
     private static final int FILEOP_MOVE_SYSTEM_PROVIDER = 6; // Move to a system provider.
     private static final int FILEOP_MOVE_EXTERNAL_PROVIDER = 7; // Move to a 3rd-party provider.
     private static final int FILEOP_DELETE = 8;
+    private static final int FILEOP_RENAME = 9;
+    private static final int FILEOP_CREATE_DIR = 10;
     private static final int FILEOP_OTHER_ERROR = 100;
     private static final int FILEOP_DELETE_ERROR = 101;
     private static final int FILEOP_MOVE_ERROR = 102;
     private static final int FILEOP_COPY_ERROR = 103;
+    private static final int FILEOP_RENAME_ERROR = 104;
+    private static final int FILEOP_CREATE_DIR_ERROR = 105;
 
     @IntDef(flag = true, value = {
             FILEOP_OTHER,
@@ -160,10 +164,14 @@ public final class Metrics {
             FILEOP_MOVE_SYSTEM_PROVIDER,
             FILEOP_MOVE_EXTERNAL_PROVIDER,
             FILEOP_DELETE,
+            FILEOP_RENAME,
+            FILEOP_CREATE_DIR,
             FILEOP_OTHER_ERROR,
             FILEOP_COPY_ERROR,
             FILEOP_MOVE_ERROR,
-            FILEOP_DELETE_ERROR
+            FILEOP_DELETE_ERROR,
+            FILEOP_RENAME_ERROR,
+            FILEOP_CREATE_DIR_ERROR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FileOp {}
@@ -317,6 +325,28 @@ public final class Metrics {
     }
 
     /**
+     * Logs create directory operation. It is a part of file operation stats. We do not
+     * differentiate between internal and external locations, all create directory operations are
+     * logged under COUNT_FILEOP_SYSTEM. Call this when a create directory operation has completed.
+     *
+     * @param context
+     */
+    public static void logCreateDirOperation(Context context) {
+        logHistogram(context, COUNT_FILEOP_SYSTEM, FILEOP_CREATE_DIR);
+    }
+
+    /**
+     * Logs rename file operation. It is a part of file operation stats. We do not differentiate
+     * between internal and external locations, all rename operations are logged under
+     * COUNT_FILEOP_SYSTEM. Call this when a rename file operation has completed.
+     *
+     * @param context
+     */
+    public static void logRenameFileOperation(Context context) {
+        logHistogram(context, COUNT_FILEOP_SYSTEM, FILEOP_RENAME);
+    }
+
+    /**
      * Logs some kind of file operation error. Call this when a file operation (e.g. copy, delete)
      * fails.
      *
@@ -346,6 +376,28 @@ public final class Metrics {
         if (counts.externalProvider > 0) {
             logHistogram(context, COUNT_FILEOP_EXTERNAL, opCode);
         }
+    }
+
+    /**
+     * Logs create directory operation error. We do not differentiate between internal and external
+     * locations, all create directory errors are logged under COUNT_FILEOP_SYSTEM. Call this when a
+     * create directory operation fails.
+     *
+     * @param context
+     */
+    public static void logCreateDirError(Context context) {
+        logHistogram(context, COUNT_FILEOP_SYSTEM, FILEOP_CREATE_DIR);
+    }
+
+    /**
+     * Logs rename file operation error. We do not differentiate between internal and external
+     * locations, all rename errors are logged under COUNT_FILEOP_SYSTEM. Call this
+     * when a rename file operation fails.
+     *
+     * @param context
+     */
+    public static void logRenameFileError(Context context) {
+        logHistogram(context, COUNT_FILEOP_SYSTEM, FILEOP_RENAME_ERROR);
     }
 
     /**
