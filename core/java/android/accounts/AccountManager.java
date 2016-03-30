@@ -2798,6 +2798,15 @@ public class AccountManager {
         if (account == null) {
             throw new IllegalArgumentException("account is null");
         }
+
+        // Always include the calling package name. This just makes life easier
+        // down stream.
+        final Bundle optionsIn = new Bundle();
+        if (options != null) {
+            optionsIn.putAll(options);
+        }
+        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+
         return new AmsTask(activity, handler, callback) {
             @Override
             public void doWork() throws RemoteException {
@@ -2806,7 +2815,7 @@ public class AccountManager {
                         account,
                         authTokenType,
                         activity != null,
-                        options);
+                        optionsIn);
             }
         }.start();
     }
