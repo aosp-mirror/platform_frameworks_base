@@ -611,7 +611,7 @@ elements, and scripts.  Most of these object are created using the Java RenderSc
   </tr>
 </tbody></table>
 <h2>Conversion Functions</h2>
-<p> The functions below convert from a numerical vector type to another, of from one color
+<p> The functions below convert from a numerical vector type to another, or from one color
 representation to another.
 </p>
 <table class='jd-sumtable'><tbody>
