@@ -45,7 +45,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
     private static final String TAG = ExifInterface.class.getSimpleName();
     private static final boolean VERBOSE = false;  // lots of logging
 
-    private static final double DIFFERENCE_TOLERANCE = .005;
+    private static final double DIFFERENCE_TOLERANCE = .001;
 
     // List of files.
     private static final String EXIF_BYTE_ORDER_II_JPEG = "image_exif_byte_order_ii.jpg";
@@ -111,11 +111,11 @@ public class ExifInterfaceTest extends AndroidTestCase {
         public final String gpsLongitudeRef;
         public final String gpsProcessingMethod;
         public final String gpsTimestamp;
-        public final String imageLength;
-        public final String imageWidth;
+        public final int imageLength;
+        public final int imageWidth;
         public final String iso;
-        public final String whiteBalance;
-        public final String orientation;
+        public final int orientation;
+        public final int whiteBalance;
 
         private static String getString(TypedArray typedArray, int index) {
             String stringValue = typedArray.getString(index);
@@ -137,7 +137,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
             longitude = typedArray.getFloat(5, 0f);
             altitude = typedArray.getFloat(6, 0f);
 
-            // Read values.
+            // Reads values.
             make = getString(typedArray, 7);
             model = getString(typedArray, 8);
             aperture = typedArray.getFloat(9, 0f);
@@ -154,11 +154,11 @@ public class ExifInterfaceTest extends AndroidTestCase {
             gpsLongitudeRef = getString(typedArray, 20);
             gpsProcessingMethod = getString(typedArray, 21);
             gpsTimestamp = getString(typedArray, 22);
-            imageLength = getString(typedArray, 23);
-            imageWidth = getString(typedArray, 24);
+            imageLength = typedArray.getInt(23, 0);
+            imageWidth = typedArray.getInt(24, 0);
             iso = getString(typedArray, 25);
-            orientation = getString(typedArray, 26);
-            whiteBalance = getString(typedArray, 27);
+            orientation = typedArray.getInt(26, 0);
+            whiteBalance = typedArray.getInt(27, 0);
 
             typedArray.recycle();
         }
@@ -208,11 +208,13 @@ public class ExifInterfaceTest extends AndroidTestCase {
                             + bitmap.getHeight());
                 }
             } else {
-                Log.e(TAG, fileName + " Corrupted image (no thumbnail)");
+                Log.e(TAG, fileName + " Unexpected result: No thumbnails were found. "
+                        + "A thumbnail is expected.");
             }
         } else {
             if (exifInterface.getThumbnail() != null) {
-                Log.e(TAG, fileName + " Corrupted image (a thumbnail exists)");
+                Log.e(TAG, fileName + " Unexpected result: A thumbnail was found. "
+                        + "No thumbnail is expected.");
             } else {
                 Log.v(TAG, fileName + " No thumbnail");
             }
@@ -226,28 +228,27 @@ public class ExifInterfaceTest extends AndroidTestCase {
             Log.v(TAG, fileName + " Latitude = " + latLong[0]);
             Log.v(TAG, fileName + " Longitude = " + latLong[1]);
         } else {
-            Log.v(TAG, fileName + "No latlong data");
+            Log.v(TAG, fileName + " No latlong data");
         }
 
         // Prints values.
         for (String tagKey : EXIF_TAGS) {
             String tagValue = exifInterface.getAttribute(tagKey);
-            Log.v(TAG, fileName + "Key{" + tagKey + "} = '" + tagValue + "'");
+            Log.v(TAG, fileName + " Key{" + tagKey + "} = '" + tagValue + "'");
         }
     }
 
-    private void compareFloatTag(ExifInterface exifInterface, String tag, float expectedValue) {
-        String stringValue = exifInterface.getAttribute(tag);
-        float floatValue = 0f;
-
-        if (stringValue != null) {
-            floatValue = Float.parseFloat(stringValue);
-        }
-
-        assertEquals(expectedValue, floatValue, DIFFERENCE_TOLERANCE);
+    private void assertIntTag(ExifInterface exifInterface, String tag, int expectedValue) {
+        int intValue = exifInterface.getAttributeInt(tag, 0);
+        assertEquals(expectedValue, intValue);
     }
 
-    private void compareStringTag(ExifInterface exifInterface, String tag, String expectedValue) {
+    private void assertFloatTag(ExifInterface exifInterface, String tag, float expectedValue) {
+        double doubleValue = exifInterface.getAttributeDouble(tag, 0.0);
+        assertEquals(expectedValue, doubleValue, DIFFERENCE_TOLERANCE);
+    }
+
+    private void assertStringTag(ExifInterface exifInterface, String tag, String expectedValue) {
         String stringValue = exifInterface.getAttribute(tag);
         if (stringValue != null) {
             stringValue = stringValue.trim();
@@ -257,7 +258,10 @@ public class ExifInterfaceTest extends AndroidTestCase {
     }
 
     private void compareWithExpectedValue(ExifInterface exifInterface,
-            ExpectedValue expectedValue) {
+            ExpectedValue expectedValue, String verboseTag) {
+        if (VERBOSE) {
+            printExifTagsAndValues(verboseTag, exifInterface);
+        }
         // Checks a thumbnail image.
         assertEquals(expectedValue.hasThumbnail, exifInterface.hasThumbnail());
         if (expectedValue.hasThumbnail) {
@@ -282,78 +286,144 @@ public class ExifInterfaceTest extends AndroidTestCase {
         assertEquals(expectedValue.altitude, exifInterface.getAltitude(.0), DIFFERENCE_TOLERANCE);
 
         // Checks values.
-        compareStringTag(exifInterface, ExifInterface.TAG_MAKE, expectedValue.make);
-        compareStringTag(exifInterface, ExifInterface.TAG_MODEL, expectedValue.model);
-        compareFloatTag(exifInterface, ExifInterface.TAG_APERTURE, expectedValue.aperture);
-        compareStringTag(exifInterface, ExifInterface.TAG_DATETIME, expectedValue.datetime);
-        compareFloatTag(exifInterface, ExifInterface.TAG_EXPOSURE_TIME, expectedValue.exposureTime);
-        compareFloatTag(exifInterface, ExifInterface.TAG_FLASH, expectedValue.flash);
-        compareStringTag(exifInterface, ExifInterface.TAG_FOCAL_LENGTH, expectedValue.focalLength);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_ALTITUDE, expectedValue.gpsAltitude);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_ALTITUDE_REF,
+        assertStringTag(exifInterface, ExifInterface.TAG_MAKE, expectedValue.make);
+        assertStringTag(exifInterface, ExifInterface.TAG_MODEL, expectedValue.model);
+        assertFloatTag(exifInterface, ExifInterface.TAG_APERTURE, expectedValue.aperture);
+        assertStringTag(exifInterface, ExifInterface.TAG_DATETIME, expectedValue.datetime);
+        assertFloatTag(exifInterface, ExifInterface.TAG_EXPOSURE_TIME, expectedValue.exposureTime);
+        assertFloatTag(exifInterface, ExifInterface.TAG_FLASH, expectedValue.flash);
+        assertStringTag(exifInterface, ExifInterface.TAG_FOCAL_LENGTH, expectedValue.focalLength);
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_ALTITUDE, expectedValue.gpsAltitude);
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_ALTITUDE_REF,
                 expectedValue.gpsAltitudeRef);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_DATESTAMP,
-                expectedValue.gpsDatestamp);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_LATITUDE, expectedValue.gpsLatitude);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_LATITUDE_REF,
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_DATESTAMP, expectedValue.gpsDatestamp);
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_LATITUDE, expectedValue.gpsLatitude);
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_LATITUDE_REF,
                 expectedValue.gpsLatitudeRef);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_LONGITUDE,
-                expectedValue.gpsLongitude);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_LONGITUDE_REF,
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_LONGITUDE, expectedValue.gpsLongitude);
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_LONGITUDE_REF,
                 expectedValue.gpsLongitudeRef);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_PROCESSING_METHOD,
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_PROCESSING_METHOD,
                 expectedValue.gpsProcessingMethod);
-        compareStringTag(exifInterface, ExifInterface.TAG_GPS_TIMESTAMP,
-                expectedValue.gpsTimestamp);
-        compareStringTag(exifInterface, ExifInterface.TAG_IMAGE_LENGTH, expectedValue.imageLength);
-        compareStringTag(exifInterface, ExifInterface.TAG_IMAGE_WIDTH, expectedValue.imageWidth);
-        compareStringTag(exifInterface, ExifInterface.TAG_ISO, expectedValue.iso);
-        compareStringTag(exifInterface, ExifInterface.TAG_ORIENTATION, expectedValue.orientation);
-        compareStringTag(exifInterface, ExifInterface.TAG_WHITE_BALANCE,
-                expectedValue.whiteBalance);
+        assertStringTag(exifInterface, ExifInterface.TAG_GPS_TIMESTAMP, expectedValue.gpsTimestamp);
+        assertIntTag(exifInterface, ExifInterface.TAG_IMAGE_LENGTH, expectedValue.imageLength);
+        assertIntTag(exifInterface, ExifInterface.TAG_IMAGE_WIDTH, expectedValue.imageWidth);
+        assertStringTag(exifInterface, ExifInterface.TAG_ISO, expectedValue.iso);
+        assertIntTag(exifInterface, ExifInterface.TAG_ORIENTATION, expectedValue.orientation);
+        assertIntTag(exifInterface, ExifInterface.TAG_WHITE_BALANCE, expectedValue.whiteBalance);
     }
 
     private void testExifInterfaceCommon(File imageFile, ExpectedValue expectedValue)
             throws IOException {
-        // Created via path.
+        String verboseTag = imageFile.getName();
+
+        // Creates via path.
         ExifInterface exifInterface = new ExifInterface(imageFile.getAbsolutePath());
-        if (VERBOSE) {
-            printExifTagsAndValues(imageFile.getName(), exifInterface);
-        }
-        compareWithExpectedValue(exifInterface, expectedValue);
+        compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
 
-        // Created from an asset file.
-        InputStream in = mContext.getAssets().open(imageFile.getName());
-        exifInterface = new ExifInterface(in);
-        if (VERBOSE) {
-            printExifTagsAndValues(imageFile.getName(), exifInterface);
-        }
-        compareWithExpectedValue(exifInterface, expectedValue);
-
-        // Created via InputStream.
-        in = null;
+        // Creates from an asset file.
+        InputStream in = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(imageFile.getAbsolutePath()));
+            in = mContext.getAssets().open(imageFile.getName());
             exifInterface = new ExifInterface(in);
-            if (VERBOSE) {
-                printExifTagsAndValues(imageFile.getName(), exifInterface);
-            }
-            compareWithExpectedValue(exifInterface, expectedValue);
+            compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
         } finally {
             IoUtils.closeQuietly(in);
         }
 
-        // Created via FileDescriptor.
+        // Creates via InputStream.
+        in = null;
         try {
-            FileDescriptor fd = Os.open(imageFile.getAbsolutePath(), OsConstants.O_RDONLY, 0600);
-            exifInterface = new ExifInterface(fd);
-            if (VERBOSE) {
-                printExifTagsAndValues(imageFile.getName(), exifInterface);
-            }
-            compareWithExpectedValue(exifInterface, expectedValue);
-        } catch (ErrnoException e) {
-            e.rethrowAsIOException();
+            in = new BufferedInputStream(new FileInputStream(imageFile.getAbsolutePath()));
+            exifInterface = new ExifInterface(in);
+            compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+        } finally {
+            IoUtils.closeQuietly(in);
         }
+
+        // Creates via FileDescriptor.
+        FileDescriptor fd = null;
+        try {
+            fd = Os.open(imageFile.getAbsolutePath(), OsConstants.O_RDONLY, 0600);
+            exifInterface = new ExifInterface(fd);
+            compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        } finally {
+            IoUtils.closeQuietly(fd);
+        }
+    }
+
+    private void testSaveAttributes_withFileName(File imageFile, ExpectedValue expectedValue)
+            throws IOException {
+        String verboseTag = imageFile.getName();
+
+        ExifInterface exifInterface = new ExifInterface(imageFile.getAbsolutePath());
+        exifInterface.saveAttributes();
+        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
+        compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+
+        // Test for modifying one attribute.
+        String backupValue = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
+        exifInterface.setAttribute(ExifInterface.TAG_MAKE, "abc");
+        exifInterface.saveAttributes();
+        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
+        assertEquals("abc", exifInterface.getAttribute(ExifInterface.TAG_MAKE));
+        // Restore the backup value.
+        exifInterface.setAttribute(ExifInterface.TAG_MAKE, backupValue);
+        exifInterface.saveAttributes();
+        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
+        compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+    }
+
+    private void testSaveAttributes_withFileDescriptor(File imageFile, ExpectedValue expectedValue)
+            throws IOException {
+        String verboseTag = imageFile.getName();
+
+        FileDescriptor fd = null;
+        try {
+            fd = Os.open(imageFile.getAbsolutePath(), OsConstants.O_RDWR, 0600);
+            ExifInterface exifInterface = new ExifInterface(fd);
+            exifInterface.saveAttributes();
+            Os.lseek(fd, 0, OsConstants.SEEK_SET);
+            exifInterface = new ExifInterface(fd);
+            compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+
+            // Test for modifying one attribute.
+            String backupValue = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
+            exifInterface.setAttribute(ExifInterface.TAG_MAKE, "abc");
+            exifInterface.saveAttributes();
+            Os.lseek(fd, 0, OsConstants.SEEK_SET);
+            exifInterface = new ExifInterface(fd);
+            assertEquals("abc", exifInterface.getAttribute(ExifInterface.TAG_MAKE));
+            // Restore the backup value.
+            exifInterface.setAttribute(ExifInterface.TAG_MAKE, backupValue);
+            exifInterface.saveAttributes();
+            Os.lseek(fd, 0, OsConstants.SEEK_SET);
+            exifInterface = new ExifInterface(fd);
+            compareWithExpectedValue(exifInterface, expectedValue, verboseTag);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        } finally {
+            IoUtils.closeQuietly(fd);
+        }
+    }
+
+    private void testSaveAttributes_withInputStream(File imageFile, ExpectedValue expectedValue)
+            throws IOException {
+        InputStream in = null;
+        try {
+            in = getContext().getAssets().open(imageFile.getName());
+            ExifInterface exifInterface = new ExifInterface(in);
+            exifInterface.saveAttributes();
+        } catch (UnsupportedOperationException e) {
+            // Expected. saveAttributes is not supported with an ExifInterface object which was
+            // created with InputStream.
+            return;
+        } finally {
+            IoUtils.closeQuietly(in);
+        }
+        fail("Should not reach here!");
     }
 
     private void testExifInterfaceForJpeg(String fileName, int typedArrayResourceId)
@@ -366,30 +436,9 @@ public class ExifInterfaceTest extends AndroidTestCase {
         testExifInterfaceCommon(imageFile, expectedValue);
 
         // Test for saving attributes.
-        ExifInterface exifInterface;
-        try {
-            FileDescriptor fd = Os.open(imageFile.getAbsolutePath(), OsConstants.O_RDWR, 0600);
-            exifInterface = new ExifInterface(fd);
-            exifInterface.saveAttributes();
-            fd = Os.open(imageFile.getAbsolutePath(), OsConstants.O_RDWR, 0600);
-            exifInterface = new ExifInterface(fd);
-            if (VERBOSE) {
-                printExifTagsAndValues(fileName, exifInterface);
-            }
-            compareWithExpectedValue(exifInterface, expectedValue);
-        } catch (ErrnoException e) {
-            e.rethrowAsIOException();
-        }
-
-        // Test for modifying one attribute.
-        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
-        exifInterface.setAttribute(ExifInterface.TAG_MAKE, "abc");
-        exifInterface.saveAttributes();
-        exifInterface = new ExifInterface(imageFile.getAbsolutePath());
-        if (VERBOSE) {
-            printExifTagsAndValues(fileName, exifInterface);
-        }
-        assertEquals("abc", exifInterface.getAttribute(ExifInterface.TAG_MAKE));
+        testSaveAttributes_withFileName(imageFile, expectedValue);
+        testSaveAttributes_withFileDescriptor(imageFile, expectedValue);
+        testSaveAttributes_withInputStream(imageFile, expectedValue);
     }
 
     private void testExifInterfaceForRaw(String fileName, int typedArrayResourceId)
