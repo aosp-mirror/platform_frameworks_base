@@ -18,9 +18,11 @@ package com.android.documentsui;
 
 import android.content.Context;
 import android.content.pm.ProviderInfo;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.database.MatrixCursor;
+import android.graphics.Point;
 import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
@@ -31,6 +33,7 @@ import android.provider.DocumentsProvider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +105,14 @@ public class StressProvider extends DocumentsProvider {
         children = new ArrayList<StubDocument>();
         mChildDocuments.put(STRESS_ROOT_2_DOC_ID, children);
         for (int i = 0; i < STRESS_ROOT_2_ITEMS; i++) {
-            document = StubDocument.createFile(STRESS_ROOT_1_ITEMS + i);
+            try {
+                document = StubDocument.createFile(
+                        getContext(), MIME_TYPE_IMAGE,
+                        com.android.documentsui.perftests.R.raw.earth_small,
+                        STRESS_ROOT_1_ITEMS + i);
+            } catch (IOException e) {
+                return false;
+            }
             mDocuments.put(document.id, document);
             children.add(document);
         }
@@ -151,6 +161,14 @@ public class StressProvider extends DocumentsProvider {
     }
 
     @Override
+    public AssetFileDescriptor openDocumentThumbnail(String docId, Point sizeHint,
+            CancellationSignal signal)
+            throws FileNotFoundException {
+        final StubDocument document = mDocuments.get(docId);
+        return getContext().getResources().openRawResourceFd(document.thumbnail);
+    }
+
+    @Override
     public ParcelFileDescriptor openDocument(String docId, String mode,
             CancellationSignal signal)
             throws FileNotFoundException {
@@ -171,7 +189,8 @@ public class StressProvider extends DocumentsProvider {
         row.add(Document.COLUMN_DISPLAY_NAME, document.id);
         row.add(Document.COLUMN_SIZE, document.size);
         row.add(Document.COLUMN_MIME_TYPE, document.mimeType);
-        row.add(Document.COLUMN_FLAGS, 0);
+        row.add(Document.COLUMN_FLAGS,
+                document.thumbnail != -1 ? Document.FLAG_SUPPORTS_THUMBNAIL : 0);
         row.add(Document.COLUMN_LAST_MODIFIED, document.lastModified);
     }
 
@@ -184,28 +203,32 @@ public class StressProvider extends DocumentsProvider {
         final String id;
         final int size;
         final long lastModified;
+        final int thumbnail;
 
-        private StubDocument(String mimeType, String id, int size, long lastModified) {
+        private StubDocument(String mimeType, String id, int size, long lastModified,
+                int thumbnail) {
             this.mimeType = mimeType;
             this.id = id;
             this.size = size;
             this.lastModified = lastModified;
+            this.thumbnail = thumbnail;
         }
 
         public static StubDocument createDirectory(int index) {
             return new StubDocument(
                     DocumentsContract.Document.MIME_TYPE_DIR, createRandomId(index), 0,
-                    createRandomTime(index));
+                    createRandomTime(index), -1);
         }
 
         public static StubDocument createDirectory(String id) {
-            return new StubDocument(DocumentsContract.Document.MIME_TYPE_DIR, id, 0, 0);
+            return new StubDocument(DocumentsContract.Document.MIME_TYPE_DIR, id, 0, 0, -1);
         }
 
-        public static StubDocument createFile(int index) {
+        public static StubDocument createFile(Context context, String mimeType, int thumbnail,
+                int index) throws IOException {
             return new StubDocument(
-                    MIME_TYPE_IMAGE, createRandomId(index), createRandomSize(index),
-                    createRandomTime(index));
+                    mimeType, createRandomId(index), createRandomSize(index),
+                    createRandomTime(index), thumbnail);
         }
 
         private static String createRandomId(int index) {
