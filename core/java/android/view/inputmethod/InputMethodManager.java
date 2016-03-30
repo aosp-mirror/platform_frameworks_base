@@ -1307,6 +1307,12 @@ public final class InputMethodManager {
     void focusInLocked(View view) {
         if (DEBUG) Log.v(TAG, "focusIn: " + dumpViewInfo(view));
 
+        if (view != null && view.isTemporarilyDetached()) {
+            // This is a request from a view that is temporarily detached from a window.
+            if (DEBUG) Log.v(TAG, "Temporarily detached view, ignoring");
+            return;
+        }
+
         if (mCurRootView != view.getRootView()) {
             // This is a request from a window that isn't in the window with
             // IME focus, so ignore it.
@@ -1332,6 +1338,7 @@ public final class InputMethodManager {
                 // whenever we go into touch mode, so it ends up hiding
                 // at times when we don't really want it to.  For now it
                 // seems better to just turn it all off.
+                // TODO: Check view.isTemporarilyDetached() when re-enable the following code.
                 if (false && view.hasWindowFocus()) {
                     mNextServedView = null;
                     scheduleCheckFocusLocked(view);
@@ -2315,6 +2322,7 @@ public final class InputMethodManager {
         sb.append(",focus=" + view.hasFocus());
         sb.append(",windowFocus=" + view.hasWindowFocus());
         sb.append(",window=" + view.getWindowToken());
+        sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
         return sb.toString();
     }
 }
