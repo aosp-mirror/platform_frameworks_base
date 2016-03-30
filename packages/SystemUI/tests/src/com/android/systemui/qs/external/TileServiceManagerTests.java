@@ -19,10 +19,12 @@ import android.content.ComponentName;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.service.quicksettings.TileService;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+@SmallTest
 public class TileServiceManagerTests extends SysuiTestCase {
 
     private TileServices mTileServices;

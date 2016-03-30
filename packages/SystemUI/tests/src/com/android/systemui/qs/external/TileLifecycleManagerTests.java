@@ -32,9 +32,11 @@ import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Log;
 
+@SmallTest
 public class TileLifecycleManagerTests extends AndroidTestCase {
     public static final String TILE_UPDATE_BROADCAST = "com.android.systemui.tests.TILE_UPDATE";
     public static final String EXTRA_CALLBACK = "callback";

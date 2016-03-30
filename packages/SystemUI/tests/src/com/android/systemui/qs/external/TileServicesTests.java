@@ -17,6 +17,7 @@ package com.android.systemui.qs.external;
 
 import android.content.ComponentName;
 import android.os.Looper;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -27,6 +28,7 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 
+@SmallTest
 public class TileServicesTests extends SysuiTestCase {
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 
