@@ -7679,6 +7679,9 @@ public final class Settings {
                 BLUETOOTH_MAP_PRIORITY_PREFIX = "bluetooth_map_priority_";
         /** {@hide} */
         public static final String
+                BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX = "bluetooth_pbap_client_priority_";
+        /** {@hide} */
+        public static final String
                 BLUETOOTH_SAP_PRIORITY_PREFIX = "bluetooth_sap_priority_";
 
         /**
@@ -7831,6 +7834,14 @@ public final class Settings {
          */
         public static final String getBluetoothMapPriorityKey(String address) {
             return BLUETOOTH_MAP_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth pbap client priority.
+         * @hide
+         */
+        public static final String getBluetoothPbapClientPriorityKey(String address) {
+            return BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 
         /**
