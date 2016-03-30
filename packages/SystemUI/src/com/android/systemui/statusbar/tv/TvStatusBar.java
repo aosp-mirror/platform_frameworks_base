@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.tv;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
@@ -29,11 +30,21 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.tv.pip.PipManager;
 
-/*
+/**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav
  */
 
 public class TvStatusBar extends BaseStatusBar {
+
+    /**
+     * Tracking calls to View.setSystemUiVisibility().
+     */
+    int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+
+    /**
+     * Last value sent to window manager.
+     */
+    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
 
     @Override
     public void setIcon(String slot, StatusBarIcon icon) {
@@ -206,5 +217,31 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void clickTile(ComponentName tile) {
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        putComponent(TvStatusBar.class, this);
+    }
+
+    public void updateRecentsVisibility(boolean visible) {
+        // Update the recents visibility flag
+        if (visible) {
+            mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
+        } else {
+            mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
+        }
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+
+    private void notifyUiVisibilityChanged(int vis) {
+        try {
+            if (mLastDispatchedSystemUiVisibility != vis) {
+                mWindowManagerService.statusBarVisibilityChanged(vis);
+                mLastDispatchedSystemUiVisibility = vis;
+            }
+        } catch (RemoteException ex) {
+        }
     }
 }

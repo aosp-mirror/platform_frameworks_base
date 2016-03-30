@@ -37,14 +37,12 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
-import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
-import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -53,7 +51,9 @@ import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.tv.animations.HomeRecentsEnterExitAnimationHolder;
 import com.android.systemui.recents.tv.views.RecentsTvView;
+import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.tv.pip.PipManager;
@@ -76,11 +76,14 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     private RecentsPackageMonitor mPackageMonitor;
     private long mLastTabKeyEventTime;
     private boolean mIgnoreAltTabRelease;
+    private boolean mLaunchedFromHome;
 
     private RecentsTvView mRecentsView;
     private View mPipView;
     private TaskStackHorizontalViewAdapter mTaskStackViewAdapter;
+    private TaskStackHorizontalGridView mTaskStackHorizontalGridView;
     private FinishRecentsRunnable mFinishLaunchHomeRunnable;
+    private HomeRecentsEnterExitAnimationHolder mHomeRecentsEnterExitAnimationHolder;
 
     private final PipManager mPipManager = PipManager.getInstance();
     private final PipManager.Listener mPipListener = new PipManager.Listener() {
@@ -174,6 +177,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         if (!plan.hasTasks()) {
             loader.preloadTasks(plan, -1, launchState.launchedFromHome);
         }
+        mLaunchedFromHome = launchState.launchedFromHome;
         TaskStack stack = plan.getTaskStack();
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = launchState.launchedToTaskId;
@@ -187,7 +191,8 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         Collections.reverse(stackTasks);
         if (mTaskStackViewAdapter == null) {
             mTaskStackViewAdapter = new TaskStackHorizontalViewAdapter(stackTasks);
-            mRecentsView.setTaskStackViewAdapter(mTaskStackViewAdapter);
+            mTaskStackHorizontalGridView = mRecentsView
+                    .setTaskStackViewAdapter(mTaskStackViewAdapter);
         } else {
             mTaskStackViewAdapter.setNewStackTasks(stackTasks);
         }
@@ -229,17 +234,24 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     }
 
     void dismissRecentsToHome(boolean animateTaskViews) {
-        DismissRecentsToHomeAnimationStarted dismissEvent =
-                new DismissRecentsToHomeAnimationStarted(animateTaskViews);
-        dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
-        dismissEvent.addPostAnimationCallback(new Runnable() {
+        Runnable closeSystemWindows = new Runnable() {
             @Override
             public void run() {
                 Recents.getSystemServices().sendCloseSystemWindows(
                         BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
             }
-        });
-        EventBus.getDefault().send(dismissEvent);
+        };
+        DismissRecentsToHomeAnimationStarted dismissEvent =
+                new DismissRecentsToHomeAnimationStarted(animateTaskViews);
+        dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
+        dismissEvent.addPostAnimationCallback(closeSystemWindows);
+
+        if(mTaskStackHorizontalGridView.getChildCount() > 0) {
+            mHomeRecentsEnterExitAnimationHolder.startExitAnimation(dismissEvent);
+        } else {
+            closeSystemWindows.run();
+            mFinishLaunchHomeRunnable.run();
+        }
     }
 
     boolean dismissRecentsToHomeIfVisible(boolean animated) {
@@ -319,6 +331,19 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         // Update the recent tasks
         updateRecentsTasks();
 
+        mHomeRecentsEnterExitAnimationHolder = new HomeRecentsEnterExitAnimationHolder(
+                getApplicationContext(), mTaskStackHorizontalGridView);
+        if(mTaskStackHorizontalGridView != null &&
+                mTaskStackHorizontalGridView.getChildCount() > 0) {
+            if(mLaunchedFromHome) {
+                mHomeRecentsEnterExitAnimationHolder.setEnterFromHomeStartingAnimationValues();
+            } else {
+                mHomeRecentsEnterExitAnimationHolder.setEnterFromAppStartingAnimationValues();
+            }
+        } else {
+            mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+        }
+
         // If this is a new instance from a configuration change, then we have to manually trigger
         // the enter animation state, or if recents was relaunched by AM, without going through
         // the normal mechanisms
@@ -340,6 +365,9 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
+        if(mLaunchedFromHome) {
+            mHomeRecentsEnterExitAnimationHolder.startEnterAnimation();
+        }
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
     }
 
@@ -444,12 +472,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         }
     }
 
-    public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
-        EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(true));
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
-        mRecentsView.invalidate();
-    }
-
     public final void onBusEvent(CancelEnterRecentsWindowAnimationEvent event) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         int launchToTaskId = launchState.launchedToTaskId;
@@ -489,6 +511,11 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     @Override
     public boolean onPreDraw() {
         mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+        if(mLaunchedFromHome) {
+            mHomeRecentsEnterExitAnimationHolder.setEnterFromHomeStartingAnimationValues();
+        } else {
+            mHomeRecentsEnterExitAnimationHolder.setEnterFromAppStartingAnimationValues();
+        }
         // We post to make sure that this information is delivered after this traversals is
         // finished.
         mRecentsView.post(new Runnable() {
