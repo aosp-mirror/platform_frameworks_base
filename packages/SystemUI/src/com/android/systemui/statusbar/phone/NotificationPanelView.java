@@ -225,7 +225,8 @@ public class NotificationPanelView extends PanelView implements
             public void onInflated(View v) {
                 mQsContainer = (QSContainer) v.findViewById(R.id.quick_settings_container);
                 mQsContainer.setPanelView(NotificationPanelView.this);
-                mQsContainer.getHeader().setOnClickListener(NotificationPanelView.this);
+                mQsContainer.getHeader().findViewById(R.id.expand_indicator)
+                        .setOnClickListener(NotificationPanelView.this);
             }
         });
         mClockView = (TextView) findViewById(R.id.clock_view);
@@ -1760,7 +1761,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onClick(View v) {
-        if (v == mQsContainer.getHeader()) {
+        if (v.getId() == R.id.expand_indicator) {
             onQsExpansionStarted();
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, false /* expand */, null, true /* isClick */);
