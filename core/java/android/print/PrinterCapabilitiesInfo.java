@@ -24,11 +24,13 @@ import android.print.PrintAttributes.DuplexMode;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntConsumer;
 
 /**
  * This class represents the capabilities of a printer. Instances
@@ -55,9 +57,9 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
 
     private static final Margins DEFAULT_MARGINS = new Margins(0,  0,  0,  0);
 
-    private Margins mMinMargins = DEFAULT_MARGINS;
-    private List<MediaSize> mMediaSizes;
-    private List<Resolution> mResolutions;
+    private @NonNull Margins mMinMargins = DEFAULT_MARGINS;
+    private @NonNull List<MediaSize> mMediaSizes;
+    private @NonNull List<Resolution> mResolutions;
 
     private int mColorModes;
     private int mDuplexModes;
@@ -205,15 +207,37 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         return builder.build();
     }
 
+    /**
+     * Call enforceSingle for each bit in the mask.
+     *
+     * @param mask The mask
+     * @param enforceSingle The function to call
+     */
+    private static void enforceValidMask(int mask, IntConsumer enforceSingle) {
+        int current = mask;
+        while (current > 0) {
+            final int currentMode = (1 << Integer.numberOfTrailingZeros(current));
+            current &= ~currentMode;
+            enforceSingle.accept(currentMode);
+        }
+    }
+
     private PrinterCapabilitiesInfo(Parcel parcel) {
-        mMinMargins = readMargins(parcel);
+        mMinMargins = Preconditions.checkNotNull(readMargins(parcel));
         readMediaSizes(parcel);
         readResolutions(parcel);
 
         mColorModes = parcel.readInt();
+        enforceValidMask(mColorModes,
+                (currentMode) -> PrintAttributes.enforceValidColorMode(currentMode));
+
         mDuplexModes = parcel.readInt();
+        enforceValidMask(mDuplexModes,
+                (currentMode) -> PrintAttributes.enforceValidColorMode(currentMode));
 
         readDefaults(parcel);
+        Preconditions.checkArgument(mMediaSizes.size() > mDefaults[PROPERTY_MEDIA_SIZE]);
+        Preconditions.checkArgument(mResolutions.size() > mDefaults[PROPERTY_RESOLUTION]);
     }
 
     @Override
@@ -537,12 +561,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          */
         public @NonNull Builder setColorModes(@ColorMode int colorModes,
                 @ColorMode int defaultColorMode) {
-            int currentModes = colorModes;
-            while (currentModes > 0) {
-                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
-                currentModes &= ~currentMode;
-                PrintAttributes.enforceValidColorMode(currentMode);
-            }
+            enforceValidMask(colorModes,
+                    (currentMode) -> PrintAttributes.enforceValidColorMode(currentMode));
             PrintAttributes.enforceValidColorMode(defaultColorMode);
             mPrototype.mColorModes = colorModes;
             mPrototype.mDefaults[PROPERTY_COLOR_MODE] = defaultColorMode;
@@ -568,12 +588,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          */
         public @NonNull Builder setDuplexModes(@DuplexMode int duplexModes,
                 @DuplexMode int defaultDuplexMode) {
-            int currentModes = duplexModes;
-            while (currentModes > 0) {
-                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
-                currentModes &= ~currentMode;
-                PrintAttributes.enforceValidDuplexMode(currentMode);
-            }
+            enforceValidMask(duplexModes,
+                    (currentMode) -> PrintAttributes.enforceValidDuplexMode(currentMode));
             PrintAttributes.enforceValidDuplexMode(defaultDuplexMode);
             mPrototype.mDuplexModes = duplexModes;
             mPrototype.mDefaults[PROPERTY_DUPLEX_MODE] = defaultDuplexMode;
