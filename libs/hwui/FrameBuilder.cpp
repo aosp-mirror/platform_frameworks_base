@@ -37,7 +37,8 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         const LightGeometry& lightGeometry, const Rect &contentDrawBounds, Caches& caches)
         : mCanvasState(*this)
         , mCaches(caches)
-        , mLightRadius(lightGeometry.radius) {
+        , mLightRadius(lightGeometry.radius)
+        , mDrawFbo0(!nodes.empty()) {
     ATRACE_NAME("prepare drawing commands");
 
     mLayerBuilders.reserve(layers.entries().size());

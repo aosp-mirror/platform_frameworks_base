@@ -86,10 +86,12 @@ void CanvasContext::destroy() {
     freePrefetechedLayers();
     destroyHardwareResources();
     mAnimationContext->destroy();
+#if !HWUI_NEW_OPS
     if (mCanvas) {
         delete mCanvas;
         mCanvas = nullptr;
     }
+#endif
 }
 
 void CanvasContext::setSurface(Surface* surface) {
@@ -587,9 +589,11 @@ void CanvasContext::freePrefetechedLayers() {
 
 void CanvasContext::buildLayer(RenderNode* node) {
     ATRACE_CALL();
-    if (!mEglManager.hasEglContext() || !mCanvas) {
-        return;
-    }
+    if (!mEglManager.hasEglContext()) return;
+#if !HWUI_NEW_OPS
+    if (!mCanvas) return;
+#endif
+
     // buildLayer() will leave the tree in an unknown state, so we must stop drawing
     stopDrawing();
 
@@ -609,7 +613,15 @@ void CanvasContext::buildLayer(RenderNode* node) {
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
 #if HWUI_NEW_OPS
-    // TODO: support buildLayer
+    static const std::vector< sp<RenderNode> > emptyNodeList;
+    auto& caches = Caches::getInstance();
+    FrameBuilder frameBuilder(mLayerUpdateQueue, SkRect::MakeWH(1, 1), 1, 1,
+            emptyNodeList, mLightGeometry, mContentDrawBounds, caches);
+    mLayerUpdateQueue.clear();
+    BakedOpRenderer renderer(caches, mRenderThread.renderState(),
+            mOpaque, mLightInfo);
+    LOG_ALWAYS_FATAL_IF(renderer.didDraw(), "shouldn't draw in buildlayer case");
+    frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 #else
     mCanvas->markLayersAsBuildLayers();
     mCanvas->flushLayerUpdates();
