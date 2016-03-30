@@ -31,6 +31,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -277,7 +278,6 @@ public class TaskStackAnimationHelper {
     public void startExitToHomeAnimation(boolean animated,
             ReferenceCountedTrigger postAnimationTrigger) {
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
-        TaskStackViewScroller stackScroller = mStackView.getScroller();
         TaskStack stack = mStackView.getStack();
 
         // Break early if there are no tasks
@@ -313,8 +313,7 @@ public class TaskStackAnimationHelper {
                 taskAnimation = AnimationProps.IMMEDIATE;
             }
 
-            stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
-                    null);
+            mTmpTransform.fillIn(tv);
             mTmpTransform.alpha = 0f;
             mTmpTransform.rect.offset(0, offscreenYOffset);
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
@@ -328,8 +327,6 @@ public class TaskStackAnimationHelper {
     public void startLaunchTaskAnimation(TaskView launchingTaskView, boolean screenPinningRequested,
             final ReferenceCountedTrigger postAnimationTrigger) {
         Resources res = mStackView.getResources();
-        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
-        TaskStackViewScroller stackScroller = mStackView.getScroller();
 
         int taskViewExitToAppDuration = res.getInteger(
                 R.integer.recents_task_exit_to_app_duration);
@@ -362,8 +359,7 @@ public class TaskStackAnimationHelper {
                         postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
 
-                stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
-                        null);
+                mTmpTransform.fillIn(tv);
                 mTmpTransform.alpha = 0f;
                 mTmpTransform.rect.offset(0, taskViewAffiliateGroupEnterOffset);
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
@@ -374,16 +370,14 @@ public class TaskStackAnimationHelper {
     /**
      * Starts the delete animation for the specified {@link TaskView}.
      */
-    public void startDeleteTaskAnimation(Task deleteTask, final TaskView deleteTaskView,
+    public void startDeleteTaskAnimation(final TaskView deleteTaskView,
             final ReferenceCountedTrigger postAnimationTrigger) {
         Resources res = mStackView.getResources();
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
-        TaskStackViewScroller stackScroller = mStackView.getScroller();
 
         int taskViewRemoveAnimDuration = res.getInteger(
                 R.integer.recents_animate_task_view_remove_duration);
-        int taskViewRemoveAnimTranslationXPx = res.getDimensionPixelSize(
-                R.dimen.recents_task_view_remove_anim_translation_x);
+        int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
 
         // Disabling clipping with the stack while the view is animating away, this will get
         // restored when the task is next picked up from the view pool
@@ -399,11 +393,55 @@ public class TaskStackAnimationHelper {
         });
         postAnimationTrigger.increment();
 
-        stackLayout.getStackTransform(deleteTask, stackScroller.getStackScroll(), mTmpTransform,
-                null);
+        mTmpTransform.fillIn(deleteTaskView);
         mTmpTransform.alpha = 0f;
-        mTmpTransform.rect.offset(taskViewRemoveAnimTranslationXPx, 0);
+        mTmpTransform.rect.offset(offscreenXOffset, 0);
         mStackView.updateTaskViewToTransform(deleteTaskView, mTmpTransform, taskAnimation);
+    }
+
+    /**
+     * Starts the delete animation for all the {@link TaskView}s.
+     */
+    public void startDeleteAllTasksAnimation(final List<TaskView> taskViews,
+                                             final ReferenceCountedTrigger postAnimationTrigger) {
+        Resources res = mStackView.getResources();
+        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
+
+        int taskViewRemoveAnimDuration = res.getInteger(
+                R.integer.recents_animate_task_views_remove_all_duration);
+        int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
+
+        int taskViewCount = taskViews.size();
+        int startDelayMax = 125;
+
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
+            int indexFromFront = taskViewCount - i - 1;
+            float x = Interpolators.ACCELERATE.getInterpolation((float) indexFromFront /
+                    taskViewCount);
+            int startDelay = (int) Utilities.mapRange(x, 0, startDelayMax);
+
+            // Disabling clipping with the stack while the view is animating away
+            tv.setClipViewInStack(false);
+
+            // Compose the new animation and transform and star the animation
+            AnimationProps taskAnimation = new AnimationProps(startDelay,
+                    taskViewRemoveAnimDuration, Interpolators.FAST_OUT_LINEAR_IN,
+                    new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    postAnimationTrigger.decrement();
+
+                    // Re-enable clipping with the stack (we will reuse this view)
+                    tv.setClipViewInStack(true);
+                }
+            });
+            postAnimationTrigger.increment();
+
+            mTmpTransform.fillIn(tv);
+            mTmpTransform.rect.offset(offscreenXOffset, 0);
+            mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
+        }
     }
 
     /**

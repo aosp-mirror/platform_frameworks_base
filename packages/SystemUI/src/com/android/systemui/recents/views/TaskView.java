@@ -384,7 +384,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     void dismissTask() {
         // Animate out the view and call the callback
         final TaskView tv = this;
-        DismissTaskViewEvent dismissEvent = new DismissTaskViewEvent(tv, mTask);
+        DismissTaskViewEvent dismissEvent = new DismissTaskViewEvent(tv);
         dismissEvent.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {

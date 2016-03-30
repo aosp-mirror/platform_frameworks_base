@@ -222,6 +222,11 @@ public class TaskStack {
             Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture);
 
         /**
+         * Notifies when all tasks have been removed from the stack.
+         */
+        void onStackTasksRemoved(TaskStack stack);
+
+        /**
          * Notifies when tasks in the stack have been updated.
          */
         void onStackTasksUpdated(TaskStack stack);
@@ -507,6 +512,22 @@ public class TaskStack {
             }
         }
         mRawTaskList.remove(t);
+    }
+
+    /**
+     * Removes all tasks from the stack.
+     */
+    public void removeAllTasks() {
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            Task t = tasks.get(i);
+            removeTaskImpl(mStackTaskList, t);
+            mRawTaskList.remove(t);
+        }
+        if (mCb != null) {
+            // Notify that all tasks have been removed
+            mCb.onStackTasksRemoved(this);
+        }
     }
 
     /**
