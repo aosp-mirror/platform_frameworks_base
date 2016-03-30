@@ -176,8 +176,11 @@ public class SettingsDrawerActivity extends Activity {
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
-        LayoutInflater.from(this).inflate(layoutResID,
-                (ViewGroup) findViewById(R.id.content_frame));
+        final ViewGroup parent = (ViewGroup) findViewById(R.id.content_frame);
+        if (parent != null) {
+            parent.removeAllViews();
+        }
+        LayoutInflater.from(this).inflate(layoutResID, parent);
     }
 
     @Override
