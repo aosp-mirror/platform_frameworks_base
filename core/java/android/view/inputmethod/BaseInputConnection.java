@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.CallSuper;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -154,12 +155,11 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Called when this InputConnection is no longer used by the InputMethodManager.
-     *
-     * @hide
+     * Default implementation calls {@link #finishComposingText()}.
      */
-    public void reportFinish() {
-        // Intentionally empty
+    @CallSuper
+    public void closeConnection() {
+        finishComposingText();
     }
 
     /**
