@@ -646,7 +646,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         runTestOnUiThread(() -> {});
     }
 
-    private static Bundle makeBundle(Object... keysAndValues) {
+    public static Bundle makeBundle(Object... keysAndValues) {
         Preconditions.checkState((keysAndValues.length % 2) == 0);
 
         if (keysAndValues.length == 0) {
