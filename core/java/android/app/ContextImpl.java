@@ -1993,7 +1993,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, mainThread,
                 packageInfo, null, null, 0, null, null, Display.INVALID_DISPLAY);
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
-                context.mResourcesManager.getDisplayMetricsLocked());
+                context.mResourcesManager.getDisplayMetrics());
         return context;
     }
 
@@ -2065,16 +2065,34 @@ class ContextImpl extends Context {
                     || overrideConfiguration != null
                     || (compatInfo != null && compatInfo.applicationScale
                             != resources.getCompatibilityInfo().applicationScale)) {
-                resources = mResourcesManager.getResources(
-                        activityToken,
-                        packageInfo.getResDir(),
-                        packageInfo.getSplitResDirs(),
-                        packageInfo.getOverlayDirs(),
-                        packageInfo.getApplicationInfo().sharedLibraryFiles,
-                        displayId,
-                        overrideConfiguration,
-                        compatInfo,
-                        packageInfo.getClassLoader());
+
+                if (container != null) {
+                    // This is a nested Context, so it can't be a base Activity context.
+                    // Just create a regular Resources object associated with the Activity.
+                    resources = mResourcesManager.getResources(
+                            activityToken,
+                            packageInfo.getResDir(),
+                            packageInfo.getSplitResDirs(),
+                            packageInfo.getOverlayDirs(),
+                            packageInfo.getApplicationInfo().sharedLibraryFiles,
+                            displayId,
+                            overrideConfiguration,
+                            compatInfo,
+                            packageInfo.getClassLoader());
+                } else {
+                    // This is not a nested Context, so it must be the root Activity context.
+                    // All other nested Contexts will inherit the configuration set here.
+                    resources = mResourcesManager.createBaseActivityResources(
+                            activityToken,
+                            packageInfo.getResDir(),
+                            packageInfo.getSplitResDirs(),
+                            packageInfo.getOverlayDirs(),
+                            packageInfo.getApplicationInfo().sharedLibraryFiles,
+                            displayId,
+                            overrideConfiguration,
+                            compatInfo,
+                            packageInfo.getClassLoader());
+                }
             }
         }
         mResources = resources;
