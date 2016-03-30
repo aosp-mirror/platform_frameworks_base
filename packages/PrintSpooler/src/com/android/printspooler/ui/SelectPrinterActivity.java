@@ -73,8 +73,9 @@ public final class SelectPrinterActivity extends Activity implements
     private static final int LOADER_ID_PRINT_REGISTRY_INT = 2;
     private static final int LOADER_ID_ENABLED_PRINT_SERVICES = 3;
 
-    public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
+    public static final String INTENT_EXTRA_PRINTER = "INTENT_EXTRA_PRINTER";
 
+    private static final String EXTRA_PRINTER = "EXTRA_PRINTER";
     private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
     private static final String KEY_NOT_FIRST_CREATE = "KEY_NOT_FIRST_CREATE";
@@ -134,7 +135,7 @@ public final class SelectPrinterActivity extends Activity implements
                 if (printer == null) {
                     startAddPrinterActivity();
                 } else {
-                    onPrinterSelected(printer.getId());
+                    onPrinterSelected(printer);
                 }
             }
         });
@@ -244,7 +245,7 @@ public final class SelectPrinterActivity extends Activity implements
                 MenuItem selectItem = menu.add(Menu.NONE, R.string.print_select_printer,
                         Menu.NONE, R.string.print_select_printer);
                 Intent intent = new Intent();
-                intent.putExtra(EXTRA_PRINTER_ID, printer.getId());
+                intent.putExtra(EXTRA_PRINTER, printer);
                 selectItem.setIntent(intent);
             }
 
@@ -263,8 +264,8 @@ public final class SelectPrinterActivity extends Activity implements
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.string.print_select_printer: {
-                PrinterId printerId = item.getIntent().getParcelableExtra(EXTRA_PRINTER_ID);
-                onPrinterSelected(printerId);
+                PrinterInfo printer = item.getIntent().getParcelableExtra(EXTRA_PRINTER);
+                onPrinterSelected(printer);
             } return true;
 
             case R.string.print_forget_printer: {
@@ -302,9 +303,9 @@ public final class SelectPrinterActivity extends Activity implements
         super.onStop();
     }
 
-    private void onPrinterSelected(PrinterId printerId) {
+    private void onPrinterSelected(PrinterInfo printer) {
         Intent intent = new Intent();
-        intent.putExtra(INTENT_EXTRA_PRINTER_ID, printerId);
+        intent.putExtra(INTENT_EXTRA_PRINTER, printer);
         setResult(RESULT_OK, intent);
         finish();
     }
