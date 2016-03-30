@@ -146,6 +146,10 @@ final class BackStackState implements Parcelable {
                     op.removed.add(r);
                 }
             }
+            bse.mEnterAnim = op.enterAnim;
+            bse.mExitAnim = op.exitAnim;
+            bse.mPopEnterAnim = op.popEnterAnim;
+            bse.mPopExitAnim = op.popExitAnim;
             bse.addOp(op);
             num++;
         }
