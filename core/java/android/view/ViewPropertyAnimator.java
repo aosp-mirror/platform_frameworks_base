@@ -1113,19 +1113,19 @@ public class ViewPropertyAnimator {
             if (mListener != null) {
                 mListener.onAnimationEnd(animation);
             }
-            if (mAnimatorCleanupMap != null) {
-                Runnable r = mAnimatorCleanupMap.get(animation);
-                if (r != null) {
-                    r.run();
-                }
-                mAnimatorCleanupMap.remove(animation);
-            }
             if (mAnimatorOnEndMap != null) {
                 Runnable r = mAnimatorOnEndMap.get(animation);
                 if (r != null) {
                     r.run();
                 }
                 mAnimatorOnEndMap.remove(animation);
+            }
+            if (mAnimatorCleanupMap != null) {
+                Runnable r = mAnimatorCleanupMap.get(animation);
+                if (r != null) {
+                    r.run();
+                }
+                mAnimatorCleanupMap.remove(animation);
             }
             mAnimatorMap.remove(animation);
         }
