@@ -509,34 +509,35 @@ final class AccessibilityController {
                         continue;
                     }
 
-                    Region windowBounds = mTempRegion2;
+                    // Consider the touchable portion of the window
                     Matrix matrix = mTempMatrix;
                     populateTransformationMatrixLocked(windowState, matrix);
+                    Region touchableRegion = mTempRegion3;
+                    windowState.getTouchableRegion(touchableRegion);
+                    Rect touchableFrame = mTempRect1;
+                    touchableRegion.getBounds(touchableFrame);
                     RectF windowFrame = mTempRectF;
+                    windowFrame.set(touchableFrame);
+                    windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
+                    matrix.mapRect(windowFrame);
+                    Region windowBounds = mTempRegion2;
+                    windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
+                            (int) windowFrame.right, (int) windowFrame.bottom);
+                    // Only update new regions
+                    Region portionOfWindowAlreadyAccountedFor = mTempRegion3;
+                    portionOfWindowAlreadyAccountedFor.set(mMagnifiedBounds);
+                    portionOfWindowAlreadyAccountedFor.op(nonMagnifiedBounds, Region.Op.UNION);
+                    windowBounds.op(portionOfWindowAlreadyAccountedFor, Region.Op.DIFFERENCE);
 
                     if (mWindowManagerService.mPolicy.canMagnifyWindow(windowState.mAttrs.type)) {
-                        windowFrame.set(windowState.mFrame);
-                        windowFrame.offset(-windowFrame.left, -windowFrame.top);
-                        matrix.mapRect(windowFrame);
-                        windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
-                                (int) windowFrame.right, (int) windowFrame.bottom);
                         mMagnifiedBounds.op(windowBounds, Region.Op.UNION);
                         mMagnifiedBounds.op(mAvailableBounds, Region.Op.INTERSECT);
                     } else {
-                        Region touchableRegion = mTempRegion3;
-                        windowState.getTouchableRegion(touchableRegion);
-                        Rect touchableFrame = mTempRect1;
-                        touchableRegion.getBounds(touchableFrame);
-                        windowFrame.set(touchableFrame);
-                        windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
-                        matrix.mapRect(windowFrame);
-                        windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
-                                (int) windowFrame.right, (int) windowFrame.bottom);
                         nonMagnifiedBounds.op(windowBounds, Region.Op.UNION);
-                        windowBounds.op(mMagnifiedBounds, Region.Op.DIFFERENCE);
                         mAvailableBounds.op(windowBounds, Region.Op.DIFFERENCE);
                     }
 
+                    // Update accounted bounds
                     Region accountedBounds = mTempRegion2;
                     accountedBounds.set(mMagnifiedBounds);
                     accountedBounds.op(nonMagnifiedBounds, Region.Op.UNION);
