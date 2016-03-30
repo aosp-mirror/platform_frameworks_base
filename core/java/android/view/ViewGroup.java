@@ -3251,8 +3251,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
+    public Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
         int count = mChildrenCount;
         int[] visibilities = null;
 
@@ -3262,7 +3265,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 View child = getChildAt(i);
                 visibilities[i] = child.getVisibility();
                 if (visibilities[i] == View.VISIBLE) {
-                    child.setVisibility(INVISIBLE);
+                    child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
+                            | (View.INVISIBLE & View.VISIBILITY_MASK);
                 }
             }
         }
@@ -3271,7 +3275,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (skipChildren) {
             for (int i = 0; i < count; i++) {
-                getChildAt(i).setVisibility(visibilities[i]);
+                View child = getChildAt(i);
+                child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
+                        | (visibilities[i] & View.VISIBILITY_MASK);
             }
         }
 
