@@ -16,10 +16,12 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.util.DebugUtils;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -64,6 +66,8 @@ class ActivityManagerShellCommand extends ShellCommand {
                     return runIsUserStopped(pw);
                 case "lenient-background-check":
                     return runLenientBackgroundCheck(pw);
+                case "get-uid-state":
+                    return getUidState(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -170,6 +174,17 @@ class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int getUidState(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.DUMP,
+                "getUidState()");
+        int state = mInternal.getUidState(Integer.parseInt(getNextArgRequired()));
+        pw.print(state);
+        pw.print(" (");
+        pw.printf(DebugUtils.valueToString(ActivityManager.class, "PROCESS_STATE_", state));
+        pw.println(")");
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -212,7 +227,7 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("    Kill all processes associated with the given application.");
             pw.println("  kill-all");
-            pw.println("    Kill all processes that are safe to kill (cached, etc)");
+            pw.println("    Kill all processes that are safe to kill (cached, etc).");
             pw.println("  write");
             pw.println("    Write all pending state to storage.");
             pw.println("  track-associations");
@@ -220,9 +235,11 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  untrack-associations");
             pw.println("    Disable and clear association tracking.");
             pw.println("  is-user-stopped <USER_ID>");
-            pw.println("    returns whether <USER_ID> has been stopped or not");
+            pw.println("    Returns whether <USER_ID> has been stopped or not.");
             pw.println("  lenient-background-check [<true|false>]");
-            pw.println("    optionally controls lenient background check mode, returns current mode.");
+            pw.println("    Optionally controls lenient background check mode, returns current mode.");
+            pw.println("  get-uid-state <UID>");
+            pw.println("    Gets the process state of an app given its <UID>.");
         }
     }
 }
