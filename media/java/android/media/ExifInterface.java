@@ -693,7 +693,7 @@ public class ExifInterface {
      */
     public ExifInterface(FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
-            throw new IllegalArgumentException("parcelFileDescriptor cannot be null");
+            throw new IllegalArgumentException("fileDescriptor cannot be null");
         }
         mAssetInputStream = null;
         mFilename = null;
@@ -705,7 +705,7 @@ public class ExifInterface {
             try {
                 fileDescriptor = Os.dup(fileDescriptor);
             } catch (ErrnoException e) {
-                e.rethrowAsIOException();
+                throw e.rethrowAsIOException();
             }
         } else {
             mSeekableFileDescriptor = null;
@@ -811,9 +811,41 @@ public class ExifInterface {
      */
     public void setAttribute(String tag, String value) {
         for (int i = 0 ; i < EXIF_TAGS.length; ++i) {
+            if (i == IFD_THUMBNAIL_HINT && !mHasThumbnail) {
+                continue;
+            }
             if (sExifTagMapsForWriting[i].containsKey(tag)) {
                 mAttributes[i].put(tag, value);
             }
+        }
+    }
+
+    /**
+     * Update the values of the tags in the tag groups if any value for the tag already was stored.
+     *
+     * @param tag the name of the tag.
+     * @param value the value of the tag.
+     * @return Returns {@code true} if updating is placed.
+     */
+    private boolean updateAttribute(String tag, String value) {
+        boolean updated = false;
+        for (int i = 0 ; i < EXIF_TAGS.length; ++i) {
+            if (mAttributes[i].containsKey(tag)) {
+                mAttributes[i].put(tag, value);
+                updated = true;
+            }
+        }
+        return updated;
+    }
+
+    /**
+     * Remove any values of the specified tag.
+     *
+     * @param tag the name of the tag.
+     */
+    private void removeAttribute(String tag) {
+        for (int i = 0 ; i < EXIF_TAGS.length; ++i) {
+            mAttributes[i].remove(tag);
         }
     }
 
@@ -853,7 +885,7 @@ public class ExifInterface {
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
-            Log.w(TAG, "Invalid JPEG: ExifInterface got an unsupported image format file"
+            Log.w(TAG, "Invalid image: ExifInterface got an unsupported image format file"
                     + "(ExifInterface supports JPEG and some RAW image formats only) "
                     + "or a corrupted JPEG file to ExifInterface.", e);
         } finally {
@@ -882,27 +914,22 @@ public class ExifInterface {
         // Mark for disabling the save feature.
         mIsRaw = true;
 
-        for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
-            String attrName = (String) entry.getKey();
-
-            switch (attrName) {
-                case TAG_HAS_THUMBNAIL:
-                    mHasThumbnail = ((String) entry.getValue()).equalsIgnoreCase("true");
-                    break;
-                case TAG_THUMBNAIL_OFFSET:
-                    mThumbnailOffset = Integer.parseInt((String) entry.getValue());
-                    break;
-                case TAG_THUMBNAIL_LENGTH:
-                    mThumbnailLength = Integer.parseInt((String) entry.getValue());
-                    break;
-                case TAG_THUMBNAIL_DATA:
-                    mThumbnailBytes = (byte[]) entry.getValue();
-                    break;
-                default:
-                    setAttribute(attrName, (String) entry.getValue());
-                    break;
-            }
+        String value = (String) map.remove(TAG_HAS_THUMBNAIL);
+        mHasThumbnail = value != null && value.equalsIgnoreCase("true");
+        value = (String) map.remove(TAG_THUMBNAIL_OFFSET);
+        if (value != null) {
+            mThumbnailOffset = Integer.parseInt(value);
         }
+        value = (String) map.remove(TAG_THUMBNAIL_LENGTH);
+        if (value != null) {
+            mThumbnailLength = Integer.parseInt(value);
+        }
+        mThumbnailBytes = (byte[]) map.remove(TAG_THUMBNAIL_DATA);
+
+        for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
+            setAttribute((String) entry.getKey(), (String) entry.getValue());
+        }
+
         return true;
     }
 
@@ -928,7 +955,7 @@ public class ExifInterface {
     /**
      * Save the tag data into the original image file. This is expensive because it involves
      * copying all the data from one file to another and deleting the old file and renaming the
-     * other. It's best to use{@link #setAttribute(String,String)} to set all attributes to write
+     * other. It's best to use {@link #setAttribute(String,String)} to set all attributes to write
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
@@ -963,7 +990,7 @@ public class ExifInterface {
                 Streams.copy(in, out);
             }
         } catch (ErrnoException e) {
-            e.rethrowAsIOException();
+            throw e.rethrowAsIOException();
         } finally {
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
@@ -982,7 +1009,7 @@ public class ExifInterface {
             }
             saveJpegAttributes(in, out);
         } catch (ErrnoException e) {
-            e.rethrowAsIOException();
+            throw e.rethrowAsIOException();
         } finally {
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
@@ -1276,7 +1303,8 @@ public class ExifInterface {
                         throw new IOException("Invalid exif");
                     }
                     length = 0;
-                    setAttribute("UserComment", new String(bytes, Charset.forName("US-ASCII")));
+                    mAttributes[IFD_EXIF_HINT].put(TAG_USER_COMMENT,
+                            new String(bytes, Charset.forName("US-ASCII")));
                     break;
                 }
 
@@ -1296,9 +1324,10 @@ public class ExifInterface {
                     if (dataInputStream.skipBytes(1) != 1) {
                         throw new IOException("Invalid SOFx");
                     }
-                    setAttribute("ImageLength",
+                    mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH,
                             String.valueOf(dataInputStream.readUnsignedShort()));
-                    setAttribute("ImageWidth", String.valueOf(dataInputStream.readUnsignedShort()));
+                    mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH,
+                            String.valueOf(dataInputStream.readUnsignedShort()));
                     length -= 5;
                     break;
                 }
@@ -1521,31 +1550,31 @@ public class ExifInterface {
         convertToInt(TAG_GPS_ALTITUDE_REF);
         convertToRational(TAG_GPS_LONGITUDE);
         convertToRational(TAG_GPS_LATITUDE);
-        convertToTimetamp(TAG_GPS_TIMESTAMP);
+        convertToTimestamp(TAG_GPS_TIMESTAMP);
 
         // The value of DATETIME tag has the same value of DATETIME_ORIGINAL tag.
-        String valueOfDateTimeOriginal = getAttribute("DateTimeOriginal");
+        String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
         if (valueOfDateTimeOriginal != null) {
-            setAttribute(TAG_DATETIME, valueOfDateTimeOriginal);
+            mAttributes[IFD_TIFF_HINT].put(TAG_DATETIME, valueOfDateTimeOriginal);
         }
 
         // Add the default value.
         if (getAttribute(TAG_IMAGE_WIDTH) == null) {
-            setAttribute(TAG_IMAGE_WIDTH, "0");
+            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, "0");
         }
         if (getAttribute(TAG_IMAGE_LENGTH) == null) {
-            setAttribute(TAG_IMAGE_LENGTH, "0");
+            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, "0");
         }
         if (getAttribute(TAG_ORIENTATION) == null) {
-            setAttribute(TAG_ORIENTATION, "0");
+            mAttributes[IFD_TIFF_HINT].put(TAG_ORIENTATION, "0");
         }
         if (getAttribute(TAG_LIGHT_SOURCE) == null) {
-            setAttribute(TAG_LIGHT_SOURCE, "0");
+            mAttributes[IFD_EXIF_HINT].put(TAG_LIGHT_SOURCE, "0");
         }
     }
 
     // Converts the tag value to timestamp; Otherwise deletes the given tag.
-    private void convertToTimetamp(String tagName) {
+    private void convertToTimestamp(String tagName) {
         String entryValue = getAttribute(tagName);
         if (entryValue == null) return;
         int dataFormat = getDataFormatOfExifEntryValue(entryValue);
@@ -1566,9 +1595,9 @@ public class ExifInterface {
                 int value = numerator / denominator;
                 stringBuilder.append(String.format("%02d", value));
             }
-            setAttribute(tagName, stringBuilder.toString());
+            updateAttribute(tagName, stringBuilder.toString());
         } else if (dataFormat != IFD_FORMAT_STRING) {
-            setAttribute(tagName, null);
+            removeAttribute(tagName);
         }
     }
 
@@ -1595,14 +1624,14 @@ public class ExifInterface {
                     }
                     stringBuilder.append((double) numerator / denominator);
                 }
-                setAttribute(tagName, stringBuilder.toString());
+                updateAttribute(tagName, stringBuilder.toString());
                 break;
             }
             case IFD_FORMAT_DOUBLE:
                 // Keep it as is.
                 break;
             default:
-                setAttribute(tagName, null);
+                removeAttribute(tagName);
                 break;
         }
     }
@@ -1624,14 +1653,14 @@ public class ExifInterface {
                     double doubleValue = Double.parseDouble(component);
                     stringBuilder.append((int) (doubleValue * 10000.0)).append("/").append(10000);
                 }
-                setAttribute(tagName, stringBuilder.toString());
+                updateAttribute(tagName, stringBuilder.toString());
                 break;
             }
             case IFD_FORMAT_SRATIONAL:
                 // Keep it as is.
                 break;
             default:
-                setAttribute(tagName, null);
+                removeAttribute(tagName);
                 break;
         }
     }
@@ -1642,7 +1671,7 @@ public class ExifInterface {
         if (entryValue == null) return;
         int dataFormat = getDataFormatOfExifEntryValue(entryValue);
         if (dataFormat != IFD_FORMAT_SLONG) {
-            setAttribute(tagName, null);
+            removeAttribute(tagName);
         }
     }
 
@@ -1758,7 +1787,7 @@ public class ExifInterface {
                 String entryValue = readExifEntryValue(
                         dataInputStream, dataFormat, numberOfComponents);
                 if (entryValue != null) {
-                    setAttribute(tagName, entryValue);
+                    mAttributes[hint].put(tagName, entryValue);
                 }
             } else {
                 StringBuilder entryValueBuilder = new StringBuilder();
@@ -1769,7 +1798,7 @@ public class ExifInterface {
                     entryValueBuilder.append(readExifEntryValue(
                             dataInputStream, dataFormat, numberOfComponents));
                 }
-                setAttribute(tagName, entryValueBuilder.toString());
+                mAttributes[hint].put(tagName, entryValueBuilder.toString());
             }
 
             if (dataInputStream.peek() != nextEntryOffset) {
@@ -1886,11 +1915,11 @@ public class ExifInterface {
 
         // Remove IFD pointer tags (we'll re-add it later.)
         for (ExifTag tag : IFD_POINTER_TAGS) {
-            setAttribute(tag.name, null);
+            removeAttribute(tag.name);
         }
         // Remove old thumbnail data
-        setAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name, null);
-        setAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name, null);
+        removeAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
+        removeAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
 
         // Remove null value tags.
         for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
