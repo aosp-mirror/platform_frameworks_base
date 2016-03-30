@@ -22,4 +22,7 @@ LOCAL_MODULE := AaptTestStaticLibOne
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
+
+# We need this to compile the Java sources of AaptTestStaticLibTwo using javac.
+LOCAL_JAR_EXCLUDE_FILES := none
 include $(BUILD_STATIC_JAVA_LIBRARY)
