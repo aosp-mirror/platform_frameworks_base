@@ -121,7 +121,7 @@ public final class GnssStatus {
      * @param satIndex the index of the satellite in the list.
      */
     public float getElevationDegrees(int satIndex) {
-        return 0f;
+        return mElevations[satIndex];
     }
 
     /**
