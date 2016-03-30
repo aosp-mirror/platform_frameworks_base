@@ -71,6 +71,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -2782,7 +2783,7 @@ public class DevicePolicyManager {
      * compromised, certificates it had already installed will be protected.
      *
      * <p>If the installer must have access to the credentials, call
-     * {@link #installKeyPair(ComponentName, PrivateKey, Certificate, String, boolean)} instead.
+     * {@link #installKeyPair(ComponentName, PrivateKey, Certificate[], String, boolean)} instead.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
@@ -2796,13 +2797,14 @@ public class DevicePolicyManager {
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias) {
-        return installKeyPair(admin, privKey, cert, alias, false);
+        return installKeyPair(admin, privKey, new Certificate[] {cert}, alias, false);
     }
 
     /**
      * Called by a device or profile owner, or delegated certificate installer, to install a
-     * certificate and corresponding private key. All apps within the profile will be able to access
-     * the certificate and use the private key, given direct user approval.
+     * certificate chain and corresponding private key for the leaf certificate. All apps within the
+     * profile will be able to access the certificate chain and use the private key, given direct
+     * user approval.
      *
      * <p>The caller of this API may grant itself access to the certificate and private key
      * immediately, without user approval. It is a best practice not to request this unless strictly
@@ -2811,7 +2813,9 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate installer.
      * @param privKey The private key to install.
-     * @param cert The certificate to install.
+     * @param certs The certificate chain to install. The chain should start with the leaf
+     *        certificate and include the chain of trust in order. This will be returned by
+     *        {@link android.security.KeyChain#getCertificateChain}.
      * @param alias The private key alias under which to install the certificate. If a certificate
      *        with that alias already exists, it will be overwritten.
      * @param requestAccess {@code true} to request that the calling app be granted access to the
@@ -2820,14 +2824,20 @@ public class DevicePolicyManager {
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
+     * @see android.security.KeyChain#getCertificateChain
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
-            @NonNull Certificate cert, @NonNull String alias, boolean requestAccess) {
+            @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
         try {
-            final byte[] pemCert = Credentials.convertToPem(cert);
+            final byte[] pemCert = Credentials.convertToPem(certs[0]);
+            byte[] pemChain = null;
+            if (certs.length > 1) {
+                pemChain = Credentials.convertToPem(Arrays.copyOfRange(certs, 1, certs.length));
+            }
             final byte[] pkcs8Key = KeyFactory.getInstance(privKey.getAlgorithm())
                     .getKeySpec(privKey, PKCS8EncodedKeySpec.class).getEncoded();
-            return mService.installKeyPair(admin, pkcs8Key, pemCert, alias, requestAccess);
+            return mService.installKeyPair(admin, pkcs8Key, pemCert, pemChain, alias,
+                    requestAccess);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

@@ -42,6 +42,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
@@ -389,7 +391,12 @@ public final class KeyChain {
 
     /**
      * Returns the {@code X509Certificate} chain for the requested
-     * alias, or null if no there is no result.
+     * alias, or null if there is no result.
+     * <p>
+     * <strong>Note:</strong> If a certificate chain was explicitly specified when the alias was
+     * installed, this method will return that chain. If only the client certificate was specified
+     * at the installation time, this method will try to build a certificate chain using all
+     * available trust anchors (preinstalled and user-added).
      *
      * <p> This method may block while waiting for a connection to another process, and must never
      * be called from the main thread.
@@ -413,11 +420,31 @@ public final class KeyChain {
             if (certificateBytes == null) {
                 return null;
             }
-
-            TrustedCertificateStore store = new TrustedCertificateStore();
-            List<X509Certificate> chain = store
-                    .getCertificateChain(toCertificate(certificateBytes));
-            return chain.toArray(new X509Certificate[chain.size()]);
+            X509Certificate leafCert = toCertificate(certificateBytes);
+            final byte[] certChainBytes = keyChainService.getCaCertificates(alias);
+            // If the keypair is installed with a certificate chain by either
+            // DevicePolicyManager.installKeyPair or CertInstaller, return that chain.
+            if (certChainBytes != null && certChainBytes.length != 0) {
+                Collection<X509Certificate> chain = toCertificates(certChainBytes);
+                ArrayList<X509Certificate> fullChain = new ArrayList<>(chain.size() + 1);
+                fullChain.add(leafCert);
+                fullChain.addAll(chain);
+                return fullChain.toArray(new X509Certificate[fullChain.size()]);
+            } else {
+                // If there isn't a certificate chain, either due to a pre-existing keypair
+                // installed before N, or no chain is explicitly installed under the new logic,
+                // fall back to old behavior of constructing the chain from trusted credentials.
+                //
+                // This logic exists to maintain old behaviour for already installed keypair, at
+                // the cost of potentially returning extra certificate chain for new clients who
+                // explicitly installed only the client certificate without a chain. The latter
+                // case is actually no different from pre-N behaviour of getCertificateChain(),
+                // in that sense this change introduces no regression. Besides the returned chain
+                // is still valid so the consumer of the chain should have no problem verifying it.
+                TrustedCertificateStore store = new TrustedCertificateStore();
+                List<X509Certificate> chain = store.getCertificateChain(leafCert);
+                return chain.toArray(new X509Certificate[chain.size()]);
+            }
         } catch (CertificateException e) {
             throw new KeyChainException(e);
         } catch (RemoteException e) {
@@ -481,6 +508,21 @@ public final class KeyChain {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             Certificate cert = certFactory.generateCertificate(new ByteArrayInputStream(bytes));
             return (X509Certificate) cert;
+        } catch (CertificateException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /** @hide */
+    @NonNull
+    public static Collection<X509Certificate> toCertificates(@NonNull byte[] bytes) {
+        if (bytes == null) {
+            throw new IllegalArgumentException("bytes == null");
+        }
+        try {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            return (Collection<X509Certificate>) certFactory.generateCertificates(
+                    new ByteArrayInputStream(bytes));
         } catch (CertificateException e) {
             throw new AssertionError(e);
         }
