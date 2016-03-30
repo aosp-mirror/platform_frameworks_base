@@ -78,6 +78,12 @@ public class QSContainer extends FrameLayout {
         mQSCustomizer.setQsContainer(this);
     }
 
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        mQSAnimator.onRtlChanged();
+    }
+
     public void setHost(QSTileHost qsh) {
         mQSPanel.setHost(qsh, mQSCustomizer);
         mHeader.setQSPanel(mQSPanel);
