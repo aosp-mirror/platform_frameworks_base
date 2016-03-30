@@ -56,6 +56,7 @@ namespace DumpFlags {
     enum {
         FrameStats = 1 << 0,
         Reset      = 1 << 1,
+        JankStats  = 1 << 2,
     };
 };
 
@@ -415,7 +416,6 @@ void RenderProxy::notifyFramePending() {
 CREATE_BRIDGE4(dumpProfileInfo, CanvasContext* context, RenderThread* thread,
         int fd, int dumpFlags) {
     args->context->profiler().dumpData(args->fd);
-    args->thread->jankTracker().dump(args->fd);
     if (args->dumpFlags & DumpFlags::FrameStats) {
         args->context->dumpFrames(args->fd);
     }
