@@ -24,19 +24,14 @@ public class TestUtils {
     }
 
     public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
-            Runnable r) {
-        assertExpectException(expectedExceptionType, null, r);
-    }
-
-    public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
             String expectedExceptionMessageRegex, Runnable r) {
         try {
             r.run();
-            Assert.fail("Expected exception type " + expectedExceptionType.getClass().getName()
+            Assert.fail("Expected exception type " + expectedExceptionType.getName()
                     + " was not thrown");
         } catch (Throwable e) {
             Assert.assertTrue(
-                    "Expected exception type was " + expectedExceptionType.getClass().getName()
+                    "Expected exception type was " + expectedExceptionType.getName()
                     + " but caught " + e.getClass().getName(),
                     expectedExceptionType.isAssignableFrom(e.getClass()));
             if (expectedExceptionMessageRegex != null) {
