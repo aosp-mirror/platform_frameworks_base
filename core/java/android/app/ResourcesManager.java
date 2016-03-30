@@ -94,9 +94,18 @@ public class ResourcesManager {
     private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
 
     /**
-     * Each Activity may have only one Resources object.
+     * Resources and base configuration override associated with an Activity.
      */
-    private final WeakHashMap<IBinder, WeakReference<Resources>> mActivityResourceReferences =
+    private static class ActivityResources {
+        public final Configuration overrideConfig = new Configuration();
+        public final ArrayList<WeakReference<Resources>> activityResources = new ArrayList<>();
+    }
+
+    /**
+     * Each Activity may has a base override configuration that is applied to each Resources object,
+     * which in turn may have their own override configuration specified.
+     */
+    private final WeakHashMap<IBinder, ActivityResources> mActivityResourceReferences =
             new WeakHashMap<>();
 
     /**
@@ -115,18 +124,20 @@ public class ResourcesManager {
     }
 
     public Configuration getConfiguration() {
-        return mResConfiguration;
+        synchronized (this) {
+            return mResConfiguration;
+        }
     }
 
-    DisplayMetrics getDisplayMetricsLocked() {
-        return getDisplayMetricsLocked(Display.DEFAULT_DISPLAY);
+    DisplayMetrics getDisplayMetrics() {
+        return getDisplayMetrics(Display.DEFAULT_DISPLAY);
     }
 
     /**
      * Protected so that tests can override and returns something a fixed value.
      */
     @VisibleForTesting
-    protected DisplayMetrics getDisplayMetricsLocked(int displayId) {
+    protected DisplayMetrics getDisplayMetrics(int displayId) {
         DisplayMetrics dm = new DisplayMetrics();
         final Display display =
                 getAdjustedDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
@@ -272,10 +283,9 @@ public class ResourcesManager {
         return config;
     }
 
-
     private ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key) {
         AssetManager assets = createAssetManager(key);
-        DisplayMetrics dm = getDisplayMetricsLocked(key.mDisplayId);
+        DisplayMetrics dm = getDisplayMetrics(key.mDisplayId);
         Configuration config = generateConfig(key, dm);
         ResourcesImpl impl = new ResourcesImpl(assets, dm, config, key.mCompatInfo);
         if (DEBUG) {
@@ -290,7 +300,7 @@ public class ResourcesManager {
      * @param key The key to match.
      * @return a ResourcesImpl if the key matches a cache entry, null otherwise.
      */
-    private ResourcesImpl findResourcesImplForKey(@NonNull ResourcesKey key) {
+    private ResourcesImpl findResourcesImplForKeyLocked(@NonNull ResourcesKey key) {
         WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.get(key);
         ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
         if (impl != null && impl.getAssets().isUpToDate()) {
@@ -303,7 +313,7 @@ public class ResourcesManager {
      * Find the ResourcesKey that this ResourcesImpl object is associated with.
      * @return the ResourcesKey or null if none was found.
      */
-    private ResourcesKey findKeyForResourceImpl(@NonNull ResourcesImpl resourceImpl) {
+    private ResourcesKey findKeyForResourceImplLocked(@NonNull ResourcesImpl resourceImpl) {
         final int refCount = mResourceImpls.size();
         for (int i = 0; i < refCount; i++) {
             WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
@@ -315,36 +325,46 @@ public class ResourcesManager {
         return null;
     }
 
+    private ActivityResources getOrCreateActivityResourcesStructLocked(
+            @NonNull IBinder activityToken) {
+        ActivityResources activityResources = mActivityResourceReferences.get(activityToken);
+        if (activityResources == null) {
+            activityResources = new ActivityResources();
+            mActivityResourceReferences.put(activityToken, activityResources);
+        }
+        return activityResources;
+    }
+
     /**
      * Gets an existing Resources object tied to this Activity, or creates one if it doesn't exist
      * or the class loader is different.
      */
     private Resources getOrCreateResourcesForActivityLocked(@NonNull IBinder activityToken,
             @NonNull ClassLoader classLoader, @NonNull ResourcesImpl impl) {
-        // This is a request tied to an Activity, meaning we will need to update all
-        // Activity related Resources to match this configuration.
-        WeakReference<Resources> weakResourceRef = mActivityResourceReferences.get(activityToken);
-        Resources resources = weakResourceRef != null ? weakResourceRef.get() : null;
-        if (resources == null || !Objects.equals(resources.getClassLoader(), classLoader)) {
-            resources = new Resources(classLoader);
-            mActivityResourceReferences.put(activityToken, new WeakReference<>(resources));
-            if (DEBUG) {
-                Slog.d(TAG, "- creating new ref=" + resources);
-            }
-        } else {
-            if (DEBUG) {
-                Slog.d(TAG, "- using existing ref=" + resources);
+        final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
+                activityToken);
+
+        final int refCount = activityResources.activityResources.size();
+        for (int i = 0; i < refCount; i++) {
+            WeakReference<Resources> weakResourceRef = activityResources.activityResources.get(i);
+            Resources resources = weakResourceRef.get();
+
+            if (resources != null
+                    && Objects.equals(resources.getClassLoader(), classLoader)
+                    && resources.getImpl() == impl) {
+                if (DEBUG) {
+                    Slog.d(TAG, "- using existing ref=" + resources);
+                }
+                return resources;
             }
         }
 
-        if (resources.getImpl() != impl) {
-            if (DEBUG) {
-                Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
-            }
-
-            // Setting an impl is expensive because we update all ThemeImpl references.
-            // too.
-            resources.setImpl(impl);
+        Resources resources = new Resources(classLoader);
+        resources.setImpl(impl);
+        activityResources.activityResources.add(new WeakReference<>(resources));
+        if (DEBUG) {
+            Slog.d(TAG, "- creating new ref=" + resources);
+            Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
         }
         return resources;
     }
@@ -359,7 +379,7 @@ public class ResourcesManager {
         final int refCount = mResourceReferences.size();
         for (int i = 0; i < refCount; i++) {
             WeakReference<Resources> weakResourceRef = mResourceReferences.get(i);
-            Resources resources = weakResourceRef != null ? weakResourceRef.get() : null;
+            Resources resources = weakResourceRef.get();
             if (resources != null &&
                     Objects.equals(resources.getClassLoader(), classLoader) &&
                     resources.getImpl() == impl) {
@@ -379,6 +399,177 @@ public class ResourcesManager {
             Slog.d(TAG, "- setting ref=" + resources + " with impl=" + impl);
         }
         return resources;
+    }
+
+    /**
+     * Creates base resources for an Activity. Calls to
+     * {@link #getResources(IBinder, String, String[], String[], String[], int, Configuration,
+     * CompatibilityInfo, ClassLoader)} with the same activityToken will have their override
+     * configurations merged with the one specified here.
+     *
+     * @param activityToken Represents an Activity.
+     * @param resDir The base resource path. Can be null (only framework resources will be loaded).
+     * @param splitResDirs An array of split resource paths. Can be null.
+     * @param overlayDirs An array of overlay paths. Can be null.
+     * @param libDirs An array of resource library paths. Can be null.
+     * @param displayId The ID of the display for which to create the resources.
+     * @param overrideConfig The configuration to apply on top of the base configuration. Can be
+     *                       null. This provides the base override for this Activity.
+     * @param compatInfo The compatibility settings to use. Cannot be null. A default to use is
+     *                   {@link CompatibilityInfo#DEFAULT_COMPATIBILITY_INFO}.
+     * @param classLoader The class loader to use when inflating Resources. If null, the
+     *                    {@link ClassLoader#getSystemClassLoader()} is used.
+     * @return a Resources object from which to access resources.
+     */
+    public Resources createBaseActivityResources(@NonNull IBinder activityToken,
+            @Nullable String resDir,
+            @Nullable String[] splitResDirs,
+            @Nullable String[] overlayDirs,
+            @Nullable String[] libDirs,
+            int displayId,
+            @Nullable Configuration overrideConfig,
+            @NonNull CompatibilityInfo compatInfo,
+            @Nullable ClassLoader classLoader) {
+        final ResourcesKey key = new ResourcesKey(
+                resDir,
+                splitResDirs,
+                overlayDirs,
+                libDirs,
+                displayId,
+                overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
+                compatInfo);
+        classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
+
+        synchronized (this) {
+            final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
+                    activityToken);
+
+            if (overrideConfig != null) {
+                activityResources.overrideConfig.setTo(overrideConfig);
+            } else {
+                activityResources.overrideConfig.setToDefaults();
+            }
+        }
+
+        // Update any existing Activity Resources references.
+        updateResourcesForActivity(activityToken, overrideConfig);
+
+        // Now request an actual Resources object.
+        return getOrCreateResources(activityToken, key, classLoader);
+    }
+
+    /**
+     * Gets an existing Resources object set with a ResourcesImpl object matching the given key,
+     * or creates one if it doesn't exist.
+     *
+     * @param activityToken The Activity this Resources object should be associated with.
+     * @param key The key describing the parameters of the ResourcesImpl object.
+     * @param classLoader The classloader to use for the Resources object.
+     *                    If null, {@link ClassLoader#getSystemClassLoader()} is used.
+     * @return A Resources object that gets updated when
+     *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
+     *         is called.
+     */
+    private Resources getOrCreateResources(@Nullable IBinder activityToken,
+            @NonNull ResourcesKey key, @NonNull ClassLoader classLoader) {
+        final boolean findSystemLocales;
+        final boolean hasNonSystemLocales;
+        synchronized (this) {
+            findSystemLocales = (mSystemLocales == null || mSystemLocales.length == 0);
+            hasNonSystemLocales = mHasNonSystemLocales;
+
+            if (DEBUG) {
+                Throwable here = new Throwable();
+                here.fillInStackTrace();
+                Slog.w(TAG, "!! Get resources for activity=" + activityToken + " key=" + key, here);
+            }
+
+            if (activityToken != null) {
+                final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
+                        activityToken);
+
+                // Clean up any dead references so they don't pile up.
+                ArrayUtils.unstableRemoveIf(activityResources.activityResources,
+                        sEmptyReferencePredicate);
+
+                // Rebase the key's override config on top of the Activity's base override.
+                if (key.hasOverrideConfiguration()
+                        && !activityResources.overrideConfig.equals(Configuration.EMPTY)) {
+                    final Configuration temp = new Configuration(activityResources.overrideConfig);
+                    temp.updateFrom(key.mOverrideConfiguration);
+                    key.mOverrideConfiguration.setTo(temp);
+                }
+
+                ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(key);
+                if (resourcesImpl != null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "- using existing impl=" + resourcesImpl);
+                    }
+                    return getOrCreateResourcesForActivityLocked(activityToken, classLoader,
+                            resourcesImpl);
+                }
+
+                // We will create the ResourcesImpl object outside of holding this lock.
+
+            } else {
+                // Clean up any dead references so they don't pile up.
+                ArrayUtils.unstableRemoveIf(mResourceReferences, sEmptyReferencePredicate);
+
+                // Not tied to an Activity, find a shared Resources that has the right ResourcesImpl
+                ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(key);
+                if (resourcesImpl != null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "- using existing impl=" + resourcesImpl);
+                    }
+                    return getOrCreateResourcesLocked(classLoader, resourcesImpl);
+                }
+
+                // We will create the ResourcesImpl object outside of holding this lock.
+            }
+        }
+
+        // If we're here, we didn't find a suitable ResourcesImpl to use, so create one now.
+        ResourcesImpl resourcesImpl = createResourcesImpl(key);
+
+        final String[] systemLocales = findSystemLocales
+                ? AssetManager.getSystem().getLocales() : null;
+        final String[] nonSystemLocales = resourcesImpl.getAssets().getNonSystemLocales();
+        // Avoid checking for non-pseudo-locales if we already know there were some from a previous
+        // Resources. The default value (for when hasNonSystemLocales is true) doesn't matter,
+        // since mHasNonSystemLocales will also be true, and thus isPseudoLocalesOnly would not be
+        // able to affect mHasNonSystemLocales.
+        final boolean isPseudoLocalesOnly = hasNonSystemLocales ||
+                LocaleList.isPseudoLocalesOnly(nonSystemLocales);
+
+        synchronized (this) {
+            if (mSystemLocales == null || mSystemLocales.length == 0) {
+                mSystemLocales = systemLocales;
+            }
+            mNonSystemLocales.addAll(Arrays.asList(nonSystemLocales));
+            mHasNonSystemLocales = mHasNonSystemLocales || !isPseudoLocalesOnly;
+
+            ResourcesImpl existingResourcesImpl = findResourcesImplForKeyLocked(key);
+            if (existingResourcesImpl != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "- got beat! existing impl=" + existingResourcesImpl
+                            + " new impl=" + resourcesImpl);
+                }
+                resourcesImpl.getAssets().close();
+                resourcesImpl = existingResourcesImpl;
+            } else {
+                // Add this ResourcesImpl to the cache.
+                mResourceImpls.put(key, new WeakReference<>(resourcesImpl));
+            }
+
+            final Resources resources;
+            if (activityToken != null) {
+                resources = getOrCreateResourcesForActivityLocked(activityToken, classLoader,
+                        resourcesImpl);
+            } else {
+                resources = getOrCreateResourcesLocked(classLoader, resourcesImpl);
+            }
+            return resources;
+        }
     }
 
     /**
@@ -425,92 +616,8 @@ public class ResourcesManager {
                 displayId,
                 overrideConfig != null ? new Configuration(overrideConfig) : null, // Copy
                 compatInfo);
-
         classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
-
-        final boolean findSystemLocales;
-        final boolean hasNonSystemLocales;
-        synchronized (this) {
-            findSystemLocales = (mSystemLocales == null || mSystemLocales.length == 0);
-            hasNonSystemLocales = mHasNonSystemLocales;
-
-            if (DEBUG) {
-                Throwable here = new Throwable();
-                here.fillInStackTrace();
-                Slog.w(TAG, "!! Get resources for activity=" + activityToken + " key=" + key, here);
-            }
-
-            if (activityToken != null) {
-                ResourcesImpl resourcesImpl = findResourcesImplForKey(key);
-                if (resourcesImpl != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "- using existing impl=" + resourcesImpl);
-                    }
-                    return getOrCreateResourcesForActivityLocked(activityToken, classLoader,
-                            resourcesImpl);
-                }
-
-                // We will create the ResourcesImpl object outside of holding this lock.
-
-            } else {
-                // Clean up any dead references so they don't pile up.
-                ArrayUtils.unstableRemoveIf(mResourceReferences, sEmptyReferencePredicate);
-
-                // Not tied to an Activity, find a shared Resources that has the right ResourcesImpl
-                ResourcesImpl resourcesImpl = findResourcesImplForKey(key);
-                if (resourcesImpl != null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "- using existing impl=" + resourcesImpl);
-                    }
-                    return getOrCreateResourcesLocked(classLoader, resourcesImpl);
-                }
-
-                // We will create the ResourcesImpl object outside of holding this lock.
-            }
-        }
-
-        // If we're here, we didn't find a suitable ResourcesImpl to use, so create one now.
-        ResourcesImpl resourcesImpl = createResourcesImpl(key);
-
-        final String[] systemLocales = findSystemLocales
-                ? AssetManager.getSystem().getLocales() : null;
-        final String[] nonSystemLocales = resourcesImpl.getAssets().getNonSystemLocales();
-        // Avoid checking for non-pseudo-locales if we already know there were some from a previous
-        // Resources. The default value (for when hasNonSystemLocales is true) doesn't matter,
-        // since mHasNonSystemLocales will also be true, and thus isPseudoLocalesOnly would not be
-        // able to affect mHasNonSystemLocales.
-        final boolean isPseudoLocalesOnly = hasNonSystemLocales ||
-                LocaleList.isPseudoLocalesOnly(nonSystemLocales);
-
-        synchronized (this) {
-            if (mSystemLocales == null || mSystemLocales.length == 0) {
-                mSystemLocales = systemLocales;
-            }
-            mNonSystemLocales.addAll(Arrays.asList(nonSystemLocales));
-            mHasNonSystemLocales = mHasNonSystemLocales || !isPseudoLocalesOnly;
-
-            ResourcesImpl existingResourcesImpl = findResourcesImplForKey(key);
-            if (existingResourcesImpl != null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "- got beat! existing impl=" + existingResourcesImpl
-                            + " new impl=" + resourcesImpl);
-                }
-                resourcesImpl.getAssets().close();
-                resourcesImpl = existingResourcesImpl;
-            } else {
-                // Add this ResourcesImpl to the cache.
-                mResourceImpls.put(key, new WeakReference<>(resourcesImpl));
-            }
-
-            final Resources resources;
-            if (activityToken != null) {
-                resources = getOrCreateResourcesForActivityLocked(activityToken, classLoader,
-                        resourcesImpl);
-            } else {
-                resources = getOrCreateResourcesLocked(classLoader, resourcesImpl);
-            }
-            return resources;
-        }
+        return getOrCreateResources(activityToken, key, classLoader);
     }
 
     /**
@@ -524,31 +631,78 @@ public class ResourcesManager {
      */
     public void updateResourcesForActivity(@NonNull IBinder activityToken,
             @Nullable Configuration overrideConfig) {
-        final ClassLoader classLoader;
-        final ResourcesKey oldKey;
         synchronized (this) {
-            // Extract the ResourcesKey that was last used to create the Resources for this
-            // activity.
-            WeakReference<Resources> weakResRef = mActivityResourceReferences.get(activityToken);
-            final Resources resources = weakResRef != null ? weakResRef.get() : null;
-            if (resources == null) {
-                Slog.e(TAG, "can't update resources for uncached activity " + activityToken);
+            final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
+                    activityToken);
+
+            if (Objects.equals(activityResources.overrideConfig, overrideConfig)) {
+                // They are the same, no work to do.
                 return;
             }
 
-            classLoader = resources.getClassLoader();
-            oldKey = findKeyForResourceImpl(resources.getImpl());
-            if (oldKey == null) {
-                Slog.e(TAG, "can't find ResourcesKey for resources impl=" + resources.getImpl());
-                return;
+            // Grab a copy of the old configuration so we can create the delta's of each
+            // Resources object associated with this Activity.
+            final Configuration oldConfig = new Configuration(activityResources.overrideConfig);
+
+            // Update the Activity's base override.
+            if (overrideConfig != null) {
+                activityResources.overrideConfig.setTo(overrideConfig);
+            } else {
+                activityResources.overrideConfig.setToDefaults();
+            }
+
+            final boolean activityHasOverrideConfig =
+                    !activityResources.overrideConfig.equals(Configuration.EMPTY);
+
+            // Rebase each Resources associated with this Activity.
+            final int refCount = activityResources.activityResources.size();
+            for (int i = 0; i < refCount; i++) {
+                WeakReference<Resources> weakResRef = activityResources.activityResources.get(i);
+                Resources resources = weakResRef.get();
+                if (resources == null) {
+                    continue;
+                }
+
+                // Extract the ResourcesKey that was last used to create the Resources for this
+                // activity.
+                final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
+                if (oldKey == null) {
+                    Slog.e(TAG, "can't find ResourcesKey for resources impl="
+                            + resources.getImpl());
+                    continue;
+                }
+
+                // Build the new override configuration for this ResourcesKey.
+                final Configuration rebasedOverrideConfig = new Configuration();
+                if (overrideConfig != null) {
+                    rebasedOverrideConfig.setTo(overrideConfig);
+                }
+
+                if (activityHasOverrideConfig && oldKey.hasOverrideConfiguration()) {
+                    // Generate a delta between the old base Activity override configuration and
+                    // the actual final override configuration that was used to figure out the real
+                    // delta this Resources object wanted.
+                    Configuration overrideOverrideConfig = Configuration.generateDelta(
+                            oldConfig, oldKey.mOverrideConfiguration);
+                    rebasedOverrideConfig.updateFrom(overrideOverrideConfig);
+                }
+
+                // Create the new ResourcesKey with the rebased override config.
+                final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir, oldKey.mSplitResDirs,
+                        oldKey.mOverlayDirs, oldKey.mLibDirs, oldKey.mDisplayId,
+                        rebasedOverrideConfig, oldKey.mCompatInfo);
+
+                ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(newKey);
+                if (resourcesImpl == null) {
+                    resourcesImpl = createResourcesImpl(newKey);
+                }
+
+                if (resourcesImpl != resources.getImpl()) {
+                    // Set the ResourcesImpl, updating it for all users of this Resources object.
+                    resources.setImpl(resourcesImpl);
+                }
             }
         }
-
-        // Update the Resources object with the new override config and all of the existing
-        // settings.
-        getResources(activityToken, oldKey.mResDir, oldKey.mSplitResDirs, oldKey.mOverlayDirs,
-                oldKey.mLibDirs, oldKey.mDisplayId, overrideConfig, oldKey.mCompatInfo,
-                classLoader);
     }
 
     /* package */ void setDefaultLocalesLocked(@NonNull LocaleList locales) {
@@ -578,7 +732,7 @@ public class ResourcesManager {
         int changes = mResConfiguration.updateFrom(config);
         // Things might have changed in display manager, so clear the cached displays.
         mDisplays.clear();
-        DisplayMetrics defaultDisplayMetrics = getDisplayMetricsLocked();
+        DisplayMetrics defaultDisplayMetrics = getDisplayMetrics();
 
         if (compat != null && (mResCompatibilityInfo == null ||
                 !mResCompatibilityInfo.equals(compat))) {
@@ -632,7 +786,7 @@ public class ResourcesManager {
                     }
                     tmpConfig.setTo(localeAdjustedConfig);
                     if (!isDefaultDisplay) {
-                        dm = getDisplayMetricsLocked(displayId);
+                        dm = getDisplayMetrics(displayId);
                         applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
                     }
                     if (hasOverrideConfiguration) {
