@@ -7221,6 +7221,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    // NOTE: this is an internal method used by the OnShellCommand implementation only and should
+    // be guarded by permission checking.
+    int getUidState(int uid) {
+        synchronized (this) {
+            UidRecord uidRec = mActiveUids.get(uid);
+            return uidRec == null ? ActivityManager.PROCESS_STATE_NONEXISTENT : uidRec.curProcState;
+        }
+    }
+
     @Override
     public boolean inMultiWindow(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
@@ -13244,6 +13253,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState() {
         enforceNotIsolatedCaller("getProcessesInErrorState");
         // assume our apps are happy - lazy create the list
@@ -13320,6 +13330,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         outInfo.processState = app.curProcState;
     }
 
+    @Override
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() {
         enforceNotIsolatedCaller("getRunningAppProcesses");
 
@@ -13371,6 +13382,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return runList;
     }
 
+    @Override
     public List<ApplicationInfo> getRunningExternalApplications() {
         enforceNotIsolatedCaller("getRunningExternalApplications");
         List<ActivityManager.RunningAppProcessInfo> runningApps = getRunningAppProcesses();
