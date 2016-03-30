@@ -212,6 +212,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String WIFI_CONTROLLER_DATA = "wfcd";
     private static final String GLOBAL_BLUETOOTH_CONTROLLER_DATA = "gble";
     private static final String BLUETOOTH_CONTROLLER_DATA = "ble";
+    private static final String BLUETOOTH_MISC_DATA = "blem";
     private static final String MISC_DATA = "m";
     private static final String GLOBAL_NETWORK_DATA = "gn";
     private static final String GLOBAL_MODEM_CONTROLLER_DATA = "gmcd";
@@ -3070,6 +3071,15 @@ public abstract class BatteryStats implements Parcelable {
 
             dumpControllerActivityLine(pw, uid, category, WIFI_CONTROLLER_DATA,
                     u.getWifiControllerActivity(), which);
+
+            // Dump Bluetooth scan data, per UID.
+            final long bleScanTimeUs = u.getBluetoothScanTimer().getTotalTimeLocked(
+                    rawRealtime, which);
+            final int bleScanCount = u.getBluetoothScanTimer().getCountLocked(which);
+            if (bleScanTimeUs != 0 || bleScanCount != 0) {
+                dumpLine(pw, uid, category, BLUETOOTH_MISC_DATA,
+                        bleScanTimeUs / 1000, bleScanCount);
+            }
 
             dumpControllerActivityLine(pw, uid, category, BLUETOOTH_CONTROLLER_DATA,
                     u.getBluetoothControllerActivity(), which);

@@ -4012,6 +4012,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "BLE scan started for: "
                     + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            mBluetoothScanTimer.startRunningLocked(elapsedRealtime);
         }
         mBluetoothScanNesting++;
         getUidStatsLocked(uid).noteBluetoothScanStartedLocked(elapsedRealtime);
@@ -4034,6 +4035,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "BLE scan stopped for: "
                     + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            mBluetoothScanTimer.stopRunningLocked(elapsedRealtime);
         }
         getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime);
     }
