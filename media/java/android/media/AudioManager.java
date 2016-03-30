@@ -2149,7 +2149,7 @@ public class AudioManager {
                                 }
                                 if (listener != null) {
                                     Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
-                                            + msg.what + ") for " + msg.obj);
+                                            + msg.arg1 + ") for " + msg.obj);
                                     listener.onAudioFocusChange(msg.arg1);
                                 }
                                 break;
