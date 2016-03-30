@@ -17,10 +17,11 @@
 package com.android.systemui.recents.events.ui;
 
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.views.TaskView;
 
 /**
- * This is sent to reset the background scrim back to the initial state.
+ * This event is sent to request that all the {@link TaskView}s are dismissed.
  */
-public class ResetBackgroundScrimEvent extends EventBus.Event {
+public class DismissAllTaskViewsEvent extends EventBus.AnimatedEvent {
     // Simple event
 }

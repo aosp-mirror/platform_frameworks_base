@@ -158,6 +158,11 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
     }
 
     @Override
+    public void onStackTasksRemoved(TaskStack stack) {
+        // Do nothing
+    }
+
+    @Override
     public void onStackTasksUpdated(TaskStack stack) {
         // Do nothing
     }

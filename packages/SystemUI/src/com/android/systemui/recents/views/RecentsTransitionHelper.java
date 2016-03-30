@@ -28,11 +28,13 @@ import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 
@@ -252,12 +254,13 @@ public class RecentsTransitionHelper {
     /**
      * Composes the transition spec when docking a task, which includes a full task bitmap.
      */
-    public List<AppTransitionAnimationSpec> composeDockAnimationSpec(
-            TaskView taskView, Rect transform) {
-        TaskViewTransform viewTransform = new TaskViewTransform();
-        viewTransform.fillIn(taskView);
-        return Collections.singletonList(new AppTransitionAnimationSpec(taskView.getTask().key.id,
-                RecentsTransitionHelper.composeTaskBitmap(taskView, viewTransform), transform));
+    public List<AppTransitionAnimationSpec> composeDockAnimationSpec(TaskView taskView,
+            Rect bounds) {
+        mTmpTransform.fillIn(taskView);
+        Task task = taskView.getTask();
+        Bitmap thumbnail = RecentsTransitionHelper.composeTaskBitmap(taskView, mTmpTransform);
+        return Collections.singletonList(new AppTransitionAnimationSpec(task.key.id, thumbnail,
+                bounds));
     }
 
     /**
@@ -336,18 +339,27 @@ public class RecentsTransitionHelper {
         float scale = transform.scale;
         int fromWidth = (int) (transform.rect.width() * scale);
         int fromHeight = (int) (transform.rect.height() * scale);
-        Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight,
-                Bitmap.Config.ARGB_8888);
+        if (fromWidth == 0 || fromHeight == 0) {
+            Log.e(TAG, "Could not compose thumbnail for task: " + taskView.getTask() +
+                    " at transform: " + transform);
 
-        if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
-            b.eraseColor(0xFFff0000);
+            Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            b.eraseColor(Color.TRANSPARENT);
+            return b;
         } else {
-            Canvas c = new Canvas(b);
-            c.scale(scale, scale);
-            taskView.draw(c);
-            c.setBitmap(null);
+            Bitmap b = Bitmap.createBitmap(fromWidth, fromHeight,
+                    Bitmap.Config.ARGB_8888);
+
+            if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
+                b.eraseColor(0xFFff0000);
+            } else {
+                Canvas c = new Canvas(b);
+                c.scale(scale, scale);
+                taskView.draw(c);
+                c.setBitmap(null);
+            }
+            return b.createAshmemBitmap();
         }
-        return b.createAshmemBitmap();
     }
 
     private static Bitmap composeHeaderBitmap(TaskView taskView,

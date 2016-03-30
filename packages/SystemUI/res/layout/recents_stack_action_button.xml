@@ -27,8 +27,6 @@
     android:textSize="14sp"
     android:textColor="#FFFFFF"
     android:textAllCaps="true"
-    android:drawableStart="@drawable/ic_history"
-    android:drawablePadding="6dp"
     android:shadowColor="#99000000"
     android:shadowDx="0"
     android:shadowDy="2"

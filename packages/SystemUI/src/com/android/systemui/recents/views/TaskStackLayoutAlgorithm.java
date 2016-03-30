@@ -557,15 +557,17 @@ public class TaskStackLayoutAlgorithm {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
                 mInitialNormX = null;
             } else {
-                float normX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
-                mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, (mNumStackTasks - 2)) -
-                        Math.max(0, mUnfocusedRange.getAbsoluteX(normX)));
+                // We are overriding the initial two task positions, so set the initial scroll
+                // position to match the second task (aka focused task) position
+                float initialTopNormX = getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP);
+                mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, (mNumStackTasks - 2))
+                        - Math.max(0, mUnfocusedRange.getAbsoluteX(initialTopNormX)));
 
                 // Set the initial scroll to the predefined state (which differs from the stack)
                 mInitialNormX = new float[] {
                         getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
                                 FROM_BOTTOM),
-                        normX
+                        initialTopNormX
                 };
             }
         }

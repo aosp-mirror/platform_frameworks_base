@@ -17,7 +17,6 @@
 package com.android.systemui.recents.events.ui;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskView;
 
 /**
@@ -26,10 +25,8 @@ import com.android.systemui.recents.views.TaskView;
 public class DismissTaskViewEvent extends EventBus.AnimatedEvent {
 
     public final TaskView taskView;
-    public final Task task;
 
-    public DismissTaskViewEvent(TaskView taskView, Task task) {
+    public DismissTaskViewEvent(TaskView taskView) {
         this.taskView = taskView;
-        this.task = task;
     }
 }
