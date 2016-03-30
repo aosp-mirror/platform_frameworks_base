@@ -1774,17 +1774,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void updateSoftKeyboardShowModeLocked(UserState userState) {
         final int userId = userState.mUserId;
-        if (userId == mCurrentUserId) {
-            // Check whether any Accessibility Services are still enabled and, if not, remove flag
-            // requesting no soft keyboard
-            final boolean accessibilityRequestingNoIme = userState.mSoftKeyboardShowMode == 1;
-            if (accessibilityRequestingNoIme && !userState.isHandlingAccessibilityEvents()) {
-                // No active Accessibility Services can be requesting the soft keyboard to be hidden
+        // Only check whether we need to reset the soft keyboard mode if it is not set to the
+        // default.
+        if ((userId == mCurrentUserId) && (userState.mSoftKeyboardShowMode != 0)) {
+            // Check whether the last Accessibility Service that changed the soft keyboard mode to
+            // something other than the default is still enabled and, if not, remove flag and
+            // reset to the default soft keyboard behavior.
+            boolean serviceChangingSoftKeyboardModeIsEnabled =
+                    userState.mEnabledServices.contains(userState.mServiceChangingSoftKeyboardMode);
+
+            if (!serviceChangingSoftKeyboardModeIsEnabled) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                         0,
                         userState.mUserId);
                 userState.mSoftKeyboardShowMode = 0;
+                userState.mServiceChangingSoftKeyboardMode = null;
             }
 
             notifySoftKeyboardShowModeChangedLocked(userState.mSoftKeyboardShowMode);
@@ -2966,6 +2971,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             final long identity = Binder.clearCallingIdentity();
             try {
+                // Keep track of the last service to request a non-default show mode. The show mode
+                // should be restored to default should this service be disabled.
+                if (showMode == Settings.Secure.SHOW_MODE_AUTO) {
+                    userState.mServiceChangingSoftKeyboardMode = null;
+                } else {
+                    userState.mServiceChangingSoftKeyboardMode = mComponentName;
+                }
+
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, showMode,
                         userState.mUserId);
@@ -4114,6 +4127,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public final Set<ComponentName> mTouchExplorationGrantedServices =
                 new HashSet<>();
+
+        public ComponentName mServiceChangingSoftKeyboardMode;
 
         public int mLastSentClientState = -1;
 
