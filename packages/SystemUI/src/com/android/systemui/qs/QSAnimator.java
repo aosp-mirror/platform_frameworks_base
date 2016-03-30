@@ -64,6 +64,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private boolean mAllowFancy;
     private boolean mFullRows;
     private int mNumQuickTiles;
+    private float mLastPosition;
 
     public QSAnimator(QSContainer container, QuickQSPanel quickPanel, QSPanel panel) {
         mQsContainer = container;
@@ -260,6 +261,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mOnKeyguard) {
             return;
         }
+        mLastPosition = position;
         if (mOnFirstPage && mAllowFancy) {
             mQuickQsPanel.setAlpha(1);
             mFirstPageAnimator.setPosition(position);
@@ -300,7 +302,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private void clearAnimationState() {
         final int N = mAllViews.size();
         mQuickQsPanel.setAlpha(0);
-        mQuickQsPanel.setVisibility(View.INVISIBLE);
+        mQuickQsPanel.setVisibility(View.VISIBLE);
         for (int i = 0; i < N; i++) {
             View v = mAllViews.get(i);
             v.setAlpha(1);
@@ -338,6 +340,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         @Override
         public void run() {
             updateAnimators();
+            setPosition(mLastPosition);
         }
     };
 }
