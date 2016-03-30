@@ -23,8 +23,6 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.util.DebugUtils;
 
-import com.android.internal.util.ArrayUtils;
-
 import java.io.PrintWriter;
 
 class ActivityManagerShellCommand extends ShellCommand {
