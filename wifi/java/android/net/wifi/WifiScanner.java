@@ -27,6 +27,7 @@ import android.os.Messenger;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -661,12 +662,26 @@ public class WifiScanner {
      *                 scans should also not share this object.
      */
     public void startBackgroundScan(ScanSettings settings, ScanListener listener) {
+        startBackgroundScan(settings, listener, null);
+    }
+
+    /** start wifi scan in background
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param workSource WorkSource to blame for power usage
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     */
+    public void startBackgroundScan(ScanSettings settings, ScanListener listener,
+            WorkSource workSource) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
         sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, key, settings);
     }
+
     /**
      * stop an ongoing wifi scan
      * @param listener specifies which scan to cancel; must be same object as passed in {@link
@@ -698,6 +713,19 @@ public class WifiScanner {
      *                 scans should also not share this object.
      */
     public void startScan(ScanSettings settings, ScanListener listener) {
+        startScan(settings, listener, null);
+    }
+
+    /**
+     * starts a single scan and reports results asynchronously
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param workSource WorkSource to blame for power usage
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     */
+    public void startScan(ScanSettings settings, ScanListener listener, WorkSource workSource) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
