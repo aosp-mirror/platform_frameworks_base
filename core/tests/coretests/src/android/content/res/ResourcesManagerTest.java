@@ -18,7 +18,7 @@ package android.content.res;
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.os.Binder;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 import android.util.DisplayMetrics;
 import android.util.LocaleList;
 import android.util.TypedValue;
@@ -58,7 +58,7 @@ public class ResourcesManagerTest extends TestCase {
             }
 
             @Override
-            protected DisplayMetrics getDisplayMetricsLocked(int displayId) {
+            protected DisplayMetrics getDisplayMetrics(int displayId) {
                 return mDisplayMetrics;
             }
         };
@@ -173,25 +173,12 @@ public class ResourcesManagerTest extends TestCase {
 
         // The implementations should be the same.
         assertSame(resources1.getImpl(), resources2.getImpl());
-
-        final Configuration overrideConfig = new Configuration();
-        overrideConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
-        Resources resources3 = mResourcesManager.getResources(
-                activity2, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY,
-                overrideConfig, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
-
-        // Since we requested new resources for activity2, the resource should be the same
-        // as the one returned before for activity2.
-        assertSame(resources2, resources3);
-
-        // But the implementation has changed.
-        assertNotSame(resources1.getImpl(), resources2.getImpl());
     }
 
     @SmallTest
     public void testThemesGetUpdatedWithNewImpl() {
         Binder activity1 = new Binder();
-        Resources resources1 = mResourcesManager.getResources(
+        Resources resources1 = mResourcesManager.createBaseActivityResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
                 CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         assertNotNull(resources1);
@@ -207,16 +194,59 @@ public class ResourcesManagerTest extends TestCase {
 
         final Configuration overrideConfig = new Configuration();
         overrideConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
-        Resources resources2 = mResourcesManager.getResources(
-                activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY,
-                overrideConfig, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
-        assertNotNull(resources2);
-        assertSame(resources1, resources2);
-        assertSame(resources2, theme.getResources());
+        mResourcesManager.updateResourcesForActivity(activity1, overrideConfig);
+        assertSame(resources1, theme.getResources());
 
         // Make sure we can still access the data.
         assertTrue(theme.resolveAttribute(android.R.attr.windowNoTitle, value, true));
         assertEquals(TypedValue.TYPE_INT_BOOLEAN, value.type);
         assertTrue(value.data != 0);
+    }
+
+    @SmallTest
+    public void testMultipleResourcesForOneActivityGetUpdatedWhenActivityBaseUpdates() {
+        Binder activity1 = new Binder();
+
+        // Create a Resources for the Activity.
+        Configuration config1 = new Configuration();
+        config1.densityDpi = 280;
+        Resources resources1 = mResourcesManager.createBaseActivityResources(
+                activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, config1,
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        assertNotNull(resources1);
+
+        // Create a Resources based on the Activity.
+        Configuration config2 = new Configuration();
+        config2.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
+        Resources resources2 = mResourcesManager.getResources(
+                activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, config2,
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        assertNotNull(resources2);
+
+        assertNotSame(resources1, resources2);
+        assertNotSame(resources1.getImpl(), resources2.getImpl());
+
+        final Configuration expectedConfig1 = new Configuration();
+        expectedConfig1.setLocales(LocaleList.getAdjustedDefault());
+        expectedConfig1.densityDpi = 280;
+        assertEquals(expectedConfig1, resources1.getConfiguration());
+
+        // resources2 should be based on the Activity's override config, so the density should
+        // be the same as resources1.
+        final Configuration expectedConfig2 = new Configuration();
+        expectedConfig2.setLocales(LocaleList.getAdjustedDefault());
+        expectedConfig2.densityDpi = 280;
+        expectedConfig2.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
+        assertEquals(expectedConfig2, resources2.getConfiguration());
+
+        // Now update the Activity base override, and both resources should update.
+        config1.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mResourcesManager.updateResourcesForActivity(activity1, config1);
+
+        expectedConfig1.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        assertEquals(expectedConfig1, resources1.getConfiguration());
+
+        expectedConfig2.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        assertEquals(expectedConfig2, resources2.getConfiguration());
     }
 }
