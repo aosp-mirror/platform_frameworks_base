@@ -4384,8 +4384,7 @@ i
         <attr name="autoLink" />
         <!-- If set to false, keeps the movement method from being set
              to the link movement method even if autoLink causes links
-             to be found or the input text contains a
-             {@link android.text.style.ClickableSpan ClickableSpan}. -->
+             to be found. -->
         <attr name="linksClickable" format="boolean" />
         <!-- If set, specifies that this TextView has a numeric input method.
              The default is false.
