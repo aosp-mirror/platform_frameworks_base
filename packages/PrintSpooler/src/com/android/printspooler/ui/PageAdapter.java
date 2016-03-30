@@ -206,6 +206,7 @@ public final class PageAdapter extends Adapter<ViewHolder> {
             int documentPageCount, MediaSize mediaSize, Margins minMargins) {
         boolean documentChanged = false;
         boolean updatePreviewAreaAndPageSize = false;
+        boolean clearSelectedPages = false;
 
         // If the app does not tell how many pages are in the document we cannot
         // optimize and ask for all pages whose count we get from the renderer.
@@ -225,28 +226,39 @@ public final class PageAdapter extends Adapter<ViewHolder> {
             }
         }
 
-        if (!Arrays.equals(mSelectedPages, selectedPages)) {
-            mSelectedPages = selectedPages;
-            mSelectedPageCount = PageRangeUtils.getNormalizedPageCount(
-                    mSelectedPages, documentPageCount);
-            setConfirmedPages(mSelectedPages, documentPageCount);
-            updatePreviewAreaAndPageSize = true;
-            documentChanged = true;
-        }
-
         if (mDocumentPageCount != documentPageCount) {
             mDocumentPageCount = documentPageCount;
             documentChanged = true;
+            clearSelectedPages = true;
         }
 
         if (mMediaSize == null || !mMediaSize.equals(mediaSize)) {
             mMediaSize = mediaSize;
             updatePreviewAreaAndPageSize = true;
             documentChanged = true;
+
+            clearSelectedPages = true;
         }
 
         if (mMinMargins == null || !mMinMargins.equals(minMargins)) {
             mMinMargins = minMargins;
+            updatePreviewAreaAndPageSize = true;
+            documentChanged = true;
+
+            clearSelectedPages = true;
+        }
+
+        if (clearSelectedPages) {
+            mSelectedPages = PageRange.ALL_PAGES_ARRAY;
+            mSelectedPageCount = documentPageCount;
+            setConfirmedPages(mSelectedPages, documentPageCount);
+            updatePreviewAreaAndPageSize = true;
+            documentChanged = true;
+        } else if (!Arrays.equals(mSelectedPages, selectedPages)) {
+            mSelectedPages = selectedPages;
+            mSelectedPageCount = PageRangeUtils.getNormalizedPageCount(
+                    mSelectedPages, documentPageCount);
+            setConfirmedPages(mSelectedPages, documentPageCount);
             updatePreviewAreaAndPageSize = true;
             documentChanged = true;
         }
