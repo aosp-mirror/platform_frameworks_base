@@ -5696,26 +5696,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setDeviceOwnerLockScreenInfo(ComponentName who, String info) {
+    public void setDeviceOwnerLockScreenInfo(ComponentName who, CharSequence info) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         if (!mHasFeature) {
-            return false;
+            return;
         }
 
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             long token = mInjector.binderClearCallingIdentity();
             try {
-                mLockPatternUtils.setDeviceOwnerInfo(info);
+                mLockPatternUtils.setDeviceOwnerInfo(info != null ? info.toString() : null);
             } finally {
                 mInjector.binderRestoreCallingIdentity(token);
             }
-            return true;
         }
     }
 
     @Override
-    public String getDeviceOwnerLockScreenInfo() {
+    public CharSequence getDeviceOwnerLockScreenInfo() {
         return mLockPatternUtils.getDeviceOwnerInfo();
     }
 

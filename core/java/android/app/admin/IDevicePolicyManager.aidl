@@ -135,8 +135,8 @@ interface IDevicePolicyManager {
     void clearProfileOwner(in ComponentName who);
     boolean hasUserSetupCompleted();
 
-    boolean setDeviceOwnerLockScreenInfo(in ComponentName who, String deviceOwnerInfo);
-    String getDeviceOwnerLockScreenInfo();
+    void setDeviceOwnerLockScreenInfo(in ComponentName who, CharSequence deviceOwnerInfo);
+    CharSequence getDeviceOwnerLockScreenInfo();
 
     String[] setPackagesSuspended(in ComponentName admin, in String[] packageNames, boolean suspended);
     boolean getPackageSuspended(in ComponentName admin, String packageName);
