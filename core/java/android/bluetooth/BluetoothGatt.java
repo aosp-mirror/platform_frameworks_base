@@ -545,7 +545,6 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ BluetoothGattCharacteristic getCharacteristicById(BluetoothDevice device, int instanceId) {
         for(BluetoothGattService svc : mServices) {
             for(BluetoothGattCharacteristic charac : svc.getCharacteristics()) {
-                Log.w(TAG, "getCharacteristicById() comparing " + charac.getInstanceId() + " and " + instanceId);
                 if (charac.getInstanceId() == instanceId)
                     return charac;
             }
