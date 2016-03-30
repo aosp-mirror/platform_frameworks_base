@@ -1,13 +1,13 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.android.internal.widget.PagerAdapter;
-import com.android.internal.widget.ViewPager;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
@@ -37,7 +37,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             public void onPageSelected(int position) {
                 if (mPageIndicator == null) return;
                 if (mPageListener != null) {
-                    mPageListener.onPageChanged(position == 0);
+                    mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
+                            : position == 0);
                 }
             }
 
@@ -47,7 +48,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 if (mPageIndicator == null) return;
                 mPageIndicator.setLocation(position + positionOffset);
                 if (mPageListener != null) {
-                    mPageListener.onPageChanged(position == 0 && positionOffsetPixels == 0);
+                    mPageListener.onPageChanged(positionOffsetPixels == 0 &&
+                            (isLayoutRtl() ? position == mPages.size() - 1 : position == 0));
                 }
             }
 
@@ -56,6 +58,21 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
         });
         setCurrentItem(0);
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        setAdapter(mAdapter);
+        setCurrentItem(0, false);
+    }
+
+    @Override
+    public void setCurrentItem(int item, boolean smoothScroll) {
+        if (isLayoutRtl()) {
+            item = mPages.size() - 1 - item;
+        }
+        super.setCurrentItem(item, smoothScroll);
     }
 
     @Override
@@ -128,6 +145,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mNumPages = index + 1;
             mPageIndicator.setNumPages(mNumPages);
             mAdapter.notifyDataSetChanged();
+            setCurrentItem(0, false);
         }
     }
 
@@ -206,6 +224,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         public Object instantiateItem(ViewGroup container, int position) {
             if (DEBUG) Log.d(TAG, "Instantiating " + position);
+            if (isLayoutRtl()) {
+                position = mPages.size() - 1 - position;
+            }
             ViewGroup view = mPages.get(position);
             container.addView(view);
             return view;
