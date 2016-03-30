@@ -161,6 +161,11 @@ public class WifiScanner {
      */
     public static final int REPORT_EVENT_NO_BATCH = (1 << 2);
 
+
+    /** {@hide} */
+    public static final String SCAN_PARAMS_SCAN_SETTINGS_KEY = "ScanSettings";
+    /** {@hide} */
+    public static final String SCAN_PARAMS_WORK_SOURCE_KEY = "WorkSource";
     /**
      * scan configuration parameters to be sent to {@link #startBackgroundScan}
      */
@@ -679,7 +684,10 @@ public class WifiScanner {
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, key, settings);
+        Bundle scanParams = new Bundle();
+        scanParams.putParcelable(SCAN_PARAMS_SCAN_SETTINGS_KEY, settings);
+        scanParams.putParcelable(SCAN_PARAMS_WORK_SOURCE_KEY, workSource);
+        sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, key, scanParams);
     }
 
     /**
@@ -730,7 +738,10 @@ public class WifiScanner {
         int key = addListener(listener);
         if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, key, settings);
+        Bundle scanParams = new Bundle();
+        scanParams.putParcelable(SCAN_PARAMS_SCAN_SETTINGS_KEY, settings);
+        scanParams.putParcelable(SCAN_PARAMS_WORK_SOURCE_KEY, workSource);
+        sAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, key, scanParams);
     }
 
     /**
@@ -749,7 +760,6 @@ public class WifiScanner {
     private void startPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings, int key) {
         // Bundle up both the settings and send it across.
         Bundle pnoParams = new Bundle();
-        if (pnoParams == null) return;
         // Set the PNO scan flag.
         scanSettings.isPnoScan = true;
         pnoParams.putParcelable(PNO_PARAMS_SCAN_SETTINGS_KEY, scanSettings);
