@@ -2953,10 +2953,11 @@
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
     <string name="hardware">Show virtual keyboard</string>
 
-    <!-- Title of the notification to prompt the user to select a keyboard layout. -->
-    <string name="select_keyboard_layout_notification_title">Select keyboard layout</string>
-    <!-- Message of the notification to prompt the user to select a keyboard layout. -->
-    <string name="select_keyboard_layout_notification_message">Touch to select a keyboard layout.</string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings. -->
+    <string name="select_keyboard_layout_notification_title">Configure physical keyboard</string>
+    <!-- Message of the notification to prompt the user to configure physical keyboard settings
+         where the user can associate language with physical keyboard layout. -->
+    <string name="select_keyboard_layout_notification_message">Tap to select language and layout</string>
 
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>

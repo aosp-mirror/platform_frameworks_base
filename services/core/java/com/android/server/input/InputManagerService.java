@@ -948,7 +948,7 @@ public class InputManagerService extends IInputManager.Stub
     // Must be called on handler.
     private void showMissingKeyboardLayoutNotification(InputDevice device) {
         if (!mKeyboardLayoutNotificationShown) {
-            final Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
+            final Intent intent = new Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS);
             if (device != null) {
                 intent.putExtra(Settings.EXTRA_INPUT_DEVICE_IDENTIFIER, device.getIdentifier());
             }
