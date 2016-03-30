@@ -26,9 +26,6 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:baselineAligned="false"
-    android:background="@drawable/quick_header_bg"
-    android:clickable="true"
-    android:focusable="true"
     >
 
     <LinearLayout
@@ -83,6 +80,10 @@
             android:id="@+id/expand_indicator"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:clipToPadding="false"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
             android:padding="12dp" />
 
     </LinearLayout>
