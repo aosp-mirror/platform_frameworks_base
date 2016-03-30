@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.print.PrintAttributes;
@@ -281,7 +282,8 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
         }
         if (onRequestCustomPrinterIcon != null) {
             doAnswer(onRequestCustomPrinterIcon).when(callbacks).onRequestCustomPrinterIcon(
-                    any(PrinterId.class), any(CustomPrinterIconCallback.class));
+                    any(PrinterId.class), any(CancellationSignal.class),
+                    any(CustomPrinterIconCallback.class));
         }
         if (onStopPrinterStateTracking != null) {
             doAnswer(onStopPrinterStateTracking).when(callbacks).onStopPrinterStateTracking(
