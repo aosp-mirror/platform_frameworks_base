@@ -16,6 +16,7 @@
 
 package android.print.mockservice;
 
+import android.os.CancellationSignal;
 import android.print.PrinterId;
 import android.printservice.CustomPrinterIconCallback;
 
@@ -42,7 +43,7 @@ public abstract class PrinterDiscoverySessionCallbacks {
     public abstract void onStartPrinterStateTracking(PrinterId printerId);
 
     public abstract void onRequestCustomPrinterIcon(PrinterId printerId,
-            CustomPrinterIconCallback callback);
+            CancellationSignal cancellationSignal, CustomPrinterIconCallback callback);
 
     public abstract void onStopPrinterStateTracking(PrinterId printerId);
 

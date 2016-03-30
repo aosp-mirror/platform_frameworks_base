@@ -16,6 +16,7 @@
 
 package android.print.mockservice;
 
+import android.os.CancellationSignal;
 import android.print.PrinterId;
 import android.printservice.CustomPrinterIconCallback;
 import android.printservice.PrintService;
@@ -70,9 +71,9 @@ public class StubbablePrinterDiscoverySession extends PrinterDiscoverySession {
 
     @Override
     public void onRequestCustomPrinterIcon(PrinterId printerId,
-            CustomPrinterIconCallback callback) {
+            CancellationSignal cancellationSignal, CustomPrinterIconCallback callback) {
         if (mCallbacks != null) {
-            mCallbacks.onRequestCustomPrinterIcon(printerId, callback);
+            mCallbacks.onRequestCustomPrinterIcon(printerId, cancellationSignal, callback);
         }
     }
 
