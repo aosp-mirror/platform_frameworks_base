@@ -6749,7 +6749,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
             int dxUnconsumed, int dyUnconsumed) {
-        // Do nothing
+        // Re-dispatch up the tree by default
+        dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, null);
     }
 
     /**
@@ -6757,7 +6758,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
-        // Do nothing
+        // Re-dispatch up the tree by default
+        dispatchNestedPreScroll(dx, dy, consumed, null);
     }
 
     /**
@@ -6765,7 +6767,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
-        return false;
+        // Re-dispatch up the tree by default
+        return dispatchNestedFling(velocityX, velocityY, consumed);
     }
 
     /**
@@ -6773,7 +6776,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
-        return false;
+        // Re-dispatch up the tree by default
+        return dispatchNestedPreFling(velocityX, velocityY);
     }
 
     /**
