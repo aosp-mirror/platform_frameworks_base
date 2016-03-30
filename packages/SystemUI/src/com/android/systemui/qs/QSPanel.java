@@ -119,12 +119,18 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS);
+        if (mHost != null) {
+            setTiles(mHost.getTiles());
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         TunerService.get(mContext).removeTunable(this);
         mHost.removeCallback(this);
+        for (TileRecord record : mRecords) {
+            record.tile.removeCallbacks();
+        }
         super.onDetachedFromWindow();
     }
 
