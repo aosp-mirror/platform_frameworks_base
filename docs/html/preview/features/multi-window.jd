@@ -20,6 +20,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
         <li><a class="external-link"
           href="https://github.com/googlesamples/android-MultiWindowPlayground">Multi-Window
           Playground sample app</a></li>
+        <li><a class="external-link"
+          href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64"
+          >Five Tips for Preparing for Multi-Window in Android N</a></li>
       </ol>
   </div>
 </div>
