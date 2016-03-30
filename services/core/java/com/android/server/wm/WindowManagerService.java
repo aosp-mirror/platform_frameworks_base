@@ -2602,8 +2602,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         == PackageManager.PERMISSION_GRANTED;
 
         long origId = Binder.clearCallingIdentity();
-        final boolean preserveGeometry = (attrs != null) && (attrs.privateFlags &
-                WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY) != 0;
         synchronized(mWindowMap) {
             WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
@@ -2611,7 +2609,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (!preserveGeometry && viewVisibility != View.GONE) {
+            if (viewVisibility != View.GONE) {
                 win.setRequestedSize(requestedWidth, requestedHeight);
             }
 
@@ -2660,9 +2658,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 winAnimator.mAlpha = attrs.alpha;
             }
-            if (!preserveGeometry) {
-                win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
-            }
+            win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
 
             boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
             final boolean isDefaultDisplay = win.isDefaultDisplay();
