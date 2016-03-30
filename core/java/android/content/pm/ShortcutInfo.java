@@ -34,18 +34,20 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+// TODO Enhance javadoc
 /**
- * TODO Enhance javadoc
  *
- * Represents a shortcut form an application.
+ * Represents a shortcut from an application.
  *
- * Notes...
- * - If an {@link Icon} is of a resource, then we'll just persist the package name and resource ID.
+ * <p>Notes about icons:
+ * <ul>
+ *     <li>If an {@link Icon} is a resource, the system keeps the package name and the resource ID.
+ *     Otherwise, the bitmap is fetched when it's registered to ShortcutManager,
+ *     then shrunk if necessary, and persisted.
+ *     <li>The system disallows byte[] icons, because they can easily go over the binder size limit.
+ * </ul>
  *
- *   Otherwise, the bitmap will be fetched when it's registered to ShortcutManager, then *shrunk*
- *   if necessary, and persisted.
- *
- *   We will disallow byte[] icons, because they can easily go over binder size limit.
+ * @see {@link ShortcutManager}.
  */
 public class ShortcutInfo implements Parcelable {
     /* @hide */
@@ -371,6 +373,9 @@ public class ShortcutInfo implements Parcelable {
 
         /**
          * Sets the title of a shortcut.  This is a mandatory field.
+         *
+         * <p>This field is intended for a concise description of a shortcut displayed under
+         * an icon.  The recommend max length is 10 characters.
          */
         @NonNull
         public Builder setTitle(@NonNull String title) {
@@ -380,6 +385,9 @@ public class ShortcutInfo implements Parcelable {
 
         /**
          * Sets the text of a shortcut.  This is an optional field.
+         *
+         * <p>This field is intended to be more descriptive than the shortcut title.
+         * The recommend max length is 25 characters.
          */
         @NonNull
         public Builder setText(@NonNull String text) {
