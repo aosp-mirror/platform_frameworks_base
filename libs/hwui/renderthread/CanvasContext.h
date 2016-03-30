@@ -196,10 +196,11 @@ private:
     RingBuffer<SwapHistory, 3> mSwapHistory;
 
     bool mOpaque;
-    OpenGLRenderer* mCanvas = nullptr;
 #if HWUI_NEW_OPS
     BakedOpRenderer::LightInfo mLightInfo;
     FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
+#else
+    OpenGLRenderer* mCanvas = nullptr;
 #endif
 
     bool mHaveNewSurface = false;

@@ -30,6 +30,7 @@ namespace android {
 namespace uirenderer {
 
 const LayerUpdateQueue sEmptyLayerUpdateQueue;
+const std::vector< sp<RenderNode> > sEmptyNodeList;
 const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
 
 
@@ -214,6 +215,49 @@ RENDERTHREAD_TEST(FrameBuilder, simpleBatching) {
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
             << "Expect number of ops = 2 * loop count";
+}
+
+RENDERTHREAD_TEST(FrameBuilder, empty_noFbo0) {
+    class EmptyNoFbo0TestRenderer : public TestRendererBase {
+    public:
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
+            ADD_FAILURE() << "Primary frame draw not expected in this test";
+        }
+        void endFrame(const Rect& repaintRect) override {
+            ADD_FAILURE() << "Primary frame draw not expected in this test";
+        }
+    };
+
+    // Pass empty node list, so no work is enqueued for Fbo0
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            sEmptyNodeList, sLightGeometry, Caches::getInstance());
+    EmptyNoFbo0TestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+}
+
+RENDERTHREAD_TEST(FrameBuilder, empty_withFbo0) {
+    class EmptyWithFbo0TestRenderer : public TestRendererBase {
+    public:
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
+            EXPECT_EQ(0, mIndex++);
+        }
+        void endFrame(const Rect& repaintRect) override {
+            EXPECT_EQ(1, mIndex++);
+        }
+    };
+    auto node = TestUtils::createNode(10, 10, 110, 110,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        // no drawn content
+    });
+    auto syncedNodeList = TestUtils::createSyncedNodeList(node);
+
+    // Draw, but pass empty node list, so no work is done for primary frame
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            syncedNodeList, sLightGeometry, Caches::getInstance());
+    EmptyWithFbo0TestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex()) << "No drawing content produced,"
+            " but fbo0 update lifecycle should still be observed";
 }
 
 RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_rects) {
@@ -1150,6 +1194,64 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
     // clean up layer pointers, so we can safely destruct RenderNodes
     *(child->getLayerHandle()) = nullptr;
     *(parent->getLayerHandle()) = nullptr;
+}
+
+
+RENDERTHREAD_TEST(FrameBuilder, buildLayer) {
+    class BuildLayerTestRenderer : public TestRendererBase {
+    public:
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(100u, offscreenBuffer->viewportWidth);
+            EXPECT_EQ(100u, offscreenBuffer->viewportHeight);
+            EXPECT_EQ(Rect(25, 25, 75, 75), repaintRect);
+        }
+        void onColorOp(const ColorOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+
+            EXPECT_TRUE(state.computedState.transform.isIdentity())
+                    << "Transform should be reset within layer";
+
+            EXPECT_EQ(Rect(25, 25, 75, 75), state.computedState.clipRect())
+                    << "Damage rect should be used to clip layer content";
+        }
+        void endLayer() override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
+            ADD_FAILURE() << "Primary frame draw not expected in this test";
+        }
+        void endFrame(const Rect& repaintRect) override {
+            ADD_FAILURE() << "Primary frame draw not expected in this test";
+        }
+    };
+
+    auto node = TestUtils::createNode(10, 10, 110, 110,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        props.mutateLayerProperties().setType(LayerType::RenderLayer);
+        canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
+    });
+    OffscreenBuffer** layerHandle = node->getLayerHandle();
+
+    // create RenderNode's layer here in same way prepareTree would
+    OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 100, 100);
+    *layerHandle = &layer;
+
+    auto syncedNodeList = TestUtils::createSyncedNodeList(node);
+
+    // only enqueue partial damage
+    LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
+    layerUpdateQueue.enqueueLayerWithDamage(node.get(), Rect(25, 25, 75, 75));
+
+    // Draw, but pass empty node list, so no work is done for primary frame
+    FrameBuilder frameBuilder(layerUpdateQueue, SkRect::MakeWH(1, 1), 1, 1,
+            sEmptyNodeList, sLightGeometry, Caches::getInstance());
+    BuildLayerTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    *layerHandle = nullptr;
 }
 
 static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) {
