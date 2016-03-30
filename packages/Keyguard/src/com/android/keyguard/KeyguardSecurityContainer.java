@@ -464,7 +464,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return 0;
     }
 
-    private int getLayoutIdFor(SecurityMode securityMode) {
+    protected int getLayoutIdFor(SecurityMode securityMode) {
         switch (securityMode) {
             case Pattern: return R.layout.keyguard_pattern_view;
             case PIN: return R.layout.keyguard_pin_view;
