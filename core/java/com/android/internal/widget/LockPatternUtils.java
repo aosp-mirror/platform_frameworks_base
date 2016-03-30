@@ -1099,7 +1099,8 @@ public class LockPatternUtils {
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
-                || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX
+                || mode == DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
         return passwordEnabled && savedPasswordExists(userId);
     }
 
