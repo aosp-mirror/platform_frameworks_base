@@ -5075,26 +5075,6 @@ public final class ActivityThread {
          */
         TimeZone.setDefault(null);
 
-        synchronized (mResourcesManager) {
-            /*
-             * Initialize the default locales in this process for the reasons we set the time zone.
-             *
-             * We do this through ResourcesManager, since we need to do locale negotiation.
-             */
-            mResourcesManager.setDefaultLocalesLocked(data.config.getLocales());
-
-            /*
-             * Update the system configuration since its preloaded and might not
-             * reflect configuration changes. The configuration object passed
-             * in AppBindData can be safely assumed to be up to date
-             */
-            mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
-            mCurDefaultDisplayDpi = data.config.densityDpi;
-
-            // This calls mResourcesManager so keep it within the synchronized block.
-            applyCompatConfiguration(mCurDefaultDisplayDpi);
-        }
-
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
         /**
@@ -5219,6 +5199,26 @@ public final class ActivityThread {
         }
 
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
+        synchronized (mResourcesManager) {
+            /*
+             * Initialize the default locales in this process for the reasons we set the time zone.
+             *
+             * We do this through ResourcesManager, since we need to do locale negotiation.
+             */
+            mResourcesManager.setDefaultLocalesLocked(data.config.getLocales());
+
+            /*
+             * Update the system configuration since its preloaded and might not
+             * reflect configuration changes. The configuration object passed
+             * in AppBindData can be safely assumed to be up to date
+             */
+            mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
+            mCurDefaultDisplayDpi = data.config.densityDpi;
+
+            // This calls mResourcesManager so keep it within the synchronized block.
+            applyCompatConfiguration(mCurDefaultDisplayDpi);
+        }
+
         if (!Process.isIsolated() && !"android".equals(appContext.getPackageName())) {
             // This cache location probably points at credential-encrypted
             // storage which may not be accessible yet; assign it anyway instead
