@@ -4,7 +4,7 @@ page.title=RenderScript Conversion Functions
 
 <div class='renderscript'>
 <h2>Overview</h2>
-<p> The functions below convert from a numerical vector type to another, of from one color
+<p> The functions below convert from a numerical vector type to another, or from one color
 representation to another.
 </p>
 <h2>Summary</h2>
