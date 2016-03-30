@@ -198,12 +198,12 @@ precision (such as SIMD CPU instructions).</p>
 
 <pre>
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 8
-        targetSdkVersion 16
+        targetSdkVersion 19
 <strong>
         renderscriptTargetApi 18
         renderscriptSupportModeEnabled true
@@ -217,9 +217,9 @@ android {
 
     <ul>
       <li>{@code renderscriptTargetApi} - Specifies the bytecode version to be generated. We
-      recommend you set this value to the highest available API level and set
-      {@code renderscriptSupportModeEnabled}
-      to {@code true}. Valid values for this setting are any integer value
+      recommend you set this value to the lowest API level able to provide all the functionality
+      you are using and set {@code renderscriptSupportModeEnabled} to {@code true}.
+      Valid values for this setting are any integer value
       from 11 to the most recently released API level. If your minimum SDK version specified in your
       application manifest is set to a different value, that value is ignored and the target value
       in the build file is used to set the minimum SDK version.</li>
