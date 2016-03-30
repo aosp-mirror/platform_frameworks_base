@@ -1852,10 +1852,16 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPolicyAccess(String pkg) {
-            if (PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
-                    android.Manifest.permission.MANAGE_NOTIFICATIONS, Binder.getCallingUid(),
-                    -1, true)) {
-                return true;
+            try {
+                int uid = getContext().getPackageManager().getPackageUidAsUser(
+                        pkg, UserHandle.getCallingUserId());
+                if (PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.MANAGE_NOTIFICATIONS, uid,
+                        -1, true)) {
+                    return true;
+                }
+            } catch (NameNotFoundException e) {
+                return false;
             }
             return checkPackagePolicyAccess(pkg) || mListeners.isComponentEnabledForPackage(pkg);
         }
