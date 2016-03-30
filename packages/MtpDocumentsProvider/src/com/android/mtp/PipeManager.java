@@ -16,13 +16,9 @@
 
 package com.android.mtp;
 
-import android.content.Context;
-import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,15 +48,6 @@ class PipeManager {
         return task.getReadingFileDescriptor();
     }
 
-    ParcelFileDescriptor writeDocument(Context context, MtpManager model, Identifier identifier,
-                                       int[] operationsSupported)
-            throws IOException {
-        final Task task = new WriteDocumentTask(
-                context, model, identifier, operationsSupported, mDatabase);
-        mExecutor.execute(task);
-        return task.getWritingFileDescriptor();
-    }
-
     ParcelFileDescriptor readThumbnail(MtpManager model, Identifier identifier) throws IOException {
         final Task task = new GetThumbnailTask(model, identifier);
         mExecutor.execute(task);
@@ -81,10 +68,6 @@ class PipeManager {
         ParcelFileDescriptor getReadingFileDescriptor() {
             return mDescriptors[0];
         }
-
-        ParcelFileDescriptor getWritingFileDescriptor() {
-            return mDescriptors[1];
-        }
     }
 
     private static class ImportFileTask extends Task {
@@ -103,85 +86,6 @@ class PipeManager {
                     mDescriptors[1].closeWithError("Failed to stream a file.");
                 } catch (IOException closeError) {
                     Log.w(MtpDocumentsProvider.TAG, closeError.getMessage());
-                }
-            }
-        }
-    }
-
-    private static class WriteDocumentTask extends Task {
-        private final Context mContext;
-        private final MtpDatabase mDatabase;
-        private final int[] mOperationsSupported;
-
-        WriteDocumentTask(Context context,
-                          MtpManager model,
-                          Identifier identifier,
-                          int[] supportedOperations,
-                          MtpDatabase database)
-                throws IOException {
-            super(model, identifier);
-            mContext = context;
-            mDatabase = database;
-            mOperationsSupported = supportedOperations;
-        }
-
-        @Override
-        public void run() {
-            File tempFile = null;
-            try {
-                // Obtain a temporary file and copy the data to it.
-                tempFile = File.createTempFile("mtp", "tmp", mContext.getCacheDir());
-                try (
-                    final FileOutputStream tempOutputStream =
-                            new ParcelFileDescriptor.AutoCloseOutputStream(
-                                    ParcelFileDescriptor.open(
-                                            tempFile, ParcelFileDescriptor.MODE_WRITE_ONLY));
-                    final ParcelFileDescriptor.AutoCloseInputStream inputStream =
-                            new ParcelFileDescriptor.AutoCloseInputStream(mDescriptors[0])
-                ) {
-                    final byte[] buffer = new byte[32 * 1024];
-                    int bytes;
-                    while ((bytes = inputStream.read(buffer)) != -1) {
-                        mDescriptors[0].checkError();
-                        tempOutputStream.write(buffer, 0, bytes);
-                    }
-                    tempOutputStream.flush();
-                }
-
-                // Get the placeholder object info.
-                final MtpObjectInfo placeholderObjectInfo =
-                        mManager.getObjectInfo(mIdentifier.mDeviceId, mIdentifier.mObjectHandle);
-
-                // Delete the target object info if it already exists (as a placeholder).
-                mManager.deleteDocument(mIdentifier.mDeviceId, mIdentifier.mObjectHandle);
-
-                // Create the target object info with a correct file size and upload the file.
-                final MtpObjectInfo targetObjectInfo =
-                        new MtpObjectInfo.Builder(placeholderObjectInfo)
-                                .setCompressedSize(tempFile.length())
-                                .build();
-                final ParcelFileDescriptor tempInputDescriptor = ParcelFileDescriptor.open(
-                        tempFile, ParcelFileDescriptor.MODE_READ_ONLY);
-                final int newObjectHandle = mManager.createDocument(
-                        mIdentifier.mDeviceId, targetObjectInfo, tempInputDescriptor);
-
-                final MtpObjectInfo newObjectInfo = mManager.getObjectInfo(
-                        mIdentifier.mDeviceId, newObjectHandle);
-                final Identifier parentIdentifier =
-                        mDatabase.getParentIdentifier(mIdentifier.mDocumentId);
-                mDatabase.updateObject(
-                        mIdentifier.mDocumentId,
-                        mIdentifier.mDeviceId,
-                        parentIdentifier.mDocumentId,
-                        mOperationsSupported,
-                        newObjectInfo,
-                        tempFile.length());
-            } catch (IOException error) {
-                Log.w(MtpDocumentsProvider.TAG,
-                        "Failed to send a file because of: " + error.getMessage());
-            } finally {
-                if (tempFile != null) {
-                    tempFile.delete();
                 }
             }
         }

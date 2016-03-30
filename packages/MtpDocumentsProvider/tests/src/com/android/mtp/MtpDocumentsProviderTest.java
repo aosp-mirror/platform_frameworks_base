@@ -21,6 +21,7 @@ import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
@@ -533,6 +534,30 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         }
     }
 
+    public void testOpenDocument_writing() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(0, 0, "Storage", 0, 0, "")
+        });
+        final String documentId = mProvider.createDocument("2", "text/plain", "test.txt");
+        {
+            final ParcelFileDescriptor fd = mProvider.openDocument(documentId, "w", null);
+            try (ParcelFileDescriptor.AutoCloseOutputStream stream =
+                    new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
+                stream.write("Hello".getBytes());
+            }
+        }
+        {
+            final ParcelFileDescriptor fd = mProvider.openDocument(documentId, "r", null);
+            try (ParcelFileDescriptor.AutoCloseInputStream stream =
+                    new ParcelFileDescriptor.AutoCloseInputStream(fd)) {
+                final byte[] bytes = new byte[5];
+                stream.read(bytes);
+                assertTrue(Arrays.equals("Hello".getBytes(), bytes));
+            }
+        }
+    }
+
     public void testBusyDevice() throws Exception {
         mMtpManager = new TestMtpManager(getContext()) {
             @Override
@@ -740,6 +765,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mProvider = new MtpDocumentsProvider();
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         assertTrue(mProvider.onCreateForTesting(
+                getContext(),
                 mResources,
                 mMtpManager,
                 mResolver,
