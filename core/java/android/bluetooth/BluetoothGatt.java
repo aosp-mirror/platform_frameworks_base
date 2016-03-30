@@ -422,7 +422,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     try {
                         mAuthRetry = true;
                         mService.writeDescriptor(mClientIf, address, handle,
-                            descriptor.getCharacteristic().getWriteType(),
+                            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT,
                             AUTHENTICATION_MITM, descriptor.getValue());
                         return;
                     } catch (RemoteException e) {
@@ -944,7 +944,8 @@ public final class BluetoothGatt implements BluetoothProfile {
 
         try {
             mService.writeDescriptor(mClientIf, device.getAddress(), descriptor.getInstanceId(),
-                characteristic.getWriteType(), AUTHENTICATION_NONE, descriptor.getValue());
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT, AUTHENTICATION_NONE,
+                descriptor.getValue());
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             mDeviceBusy = false;
