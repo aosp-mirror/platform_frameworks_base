@@ -53,8 +53,8 @@ class ShortcutUser {
             this.packageName = Preconditions.checkNotNull(packageName);
         }
 
-        public static PackageWithUser of(int launcherUserId, String packageName) {
-            return new PackageWithUser(launcherUserId, packageName);
+        public static PackageWithUser of(int userId, String packageName) {
+            return new PackageWithUser(userId, packageName);
         }
 
         public static PackageWithUser of(ShortcutPackageItem spi) {
@@ -78,12 +78,12 @@ class ShortcutUser {
 
         @Override
         public String toString() {
-            return String.format("{Launcher: %d, %s}", userId, packageName);
+            return String.format("{Package: %d, %s}", userId, packageName);
         }
     }
 
     @UserIdInt
-    final int mUserId;
+    private final int mUserId;
 
     private final ArrayMap<String, ShortcutPackage> mPackages = new ArrayMap<>();
 
@@ -95,8 +95,16 @@ class ShortcutUser {
         mUserId = userId;
     }
 
-    public ArrayMap<String, ShortcutPackage> getPackages() {
+    public int getUserId() {
+        return mUserId;
+    }
+
+    public ArrayMap<String, ShortcutPackage> getAllPackages() {
         return mPackages;
+    }
+
+    public ShortcutPackage removePackage(@NonNull String packageName) {
+        return mPackages.remove(packageName);
     }
 
     public ArrayMap<PackageWithUser, ShortcutLauncher> getAllLaunchers() {
@@ -113,22 +121,26 @@ class ShortcutUser {
         return mLaunchers.remove(PackageWithUser.of(packageUserId, packageName));
     }
 
-    public ShortcutPackage getPackageShortcuts(@NonNull String packageName) {
+    public ShortcutPackage getPackageShortcuts(ShortcutService s, @NonNull String packageName) {
         ShortcutPackage ret = mPackages.get(packageName);
         if (ret == null) {
             ret = new ShortcutPackage(mUserId, packageName);
             mPackages.put(packageName, ret);
+        } else {
+            ret.attemptToRestoreIfNeededAndSave(s);
         }
         return ret;
     }
 
-    public ShortcutLauncher getLauncherShortcuts(@NonNull String packageName,
+    public ShortcutLauncher getLauncherShortcuts(ShortcutService s, @NonNull String packageName,
             @UserIdInt int launcherUserId) {
         final PackageWithUser key = PackageWithUser.of(launcherUserId, packageName);
         ShortcutLauncher ret = mLaunchers.get(key);
         if (ret == null) {
             ret = new ShortcutLauncher(mUserId, packageName, launcherUserId);
             mLaunchers.put(key, ret);
+        } else {
+            ret.attemptToRestoreIfNeededAndSave(s);
         }
         return ret;
     }
@@ -148,14 +160,6 @@ class ShortcutUser {
         }
     }
 
-    public void unshadowPackage(ShortcutService s, @NonNull String packageName,
-            @UserIdInt int packageUserId) {
-        forPackageItem(packageName, packageUserId, spi -> {
-            Slog.i(TAG, String.format("Restoring for %s, user=%d", packageName, packageUserId));
-            spi.ensureNotShadowAndSave(s);
-        });
-    }
-
     public void forPackageItem(@NonNull String packageName, @UserIdInt int packageUserId,
             Consumer<ShortcutPackageItem> callback) {
         forAllPackageItems(spi -> {
@@ -163,6 +167,13 @@ class ShortcutUser {
                     && spi.getPackageName().equals(packageName)) {
                 callback.accept(spi);
             }
+        });
+    }
+
+    public void attemptToRestoreIfNeededAndSave(ShortcutService s, @NonNull String packageName,
+            @UserIdInt int packageUserId) {
+        forPackageItem(packageName, packageUserId, spi -> {
+            spi.attemptToRestoreIfNeededAndSave(s);
         });
     }
 
@@ -229,7 +240,7 @@ class ShortcutUser {
                                 s, parser, userId, fromBackup);
 
                         // Don't use addShortcut(), we don't need to save the icon.
-                        ret.getPackages().put(shortcuts.getPackageName(), shortcuts);
+                        ret.mPackages.put(shortcuts.getPackageName(), shortcuts);
                         continue;
                     }
 

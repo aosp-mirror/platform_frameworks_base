@@ -57,7 +57,9 @@ import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -76,6 +78,7 @@ import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
+import com.android.server.testutis.TestUtils;
 
 import libcore.io.IoUtils;
 
@@ -96,6 +99,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
@@ -107,10 +111,8 @@ import java.util.Set;
  -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
 
  * TODO: Add checks with assertAllNotHaveIcon()
- *
- * TODO: separate, detailed tests for ShortcutInfo (CTS?) *
- *
- * TODO: Cross-user test (do in CTS?)
+ * TODO: Detailed test for hasShortcutPermissionInner().
+ * TODO: Add tests for the command line functions too.
  */
 @SmallTest
 public class ShortcutManagerTest extends InstrumentationTestCase {
@@ -121,6 +123,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
      * dump affecting the behavior.
      */
     private static final boolean ENABLE_DUMP = false; // DO NOT SUBMIT WITH true
+
+    private static final boolean DUMP_ON_TEARDOWN = false; // DO NOT SUBMIT WITH true
 
     // public for mockito
     public class BaseContext extends MockContext {
@@ -261,7 +265,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         @Override
         boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
             // Sort of hack; do a simpler check.
-            return LAUNCHER_1.equals(callingPackage) || LAUNCHER_2.equals(callingPackage);
+            return LAUNCHER_1.equals(callingPackage) || LAUNCHER_2.equals(callingPackage)
+                    || LAUNCHER_3.equals(callingPackage) || LAUNCHER_4.equals(callingPackage);
         }
 
         @Override
@@ -394,7 +399,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private Map<String, PackageInfo> mInjectedPackages;
 
-    private ArrayList<PackageWithUser> mUninstalledPackages;
+    private Set<PackageWithUser> mUninstalledPackages;
 
     private PackageManager mMockPackageManager;
     private PackageManagerInternal mMockPackageManagerInternal;
@@ -409,11 +414,20 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private static final String CALLING_PACKAGE_3 = "com.android.test.3";
     private static final int CALLING_UID_3 = 10003;
 
+    private static final String CALLING_PACKAGE_4 = "com.android.test.4";
+    private static final int CALLING_UID_4 = 10004;
+
     private static final String LAUNCHER_1 = "com.android.launcher.1";
     private static final int LAUNCHER_UID_1 = 10011;
 
     private static final String LAUNCHER_2 = "com.android.launcher.2";
     private static final int LAUNCHER_UID_2 = 10012;
+
+    private static final String LAUNCHER_3 = "com.android.launcher.3";
+    private static final int LAUNCHER_UID_3 = 10013;
+
+    private static final String LAUNCHER_4 = "com.android.launcher.4";
+    private static final int LAUNCHER_UID_4 = 10014;
 
     private static final int USER_0 = UserHandle.USER_SYSTEM;
     private static final int USER_10 = 10;
@@ -438,6 +452,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private static final int MAX_ICON_DIMENSION_LOWRAM = 32;
 
+    private static final ShortcutQuery QUERY_ALL = new ShortcutQuery();
+
+    static {
+        QUERY_ALL.setQueryFlags(
+                ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -457,10 +478,19 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 1);
         addPackage(CALLING_PACKAGE_2, CALLING_UID_2, 2);
         addPackage(CALLING_PACKAGE_3, CALLING_UID_3, 3);
+        addPackage(CALLING_PACKAGE_4, CALLING_UID_4, 10);
         addPackage(LAUNCHER_1, LAUNCHER_UID_1, 4);
         addPackage(LAUNCHER_2, LAUNCHER_UID_2, 5);
+        addPackage(LAUNCHER_3, LAUNCHER_UID_3, 6);
+        addPackage(LAUNCHER_4, LAUNCHER_UID_4, 10);
 
-        mUninstalledPackages = new ArrayList<>();
+        // CALLING_PACKAGE_3 / LAUNCHER_3 are not backup target.
+        updatePackageInfo(CALLING_PACKAGE_3,
+                pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
+        updatePackageInfo(LAUNCHER_3,
+                pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
+
+        mUninstalledPackages = new HashSet<>();
 
         mInjectedFilePathRoot = new File(getTestContext().getCacheDir(), "test-files");
 
@@ -473,6 +503,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         initService();
         setCaller(CALLING_PACKAGE_1);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (DUMP_ON_TEARDOWN) dumpsysOnLogcat("Teardown");
+
+        super.tearDown();
     }
 
     private Context getTestContext() {
@@ -504,6 +541,10 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return Arrays.asList(array);
     }
 
+    private <T> Set<T> set(Set<T> in) {
+        return new ArraySet<T>(in);
+    }
+
     private Signature[] genSignatures(String... signatures) {
         final Signature[] sigs = new Signature[signatures.length];
         for (int i = 0; i < signatures.length; i++){
@@ -529,8 +570,22 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mInjectedPackages.put(packageName, genPackage(packageName, uid, version, signatures));
     }
 
+    private void updatePackageInfo(String packageName, Consumer<PackageInfo> c) {
+        c.accept(mInjectedPackages.get(packageName));
+    }
+
     private void uninstallPackage(int userId, String packageName) {
+        if (ENABLE_DUMP) {
+            Log.i(TAG, "Unnstall package " + packageName + " / " + userId);
+        }
         mUninstalledPackages.add(PackageWithUser.of(userId, packageName));
+    }
+
+    private void installPackage(int userId, String packageName) {
+        if (ENABLE_DUMP) {
+            Log.i(TAG, "Install package " + packageName + " / " + userId);
+        }
+        mUninstalledPackages.remove(PackageWithUser.of(userId, packageName));
     }
 
     PackageInfo getInjectedPackageInfo(String packageName, @UserIdInt int userId,
@@ -591,14 +646,22 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     /** For debugging */
     private void dumpsysOnLogcat() {
-        if (!ENABLE_DUMP) return;
+        dumpsysOnLogcat("");
+    }
+
+    private void dumpsysOnLogcat(String message) {
+        dumpsysOnLogcat(message, false);
+    }
+
+    private void dumpsysOnLogcat(String message, boolean force) {
+        if (force || !ENABLE_DUMP) return;
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter pw = new PrintWriter(out);
         mService.dumpInner(pw);
         pw.close();
 
-        Log.e(TAG, "Dumping ShortcutService:");
+        Log.e(TAG, "Dumping ShortcutService: " + message);
         for (String line : out.toString().split("\n")) {
             Log.e(TAG, line);
         }
@@ -608,9 +671,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
      * For debugging, dump arbitrary file on logcat.
      */
     private void dumpFileOnLogcat(String path) {
+        dumpFileOnLogcat(path, "");
+    }
+
+    private void dumpFileOnLogcat(String path, String message) {
         if (!ENABLE_DUMP) return;
 
-        Log.i(TAG, "Dumping file: " + path);
+        Log.i(TAG, "Dumping file: " + path + " " + message);
         final StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
@@ -636,10 +703,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
      * For debugging, dump per-user state file on logcat.
      */
     private void dumpUserFile(int userId) {
+        dumpUserFile(userId, "");
+    }
+
+    private void dumpUserFile(int userId, String message) {
         mService.saveDirtyInfo();
         dumpFileOnLogcat(mInjectedFilePathRoot.getAbsolutePath()
                 + "/user-" + userId
-                + "/" + ShortcutService.FILENAME_USER_PACKAGES);
+                + "/" + ShortcutService.FILENAME_USER_PACKAGES, message);
     }
 
     private void waitOnMainThread() throws Throwable {
@@ -1055,11 +1126,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         return i;
     }
 
-    /**
-     * Wrap a set in an ArraySet just to get a better toString.
-     */
-    private <T> Set<T> set(Set<T> in) {
-        return new ArraySet<T>(in);
+    private ShortcutInfo parceled(ShortcutInfo si) {
+        Parcel p = Parcel.obtain();
+        p.writeParcelable(si, 0);
+        p.setDataPosition(0);
+        ShortcutInfo si2 = p.readParcelable(getClass().getClassLoader());
+        p.recycle();
+        return si2;
     }
 
     /**
@@ -1320,8 +1393,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Still 2 calls left.
         assertEquals(2, mManager.getRemainingCallCount());
-
-        // TODO Make sure pinned shortcuts won't be deleted.
     }
 
     public void testDeleteAllDynamicShortcuts() {
@@ -1351,8 +1422,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Still 1 call left
         assertEquals(1, mManager.getRemainingCallCount());
-
-        // TODO Make sure pinned shortcuts won't be deleted.
     }
 
     public void testThrottling() {
@@ -1877,9 +1946,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         });
     }
 
-    // TODO: updateShortcuts()
-    // TODO: getPinnedShortcuts()
-
     // === Test for launcher side APIs ===
 
     private static ShortcutQuery buildQuery(long changedSince,
@@ -1890,6 +1956,20 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         q.setPackage(packageName);
         q.setActivity(componentName);
         q.setQueryFlags(flags);
+        return q;
+    }
+
+    private static ShortcutQuery buildAllQuery(String packageName) {
+        final ShortcutQuery q = new ShortcutQuery();
+        q.setPackage(packageName);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        return q;
+    }
+
+    private static ShortcutQuery buildPinnedQuery(String packageName) {
+        final ShortcutQuery q = new ShortcutQuery();
+        q.setPackage(packageName);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_PINNED);
         return q;
     }
 
@@ -3052,6 +3132,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Remove CALLING_PACKAGE_2
         reset(c0);
+        uninstallPackage(USER_0, CALLING_PACKAGE_2);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_2, USER_0, USER_0);
 
         // Should get a callback with an empty list.
@@ -3299,9 +3380,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Check the registered packages.
         dumpsysOnLogcat();
         assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3326,13 +3407,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.saveDirtyInfo();
 
         // Nonexistent package.
+        uninstallPackage(USER_0, "abc");
         mService.cleanUpPackageLocked("abc", USER_0, USER_0);
 
         // No changes.
         assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3357,12 +3439,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.saveDirtyInfo();
 
         // Remove a package.
+        uninstallPackage(USER_0, CALLING_PACKAGE_1);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_0, USER_0);
 
         assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3387,12 +3470,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.saveDirtyInfo();
 
         // Remove a launcher.
+        uninstallPackage(USER_10, LAUNCHER_1);
         mService.cleanUpPackageLocked(LAUNCHER_1, USER_10, USER_10);
 
         assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3414,12 +3498,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.saveDirtyInfo();
 
         // Remove a package.
+        uninstallPackage(USER_10, CALLING_PACKAGE_2);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_2, USER_10, USER_10);
 
         assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(CALLING_PACKAGE_1),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3441,12 +3526,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.saveDirtyInfo();
 
         // Remove the other launcher from user 10 too.
+        uninstallPackage(USER_10, LAUNCHER_2);
         mService.cleanUpPackageLocked(LAUNCHER_2, USER_10, USER_10);
 
         assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(CALLING_PACKAGE_1),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3468,12 +3554,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.saveDirtyInfo();
 
         // More remove.
+        uninstallPackage(USER_10, CALLING_PACKAGE_1);
         mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_10, USER_10);
 
         assertEquals(makeSet(CALLING_PACKAGE_2),
-                set(user0.getPackages().keySet()));
+                set(user0.getAllPackages().keySet()));
         assertEquals(makeSet(),
-                set(user10.getPackages().keySet()));
+                set(user10.getAllPackages().keySet()));
         assertEquals(
                 makeSet(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
@@ -3492,97 +3579,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertShortcutNotExists(CALLING_PACKAGE_2, "s10_2", USER_10);
 
         mService.saveDirtyInfo();
-    }
-
-
-    public void testSaveAndLoadUser_forBackup() {
-        // Create some shortcuts.
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertTrue(mManager.setDynamicShortcuts(list(
-                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
-        });
-        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            assertTrue(mManager.setDynamicShortcuts(list(
-                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
-        });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            assertTrue(mManager.setDynamicShortcuts(list(
-                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
-        });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
-            assertTrue(mManager.setDynamicShortcuts(list(
-                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
-        });
-
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_0));
-
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_P0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_P0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_P0));
-
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s1", USER_0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s2", USER_0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s3", USER_0));
-
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
-
-        // Pin some.
-
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                    list("s1"), HANDLE_USER_0);
-
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                    list("s2"), UserHandle.of(USER_P0));
-
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
-                    list("s3"), HANDLE_USER_0);
-        });
-
-        runWithCaller(LAUNCHER_1, USER_P0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                    list("s2"), HANDLE_USER_0);
-
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                    list("s3"), UserHandle.of(USER_P0));
-
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
-                    list("s1"), HANDLE_USER_0);
-        });
-
-        runWithCaller(LAUNCHER_1, USER_10, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                    list("s3"), HANDLE_USER_10);
-        });
-
-        // Check the state.
-
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_0));
-
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_P0));
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_P0));
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_P0));
-
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_2, "s1", USER_0));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s2", USER_0));
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_2, "s3", USER_0));
-
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
-        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
-        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
-
-        // Make sure all the information is persisted.
-        mService.saveDirtyInfo();
-        initService();
-        mService.handleUnlockUser(USER_0);
-        mService.handleUnlockUser(USER_P0);
-        mService.handleUnlockUser(USER_10);
     }
 
     public void testHandleGonePackage_crossProfile() {
@@ -3841,13 +3837,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
     }
 
-    // TODO Detailed test for hasShortcutPermissionInner().
-
-    // TODO Add tests for the command line functions too.
-
     private void checkCanRestoreTo(boolean expected, ShortcutPackageInfo spi,
             int version, String... signatures) {
-        assertEquals(expected, spi.canRestoreTo(genPackage(
+        assertEquals(expected, spi.canRestoreTo(mService, genPackage(
                 "dummy", /* uid */ 0, version, signatures)));
     }
 
@@ -3919,6 +3911,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
+        uninstallPackage(USER_0, CALLING_PACKAGE_1);
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_1, USER_0));
 
@@ -3929,6 +3922,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
+        uninstallPackage(USER_10, CALLING_PACKAGE_2);
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_2, USER_10));
 
@@ -3961,7 +3955,1163 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
     }
 
-    public void testHandlePackageUpdate() {
-        // TODO: Make sure unshadow is called.
+    private void backupAndRestore() {
+        int prevUid = mInjectedCallingUid;
+
+        mInjectedCallingUid = Process.SYSTEM_UID; // Only system can call it.
+
+        dumpsysOnLogcat("Before backup");
+
+        final byte[] payload =  mService.getBackupPayload(USER_0);
+        if (ENABLE_DUMP) {
+            final String xml = new String(payload);
+            Log.i(TAG, "Backup payload:");
+            for (String line : xml.split("\n")) {
+                Log.i(TAG, line);
+            }
+        }
+
+        // Before doing anything else, uninstall all packages.
+        for (int userId : list(USER_0, USER_P0)) {
+            for (String pkg : list(CALLING_PACKAGE_1, CALLING_PACKAGE_2, CALLING_PACKAGE_3,
+                    LAUNCHER_1, LAUNCHER_2, LAUNCHER_3)) {
+                uninstallPackage(userId, pkg);
+            }
+        }
+
+        initService();
+        mService.applyRestore(payload, USER_0);
+
+        // handleUnlockUser will perform the gone package check, but it shouldn't remove
+        // shadow information.
+        mService.handleUnlockUser(USER_0);
+
+        dumpsysOnLogcat("After restore");
+
+        mInjectedCallingUid = prevUid;
+    }
+
+    private void prepareCrossProfileDataSet() {
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
+                    makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
+                    makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
+                    makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list()));
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
+                    makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("x1"), makeShortcut("x2"), makeShortcut("x3"),
+                    makeShortcut("x4"), makeShortcut("x5"), makeShortcut("x6"))));
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s1", "s2"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s1", "s2", "s3"), HANDLE_USER_0);
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1", "s4"), HANDLE_USER_P0);
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s2", "s3"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s2", "s3", "s4"), HANDLE_USER_0);
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2", "s5"), HANDLE_USER_P0);
+        });
+        runWithCaller(LAUNCHER_3, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s3", "s4", "s5"), HANDLE_USER_0);
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3", "s6"), HANDLE_USER_P0);
+        });
+        runWithCaller(LAUNCHER_4, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list(), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list(), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list(), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_4, list(), HANDLE_USER_0);
+        });
+
+        // Launcher on a managed profile is referring ot user 0!
+        runWithCaller(LAUNCHER_1, USER_P0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3", "s4"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4", "s5"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s3", "s4", "s5", "s6"),
+                    HANDLE_USER_0);
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s4", "s1"), HANDLE_USER_P0);
+        });
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("x4", "x5"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("x4", "x5", "x6"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("x4", "x5", "x6", "x1"),
+                    HANDLE_USER_10);
+        });
+    }
+
+    private void prepareForBackupTest() {
+
+        prepareCrossProfileDataSet();
+
+        backupAndRestore();
+    }
+
+    private void assertExistsAndShadow(ShortcutPackageItem spi) {
+        assertNotNull(spi);
+        assertTrue(spi.getPackageInfo().isShadow());
+    }
+
+    /**
+     * Make sure the backup data doesn't have the following information:
+     * - Launchers on other users.
+     * - Non-backup app information.
+     *
+     * But restores all other infomation.
+     *
+     * It also omits the following pieces of information, but that's tested in
+     * {@link #testShortcutInfoSaveAndLoad_forBackup}.
+     * - Unpinned dynamic shortcuts
+     * - Bitmaps
+     */
+    public void testBackupAndRestore() {
+        prepareForBackupTest();
+
+        checkBackupAndRestore_success();
+    }
+
+    public void testBackupAndRestore_backupRestoreTwice() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        dumpsysOnLogcat("Before second backup");
+
+        backupAndRestore();
+
+        dumpsysOnLogcat("After second backup");
+
+        checkBackupAndRestore_success();
+    }
+
+    public void testBackupAndRestore_backupRestoreMultiple() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        // This also shouldn't affect the result.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
+                    makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
+        });
+
+        backupAndRestore();
+
+        checkBackupAndRestore_success();
+    }
+
+    public void testBackupAndRestore_restoreToNewVersion() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 2);
+        addPackage(LAUNCHER_1, LAUNCHER_UID_1, 5);
+
+        checkBackupAndRestore_success();
+    }
+
+    public void testBackupAndRestore_restoreToSuperSetSignatures() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 1, "sigx", CALLING_PACKAGE_1);
+        addPackage(LAUNCHER_1, LAUNCHER_UID_1, 4, LAUNCHER_1, "sigy");
+
+        checkBackupAndRestore_success();
+    }
+
+    private void checkBackupAndRestore_success() {
+        // Make sure non-system user is not restored.
+        final ShortcutUser userP0 = mService.getUserShortcutsLocked(USER_P0);
+        assertEquals(0, userP0.getAllPackages().size());
+        assertEquals(0, userP0.getAllLaunchers().size());
+
+        // Make sure only "allowBackup" apps are restored, and are shadow.
+        final ShortcutUser user0 = mService.getUserShortcutsLocked(USER_0);
+        assertExistsAndShadow(user0.getAllPackages().get(CALLING_PACKAGE_1));
+        assertExistsAndShadow(user0.getAllPackages().get(CALLING_PACKAGE_2));
+        assertExistsAndShadow(user0.getAllLaunchers().get(PackageWithUser.of(USER_0, LAUNCHER_1)));
+        assertExistsAndShadow(user0.getAllLaunchers().get(PackageWithUser.of(USER_0, LAUNCHER_2)));
+
+        assertNull(user0.getAllPackages().get(CALLING_PACKAGE_3));
+        assertNull(user0.getAllLaunchers().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
+        assertNull(user0.getAllLaunchers().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
+
+        installPackage(USER_0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2");
+        });
+
+        installPackage(USER_0, LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
+                    "s1");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    /* empty, not restored */ );
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty, not restored */ );
+
+            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_2);
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3");
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
+                    "s1");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s1", "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty, not restored */ );
+
+            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+        });
+
+        // 3 shouldn't be backed up, so no pinned shortcuts.
+        installPackage(USER_0, CALLING_PACKAGE_3);
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        // Launcher on a different profile shouldn't be restored.
+        runWithCaller(LAUNCHER_1, USER_P0, () -> {
+            assertEquals(0,
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)
+                    .size());
+            assertEquals(0,
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)
+                            .size());
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* wasn't restored, so still empty */ );
+        });
+
+        // Package on a different profile, no restore.
+        installPackage(USER_P0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        // Restore launcher 2 on user 0.
+        installPackage(USER_0, LAUNCHER_2);
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
+                    "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* wasn't restored, so still empty */ );
+
+            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+        });
+
+
+        // Restoration of launcher2 shouldn't affect other packages; so do the same checks and
+        // make sure they still have the same result.
+        installPackage(USER_0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2");
+        });
+
+        installPackage(USER_0, LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
+                    "s1");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s1", "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* wasn't restored, so still empty */ );
+
+            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_2);
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3");
+        });
+    }
+
+    public void testBackupAndRestore_publisherLowerVersion() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 0); // Lower version
+
+        checkBackupAndRestore_publisherNotRestored();
+    }
+
+    public void testBackupAndRestore_publisherWrongSignature() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 10, "sigx"); // different signature
+
+        checkBackupAndRestore_publisherNotRestored();
+    }
+
+    public void testBackupAndRestore_publisherNoLongerBackupTarget() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        updatePackageInfo(CALLING_PACKAGE_1,
+                pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
+
+        checkBackupAndRestore_publisherNotRestored();
+    }
+
+    private void checkBackupAndRestore_publisherNotRestored() {
+        installPackage(USER_0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_2);
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3");
+        });
+
+        installPackage(USER_0, LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s1", "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+        installPackage(USER_0, LAUNCHER_2);
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_3);
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s1", "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+    }
+
+    public void testBackupAndRestore_launcherLowerVersion() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        addPackage(LAUNCHER_1, LAUNCHER_UID_1, 0); // Lower version
+
+        checkBackupAndRestore_launcherNotRestored();
+    }
+
+    public void testBackupAndRestore_launcherWrongSignature() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        addPackage(LAUNCHER_1, LAUNCHER_UID_1, 10, "sigx"); // different signature
+
+        checkBackupAndRestore_launcherNotRestored();
+    }
+
+    public void testBackupAndRestore_launcherNoLongerBackupTarget() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        updatePackageInfo(LAUNCHER_1,
+                pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
+
+        checkBackupAndRestore_launcherNotRestored();
+    }
+
+    private void checkBackupAndRestore_launcherNotRestored() {
+        installPackage(USER_0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+
+            // s1 was pinned by launcher 1, which is not restored, yet, so we still see "s1" here.
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2");
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_2);
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3");
+        });
+
+        // Now we try to restore launcher 1.  Then we realize it's not restorable, so L1 has no pinned
+        // shortcuts.
+        installPackage(USER_0, LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+
+            // Now CALLING_PACKAGE_1 realizes "s1" is no longer pinned.
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s2");
+        });
+
+        installPackage(USER_0, LAUNCHER_2);
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
+                    "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_3);
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
+                    "s2");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+    }
+
+    public void testBackupAndRestore_launcherAndPackageNoLongerBackupTarget() {
+        prepareForBackupTest();
+
+        // Note doing a backup & restore again here shouldn't affect the result.
+        backupAndRestore();
+
+        updatePackageInfo(CALLING_PACKAGE_1,
+                pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
+
+        updatePackageInfo(LAUNCHER_1,
+                pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
+
+        checkBackupAndRestore_publisherAndLauncherNotRestored();
+    }
+
+    private void checkBackupAndRestore_publisherAndLauncherNotRestored() {
+        installPackage(USER_0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_2);
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3");
+        });
+
+        installPackage(USER_0, LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+        installPackage(USER_0, LAUNCHER_2);
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+
+        // Because launcher 1 wasn't restored, "s1" is no longer pinned.
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertShortcutIds(assertAllPinned(
+                    mManager.getPinnedShortcuts()),
+                    "s2", "s3");
+        });
+
+        installPackage(USER_0, CALLING_PACKAGE_3);
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(0, mManager.getDynamicShortcuts().size());
+            assertEquals(0, mManager.getPinnedShortcuts().size());
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
+                    "s2", "s3");
+            assertShortcutIds(assertAllPinned(
+                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    /* empty */);
+        });
+    }
+
+    public void testSaveAndLoad_crossProfile() {
+        prepareCrossProfileDataSet();
+
+        dumpsysOnLogcat("Before save & load");
+
+        mService.saveDirtyInfo();
+        initService();
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5", "s6");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3", "s4");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5", "s6");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5");
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5", "s6");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5", "s6");
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts())
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts())
+                    /* empty */);
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5", "s6");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()),
+                    "s1", "s2", "s3", "s4", "s5", "s6");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_P0, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts())
+                    /* empty */);
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts())
+                    /* empty */);
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()),
+                    "x1", "x2", "x3", "x4", "x5", "x6");
+            assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()),
+                    "x4", "x5");
+        });
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_0),
+                    "s1");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_0),
+                    "s1", "s2");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_0),
+                    "s1", "s2", "s3");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_4), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_P0),
+                    "s1", "s4");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_P0)
+                    /* empty */);
+            TestUtils.assertExpectException(
+                    SecurityException.class, "", () -> {
+                        mLauncherApps.getShortcuts(
+                                buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_10);
+                    });
+        });
+        runWithCaller(LAUNCHER_2, USER_0, () -> {
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_0),
+                    "s2");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_0),
+                    "s2", "s3");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_0),
+                    "s2", "s3", "s4");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_4), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_P0),
+                    "s2", "s5");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_P0)
+                    /* empty */);
+        });
+        runWithCaller(LAUNCHER_3, USER_0, () -> {
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_0),
+                    "s3");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_0),
+                    "s3", "s4");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_0),
+                    "s3", "s4", "s5");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_4), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_P0),
+                    "s3", "s6");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_P0)
+                    /* empty */);
+        });
+        runWithCaller(LAUNCHER_4, USER_0, () -> {
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_4), HANDLE_USER_0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_P0)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_P0)
+                    /* empty */);
+        });
+        runWithCaller(LAUNCHER_1, USER_P0, () -> {
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_0),
+                    "s3", "s4");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_0),
+                    "s3", "s4", "s5");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_0),
+                    "s3", "s4", "s5", "s6");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_P0),
+                    "s1", "s4");
+            TestUtils.assertExpectException(
+                    SecurityException.class, "you need to be SYSTEM", () -> {
+                        mLauncherApps.getShortcuts(
+                                buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_10);
+                    });
+        });
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_1), HANDLE_USER_10),
+                    "x4", "x5");
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_2), HANDLE_USER_10)
+                    /* empty */);
+            assertShortcutIds(
+                    mLauncherApps.getShortcuts(buildPinnedQuery(CALLING_PACKAGE_3), HANDLE_USER_10)
+                    /* empty */);
+            TestUtils.assertExpectException(
+                    SecurityException.class, "you need to be SYSTEM", () -> {
+                        mLauncherApps.getShortcuts(
+                                buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0);
+                    });
+            TestUtils.assertExpectException(
+                    SecurityException.class, "you need to be SYSTEM", () -> {
+                        mLauncherApps.getShortcuts(
+                                buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_P0);
+                    });
+        });
+    }
+
+    // ShortcutInfo tests
+
+    public void testShortcutInfoMissingMandatoryFields() {
+        TestUtils.assertExpectException(
+                IllegalArgumentException.class,
+                "ID must be provided",
+                () -> new ShortcutInfo.Builder(getTestContext()).build());
+        TestUtils.assertExpectException(
+                IllegalArgumentException.class,
+                "title must be provided",
+                () -> new ShortcutInfo.Builder(getTestContext()).setId("id").build()
+                        .enforceMandatoryFields());
+        TestUtils.assertExpectException(
+                NullPointerException.class,
+                "Intent must be provided",
+                () -> new ShortcutInfo.Builder(getTestContext()).setId("id").setTitle("x").build()
+                        .enforceMandatoryFields());
+    }
+
+    public void testShortcutInfoParcel() {
+        ShortcutInfo si = parceled(new ShortcutInfo.Builder(getTestContext())
+                .setId("id")
+                .setTitle("title")
+                .setIntent(makeIntent("action", ShortcutActivity.class))
+                .build());
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals("title", si.getTitle());
+        assertEquals("action", si.getIntent().getAction());
+
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+
+        si = new ShortcutInfo.Builder(getTestContext())
+                .setId("id")
+                .setActivityComponent(new ComponentName("a", "b"))
+                .setIcon(Icon.createWithContentUri("content://a.b.c/"))
+                .setTitle("title")
+                .setText("text")
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setWeight(123)
+                .setExtras(pb)
+                .build();
+        si.addFlags(ShortcutInfo.FLAG_PINNED);
+        si.setBitmapPath("abc");
+        si.setIconResourceId(456);
+
+        si = parceled(si);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
+        assertEquals("content://a.b.c/", si.getIcon().getUriString());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(123, si.getWeight());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals("abc", si.getBitmapPath());
+        assertEquals(456, si.getIconResourceId());
+    }
+
+    public void testShortcutInfoClone() {
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(getTestContext())
+                .setId("id")
+                .setActivityComponent(new ComponentName("a", "b"))
+                .setIcon(Icon.createWithContentUri("content://a.b.c/"))
+                .setTitle("title")
+                .setText("text")
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setWeight(123)
+                .setExtras(pb)
+                .build();
+        sorig.addFlags(ShortcutInfo.FLAG_PINNED);
+        sorig.setBitmapPath("abc");
+        sorig.setIconResourceId(456);
+
+        ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
+        assertEquals("content://a.b.c/", si.getIcon().getUriString());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(123, si.getWeight());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals("abc", si.getBitmapPath());
+        assertEquals(456, si.getIconResourceId());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(123, si.getWeight());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(null, si.getBitmapPath());
+        assertEquals(0, si.getIconResourceId());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals(null, si.getIntent());
+        assertEquals(123, si.getWeight());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(null, si.getBitmapPath());
+        assertEquals(0, si.getIconResourceId());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(null, si.getActivityComponent());
+        assertEquals(null, si.getIcon());
+        assertEquals(null, si.getTitle());
+        assertEquals(null, si.getText());
+        assertEquals(null, si.getIntent());
+        assertEquals(0, si.getWeight());
+        assertEquals(null, si.getExtras());
+
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_KEY_FIELDS_ONLY, si.getFlags());
+        assertEquals(null, si.getBitmapPath());
+        assertEquals(0, si.getIconResourceId());
+    }
+
+    public void testShortcutInfoCopyNonNullFieldsFrom() throws InterruptedException {
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(getTestContext())
+                .setId("id")
+                .setActivityComponent(new ComponentName("a", "b"))
+                .setIcon(Icon.createWithContentUri("content://a.b.c/"))
+                .setTitle("title")
+                .setText("text")
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setWeight(123)
+                .setExtras(pb)
+                .build();
+        sorig.addFlags(ShortcutInfo.FLAG_PINNED);
+        sorig.setBitmapPath("abc");
+        sorig.setIconResourceId(456);
+
+        ShortcutInfo si;
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setActivityComponent(new ComponentName("x", "y")).build());
+        assertEquals(new ComponentName("x", "y"), si.getActivityComponent());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setIcon(Icon.createWithContentUri("content://x.y.z/")).build());
+        assertEquals("content://x.y.z/", si.getIcon().getUriString());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setTitle("xyz").build());
+        assertEquals("xyz", si.getTitle());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setText("xxx").build());
+        assertEquals("xxx", si.getText());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setIntent(makeIntent("action2", ShortcutActivity.class)).build());
+        assertEquals("action2", si.getIntent().getAction());
+        assertEquals(null, si.getIntent().getStringExtra("key"));
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setIntent(makeIntent("action3", ShortcutActivity.class, "key", "x")).build());
+        assertEquals("action3", si.getIntent().getAction());
+        assertEquals("x", si.getIntent().getStringExtra("key"));
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setWeight(999).build());
+        assertEquals(999, si.getWeight());
+
+
+        PersistableBundle pb2 = new PersistableBundle();
+        pb2.putInt("x", 99);
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setExtras(pb2).build());
+        assertEquals(99, si.getExtras().getInt("x"));
+
+        final long timestamp = si.getLastChangedTimestamp();
+        Thread.sleep(2);
+
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setTitle("xyz").build());
+
+        assertTrue(si.getLastChangedTimestamp() > timestamp);
+    }
+
+    public void testShortcutInfoSaveAndLoad() throws InterruptedException {
+        setCaller(CALLING_PACKAGE_1, USER_0);
+
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
+
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
+                .setId("id")
+                .setActivityComponent(new ComponentName(mClientContext, ShortcutActivity2.class))
+                .setIcon(bmp32x32)
+                .setTitle("title")
+                .setText("text")
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setWeight(123)
+                .setExtras(pb)
+                .build();
+
+        mManager.addDynamicShortcut(sorig);
+
+        Thread.sleep(2);
+        final long now = System.currentTimeMillis();
+
+        // Save and load.
+        mService.saveDirtyInfo();
+        initService();
+        mService.handleUnlockUser(USER_0);
+
+        ShortcutInfo si;
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
+
+        assertEquals(CALLING_PACKAGE_1, si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(ShortcutActivity2.class.getName(), si.getActivityComponent().getClassName());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(123, si.getWeight());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE, si.getFlags());
+        assertNotNull(si.getBitmapPath()); // Something should be set.
+        assertEquals(0, si.getIconResourceId());
+        assertTrue(si.getLastChangedTimestamp() < now);
+    }
+
+    public void testShortcutInfoSaveAndLoad_forBackup() {
+        setCaller(CALLING_PACKAGE_1, USER_0);
+
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
+
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
+                .setId("id")
+                .setActivityComponent(new ComponentName(mClientContext, ShortcutActivity2.class))
+                .setIcon(bmp32x32)
+                .setTitle("title")
+                .setText("text")
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setWeight(123)
+                .setExtras(pb)
+                .build();
+
+        mManager.addDynamicShortcut(sorig);
+
+        // Dynamic shortcuts won't be backed up, so we need to pin it.
+        setCaller(LAUNCHER_1, USER_0);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id"), HANDLE_USER_0);
+
+        // Do backup & restore.
+        backupAndRestore();
+
+        ShortcutInfo si;
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
+
+        assertEquals(CALLING_PACKAGE_1, si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(ShortcutActivity2.class.getName(), si.getActivityComponent().getClassName());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(123, si.getWeight());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertNull(si.getBitmapPath()); // No icon.
+        assertEquals(0, si.getIconResourceId());
+    }
+
+    public void testDumpsys_crossProfile() {
+        prepareCrossProfileDataSet();
+        dumpsysOnLogcat("test1", /* force= */ true);
+    }
+
+    public void testDumpsys_withIcons() {
+        testIcons();
+        // Dump after having some icons.
+        dumpsysOnLogcat("test1", /* force= */ true);
     }
 }

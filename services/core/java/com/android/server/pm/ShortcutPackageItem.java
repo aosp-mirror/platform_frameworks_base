@@ -16,6 +16,8 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageInfo;
+import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 
@@ -25,10 +27,12 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 
 abstract class ShortcutPackageItem {
+    private static final String TAG = ShortcutService.TAG;
+
     private final int mPackageUserId;
     private final String mPackageName;
 
-    private ShortcutPackageInfo mPackageInfo;
+    private final ShortcutPackageInfo mPackageInfo;
 
     protected ShortcutPackageItem(int packageUserId, @NonNull String packageName,
             @NonNull ShortcutPackageInfo packageInfo) {
@@ -61,24 +65,61 @@ abstract class ShortcutPackageItem {
         return mPackageInfo;
     }
 
-    /**
-     * Should be only used when loading from a file.o
-     */
-    protected void replacePackageInfo(@NonNull ShortcutPackageInfo packageInfo) {
-        mPackageInfo = Preconditions.checkNotNull(packageInfo);
-    }
-
     public void refreshPackageInfoAndSave(ShortcutService s) {
+        if (mPackageInfo.isShadow()) {
+            return; // Don't refresh for shadow user.
+        }
         mPackageInfo.refresh(s, this);
         s.scheduleSaveUser(getOwnerUserId());
     }
 
-    public void ensureNotShadowAndSave(ShortcutService s) {
-        if (mPackageInfo.isShadow()) {
-            mPackageInfo.setShadow(false);
-            s.scheduleSaveUser(getOwnerUserId());
+    public void attemptToRestoreIfNeededAndSave(ShortcutService s) {
+        if (!mPackageInfo.isShadow()) {
+            return; // Already installed, nothing to do.
         }
+        if (!s.isPackageInstalled(mPackageName, mPackageUserId)) {
+            if (ShortcutService.DEBUG) {
+                Slog.d(TAG, String.format("Package still not installed: %s user=%d",
+                        mPackageName, mPackageUserId));
+            }
+            return; // Not installed, no need to restore yet.
+        }
+        if (!mPackageInfo.hasSignatures()) {
+            s.wtf("Attempted to restore package " + mPackageName + ", user=" + mPackageUserId
+                    + " but signatures not found in the restore data.");
+            onRestoreBlocked(s);
+            return;
+        }
+
+        final PackageInfo pi = s.getPackageInfoWithSignatures(mPackageName, mPackageUserId);
+        if (!mPackageInfo.canRestoreTo(s, pi)) {
+            // Package is now installed, but can't restore.  Let the subclass do the cleanup.
+            onRestoreBlocked(s);
+            return;
+        }
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format("Restored package: %s/%d on user %d", mPackageName,
+                    mPackageUserId, getOwnerUserId()));
+        }
+
+        onRestored(s);
+
+        // Now the package is not shadow.
+        mPackageInfo.setShadow(false);
+
+        s.scheduleSaveUser(mPackageUserId);
     }
+
+    /**
+     * Called when the new package can't be restored because it has a lower version number
+     * or different signatures.
+     */
+    protected abstract void onRestoreBlocked(ShortcutService s);
+
+    /**
+     * Called when the new package is successfully restored.
+     */
+    protected abstract void onRestored(ShortcutService s);
 
     public abstract void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;

@@ -26,6 +26,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -34,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -83,7 +86,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     private long mLastResetTime;
 
-    public ShortcutPackage(int packageUserId, String packageName, ShortcutPackageInfo spi) {
+    private ShortcutPackage(int packageUserId, String packageName, ShortcutPackageInfo spi) {
         super(packageUserId, packageName, spi != null ? spi : ShortcutPackageInfo.newEmpty());
     }
 
@@ -95,6 +98,19 @@ class ShortcutPackage extends ShortcutPackageItem {
     public int getOwnerUserId() {
         // For packages, always owner user == package user.
         return getPackageUserId();
+    }
+
+    @Override
+    protected void onRestoreBlocked(ShortcutService s) {
+        // Can't restore due to version/signature mismatch.  Remove all shortcuts.
+        mShortcuts.clear();
+    }
+
+    @Override
+    protected void onRestored(ShortcutService s) {
+        // Because some launchers may not have been restored (e.g. allowBackup=false),
+        // we need to re-calculate the pinned shortcuts.
+        refreshPinnedFlags(s);
     }
 
     /**
@@ -229,20 +245,26 @@ class ShortcutPackage extends ShortcutPackageItem {
                 s.getUserShortcutsLocked(getPackageUserId()).getAllLaunchers();
 
         for (int l = launchers.size() - 1; l >= 0; l--) {
+            // Note even if a launcher that hasn't been installed can still pin shortcuts.
+
             final ShortcutLauncher launcherShortcuts = launchers.valueAt(l);
             final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
-                    getPackageName());
+                    getPackageName(), getPackageUserId());
 
             if (pinned == null || pinned.size() == 0) {
                 continue;
             }
             for (int i = pinned.size() - 1; i >= 0; i--) {
-                final ShortcutInfo si = mShortcuts.get(pinned.valueAt(i));
+                final String id = pinned.valueAt(i);
+                final ShortcutInfo si = mShortcuts.get(id);
                 if (si == null) {
-                    s.wtf("Shortcut not found");
-                } else {
-                    si.addFlags(ShortcutInfo.FLAG_PINNED);
+                    // This happens if a launcher pinned shortcuts from this package, then backup&
+                    // restored, but this package doesn't allow backing up.
+                    // In that case the launcher ends up having a dangling pinned shortcuts.
+                    // That's fine, when the launcher is restored, we'll fix it.
+                    continue;
                 }
+                si.addFlags(ShortcutInfo.FLAG_PINNED);
             }
         }
 
@@ -312,11 +334,15 @@ class ShortcutPackage extends ShortcutPackageItem {
     public void findAll(@NonNull ShortcutService s, @NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
             @Nullable String callingLauncher, int launcherUserId) {
+        if (getPackageInfo().isShadow()) {
+            // Restored and the app not installed yet, so don't return any.
+            return;
+        }
 
         // Set of pinned shortcuts by the calling launcher.
         final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
-                : s.getLauncherShortcuts(callingLauncher, getPackageUserId(), launcherUserId)
-                    .getPinnedShortcutIds(getPackageName());
+                : s.getLauncherShortcutsLocked(callingLauncher, getPackageUserId(), launcherUserId)
+                    .getPinnedShortcutIds(getPackageName(), getPackageUserId());
 
         for (int i = 0; i < mShortcuts.size(); i++) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
@@ -328,7 +354,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                     || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
             if (!si.isDynamic()) {
                 if (!si.isPinned()) {
-                    s.wtf("Shortcut not pinned here");
+                    s.wtf("Shortcut not pinned: package " + getPackageName()
+                            + ", user=" + getPackageUserId() + ", id=" + si.getId());
                     continue;
                 }
                 if (!isPinnedByCaller) {
@@ -479,7 +506,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                 ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
         ret.mLastResetTime =
                 ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
-        ShortcutPackageInfo spi = null;
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -493,7 +519,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             if (depth == outerDepth + 1) {
                 switch (tag) {
                     case ShortcutPackageInfo.TAG_ROOT:
-                        spi = ShortcutPackageInfo.loadFromXml(parser);
+                        ret.getPackageInfo().loadFromXml(parser, fromBackup);
                         continue;
                     case TAG_SHORTCUT:
                         final ShortcutInfo si = parseShortcut(parser, packageName);
@@ -504,9 +530,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                 }
             }
             ShortcutService.warnForInvalidTag(depth, tag);
-        }
-        if (spi != null) {
-            ret.replacePackageInfo(spi);
         }
         return ret;
     }
@@ -566,5 +589,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 id, packageName, activityComponent, /* icon =*/ null, title, text, intent,
                 intentPersistableExtras, weight, extras, lastChangedTimestamp, flags,
                 iconRes, bitmapPath);
+    }
+
+    @VisibleForTesting
+    List<ShortcutInfo> getAllShortcutsForTest() {
+        return new ArrayList<>(mShortcuts.values());
     }
 }
