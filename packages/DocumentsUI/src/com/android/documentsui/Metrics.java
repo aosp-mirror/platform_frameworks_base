@@ -66,6 +66,7 @@ public final class Metrics {
     private static final String COUNT_FILEOP_EXTERNAL = "docsui_fileop_external";
     private static final String COUNT_FILEOP_CANCELED = "docsui_fileop_canceled";
     private static final String COUNT_STARTUP_MS = "docsui_startup_ms";
+    private static final String COUNT_DRAWER_OPENED = "docsui_drawer_opened";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -227,6 +228,21 @@ public final class Metrics {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Provider {}
 
+    // Codes representing different actions to open the drawer. They are used for bucketing stats in
+    // the COUNT_DRAWER_OPENED histogram.
+    // Do not change or rearrange these values, that will break historical data. Only add to the
+    // list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int DRAWER_OPENED_HAMBURGER = 1;
+    private static final int DRAWER_OPENED_SWIPE = 2;
+
+    @IntDef(flag = true, value = {
+            DRAWER_OPENED_HAMBURGER,
+            DRAWER_OPENED_SWIPE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DrawerTrigger {}
+
     /**
      * Logs when DocumentsUI is started, and how. Call this when DocumentsUI first starts up.
      *
@@ -284,6 +300,20 @@ public final class Metrics {
      */
     public static void logMultiWindow(Context context) {
         logCount(context, COUNT_MULTI_WINDOW);
+    }
+
+    /**
+     * Logs a drawer opened event. Call this when the user opens drawer by swipe or by clicking the
+     * hamburger icon.
+     * @param context
+     * @param trigger type of action that opened the drawer
+     */
+    public static void logDrawerOpened(Context context, @DrawerController.Trigger int trigger) {
+        if (trigger == DrawerController.OPENED_HAMBURGER) {
+            logHistogram(context, COUNT_DRAWER_OPENED, DRAWER_OPENED_HAMBURGER);
+        } else if (trigger == DrawerController.OPENED_SWIPE) {
+            logHistogram(context, COUNT_DRAWER_OPENED, DRAWER_OPENED_SWIPE);
+        }
     }
 
     /**
