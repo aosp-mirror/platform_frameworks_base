@@ -44,6 +44,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DocumentsApplication;
+import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
@@ -227,11 +228,13 @@ public class RenameDocumentFragment extends DialogFragment {
 
         @Override
         protected void onPostExecute(DocumentInfo result) {
-            if (result == null) {
+            if (result != null) {
+                Metrics.logRenameFileOperation(getContext());
+            } else {
                 Snackbars.makeSnackbar(mActivity, R.string.rename_error, Snackbar.LENGTH_SHORT)
                         .show();
+                Metrics.logRenameFileError(getContext());
             }
-
             mActivity.setPending(false);
         }
     }
