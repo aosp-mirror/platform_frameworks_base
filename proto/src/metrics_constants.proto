@@ -2116,6 +2116,25 @@ message MetricsEvent {
     // Work profile off
     SETTINGS_CONDITION_WORK_MODE = 383;
 
+    // ------- Begin N Settings suggestions -----
+    // Since suggestions come from system apps, suggestions will
+    // have generic constants and the package providing the suggestion
+    // will be put in the package field.  For suggestions in the Settings
+    // package, the class name will be filled in instead (since settings
+    // provides several suggetions).
+
+    // Settings shown/hidden on main settings dashboard.
+    // These are actually visibility events, but visible/hidden doesn't
+    // take a package, so these are being logged as actions.
+    ACTION_SHOW_SETTINGS_SUGGESTION = 383;
+    ACTION_HIDE_SETTINGS_SUGGESTION = 384;
+
+    // Click on a suggestion.
+    ACTION_SETTINGS_SUGGESTION = 385;
+
+    // Suggestion -> Overflow -> Remove.
+    ACTION_SETTINGS_DISMISS_SUGGESTION = 386;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
