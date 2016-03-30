@@ -437,10 +437,9 @@ interface IPackageManager {
     void performFstrimIfNeeded();
 
     /**
-     * Ask the package manager to extract packages if needed, to save
-     * the VM unzipping the APK in memory during launch.
+     * Ask the package manager to update packages if needed.
      */
-    void extractPackagesIfNeeded();
+    void updatePackagesIfNeeded();
 
     /**
      * Notify the package manager that a package is going to be used.
