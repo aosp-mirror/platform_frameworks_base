@@ -40,7 +40,6 @@ public final class BluetoothPbapClient implements BluetoothProfile {
         "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
 
     private IBluetoothPbapClient mService;
-    private BluetoothDevice mDevice;
     private final Context mContext;
     private ServiceListener mServiceListener;
     private BluetoothAdapter mAdapter;
@@ -173,7 +172,6 @@ public final class BluetoothPbapClient implements BluetoothProfile {
         }
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
-                mDevice = device;
                 return mService.connect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
@@ -193,13 +191,13 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      * @return false on error,
      *               true otherwise
      */
-    public boolean disconnect() {
+    public boolean disconnect(BluetoothDevice device) {
         if (DBG) {
-            log("disconnect(" + mDevice + ")");
+            log("disconnect(" + device + ")" + new Exception() );
         }
-        if (mService != null && isEnabled() && isValidDevice(mDevice)) {
+        if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
-                mService.disconnect(mDevice);
+                mService.disconnect(device);
                 return true;
             } catch (RemoteException e) {
               Log.e(TAG, Log.getStackTraceString(new Throwable()));
@@ -327,5 +325,67 @@ public final class BluetoothPbapClient implements BluetoothProfile {
            return true;
        }
        return false;
+    }
+
+    /**
+     * Set priority of the profile
+     *
+     * <p> The device should already be paired.
+     *  Priority can be one of {@link #PRIORITY_ON} or
+     * {@link #PRIORITY_OFF},
+     *
+     * @param device Paired bluetooth device
+     * @param priority
+     * @return true if priority is set, false on error
+     */
+    public boolean setPriority(BluetoothDevice device, int priority) {
+        if (DBG) {
+            log("setPriority(" + device + ", " + priority + ")");
+        }
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF &&
+                priority != BluetoothProfile.PRIORITY_ON) {
+              return false;
+            }
+            try {
+                return mService.setPriority(device, priority);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
+    }
+
+    /**
+     * Get the priority of the profile.
+     *
+     * <p> The priority can be any of:
+     * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
+     * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
+     *
+     * @param device Bluetooth device
+     * @return priority of the device
+     */
+    public int getPriority(BluetoothDevice device) {
+        if (VDBG) {
+            log("getPriority(" + device + ")");
+        }
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return mService.getPriority(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return PRIORITY_OFF;
+            }
+        }
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return PRIORITY_OFF;
     }
 }
