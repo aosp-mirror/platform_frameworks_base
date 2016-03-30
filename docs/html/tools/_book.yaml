@@ -28,12 +28,12 @@ toc:
   - title: Publishing
     path: /tools/publishing/publishing_overview.html
     custom_link_attributes:
-    - zh-cn-lang: "发布概述"
+    - zh-cn-lang="发布概述"
     section:
     - title: Preparing for Release
       path: /tools/publishing/preparing.html
       custom_link_attributes:
-      - zh-cn-lang: "准备发布"
+      - zh-cn-lang="准备发布"
     - title: Versioning Your Apps
       path: /tools/publishing/versioning.html
     - title: Signing Your Apps

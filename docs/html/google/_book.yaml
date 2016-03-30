@@ -2,16 +2,16 @@ toc:
 - title: Google Play In-app Billing
   path: /google/play/billing/index.html
   custom_link_attributes:
-  - zh-cn-lang: "应用内结算"
+  - zh-cn-lang="应用内结算"
   section:
   - title: Overview
     path: /google/play/billing/billing_overview.html
     custom_link_attributes:
-    - zh-cn-lang: "应用内结算概述"
+    - zh-cn-lang="应用内结算概述"
   - title: Version 3 API
     path: /google/play/billing/api.html
     custom_link_attributes:
-    - zh-cn-lang: "应用内结算 API"
+    - zh-cn-lang="应用内结算 API"
     section:
     - title: Implementing the API
       path: /google/play/billing/billing_integrate.html
@@ -24,31 +24,34 @@ toc:
   - title: Security and Design
     path: /google/play/billing/billing_best_practices.html
     custom_link_attributes:
-    - zh-cn-lang: "安全性和设计"
+    - zh-cn-lang="安全性和设计"
   - title: Testing In-app Billing
     path: /google/play/billing/billing_testing.html
     custom_link_attributes:
-    - zh-cn-lang: "测试应用内结算"
+    - zh-cn-lang="测试应用内结算"
   - title: Administering In-app Billing
     path: /google/play/billing/billing_admin.html
     custom_link_attributes:
-    - zh-cn-lang: "管理应用内结算"
+    - zh-cn-lang="管理应用内结算"
   - title: Version Notes
     path: /google/play/billing/versions.html
 
 - title: Filters on Google Play
   path: /google/play/filters.html
   custom_link_attributes:
-  - es-lang: "Filtros en Google Play"
-  - ja-lang: "Google Play 上のフィルタ"
-  - ko-lang: "Google Play 필터"
-  - pt-br-lang: "Filtros no Google Play"
-  - ru-lang: "Фильтры в Google Play"
-  - zh-cn-lang: "Google Play 上的筛选器"
-  - zh-tw-lang: "Google Play 上的篩選器"
+  - es-lang="Filtros en Google Play"
+  - ja-lang="Google Play 上のフィルタ"
+  - ko-lang="Google Play 필터"
+  - pt-br-lang="Filtros no Google Play"
+  - ru-lang="Фильтры в Google Play"
+  - zh-cn-lang="Google Play 上的筛选器"
+  - zh-tw-lang="Google Play 上的篩選器"
 
 - title: Google Play Developer API
   path: /google/play/developer-api.html
+
+- title: Advertising ID
+  path: /google/play-services/id.html
 
 - title: Multiple APK Support
   path: /google/play/publishing/multiple-apks.html
