@@ -66,6 +66,8 @@ bool Properties::sDisableProfileBars = false;
 
 bool Properties::waitForGpuCompletion = false;
 
+bool Properties::filterOutTestOverhead = false;
+
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {'\0',};
 
@@ -155,6 +157,8 @@ bool Properties::load() {
     textureCacheSize = MB(property_get_float(PROPERTY_TEXTURE_CACHE_SIZE, DEFAULT_TEXTURE_CACHE_SIZE));
     textureCacheFlushRate = std::max(0.0f, std::min(1.0f,
             property_get_float(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, DEFAULT_TEXTURE_CACHE_FLUSH_RATE)));
+
+    filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
     return (prevDebugLayersUpdates != debugLayersUpdates)
             || (prevDebugOverdraw != debugOverdraw)

@@ -151,6 +151,8 @@ enum DebugLevel {
  */
 #define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.enable_partial_updates"
 
+#define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
 ///////////////////////////////////////////////////////////////////////////////
@@ -293,6 +295,10 @@ public:
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
+
+    // Should only be set by automated tests to try and filter out
+    // any overhead they add
+    static bool filterOutTestOverhead;
 
 private:
     static ProfileType sProfileType;
