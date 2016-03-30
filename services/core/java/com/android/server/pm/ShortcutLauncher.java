@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Launcher information used by {@link ShortcutService}.
  */
-class ShortcutLauncher implements ShortcutPackageItem {
+class ShortcutLauncher extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "launcher-pins";
@@ -44,44 +44,34 @@ class ShortcutLauncher implements ShortcutPackageItem {
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_PACKAGE_NAME = "package-name";
 
-    @UserIdInt
-    private final int mUserId;
-
-    @NonNull
-    private final String mPackageName;
-
-    @UserIdInt
-    private final int mLauncherUserId;
+    private final int mOwnerUserId;
 
     /**
      * Package name -> IDs.
      */
     final private ArrayMap<String, ArraySet<String>> mPinnedShortcuts = new ArrayMap<>();
 
-    ShortcutLauncher(@UserIdInt int userId, @NonNull String packageName,
+    public ShortcutLauncher(@UserIdInt int ownerUserId, @NonNull String packageName,
+            @UserIdInt int launcherUserId, ShortcutPackageInfo spi) {
+        super(launcherUserId, packageName, spi != null ? spi : ShortcutPackageInfo.newEmpty());
+        mOwnerUserId = ownerUserId;
+    }
+
+    public ShortcutLauncher(@UserIdInt int ownerUserId, @NonNull String packageName,
             @UserIdInt int launcherUserId) {
-        mUserId = userId;
-        mPackageName = packageName;
-        mLauncherUserId = launcherUserId;
+        this(launcherUserId, packageName, launcherUserId, null);
     }
 
-    @UserIdInt
-    public int getUserId() {
-        return mUserId;
+    @Override
+    public int getOwnerUserId() {
+        return mOwnerUserId;
     }
 
-    @UserIdInt
-    public int getLauncherUserId() {
-        return mLauncherUserId;
-    }
+    public void pinShortcuts(@NonNull ShortcutService s, @UserIdInt int packageUserId,
+            @NonNull String packageName, @NonNull List<String> ids) {
+        final ShortcutPackage packageShortcuts =
+                s.getPackageShortcutsLocked(packageName, packageUserId);
 
-    @NonNull
-    public String getPackageName() {
-        return mPackageName;
-    }
-
-    public void pinShortcuts(@NonNull ShortcutService s, @NonNull String packageName,
-            @NonNull List<String> ids) {
         final int idSize = ids.size();
         if (idSize == 0) {
             mPinnedShortcuts.remove(packageName);
@@ -91,8 +81,6 @@ class ShortcutLauncher implements ShortcutPackageItem {
             // Pin shortcuts.  Make sure only pin the ones that were visible to the caller.
             // i.e. a non-dynamic, pinned shortcut by *other launchers* shouldn't be pinned here.
 
-            final ShortcutPackage packageShortcuts =
-                    s.getPackageShortcutsLocked(packageName, mUserId);
             final ArraySet<String> newSet = new ArraySet<>();
 
             for (int i = 0; i < idSize; i++) {
@@ -107,7 +95,7 @@ class ShortcutLauncher implements ShortcutPackageItem {
             }
             mPinnedShortcuts.put(packageName, newSet);
         }
-        s.getPackageShortcutsLocked(packageName, mUserId).refreshPinnedFlags(s);
+        packageShortcuts.refreshPinnedFlags(s);
     }
 
     /**
@@ -124,15 +112,18 @@ class ShortcutLauncher implements ShortcutPackageItem {
     /**
      * Persist.
      */
-    public void saveToXml(XmlSerializer out, boolean forBackup) throws IOException {
+    @Override
+    public void saveToXml(XmlSerializer out, boolean forBackup)
+            throws IOException {
         final int size = mPinnedShortcuts.size();
         if (size == 0) {
             return; // Nothing to write.
         }
 
         out.startTag(null, TAG_ROOT);
-        ShortcutService.writeAttr(out, ATTR_PACKAGE_NAME, mPackageName);
-        ShortcutService.writeAttr(out, ATTR_LAUNCHER_USER_ID, mLauncherUserId);
+        ShortcutService.writeAttr(out, ATTR_PACKAGE_NAME, getPackageName());
+        ShortcutService.writeAttr(out, ATTR_LAUNCHER_USER_ID, getPackageUserId());
+        getPackageInfo().saveToXml(out);
 
         for (int i = 0; i < size; i++) {
             out.startTag(null, TAG_PACKAGE);
@@ -153,15 +144,20 @@ class ShortcutLauncher implements ShortcutPackageItem {
     /**
      * Load.
      */
-    public static ShortcutLauncher loadFromXml(XmlPullParser parser, int ownerUserId)
-            throws IOException, XmlPullParserException {
+    public static ShortcutLauncher loadFromXml(XmlPullParser parser, int ownerUserId,
+            boolean fromBackup) throws IOException, XmlPullParserException {
         final String launcherPackageName = ShortcutService.parseStringAttribute(parser,
                 ATTR_PACKAGE_NAME);
-        final int launcherUserId = ShortcutService.parseIntAttribute(parser,
-                ATTR_LAUNCHER_USER_ID, ownerUserId);
+
+        // If restoring, just use the real user ID.
+        final int launcherUserId =
+                fromBackup ? ownerUserId
+                : ShortcutService.parseIntAttribute(parser, ATTR_LAUNCHER_USER_ID, ownerUserId);
 
         final ShortcutLauncher ret = new ShortcutLauncher(launcherUserId, launcherPackageName,
                 launcherUserId);
+
+        ShortcutPackageInfo spi = null;
 
         ArraySet<String> ids = null;
         final int outerDepth = parser.getDepth();
@@ -173,21 +169,33 @@ class ShortcutLauncher implements ShortcutPackageItem {
             }
             final int depth = parser.getDepth();
             final String tag = parser.getName();
-            switch (tag) {
-                case TAG_PACKAGE: {
-                    final String packageName = ShortcutService.parseStringAttribute(parser,
-                            ATTR_PACKAGE_NAME);
-                    ids = new ArraySet<>();
-                    ret.mPinnedShortcuts.put(packageName, ids);
-                    continue;
-                }
-                case TAG_PIN: {
-                    ids.add(ShortcutService.parseStringAttribute(parser,
-                            ATTR_VALUE));
-                    continue;
+            if (depth == outerDepth + 1) {
+                switch (tag) {
+                    case ShortcutPackageInfo.TAG_ROOT:
+                        spi = ShortcutPackageInfo.loadFromXml(parser);
+                        continue;
+                    case TAG_PACKAGE: {
+                        final String packageName = ShortcutService.parseStringAttribute(parser,
+                                ATTR_PACKAGE_NAME);
+                        ids = new ArraySet<>();
+                        ret.mPinnedShortcuts.put(packageName, ids);
+                        continue;
+                    }
                 }
             }
-            throw ShortcutService.throwForInvalidTag(depth, tag);
+            if (depth == outerDepth + 2) {
+                switch (tag) {
+                    case TAG_PIN: {
+                        ids.add(ShortcutService.parseStringAttribute(parser,
+                                ATTR_VALUE));
+                        continue;
+                    }
+                }
+            }
+            ShortcutService.warnForInvalidTag(depth, tag);
+        }
+        if (spi != null) {
+            ret.replacePackageInfo(spi);
         }
         return ret;
     }
@@ -197,9 +205,12 @@ class ShortcutLauncher implements ShortcutPackageItem {
 
         pw.print(prefix);
         pw.print("Launcher: ");
-        pw.print(mPackageName);
-        pw.print("  UserId: ");
-        pw.print(mLauncherUserId);
+        pw.print(getPackageName());
+        pw.print("  Package user: ");
+        pw.print(getPackageUserId());
+        pw.println();
+
+        getPackageInfo().dump(s, pw, prefix + "  ");
         pw.println();
 
         final int size = mPinnedShortcuts.size();

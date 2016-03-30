@@ -797,7 +797,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     @NonNull
     private List<ShortcutInfo> assertShortcutIds(@NonNull List<ShortcutInfo> actualShortcuts,
             String... expectedIds) {
-        assertEquals(expectedIds.length, actualShortcuts.size());
         final HashSet<String> expected = new HashSet<>(list(expectedIds));
         final HashSet<String> actual = new HashSet<>();
         for (ShortcutInfo s : actualShortcuts) {
@@ -971,18 +970,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private void assertBundleEmpty(BaseBundle b) {
         assertTrue(b == null || b.size() == 0);
-    }
-
-    private void assertShortcutPackageInfo(String packageName, int userId, int expectedVersion) {
-        ShortcutPackageInfo spi = mService.getPackageInfoForTest(packageName, userId);
-        assertNotNull(spi);
-        assertEquals(expectedVersion, spi.getVersionCode());
-
-        assertTrue(spi.canRestoreTo(genPackage(packageName, /*uid*/ 0, 9999999, packageName)));
-    }
-
-    private void assertNoShortcutPackageInfo(String packageName, int userId) {
-        assertNull(mService.getPackageInfoForTest(packageName, userId));
     }
 
     private ShortcutInfo getPackageShortcut(String packageName, String shortcutId, int userId) {
@@ -1229,11 +1216,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 "shortcut1", "shortcut2");
         assertEquals(2, mManager.getRemainingCallCount());
 
-        assertShortcutPackageInfo(CALLING_PACKAGE_1, USER_0, 1);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_2, USER_0);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_1, USER_10);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_2, USER_10);
-
         // TODO: Check fields
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1260,11 +1242,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
-
-            assertShortcutPackageInfo(CALLING_PACKAGE_1, USER_0, 1);
-            assertNoShortcutPackageInfo(CALLING_PACKAGE_2, USER_0);
-            assertNoShortcutPackageInfo(CALLING_PACKAGE_1, USER_10);
-            assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_10, 2);
         });
     }
 
@@ -1302,7 +1279,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
-            assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_10, 2);
         });
     }
 
@@ -1608,7 +1584,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         Bitmap bmp;
 
         setCaller(LAUNCHER_1);
-
         // Check hasIconResource()/hasIconFile().
         assertShortcutIds(assertAllHaveIconResId(mLauncherApps.getShortcutInfo(
                 CALLING_PACKAGE_1, list("res32x32"),
@@ -1898,12 +1873,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // TODO Check bitmap removal too.
 
         runWithCaller(CALLING_PACKAGE_2, USER_11, () -> {
-            assertNoShortcutPackageInfo(CALLING_PACKAGE_2, USER_11);
-
             mManager.updateShortcuts(list());
-
-            // Even an empty update call will populate the package info.
-            assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_11, 2);
         });
     }
 
@@ -1940,7 +1910,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertTrue(mManager.setDynamicShortcuts(list(s2_2, s2_3, s2_4)));
 
         setCaller(CALLING_PACKAGE_3);
-        final ShortcutInfo s3_2 = makeShortcutWithTimestamp("s3", 5000);
+        final ShortcutInfo s3_2 = makeShortcutWithTimestamp("s3", START_TIME + 5000);
         assertTrue(mManager.setDynamicShortcuts(list(s3_2)));
 
         setCaller(LAUNCHER_1);
@@ -2100,15 +2070,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Pin some.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            assertNoShortcutPackageInfo(LAUNCHER_1, USER_0);
-
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
                     list("s2", "s3"), getCallingUser());
-
-            assertShortcutPackageInfo(LAUNCHER_1, USER_0, 4);
-            assertNoShortcutPackageInfo(LAUNCHER_2, USER_0);
-            assertNoShortcutPackageInfo(LAUNCHER_1, USER_10);
-            assertNoShortcutPackageInfo(LAUNCHER_2, USER_10);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
                     list("s3", "s4", "s5"), getCallingUser());
@@ -2170,18 +2133,10 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         dumpsysOnLogcat();
 
-        assertNoShortcutPackageInfo(LAUNCHER_1, USER_0);
-        assertNoShortcutPackageInfo(LAUNCHER_2, USER_0);
-        assertNoShortcutPackageInfo(LAUNCHER_1, USER_10);
-        assertNoShortcutPackageInfo(LAUNCHER_2, USER_10);
-
         // Pin some.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
                     list("s3", "s4"), getCallingUser());
-
-            assertShortcutPackageInfo(LAUNCHER_1, USER_0, 4);
-            assertNoShortcutPackageInfo(LAUNCHER_2, USER_0);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
                     list("s1", "s2", "s4"), getCallingUser());
@@ -2256,15 +2211,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                                     | ShortcutQuery.FLAG_GET_DYNAMIC), getCallingUser())),
                     "s2");
 
-            assertNoShortcutPackageInfo(LAUNCHER_2, USER_0);
-            assertNoShortcutPackageInfo(LAUNCHER_2, USER_10);
-
             // Now pin some.
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
                     list("s1", "s2"), getCallingUser());
-
-            assertShortcutPackageInfo(LAUNCHER_2, USER_0, 5);
-            assertNoShortcutPackageInfo(LAUNCHER_2, USER_10);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
                     list("s1", "s2"), getCallingUser());
@@ -2283,12 +2232,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                     "s2");
         });
 
-        assertShortcutPackageInfo(CALLING_PACKAGE_1, USER_0, 1);
-        assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_0, 2);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_3, USER_0);
-        assertShortcutPackageInfo(LAUNCHER_1, USER_0, 4);
-        assertShortcutPackageInfo(LAUNCHER_2, USER_0, 5);
-
         // Re-initialize and load from the files.
         mService.saveDirtyInfo();
         initService();
@@ -2297,12 +2240,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.handleUnlockUser(USER_0);
 
         // Make sure package info is restored too.
-        assertShortcutPackageInfo(CALLING_PACKAGE_1, USER_0, 1);
-        assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_0, 2);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_3, USER_0);
-        assertShortcutPackageInfo(LAUNCHER_1, USER_0, 4);
-        assertShortcutPackageInfo(LAUNCHER_2, USER_0, 5);
-
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
@@ -3234,10 +3171,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setLauncherComponent(
                 mService, new ComponentName("pkg1", "class"));
 
-        assertShortcutPackageInfo(CALLING_PACKAGE_1, USER_0, 1);
-        assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_0, 2);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_3, USER_0);
-
         // Restore.
         mService.saveDirtyInfo();
         initService();
@@ -3247,10 +3180,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // this will pre-load the per-user info.
         mService.handleUnlockUser(UserHandle.USER_SYSTEM);
-
-        assertShortcutPackageInfo(CALLING_PACKAGE_1, USER_0, 1);
-        assertShortcutPackageInfo(CALLING_PACKAGE_2, USER_0, 2);
-        assertNoShortcutPackageInfo(CALLING_PACKAGE_3, USER_0);
 
         // Now it's loaded.
         assertEquals(1, mService.getShortcutsForTest().size());
@@ -3394,11 +3323,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
         assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-
         mService.saveDirtyInfo();
 
         // Nonexistent package.
@@ -3430,11 +3354,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
         assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-
         mService.saveDirtyInfo();
 
         // Remove a package.
@@ -3464,11 +3383,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertShortcutExists(CALLING_PACKAGE_2, "s0_2", USER_0);
         assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
         assertShortcutExists(CALLING_PACKAGE_2, "s10_2", USER_10);
-
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
 
         mService.saveDirtyInfo();
 
@@ -3524,11 +3438,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertShortcutExists(CALLING_PACKAGE_1, "s10_1", USER_10);
         assertShortcutNotExists(CALLING_PACKAGE_2, "s10_2", USER_10);
 
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-
         mService.saveDirtyInfo();
 
         // Remove the other launcher from user 10 too.
@@ -3583,6 +3492,97 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertShortcutNotExists(CALLING_PACKAGE_2, "s10_2", USER_10);
 
         mService.saveDirtyInfo();
+    }
+
+
+    public void testSaveAndLoadUser_forBackup() {
+        // Create some shortcuts.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_0));
+
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_P0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_P0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_P0));
+
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s1", USER_0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s2", USER_0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s3", USER_0));
+
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
+
+        // Pin some.
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("s1"), HANDLE_USER_0);
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("s2"), UserHandle.of(USER_P0));
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
+                    list("s3"), HANDLE_USER_0);
+        });
+
+        runWithCaller(LAUNCHER_1, USER_P0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("s2"), HANDLE_USER_0);
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("s3"), UserHandle.of(USER_P0));
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2,
+                    list("s1"), HANDLE_USER_0);
+        });
+
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("s3"), HANDLE_USER_10);
+        });
+
+        // Check the state.
+
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_0));
+
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_P0));
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_P0));
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_P0));
+
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_2, "s1", USER_0));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_2, "s2", USER_0));
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_2, "s3", USER_0));
+
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
+        assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
+        assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
+
+        // Make sure all the information is persisted.
+        mService.saveDirtyInfo();
+        initService();
+        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_P0);
+        mService.handleUnlockUser(USER_10);
     }
 
     public void testHandleGonePackage_crossProfile() {
@@ -3667,20 +3667,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        // These two shouldn't exist
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0, USER_P0));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
-
         // Make sure all the information is persisted.
         mService.saveDirtyInfo();
         initService();
@@ -3704,21 +3690,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        // These two shouldn't exist
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0, USER_P0));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
-
-
         // Start uninstalling.
         uninstallPackage(USER_10, LAUNCHER_1);
         mService.cleanupGonePackages(USER_10);
@@ -3738,16 +3709,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
 
         // Uninstall.
         uninstallPackage(USER_10, CALLING_PACKAGE_1);
@@ -3769,17 +3730,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
-
         uninstallPackage(USER_P0, LAUNCHER_1);
         mService.cleanupGonePackages(USER_0);
 
@@ -3799,17 +3749,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
-
         mService.cleanupGonePackages(USER_P0);
         
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
@@ -3827,17 +3766,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
 
         uninstallPackage(USER_P0, CALLING_PACKAGE_1);
 
@@ -3862,17 +3790,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
 
         // Uninstall
         uninstallPackage(USER_0, LAUNCHER_1);
@@ -3899,17 +3816,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
-
         uninstallPackage(USER_0, CALLING_PACKAGE_2);
 
         mService.saveDirtyInfo();
@@ -3933,17 +3839,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_10));
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
-
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_P0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_P0, USER_P0));
-        assertNull(mService.getPackageInfoForTest(LAUNCHER_1, USER_10, USER_10));
     }
 
     // TODO Detailed test for hasShortcutPermissionInner().
@@ -3998,27 +3893,6 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         checkCanRestoreTo(false, spi2, 11, "x", "sig2x", "sig1", "y");
     }
 
-    public void testShortcutPackageInfoRefresh() {
-        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 10, "sig1");
-
-        final ShortcutPackageInfo spi1 = ShortcutPackageInfo.generateForInstalledPackage(
-                mService, CALLING_PACKAGE_1, USER_0);
-
-        checkCanRestoreTo(true, spi1, 10, "sig1");
-
-        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 11, "sig1", "sig2");
-
-        spi1.refreshAndSave(mService, USER_0);
-
-        mService.handleCleanupUser(USER_0);
-        initService();
-
-        checkCanRestoreTo(false, spi1, 10, "sig1", "sig2");
-        checkCanRestoreTo(false, spi1, 11, "sig", "sig2");
-        checkCanRestoreTo(false, spi1, 11, "sig1", "sig");
-        checkCanRestoreTo(true, spi1, 11, "sig1", "sig2");
-    }
-
     public void testHandlePackageDelete() {
         setCaller(CALLING_PACKAGE_1, USER_0);
         assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
@@ -4038,73 +3912,56 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         setCaller(CALLING_PACKAGE_3, USER_10);
         assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
 
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_1, USER_0));
 
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_2, USER_10));
 
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
         mInjectedPackages.remove(CALLING_PACKAGE_1);
         mInjectedPackages.remove(CALLING_PACKAGE_3);
 
         mService.handleUnlockUser(USER_0);
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_10));
+
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
 
         mService.handleUnlockUser(USER_10);
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_0));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_10));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_2, USER_10));
-        assertNull(mService.getPackageInfoForTest(CALLING_PACKAGE_3, USER_10));
+
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
     }
 
     public void testHandlePackageUpdate() {
-        setCaller(CALLING_PACKAGE_1, USER_0);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
-
-        assertNotNull(mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0));
-        assertEquals(1, mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0).getVersionCode());
-
-        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 123);
-
-        mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageUpdateIntent("abc", USER_0));
-        assertEquals(1, mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0).getVersionCode());
-
-        mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageUpdateIntent("abc", USER_10));
-        assertEquals(1, mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0).getVersionCode());
-
-        mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
-        assertEquals(123, mService.getPackageInfoForTest(CALLING_PACKAGE_1, USER_0)
-                .getVersionCode());
+        // TODO: Make sure unshadow is called.
     }
 }
