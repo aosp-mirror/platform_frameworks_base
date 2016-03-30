@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
@@ -31,6 +32,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -49,7 +51,7 @@ public final class PrintAttributes implements Parcelable {
     @IntDef(flag = true, value = {
             COLOR_MODE_MONOCHROME, COLOR_MODE_COLOR
     })
-    public @interface ColorMode {
+    @interface ColorMode {
     }
     /** Color mode: Monochrome color scheme, for example one color is used. */
     public static final int COLOR_MODE_MONOCHROME = 1 << 0;
@@ -64,7 +66,7 @@ public final class PrintAttributes implements Parcelable {
     @IntDef(flag = true, value = {
             DUPLEX_MODE_NONE, DUPLEX_MODE_LONG_EDGE, DUPLEX_MODE_SHORT_EDGE
     })
-    public @interface DuplexMode {
+    @interface DuplexMode {
     }
     /** Duplex mode: No duplexing. */
     public static final int DUPLEX_MODE_NONE = 1 << 0;
@@ -76,23 +78,29 @@ public final class PrintAttributes implements Parcelable {
     private static final int VALID_DUPLEX_MODES =
             DUPLEX_MODE_NONE | DUPLEX_MODE_LONG_EDGE | DUPLEX_MODE_SHORT_EDGE;
 
-    private MediaSize mMediaSize;
-    private Resolution mResolution;
-    private Margins mMinMargins;
+    private @Nullable MediaSize mMediaSize;
+    private @Nullable Resolution mResolution;
+    private @Nullable Margins mMinMargins;
 
-    private int mColorMode;
-    private int mDuplexMode;
+    private @IntRange(from = 0) int mColorMode;
+    private @IntRange(from = 0) int mDuplexMode;
 
     PrintAttributes() {
         /* hide constructor */
     }
 
     private PrintAttributes(@NonNull Parcel parcel) {
-        mMediaSize = (parcel.readInt() ==  1) ? MediaSize.createFromParcel(parcel) : null;
-        mResolution = (parcel.readInt() ==  1) ? Resolution.createFromParcel(parcel) : null;
-        mMinMargins = (parcel.readInt() ==  1) ? Margins.createFromParcel(parcel) : null;
+        mMediaSize = (parcel.readInt() == 1) ? MediaSize.createFromParcel(parcel) : null;
+        mResolution = (parcel.readInt() == 1) ? Resolution.createFromParcel(parcel) : null;
+        mMinMargins = (parcel.readInt() == 1) ? Margins.createFromParcel(parcel) : null;
         mColorMode = parcel.readInt();
+        if (mColorMode != 0) {
+            enforceValidColorMode(mColorMode);
+        }
         mDuplexMode = parcel.readInt();
+        if (mDuplexMode != 0) {
+            enforceValidDuplexMode(mDuplexMode);
+        }
     }
 
     /**
@@ -179,7 +187,7 @@ public final class PrintAttributes implements Parcelable {
      * @see #COLOR_MODE_COLOR
      * @see #COLOR_MODE_MONOCHROME
      */
-    public @ColorMode int getColorMode() {
+    public @IntRange(from = 0) int getColorMode() {
         return mColorMode;
     }
 
@@ -214,13 +222,13 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Gets the duplex mode.
      *
-     * @return The duplex mode.
+     * @return The duplex mode or zero if not set.
      *
      * @see #DUPLEX_MODE_NONE
      * @see #DUPLEX_MODE_LONG_EDGE
      * @see #DUPLEX_MODE_SHORT_EDGE
      */
-    public @DuplexMode int getDuplexMode() {
+    public @IntRange(from = 0) int getDuplexMode() {
         return mDuplexMode;
     }
 
@@ -448,7 +456,7 @@ public final class PrintAttributes implements Parcelable {
         private static final String LOG_TAG = "MediaSize";
 
         private static final Map<String, MediaSize> sIdToMediaSizeMap =
-                new ArrayMap<String, MediaSize>();
+                new ArrayMap<>();
 
         /**
          * Unknown media size in portrait mode.
@@ -781,15 +789,15 @@ public final class PrintAttributes implements Parcelable {
                 new MediaSize("JPN_YOU4", "android",
                         R.string.mediasize_japanese_you4, 4134, 9252);
 
-        private final String mId;
+        private final @NonNull String mId;
         /**@hide */
-        public final String mLabel;
+        public final @NonNull String mLabel;
         /**@hide */
-        public final String mPackageName;
+        public final @Nullable String mPackageName;
         /**@hide */
-        public final int mLabelResId;
-        private final int mWidthMils;
-        private final int mHeightMils;
+        public final @StringRes int mLabelResId;
+        private final @IntRange(from = 1) int mWidthMils;
+        private final @IntRange(from = 1) int mHeightMils;
 
         /**
          * Creates a new instance.
@@ -808,29 +816,7 @@ public final class PrintAttributes implements Parcelable {
          */
         public MediaSize(String id, String packageName, int labelResId,
                 int widthMils, int heightMils) {
-            if (TextUtils.isEmpty(id)) {
-                throw new IllegalArgumentException("id cannot be empty.");
-            }
-            if (TextUtils.isEmpty(packageName)) {
-                throw new IllegalArgumentException("packageName cannot be empty.");
-            }
-            if (labelResId <= 0) {
-                throw new IllegalArgumentException("labelResId must be greater than zero.");
-            }
-            if (widthMils <= 0) {
-                throw new IllegalArgumentException("widthMils "
-                        + "cannot be less than or equal to zero.");
-            }
-            if (heightMils <= 0) {
-                throw new IllegalArgumentException("heightMils "
-                       + "cannot be less than or euqual to zero.");
-            }
-            mPackageName = packageName;
-            mId = id;
-            mLabelResId = labelResId;
-            mWidthMils = widthMils;
-            mHeightMils = heightMils;
-            mLabel = null;
+            this(id, null, packageName, widthMils, heightMils, labelResId);
 
             // Build this mapping only for predefined media sizes.
             sIdToMediaSizeMap.put(mId, this);
@@ -851,26 +837,7 @@ public final class PrintAttributes implements Parcelable {
          */
         public MediaSize(@NonNull String id, @NonNull String label,
                 @IntRange(from = 1) int widthMils, @IntRange(from = 1) int heightMils) {
-            if (TextUtils.isEmpty(id)) {
-                throw new IllegalArgumentException("id cannot be empty.");
-            }
-            if (TextUtils.isEmpty(label)) {
-                throw new IllegalArgumentException("label cannot be empty.");
-            }
-            if (widthMils <= 0) {
-                throw new IllegalArgumentException("widthMils "
-                        + "cannot be less than or equal to zero.");
-            }
-            if (heightMils <= 0) {
-                throw new IllegalArgumentException("heightMils "
-                       + "cannot be less than or euqual to zero.");
-            }
-            mId = id;
-            mLabel = label;
-            mWidthMils = widthMils;
-            mHeightMils = heightMils;
-            mLabelResId = 0;
-            mPackageName = null;
+            this(id, label, null, widthMils, heightMils, 0);
         }
 
         /**
@@ -890,15 +857,37 @@ public final class PrintAttributes implements Parcelable {
             return definedMediaSizes;
         }
 
-        /** @hide */
-        public MediaSize(String id, String label, String packageName,
-                int widthMils, int heightMils, int labelResId) {
+        /**
+         * Creates a new instance.
+         *
+         * @param id The unique media size id. It is unique amongst other media sizes
+         *        supported by the printer.
+         * @param label The <strong>localized</strong> human readable label.
+         * @param packageName The name of the creating package.
+         * @param widthMils The width in mils (thousands of an inch).
+         * @param heightMils The height in mils (thousands of an inch).
+         * @param labelResId The resource if of a human readable label.
+         *
+         * @throws IllegalArgumentException If the id is empty or the label is unset
+         * or the widthMils is less than or equal to zero or the heightMils is less
+         * than or equal to zero.
+         *
+         * @hide
+         */
+        public MediaSize(String id, String label, String packageName, int widthMils, int heightMils,
+                int labelResId) {
             mPackageName = packageName;
-            mId = id;
+            mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty.");
             mLabelResId = labelResId;
-            mWidthMils = widthMils;
-            mHeightMils = heightMils;
+            mWidthMils = Preconditions.checkArgumentPositive(widthMils, "widthMils cannot be " +
+                    "less than or equal to zero.");
+            mHeightMils = Preconditions.checkArgumentPositive(heightMils, "heightMils cannot be " +
+                    "less than or equal to zero.");
             mLabel = label;
+
+            // The label has to be either a string ot a StringRes
+            Preconditions.checkArgument(!TextUtils.isEmpty(label) !=
+                    (!TextUtils.isEmpty(packageName) && labelResId != 0), "label cannot be empty.");
         }
 
         /**
@@ -926,10 +915,7 @@ public final class PrintAttributes implements Parcelable {
                 try {
                     return packageManager.getResourcesForApplication(
                             mPackageName).getString(mLabelResId);
-                } catch (NotFoundException nfe) {
-                    Log.w(LOG_TAG, "Could not load resouce" + mLabelResId
-                            + " from package " + mPackageName);
-                } catch (NameNotFoundException nnfee) {
+                } catch (NotFoundException | NameNotFoundException e) {
                     Log.w(LOG_TAG, "Could not load resouce" + mLabelResId
                             + " from package " + mPackageName);
                 }
@@ -1084,10 +1070,10 @@ public final class PrintAttributes implements Parcelable {
      * the one with 300 DPI resolution.
      */
     public static final class Resolution {
-        private final String mId;
-        private final String mLabel;
-        private final int mHorizontalDpi;
-        private final int mVerticalDpi;
+        private final @NonNull String mId;
+        private final @NonNull String mLabel;
+        private final @IntRange(from = 1) int mHorizontalDpi;
+        private final @IntRange(from = 1) int mVerticalDpi;
 
         /**
          * Creates a new instance.
@@ -1244,8 +1230,7 @@ public final class PrintAttributes implements Parcelable {
          * @param rightMils The right margin in mils (thousands of an inch).
          * @param bottomMils The bottom margin in mils (thousands of an inch).
          */
-        public Margins(@IntRange(from = 0) int leftMils, @IntRange(from = 0) int topMils,
-                @IntRange(from = 0) int rightMils, @IntRange(from = 0) int bottomMils) {
+        public Margins(int leftMils, int topMils, int rightMils, int bottomMils) {
             mTopMils = topMils;
             mLeftMils = leftMils;
             mRightMils = rightMils;
@@ -1257,7 +1242,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The left margin.
          */
-        public @IntRange(from = 0) int getLeftMils() {
+        public int getLeftMils() {
             return mLeftMils;
         }
 
@@ -1266,7 +1251,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The top margin.
          */
-        public @IntRange(from = 0) int getTopMils() {
+        public int getTopMils() {
             return mTopMils;
         }
 
@@ -1275,7 +1260,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The right margin.
          */
-        public @IntRange(from = 0) int getRightMils() {
+        public int getRightMils() {
             return mRightMils;
         }
 
@@ -1284,7 +1269,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The bottom margin.
          */
-        public @IntRange(from = 0) int getBottomMils() {
+        public int getBottomMils() {
             return mBottomMils;
         }
 
