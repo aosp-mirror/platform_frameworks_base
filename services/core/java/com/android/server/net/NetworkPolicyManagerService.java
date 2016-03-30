@@ -2301,7 +2301,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final int state = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
                 fout.print(" state=");
                 fout.print(state);
-                fout.print(state <= ActivityManager.PROCESS_STATE_TOP ? " (fg)" : " (bg)");
+                if (state <= ActivityManager.PROCESS_STATE_TOP) {
+                    fout.print(" (fg)");
+                } else {
+                    fout.print(state <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+                            ? " (fg svc)" : " (bg)");
+                }
 
                 final int rule = mUidRules.get(uid, RULE_UNKNOWN);
                 fout.print(" rule=");
@@ -2336,6 +2341,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private boolean isUidForegroundLocked(int uid) {
         return isUidStateForegroundLocked(
                 mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY));
+    }
+
+    private boolean isUidForegroundOnRestrictBackgroundLocked(int uid) {
+        final int procState = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+        return isProcStateAllowedWhileOnRestrictBackgroundLocked(procState);
     }
 
     private boolean isUidStateForegroundLocked(int state) {
@@ -2396,8 +2406,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private void updateRestrictBackgroundRulesOnUidStatusChangedLocked(int uid, int oldUidState,
             int newUidState) {
-        final boolean oldForeground = oldUidState <= ActivityManager.PROCESS_STATE_TOP;
-        final boolean newForeground = newUidState <= ActivityManager.PROCESS_STATE_TOP;
+        final boolean oldForeground =
+                isProcStateAllowedWhileOnRestrictBackgroundLocked(oldUidState);
+        final boolean newForeground =
+                isProcStateAllowedWhileOnRestrictBackgroundLocked(newUidState);
         if (oldForeground != newForeground) {
             updateRuleForRestrictBackgroundLocked(uid);
         }
@@ -2421,7 +2433,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // only update rules for anyone with foreground activities
         final int size = mUidState.size();
         for (int i = 0; i < size; i++) {
-            if (mUidState.valueAt(i) <= ActivityManager.PROCESS_STATE_TOP) {
+            if (mUidState.valueAt(i) <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                 final int uid = mUidState.keyAt(i);
                 updateRestrictionRulesForUidLocked(uid);
             }
@@ -2429,6 +2441,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
+        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+    }
+
+    static boolean isProcStateAllowedWhileOnRestrictBackgroundLocked(int procState) {
         return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
@@ -2715,7 +2731,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
-        final boolean isForeground = isUidForegroundLocked(uid);
+        final boolean isForeground = isUidForegroundOnRestrictBackgroundLocked(uid);
         final boolean isBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
         final boolean isWhitelisted = mRestrictBackgroundWhitelistUids.get(uid);
 
