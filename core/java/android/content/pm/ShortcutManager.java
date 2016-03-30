@@ -19,15 +19,13 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
+// TODO Enhance javadoc
 /**
- * TODO Enhance javadoc
- *
  * {@link ShortcutManager} manages shortcuts created by applications.
  *
  * <h3>Dynamic shortcuts and pinned shortcuts</h3>
@@ -66,14 +64,17 @@ import java.util.List;
  * {@link #getRemainingCallCount()} times until the rate-limiting counter is reset,
  * which happens at a certain time every day.
  *
- * <p>An applications can use {@link #getRateLimitResetTime()} to get the next reset time.
+ * <p>An application can use {@link #getRateLimitResetTime()} to get the next reset time.
+ *
+ * <p>For testing purposes, use "Developer Options" (found in the Settings menu) to reset the
+ * internal rate-limiting counter.  Automated tests can use the following ADB shell command to
+ * achieve the same effect:</p>
+ * <pre>adb shell cmd shortcut reset-throttling</pre>
  *
  * <h3>Backup and Restore</h3>
  *
  * Shortcuts will be backed up and restored across devices.  This means all information, including
  * IDs, must be meaningful on a different device.
- *
- * TODO: Define a Broadcast to let apps update shortcuts on a restored device.
  *
  * <h3>APIs for launcher</h3>
  *
