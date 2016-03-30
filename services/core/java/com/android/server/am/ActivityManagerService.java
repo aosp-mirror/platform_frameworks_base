@@ -892,6 +892,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         int mNesting;
         long mStartTime;
 
+        // states of the source process when the bind occurred.
+        int mLastState = ActivityManager.MAX_PROCESS_STATE + 1;
+        long mLastStateUptime;
+        long[] mStateTimes = new long[ActivityManager.MAX_PROCESS_STATE
+                - ActivityManager.MIN_PROCESS_STATE+1];
+
         Association(int sourceUid, String sourceProcess, int targetUid,
                 ComponentName targetComponent, String targetProcess) {
             mSourceUid = sourceUid;
@@ -6057,8 +6063,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         "No more processes in " + old.uidRecord);
                 enqueueUidChangeLocked(old.uidRecord, -1, UidRecord.CHANGE_GONE);
                 mActiveUids.remove(uid);
-                mBatteryStatsService.noteUidProcessState(uid,
-                        ActivityManager.PROCESS_STATE_NONEXISTENT);
+                noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
             }
             old.uidRecord = null;
         }
@@ -6083,7 +6088,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
             mActiveUids.put(proc.uid, uidRec);
-            mBatteryStatsService.noteUidProcessState(uidRec.uid, uidRec.curProcState);
+            noteUidProcessState(uidRec.uid, uidRec.curProcState);
             enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
         }
         proc.uidRecord = uidRec;
@@ -10191,7 +10196,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             cpr.connections.add(conn);
             r.conProviders.add(conn);
-            startAssociationLocked(r.uid, r.processName, cpr.uid, cpr.name, cpr.info.processName);
+            startAssociationLocked(r.uid, r.processName, r.curProcState,
+                    cpr.uid, cpr.name, cpr.info.processName);
             return conn;
         }
         cpr.addExternalProcessHandleLocked(externalProcessToken);
@@ -13798,10 +13804,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                         TimeUtils.formatDuration(dur, pw);
                         pw.print(" (");
                         pw.print(ass.mCount);
-                        pw.println(" times)");
+                        pw.print(" times)");
+                        pw.print("  ");
+                        for (int i=0; i<ass.mStateTimes.length; i++) {
+                            long amt = ass.mStateTimes[i];
+                            if (ass.mLastState-ActivityManager.MIN_PROCESS_STATE == i) {
+                                amt += now - ass.mLastStateUptime;
+                            }
+                            if (amt != 0) {
+                                pw.print(" ");
+                                pw.print(ProcessList.makeProcStateString(
+                                            i + ActivityManager.MIN_PROCESS_STATE));
+                                pw.print("=");
+                                TimeUtils.formatDuration(amt, pw);
+                                if (ass.mLastState-ActivityManager.MIN_PROCESS_STATE == i) {
+                                    pw.print("*");
+                                }
+                            }
+                        }
+                        pw.println();
                         if (ass.mNesting > 0) {
-                            pw.print("    ");
-                            pw.print(" Currently active: ");
+                            pw.print("    Currently active: ");
                             TimeUtils.formatDuration(now - ass.mStartTime, pw);
                             pw.println();
                         }
@@ -18239,8 +18262,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return null;
     }
 
-    Association startAssociationLocked(int sourceUid, String sourceProcess, int targetUid,
-            ComponentName targetComponent, String targetProcess) {
+    Association startAssociationLocked(int sourceUid, String sourceProcess, int sourceState,
+            int targetUid, ComponentName targetComponent, String targetProcess) {
         if (!mTrackingAssociations) {
             return null;
         }
@@ -18269,7 +18292,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         ass.mCount++;
         ass.mNesting++;
         if (ass.mNesting == 1) {
-            ass.mStartTime = SystemClock.uptimeMillis();
+            ass.mStartTime = ass.mLastStateUptime = SystemClock.uptimeMillis();
+            ass.mLastState = sourceState;
         }
         return ass;
     }
@@ -18298,7 +18322,39 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         ass.mNesting--;
         if (ass.mNesting == 0) {
-            ass.mTime += SystemClock.uptimeMillis() - ass.mStartTime;
+            long uptime = SystemClock.uptimeMillis();
+            ass.mTime += uptime - ass.mStartTime;
+            ass.mStateTimes[ass.mLastState-ActivityManager.MIN_PROCESS_STATE]
+                    += uptime - ass.mLastStateUptime;
+            ass.mLastState = ActivityManager.MAX_PROCESS_STATE + 2;
+        }
+    }
+
+    private void noteUidProcessState(final int uid, final int state) {
+        mBatteryStatsService.noteUidProcessState(uid, state);
+        if (mTrackingAssociations) {
+            for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
+                ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
+                        = mAssociations.valueAt(i1);
+                for (int i2=0, N2=targetComponents.size(); i2<N2; i2++) {
+                    SparseArray<ArrayMap<String, Association>> sourceUids
+                            = targetComponents.valueAt(i2);
+                    ArrayMap<String, Association> sourceProcesses = sourceUids.get(uid);
+                    if (sourceProcesses != null) {
+                        for (int i4=0, N4=sourceProcesses.size(); i4<N4; i4++) {
+                            Association ass = sourceProcesses.valueAt(i4);
+                            if (ass.mNesting >= 1) {
+                                // currently associated
+                                long uptime = SystemClock.uptimeMillis();
+                                ass.mStateTimes[ass.mLastState-ActivityManager.MIN_PROCESS_STATE]
+                                        += uptime - ass.mLastStateUptime;
+                                ass.mLastState = state;
+                                ass.mLastStateUptime = uptime;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -20177,7 +20233,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 uidRec.setProcState = uidRec.curProcState;
                 enqueueUidChangeLocked(uidRec, -1, uidChange);
-                mBatteryStatsService.noteUidProcessState(uidRec.uid, uidRec.curProcState);
+                noteUidProcessState(uidRec.uid, uidRec.curProcState);
             }
         }
 
