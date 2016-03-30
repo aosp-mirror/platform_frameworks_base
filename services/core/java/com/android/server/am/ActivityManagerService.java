@@ -1468,6 +1468,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int FIRST_COMPAT_MODE_MSG = 300;
     static final int FIRST_SUPERVISOR_STACK_MSG = 100;
 
+    static ServiceThread sKillThread = null;
+    static KillHandler sKillHandler = null;
+
     CompatModeDialog mCompatModeDialog;
     long mLastMemUsageReportTime = 0;
 
@@ -1490,6 +1493,30 @@ public final class ActivityManagerService extends ActivityManagerNative
     final UiHandler mUiHandler;
 
     PackageManagerInternal mPackageManagerInt;
+
+    final class KillHandler extends Handler {
+        static final int KILL_PROCESS_GROUP_MSG = 4000;
+
+        public KillHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case KILL_PROCESS_GROUP_MSG:
+                {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "killProcessGroup");
+                    Process.killProcessGroup(msg.arg1 /* uid */, msg.arg2 /* pid */);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                }
+                break;
+
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
 
     final class UiHandler extends Handler {
         public UiHandler() {
@@ -2459,6 +2486,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         mHandler = new MainHandler(mHandlerThread.getLooper());
         mUiHandler = new UiHandler();
 
+        /* static; one-time init here */
+        if (sKillHandler == null) {
+            sKillThread = new ServiceThread(TAG + ":kill",
+                    android.os.Process.THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
+            sKillThread.start();
+            sKillHandler = new KillHandler(sKillThread.getLooper());
+        }
+
         mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "foreground", BROADCAST_FG_TIMEOUT, false);
         mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
@@ -3007,9 +3042,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     static void killProcessGroup(int uid, int pid) {
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "killProcessGroup");
-        Process.killProcessGroup(uid, pid);
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        if (sKillHandler != null) {
+            sKillHandler.sendMessage(
+                    sKillHandler.obtainMessage(KillHandler.KILL_PROCESS_GROUP_MSG, uid, pid));
+        } else {
+            Slog.w(TAG, "Asked to kill process group before system bringup!");
+            Process.killProcessGroup(uid, pid);
+        }
     }
 
     final void removeLruProcessLocked(ProcessRecord app) {
