@@ -27,6 +27,7 @@ import android.content.pm.ParceledListSlice;
 import android.media.MediaDescription;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -475,14 +476,8 @@ public final class MediaBrowser {
         // the service will be told when we connect.
         if (mState == CONNECT_STATE_CONNECTED) {
             try {
-                // NOTE: Do not call addSubscriptionWithOptions when options are null. Otherwise,
-                // it will break the action of support library which expects addSubscription will
-                // be called when options are null.
-                if (options == null) {
-                    mServiceBinder.addSubscription(parentId, mServiceCallbacks);
-                } else {
-                    mServiceBinder.addSubscriptionWithOptions(parentId, options, mServiceCallbacks);
-                }
+                mServiceBinder.addSubscription(parentId, callback.mToken, options,
+                        mServiceCallbacks);
             } catch (RemoteException ex) {
                 // Process is crashing. We will disconnect, and upon reconnect we will
                 // automatically reregister. So nothing to do here.
@@ -497,34 +492,37 @@ public final class MediaBrowser {
             throw new IllegalArgumentException("parentId is empty.");
         }
 
-        // Remove from our list.
         Subscription sub = mSubscriptions.get(parentId);
-
+        if (sub == null) {
+            return;
+        }
         // Tell the service if necessary.
-        if (mState == CONNECT_STATE_CONNECTED && sub != null) {
-            try {
-                if (callback == null) {
-                    mServiceBinder.removeSubscription(parentId, mServiceCallbacks);
-                } else {
-                    final List<SubscriptionCallback> callbacks = sub.getCallbacks();
-                    final List<Bundle> optionsList = sub.getOptionsList();
-                    for (int i = callbacks.size() - 1; i >= 0; --i) {
-                        if (callbacks.get(i) == callback) {
-                            mServiceBinder.removeSubscriptionWithOptions(
-                                    parentId, optionsList.get(i), mServiceCallbacks);
-                            callbacks.remove(i);
-                            optionsList.remove(i);
+        try {
+            if (callback == null) {
+                if (mState == CONNECT_STATE_CONNECTED) {
+                    mServiceBinder.removeSubscription(parentId, null, mServiceCallbacks);
+                }
+            } else {
+                final List<SubscriptionCallback> callbacks = sub.getCallbacks();
+                final List<Bundle> optionsList = sub.getOptionsList();
+                for (int i = callbacks.size() - 1; i >= 0; --i) {
+                    if (callbacks.get(i) == callback) {
+                        if (mState == CONNECT_STATE_CONNECTED) {
+                            mServiceBinder.removeSubscription(
+                                    parentId, callback.mToken, mServiceCallbacks);
                         }
+                        callbacks.remove(i);
+                        optionsList.remove(i);
                     }
                 }
-            } catch (RemoteException ex) {
-                // Process is crashing. We will disconnect, and upon reconnect we will
-                // automatically reregister. So nothing to do here.
-                Log.d(TAG, "removeSubscription failed with RemoteException parentId=" + parentId);
             }
+        } catch (RemoteException ex) {
+            // Process is crashing. We will disconnect, and upon reconnect we will
+            // automatically reregister. So nothing to do here.
+            Log.d(TAG, "removeSubscription failed with RemoteException parentId=" + parentId);
         }
 
-        if (sub != null && (sub.isEmpty() || callback == null)) {
+        if (sub.isEmpty() || callback == null) {
             mSubscriptions.remove(parentId);
         }
     }
@@ -579,17 +577,12 @@ public final class MediaBrowser {
                 for (Entry<String, Subscription> subscriptionEntry : mSubscriptions.entrySet()) {
                     String id = subscriptionEntry.getKey();
                     Subscription sub = subscriptionEntry.getValue();
-                    for (Bundle options : sub.getOptionsList()) {
+                    List<SubscriptionCallback> callbackList = sub.getCallbacks();
+                    List<Bundle> optionsList = sub.getOptionsList();
+                    for (int i = 0; i < callbackList.size(); ++i) {
                         try {
-                            // NOTE: Do not call addSubscriptionWithOptions when options are null.
-                            // Otherwise, it will break the action of support library which expects
-                            // addSubscription will be called when options are null.
-                            if (options == null) {
-                                mServiceBinder.addSubscription(id, mServiceCallbacks);
-                            } else {
-                                mServiceBinder.addSubscriptionWithOptions(
-                                        id, options, mServiceCallbacks);
-                            }
+                            mServiceBinder.addSubscription(id, callbackList.get(i).mToken,
+                                    optionsList.get(i), mServiceCallbacks);
                         } catch (RemoteException ex) {
                             // Process is crashing. We will disconnect, and upon reconnect we will
                             // automatically reregister. So nothing to do here.
@@ -859,6 +852,12 @@ public final class MediaBrowser {
      * Callbacks for subscription related events.
      */
     public static abstract class SubscriptionCallback {
+        Binder mToken;
+
+        public SubscriptionCallback() {
+            mToken = new Binder();
+        }
+
         /**
          * Called when the list of children is loaded or updated.
          *
@@ -1071,12 +1070,7 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(String parentId, ParceledListSlice list) {
-            onLoadChildrenWithOptions(parentId, list, null);
-        }
-
-        @Override
-        public void onLoadChildrenWithOptions(String parentId, ParceledListSlice list,
+        public void onLoadChildren(String parentId, ParceledListSlice list,
                 final Bundle options) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
