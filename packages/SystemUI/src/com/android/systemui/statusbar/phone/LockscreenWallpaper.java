@@ -85,7 +85,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             // wallpaper.
             final int lockWallpaperUserId =
                     mSelectedUser != null ? mSelectedUser.getIdentifier() : mCurrentUserId;
-            ParcelFileDescriptor fd = mService.getWallpaper(null, WallpaperManager.FLAG_SET_LOCK,
+            ParcelFileDescriptor fd = mService.getWallpaper(null, WallpaperManager.FLAG_LOCK,
                     new Bundle(), lockWallpaperUserId);
             if (fd != null) {
                 try {
