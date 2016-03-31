@@ -377,6 +377,12 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 16;
 
+    /** @hide The lowest process state number */
+    public static final int MIN_PROCESS_STATE = PROCESS_STATE_NONEXISTENT;
+
+    /** @hide The highest process state number */
+    public static final int MAX_PROCESS_STATE = PROCESS_STATE_CACHED_EMPTY;
+
     /** @hide Should this process state be considered a background state? */
     public static final boolean isProcStateBackground(int procState) {
         return procState >= PROCESS_STATE_BACKUP;

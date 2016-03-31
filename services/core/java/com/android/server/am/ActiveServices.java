@@ -940,7 +940,7 @@ public final class ActiveServices {
                 }
             }
 
-            mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
+            mAm.startAssociationLocked(callerApp.uid, callerApp.processName, callerApp.curProcState,
                     s.appInfo.uid, s.name, s.processName);
 
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
