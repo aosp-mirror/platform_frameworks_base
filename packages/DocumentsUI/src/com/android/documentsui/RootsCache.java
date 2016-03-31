@@ -65,8 +65,6 @@ public class RootsCache {
 
     private static final String TAG = "RootsCache";
 
-    private static final boolean ENABLE_SYSTEM_CACHE = true;
-
     private final Context mContext;
     private final ContentObserver mObserver;
     private OnCacheUpdateListener mCacheUpdateListener;
@@ -200,7 +198,7 @@ public class RootsCache {
         synchronized (mLock) {
             for (String authority : mStoppedAuthorities) {
                 if (DEBUG) Log.d(TAG, "Loading stopped authority " + authority);
-                mRoots.putAll(authority, loadRootsForAuthority(resolver, authority));
+                mRoots.putAll(authority, loadRootsForAuthority(resolver, authority, true));
             }
             mStoppedAuthorities.clear();
         }
@@ -219,13 +217,13 @@ public class RootsCache {
             if (DEBUG) {
                 Log.d(TAG, "Loading stopped authority " + authority);
             }
-            mRoots.putAll(authority, loadRootsForAuthority(resolver, authority));
+            mRoots.putAll(authority, loadRootsForAuthority(resolver, authority, true));
             mStoppedAuthorities.remove(authority);
         }
     }
 
     private class UpdateTask extends AsyncTask<Void, Void, Void> {
-        private final String mFilterPackage;
+        private final String mForceRefreshPackage;
 
         private final Multimap<String, RootInfo> mTaskRoots = ArrayListMultimap.create();
         private final HashSet<String> mTaskStoppedAuthorities = new HashSet<>();
@@ -238,18 +236,18 @@ public class RootsCache {
         }
 
         /**
-         * Only update roots belonging to given package name. Other roots will
+         * Force update roots belonging to given package name. Other roots will
          * be copied from cached {@link #mRoots} values.
          */
-        public UpdateTask(String filterPackage) {
-            mFilterPackage = filterPackage;
+        public UpdateTask(String forceRefreshPackage) {
+            mForceRefreshPackage = forceRefreshPackage;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             final long start = SystemClock.elapsedRealtime();
 
-            if (mFilterPackage != null) {
+            if (mForceRefreshPackage != null) {
                 // We must have previously cached values to fill in non-matching
                 // packages, so wait around for successful first load.
                 if (!waitForFirstLoad()) {
@@ -302,29 +300,17 @@ public class RootsCache {
                 return;
             }
 
-            // Try using cached roots if filtering
-            boolean cacheHit = false;
-            if (mFilterPackage != null && !mFilterPackage.equals(info.packageName)) {
-                synchronized (mLock) {
-                    if (mTaskRoots.putAll(info.authority, mRoots.get(info.authority))) {
-                        if (DEBUG) Log.d(TAG, "Used cached roots for " + info.authority);
-                        cacheHit = true;
-                    }
-                }
-            }
-
-            // Cache miss, or loading everything
-            if (!cacheHit) {
-                mTaskRoots.putAll(info.authority,
-                        loadRootsForAuthority(mContext.getContentResolver(), info.authority));
-            }
+            final boolean forceRefresh = Objects.equals(mForceRefreshPackage, info.packageName);
+            mTaskRoots.putAll(info.authority, loadRootsForAuthority(mContext.getContentResolver(),
+                    info.authority, forceRefresh));
         }
     }
 
     /**
      * Bring up requested provider and query for all active roots.
      */
-    private Collection<RootInfo> loadRootsForAuthority(ContentResolver resolver, String authority) {
+    private Collection<RootInfo> loadRootsForAuthority(ContentResolver resolver, String authority,
+            boolean forceRefresh) {
         if (DEBUG) Log.d(TAG, "Loading roots for " + authority);
 
         synchronized (mObservedAuthorities) {
@@ -336,7 +322,7 @@ public class RootsCache {
         }
 
         final Uri rootsUri = DocumentsContract.buildRootsUri(authority);
-        if (ENABLE_SYSTEM_CACHE) {
+        if (!forceRefresh) {
             // Look for roots data that we might have cached for ourselves in the
             // long-lived system process.
             final Bundle systemCache = resolver.getCache(rootsUri);
@@ -363,14 +349,12 @@ public class RootsCache {
             ContentProviderClient.releaseQuietly(client);
         }
 
-        if (ENABLE_SYSTEM_CACHE) {
-            // Cache these freshly parsed roots over in the long-lived system
-            // process, in case our process goes away. The system takes care of
-            // invalidating the cache if the package or Uri changes.
-            final Bundle systemCache = new Bundle();
-            systemCache.putParcelableArrayList(TAG, roots);
-            resolver.putCache(rootsUri, systemCache);
-        }
+        // Cache these freshly parsed roots over in the long-lived system
+        // process, in case our process goes away. The system takes care of
+        // invalidating the cache if the package or Uri changes.
+        final Bundle systemCache = new Bundle();
+        systemCache.putParcelableArrayList(TAG, roots);
+        resolver.putCache(rootsUri, systemCache);
 
         return roots;
     }
@@ -384,8 +368,8 @@ public class RootsCache {
         synchronized (mLock) {
             RootInfo root = getRootLocked(authority, rootId);
             if (root == null) {
-                mRoots.putAll(
-                        authority, loadRootsForAuthority(mContext.getContentResolver(), authority));
+                mRoots.putAll(authority,
+                        loadRootsForAuthority(mContext.getContentResolver(), authority, false));
                 root = getRootLocked(authority, rootId);
             }
             return root;
