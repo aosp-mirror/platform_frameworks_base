@@ -67,7 +67,7 @@ public class SecurityLog {
      * information about the process encapsulated in an {@link Object} array, accessible via
      * {@link SecurityEvent#getData()}:
      * process name (String), exact start time (long), app Uid (integer), app Pid (integer),
-     * seinfo tag (String), SHA-256 hash of the APK in hexadecimal (String)
+     * seinfo tag (String), SHA-256 hash of the base APK in hexadecimal (String)
      */
     public static final int TAG_APP_PROCESS_START = SecurityLogTags.SECURITY_APP_PROCESS_START;
     /**
