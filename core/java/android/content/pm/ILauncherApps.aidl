@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.ParceledListSlice;
@@ -37,7 +38,7 @@ interface ILauncherApps {
     void addOnAppsChangedListener(String callingPackage, in IOnAppsChangedListener listener);
     void removeOnAppsChangedListener(in IOnAppsChangedListener listener);
     ParceledListSlice getLauncherActivities(String packageName, in UserHandle user);
-    ResolveInfo resolveActivity(in Intent intent, in UserHandle user);
+    ActivityInfo resolveActivity(in ComponentName component, in UserHandle user);
     void startActivityAsUser(in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     void showAppDetailsAsUser(in ComponentName component, in Rect sourceBounds,
