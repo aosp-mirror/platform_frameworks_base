@@ -228,6 +228,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Removes any entry with the given key from the mapping of this Bundle.
+     *
+     * @param key a String key
+     */
+    public void remove(String key) {
+        super.remove(key);
+        if ((mFlags & FLAG_HAS_FDS) != 0) {
+            mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        }
+    }
+
+    /**
      * Inserts all mappings from the given Bundle into this Bundle.
      *
      * @param bundle a Bundle
@@ -308,6 +320,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
             if (fdFound) {
                 mFlags |= FLAG_HAS_FDS;
+            } else {
+                mFlags &= ~FLAG_HAS_FDS;
             }
             mFlags |= FLAG_HAS_FDS_KNOWN;
         }
@@ -335,6 +349,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
                 mMap.removeAt(i);
             }
         }
+        mFlags |= FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_FDS;
     }
 
     /**
