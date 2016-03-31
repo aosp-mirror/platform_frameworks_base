@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * MediaMuxer facilitates muxing elementary streams. Currently supports mp4 or
  * webm file as the output and at most one audio and/or one video elementary
- * stream.
+ * stream. MediaMuxer does not support muxing B-frames.
  * <p>
  * It is generally used like this:
  *
