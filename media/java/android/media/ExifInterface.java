@@ -161,9 +161,14 @@ public class ExifInterface {
     public static final String TAG_EXPOSURE_PROGRAM = "ExposureProgram";
     /** Type is double. */
     public static final String TAG_EXPOSURE_TIME = "ExposureTime";
-    /** Type is String. */
+    /** Type is double. */
     public static final String TAG_F_NUMBER = "FNumber";
-    /** Type is String. */
+    /**
+     * Type is double.
+     *
+     * @deprecated use {@link #TAG_F_NUMBER} instead
+     */
+    @Deprecated
     public static final String TAG_APERTURE = "FNumber";
     /** Type is String. */
     public static final String TAG_FILE_SOURCE = "FileSource";
@@ -185,9 +190,14 @@ public class ExifInterface {
     public static final String TAG_FOCAL_PLANE_Y_RESOLUTION = "FocalPlaneYResolution";
     /** Type is rational. */
     public static final String TAG_GAIN_CONTROL = "GainControl";
-    /** Type is String. */
+    /** Type is int. */
     public static final String TAG_ISO_SPEED_RATINGS = "ISOSpeedRatings";
-    /** Type is String. */
+    /**
+     * Type is int.
+     *
+     * @deprecated use {@link #TAG_ISO_SPEED_RATINGS} instead
+     */
+    @Deprecated
     public static final String TAG_ISO = "ISOSpeedRatings";
     /** Type is String. */
     public static final String TAG_IMAGE_UNIQUE_ID = "ImageUniqueID";
