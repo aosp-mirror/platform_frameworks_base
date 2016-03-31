@@ -56,7 +56,26 @@ import java.util.Map;
 
 /**
  * Central system API to the overall TV input framework (TIF) architecture, which arbitrates
- * interaction between applications and the selected TV inputs.
+ * interaction between applications and the selected TV inputs. You can retrieve an instance of
+ * this interface with {@link android.content.Context#getSystemService
+ * Context.getSystemService(Context.TV_INPUT_SERVICE)}.
+ *
+ * <p>There are three primary parties involved in the TV input framework (TIF) architecture:
+ *
+ * <ul>
+ * <li>The <strong>TV input manager</strong> as expressed by this class is the central point of the
+ * system that manages interaction between all other parts. It is expressed as the client-side API
+ * here which exists in each application context and communicates with a global system service that
+ * manages the interaction across all processes.
+ * <li>A <strong>TV input</strong> implemented by {@link TvInputService} represents an input source
+ * of TV, which can be a pass-through input such as HDMI, or a tuner input which provides broadcast
+ * TV programs. The system binds to the TV input per application’s request.
+ * on implementing TV inputs.
+ * <li><strong>Applications</strong> talk to the TV input manager to list TV inputs and check their
+ * status. Once an application find the input to use, it uses {@link TvView} or
+ * {@link TvRecordingClient} for further interaction such as watching and recording broadcast TV
+ * programs.
+ * </ul>
  */
 public final class TvInputManager {
     private static final String TAG = "TvInputManager";
