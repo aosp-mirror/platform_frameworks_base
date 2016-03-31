@@ -126,4 +126,10 @@ class PackageManagerServiceCompilerMapping {
         return value;
     }
 
+    /**
+     * Return the non-profile-guided filter corresponding to the given filter.
+     */
+    public static String getNonProfileGuidedCompilerFilter(String filter) {
+        return DexFile.getNonProfileGuidedCompilerFilter(filter);
+    }
 }
