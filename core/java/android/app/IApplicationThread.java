@@ -158,8 +158,8 @@ public interface IApplicationThread extends IInterface {
     void notifyCleartextNetwork(byte[] firstPacket) throws RemoteException;
     void startBinderTracking() throws RemoteException;
     void stopBinderTrackingAndDump(FileDescriptor fd) throws RemoteException;
-    void scheduleMultiWindowChanged(IBinder token, boolean multiWindowMode) throws RemoteException;
-    void schedulePictureInPictureChanged(IBinder token, boolean multiWindowMode) throws RemoteException;
+    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) throws RemoteException;
+    void schedulePictureInPictureModeChanged(IBinder token, boolean isInPictureInPictureMode) throws RemoteException;
     void scheduleLocalVoiceInteractionStarted(IBinder token, IVoiceInteractor voiceInteractor) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";

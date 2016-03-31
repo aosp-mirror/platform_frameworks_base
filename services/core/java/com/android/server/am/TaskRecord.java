@@ -1449,7 +1449,7 @@ final class TaskRecord {
         }
 
         if (mFullscreen != oldFullscreen) {
-            mService.mStackSupervisor.scheduleReportMultiWindowChanged(this);
+            mService.mStackSupervisor.scheduleReportMultiWindowModeChanged(this);
         }
 
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;

@@ -2069,26 +2069,26 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         mParent = null;
     }
 
-    public void dispatchMultiWindowChanged(boolean inMultiWindow) {
+    public void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
         if (mAdded == null) {
             return;
         }
         for (int i = mAdded.size() - 1; i >= 0; --i) {
             final Fragment f = mAdded.get(i);
             if (f != null) {
-                f.performMultiWindowChanged(inMultiWindow);
+                f.performMultiWindowModeChanged(isInMultiWindowMode);
             }
         }
     }
 
-    public void dispatchPictureInPictureChanged(boolean inPictureInPicture) {
+    public void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (mAdded == null) {
             return;
         }
         for (int i = mAdded.size() - 1; i >= 0; --i) {
             final Fragment f = mAdded.get(i);
             if (f != null) {
-                f.performPictureInPictureChanged(inPictureInPicture);
+                f.performPictureInPictureModeChanged(isInPictureInPictureMode);
             }
         }
     }

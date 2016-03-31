@@ -247,10 +247,10 @@ public class FragmentController {
      * the activity changed.
      * <p>Call when the multi-window mode of the activity changed.
      *
-     * @see Fragment#onMultiWindowChanged
+     * @see Fragment#onMultiWindowModeChanged
      */
-    public void dispatchMultiWindowChanged(boolean inMultiWindow) {
-        mHost.mFragmentManager.dispatchMultiWindowChanged(inMultiWindow);
+    public void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        mHost.mFragmentManager.dispatchMultiWindowModeChanged(isInMultiWindowMode);
     }
 
     /**
@@ -258,10 +258,10 @@ public class FragmentController {
      * mode of the activity changed.
      * <p>Call when the picture-in-picture mode of the activity changed.
      *
-     * @see Fragment#onPictureInPictureChanged
+     * @see Fragment#onPictureInPictureModeChanged
      */
-    public void dispatchPictureInPictureChanged(boolean inPictureInPicture) {
-        mHost.mFragmentManager.dispatchPictureInPictureChanged(inPictureInPicture);
+    public void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        mHost.mFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     /**

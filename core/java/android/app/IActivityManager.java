@@ -623,11 +623,11 @@ public interface IActivityManager extends IInterface {
 
     public int getAppStartMode(int uid, String packageName) throws RemoteException;
 
-    public boolean inMultiWindow(IBinder token) throws RemoteException;
+    public boolean isInMultiWindowMode(IBinder token) throws RemoteException;
 
-    public boolean inPictureInPicture(IBinder token) throws RemoteException;
+    public boolean isInPictureInPictureMode(IBinder token) throws RemoteException;
 
-    public void enterPictureInPicture(IBinder token) throws RemoteException;
+    public void enterPictureInPictureMode(IBinder token) throws RemoteException;
 
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName)
             throws RemoteException;

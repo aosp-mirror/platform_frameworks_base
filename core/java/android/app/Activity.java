@@ -51,12 +51,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.session.MediaController;
@@ -121,7 +116,6 @@ import android.widget.Toolbar;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 import java.io.FileDescriptor;
@@ -1855,15 +1849,15 @@ public class Activity extends ContextThemeWrapper
      * visa-versa.
      * @see android.R.attr#resizeableActivity
      *
-     * @param inMultiWindow True if the activity is in multi-window mode.
+     * @param isInMultiWindowMode True if the activity is in multi-window mode.
      */
     @CallSuper
-    public void onMultiWindowChanged(boolean inMultiWindow) {
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "onMultiWindowChanged " + this + ": " + inMultiWindow);
-        mFragments.dispatchMultiWindowChanged(inMultiWindow);
+                "onMultiWindowModeChanged " + this + ": " + isInMultiWindowMode);
+        mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode);
         if (mWindow != null) {
-            mWindow.onMultiWindowChanged();
+            mWindow.onMultiWindowModeChanged();
         }
     }
 
@@ -1873,9 +1867,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if the activity is in multi-window mode.
      */
-    public boolean inMultiWindow() {
+    public boolean isInMultiWindowMode() {
         try {
-            return ActivityManagerNative.getDefault().inMultiWindow(mToken);
+            return ActivityManagerNative.getDefault().isInMultiWindowMode(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1885,13 +1879,13 @@ public class Activity extends ContextThemeWrapper
      * Called by the system when the activity changes to and from picture-in-picture mode.
      * @see android.R.attr#supportsPictureInPicture
      *
-     * @param inPictureInPicture True if the activity is in picture-in-picture mode.
+     * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
      */
     @CallSuper
-    public void onPictureInPictureChanged(boolean inPictureInPicture) {
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "onPictureInPictureChanged " + this + ": " + inPictureInPicture);
-        mFragments.dispatchPictureInPictureChanged(inPictureInPicture);
+                "onPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode);
+        mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     /**
@@ -1900,9 +1894,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if the activity is in picture-in-picture mode.
      */
-    public boolean inPictureInPicture() {
+    public boolean isInPictureInPictureMode() {
         try {
-            return ActivityManagerNative.getDefault().inPictureInPicture(mToken);
+            return ActivityManagerNative.getDefault().isInPictureInPictureMode(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1912,9 +1906,9 @@ public class Activity extends ContextThemeWrapper
      * Puts the activity in picture-in-picture mode.
      * @see android.R.attr#supportsPictureInPicture
      */
-    public void enterPictureInPicture() {
+    public void enterPictureInPictureMode() {
         try {
-            ActivityManagerNative.getDefault().enterPictureInPicture(mToken);
+            ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken);
         } catch (RemoteException e) {
         }
     }
@@ -6920,14 +6914,25 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Check whether the caption on freeform windows is displayed directly on the content.
+     *
+     * @return True if caption is displayed on content, false if it pushes the content down.
+     *
+     * @see {@link #setOverlayWithDecorCaptionEnabled(boolean)}
+     */
+    public boolean isOverlayWithDecorCaptionEnabled() {
+        return mWindow.isOverlayWithDecorCaptionEnabled();
+    }
+
+    /**
      * Set whether the caption should displayed directly on the content rather than push it down.
      *
      * This affects only freeform windows since they display the caption and only the main
      * window of the activity. The caption is used to drag the window around and also shows
      * maximize and close action buttons.
      */
-    public void overlayWithDecorCaption(boolean overlay) {
-        mWindow.setOverlayDecorCaption(overlay);
+    public void setOverlayWithDecorCaptionEnabled(boolean enabled) {
+        mWindow.setOverlayWithDecorCaptionEnabled(enabled);
     }
 
     /**
