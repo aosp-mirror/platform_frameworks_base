@@ -143,7 +143,7 @@ public class QuickQSPanel extends QSPanel {
         }
     };
 
-    public static int getNumQuickTiles(Context context) {
+    public int getNumQuickTiles(Context context) {
         return TunerService.get(context).getValue(NUM_QUICK_TILES, 5);
     }
 
