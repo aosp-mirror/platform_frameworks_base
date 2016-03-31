@@ -1169,6 +1169,18 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         doFinish();
     }
 
+    /**
+     * Update the selected pages from the text field.
+     */
+    private void updateSelectedPagesFromTextField() {
+        PageRange[] selectedPages = computeSelectedPages();
+        if (!Arrays.equals(mSelectedPages, selectedPages)) {
+            mSelectedPages = selectedPages;
+            // Update preview.
+            updatePrintPreviewController(false);
+        }
+    }
+
     private void confirmPrint() {
         setState(STATE_PRINT_CONFIRMED);
 
@@ -1178,14 +1190,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         addCurrentPrinterToHistory();
         setUserPrinted();
 
-        PageRange[] selectedPages = computeSelectedPages();
-        if (!Arrays.equals(mSelectedPages, selectedPages)) {
-            mSelectedPages = selectedPages;
-            // Update preview.
-            updatePrintPreviewController(false);
-        }
-
+        // updateSelectedPagesFromTextField migth update the preview, hence apply the preview first
         updateSelectedPagesFromPreview();
+        updateSelectedPagesFromTextField();
+
         mPrintPreviewController.closeOptions();
 
         if (canUpdateDocument()) {
@@ -1485,6 +1493,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     cancelPrint();
                 }
             } else if (view == mMoreOptionsButton) {
+                // The selected pages is only applied once the user leaves the text field. A click
+                // on this button, does not count as leaving.
+                updateSelectedPagesFromTextField();
+
                 if (mCurrentPrinter != null) {
                     startAdvancedPrintOptionsActivity(mCurrentPrinter);
                 }
@@ -2773,13 +2785,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
 
             if (view == mPageRangeEditText && !hasFocus) {
-                PageRange[] selectedPages = computeSelectedPages();
-                if (selectedPages != null && !Arrays.equals(mSelectedPages, selectedPages)) {
-                    mSelectedPages = selectedPages;
-
-                    // Update preview.
-                    updatePrintPreviewController(false);
-                }
+                updateSelectedPagesFromTextField();
             }
         }
     }
