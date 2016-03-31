@@ -56,24 +56,17 @@ static const Comparison COMPARISONS[] = {
 static const int64_t IGNORE_EXCEEDING = seconds_to_nanoseconds(10);
 
 /*
- * Frames that are exempt from jank metrics.
- * First-draw frames, for example, are expected to
- * be slow, this is hidden from the user with window animations and
- * other tricks
- *
- * Similarly, we don't track direct-drawing via Surface:lockHardwareCanvas()
+ * We don't track direct-drawing via Surface:lockHardwareCanvas()
  * for now
  *
  * TODO: kSurfaceCanvas can negatively impact other drawing by using up
  * time on the RenderThread, figure out how to attribute that as a jank-causer
  */
-static const int64_t EXEMPT_FRAMES_FLAGS
-        = FrameInfoFlags::WindowLayoutChanged
-        | FrameInfoFlags::SurfaceCanvas;
+static const int64_t EXEMPT_FRAMES_FLAGS = FrameInfoFlags::SurfaceCanvas;
 
 // The bucketing algorithm controls so to speak
 // If a frame is <= to this it goes in bucket 0
-static const uint32_t kBucketMinThreshold = 7;
+static const uint32_t kBucketMinThreshold = 5;
 // If a frame is > this, start counting in increments of 2ms
 static const uint32_t kBucket2msIntervals = 32;
 // If a frame is > this, start counting in increments of 4ms
@@ -84,9 +77,14 @@ static const uint32_t kBucket4msIntervals = 48;
 // and filter it out of the frame profile data
 static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 
+// The interval of the slow frame histogram
+static const uint32_t kSlowFrameBucketIntervalMs = 50;
+// The start point of the slow frame bucket in ms
+static const uint32_t kSlowFrameBucketStartMs = 150;
+
 // This will be called every frame, performance sensitive
 // Uses bit twiddling to avoid branching while achieving the packing desired
-static uint32_t frameCountIndexForFrameTime(nsecs_t frameTime, uint32_t max) {
+static uint32_t frameCountIndexForFrameTime(nsecs_t frameTime) {
     uint32_t index = static_cast<uint32_t>(ns2ms(frameTime));
     // If index > kBucketMinThreshold mask will be 0xFFFFFFFF as a result
     // of negating 1 (twos compliment, yaay) else mask will be 0
@@ -104,7 +102,7 @@ static uint32_t frameCountIndexForFrameTime(nsecs_t frameTime, uint32_t max) {
     // be a pretty garbage value right now. However, mask is 0 so we'll end
     // up with the desired result of 0.
     index = (index - kBucketMinThreshold) & mask;
-    return index < max ? index : max;
+    return index;
 }
 
 // Only called when dumping stats, less performance sensitive
@@ -211,63 +209,34 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
 
 }
 
-static bool shouldReplace(SlowFrame& existing, SlowFrame& candidate) {
-    if (candidate.whenHours - existing.whenHours >= 24) {
-        // If the old slowframe is over 24 hours older than the candidate,
-        // replace it. It's too stale
-        return true;
-    }
-    if (candidate.frametimeMs > existing.frametimeMs) {
-        return true;
-    }
-    return false;
-}
-
-void JankTracker::updateSlowest(const FrameInfo& frame) {
-    uint16_t durationMs = static_cast<uint16_t>(std::min(
-            ns2ms(frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::IntendedVsync]),
-            static_cast<nsecs_t>(std::numeric_limits<uint16_t>::max())));
-    uint16_t startHours = static_cast<uint16_t>(std::lround(
-            ns2s(frame[FrameInfoIndex::IntendedVsync]) / 3600.0f));
-    SlowFrame* toReplace = nullptr;
-    SlowFrame thisFrame{startHours, durationMs};
-    // First find the best candidate for replacement
-    for (SlowFrame& existing : mData->slowestFrames) {
-        // If we should replace the current data with the replacement candidate,
-        // it means the current data is worse than the replacement candidate
-        if (!toReplace || shouldReplace(existing, *toReplace)) {
-            toReplace = &existing;
-        }
-    }
-    // Now see if we should replace it
-    if (shouldReplace(*toReplace, thisFrame)) {
-        *toReplace = thisFrame;
-    }
-}
-
 void JankTracker::addFrame(const FrameInfo& frame) {
     mData->totalFrameCount++;
     // Fast-path for jank-free frames
     int64_t totalDuration =
             frame[FrameInfoIndex::FrameCompleted] - frame[sFrameStart];
-    uint32_t framebucket = frameCountIndexForFrameTime(
-            totalDuration, mData->frameCounts.size() - 1);
+    uint32_t framebucket = frameCountIndexForFrameTime(totalDuration);
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
         mData->frameCounts[framebucket]++;
         return;
     }
 
-    // For slowest frames we are still interested in frames that are otherwise
-    // exempt (such as first-draw). Although those frames don't directly impact
-    // smoothness, they do impact responsiveness.
-    updateSlowest(frame);
-
+    // Only things like Surface.lockHardwareCanvas() are exempt from tracking
     if (frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS) {
         return;
     }
 
-    mData->frameCounts[framebucket]++;
+    if (framebucket <= mData->frameCounts.size()) {
+        mData->frameCounts[framebucket]++;
+    } else {
+        framebucket = (ns2ms(totalDuration) - kSlowFrameBucketStartMs)
+                / kSlowFrameBucketIntervalMs;
+        framebucket = std::min(framebucket,
+                static_cast<uint32_t>(mData->slowFrameCounts.size() - 1));
+        framebucket = std::max(framebucket, 0u);
+        mData->slowFrameCounts[framebucket]++;
+    }
+
     mData->jankFrameCount++;
 
     for (int i = 0; i < NUM_BUCKETS; i++) {
@@ -298,13 +267,17 @@ void JankTracker::dumpData(const ProfileData* data, int fd) {
     dprintf(fd, "\n90th percentile: %ums", findPercentile(data, 90));
     dprintf(fd, "\n95th percentile: %ums", findPercentile(data, 95));
     dprintf(fd, "\n99th percentile: %ums", findPercentile(data, 99));
-    dprintf(fd, "\nSlowest frames over last 24h: ");
-    for (auto& slowFrame : data->slowestFrames) {
-        if (!slowFrame.frametimeMs) continue;
-        dprintf(fd, "%ums ", slowFrame.frametimeMs);
-    }
     for (int i = 0; i < NUM_BUCKETS; i++) {
         dprintf(fd, "\nNumber %s: %u", JANK_TYPE_NAMES[i], data->jankTypeCounts[i]);
+    }
+    dprintf(fd, "\nHISTOGRAM:");
+    for (size_t i = 0; i < data->frameCounts.size(); i++) {
+        dprintf(fd, " %ums=%u", frameTimeForFrameCountIndex(i),
+                data->frameCounts[i]);
+    }
+    for (size_t i = 0; i < data->slowFrameCounts.size(); i++) {
+        dprintf(fd, " %zums=%u", (i * kSlowFrameBucketIntervalMs) + kSlowFrameBucketStartMs,
+                data->slowFrameCounts[i]);
     }
     dprintf(fd, "\n");
 }
@@ -323,6 +296,12 @@ void JankTracker::reset() {
 uint32_t JankTracker::findPercentile(const ProfileData* data, int percentile) {
     int pos = percentile * data->totalFrameCount / 100;
     int remaining = data->totalFrameCount - pos;
+    for (int i = data->slowFrameCounts.size() - 1; i >= 0; i--) {
+        remaining -= data->slowFrameCounts[i];
+        if (remaining <= 0) {
+            return (i * kSlowFrameBucketIntervalMs) + kSlowFrameBucketStartMs;
+        }
+    }
     for (int i = data->frameCounts.size() - 1; i >= 0; i--) {
         remaining -= data->frameCounts[i];
         if (remaining <= 0) {

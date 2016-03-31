@@ -51,7 +51,7 @@ import java.util.ArrayList;
  * 2) ASHMEM_SIZE (for scratch space used during dumping)
  * 3) ASHMEM_SIZE * HISTORY_SIZE
  *
- * This is currently under 16KiB total memory in the worst case of
+ * This is currently under 20KiB total memory in the worst case of
  * 20 processes in history + 10 unique active processes.
  *
  *  @hide */
@@ -59,7 +59,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     public static final String GRAPHICS_STATS_SERVICE = "graphicsstats";
 
     private static final String TAG = "GraphicsStatsService";
-    private static final int ASHMEM_SIZE = 296;
+    private static final int ASHMEM_SIZE = 464;
     private static final int HISTORY_SIZE = 20;
 
     private final Context mContext;
