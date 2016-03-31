@@ -24,8 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -83,8 +81,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
     abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
 
-    private UserManager mUserManager;
-
     /**
      * Declare the category of this tile.
      *
@@ -97,7 +93,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHost = host;
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
-        mUserManager = UserManager.get(mContext);
     }
 
     public String getTileSpec() {
@@ -287,11 +282,12 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
-        UserHandle user = UserHandle.of(ActivityManager.getCurrentUser());
-        if (mUserManager.hasUserRestriction(userRestriction, user)
-                && !mUserManager.hasBaseUserRestriction(userRestriction, user)) {
+        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                userRestriction, ActivityManager.getCurrentUser());
+        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+                userRestriction, ActivityManager.getCurrentUser())) {
             state.disabledByPolicy = true;
-            state.enforcedAdmin = EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            state.enforcedAdmin = admin;
         } else {
             state.disabledByPolicy = false;
             state.enforcedAdmin = null;
