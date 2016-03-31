@@ -15,7 +15,7 @@
 -->
 
 <resources>
-    <style name="Theme.WallpaperCropper" parent="@*android:style/Theme.Material.DayNight">
+    <style name="Theme.WallpaperCropper" parent="@android:style/Theme.Material.Light">
         <item name="android:actionBarStyle">@style/WallpaperCropperActionBar</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowActionBarOverlay">true</item>

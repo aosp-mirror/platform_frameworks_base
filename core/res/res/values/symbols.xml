@@ -2451,24 +2451,6 @@
   <java-symbol type="id" name="aerr_close" />
   <java-symbol type="id" name="aerr_mute" />
 
-  <!-- Framework-private Material.DayNight styles. -->
-  <java-symbol type="style" name="Theme.Material.DayNight" />
-  <java-symbol type="style" name="Theme.Material.DayNight.DarkActionBar" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Dialog" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.Alert" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
-  <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
-  <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
-  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar" />
-  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
-  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
-  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
-  <java-symbol type="style" name="Theme.Material.DayNight.Panel" />
-  <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
-
   <java-symbol type="string" name="status_bar_rotate" />
   <java-symbol type="string" name="status_bar_headset" />
   <java-symbol type="string" name="status_bar_data_saver" />
