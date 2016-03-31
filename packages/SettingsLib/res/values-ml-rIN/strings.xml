@@ -278,8 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ഒറ്റപ്പെട്ടൊരു പ്രോസസ്സിൽ WebView റെൻഡററുകൾ റൺ ചെയ്യുക."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
-    <!-- no translation found for select_webview_provider_toast_text (5466970498308266359) -->
-    <skip />
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ഈ തിരഞ്ഞെടുപ്പിന് തുടർന്നങ്ങോട്ട് സാധുതയില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ഫയൽ എൻക്രിപ്ഷനിലേക്ക് പരിവർത്തിപ്പിക്കുക"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"പരിവർത്തിപ്പിക്കുക…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ഇതിനകം തന്നെ ഫയൽ എൻക്രിപ്റ്റ് ചെയ്തു"</string>
