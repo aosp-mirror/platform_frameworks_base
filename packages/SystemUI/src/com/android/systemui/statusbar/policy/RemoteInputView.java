@@ -121,8 +121,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setEnabled(false);
         mSendButton.setVisibility(INVISIBLE);
         mProgressBar.setVisibility(VISIBLE);
+        mEntry.remoteInputText = mEditText.getText();
+        mController.addSpinning(mEntry.key);
         mController.removeRemoteInput(mEntry);
         mEditText.mShowImeOnInputConnection = false;
+        mController.remoteInputSent(mEntry);
 
         try {
             mPendingIntent.send(mContext, 0, fillInIntent);
@@ -177,6 +180,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return;
         }
         mController.removeRemoteInput(mEntry);
+        mController.removeSpinning(mEntry.key);
     }
 
     public void setPendingIntent(PendingIntent pendingIntent) {
@@ -213,6 +217,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setEnabled(true);
         mSendButton.setVisibility(VISIBLE);
         mProgressBar.setVisibility(INVISIBLE);
+        mController.removeSpinning(mEntry.key);
         updateSendButton();
         onDefocus();
     }
