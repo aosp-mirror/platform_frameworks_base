@@ -876,7 +876,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DensityContainer container = (DensityContainer) mStatusBarWindow.findViewById(
                 R.id.qs_density_container);
         if (container != null) {
-            final QSTileHost qsh = new QSTileHost(mContext, this,
+            final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,

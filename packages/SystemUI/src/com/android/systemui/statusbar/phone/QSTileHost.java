@@ -81,7 +81,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Platform implementation of the quick settings tile host **/
-public final class QSTileHost implements QSTile.Host, Tunable {
+public class QSTileHost implements QSTile.Host, Tunable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -450,7 +450,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         }
     }
 
-    public static List<String> loadTileSpecs(Context context, String tileList) {
+    protected List<String> loadTileSpecs(Context context, String tileList) {
         final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
         if (tileList == null) {

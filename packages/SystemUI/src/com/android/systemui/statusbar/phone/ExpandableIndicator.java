@@ -23,6 +23,7 @@ import com.android.systemui.R;
 public class ExpandableIndicator extends ImageView {
 
     private boolean mExpanded;
+    private boolean mIsDefaultDirection = true;
 
     public ExpandableIndicator(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,21 +32,34 @@ public class ExpandableIndicator extends ImageView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        final int res = mExpanded ? R.drawable.ic_volume_collapse_animation
-                : R.drawable.ic_volume_expand_animation;
+        final int res = getDrawableResourceId(mExpanded);
         setImageResource(res);
     }
 
     public void setExpanded(boolean expanded) {
         if (expanded == mExpanded) return;
         mExpanded = expanded;
-        final int res = mExpanded ? R.drawable.ic_volume_expand_animation
-                : R.drawable.ic_volume_collapse_animation;
+        final int res = getDrawableResourceId(!mExpanded);
         // workaround to reset drawable
         final AnimatedVectorDrawable avd = (AnimatedVectorDrawable) getContext()
                 .getDrawable(res).getConstantState().newDrawable();
         setImageDrawable(avd);
         avd.forceAnimationOnUI();
         avd.start();
+    }
+
+    /** Whether the icons are using the default direction or the opposite */
+    public void setDefaultDirection(boolean isDefaultDirection) {
+        mIsDefaultDirection = isDefaultDirection;
+    }
+
+    private int getDrawableResourceId(boolean expanded) {
+        if (mIsDefaultDirection) {
+            return expanded ? R.drawable.ic_volume_collapse_animation
+                    : R.drawable.ic_volume_expand_animation;
+        } else {
+            return expanded ? R.drawable.ic_volume_expand_animation
+                    : R.drawable.ic_volume_collapse_animation;
+        }
     }
 }

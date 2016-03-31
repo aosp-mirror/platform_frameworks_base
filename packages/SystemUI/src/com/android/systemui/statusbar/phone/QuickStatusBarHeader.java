@@ -68,7 +68,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private ViewGroup mDateTimeAlarmGroup;
     private TextView mEmergencyOnly;
 
-    private ExpandableIndicator mExpandIndicator;
+    protected ExpandableIndicator mExpandIndicator;
 
     private boolean mListening;
     private AlarmManager.AlarmClockInfo mNextAlarm;
