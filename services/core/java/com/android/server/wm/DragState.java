@@ -589,7 +589,7 @@ class DragState {
     void overridePointerIconLw(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_GRAB);
+            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_GRABBING);
         }
     }
 }
