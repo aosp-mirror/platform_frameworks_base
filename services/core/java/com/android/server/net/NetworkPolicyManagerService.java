@@ -1940,16 +1940,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void addRestrictBackgroundWhitelistedUid(int uid) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
         final boolean oldStatus;
+        final boolean needFirewallRules;
         synchronized (mRulesLock) {
             oldStatus = mRestrictBackgroundWhitelistUids.get(uid);
             if (oldStatus) {
                 if (LOGD) Slog.d(TAG, "uid " + uid + " is already whitelisted");
                 return;
             }
-            if (!isUidValidForWhitelistRules(uid)) {
-                if (LOGD) Slog.d(TAG, "no need to whitelist uid " + uid);
-                return;
-            }
+            needFirewallRules = isUidValidForWhitelistRules(uid);
             Slog.i(TAG, "adding uid " + uid + " to restrict background whitelist");
             mRestrictBackgroundWhitelistUids.append(uid, true);
             if (mDefaultRestrictBackgroundWhitelistUids.get(uid)
@@ -1958,10 +1956,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         + " from revoked restrict background whitelist");
                 mRestrictBackgroundWhitelistRevokedUids.delete(uid);
             }
-            updateRuleForRestrictBackgroundLocked(uid);
+            if (needFirewallRules) {
+                // Only update firewall rules if necessary...
+                updateRuleForRestrictBackgroundLocked(uid);
+            }
+            // ...but always persists the whitelist request.
             writePolicyLocked();
         }
-        if (mRestrictBackground && !oldStatus) {
+        if (mRestrictBackground && !oldStatus && needFirewallRules) {
             mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
                     .sendToTarget();
         }
@@ -1991,10 +1993,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (LOGD) Slog.d(TAG, "uid " + uid + " was not whitelisted before");
             return false;
         }
-        if (!uidDeleted && !isUidValidForWhitelistRules(uid)) {
-            if (LOGD) Slog.d(TAG, "no need to remove whitelist for uid " + uid);
-            return false;
-        }
+        final boolean needFirewallRules = uidDeleted || isUidValidForWhitelistRules(uid);
         Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
         mRestrictBackgroundWhitelistUids.delete(uid);
         if (mDefaultRestrictBackgroundWhitelistUids.get(uid)
@@ -2003,13 +2002,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + " to revoked restrict background whitelist");
             mRestrictBackgroundWhitelistRevokedUids.append(uid, true);
         }
-        updateRuleForRestrictBackgroundLocked(uid, uidDeleted);
+        if (needFirewallRules) {
+            // Only update firewall rules if necessary...
+            updateRuleForRestrictBackgroundLocked(uid, uidDeleted);
+        }
         if (updateNow) {
+            // ...but always persists the whitelist request.
             writePolicyLocked();
         }
         // Status only changes if Data Saver is turned on (otherwise it is DISABLED, even if the
         // app was whitelisted before).
-        return mRestrictBackground;
+        return mRestrictBackground && needFirewallRules;
     }
 
     @Override
