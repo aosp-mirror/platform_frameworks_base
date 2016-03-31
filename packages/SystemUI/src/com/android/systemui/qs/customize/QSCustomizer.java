@@ -175,6 +175,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             specs.add(tile.getTileSpec());
         }
         mTileAdapter.setTileSpecs(specs);
+        mRecyclerView.setAdapter(mTileAdapter);
     }
 
     private void save() {
