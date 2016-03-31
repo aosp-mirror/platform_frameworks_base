@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -63,6 +64,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.providers.settings.SettingsState.Setting;
+import com.android.server.SystemConfig;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1940,7 +1942,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 125;
+            private static final int SETTINGS_VERSION = 126;
 
             private final int mUserId;
 
@@ -2134,6 +2136,35 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 125;
+                }
+
+                if (currentVersion == 125) {
+                    // Version 125: Allow OEMs to set the default VR service.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    Setting currentSetting = secureSettings.getSettingLocked(
+                            Settings.Secure.ENABLED_VR_LISTENERS);
+                    if (currentSetting == null) {
+                        ArraySet<ComponentName> l =
+                                SystemConfig.getInstance().getDefaultVrComponents();
+
+                        if (l != null && !l.isEmpty()) {
+                            StringBuilder b = new StringBuilder();
+                            boolean start = true;
+                            for (ComponentName c : l) {
+                                if (!start) {
+                                    b.append(':');
+                                }
+                                b.append(c.flattenToString());
+                                start = false;
+                            }
+                            secureSettings.insertSettingLocked(
+                                    Settings.Secure.ENABLED_VR_LISTENERS, b.toString(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+
+                    }
+                    currentVersion = 126;
                 }
 
                 // vXXX: Add new settings above this point.
