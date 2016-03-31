@@ -13,17 +13,21 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="top|center_horizontal">
 
-<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.android.systemui.tv.pip.PipRecentsControlsView
+        android:id="@+id/pip_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
 
-    <objectAnimator
-        android:propertyName="translationY"
-        android:valueTo="10dp"
-        android:interpolator="@android:interpolator/linear_out_slow_in"
-        android:duration="@integer/recents_tv_pip_focus_anim_duration" />
-    <objectAnimator
-        android:propertyName="alpha"
-        android:valueTo="1.0"
-        android:interpolator="@android:interpolator/linear_out_slow_in"
-        android:duration="@integer/recents_tv_pip_focus_anim_duration" />
-</set>
+    <View
+        android:id="@+id/recents"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:focusable="true" />
+</LinearLayout>

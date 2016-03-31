@@ -26,7 +26,8 @@
     android:gravity="top|center_horizontal"
     android:clipChildren="false">
 
-    <include
-        layout="@layout/tv_pip_controls"
-        android:clipChildren="false" />
+    <com.android.systemui.tv.pip.PipControlsView
+        android:id="@+id/pip_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -38,25 +38,4 @@
         android:gravity="center"
         android:maxLines="2"
         android:text="@string/pip_hold_home" />
-    <LinearLayout
-        android:id="@+id/guide_buttons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="horizontal">
-        <ImageView
-            android:layout_width="19dp"
-            android:layout_height="19dp"
-            android:src="@drawable/ic_fullscreen_white_24dp" />
-        <ImageView
-            android:layout_width="19dp"
-            android:layout_height="19dp"
-            android:src="@drawable/ic_close_white" />
-        <ImageView
-            android:id="@+id/guide_button_play_pause"
-            android:layout_width="19dp"
-            android:layout_height="19dp"
-            android:src="@drawable/ic_pause_white_24dp" />
-    </LinearLayout>
 </RelativeLayout>
