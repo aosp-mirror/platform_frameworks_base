@@ -2893,6 +2893,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextLocale(@NonNull Locale locale) {
         mLocalesChanged = true;
         mTextPaint.setTextLocale(locale);
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
     }
 
     /**
@@ -2909,6 +2914,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextLocales(@NonNull @Size(min=1) LocaleList locales) {
         mLocalesChanged = true;
         mTextPaint.setTextLocales(locales);
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
     }
 
     @Override
@@ -2916,6 +2926,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.onConfigurationChanged(newConfig);
         if (!mLocalesChanged) {
             mTextPaint.setTextLocales(LocaleList.getDefault());
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
         }
     }
 
