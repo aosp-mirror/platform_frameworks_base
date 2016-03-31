@@ -224,8 +224,6 @@ public final class PowerManager {
      * This is used by Gaming and VR applications to ensure the device provides
      * will provide consistent performance over a large amount of time.
      * </p>
-     *
-     * {@hide}
      */
     public static final int SUSTAINED_PERFORMANCE_WAKE_LOCK = 0x00000100;
 
