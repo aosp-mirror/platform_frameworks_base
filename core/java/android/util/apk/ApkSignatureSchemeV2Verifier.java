@@ -606,7 +606,6 @@ public class ApkSignatureSchemeV2Verifier {
     private static final int SIGNATURE_ECDSA_WITH_SHA256 = 0x0201;
     private static final int SIGNATURE_ECDSA_WITH_SHA512 = 0x0202;
     private static final int SIGNATURE_DSA_WITH_SHA256 = 0x0301;
-    private static final int SIGNATURE_DSA_WITH_SHA512 = 0x0302;
 
     private static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
     private static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
@@ -620,7 +619,6 @@ public class ApkSignatureSchemeV2Verifier {
             case SIGNATURE_ECDSA_WITH_SHA256:
             case SIGNATURE_ECDSA_WITH_SHA512:
             case SIGNATURE_DSA_WITH_SHA256:
-            case SIGNATURE_DSA_WITH_SHA512:
                 return true;
             default:
                 return false;
@@ -670,7 +668,6 @@ public class ApkSignatureSchemeV2Verifier {
             case SIGNATURE_RSA_PSS_WITH_SHA512:
             case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
             case SIGNATURE_ECDSA_WITH_SHA512:
-            case SIGNATURE_DSA_WITH_SHA512:
                 return CONTENT_DIGEST_CHUNKED_SHA512;
             default:
                 throw new IllegalArgumentException(
@@ -714,7 +711,6 @@ public class ApkSignatureSchemeV2Verifier {
             case SIGNATURE_ECDSA_WITH_SHA512:
                 return "EC";
             case SIGNATURE_DSA_WITH_SHA256:
-            case SIGNATURE_DSA_WITH_SHA512:
                 return "DSA";
             default:
                 throw new IllegalArgumentException(
@@ -746,8 +742,6 @@ public class ApkSignatureSchemeV2Verifier {
                 return Pair.create("SHA512withECDSA", null);
             case SIGNATURE_DSA_WITH_SHA256:
                 return Pair.create("SHA256withDSA", null);
-            case SIGNATURE_DSA_WITH_SHA512:
-                return Pair.create("SHA512withDSA", null);
             default:
                 throw new IllegalArgumentException(
                         "Unknown signature algorithm: 0x"
