@@ -30,6 +30,6 @@
     android:scrollbars="vertical"
     android:overScrollMode="ifContentScrolls"
     android:textAlignment="viewStart"
-    android:paddingTop="@dimen/dialog_list_padding_vertical_material"
-    android:paddingBottom="@dimen/dialog_list_padding_vertical_material"
-    android:clipToPadding="false" />
+    android:clipToPadding="false"
+    android:paddingBottomNoButtons="@dimen/dialog_list_padding_bottom_no_buttons"
+    android:paddingTopNoTitle="@dimen/dialog_list_padding_top_no_title" />
