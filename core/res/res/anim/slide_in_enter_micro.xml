@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/slide_in_micro.xml
 **
 ** Copyright 2014, The Android Open Source Project
 **
@@ -18,10 +17,13 @@
 */
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-    <translate android:fromXDelta="100%p" android:toXDelta="0"
-               android:duration="@android:integer/config_mediumAnimTime"/>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+     android:zAdjustment="top">
+    <translate android:fromYDelta="5%p" android:toXDelta="0"
+               android:duration="417"
+               android:interpolator="@android:interpolator/launch_task_micro_ydelta" />
     <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-           android:duration="@android:integer/config_mediumAnimTime" />
+           android:duration="150"
+           android:interpolator="@android:interpolator/launch_task_micro_alpha" />
 </set>
