@@ -195,7 +195,7 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
 }
 
 static void renderTextShadow(BakedOpRenderer& renderer, FontRenderer& fontRenderer,
-        const TextOp& op, const BakedOpState& state) {
+        const TextOp& op, const BakedOpState& textOpState) {
     renderer.caches().textureState().activateTexture(0);
 
     PaintUtils::TextShadow textShadow;
@@ -216,13 +216,41 @@ static void renderTextShadow(BakedOpRenderer& renderer, FontRenderer& fontRender
 
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(state.roundRectClipState)
+            .setRoundRectClipState(textOpState.roundRectClipState)
             .setMeshTexturedUnitQuad(nullptr)
-            .setFillShadowTexturePaint(*texture, textShadow.color, *op.paint, state.alpha)
-            .setTransform(state.computedState.transform, TransformFlags::None)
+            .setFillShadowTexturePaint(*texture, textShadow.color, *op.paint, textOpState.alpha)
+            .setTransform(textOpState.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width(), sy + texture->height()))
             .build();
-    renderer.renderGlop(state, glop);
+
+    // Compute damage bounds and clip (since may differ from those in textOpState).
+    // Bounds should be same as text op, but with dx/dy offset and radius outset
+    // applied in local space.
+    auto& transform = textOpState.computedState.transform;
+    Rect shadowBounds = op.unmappedBounds; // STROKE
+    const bool expandForStroke = op.paint->getStyle() != SkPaint::kFill_Style;
+    if (expandForStroke) {
+        shadowBounds.outset(op.paint->getStrokeWidth() * 0.5f);
+    }
+    shadowBounds.translate(textShadow.dx, textShadow.dy);
+    shadowBounds.outset(textShadow.radius, textShadow.radius);
+    transform.mapRect(shadowBounds);
+    if (CC_UNLIKELY(expandForStroke &&
+            (!transform.isPureTranslate() || op.paint->getStrokeWidth() < 1.0f))) {
+        shadowBounds.outset(0.5f);
+    }
+
+    auto clipState = textOpState.computedState.clipState;
+    if (clipState->mode != ClipMode::Rectangle
+            || !clipState->rect.contains(shadowBounds)) {
+        // need clip, so pass it and clip bounds
+        shadowBounds.doIntersect(clipState->rect);
+    } else {
+        // don't need clip, ignore
+        clipState = nullptr;
+    }
+
+    renderer.renderGlop(&shadowBounds, clipState, glop);
 }
 
 enum class TextRenderType {
