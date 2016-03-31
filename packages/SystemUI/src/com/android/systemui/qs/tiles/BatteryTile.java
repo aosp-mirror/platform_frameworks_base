@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -44,7 +45,6 @@ import java.text.NumberFormat;
 
 public class BatteryTile extends QSTile<QSTile.State> implements BatteryController.BatteryStateChangeCallback {
 
-    private final BatteryMeterDrawable mDrawable;
     private final BatteryController mBatteryController;
     private final BatteryDetail mBatteryDetail = new BatteryDetail();
 
@@ -52,13 +52,11 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     private boolean mPowerSave;
     private boolean mCharging;
     private boolean mDetailShown;
+    private boolean mPluggedIn;
 
     public BatteryTile(Host host) {
         super(host);
         mBatteryController = host.getBatteryController();
-        mDrawable = new BatteryMeterDrawable(host.getContext(), new Handler(),
-                host.getContext().getColor(R.color.batterymeter_frame_color));
-        mDrawable.setBatteryController(mBatteryController);
     }
 
     @Override
@@ -79,10 +77,8 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mDrawable.startListening();
             mBatteryController.addStateChangedCallback(this);
         } else {
-            mDrawable.stopListening();
             mBatteryController.removeStateChangedCallback(this);
         }
     }
@@ -118,7 +114,12 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         state.icon = new Icon() {
             @Override
             public Drawable getDrawable(Context context) {
-                return mDrawable;
+                BatteryMeterDrawable drawable =
+                        new BatteryMeterDrawable(context, new Handler(Looper.getMainLooper()),
+                        context.getColor(R.color.batterymeter_frame_color));
+                drawable.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+                drawable.onPowerSaveChanged(mPowerSave);
+                return drawable;
             }
 
             @Override
@@ -133,6 +134,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         mLevel = level;
+        mPluggedIn = pluggedIn;
         mCharging = charging;
         refreshState((Integer) level);
         if (mDetailShown) {
@@ -143,6 +145,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         mPowerSave = isPowerSave;
+        refreshState(null);
         if (mDetailShown) {
             mBatteryDetail.postBindView();
         }
