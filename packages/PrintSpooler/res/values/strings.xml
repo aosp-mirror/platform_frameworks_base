@@ -185,6 +185,12 @@
     <!-- Label for the list item that links to the list of all print services. [CHAR LIMIT=50] -->
     <string name="all_services_title">All services</string>
 
+    <!-- Subtitle for a print service recommendation. [CHAR LIMIT=50] -->
+    <plurals name="print_services_recommendation_subtitle">
+        <item quantity="one">Install to discover <xliff:g id="count" example="1">%1$s</xliff:g> printer</item>
+        <item quantity="other">Install to discover <xliff:g id="count" example="2">%1$s</xliff:g> printers</item>
+    </plurals>
+
     <!-- Notifications -->
 
     <!-- Template for the notification label for a printing print job. [CHAR LIMIT=25] -->

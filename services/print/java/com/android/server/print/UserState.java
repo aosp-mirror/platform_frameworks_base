@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
@@ -44,12 +45,14 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
+import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.printservice.recommendation.RecommendationInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
@@ -68,6 +71,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.print.RemotePrintService.PrintServiceCallbacks;
 import com.android.server.print.RemotePrintSpooler.PrintSpoolerCallbacks;
+import com.android.server.print.RemotePrintServiceRecommendationService.RemotePrintServiceRecommendationServiceCallbacks;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -82,7 +86,8 @@ import java.util.Set;
 /**
  * Represents the print state for a user.
  */
-final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
+final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
+        RemotePrintServiceRecommendationServiceCallbacks {
 
     private static final String LOG_TAG = "UserState";
 
@@ -122,9 +127,21 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
     private List<PrintJobStateChangeListenerRecord> mPrintJobStateChangeListenerRecords;
 
-    private List<PrintServicesChangeListenerRecord> mPrintServicesChangeListenerRecords;
+    private List<ListenerRecord<IPrintServicesChangeListener>> mPrintServicesChangeListenerRecords;
+
+    private List<ListenerRecord<IRecommendationsChangeListener>>
+            mPrintServiceRecommendationsChangeListenerRecords;
 
     private boolean mDestroyed;
+
+    /** Currently known list of print service recommendations */
+    private List<RecommendationInfo> mPrintServiceRecommendations;
+
+    /**
+     * Connection to the service updating the {@link #mPrintServiceRecommendations print service
+     * recommendations}.
+     */
+    private RemotePrintServiceRecommendationService mPrintServiceRecommendationsService;
 
     public UserState(Context context, int userId, Object lock, boolean lowPriority) {
         mContext = context;
@@ -409,6 +426,13 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
+    /**
+     * @return The currently known print service recommendations
+     */
+    public @Nullable List<RecommendationInfo> getPrintServiceRecommendations() {
+        return mPrintServiceRecommendations;
+    }
+
     public void createPrinterDiscoverySession(@NonNull IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -566,7 +590,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 mPrintServicesChangeListenerRecords = new ArrayList<>();
             }
             mPrintServicesChangeListenerRecords.add(
-                    new PrintServicesChangeListenerRecord(listener) {
+                    new ListenerRecord<IPrintServicesChangeListener>(listener) {
                         @Override
                         public void onBinderDied() {
                             mPrintServicesChangeListenerRecords.remove(this);
@@ -583,7 +607,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
             final int recordCount = mPrintServicesChangeListenerRecords.size();
             for (int i = 0; i < recordCount; i++) {
-                PrintServicesChangeListenerRecord record =
+                ListenerRecord<IPrintServicesChangeListener> record =
                         mPrintServicesChangeListenerRecords.get(i);
                 if (record.listener.asBinder().equals(listener.asBinder())) {
                     mPrintServicesChangeListenerRecords.remove(i);
@@ -592,6 +616,54 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
             if (mPrintServicesChangeListenerRecords.isEmpty()) {
                 mPrintServicesChangeListenerRecords = null;
+            }
+        }
+    }
+
+    public void addPrintServiceRecommendationsChangeListener(
+            @NonNull IRecommendationsChangeListener listener) throws RemoteException {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mPrintServiceRecommendationsChangeListenerRecords == null) {
+                mPrintServiceRecommendationsChangeListenerRecords = new ArrayList<>();
+
+                mPrintServiceRecommendationsService =
+                        new RemotePrintServiceRecommendationService(mContext,
+                                UserHandle.getUserHandleForUid(mUserId), this);
+            }
+            mPrintServiceRecommendationsChangeListenerRecords.add(
+                    new ListenerRecord<IRecommendationsChangeListener>(listener) {
+                        @Override
+                        public void onBinderDied() {
+                            mPrintServiceRecommendationsChangeListenerRecords.remove(this);
+                        }
+                    });
+        }
+    }
+
+    public void removePrintServiceRecommendationsChangeListener(
+            @NonNull IRecommendationsChangeListener listener) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mPrintServiceRecommendationsChangeListenerRecords == null) {
+                return;
+            }
+            final int recordCount = mPrintServiceRecommendationsChangeListenerRecords.size();
+            for (int i = 0; i < recordCount; i++) {
+                ListenerRecord<IRecommendationsChangeListener> record =
+                        mPrintServiceRecommendationsChangeListenerRecords.get(i);
+                if (record.listener.asBinder().equals(listener.asBinder())) {
+                    mPrintServiceRecommendationsChangeListenerRecords.remove(i);
+                    break;
+                }
+            }
+            if (mPrintServiceRecommendationsChangeListenerRecords.isEmpty()) {
+                mPrintServiceRecommendationsChangeListenerRecords = null;
+
+                mPrintServiceRecommendations = null;
+
+                mPrintServiceRecommendationsService.close();
+                mPrintServiceRecommendationsService = null;
             }
         }
     }
@@ -605,6 +677,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
     public void onPrintServicesChanged() {
         mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_SERVICES_CHANGED).sendToTarget();
+    }
+
+    @Override
+    public void onPrintServiceRecommendationsUpdated(List<RecommendationInfo> recommendations) {
+        mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED,
+                0, 0, recommendations).sendToTarget();
     }
 
     @Override
@@ -1058,7 +1136,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     }
 
     private void handleDispatchPrintServicesChanged() {
-        final List<PrintServicesChangeListenerRecord> records;
+        final List<ListenerRecord<IPrintServicesChangeListener>> records;
         synchronized (mLock) {
             if (mPrintServicesChangeListenerRecords == null) {
                 return;
@@ -1067,7 +1145,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
         final int recordCount = records.size();
         for (int i = 0; i < recordCount; i++) {
-            PrintServicesChangeListenerRecord record = records.get(i);
+            ListenerRecord<IPrintServicesChangeListener> record = records.get(i);
 
             try {
                 record.listener.onPrintServicesChanged();;
@@ -1077,9 +1155,33 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
+    private void handleDispatchPrintServiceRecommendationsUpdated(
+            @Nullable List<RecommendationInfo> recommendations) {
+        final List<ListenerRecord<IRecommendationsChangeListener>> records;
+        synchronized (mLock) {
+            if (mPrintServiceRecommendationsChangeListenerRecords == null) {
+                return;
+            }
+            records = new ArrayList<>(mPrintServiceRecommendationsChangeListenerRecords);
+
+            mPrintServiceRecommendations = recommendations;
+        }
+        final int recordCount = records.size();
+        for (int i = 0; i < recordCount; i++) {
+            ListenerRecord<IRecommendationsChangeListener> record = records.get(i);
+
+            try {
+                record.listener.onRecommendationsChanged();
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error notifying for print service recommendations change", re);
+            }
+        }
+    }
+
     private final class UserStateHandler extends Handler {
         public static final int MSG_DISPATCH_PRINT_JOB_STATE_CHANGED = 1;
         public static final int MSG_DISPATCH_PRINT_SERVICES_CHANGED = 2;
+        public static final int MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED = 3;
 
         public UserStateHandler(Looper looper) {
             super(looper, null, false);
@@ -1095,6 +1197,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     break;
                 case MSG_DISPATCH_PRINT_SERVICES_CHANGED:
                     handleDispatchPrintServicesChanged();
+                    break;
+                case MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED:
+                    handleDispatchPrintServiceRecommendationsUpdated(
+                            (List<RecommendationInfo>) message.obj);
                     break;
                 default:
                     // not reached
@@ -1122,10 +1228,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         public abstract void onBinderDied();
     }
 
-    private abstract class PrintServicesChangeListenerRecord implements DeathRecipient {
-        @NonNull final IPrintServicesChangeListener listener;
+    private abstract class ListenerRecord<T extends IInterface> implements DeathRecipient {
+        @NonNull final T listener;
 
-        public PrintServicesChangeListenerRecord(@NonNull IPrintServicesChangeListener listener) throws RemoteException {
+        public ListenerRecord(@NonNull T listener) throws RemoteException {
             this.listener = listener;
             listener.asBinder().linkToDeath(this, 0);
         }
