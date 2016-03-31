@@ -86,6 +86,7 @@ public class OpenExternalDirectoryActivity extends Activity {
     private static final String EXTRA_VOLUME_LABEL = "com.android.documentsui.VOLUME_LABEL";
     private static final String EXTRA_VOLUME_UUID = "com.android.documentsui.VOLUME_UUID";
     private static final String EXTRA_IS_ROOT = "com.android.documentsui.IS_ROOT";
+    private static final String EXTRA_IS_PRIMARY = "com.android.documentsui.IS_PRIMARY";
     // Special directory name representing the full volume
     static final String DIRECTORY_ROOT = "ROOT_DIRECTORY";
 
@@ -157,6 +158,13 @@ public class OpenExternalDirectoryActivity extends Activity {
             Log.d(TAG, "showFragment() for volume " + storageVolume.dump() + ", directory "
                     + directoryName + ", and user " + userId);
         final boolean isRoot = directoryName.equals(DIRECTORY_ROOT);
+        final boolean isPrimary = storageVolume.isPrimary();
+
+        if (isRoot && isPrimary) {
+            if (DEBUG) Log.d(TAG, "root access requested on primary volume");
+            return false;
+        }
+
         final File volumeRoot = storageVolume.getPathFile();
         File file;
         try {
@@ -235,6 +243,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         args.putString(EXTRA_VOLUME_UUID, volumeUuid);
         args.putString(EXTRA_APP_LABEL, appLabel);
         args.putBoolean(EXTRA_IS_ROOT, isRoot);
+        args.putBoolean(EXTRA_IS_PRIMARY, isPrimary);
 
         final FragmentManager fm = activity.getFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
@@ -352,6 +361,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         private String mVolumeLabel;
         private String mAppLabel;
         private boolean mIsRoot;
+        private boolean mIsPrimary;
         private CheckBox mDontAskAgain;
         private OpenExternalDirectoryActivity mActivity;
         private AlertDialog mDialog;
@@ -367,6 +377,7 @@ public class OpenExternalDirectoryActivity extends Activity {
                 mVolumeLabel = args.getString(EXTRA_VOLUME_LABEL);
                 mAppLabel = args.getString(EXTRA_APP_LABEL);
                 mIsRoot = args.getBoolean(EXTRA_IS_ROOT);
+                mIsPrimary= args.getBoolean(EXTRA_IS_PRIMARY);
             }
             mActivity = (OpenExternalDirectoryActivity) getActivity();
         }
@@ -435,7 +446,9 @@ public class OpenExternalDirectoryActivity extends Activity {
                 message = TextUtils.expandTemplate(getText(
                         R.string.open_external_dialog_root_request), mAppLabel, mVolumeLabel);
             } else {
-                message = TextUtils.expandTemplate(getText(R.string.open_external_dialog_request),
+                message = TextUtils.expandTemplate(
+                        getText(mIsPrimary ? R.string.open_external_dialog_request_primary_volume
+                                : R.string.open_external_dialog_request),
                         mAppLabel, directory, mVolumeLabel);
             }
             final TextView messageField = (TextView) view.findViewById(R.id.message);

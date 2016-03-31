@@ -204,6 +204,9 @@
     <string name="open_external_dialog_request">Grant <xliff:g id="appName" example="System Settings"><b>^1</b></xliff:g>
         access to <xliff:g id="directory" example="Pictures"><i>^2</i></xliff:g> directory on
         <xliff:g id="storage" example="SD Card"><i>^3</i></xliff:g>?</string>
+    <!-- Text in an alert dialog asking user to grant app access to a given directory in the internal storage -->
+    <string name="open_external_dialog_request_primary_volume">Grant <xliff:g id="appName" example="System Settings"><b>^1</b></xliff:g>
+        access to <xliff:g id="directory" example="Pictures"><i>^2</i></xliff:g> directory?</string>
     <!-- Text in an alert dialog asking user to grant app access to all data in an external storage volume -->
     <string name="open_external_dialog_root_request">Grant <xliff:g id="appName" example="System Settings"><b>^1</b></xliff:g>
         access to your data, including photos and videos, on <xliff:g id="storage" example="SD Card"><i>^2</i></xliff:g>?</string>
