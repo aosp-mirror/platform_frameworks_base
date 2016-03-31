@@ -47,7 +47,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  *   We will disallow byte[] icons, because they can easily go over binder size limit.
  */
-public class ShortcutInfo implements Parcelable {
+public final class ShortcutInfo implements Parcelable {
     /* @hide */
     public static final int FLAG_DYNAMIC = 1 << 0;
 
