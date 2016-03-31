@@ -125,6 +125,7 @@ import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IShortcutService;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -514,6 +515,8 @@ public class WindowManagerService extends IWindowManager.Stub
     Rect mDockedStackCreateBounds;
 
     private final SparseIntArray mTmpTaskIds = new SparseIntArray();
+
+    private final ArrayList<Integer> mChangedStackList = new ArrayList();
 
     boolean mForceResizableTasks = false;
 
@@ -3580,7 +3583,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setNewConfiguration(Configuration config) {
+    public int[] setNewConfiguration(Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setNewConfiguration()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3592,16 +3595,30 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
-            onConfigurationChanged();
-            mWindowPlacerLocked.performSurfacePlacement();
+            return onConfigurationChanged();
         }
     }
 
-    private void onConfigurationChanged() {
+    @Override
+    public Rect getBoundsForNewConfiguration(int stackId) {
+        synchronized(mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            final Rect outBounds = new Rect();
+            stack.getBoundsForNewConfiguration(outBounds);
+            return outBounds;
+        }
+    }
+
+    private int[] onConfigurationChanged() {
+        mChangedStackList.clear();
         for (int stackNdx = mStackIdToStack.size() - 1; stackNdx >= 0; stackNdx--) {
             final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
-            stack.onConfigurationChanged();
+            if (stack.onConfigurationChanged()) {
+                mChangedStackList.add(stack.mStackId);
+            }
         }
+        return mChangedStackList.isEmpty() ?
+                null : ArrayUtils.convertToIntArray(mChangedStackList);
     }
 
     @Override
