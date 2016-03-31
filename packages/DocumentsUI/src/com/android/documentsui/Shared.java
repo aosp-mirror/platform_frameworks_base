@@ -181,12 +181,4 @@ public final class Shared {
         return context.getResources().getBoolean(R.bool.home_root_hidden);
     }
 
-    /*
-     * Indicates if the advanced roots should be hidden.
-     */
-    public static boolean areAdvancedRootsHidden(Context context, State state) {
-        return context.getResources().getBoolean(R.bool.advanced_roots_hidden)
-                && state.action != ACTION_OPEN_TREE;
-    }
-
 }

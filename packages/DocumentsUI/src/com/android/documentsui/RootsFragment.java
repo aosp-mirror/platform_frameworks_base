@@ -321,9 +321,6 @@ public class RootsFragment extends Fragment {
 
                 if (root.isHome() && Shared.isHomeRootHidden(context)) {
                     continue;
-                } else if (root.isAdvanced()
-                        && Shared.areAdvancedRootsHidden(context, state)) {
-                    continue;
                 } else if (root.isLibrary()) {
                     if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
                     libraries.add(item);

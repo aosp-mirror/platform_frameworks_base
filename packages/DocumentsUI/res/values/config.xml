@@ -24,8 +24,9 @@
     <!-- Indicates if the home directory should be hidden in the roots list, that is presented
          in the drawer/left side panel ) -->
     <bool name="home_root_hidden">true</bool>
-    <!-- Indicates if the advanced roots like internal storage should be hidden in the roots list) -->
-    <bool name="advanced_roots_hidden">true</bool>
+    <!-- Indicates if the advanced roots like internal storage should be shown in the roots list.
+         When enabled there is no menu option to toggle internal storage visibility. -->
+    <bool name="advanced_roots_shown">false</bool>
     <!-- Indicates if search view is taking the whole toolbar space -->
     <bool name="full_bar_search_view">true</bool>
 </resources>
