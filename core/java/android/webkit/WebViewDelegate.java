@@ -86,8 +86,7 @@ public final class WebViewDelegate {
      */
     public void invokeDrawGlFunctor(View containerView, long nativeDrawGLFunctor,
             boolean waitForCompletion) {
-        ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
-        viewRootImpl.invokeFunctor(nativeDrawGLFunctor, waitForCompletion);
+        ViewRootImpl.invokeFunctor(nativeDrawGLFunctor, waitForCompletion);
     }
 
     /**

@@ -576,7 +576,7 @@ void CanvasContext::markLayerInUse(RenderNode* node) {
 
 static void destroyPrefetechedNode(RenderNode* node) {
     ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...", node->getName());
-    node->destroyHardwareResources();
+    node->destroyHardwareResources(nullptr);
     node->decStrong(nullptr);
 }
 
@@ -641,7 +641,7 @@ void CanvasContext::destroyHardwareResources() {
     if (mEglManager.hasEglContext()) {
         freePrefetechedLayers();
         for (const sp<RenderNode>& node : mRenderNodes) {
-            node->destroyHardwareResources();
+            node->destroyHardwareResources(nullptr);
         }
         Caches& caches = Caches::getInstance();
         // Make sure to release all the textures we were owning as there won't

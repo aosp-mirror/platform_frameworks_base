@@ -32,6 +32,7 @@ class CanvasContext;
 class DamageAccumulator;
 class LayerUpdateQueue;
 class OpenGLRenderer;
+class RenderNode;
 class RenderState;
 
 class ErrorHandler {
@@ -39,6 +40,17 @@ public:
     virtual void onError(const std::string& message) = 0;
 protected:
     ~ErrorHandler() {}
+};
+
+class TreeObserver {
+public:
+    // Called when a RenderNode's parent count hits 0.
+    // Due to the unordered nature of tree pushes, once prepareTree
+    // is finished it is possible that the node was "resurrected" and has
+    // a non-zero parent count.
+    virtual void onMaybeRemovedFromTree(RenderNode* node) {}
+protected:
+    ~TreeObserver() {}
 };
 
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
@@ -85,6 +97,10 @@ public:
     OpenGLRenderer* renderer = nullptr;
 #endif
     ErrorHandler* errorHandler = nullptr;
+
+    // Optional, may be nullptr. Used to allow things to observe interesting
+    // tree state changes
+    TreeObserver* observer = nullptr;
 
     // Frame number for use with synchronized surfaceview position updating
     int64_t frameNumber = -1;

@@ -68,6 +68,7 @@ class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
 class TreeInfo;
+class TreeObserver;
 
 namespace proto {
 class RenderNode;
@@ -154,6 +155,14 @@ public:
         }
     }
 
+    VirtualLightRefBase* getUserContext() const {
+        return mUserContext.get();
+    }
+
+    void setUserContext(VirtualLightRefBase* context) {
+        mUserContext = context;
+    }
+
     bool isPropertyFieldDirty(DirtyPropertyMask field) const {
         return mDirtyPropertyFields & field;
     }
@@ -187,7 +196,7 @@ public:
     }
 
     ANDROID_API virtual void prepareTree(TreeInfo& info);
-    void destroyHardwareResources();
+    void destroyHardwareResources(TreeObserver* observer);
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
@@ -230,6 +239,12 @@ public:
     // RenderNode takes ownership of the pointer
     ANDROID_API void setPositionListener(PositionListener* listener) {
         mPositionListener.reset(listener);
+    }
+
+    // This is only modified in MODE_FULL, so it can be safely accessed
+    // on the UI thread.
+    ANDROID_API bool hasParents() {
+        return mParentCount;
     }
 
 private:
@@ -291,7 +306,7 @@ private:
 
 
     void syncProperties();
-    void syncDisplayList();
+    void syncDisplayList(TreeObserver* observer);
 
     void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
@@ -302,13 +317,14 @@ private:
 #endif
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
-    void deleteDisplayList();
+    void deleteDisplayList(TreeObserver* observer);
     void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }
-    void decParentRefCount();
+    void decParentRefCount(TreeObserver* observer);
 
     String8 mName;
+    sp<VirtualLightRefBase> mUserContext;
 
     uint32_t mDirtyPropertyFields;
     RenderProperties mProperties;
