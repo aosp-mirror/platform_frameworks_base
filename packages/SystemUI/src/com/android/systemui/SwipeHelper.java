@@ -322,10 +322,11 @@ public class SwipeHelper implements Gefingerpoken {
     /**
      * @param view The view to be dismissed
      * @param velocity The desired pixels/second speed at which the view should move
+     * @param useAccelerateInterpolator Should an accelerating Interpolator be used
      */
-    public void dismissChild(final View view, float velocity) {
+    public void dismissChild(final View view, float velocity, boolean useAccelerateInterpolator) {
         dismissChild(view, velocity, null /* endAction */, 0 /* delay */,
-                velocity == 0 /* useAccelerateInterpolator */, 0 /* fixedDuration */);
+                useAccelerateInterpolator, 0 /* fixedDuration */);
     }
 
     /**
@@ -526,7 +527,8 @@ public class SwipeHelper implements Gefingerpoken {
                 if (!handleUpEvent(ev, mCurrView, velocity, getTranslation(mCurrView))) {
                     if (isDismissGesture(ev)) {
                         // flingadingy
-                        dismissChild(mCurrView, swipedFastEnough() ? velocity : 0f);
+                        dismissChild(mCurrView, velocity,
+                                !swipedFastEnough() /* useAccelerateInterpolator */);
                     } else {
                         // snappity
                         mCallback.onDragCancelled(mCurrView);
@@ -570,11 +572,9 @@ public class SwipeHelper implements Gefingerpoken {
 
     protected boolean swipedFastEnough() {
         float velocity = getVelocity(mVelocityTracker);
-        float perpendicularVelocity = getPerpendicularVelocity(mVelocityTracker);
         float translation = getTranslation(mCurrView);
-        boolean ret = (Math.abs(velocity) > getEscapeVelocity()) &&
-                (Math.abs(velocity) > Math.abs(perpendicularVelocity)) &&
-                (velocity > 0) == (translation > 0);
+        boolean ret = (Math.abs(velocity) > getEscapeVelocity())
+                && (velocity > 0) == (translation > 0);
         return ret;
     }
 

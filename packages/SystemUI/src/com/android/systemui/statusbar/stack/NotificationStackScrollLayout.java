@@ -3486,8 +3486,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        public void dismissChild(final View view, float velocity) {
-            super.dismissChild(view, velocity);
+        public void dismissChild(final View view, float velocity,
+                boolean useAccelerateInterpolator) {
+            super.dismissChild(view, velocity, useAccelerateInterpolator);
             cancelCheckForDrag();
             setSnappedToGear(false);
         }
@@ -3523,7 +3524,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                         snapChild(animView, 0 /* leftTarget */, velocity);
                     } else if (isDismissGesture(ev)) {
                         // Gesture is a dismiss that's not towards the gear
-                        dismissChild(animView, swipedFastEnough() ? velocity : 0f);
+                        dismissChild(animView, velocity,
+                                !swipedFastEnough() /* useAccelerateInterpolator */);
                     } else {
                         // Didn't move enough to dismiss or cover, snap to the gear
                         snapToGear(animView, velocity);
@@ -3548,7 +3550,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         private void dismissOrSnapBack(View animView, float velocity, MotionEvent ev) {
             if (isDismissGesture(ev)) {
-                dismissChild(animView, swipedFastEnough() ? velocity : 0f);
+                dismissChild(animView, velocity,
+                        !swipedFastEnough() /* useAccelerateInterpolator */);
             } else {
                 snapChild(animView, 0 /* leftTarget */, velocity);
             }
