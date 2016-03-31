@@ -169,6 +169,8 @@
     <color name="ksh_system_group_color">#ff00bcd4</color>
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_keyword_color">#d9000000</color>
+    <color name="ksh_key_item_color">@color/material_grey_600</color>
+    <color name="ksh_key_item_background">#eeeeee</color>
 
     <!-- Background color of edit overflow -->
     <color name="qs_edit_overflow_bg">#455A64</color>
