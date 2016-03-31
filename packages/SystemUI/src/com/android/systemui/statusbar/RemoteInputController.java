@@ -21,6 +21,8 @@ import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
+import android.util.ArraySet;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -29,7 +31,8 @@ import java.util.ArrayList;
  */
 public class RemoteInputController {
 
-    private final ArrayList<WeakReference<NotificationData.Entry>> mRemoteInputs = new ArrayList<>();
+    private final ArrayList<WeakReference<NotificationData.Entry>> mOpen = new ArrayList<>();
+    private final ArraySet<String> mSpinning = new ArraySet<>();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
     private final HeadsUpManager mHeadsUpManager;
 
@@ -44,7 +47,7 @@ public class RemoteInputController {
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */);
         if (!found) {
-            mRemoteInputs.add(new WeakReference<>(entry));
+            mOpen.add(new WeakReference<>(entry));
         }
 
         apply(entry);
@@ -56,6 +59,18 @@ public class RemoteInputController {
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */);
 
         apply(entry);
+    }
+
+    public void addSpinning(String key) {
+        mSpinning.add(key);
+    }
+
+    public void removeSpinning(String key) {
+        mSpinning.remove(key);
+    }
+
+    public boolean isSpinning(String key) {
+        return mSpinning.contains(key);
     }
 
     private void apply(NotificationData.Entry entry) {
@@ -79,7 +94,7 @@ public class RemoteInputController {
      */
     public boolean isRemoteInputActive() {
         pruneWeakThenRemoveAndContains(null /* contains */, null /* remove */);
-        return !mRemoteInputs.isEmpty();
+        return !mOpen.isEmpty();
     }
 
     /**
@@ -91,10 +106,10 @@ public class RemoteInputController {
     private boolean pruneWeakThenRemoveAndContains(
             NotificationData.Entry contains, NotificationData.Entry remove) {
         boolean found = false;
-        for (int i = mRemoteInputs.size() - 1; i >= 0; i--) {
-            NotificationData.Entry item = mRemoteInputs.get(i).get();
+        for (int i = mOpen.size() - 1; i >= 0; i--) {
+            NotificationData.Entry item = mOpen.get(i).get();
             if (item == null || item == remove) {
-                mRemoteInputs.remove(i);
+                mOpen.remove(i);
             } else if (item == contains) {
                 found = true;
             }
@@ -108,7 +123,16 @@ public class RemoteInputController {
         mCallbacks.add(callback);
     }
 
+    public void remoteInputSent(NotificationData.Entry entry) {
+        int N = mCallbacks.size();
+        for (int i = 0; i < N; i++) {
+            mCallbacks.get(i).onRemoteInputSent(entry);
+        }
+    }
+
     public interface Callback {
-        void onRemoteInputActive(boolean active);
+        default void onRemoteInputActive(boolean active) {}
+
+        default void onRemoteInputSent(NotificationData.Entry entry) {}
     }
 }

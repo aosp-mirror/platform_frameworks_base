@@ -1110,6 +1110,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mStatusBarKeyguardViewManager);
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);
+
+        if (FORCE_REMOTE_INPUT_HISTORY) {
+            mRemoteInputController.addCallback(new RemoteInputController.Callback() {
+                @Override
+                public void onRemoteInputSent(Entry entry) {
+                    if (mKeysKeptForRemoteInput.contains(entry.key)) {
+                        removeNotification(entry.key, null);
+                    }
+                }
+            });
+        }
+
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightStatusBarController.setFingerprintUnlockController(mFingerprintUnlockController);
     }
@@ -1377,6 +1389,42 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (key.equals(mMediaNotificationKey)) {
             clearCurrentMediaNotification();
             updateMediaMetaData(true, true);
+        }
+        if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputController.isSpinning(key)) {
+            Entry entry = mNotificationData.get(key);
+            StatusBarNotification sbn = entry.notification;
+
+            Notification.Builder b = Notification.Builder
+                    .recoverBuilder(mContext, sbn.getNotification().clone());
+            CharSequence[] oldHistory = sbn.getNotification().extras
+                    .getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY);
+            CharSequence[] newHistory;
+            if (oldHistory == null) {
+                newHistory = new CharSequence[1];
+            } else {
+                newHistory = new CharSequence[oldHistory.length + 1];
+                for (int i = 0; i < oldHistory.length; i++) {
+                    newHistory[i + 1] = oldHistory[i];
+                }
+            }
+            newHistory[0] = String.valueOf(entry.remoteInputText);
+            b.setRemoteInputHistory(newHistory);
+
+            Notification newNotification = b.build();
+
+            // Undo any compatibility view inflation
+            newNotification.contentView = sbn.getNotification().contentView;
+            newNotification.bigContentView = sbn.getNotification().bigContentView;
+            newNotification.headsUpContentView = sbn.getNotification().headsUpContentView;
+
+            StatusBarNotification newSbn = new StatusBarNotification(sbn.getPackageName(),
+                    sbn.getOpPkg(),
+                    sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
+                    0, newNotification, sbn.getUser(), sbn.getPostTime());
+
+            updateNotification(newSbn, null);
+            mKeysKeptForRemoteInput.add(entry.key);
+            return;
         }
         if (deferRemoval) {
             mLatestRankingMap = ranking;
