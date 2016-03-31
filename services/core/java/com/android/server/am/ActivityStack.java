@@ -4574,6 +4574,8 @@ final class ActivityStack {
         }
 
         r.configChangeFlags = 0;
+        r.deferRelaunchUntilPaused = false;
+        r.preserveWindowOnDeferredRelaunch = false;
     }
 
     boolean willActivityBeVisibleLocked(IBinder token) {
