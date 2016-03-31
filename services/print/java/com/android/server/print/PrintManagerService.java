@@ -41,12 +41,14 @@ import android.os.UserManager;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintManager;
+import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.printservice.recommendation.RecommendationInfo;
 import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
@@ -265,7 +267,7 @@ public final class PrintManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
-                // Only the current group members can get enabled services.
+                // Only the current group members can get print services.
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return null;
                 }
@@ -308,6 +310,25 @@ public final class PrintManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 userState.setPrintServiceEnabled(service, isEnabled);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<RecommendationInfo> getPrintServiceRecommendations(int userId) {
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can get print service recommendations.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return null;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return userState.getPrintServiceRecommendations();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -543,7 +564,7 @@ public final class PrintManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
-                // Only the current group members can remove a print job listener.
+                // Only the current group members can remove a print services change listener.
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
                     return;
                 }
@@ -552,6 +573,52 @@ public final class PrintManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 userState.removePrintServicesChangeListener(listener);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void addPrintServiceRecommendationsChangeListener(
+                IRecommendationsChangeListener listener, int userId)
+                throws RemoteException {
+            listener = Preconditions.checkNotNull(listener);
+
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can add a print service recommendations listener.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                userState.addPrintServiceRecommendationsChangeListener(listener);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void removePrintServiceRecommendationsChangeListener(
+                IRecommendationsChangeListener listener, int userId) {
+            listener = Preconditions.checkNotNull(listener);
+
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can remove a print service recommendations
+                // listener.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId, false);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                userState.removePrintServiceRecommendationsChangeListener(listener);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

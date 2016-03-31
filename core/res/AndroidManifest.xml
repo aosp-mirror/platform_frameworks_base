@@ -2172,6 +2172,15 @@
     <permission android:name="android.permission.BIND_PRINT_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link android.printservice.recommendation.RecommendationService},
+     to ensure that only the system can bind to it.
+     @hide
+     @SystemApi
+     <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_PRINT_RECOMMENDATION_SERVICE"
+            android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.nfc.cardemulation.HostApduService}
          or {@link android.nfc.cardemulation.OffHostApduService} to ensure that only
          the system can bind to it.
