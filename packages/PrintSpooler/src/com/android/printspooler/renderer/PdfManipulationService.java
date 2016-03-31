@@ -244,9 +244,20 @@ public final class PdfManipulationService extends Service {
 
                 ranges = PageRangeUtils.normalize(ranges);
 
+                int lastPageIdx = mEditor.getPageCount() - 1;
+
                 final int rangeCount = ranges.length;
                 for (int i = rangeCount - 1; i >= 0; i--) {
                     PageRange range = ranges[i];
+
+                    // Ignore removal of pages that are outside the document
+                    if (range.getEnd() > lastPageIdx) {
+                        if (range.getStart() > lastPageIdx) {
+                            continue;
+                        }
+                        range = new PageRange(range.getStart(), lastPageIdx);
+                    }
+
                     for (int j = range.getEnd(); j >= range.getStart(); j--) {
                         mEditor.removePage(j);
                     }
