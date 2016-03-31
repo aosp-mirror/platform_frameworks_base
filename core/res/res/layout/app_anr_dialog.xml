@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingTop="@dimen/aerr_padding_list_top"
-        android:paddingBottom="@dimen/dialog_list_padding_vertical_material">
+        android:paddingBottom="@dimen/aerr_padding_list_bottom">
 
     <Button
             android:id="@+id/aerr_close"
