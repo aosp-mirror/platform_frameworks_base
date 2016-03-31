@@ -763,6 +763,16 @@ public class RenderNode {
         return nGetDebugSize(mNativeRenderNode);
     }
 
+    /**
+     * Called by native when the passed displaylist is removed from the draw tree
+     */
+    void onRenderNodeDetached() {
+        discardDisplayList();
+        if (mOwningView != null) {
+            mOwningView.onRenderNodeDetached(this);
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Animations
     ///////////////////////////////////////////////////////////////////////////
@@ -795,7 +805,9 @@ public class RenderNode {
     // Native methods
     ///////////////////////////////////////////////////////////////////////////
 
-    private static native long nCreate(String name);
+    // Intentionally not static because it acquires a reference to 'this'
+    private native long nCreate(String name);
+
     private static native void nDestroyRenderNode(long renderNode);
     private static native void nSetDisplayList(long renderNode, long newData);
 

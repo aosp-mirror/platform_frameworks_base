@@ -16009,6 +16009,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Called when the passed RenderNode is removed from the draw tree
+     * @hide
+     */
+    public void onRenderNodeDetached(RenderNode renderNode) {
+    }
+
+    /**
      * <p>Calling this method is equivalent to calling <code>getDrawingCache(false)</code>.</p>
      *
      * @return A non-scaled bitmap representing this view or null if cache is disabled.
