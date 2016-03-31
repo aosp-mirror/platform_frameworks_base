@@ -30,6 +30,11 @@ you must indicate to the system that your app supports recording, implement
 the ability to record programs, handle and communicate any errors that occur
 during recording, and manage your recorded sessions.</p>
 
+<p class="note"><strong>Note:</strong> The Live Channels app does not yet
+provide a way for users to create or access recordings. Until changes are
+made to the Live Channels app, it may be difficult to fully test the recording
+experience for your TV input service.</p>
+
 <h2 id="supporting">Indicating Support for Recording</h2>
 
 <p>To tell the system that your TV input service supports recording, follow
