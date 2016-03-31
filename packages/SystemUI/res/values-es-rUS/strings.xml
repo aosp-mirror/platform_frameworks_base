@@ -508,7 +508,7 @@
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centro"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulación"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Espacio"</string>
-    <string name="keyboard_key_enter" msgid="5739632123216118137">"Ingresar"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Intro"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Retroceso"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Reproducir/pausar"</string>
     <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Detener"</string>
@@ -516,11 +516,11 @@
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Anterior"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Retroceder"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Avanzar rápido"</string>
-    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Página anterior"</string>
-    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Página siguiente"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Re Pág"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Av Pág"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Borrar"</string>
     <string name="keyboard_key_move_home" msgid="2765693292069487486">"Página principal"</string>
-    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Finalizar"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Fin"</string>
     <string name="keyboard_key_insert" msgid="8530501581636082614">"Insertar"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Bloqueo numérico"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Teclado numérico <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -582,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Mover hacia arriba"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mover a la izquierda"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mover a la derecha"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Es posible que la app no funcione con la función Multiventana"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posición <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Presiona dos veces para editarla."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Presiona dos veces para agregarlo."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posición <xliff:g id="POSITION">%1$d</xliff:g>. Presiona dos veces para seleccionarla."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Quitar <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"Se agregó <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Se quitó <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Se movió <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de Configuración rápida"</string>
 </resources>

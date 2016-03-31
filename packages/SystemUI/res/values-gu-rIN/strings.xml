@@ -582,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ઉપર ખસેડો"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ડાબે ખસેડો"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"જમણે ખસેડો"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"બહુ-વિંડો સાથે અ‍ૅપ્લિકેશન કદાચ કામ ન કરે"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"સ્થિતિ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. સંપાદિત કરવા માટે બે વાર ટૅપ કરો."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ઉમેરવા માટે બે વાર ટૅપ કરો."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"સ્થિતિ <xliff:g id="POSITION">%1$d</xliff:g>. પસંદ કરવા માટે બે વાર ટૅપ કરો."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ખસેડો"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> દૂર કરો"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="POSITION">%2$d</xliff:g> સ્થિતિ પર <xliff:g id="TILE_NAME">%1$s</xliff:g> ઉમેર્યું છે"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> દૂર કરવામાં આવ્યું છે"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ને <xliff:g id="POSITION">%2$d</xliff:g> સ્થિતિ પર ખસેડ્યું"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ઝડપી સેટિંગ્સ સંપાદક."</string>
 </resources>

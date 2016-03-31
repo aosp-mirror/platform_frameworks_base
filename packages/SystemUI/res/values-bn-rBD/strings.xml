@@ -582,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"উপরে সরান"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"বাঁয়ে সরান"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ডানে সরান"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"একাধিক-উইন্ডো দিয়ে অ্যাপ কাজ নাও করতে পারে"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g> অবস্থান, <xliff:g id="TILE_NAME">%2$s</xliff:g>৷ সম্পাদনা করতে দুবার আলতো চাপুন৷"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>৷ যোগ করতে দুবার আলতো চাপুন৷"</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g> অবস্থান৷ নির্বাচন করতে দুবার আলতো চাপুন৷"</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> সরান"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> সরান"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="POSITION">%2$d</xliff:g> অবস্থানে <xliff:g id="TILE_NAME">%1$s</xliff:g> যোগ করা হয়েছে"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> মোছা হয়েছে"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> এ সরানো হয়েছে"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"দ্রুত সেটিংস সম্পাদক৷"</string>
 </resources>

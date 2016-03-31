@@ -583,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ເລື່ອນຊ້າຍ"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ເລື່ອນຂວາ"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"ແອັບອາດບໍ່ສາມາດໃຊ້ໄດ້ກັບຫຼາຍໜ້າຈໍ"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ຕຳແໜ່ງ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. ແຕະສອງເທື່ອເພື່ອແກ້ໄຂ."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ແຕະສອງເທື່ອເພື່ອເພີ່ມ."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ຕຳແໜ່ງ <xliff:g id="POSITION">%1$d</xliff:g>. ແຕະສອງເທື່ອເພື່ອເລືອກ."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"ຍ້າຍ <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"ລຶບ <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ຖືກເພີ່ມໃສ່ຕຳແໜ່ງ <xliff:g id="POSITION">%2$d</xliff:g> ແລ້ວ"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"ລຶບ <xliff:g id="TILE_NAME">%1$s</xliff:g> ອອກແລ້ວ"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ຍ້າຍໄປຕຳແໜ່ງ <xliff:g id="POSITION">%2$d</xliff:g> ແລ້ວ"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ຕົວແກ້ໄຂການຕັ້ງຄ່າດ່ວນ"</string>
 </resources>
