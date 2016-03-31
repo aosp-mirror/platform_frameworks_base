@@ -335,7 +335,8 @@ public final class DreamManagerService extends SystemService {
 
     private ServiceInfo getServiceInfo(ComponentName name) {
         try {
-            return name != null ? mContext.getPackageManager().getServiceInfo(name, 0) : null;
+            return name != null ? mContext.getPackageManager().getServiceInfo(name,
+                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING) : null;
         } catch (NameNotFoundException e) {
             return null;
         }
