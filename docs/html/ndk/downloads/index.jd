@@ -319,50 +319,36 @@ $('#Downloads').after($('#download-table'));
 
 <h2 id="rel">Release Notes</h2>
 
- <p>Android NDK, Revision 11b</a> <em>(March 2016)</em></p>
-    <dl>
-      <dt>NDK</dt>
-      <dd>
-      <ul>
-      <li>Important announcements
-      <ul>
-         <li>We’ve moved our bug tracker to <a href="https://github.com/android-ndk/ndk/issues">
-         GitHub.</a></li>
-     </ul>
-     </li>
+<p>
+  Android NDK, Revision 11c <em>(March 2016)</em>
+</p>
 
-     <li>Changes
+<dl>
+  <dt>
+    NDK
+  </dt>
+
+  <dd>
+    <ul>
+      <li>Changes
         <ul>
-         <li>{@code ndk-gdb.py} is fixed. It had
-               <a href="https://github.com/android-ndk/ndk/issues/3">regressed entirely</a>
-               in r11.</li>
-               <li>{@code ndk-gdb} for Mac <a href="https://github.com/android-ndk/ndk/issues/2">
-               is fixed</a>.</li>
-               <li>Added more top-level shortcuts for command line tools:
-                  <ul>
-                     <li>{@code ndk-depends}.</li>
-                     <li>{@code ndk-gdb}.</li>
-                     <li>{@code ndk-stack}.</li>
-                     <li>{@code ndk-which}. This command had been entirely absent from previous
-                     releases.</li>
-                  </ul>
-               </li>
-               <li>Fixed standalone toolchains for libc++, which had been missing
-               {@code __cxxabi_config.h}.</li>
-               <li>Fixed help documentation for {@code --toolchain} in
-               {@code make-standalone-toolchain.sh}.</li>
-         </li>
-       </ul>
-      </dd>
-   <dl>
-      <dt>Clang</dt>
-      <dd>
-      <ul>
-      <li>Errata</li>
-          <ul>
-             <li>Contrary to what we reported in the r11 Release Notes, {@code __thread}
-             does not work. This is because the version of Clang we ship is missing a bug fix for
-             emulated TLS support.</li>
-          </ul>
-      </ul>
-      </dd>
+          <li>Applied additional fixes to the {@code ndk-gdb.py} script.
+          </li>
+          <li>Added an optional package name argument to the {@code ndk-gdb}
+            command {@code --attach} option.
+            (<a href="https://github.com/android-ndk/ndk/issues/13">Issue 13</a>)
+          </li>
+          <li>Fixed invalid toolchain paths for 32-bit Windows platform.
+            (<a href="https://github.com/android-ndk/ndk/issues/45">Issue 45</a>)
+          </li>
+          <li>Fixed the relative path for the {@code ndk-which} command.
+            (<a href="https://github.com/android-ndk/ndk/issues/29">Issue 29</a>)
+          </li>
+          <li>Fixed use of cygpath for the libgcc compiler.
+            (Android <a href="http://b.android.com/195486">Issue 195486</a>)
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </dd>
+</dl>
