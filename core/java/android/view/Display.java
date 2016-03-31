@@ -722,7 +722,10 @@ public final class Display {
      * @hide
      */
     public HdrCapabilities getHdrCapabilities() {
-        return new HdrCapabilities();
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hdrCapabilities;
+        }
     }
 
     /**

@@ -627,7 +627,7 @@ static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject token
     auto typesArray = env->NewIntArray(types.size());
     env->SetIntArrayRegion(typesArray, 0, types.size(), types.data());
 
-    return env->NewObject(gHdrCapabilitiesClassInfo.clazz, gPhysicalDisplayInfoClassInfo.ctor,
+    return env->NewObject(gHdrCapabilitiesClassInfo.clazz, gHdrCapabilitiesClassInfo.ctor,
             typesArray, capabilities.getDesiredMaxLuminance(),
             capabilities.getDesiredMaxAverageLuminance(), capabilities.getDesiredMinLuminance());
 }
@@ -693,6 +693,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveConfig },
     {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveConfig },
+    {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
+            (void*)nativeGetHdrCapabilities },
     {"nativeClearContentFrameStats", "(J)Z",
             (void*)nativeClearContentFrameStats },
     {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",
