@@ -218,7 +218,7 @@ public:
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         node->syncProperties();
-        node->syncDisplayList();
+        node->syncDisplayList(nullptr);
         auto displayList = node->getDisplayList();
         if (displayList) {
             for (auto&& childOp : displayList->getChildren()) {
