@@ -282,8 +282,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
         boolean addInputConsumerHandle = mService.mInputConsumer != null;
 
-        boolean addWallpaperInputConsumerHandle = mService.mWallpaperInputConsumer != null;
-
         // Add all windows on the default display.
         final int numDisplays = mService.mDisplayContents.size();
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
@@ -302,14 +300,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                         && inputWindowHandle.layer <= mService.mInputConsumer.mWindowHandle.layer) {
                     addInputWindowHandleLw(mService.mInputConsumer.mWindowHandle);
                     addInputConsumerHandle = false;
-                }
-
-                if (addWallpaperInputConsumerHandle) {
-                    if (child.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
-                        // Add the wallpaper input consumer above the first wallpaper window.
-                        addInputWindowHandleLw(mService.mWallpaperInputConsumer.mWindowHandle);
-                        addWallpaperInputConsumerHandle = false;
-                    }
                 }
 
                 final int flags = child.mAttrs.flags;
@@ -337,11 +327,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 addInputWindowHandleLw(
                         inputWindowHandle, child, flags, type, isVisible, hasFocus, hasWallpaper);
             }
-        }
-
-        if (addWallpaperInputConsumerHandle) {
-            // No wallpaper found, add the wallpaper input consumer at the end.
-            addInputWindowHandleLw(mService.mWallpaperInputConsumer.mWindowHandle);
         }
 
         // Send windows to native code.
