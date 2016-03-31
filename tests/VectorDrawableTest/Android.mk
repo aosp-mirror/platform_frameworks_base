@@ -23,6 +23,4 @@ LOCAL_PACKAGE_NAME := VectorDrawableTest
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_SDK_VERSION := current
-
 include $(BUILD_PACKAGE)
