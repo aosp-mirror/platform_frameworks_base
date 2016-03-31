@@ -1941,6 +1941,7 @@ public class UserManagerService extends IUserManager.Stub {
                     long now = System.currentTimeMillis();
                     userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
                     userInfo.partial = true;
+                    userInfo.lastLoggedInFingerprint = Build.FINGERPRINT;
                     userData = new UserData();
                     userData.info = userInfo;
                     mUsers.put(userId, userData);
