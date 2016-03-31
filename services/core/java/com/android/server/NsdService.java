@@ -30,16 +30,14 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.android.internal.util.AsyncChannel;
@@ -492,6 +490,7 @@ public class NsdService extends INsdManager.Stub {
                         clientInfo.mResolvedService.setServiceName(name);
                         clientInfo.mResolvedService.setServiceType(type);
                         clientInfo.mResolvedService.setPort(Integer.parseInt(cooked[4]));
+                        clientInfo.mResolvedService.setTxtRecords(cooked[6]);
 
                         stopResolveService(id);
                         removeRequestMap(clientId, id, clientInfo);
@@ -708,20 +707,9 @@ public class NsdService extends INsdManager.Stub {
         if (DBG) Slog.d(TAG, "registerService: " + regId + " " + service);
         try {
             Command cmd = new Command("mdnssd", "register", regId, service.getServiceName(),
-                    service.getServiceType(), service.getPort());
-
-            // Add TXT records as additional arguments.
-            Map<String, byte[]> txtRecords = service.getAttributes();
-            for (String key : txtRecords.keySet()) {
-                try {
-                    // TODO: Send encoded TXT record as bytes once NDC/netd supports binary data.
-                    byte[] recordValue = txtRecords.get(key);
-                    cmd.appendArg(String.format(Locale.US, "%s=%s", key,
-                            recordValue != null ? new String(recordValue, "UTF_8") : ""));
-                } catch (UnsupportedEncodingException e) {
-                    Slog.e(TAG, "Failed to encode txtRecord " + e);
-                }
-            }
+                    service.getServiceType(), service.getPort(),
+                    Base64.encodeToString(service.getTxtRecord(), Base64.DEFAULT)
+                            .replace("\n", ""));
 
             mNativeConnector.execute(cmd);
         } catch(NativeDaemonConnectorException e) {
