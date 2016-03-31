@@ -57,6 +57,17 @@ abstract class DhcpPacket {
 
     public static final int HWADDR_LEN = 16;
     public static final int MAX_OPTION_LEN = 255;
+
+    /**
+     * The minimum and maximum MTU that we are prepared to use. We set the minimum to the minimum
+     * IPv6 MTU because the IPv6 stack enters unusual codepaths when the link MTU drops below 1280,
+     * and does not recover if the MTU is brought above 1280 again. We set the maximum to 1500
+     * because in general it is risky to assume that the hardware is able to send/receive packets
+     * larger than 1500 bytes even if the network supports it.
+     */
+    private static final int MIN_MTU = 1280;
+    private static final int MAX_MTU = 1500;
+
     /**
      * IP layer definitions.
      */
@@ -917,7 +928,7 @@ abstract class DhcpPacket {
                             break;
                         case DHCP_MTU:
                             expectedLen = 2;
-                            mtu = Short.valueOf(packet.getShort());
+                            mtu = packet.getShort();
                             break;
                         case DHCP_DOMAIN_NAME:
                             expectedLen = optionLen;
@@ -1106,6 +1117,8 @@ abstract class DhcpPacket {
         results.serverAddress = mServerIdentifier;
         results.vendorInfo = mVendorInfo;
         results.leaseDuration = (mLeaseTime != null) ? mLeaseTime : INFINITE_LEASE;
+        results.mtu = (mMtu != null && MIN_MTU <= mMtu && mMtu <= MAX_MTU) ? mMtu : 0;
+
         return results;
     }
 
