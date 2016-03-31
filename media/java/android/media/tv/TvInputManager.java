@@ -856,7 +856,7 @@ public final class TvInputManager {
         /**
          * This is called when the underlying {@link TvStreamConfig} has been changed.
          *
-         * @param configs A list of new {@link TvStreamConfig}s.
+         * @param configs The new {@link TvStreamConfig}s.
          */
         public abstract void onStreamConfigChanged(TvStreamConfig[] configs);
     }
