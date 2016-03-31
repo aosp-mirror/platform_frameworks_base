@@ -162,7 +162,9 @@ public class UiBot extends BaseBot {
     }
 
     UiObject findSearchViewIcon() {
-        return findObject("com.android.documentsui:id/menu_search", "android:id/search_button");
+        return mContext.getResources().getBoolean(R.bool.full_bar_search_view)
+                ? findObject("com.android.documentsui:id/menu_search")
+                : findObject("com.android.documentsui:id/menu_search", "android:id/search_button");
     }
 
     UiObject findActionModeBar() {
