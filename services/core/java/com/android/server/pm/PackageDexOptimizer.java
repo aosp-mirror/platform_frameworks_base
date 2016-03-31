@@ -42,7 +42,7 @@ import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
 import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getFullCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
 
 /**
  * Helper class for running dexopt command on packages.
@@ -144,9 +144,10 @@ class PackageDexOptimizer {
                 if (isUsedByOtherApps(path)) {
                     checkProfiles = false;
 
-                    // TODO: Should we only upgrade to the non-profile-guided version? That is,
-                    //       given verify-profile, should we move to interpret-only?
-                    targetCompilerFilter = getFullCompilerFilter();
+                    targetCompilerFilter = getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+                    if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
+                        throw new IllegalStateException(targetCompilerFilter);
+                    }
                     isProfileGuidedFilter = false;
 
                     break;
@@ -181,6 +182,10 @@ class PackageDexOptimizer {
                     return DEX_OPT_FAILED;
                 }
                 dexoptNeeded = adjustDexoptNeeded(dexoptNeeded);
+                if (PackageManagerService.DEBUG_DEXOPT) {
+                    Log.i(TAG, "DexoptNeeded for " + path + "@" + targetCompilerFilter + " is " +
+                            dexoptNeeded);
+                }
 
                 final String dexoptType;
                 String oatDir = null;
