@@ -654,7 +654,7 @@ public class StatusBarWindowView extends FrameLayout {
         }
 
         @Override
-        public void onMultiWindowChanged() {
+        public void onMultiWindowModeChanged() {
         }
 
         @Override

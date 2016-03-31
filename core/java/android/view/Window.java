@@ -298,7 +298,7 @@ public abstract class Window {
 
     private boolean mDestroyed;
 
-    private boolean mOverlayWithDecorCaption = false;
+    private boolean mOverlayWithDecorCaptionEnabled = false;
 
     // The current window attributes.
     private final WindowManager.LayoutParams mWindowAttributes =
@@ -2139,13 +2139,13 @@ public abstract class Window {
      * down. This affects only freeform windows since they display the caption.
      * @hide
      */
-    public void setOverlayDecorCaption(boolean overlayCaption) {
-        mOverlayWithDecorCaption = overlayCaption;
+    public void setOverlayWithDecorCaptionEnabled(boolean enabled) {
+        mOverlayWithDecorCaptionEnabled = enabled;
     }
 
     /** @hide */
-    public boolean getOverlayDecorCaption() {
-        return mOverlayWithDecorCaption;
+    public boolean isOverlayWithDecorCaptionEnabled() {
+        return mOverlayWithDecorCaptionEnabled;
     }
 
     /** @hide */
@@ -2181,7 +2181,7 @@ public abstract class Window {
      * Called when the activity changes from fullscreen mode to multi-window mode and visa-versa.
      * @hide
      */
-    public abstract void onMultiWindowChanged();
+    public abstract void onMultiWindowModeChanged();
 
     /**
      * Called when the activity just relaunched.

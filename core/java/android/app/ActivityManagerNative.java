@@ -2890,7 +2890,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case IN_MULTI_WINDOW_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
-            final boolean inMultiWindow = inMultiWindow(token);
+            final boolean inMultiWindow = isInMultiWindowMode(token);
             reply.writeNoException();
             reply.writeInt(inMultiWindow ? 1 : 0);
             return true;
@@ -2898,7 +2898,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case IN_PICTURE_IN_PICTURE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
-            final boolean inPip = inPictureInPicture(token);
+            final boolean inPip = isInPictureInPictureMode(token);
             reply.writeNoException();
             reply.writeInt(inPip ? 1 : 0);
             return true;
@@ -2906,7 +2906,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case ENTER_PICTURE_IN_PICTURE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
-            enterPictureInPicture(token);
+            enterPictureInPictureMode(token);
             reply.writeNoException();
             return true;
         }
@@ -6837,7 +6837,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public boolean inMultiWindow(IBinder token) throws RemoteException {
+    public boolean isInMultiWindowMode(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -6851,7 +6851,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public boolean inPictureInPicture(IBinder token) throws RemoteException {
+    public boolean isInPictureInPictureMode(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -6865,7 +6865,7 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void enterPictureInPicture(IBinder token) throws RemoteException {
+    public void enterPictureInPictureMode(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);

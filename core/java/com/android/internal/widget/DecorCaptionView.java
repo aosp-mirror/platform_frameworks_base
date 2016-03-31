@@ -136,7 +136,7 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     public void setPhoneWindow(PhoneWindow owner, boolean show) {
         mOwner = owner;
         mShow = show;
-        mOverlayWithAppContent = owner.getOverlayDecorCaption();
+        mOverlayWithAppContent = owner.isOverlayWithDecorCaptionEnabled();
         if (mOverlayWithAppContent) {
             // The caption is covering the content, so we make its background transparent to make
             // the content visible.

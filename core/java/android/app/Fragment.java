@@ -1582,21 +1582,21 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     /**
      * Called when the Fragment's activity changes from fullscreen mode to multi-window mode and
-     * visa-versa. This is generally tied to {@link Activity#onMultiWindowChanged} of the containing
-     * Activity.
+     * visa-versa. This is generally tied to {@link Activity#onMultiWindowModeChanged} of the
+     * containing Activity.
      *
-     * @param inMultiWindow True if the activity is in multi-window mode.
+     * @param isInMultiWindowMode True if the activity is in multi-window mode.
      */
-    public void onMultiWindowChanged(boolean inMultiWindow) {
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
     }
 
     /**
      * Called by the system when the activity changes to and from picture-in-picture mode. This is
-     * generally tied to {@link Activity#onPictureInPictureChanged} of the containing Activity.
+     * generally tied to {@link Activity#onPictureInPictureModeChanged} of the containing Activity.
      *
-     * @param inPictureInPicture True if the activity is in picture-in-picture mode.
+     * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
      */
-    public void onPictureInPictureChanged(boolean inPictureInPicture) {
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -2334,17 +2334,17 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
-    void performMultiWindowChanged(boolean inMultiWindow) {
-        onMultiWindowChanged(inMultiWindow);
+    void performMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        onMultiWindowModeChanged(isInMultiWindowMode);
         if (mChildFragmentManager != null) {
-            mChildFragmentManager.dispatchMultiWindowChanged(inMultiWindow);
+            mChildFragmentManager.dispatchMultiWindowModeChanged(isInMultiWindowMode);
         }
     }
 
-    void performPictureInPictureChanged(boolean inPictureInPicture) {
-        onPictureInPictureChanged(inPictureInPicture);
+    void performPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        onPictureInPictureModeChanged(isInPictureInPictureMode);
         if (mChildFragmentManager != null) {
-            mChildFragmentManager.dispatchPictureInPictureChanged(inPictureInPicture);
+            mChildFragmentManager.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
         }
     }
 

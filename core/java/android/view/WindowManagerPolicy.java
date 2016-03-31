@@ -415,7 +415,7 @@ public interface WindowManagerPolicy {
          * Returns true if the window is current in multi-windowing mode. i.e. it shares the
          * screen with other application windows.
          */
-        public boolean inMultiWindowMode();
+        public boolean isInMultiWindowMode();
     }
 
     /**
