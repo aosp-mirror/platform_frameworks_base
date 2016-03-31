@@ -233,8 +233,10 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Ocultouse contido por causa da política"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Persoal"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Traballo"</string>
+    <!-- no translation found for user_owner_label (1119010402169916617) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (5289992269827577857) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"acceder aos teus contactos"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localización"</string>
@@ -1045,7 +1047,8 @@
     <string name="no_permissions" msgid="7283357728219338112">"Non é necesario ningún permiso"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"é posible que teñas que pagar"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB para carga"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"O USB está cargando este dispositivo"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"O USB está proporcionando enerxía ao dispositivo conectado"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB para transferencia de ficheiros"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB para transferencia de fotos"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB para MIDI"</string>
@@ -1063,8 +1066,10 @@
     <string name="configure_input_methods" msgid="5673193194563164021">"Outros teclados"</string>
     <string name="show_ime" msgid="2506087537466597099">"Manteno na pantalla mentres o teclado físico estea activo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Seleccionar deseño de teclado"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Toca para seleccionar un deseño de teclado."</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>

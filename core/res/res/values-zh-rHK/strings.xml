@@ -233,8 +233,10 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"已根據政策隱藏內容"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"個人"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"公司"</string>
+    <!-- no translation found for user_owner_label (1119010402169916617) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (5289992269827577857) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通訊錄"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"存取您的通訊錄"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置"</string>
@@ -1045,7 +1047,8 @@
     <string name="no_permissions" msgid="7283357728219338112">"不需授權"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"這可能需要付費"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB 充電"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"正在透過 USB 為此裝置充電"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"正在透過 USB 為已連接的裝置供電"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB 檔案傳輸"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB 相片傳輸"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI"</string>
@@ -1063,8 +1066,10 @@
     <string name="configure_input_methods" msgid="5673193194563164021">"其他鍵盤"</string>
     <string name="show_ime" msgid="2506087537466597099">"在實體鍵盤處於連接狀態時保持顯示"</string>
     <string name="hardware" msgid="194658061510127999">"顯示虛擬鍵盤"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"選取鍵盤配置"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"輕觸即可選取鍵盤配置。"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
