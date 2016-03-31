@@ -129,7 +129,19 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Ștergeți „<xliff:g id="NAME">%1$s</xliff:g>”?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Ștergeți dosarul „<xliff:g id="NAME">%1$s</xliff:g>” și conținutul acestuia?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="few">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere?</item>
+      <item quantity="other">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere?</item>
+      <item quantity="one">Ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> fișier?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="few">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> dosare și conținutul acestora?</item>
+      <item quantity="other">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de dosare și conținutul acestora?</item>
+      <item quantity="one">Ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> dosar și conținutul acestuia?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="few">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> elemente?</item>
+      <item quantity="other">Ștergeți <xliff:g id="COUNT_1">%1$d</xliff:g> de elemente?</item>
+      <item quantity="one">Ștergeți <xliff:g id="COUNT_0">%1$d</xliff:g> element?</item>
+    </plurals>
 </resources>

@@ -111,7 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"No s\'ha pogut canviar el nom del document"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"S\'han convertit alguns fitxers"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Vols que l\'aplicació <xliff:g id="APPNAME"><b>^1</b></xliff:g> tingui accés al directori <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> de l\'emmagatzematge <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
-    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Vols que l\'aplicació <xliff:g id="APPNAME"><b>^1</b></xliff:g> tingui accés a les dades de l\'emmagatzematge <xliff:g id="STORAGE"><i>^2</i></xliff:g>, incloses les fotos i els vídeos?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Vols que l\'aplicació <xliff:g id="APPNAME"><b>^1</b></xliff:g> tingui accés a les dades de <xliff:g id="STORAGE"><i>^2</i></xliff:g>, incloses les fotos i els vídeos?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"No m\'ho demanis més"</string>
     <string name="allow" msgid="7225948811296386551">"Permet"</string>
     <string name="deny" msgid="2081879885755434506">"Denega"</string>
@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Vols suprimir el fitxer <xliff:g id="NAME">%1$s</xliff:g>?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Vols suprimir la carpeta <xliff:g id="NAME">%1$s</xliff:g> i el seu contingut?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">Vols suprimir <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers?</item>
+      <item quantity="one">Vols suprimir <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">Vols suprimir <xliff:g id="COUNT_1">%1$d</xliff:g> carpetes i el seu contingut?</item>
+      <item quantity="one">Vols suprimir <xliff:g id="COUNT_0">%1$d</xliff:g> carpeta i el seu contingut?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">Vols suprimir <xliff:g id="COUNT_1">%1$d</xliff:g> elements?</item>
+      <item quantity="one">Vols suprimir <xliff:g id="COUNT_0">%1$d</xliff:g> element?</item>
+    </plurals>
 </resources>

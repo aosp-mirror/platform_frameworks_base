@@ -129,7 +129,19 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Желите ли да избришете „<xliff:g id="NAME">%1$s</xliff:g>“?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Желите ли да избришете директоријум „<xliff:g id="NAME">%1$s</xliff:g>“ и његов садржај?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="one">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотеку?</item>
+      <item quantity="few">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке?</item>
+      <item quantity="other">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотека?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="one">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> директоријум и њихов садржај?</item>
+      <item quantity="few">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> директоријума и њихов садржај?</item>
+      <item quantity="other">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> директоријума и њихов садржај?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="one">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> ставку?</item>
+      <item quantity="few">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> ставке?</item>
+      <item quantity="other">Желите ли да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> ставки?</item>
+    </plurals>
 </resources>
