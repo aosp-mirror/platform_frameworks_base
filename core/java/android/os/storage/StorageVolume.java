@@ -315,27 +315,34 @@ public final class StorageVolume implements Parcelable {
      * To gain access to descendants (child, grandchild, etc) documents, use
      * {@link DocumentsContract#buildDocumentUriUsingTree(Uri, String)}, or
      * {@link DocumentsContract#buildChildDocumentsUriUsingTree(Uri, String)} with the returned URI.
-     *
-     * <b>If your application only needs to store internal data, consider using
+     * <p>
+     * If your application only needs to store internal data, consider using
      * {@link Context#getExternalFilesDirs(String) Context.getExternalFilesDirs},
-     * {@link Context#getExternalCacheDirs()}, or
-     * {@link Context#getExternalMediaDirs()}, which require no permissions to read or write.
+     * {@link Context#getExternalCacheDirs()}, or {@link Context#getExternalMediaDirs()}, which
+     * require no permissions to read or write.
+     * <p>
+     * Access to the entire volume is only available for non-primary volumes (for the primary
+     * volume, apps can use the {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} and
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permissions) and should be used
+     * with caution, since users are more likely to deny access when asked for entire volume access
+     * rather than specific directories.
      *
-     * <strong>NOTE: </strong>requesting access to the entire volume is not recommended and it will
-     * result in a stronger message displayed to the user, which may cause the user to reject
-     * the request.
-     *
-     * @param directoryName must be one of
-     * {@link Environment#DIRECTORY_MUSIC}, {@link Environment#DIRECTORY_PODCASTS},
-     * {@link Environment#DIRECTORY_RINGTONES}, {@link Environment#DIRECTORY_ALARMS},
-     * {@link Environment#DIRECTORY_NOTIFICATIONS}, {@link Environment#DIRECTORY_PICTURES},
-     * {@link Environment#DIRECTORY_MOVIES}, {@link Environment#DIRECTORY_DOWNLOADS},
-     * {@link Environment#DIRECTORY_DCIM}, or {@link Environment#DIRECTORY_DOCUMENTS}, or
-     * {code null} to request access to the entire volume.
-     *
+     * @param directoryName must be one of {@link Environment#DIRECTORY_MUSIC},
+     *            {@link Environment#DIRECTORY_PODCASTS}, {@link Environment#DIRECTORY_RINGTONES},
+     *            {@link Environment#DIRECTORY_ALARMS}, {@link Environment#DIRECTORY_NOTIFICATIONS},
+     *            {@link Environment#DIRECTORY_PICTURES}, {@link Environment#DIRECTORY_MOVIES},
+     *            {@link Environment#DIRECTORY_DOWNLOADS}, {@link Environment#DIRECTORY_DCIM}, or
+     *            {@link Environment#DIRECTORY_DOCUMENTS}, or {code null} to request access to the
+     *            entire volume.
+     * @return intent to request access, or {@code null} if the requested directory is invalid for
+     *         that volume.
      * @see DocumentsContract
      */
-    public Intent createAccessIntent(String directoryName) {
+    public @Nullable Intent createAccessIntent(String directoryName) {
+        if ((isPrimary() && directoryName == null) ||
+                (directoryName != null && !Environment.isStandardDirectory(directoryName))) {
+            return null;
+        }
         final Intent intent = new Intent(ACTION_OPEN_EXTERNAL_DIRECTORY);
         intent.putExtra(EXTRA_STORAGE_VOLUME, this);
         intent.putExtra(EXTRA_DIRECTORY_NAME, directoryName);
