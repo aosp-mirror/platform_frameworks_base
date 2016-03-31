@@ -16,6 +16,222 @@ page.image=images/cards/card-n-support_2x.png
 <p>To discuss issues or ideas with other developers working with Android N, join the
 <a href="{@docRoot}preview/dev-community">Developer Preview Google+ community</a>.</p>
 
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Date: April 2016<br>
+        Builds: NPC91K<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
+        Google Play services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="new">New in DP2</h3>
+
+<ul>
+  <li>Platform support for Vulkan, a new 3D rendering API that provides
+  explicit, low-overhead GPU (Graphics Processor Unit) control and offers
+  improved performance for draw-call heavy applications. For details, see the
+  <a href="{@docRoot}ndk/guides/graphics/index.html">documentation</a>.
+  </li>
+
+  <li>New people emoji with support for skin tones, and new Unicode 9 glyphs.
+  Skin tone and new emoji will not show up until keyboards build support for
+  them in the palette. Apps should not need to take any action to take
+  advantage of these new emoji, unless the apps use a non-system font. IME
+  developers need to incorporate support for the new emoji.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/api-overview.html#launcher_shortcuts">Launcher
+    Shortcuts API</a>: Apps can use <code>ShortcutManager</code> to send
+    shortcuts to starting points within themselves to the launcher.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/features/multi-window.html">Multi-Window</a>:
+    You can now specify a separate minimum height and minimum width for an
+    activity. In addition, several API names have been slightly changed.
+  </li>
+</ul>
+
+<h4 id="dp2-fixes">Fixes for issues reported by developers</h4>
+
+<p>
+  A number of issues reported by developers have been fixed, including:
+</p>
+
+<ul>
+  <li>Can’t connect to hidden SSID or non-broadcast Wi-Fi (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=203116">203116</a>)
+  </li>
+
+  <li>Microphone mute state persists across activities (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=205922">205922</a>)
+  </li>
+
+  <li>Changing Multiwindow focus pauses YouTube (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=203424">203424</a>)
+  </li>
+
+  <li>Direct Reply may close open activity (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=204411">204411</a>)
+  </li>
+
+  <li>Various stability fixes
+  </li>
+</ul>
+
+<h3 id="general">General advisories</h3>
+
+<p>
+  This Developer Preview release is for <strong>app developers only</strong>
+  and is designed for use in compatibility testing and early development only.
+  Please be aware of these general notes about the release:
+</p>
+
+<ul>
+  <li>This release has various stability and performance issues on all devices
+  that make it <strong>not suitable for daily use on phone or tablet</strong>,
+  especially for non-developers.
+  </li>
+
+  <li>Battery life and performance have not yet been optimized with this
+  release:
+
+    <ul>
+      <li>System and app <strong>performance is known to be periodically slow /
+      janky</strong>, and devices may become occasionally unresponsive. These
+      problems may become more acute with prolonged use.
+      </li>
+
+      <li>Battery life may be regressed in this release for screen-on and
+      screen-off use cases.
+      </li>
+    </ul>
+  </li>
+
+  <li>Some <strong>apps may not function normally</strong> on Developer Preview
+  2. This includes Google’s apps as well as other apps.
+  </li>
+
+  <li>This early build is not <strong>Compatibility Test Suite (CTS)
+  approved</strong>. Apps that depend on CTS approved builds won’t work
+  (Android Pay for example).
+  </li>
+
+  <li>This preview release supports the following devices: Nexus 5X, Nexus 6,
+  Nexus 6P, Nexus 9, and Pixel C, as well as General Mobile 4G
+  (Android One). Support for Nexus Player is coming soon.
+  </li>
+</ul>
+
+<h3 id="ki">Known Issues</h3>
+
+<h4>Performance and battery</h4>
+
+<ul>
+  <li>System and app performance is known to be <strong>periodically slow /
+  janky</strong>, and device may become occasionally unresponsive. These
+  problems may become more acute with prolonged use.
+  </li>
+</ul>
+
+<h4>Google accounts</h4>
+
+<ul>
+  <li>In some circumstances, there can be issues with
+  <code>AccountManagerService</code> that prevent logging in to Google accounts
+  </li>
+</ul>
+
+<h4>System update</h4>
+
+<ul>
+  <li>Device may restart immediately after updating to DP2.
+  </li>
+</ul>
+
+<h4>Accessibility</h4>
+
+<ul>
+  <li>Problem with listening to text-to-speech (TTS) output when pitch is set
+  near maximum level.
+  </li>
+</ul>
+
+<h4>Bluetooth</h4>
+
+<ul>
+  <li>Bluetooth Low Energy (LE) GATT characteristics are using the wrong write
+  type and will not be sent to a remote device. Thus, for example, some fitness
+  devices will not work.
+  </li>
+</ul>
+
+
+<h4>Setup wizard</h4>
+
+<ul>
+  <li>The option to restore data on a new device (or newly reset device) from
+  "Your Google Account" is not actionable in the setup wizard. You must restore
+  data from an existing device using NFC or set it up as a new device.
+  </li>
+</ul>
+
+<h4>App compatibility</h4>
+
+<ul>
+  <li>Tapping on the image of a product in the Amazon app to enlarge it causes
+  the app to crash.
+  </li>
+
+  <li>"The Spectator" app crashes on launch.
+  </li>
+
+  <li>May be unable to open downloaded archives in the Downloads app.
+  </li>
+
+  <li>Calendar app crashes on docking to multi-window.
+  </li>
+</ul>
+
+<h4>Device-specific issues</h4>
+
+
+<dl>
+  <dt>
+    <strong>Seed</strong>
+  </dt>
+
+  <dd>
+    Data connection fails when device is switched from slot 1 to slot 2 SIM.
+  </dd>
+
+  <dt>
+    <strong>Ryu</strong>
+  </dt>
+
+  <dd>
+    Unable to toggle Voice Search "Always On" option.
+  </dd>
+
+  <dt>
+    <strong>Shamu</strong>
+  </dt>
+
+  <dd>
+    Camera pictures in portrait orientation are corrupted, except for HDR+
+    photos.
+  </dd>
+</dl>
+
+<!-- DP 1 release notes archive -->
 
 <h2 id="dp1">Developer Preview 1</h2>
 
@@ -32,7 +248,7 @@ page.image=images/cards/card-n-support_2x.png
   </div>
 </div>
 
-<h3 id="general">General advisories</h3>
+<h3 id="dp1-general">General advisories</h3>
 
 <p>
   This Developer Preview release is for app developers only and is designed for
@@ -68,7 +284,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h3 id="platform">Platform Issues</h3>
+<h3 id="dp1-platform">Platform Issues</h3>
 
 <h4 id="performance">Performance and battery</h4>
 
@@ -152,7 +368,7 @@ page.image=images/cards/card-n-support_2x.png
         Google Apps Device Policy</a> that is bundled with N Developer Preview
         does not yet support the Work Profile Security Challenge feature.
         Developers should instead use <a href=
-        "https://play.google.com/store/apps/details?id=com.afwsamples.testdpc">TestDPC</a>
+        "https://github.com/googlesamples/android-testdpc/releases">TestDPC</a>
         to test this feature.
       </li>
     </ul>
