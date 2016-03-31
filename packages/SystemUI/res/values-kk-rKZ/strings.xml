@@ -309,8 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"іздеу"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> іске қосу мүмкін болмады."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> қауіпсіз режимде өшіріледі."</string>
-    <!-- no translation found for recents_stack_action_button_label (6593727103310426253) -->
-    <skip />
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Барлығын тазалау"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Бұл қолданба көп терезені қолдамайды"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Қолданба көп терезені қолдамайды"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
@@ -499,58 +498,32 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Өнімділікті және фондық деректерді азайтады"</string>
-    <!-- no translation found for keyboard_key_button_template (6230056639734377300) -->
-    <skip />
-    <!-- no translation found for keyboard_key_home (2243500072071305073) -->
-    <skip />
-    <!-- no translation found for keyboard_key_back (2337450286042721351) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_up (5584144111755734686) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_down (7331518671788337815) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_left (1346446024676962251) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_right (3317323247127515341) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_center (2566737770049304658) -->
-    <skip />
-    <!-- no translation found for keyboard_key_tab (3871485650463164476) -->
-    <skip />
-    <!-- no translation found for keyboard_key_space (2499861316311153293) -->
-    <skip />
-    <!-- no translation found for keyboard_key_enter (5739632123216118137) -->
-    <skip />
-    <!-- no translation found for keyboard_key_backspace (1559580097512385854) -->
-    <skip />
-    <!-- no translation found for keyboard_key_media_play_pause (3861975717393887428) -->
-    <skip />
-    <!-- no translation found for keyboard_key_media_stop (2859963958595908962) -->
-    <skip />
-    <!-- no translation found for keyboard_key_media_next (1894394911630345607) -->
-    <skip />
-    <!-- no translation found for keyboard_key_media_previous (4256072387192967261) -->
-    <skip />
-    <!-- no translation found for keyboard_key_media_rewind (2654808213360820186) -->
-    <skip />
-    <!-- no translation found for keyboard_key_media_fast_forward (3849417047738200605) -->
-    <skip />
-    <!-- no translation found for keyboard_key_page_up (5654098530106845603) -->
-    <skip />
-    <!-- no translation found for keyboard_key_page_down (8720502083731906136) -->
-    <skip />
-    <!-- no translation found for keyboard_key_forward_del (1391451334716490176) -->
-    <skip />
-    <!-- no translation found for keyboard_key_move_home (2765693292069487486) -->
-    <skip />
-    <!-- no translation found for keyboard_key_move_end (5901174332047975247) -->
-    <skip />
-    <!-- no translation found for keyboard_key_insert (8530501581636082614) -->
-    <skip />
-    <!-- no translation found for keyboard_key_num_lock (5052537581246772117) -->
-    <skip />
-    <!-- no translation found for keyboard_key_numpad_template (8729216555174634026) -->
-    <skip />
+    <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> түймесі"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
+    <string name="keyboard_key_back" msgid="2337450286042721351">"Артқа"</string>
+    <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Жоғары"</string>
+    <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Төмен"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Сол"</string>
+    <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Оң"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Орталық"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Бос орын"</string>
+    <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
+    <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Ойнату/кідірту"</string>
+    <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Тоқтату"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Келесі"</string>
+    <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Алдыңғы"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Кері айналдыру"</string>
+    <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Алға айналдыру"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Delete"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Home"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"End"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
+    <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Сандық пернетақта <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Жүйе"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Негізгі бет"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Жақындағылар"</string>
@@ -610,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Солға жылжыту"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Оңға жылжыту"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"Қолданба көп тереземен жұмыс істемеуі мүмкін"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g> орны, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Өңдеу үшін екі рет түртіңіз."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Қосу үшін екі рет түртіңіз."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g> орны. Таңдау үшін екі рет түртіңіз."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> жылжыту"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> жою"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> орнына қосылды"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> жойылды"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> орнына жылжытылды"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Жылдам параметрлер өңдегіші."</string>
 </resources>

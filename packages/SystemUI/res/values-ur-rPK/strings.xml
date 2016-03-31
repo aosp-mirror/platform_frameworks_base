@@ -582,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"اوپر منتقل کریں"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"بائیں منتقل کریں"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"دائیں منتقل کریں"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"ایپ شاید ملٹی ونڈو کے ساتھ کام نہ کرے"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>۔ ترمیم کرنے کیلئے دو بار تھپتھپائیں۔"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>۔ شامل کرنے کیلئے دو بار تھپتھپائیں۔"</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g>۔ منتخب کرنے کیلئے دو بار تھپتھپائیں۔"</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> کو منتقل کریں"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ہٹائیں"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="POSITION">%2$d</xliff:g> پوزیشن پر <xliff:g id="TILE_NAME">%1$s</xliff:g> شامل ہو گیا ہے"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ہٹا دیا گیا"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="POSITION">%2$d</xliff:g> پوزیشن پر <xliff:g id="TILE_NAME">%1$s</xliff:g> منتقل ہو گیا ہے"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"فوری ترتیبات ایڈیٹر۔"</string>
 </resources>
