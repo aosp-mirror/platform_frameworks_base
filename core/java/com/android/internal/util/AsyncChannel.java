@@ -402,7 +402,7 @@ public class AsyncChannel {
 
         // Initialize destination fields
         mDstMessenger = dstMessenger;
-
+        linkToDeathMonitor();
         if (DBG) log("connected srcHandler to the dstMessenger X");
     }
 
@@ -844,22 +844,30 @@ public class AsyncChannel {
         msg.arg1 = status;
         msg.obj = this;
         msg.replyTo = mDstMessenger;
+        if (!linkToDeathMonitor()) {
+            // Override status to indicate failure
+            msg.arg1 = STATUS_BINDING_UNSUCCESSFUL;
+        }
 
-        /*
-         * Link to death only when bindService isn't used.
-         */
-        if (mConnection == null) {
+        mSrcHandler.sendMessage(msg);
+    }
+
+    /**
+     * Link to death monitor for destination messenger. Returns true if successfully binded to
+     * destination messenger; false otherwise.
+     */
+    private boolean linkToDeathMonitor() {
+        // Link to death only when bindService isn't used and not already linked.
+        if (mConnection == null && mDeathMonitor == null) {
             mDeathMonitor = new DeathMonitor();
             try {
                 mDstMessenger.getBinder().linkToDeath(mDeathMonitor, 0);
             } catch (RemoteException e) {
                 mDeathMonitor = null;
-                // Override status to indicate failure
-                msg.arg1 = STATUS_BINDING_UNSUCCESSFUL;
+                return false;
             }
         }
-
-        mSrcHandler.sendMessage(msg);
+        return true;
     }
 
     /**
