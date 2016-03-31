@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Vill du radera <xliff:g id="NAME">%1$s</xliff:g>?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Vill du radera mappen <xliff:g id="NAME">%1$s</xliff:g> och dess innehåll?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">Vill du radera <xliff:g id="COUNT_1">%1$d</xliff:g> filer?</item>
+      <item quantity="one">Vill du radera <xliff:g id="COUNT_0">%1$d</xliff:g> fil?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">Vill du radera <xliff:g id="COUNT_1">%1$d</xliff:g>  mappar och deras innehåll?</item>
+      <item quantity="one">Vill du radera <xliff:g id="COUNT_0">%1$d</xliff:g> mapp och dess innehåll?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">Vill du radera <xliff:g id="COUNT_1">%1$d</xliff:g> objekt?</item>
+      <item quantity="one">Vill du radera <xliff:g id="COUNT_0">%1$d</xliff:g> objekt?</item>
+    </plurals>
 </resources>

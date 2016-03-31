@@ -137,7 +137,22 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Ištrinti „<xliff:g id="NAME">%1$s</xliff:g>“?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Ištrinti aplanką „<xliff:g id="NAME">%1$s</xliff:g>“ ir jo turinį?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="one">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failą?</item>
+      <item quantity="few">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failus?</item>
+      <item quantity="many">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failo?</item>
+      <item quantity="other">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failų?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="one">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> aplanką ir jų turinį?</item>
+      <item quantity="few">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> aplankus ir jų turinį?</item>
+      <item quantity="many">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> aplanko ir jų turinį?</item>
+      <item quantity="other">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> aplankų ir jų turinį?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="one">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elementą?</item>
+      <item quantity="few">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elementus?</item>
+      <item quantity="many">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elemento?</item>
+      <item quantity="other">Ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> elementų?</item>
+    </plurals>
 </resources>

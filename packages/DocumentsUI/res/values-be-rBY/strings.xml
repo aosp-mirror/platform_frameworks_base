@@ -135,11 +135,24 @@
       <item quantity="many">Выбрана <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Выбрана <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
-    <skip />
-    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
-    <skip />
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Выдаліць \"<xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Выдаліць папку \"<xliff:g id="NAME">%1$s</xliff:g>\" і яе змесціва?"</string>
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="one">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> файл?</item>
+      <item quantity="few">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> файлы?</item>
+      <item quantity="many">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> файлаў?</item>
+      <item quantity="other">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> файла?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="one">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> папку і іх змесціва?</item>
+      <item quantity="few">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> папкі і іх змесціва?</item>
+      <item quantity="many">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> папак і іх змесціва?</item>
+      <item quantity="other">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> папкі і іх змесціва?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="one">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элемент?</item>
+      <item quantity="few">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элементы?</item>
+      <item quantity="many">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элементаў?</item>
+      <item quantity="other">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элемента?</item>
+    </plurals>
 </resources>
