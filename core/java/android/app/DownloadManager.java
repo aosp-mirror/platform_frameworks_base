@@ -1380,7 +1380,7 @@ public class DownloadManager {
             if (destinationType == Downloads.Impl.DESTINATION_FILE_URI ||
                     destinationType == Downloads.Impl.DESTINATION_EXTERNAL ||
                     destinationType == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
-                String localPath = getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
+                String localPath = super.getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
                 if (localPath == null) {
                     return null;
                 }
