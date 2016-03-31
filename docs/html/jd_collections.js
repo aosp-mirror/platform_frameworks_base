@@ -16,6 +16,7 @@ var RESOURCE_COLLECTIONS = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
+      "https://www.youtube.com/watch?v=dFrgNiweQDk",
       "http://www.youtube.com/watch?v=9m6MoBM-sFI",
       "http://www.youtube.com/watch?v=Pms0pcyPbAM",
       "http://www.youtube.com/watch?v=e7t3svG9PTk",
