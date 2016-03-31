@@ -3528,6 +3528,13 @@ i
              This setting implies fastScrollEnabled. -->
         <attr name="fastScrollAlwaysVisible" format="boolean" />
     </declare-styleable>
+    <!-- @hide -->
+    <declare-styleable name="RecycleListView">
+        <!-- Bottom padding to use when no buttons are present. -->
+        <attr name="paddingBottomNoButtons" format="dimension" />
+        <!-- Top padding to use when no title is present. -->
+        <attr name="paddingTopNoTitle" format="dimension" />
+    </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
              this is simpler than populating the Spinner programmatically. -->

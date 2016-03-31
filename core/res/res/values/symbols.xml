@@ -2556,4 +2556,7 @@
 
   <!-- WallpaperManager config -->
   <java-symbol type="string" name="config_wallpaperCropperPackage" />
+
+  <java-symbol type="id" name="textSpacerNoTitle" />
+  <java-symbol type="id" name="titleDividerNoCustom" />
 </resources>
