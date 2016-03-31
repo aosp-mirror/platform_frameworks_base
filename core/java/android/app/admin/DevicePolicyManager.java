@@ -3811,13 +3811,17 @@ public class DevicePolicyManager {
      * @return {@code true} if the package is suspended or {@code false} if the package is not
      *         suspended, could not be found or an error occurred.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws NameNotFoundException if the package could not be found.
      */
-    public boolean getPackageSuspended(@NonNull ComponentName admin, String packageName) {
+    public boolean isPackageSuspended(@NonNull ComponentName admin, String packageName)
+            throws NameNotFoundException {
         if (mService != null) {
             try {
-                return mService.getPackageSuspended(admin, packageName);
+                return mService.isPackageSuspended(admin, packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            } catch (IllegalArgumentException ex) {
+                throw new NameNotFoundException(packageName);
             }
         }
         return false;

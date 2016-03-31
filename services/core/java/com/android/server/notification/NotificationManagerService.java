@@ -3441,6 +3441,9 @@ public class NotificationManagerService extends SystemService {
             return AppGlobals.getPackageManager().isPackageSuspendedForUser(pkg, userId);
         } catch (RemoteException re) {
             throw new SecurityException("Could not talk to package manager service");
+        } catch (IllegalArgumentException ex) {
+            // Package not found.
+            return false;
         }
     }
 

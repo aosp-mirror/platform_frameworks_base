@@ -190,7 +190,7 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Package " + packageName + " new suspended state: "
                     + mInterface.isPackageSuspendedForUser(packageName, userId));
             return 0;
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalArgumentException e) {
             pw.println(e.toString());
             return 1;
         }

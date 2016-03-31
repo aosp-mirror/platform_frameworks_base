@@ -901,7 +901,15 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-        if (isPackageSuspendedForUser(packageName, uid)) {
+        boolean suspended;
+        try {
+            suspended = isPackageSuspendedForUser(packageName, uid);
+        } catch (IllegalArgumentException ex) {
+            // Package not found.
+            suspended = false;
+        }
+
+        if (suspended) {
             Log.i(TAG, "Audio disabled for suspended package=" + packageName + " for uid=" + uid);
             return AppOpsManager.MODE_IGNORED;
         }
