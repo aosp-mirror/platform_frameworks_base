@@ -1079,12 +1079,16 @@ public class ExifInterface {
      *
      * @return two-element array, the offset in the first value, and length in
      *         the second, or {@code null} if no thumbnail was found.
-     * @hide
      */
     public long[] getThumbnailRange() {
+        if (!mHasThumbnail) {
+            return null;
+        }
+
         long[] range = new long[2];
         range[0] = mThumbnailOffset;
         range[1] = mThumbnailLength;
+
         return range;
     }
 
