@@ -284,20 +284,30 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         Uri uri = getServerUri(DEFAULT_FILENAME);
         enqueueResponse(buildResponse(HTTP_PARTIAL_CONTENT));
 
-        doErrorTest(uri, DownloadManager.ERROR_UNHANDLED_HTTP_CODE);
+        doErrorTest(uri, DownloadManager.ERROR_CANNOT_RESUME);
     }
 
     /**
      * Tests the download failure error from an unhandled HTTP status code
      */
     @LargeTest
-    public void testErrorHttpDataError_invalidRedirect() throws Exception {
+    public void testRelativeRedirect() throws Exception {
         Uri uri = getServerUri(DEFAULT_FILENAME);
         final MockResponse resp = buildResponse(HTTP_REDIRECT);
-        resp.setHeader("Location", "://blah.blah.blah.com");
+        resp.setHeader("Location", ":" + uri.getSchemeSpecificPart());
         enqueueResponse(resp);
 
-        doErrorTest(uri, DownloadManager.ERROR_HTTP_DATA_ERROR);
+        byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
+        enqueueResponse(buildResponse(HTTP_OK, blobData));
+
+        Request request = new Request(uri);
+        request.setTitle(DEFAULT_FILENAME);
+
+        long dlRequest = mDownloadManager.enqueue(request);
+        waitForDownloadOrTimeout(dlRequest);
+
+        verifyAndCleanupSingleFileDownload(dlRequest, blobData);
+        assertEquals(1, mReceiver.numDownloadsCompleted());
     }
 
     /**
