@@ -127,6 +127,8 @@ public:
     ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);
     ANDROID_API long getDroppedFrameReportCount();
 
+    ANDROID_API static bool copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap);
+
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;
