@@ -400,4 +400,14 @@ interface IWindowManager
      * @hide
      */
     void registerShortcutKey(in long shortcutCode, IShortcutService keySubscriber);
+
+    /**
+     * Create the input consumer for wallpaper events.
+     */
+    void createWallpaperInputConsumer(out InputChannel inputChannel);
+
+    /**
+     * Remove the input consumer for wallpaper events.
+     */
+    void removeWallpaperInputConsumer();
 }
