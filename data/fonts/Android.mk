@@ -101,8 +101,13 @@ font_src_files :=
 checkbuild: fontchain_lint
 
 FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
+ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+CHECK_EMOJI := false
+else
+CHECK_EMOJI := true
+endif
 
 .PHONY: fontchain_lint
 fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml
 	PYTHONPATH=$$PYTHONPATH:external/fonttools/Lib \
-	python $(FONTCHAIN_LINTER) $(TARGET_OUT) external/unicode
+	python $(FONTCHAIN_LINTER) $(TARGET_OUT) $(CHECK_EMOJI) external/unicode
