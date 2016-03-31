@@ -4950,8 +4950,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                             if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping mAlways=false entry");
                             continue;
                         }
-                        final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
-                                flags | MATCH_DISABLED_COMPONENTS, userId);
+                        final ActivityInfo ai = getActivityInfo(
+                                pa.mPref.mComponent, flags | MATCH_DISABLED_COMPONENTS
+                                        | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                                userId);
                         if (DEBUG_PREFERRED || debug) {
                             Slog.v(TAG, "Found preferred activity:");
                             if (ai != null) {
