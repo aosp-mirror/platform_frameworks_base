@@ -35,6 +35,7 @@ import com.android.systemui.qs.customize.QSCustomizer;
 public class NotificationsQuickSettingsContainer extends FrameLayout
         implements ViewStub.OnInflateListener, DensityContainer.InflateListener {
 
+
     private DensityContainer mQsContainer;
     private View mUserSwitcher;
     private View mStackScroller;
@@ -42,6 +43,9 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     private boolean mInflated;
     private boolean mQsExpanded;
     private boolean mCustomizerAnimating;
+
+    private int mBottomPadding;
+    private int mStackScrollerMargin;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,6 +57,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         mQsContainer = (DensityContainer) findViewById(R.id.qs_density_container);
         mQsContainer.addInflateListener(this);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
+        mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
         userSwitcher.setOnInflateListener(this);
@@ -75,7 +80,8 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        setPadding(0, 0, 0, insets.getStableInsetBottom());
+        mBottomPadding = insets.getStableInsetBottom();
+        setPadding(0, 0, 0, mBottomPadding);
         return insets;
     }
 
@@ -140,5 +146,23 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
             mCustomizerAnimating = isAnimating;
             invalidate();
         }
+    }
+
+    public void setCustomizerShowing(boolean isShowing) {
+        if (isShowing) {
+            // Clear out bottom paddings/margins so the qs customization can be full height.
+            setPadding(0, 0, 0, 0);
+            setBottomMargin(mStackScroller, 0);
+        } else {
+            setPadding(0, 0, 0, mBottomPadding);
+            setBottomMargin(mStackScroller, mStackScrollerMargin);
+        }
+
+    }
+
+    private void setBottomMargin(View v, int bottomMargin) {
+        LayoutParams params = (LayoutParams) v.getLayoutParams();
+        params.bottomMargin = bottomMargin;
+        v.setLayoutParams(params);
     }
 }
