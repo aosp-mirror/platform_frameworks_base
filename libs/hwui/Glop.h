@@ -163,11 +163,13 @@ public:
         GLenum dst;
     } blend;
 
+#if !HWUI_NEW_OPS
     /**
      * Bounds of the drawing command in layer space. Only mapped into layer
      * space once GlopBuilder::build() is called.
      */
     Rect bounds; // TODO: remove for HWUI_NEW_OPS
+#endif
 
     /**
      * Additional render state to enumerate:

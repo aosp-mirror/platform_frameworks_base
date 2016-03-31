@@ -85,7 +85,9 @@ static void expectTransformEq(Glop::Transform& expectedTransform, Glop::Transfor
 }
 
 static void expectGlopEq(Glop& expectedGlop, Glop& builtGlop) {
+#if !HWUI_NEW_OPS
     EXPECT_EQ(expectedGlop.bounds, builtGlop.bounds);
+#endif
     expectBlendEq(expectedGlop.blend, builtGlop.blend);
     expectFillEq(expectedGlop.fill, builtGlop.fill);
     expectMeshEq(expectedGlop.mesh, builtGlop.mesh);
@@ -136,7 +138,9 @@ RENDERTHREAD_TEST(GlopBuilder, rectSnapTest) {
     // unit quad also should be translate by additional (0.3, 0.3) to snap to exact pixels.
     goldenGlop->transform.modelView.loadTranslate(1.3, 1.3, 0);
     goldenGlop->transform.modelView.scale(99, 99, 1);
+#if !HWUI_NEW_OPS
     goldenGlop->bounds = android::uirenderer::Rect(1.70, 1.70, 100.70, 100.70);
+#endif
     goldenGlop->transform.canvas = simpleTranslate;
     goldenGlop->fill.texture.filter = GL_NEAREST;
     expectGlopEq(*goldenGlop, glop);
