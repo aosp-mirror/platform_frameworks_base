@@ -16,37 +16,32 @@
 
 package com.android.server.wm;
 
-import android.os.Looper;
 import android.os.Process;
 import android.view.Display;
 import android.view.InputChannel;
-import android.view.InputEventReceiver;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
-
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
 
-public final class InputConsumerImpl implements WindowManagerPolicy.InputConsumer {
+class InputConsumerImpl {
     final WindowManagerService mService;
     final InputChannel mServerChannel, mClientChannel;
     final InputApplicationHandle mApplicationHandle;
     final InputWindowHandle mWindowHandle;
-    final InputEventReceiver mInputEventReceiver;
-    final int mWindowLayer;
 
-    public InputConsumerImpl(WindowManagerService service, Looper looper,
-            InputEventReceiver.Factory inputEventReceiverFactory) {
-        String name = "input consumer";
+    InputConsumerImpl(WindowManagerService service, String name, InputChannel inputChannel) {
         mService = service;
 
         InputChannel[] channels = InputChannel.openInputChannelPair(name);
         mServerChannel = channels[0];
-        mClientChannel = channels[1];
+        if (inputChannel != null) {
+            channels[1].transferTo(inputChannel);
+            channels[1].dispose();
+            mClientChannel = inputChannel;
+        } else {
+            mClientChannel = channels[1];
+        }
         mService.mInputManager.registerInputChannel(mServerChannel, null);
-
-        mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
-                mClientChannel, looper);
 
         mApplicationHandle = new InputApplicationHandle(null);
         mApplicationHandle.name = name;
@@ -57,8 +52,7 @@ public final class InputConsumerImpl implements WindowManagerPolicy.InputConsume
         mWindowHandle.name = name;
         mWindowHandle.inputChannel = mServerChannel;
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-        mWindowLayer = getLayerLw(mWindowHandle.layoutParamsType);
-        mWindowHandle.layer = mWindowLayer;
+        mWindowHandle.layer = getLayerLw(mWindowHandle.layoutParamsType);
         mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
@@ -81,21 +75,15 @@ public final class InputConsumerImpl implements WindowManagerPolicy.InputConsume
         mWindowHandle.frameBottom = dh;
     }
 
-    @Override
-    public void dismiss() {
-        synchronized (mService.mWindowMap) {
-            if (mService.removeInputConsumer()) {
-                mInputEventReceiver.dispose();
-                mService.mInputManager.unregisterInputChannel(mServerChannel);
-                mClientChannel.dispose();
-                mServerChannel.dispose();
-            }
-        }
-    }
-
     private int getLayerLw(int windowType) {
         return mService.mPolicy.windowTypeToLayerLw(windowType)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
                 + WindowManagerService.TYPE_LAYER_OFFSET;
+    }
+
+    void disposeChannelsLw() {
+        mService.mInputManager.unregisterInputChannel(mServerChannel);
+        mClientChannel.dispose();
+        mServerChannel.dispose();
     }
 }
