@@ -516,9 +516,15 @@ public class AlertController {
             }
 
             // Only show the divider if we have a title.
-            final View divider;
+            View divider = null;
             if (mMessage != null || mListView != null || hasCustomPanel) {
-                divider = topPanel.findViewById(R.id.titleDivider);
+                if (!hasCustomPanel) {
+                    divider = topPanel.findViewById(R.id.titleDividerNoCustom);
+                }
+                if (divider == null) {
+                    divider = topPanel.findViewById(R.id.titleDivider);
+                }
+
             } else {
                 divider = topPanel.findViewById(R.id.titleDividerTop);
             }
@@ -526,6 +532,17 @@ public class AlertController {
             if (divider != null) {
                 divider.setVisibility(View.VISIBLE);
             }
+        } else {
+            if (contentPanel != null) {
+                final View spacer = contentPanel.findViewById(R.id.textSpacerNoTitle);
+                if (spacer != null) {
+                    spacer.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+        if (mListView instanceof RecycleListView) {
+            ((RecycleListView) mListView).setHasDecor(hasTopPanel, hasButtonPanel);
         }
 
         // Update scroll indicators as needed.
@@ -861,23 +878,34 @@ public class AlertController {
     }
 
     public static class RecycleListView extends ListView {
+        private final int mPaddingTopNoTitle;
+        private final int mPaddingBottomNoButtons;
+
         boolean mRecycleOnMeasure = true;
 
         public RecycleListView(Context context) {
-            super(context);
+            this(context, null);
         }
 
         public RecycleListView(Context context, AttributeSet attrs) {
             super(context, attrs);
+
+            final TypedArray ta = context.obtainStyledAttributes(
+                    attrs, R.styleable.RecycleListView);
+            mPaddingBottomNoButtons = ta.getDimensionPixelOffset(
+                    R.styleable.RecycleListView_paddingBottomNoButtons, -1);
+            mPaddingTopNoTitle = ta.getDimensionPixelOffset(
+                    R.styleable.RecycleListView_paddingTopNoTitle, -1);
         }
 
-        public RecycleListView(Context context, AttributeSet attrs, int defStyleAttr) {
-            super(context, attrs, defStyleAttr);
-        }
-
-        public RecycleListView(
-                Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-            super(context, attrs, defStyleAttr, defStyleRes);
+        public void setHasDecor(boolean hasTitle, boolean hasButtons) {
+            if (!hasButtons || !hasTitle) {
+                final int paddingLeft = getPaddingLeft();
+                final int paddingTop = hasTitle ? getPaddingTop() : mPaddingTopNoTitle;
+                final int paddingRight = getPaddingRight();
+                final int paddingBottom = hasButtons ? getPaddingBottom() : mPaddingBottomNoButtons;
+                setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+            }
         }
 
         @Override

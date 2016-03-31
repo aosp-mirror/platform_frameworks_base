@@ -450,6 +450,7 @@
     <item type="dimen" format="integer" name="time_picker_column_end_material">1</item>
 
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
+    <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
 
     <item type="fraction" name="docked_stack_divider_fixed_ratio">34.15%</item>
 
