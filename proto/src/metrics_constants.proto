@@ -2126,14 +2126,14 @@ message MetricsEvent {
     // Settings shown/hidden on main settings dashboard.
     // These are actually visibility events, but visible/hidden doesn't
     // take a package, so these are being logged as actions.
-    ACTION_SHOW_SETTINGS_SUGGESTION = 383;
-    ACTION_HIDE_SETTINGS_SUGGESTION = 384;
+    ACTION_SHOW_SETTINGS_SUGGESTION = 384;
+    ACTION_HIDE_SETTINGS_SUGGESTION = 385;
 
     // Click on a suggestion.
-    ACTION_SETTINGS_SUGGESTION = 385;
+    ACTION_SETTINGS_SUGGESTION = 386;
 
     // Suggestion -> Overflow -> Remove.
-    ACTION_SETTINGS_DISMISS_SUGGESTION = 386;
+    ACTION_SETTINGS_DISMISS_SUGGESTION = 387;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
