@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.Slog;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -229,7 +230,7 @@ public class BaseBundle {
         }
 
         if (sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
-            Log.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
+            Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
                     + "clobber all data inside!", new Throwable());
         }
 
