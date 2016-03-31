@@ -67,6 +67,8 @@ public final class Metrics {
     private static final String COUNT_FILEOP_CANCELED = "docsui_fileop_canceled";
     private static final String COUNT_STARTUP_MS = "docsui_startup_ms";
     private static final String COUNT_DRAWER_OPENED = "docsui_drawer_opened";
+    private static final String COUNT_DRAG_N_DROP = "docsui_drag_n_drop";
+    private static final String COUNT_SEARCH = "docsui_search";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -446,6 +448,25 @@ public final class Metrics {
      */
     public static void logStartupMs(Context context, int startupMs) {
         logHistogram(context, COUNT_STARTUP_MS, startupMs);
+    }
+
+    /**
+     * Logs a drag and drop action. Call this when the user drops the content triggering copy.
+     * operation.
+     *
+     * @param context
+     */
+    public static void logDragNDrop(Context context) {
+        logCount(context, COUNT_DRAG_N_DROP);
+    }
+
+    /**
+     * Logs a search. Call this when the search operation is finished.
+     *
+     * @param context
+     */
+    public static void logSearch(Context context) {
+        logCount(context, COUNT_SEARCH);
     }
 
     private static void logInterProviderFileOps(
