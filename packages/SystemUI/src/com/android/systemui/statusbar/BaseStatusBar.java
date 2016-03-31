@@ -127,6 +127,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             SystemProperties.getBoolean("debug.enable_remote_input", true);
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
             = SystemProperties.getBoolean("debug.child_notifs", true);
+    public static final boolean FORCE_REMOTE_INPUT_HISTORY =
+            SystemProperties.getBoolean("debug.force_remoteinput_history", false);
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -181,6 +183,13 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected boolean mVisible;
     protected ArraySet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new ArraySet<>();
+
+    /**
+     * Notifications with keys in this set are not actually around anymore. We kept them around
+     * when they were canceled in response to a remote input interaction. This allows us to show
+     * what you replied and allows you to continue typing into it.
+     */
+    protected ArraySet<String> mKeysKeptForRemoteInput = new ArraySet<>();
 
     // mScreenOnFromKeyguard && mVisible.
     private boolean mVisibleToUser;
@@ -570,6 +579,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     public void run() {
                         processForRemoteInput(sbn.getNotification());
                         String key = sbn.getKey();
+                        mKeysKeptForRemoteInput.remove(key);
                         boolean isUpdate = mNotificationData.get(key) != null;
                         // In case we don't allow child notifications, we ignore children of
                         // notifications that have a summary, since we're not going to show them
@@ -908,7 +918,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected View bindVetoButtonClickListener(View row, StatusBarNotification n) {
+    protected View bindVetoButtonClickListener(View row, final StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
         final String _pkg = n.getPackageName();
         final String _tag = n.getTag();
@@ -921,6 +931,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                         mContext.getString(R.string.accessibility_notification_dismissed));
                 try {
                     mBarService.onNotificationClear(_pkg, _tag, _id, _userId);
+                    if (FORCE_REMOTE_INPUT_HISTORY
+                            && mKeysKeptForRemoteInput.contains(n.getKey())) {
+                        removeNotification(n.getKey(), null);
+                        mKeysKeptForRemoteInput.remove(n.getKey());
+                    }
 
                 } catch (RemoteException ex) {
                     // system process is dead if we're here.
