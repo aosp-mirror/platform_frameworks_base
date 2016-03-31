@@ -48,7 +48,8 @@ public class HardwarePropertiesManager {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-        TEMPERATURE_CURRENT, TEMPERATURE_THROTTLING, TEMPERATURE_SHUTDOWN
+        TEMPERATURE_CURRENT, TEMPERATURE_THROTTLING, TEMPERATURE_SHUTDOWN,
+                TEMPERATURE_THROTTLING_BELOW_VR_MIN
     })
     public @interface TemperatureSource {}
 
@@ -77,6 +78,12 @@ public class HardwarePropertiesManager {
     /** Get shutdown temperature threshold. */
     public static final int TEMPERATURE_SHUTDOWN = 2;
 
+    /**
+     * Get throttling temperature threshold above which minimum clockrates for VR mode will not be
+     * met.
+     */
+    public static final int TEMPERATURE_THROTTLING_BELOW_VR_MIN = 3;
+
     /** Undefined temperature constant. */
     public static final float UNDEFINED_TEMPERATURE = -Float.MAX_VALUE;
 
@@ -96,7 +103,8 @@ public class HardwarePropertiesManager {
      * {@link #DEVICE_TEMPERATURE_GPU}, {@link #DEVICE_TEMPERATURE_BATTERY} or {@link
      * #DEVICE_TEMPERATURE_SKIN}.
      * @param source source of requested device temperature, one of {@link #TEMPERATURE_CURRENT},
-     * {@link #TEMPERATURE_THROTTLING} or {@link #TEMPERATURE_SHUTDOWN}.
+     * {@link #TEMPERATURE_THROTTLING}, {@link #TEMPERATURE_THROTTLING_BELOW_VR_MIN} or
+     * {@link #TEMPERATURE_SHUTDOWN}.
      * @return an array of requested float device temperatures. Temperature equals to
      *         {@link #UNDEFINED_TEMPERATURE} if undefined.
      *         Empty if platform doesn't provide the queried temperature.
@@ -115,6 +123,7 @@ public class HardwarePropertiesManager {
                     case TEMPERATURE_CURRENT:
                     case TEMPERATURE_THROTTLING:
                     case TEMPERATURE_SHUTDOWN:
+                    case TEMPERATURE_THROTTLING_BELOW_VR_MIN:
                         try {
                             return mService.getDeviceTemperatures(mContext.getOpPackageName(), type,
                                     source);
