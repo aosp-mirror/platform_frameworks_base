@@ -226,10 +226,10 @@ Versions dashboards page</a>.</p>
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
 
-    <tr><td>Android 6.0</td>
+    <tr><td><a href="{@docRoot}about/versions/marshmallow/android-6.0.html">Android 6.0</a></td>
     <td><a href="{@docRoot}sdk/api_diff/23/changes.html" title="Diff Report">23</a></td>
     <td>{@link android.os.Build.VERSION_CODES#M}</td>
-    <td><a href="{@docRoot}preview/api-overview.html">API Changes</a></td></tr>
+    <td><a href="{@docRoot}about/versions/marshmallow/index.html">Platform Highlights</a></td></tr>
 
     <tr><td><a href="{@docRoot}about/versions/android-5.1.html">Android 5.1</a></td>
     <td><a href="{@docRoot}sdk/api_diff/22/changes.html" title="Diff Report">22</a></td>
