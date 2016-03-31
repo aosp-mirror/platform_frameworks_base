@@ -181,6 +181,7 @@ public class LocaleHelper {
     public static final class LocaleInfoComparator implements Comparator<LocaleStore.LocaleInfo> {
         private final Collator mCollator;
         private final boolean mCountryMode;
+        private static final String PREFIX_ARABIC = "\u0627\u0644"; // ALEF-LAM, ال
 
         /**
          * Constructor.
@@ -190,6 +191,20 @@ public class LocaleHelper {
         public LocaleInfoComparator(Locale sortLocale, boolean countryMode) {
             mCollator = Collator.getInstance(sortLocale);
             mCountryMode = countryMode;
+        }
+
+        /*
+         * The Arabic collation should ignore Alef-Lam at the beginning (b/26277596)
+         *
+         * We look at the label's locale, not the current system locale.
+         * This is because the name of the Arabic language itself is in Arabic,
+         * and starts with Alef-Lam, no matter what the system locale is.
+         */
+        private String removePrefixForCompare(Locale locale, String str) {
+            if ("ar".equals(locale.getLanguage()) && str.startsWith(PREFIX_ARABIC)) {
+                return str.substring(PREFIX_ARABIC.length());
+            }
+            return str;
         }
 
         /**
@@ -206,7 +221,9 @@ public class LocaleHelper {
             // and "all others" (== 0)
             if (mCountryMode || (lhs.isSuggested() == rhs.isSuggested())) {
                 // They are in the same "bucket" (suggested / others), so we compare the text
-                return mCollator.compare(lhs.getLabel(mCountryMode), rhs.getLabel(mCountryMode));
+                return mCollator.compare(
+                        removePrefixForCompare(lhs.getLocale(), lhs.getLabel(mCountryMode)),
+                        removePrefixForCompare(rhs.getLocale(), rhs.getLabel(mCountryMode)));
             } else {
                 // One locale is suggested and one is not, so we put them in different "buckets"
                 return lhs.isSuggested() ? -1 : 1;
