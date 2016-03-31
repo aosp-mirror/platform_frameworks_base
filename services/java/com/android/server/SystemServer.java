@@ -155,6 +155,8 @@ public final class SystemServer {
             "com.android.server.search.SearchManagerService$Lifecycle";
     private static final String THERMAL_OBSERVER_CLASS =
             "com.google.android.clockwork.ThermalObserver";
+    private static final String WEAR_BLUETOOTH_SERVICE_CLASS =
+            "com.google.android.clockwork.bluetooth.WearBluetoothService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -959,8 +961,7 @@ public final class SystemServer {
             if (!disableNonCoreServices) {
                 mSystemServiceManager.startService(DockObserver.class);
 
-                if (context.getPackageManager().hasSystemFeature
-                        (PackageManager.FEATURE_WATCH)) {
+                if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
                     mSystemServiceManager.startService(THERMAL_OBSERVER_CLASS);
                 }
             }
@@ -1170,6 +1171,10 @@ public final class SystemServer {
 
         if (!disableNonCoreServices && !disableMediaProjection) {
             mSystemServiceManager.startService(MediaProjectionManagerService.class);
+        }
+
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            mSystemServiceManager.startService(WEAR_BLUETOOTH_SERVICE_CLASS);
         }
 
         // Before things start rolling, be sure we have decided whether
