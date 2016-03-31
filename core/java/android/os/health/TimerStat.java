@@ -27,7 +27,7 @@ import android.os.Parcelable;
  * object to be constructed, even internally, but the getTimers method on
  * {@link android.os.health.HealthStats} does require TimerStat objects.
  */
-public class TimerStat implements Parcelable {
+public final class TimerStat implements Parcelable {
     private int mCount;
     private long mTime;
 

@@ -145,6 +145,7 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @removed */
     @Override
     public SharedPreferences getSharedPreferences(File file, int mode) {
         throw new UnsupportedOperationException();
@@ -180,6 +181,7 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @removed */
     @Override
     public File getSharedPreferencesPath(String name) {
         throw new UnsupportedOperationException();

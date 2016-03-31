@@ -980,6 +980,16 @@ def verify_files(clazz):
             warn(clazz, m, "M10", "Methods accepting File should also accept FileDescriptor or streams")
 
 
+def verify_manager_list(clazz):
+    """Verifies that managers return List<? extends Parcelable> instead of arrays."""
+
+    if not clazz.name.endswith("Manager"): return
+
+    for m in clazz.methods:
+        if m.typ.startswith("android.") and m.typ.endswith("[]"):
+            warn(clazz, m, None, "Methods should return List<? extends Parcelable> instead of Parcelable[] to support ParceledListSlice under the hood")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
     if clazz.pkg.name.startswith("java"): return
@@ -1025,6 +1035,7 @@ def examine_clazz(clazz):
     verify_listener_last(clazz)
     verify_resource_names(clazz)
     verify_files(clazz)
+    verify_manager_list(clazz)
 
 
 def examine_stream(stream):
