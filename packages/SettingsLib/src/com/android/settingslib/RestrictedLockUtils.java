@@ -78,7 +78,8 @@ public class RestrictedLockUtils {
         int deviceOwnerUserId = dpm.getDeviceOwnerUserId();
         boolean enforcedByDeviceOwner = false;
         if (deviceOwner != null && deviceOwnerUserId != UserHandle.USER_NULL) {
-            Bundle enforcedRestrictions = dpm.getUserRestrictions(deviceOwner, deviceOwnerUserId);
+            Bundle enforcedRestrictions =
+                    dpm.getUserRestrictionsForUser(deviceOwner, deviceOwnerUserId);
             if (enforcedRestrictions != null
                     && enforcedRestrictions.getBoolean(userRestriction, false)) {
                 enforcedByDeviceOwner = true;
@@ -90,7 +91,8 @@ public class RestrictedLockUtils {
         if (userId != UserHandle.USER_NULL) {
             profileOwner = dpm.getProfileOwnerAsUser(userId);
             if (profileOwner != null) {
-                Bundle enforcedRestrictions = dpm.getUserRestrictions(profileOwner, userId);
+                Bundle enforcedRestrictions =
+                        dpm.getUserRestrictionsForUser(profileOwner, userId);
                 if (enforcedRestrictions != null
                         && enforcedRestrictions.getBoolean(userRestriction, false)) {
                     enforcedByProfileOwner = true;

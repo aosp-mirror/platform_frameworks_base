@@ -4889,15 +4889,30 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public Bundle getUserRestrictions(@NonNull ComponentName admin) {
-        return getUserRestrictions(admin, myUserId());
-    }
-
-    /** @hide per-user version */
-    public Bundle getUserRestrictions(@NonNull ComponentName admin, int userHandle) {
         Bundle ret = null;
         if (mService != null) {
             try {
-                ret = mService.getUserRestrictions(admin, userHandle);
+                ret = mService.getUserRestrictions(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return ret == null ? new Bundle() : ret;
+    }
+
+    /**
+     * Called by the system to get the user restrictions for a user.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle user id the admin is running as.
+     *
+     * @hide
+     */
+    public Bundle getUserRestrictionsForUser(@NonNull ComponentName admin, int userHandle) {
+        Bundle ret = null;
+        if (mService != null) {
+            try {
+                ret = mService.getUserRestrictionsForUser(admin, userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
