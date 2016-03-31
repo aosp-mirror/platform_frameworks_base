@@ -3221,16 +3221,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             };
             mDialogBuilder.setSingleChoiceItems(adapter, checkedItem, choiceListener);
 
-            if (!isScreenLocked) {
-                final OnClickListener positiveListener = new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        showConfigureInputMethods();
-                    }
-                };
-                mDialogBuilder.setPositiveButton(
-                        com.android.internal.R.string.configure_input_methods, positiveListener);
-            }
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.setCanceledOnTouchOutside(true);
             mSwitchingDialog.getWindow().setType(
