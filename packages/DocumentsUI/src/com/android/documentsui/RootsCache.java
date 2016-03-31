@@ -477,6 +477,11 @@ public class RootsCache {
                 continue;
             }
 
+            if (!state.showAdvanced && root.isAdvanced()) {
+                if (DEBUG) Log.d(TAG, "Excluding root because: unwanted advanced device.");
+                continue;
+            }
+
             if (state.localOnly && !root.isLocalOnly()) {
                 if (DEBUG) Log.d(TAG, "Excluding root because: unwanted non-local device.");
                 continue;
