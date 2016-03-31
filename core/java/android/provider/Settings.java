@@ -3991,6 +3991,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SAVED_STATE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
+            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ENHANCED_AUTO_JOIN);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NETWORK_SHOW_RSSI);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_ON);
@@ -7256,6 +7257,14 @@ public final class Settings {
         */
        public static final String WIFI_SUSPEND_OPTIMIZATIONS_ENABLED =
                "wifi_suspend_optimizations_enabled";
+
+       /**
+        * Setting to enable verbose logging in Wi-Fi; disabled by default, and setting to 1
+        * will enable it. In the future, additional values may be supported.
+        * @hide
+        */
+       public static final String WIFI_VERBOSE_LOGGING_ENABLED =
+               "wifi_verbose_logging_enabled";
 
        /**
         * The maximum number of times we will retry a connection to an access
