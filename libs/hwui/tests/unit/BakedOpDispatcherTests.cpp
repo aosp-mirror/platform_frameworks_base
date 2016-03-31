@@ -85,7 +85,9 @@ RENDERTHREAD_TEST(BakedOpDispatcher, onArc_position) {
                 << "Should see conservative offset from PathCache::computeBounds";
         Rect expectedBounds(10, 15, 20, 25);
         expectedBounds.outset(expectedOffset);
+#if !HWUI_NEW_OPS
         EXPECT_EQ(expectedBounds, glop.bounds) << "bounds outset by stroke 'offset'";
+#endif
         Matrix4 expectedModelView;
         expectedModelView.loadTranslate(10 - expectedOffset, 15 - expectedOffset, 0);
         expectedModelView.scale(10 + 2 * expectedOffset, 10 + 2 * expectedOffset, 1);

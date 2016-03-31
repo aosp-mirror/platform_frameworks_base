@@ -1413,7 +1413,9 @@ void OpenGLRenderer::renderGlop(const Glop& glop, GlopRenderType type) {
     if (type == GlopRenderType::Standard && !mRenderState.stencil().isWriteEnabled()) {
         // TODO: specify more clearly when a draw should dirty the layer.
         // is writing to the stencil the only time we should ignore this?
+#if !HWUI_NEW_OPS
         dirtyLayer(glop.bounds.left, glop.bounds.top, glop.bounds.right, glop.bounds.bottom);
+#endif
         mDirty = true;
     }
 }
