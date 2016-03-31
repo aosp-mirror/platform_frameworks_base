@@ -102,7 +102,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
@@ -3524,7 +3523,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mActivityMetricsLogger.logWindowState();
     }
 
-    void scheduleReportMultiWindowChanged(TaskRecord task) {
+    void scheduleReportMultiWindowModeChanged(TaskRecord task) {
         for (int i = task.mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = task.mActivities.get(i);
             if (r.app != null && r.app.thread != null) {
@@ -3537,7 +3536,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void scheduleReportPictureInPictureChangedIfNeeded(TaskRecord task, ActivityStack prevStack) {
+    void scheduleReportPictureInPictureModeChangedIfNeeded(TaskRecord task, ActivityStack prevStack) {
         final ActivityStack stack = task.stack;
         if (prevStack == null || prevStack == stack
                 || (prevStack.mStackId != PINNED_STACK_ID && stack.mStackId != PINNED_STACK_ID)) {
@@ -3575,7 +3574,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     synchronized (mService) {
                         for (int i = mMultiWindowModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mMultiWindowModeChangedActivities.remove(i);
-                            r.scheduleMultiWindowChanged();
+                            r.scheduleMultiWindowModeChanged();
                         }
                     }
                 } break;
@@ -3583,7 +3582,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     synchronized (mService) {
                         for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mPipModeChangedActivities.remove(i);
-                            r.schedulePictureInPictureChanged();
+                            r.schedulePictureInPictureModeChanged();
                         }
                     }
                 } break;

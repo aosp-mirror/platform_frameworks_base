@@ -642,7 +642,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean fullscreenTask = !inMultiWindowMode();
+        final boolean fullscreenTask = !isInMultiWindowMode();
         final boolean windowsAreFloating = task != null && task.isFloating();
 
         // If the task has temp inset bounds set, we have to make sure all its windows uses
@@ -2226,7 +2226,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public boolean inMultiWindowMode() {
+    public boolean isInMultiWindowMode() {
         final Task task = getTask();
         return task != null && !task.isFullscreen();
     }
@@ -2527,7 +2527,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int pw = mContainingFrame.width();
         final int ph = mContainingFrame.height();
         final Task task = getTask();
-        final boolean nonFullscreenTask = inMultiWindowMode();
+        final boolean nonFullscreenTask = isInMultiWindowMode();
         final boolean fitToDisplay = task != null && !task.isFloating() && !layoutInParentFrame();
         float x, y;
         int w,h;

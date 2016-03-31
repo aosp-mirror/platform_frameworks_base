@@ -351,7 +351,6 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_RELAUNCH;
-import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
@@ -7231,7 +7230,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean inMultiWindow(IBinder token) {
+    public boolean isInMultiWindowMode(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
@@ -7248,7 +7247,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean inPictureInPicture(IBinder token) {
+    public boolean isInPictureInPictureMode(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
@@ -7264,24 +7263,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void enterPictureInPicture(IBinder token) {
+    public void enterPictureInPictureMode(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
                 if (!mSupportsPictureInPicture) {
-                    throw new IllegalStateException("enterPictureInPicture: "
+                    throw new IllegalStateException("enterPictureInPictureMode: "
                             + "Device doesn't support picture-in-picture mode.");
                 }
 
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
 
                 if (r == null) {
-                    throw new IllegalStateException("enterPictureInPicture: "
+                    throw new IllegalStateException("enterPictureInPictureMode: "
                             + "Can't find activity for token=" + token);
                 }
 
                 if (!r.supportsPictureInPicture()) {
-                    throw new IllegalArgumentException("enterPictureInPicture: "
+                    throw new IllegalArgumentException("enterPictureInPictureMode: "
                             + "Picture-In-Picture not supported for r=" + r);
                 }
 
@@ -7290,7 +7289,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         ? mDefaultPinnedStackBounds : null;
 
                 mStackSupervisor.moveActivityToPinnedStackLocked(
-                        r, "enterPictureInPicture", bounds);
+                        r, "enterPictureInPictureMode", bounds);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

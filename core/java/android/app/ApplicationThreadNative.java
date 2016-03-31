@@ -736,7 +736,7 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             final IBinder b = data.readStrongBinder();
             final boolean inMultiWindow = data.readInt() != 0;
-            scheduleMultiWindowChanged(b, inMultiWindow);
+            scheduleMultiWindowModeChanged(b, inMultiWindow);
             return true;
         }
 
@@ -745,7 +745,7 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             final IBinder b = data.readStrongBinder();
             final boolean inPip = data.readInt() != 0;
-            schedulePictureInPictureChanged(b, inPip);
+            schedulePictureInPictureModeChanged(b, inPip);
             return true;
         }
 
@@ -1498,24 +1498,24 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     @Override
-    public final void scheduleMultiWindowChanged(
-            IBinder token, boolean inMultiWindow) throws RemoteException {
+    public final void scheduleMultiWindowModeChanged(
+            IBinder token, boolean isInMultiWindowMode) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
-        data.writeInt(inMultiWindow ? 1 : 0);
+        data.writeInt(isInMultiWindowMode ? 1 : 0);
         mRemote.transact(SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
     @Override
-    public final void schedulePictureInPictureChanged(IBinder token, boolean inPip)
+    public final void schedulePictureInPictureModeChanged(IBinder token, boolean isInPipMode)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
-        data.writeInt(inPip ? 1 : 0);
+        data.writeInt(isInPipMode ? 1 : 0);
         mRemote.transact(SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
