@@ -2080,6 +2080,61 @@ message MetricsEvent {
     // OS: N
     SUW_ACCESSIBILITY_TOGGLE_SCREEN_READER = 371;
 
+    // ------- Begin N Settings conditionals -----
+    // Conditionals are the green bars at the top of the settings dashboard
+    // All conditionals will have visible/hide events onResume/onPause
+    // but they will also be used as extra ints in the
+    // dismiss/expand/collapse/click/button events
+
+    // swipe away conditional
+    ACTION_SETTINGS_CONDITION_DISMISS = 372;
+
+    // click on collapsed conditional or clicks expand button
+    ACTION_SETTINGS_CONDITION_EXPAND = 373;
+
+    // click collapse button on expanded conditional
+    ACTION_SETTINGS_CONDITION_COLLAPSE = 374;
+
+    // click main area of expanded conditional
+    ACTION_SETTINGS_CONDITION_CLICK = 375;
+
+    // click a direct button on expanded conditional
+    ACTION_SETTINGS_CONDITION_BUTTON = 376;
+
+    // Airplane mode on
+    SETTINGS_CONDITION_AIRPLANE_MODE = 377;
+    // AKA Data saver on
+    SETTINGS_CONDITION_BACKGROUND_DATA = 378;
+    // Battery saver on
+    SETTINGS_CONDITION_BATTERY_SAVER = 379;
+    // Cellular data off
+    SETTINGS_CONDITION_CELLULAR_DATA = 380;
+    // Do not disturb on
+    SETTINGS_CONDITION_DND = 381;
+    // Hotspot on
+    SETTINGS_CONDITION_HOTSPOT = 382;
+    // Work profile off
+    SETTINGS_CONDITION_WORK_MODE = 383;
+
+    // ------- Begin N Settings suggestions -----
+    // Since suggestions come from system apps, suggestions will
+    // have generic constants and the package providing the suggestion
+    // will be put in the package field.  For suggestions in the Settings
+    // package, the class name will be filled in instead (since settings
+    // provides several suggetions).
+
+    // Settings shown/hidden on main settings dashboard.
+    // These are actually visibility events, but visible/hidden doesn't
+    // take a package, so these are being logged as actions.
+    ACTION_SHOW_SETTINGS_SUGGESTION = 383;
+    ACTION_HIDE_SETTINGS_SUGGESTION = 384;
+
+    // Click on a suggestion.
+    ACTION_SETTINGS_SUGGESTION = 385;
+
+    // Suggestion -> Overflow -> Remove.
+    ACTION_SETTINGS_DISMISS_SUGGESTION = 386;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
