@@ -670,10 +670,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mContainingFrame.bottom = mContainingFrame.top + frozen.height();
             }
             final WindowState imeWin = mService.mInputMethodWindow;
-            if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
-                    && mContainingFrame.bottom > cf.bottom) {
-                // IME is up and obscuring this window. Adjust the window position so it is visible.
-                mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
+            // IME is up and obscuring this window. Adjust the window position so it is visible.
+            if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this) {
+                    if (windowsAreFloating && mContainingFrame.bottom > cf.bottom) {
+                        // In freeform we want to move the top up directly.
+                        // TODO: Investigate why this is cf not pf.
+                        mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
+                    } else if (mContainingFrame.bottom > pf.bottom) {
+                        // But in docked we want to behave like fullscreen
+                        // and behave as if the task were given smaller bounds
+                        // for the purposes of layout.
+                        mContainingFrame.bottom = pf.bottom;
+                    }
             }
 
             if (windowsAreFloating) {
