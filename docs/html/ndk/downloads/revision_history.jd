@@ -4,11 +4,73 @@ page.title=NDK Revision History
 <p>This page provides information on previous releases of the NDK, enumerating the changes that
 took place in each new version.</p>
 
+
+<div class="toggle-content closed">
+<a name="11b"></a>
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 11b</a> <em>(March 2016)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+
+    <dl>
+      <dt>NDK</dt>
+      <dd>
+      <ul>
+      <li>Important announcements
+      <ul>
+         <li>We’ve moved our bug tracker to <a href="https://github.com/android-ndk/ndk/issues">
+         GitHub.</a></li>
+     </ul>
+     </li>
+
+     <li>Changes
+        <ul>
+         <li>{@code ndk-gdb.py} is fixed. It had
+               <a href="https://github.com/android-ndk/ndk/issues/3">regressed entirely</a>
+               in r11.</li>
+               <li>{@code ndk-gdb} for Mac <a href="https://github.com/android-ndk/ndk/issues/2">
+               is fixed</a>.</li>
+               <li>Added more top-level shortcuts for command line tools:
+                  <ul>
+                     <li>{@code ndk-depends}.</li>
+                     <li>{@code ndk-gdb}.</li>
+                     <li>{@code ndk-stack}.</li>
+                     <li>{@code ndk-which}. This command had been entirely absent from previous
+                     releases.</li>
+                  </ul>
+               </li>
+               <li>Fixed standalone toolchains for libc++, which had been missing
+               {@code __cxxabi_config.h}.</li>
+               <li>Fixed help documentation for {@code --toolchain} in
+               {@code make-standalone-toolchain.sh}.</li>
+         </li>
+       </ul>
+      </dd>
+
+      <dt>Clang</dt>
+      <dd>
+      <ul>
+      <li>Errata</li>
+          <ul>
+             <li>Contrary to what we reported in the r11 Release Notes, {@code __thread}
+             does not work. This is because the version of Clang we ship is missing a bug fix for
+             emulated TLS support.</li>
+          </ul>
+      </ul>
+      </dd>
+   </dl>
+
+
+ </div>
+</div>
+
 <div class="toggle-content closed">
 <a name="11"></a>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
-     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 11</a> <em>(March 2016)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -53,7 +115,7 @@ took place in each new version.</p>
          </li>
        </ul>
       </dd>
-   <dl>
+   </dl>
 
     <dl>
       <dt>GCC</dt>
@@ -83,7 +145,7 @@ took place in each new version.</p>
        </li>
        </ul>
       </dd>
-   <dl>
+   </dl>
     <dl>
       <dt>NDK</dt>
       <dd>
@@ -268,6 +330,7 @@ took place in each new version.</p>
 
  </div>
 </div>
+
 <div class="toggle-content closed">
 <a name="10e"></a>
  <p>
