@@ -18,6 +18,11 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.EXTRA_BENCHMARK;
+import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_OPEN;
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_GET_CONTENT;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.State.MODE_GRID;
 
 import android.app.Activity;
@@ -165,6 +170,7 @@ public abstract class BaseActivity extends Activity
         final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
+        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
         // Search uses backend ranking; no sorting, recents doesn't support sort.
@@ -176,6 +182,9 @@ public abstract class BaseActivity extends Activity
         grid.setVisible(mState.derivedMode != State.MODE_GRID);
         list.setVisible(mState.derivedMode != State.MODE_LIST);
 
+        advanced.setVisible(mState.showAdvancedOption);
+        advanced.setTitle(mState.showAdvancedOption && mState.showAdvanced
+                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
@@ -195,24 +204,29 @@ public abstract class BaseActivity extends Activity
             return state;
         }
 
-        State state = createSharedState();
-        includeState(state);
-        if (DEBUG) Log.d(mTag, "Created new state object: " + state);
-        return state;
-    }
-
-    private State createSharedState() {
         State state = new State();
 
         final Intent intent = getIntent();
 
         state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-
         state.forceSize = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_FILESIZE, false);
         state.showSize = state.forceSize || LocalPreferences.getDisplayFileSize(this);
-
         state.initAcceptMimes(intent);
         state.excludedAuthorities = getExcludedAuthorities();
+
+        includeState(state);
+
+        // Advanced roots are shown by deafult without menu option if forced by config or intent.
+        state.showAdvanced = getResources().getBoolean(R.bool.advanced_roots_shown)
+                || intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+        // Menu option is shown for whitelisted intents if advanced roots are not shown by default.
+        state.showAdvancedOption = !state.showAdvanced &&
+                (state.action == ACTION_OPEN ||
+                        state.action == ACTION_CREATE ||
+                        state.action == ACTION_OPEN_TREE ||
+                        state.action == ACTION_GET_CONTENT);
+
+        if (DEBUG) Log.d(mTag, "Created new state object: " + state);
 
         return state;
     }
@@ -285,6 +299,10 @@ public abstract class BaseActivity extends Activity
                 if (dir != null) {
                     dir.pasteFromClipboard();
                 }
+                return true;
+
+            case R.id.menu_advanced:
+                setDisplayAdvancedDevices(!mState.showAdvanced);
                 return true;
 
             case R.id.menu_file_size:
@@ -452,6 +470,12 @@ public abstract class BaseActivity extends Activity
                 ? DocumentsContract.buildRootUri("com.android.providers.downloads.documents",
                         "downloads")
                 : DocumentsContract.buildHomeUri();
+            }
+
+    void setDisplayAdvancedDevices(boolean display) {
+        mState.showAdvanced = display;
+        RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
+        invalidateOptionsMenu();
     }
 
     void setDisplayFileSize(boolean display) {
