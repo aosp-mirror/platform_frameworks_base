@@ -1247,6 +1247,11 @@ class MountService extends IMountService.Stub
     }
 
     private void onVolumeCreatedLocked(VolumeInfo vol) {
+        if (mPms.isOnlyCoreApps()) {
+            Slog.d(TAG, "System booted in core-only mode; ignoring volume " + vol.getId());
+            return;
+        }
+
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             final VolumeInfo privateVol = storage.findPrivateForEmulated(vol);
