@@ -5920,7 +5920,7 @@ public class DevicePolicyManager {
      * <p>
      * <strong> The device logs are retrieved from a RAM region which is not guaranteed to be
      * corruption-free during power cycles, due to hardware variations and limitations. As a result,
-     * this API is provided as best-effort and the returned logs may contain corrupted
+     * this API is provided as best-effort and the returned logs may be empty or contain corrupted
      * data. </strong>
      * <p>
      * There must be only one user on the device, managed by the device owner. Otherwise a
