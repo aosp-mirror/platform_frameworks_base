@@ -478,7 +478,7 @@
     <string name="notification_importance_max" msgid="5806278962376556491">"Эскертмелер тизмесинин эң башында көрсөтүлүп, үн менен коштолуп, экранга чыгарылсын"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
     <string name="notification_done" msgid="5279426047273930175">"Аткарылды"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> эскертмесин көзөмөлдөө каражаттары"</string>
+    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> эскертмесин башкаруу каражаттары"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Түсү жана көрүнүшү"</string>
     <string name="night_mode" msgid="3540405868248625488">"Түнкү режим"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Дисплейди калибрлөө"</string>
@@ -505,7 +505,7 @@
     <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Төмөн"</string>
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Солго"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Оңго"</string>
-    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Экрандын ортосунда"</string>
+    <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Ортолотуу"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"Өтмөк"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Боштук"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Киргизүү"</string>
@@ -516,12 +516,12 @@
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Мурунку"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Артка түрүү"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Алдыга түрүү"</string>
-    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Бир бет жогору"</string>
-    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Бир бет төмөн"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Жок кылуу"</string>
     <string name="keyboard_key_move_home" msgid="2765693292069487486">"Башкы бет"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"Бүтүрүү"</string>
-    <string name="keyboard_key_insert" msgid="8530501581636082614">"Салуу"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Тутум"</string>
@@ -563,8 +563,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Баскычтоптогу баскычты тандоо"</string>
     <string name="preview" msgid="9077832302472282938">"Алдын ала көрүү"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Керектүү нерселерди сүйрөп кошуңуз"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Түзөтүү"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Убакыт"</string>
   <string-array name="clock_options">
@@ -583,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Жогору жылдыруу"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Солго жылдыруу"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Оңго жылдыруу"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Көп терезе режиминде колдонмо иштебей калышы мүмкүн"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Орду - <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Түзөтүү үчүн эки жолу таптаңыз."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Кошуу үчүн эки жолу таптаңыз."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Орду - <xliff:g id="POSITION">%1$d</xliff:g>. Тандоо үчүн эки жолу таптаңыз."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> дегенди жылдыруу"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> дегенди алып салуу"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> деген <xliff:g id="POSITION">%2$d</xliff:g>-орунга кошулду"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> алынып салынды"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> деген <xliff:g id="POSITION">%2$d</xliff:g>-орунга жылдырылды"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Ыкчам жөндөөлөр түзөткүчү."</string>
 </resources>

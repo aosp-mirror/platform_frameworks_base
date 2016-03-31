@@ -516,8 +516,8 @@
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Anterior"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Rebobinar"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Avance rápido"</string>
-    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Retroceder página"</string>
-    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Avanzar página"</string>
+    <string name="keyboard_key_page_up" msgid="5654098530106845603">"Re Pág"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"Av Pág"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Supr"</string>
     <string name="keyboard_key_move_home" msgid="2765693292069487486">"Inicio"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"Fin"</string>
@@ -583,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mover a la izquierda"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mover a la derecha"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"Es posible que la aplicación no funcione con el modo multiventana"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posición <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Toca dos veces para cambiarla."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Toca dos veces para añadirlo."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posición <xliff:g id="POSITION">%1$d</xliff:g>. Toca dos veces para seleccionarla."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Quitar <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> se ha añadido a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> se ha quitado"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> se ha movido a la posición <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de ajustes rápidos."</string>
 </resources>

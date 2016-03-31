@@ -563,8 +563,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"යතුරු පුවරු බොත්තම තෝරන්න"</string>
     <string name="preview" msgid="9077832302472282938">"පෙරදසුන"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ටයිල් එක් කිරීමට අදින්න"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ඉවත් කිරීමට මෙතැනට අදින්න"</string>
     <string name="qs_edit" msgid="2232596095725105230">"සංස්කරණය කරන්න"</string>
     <string name="tuner_time" msgid="6572217313285536011">"වේලාව"</string>
   <string-array name="clock_options">
@@ -584,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"වමට ගෙන යන්න"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"දකුණට ගෙන යන්න"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"යෙදුම බහු-කවුළුව සමඟ ක්‍රියා නොකළ හැකිය."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ස්ථානය <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. වෙනස් කිරීමට දෙවරක් තට්ටු කරන්න."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. එක් කිරීමට දෙවරක් තට්ටු කරන්න."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ස්ථානය <xliff:g id="POSITION">%1$d</xliff:g>. තෝරා ගැනීමට දෙවරක් තට්ටු කරන්න."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ගෙන යන්න"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ඉවත් කරන්න"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> වන ස්ථානයට එක් කරන ලදි"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ඉවත් කරන ලදි"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> වන ස්ථානයට ගෙන යන ලදි"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ඉක්මන් සැකසුම් සංස්කාරකය."</string>
 </resources>

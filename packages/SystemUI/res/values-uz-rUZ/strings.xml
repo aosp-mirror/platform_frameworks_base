@@ -309,7 +309,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"qidirish"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"“<xliff:g id="APP">%s</xliff:g>” ilovasini ishga tushirib bo‘lmadi."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Xavfsiz rejimda <xliff:g id="APP">%s</xliff:g> ilovasi o‘chirib qo‘yildi."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Barchasini tozalash"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hammasini tozalash"</string>
     <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Bu ilova ko‘p oynali rejimni qo‘llab-quvvatlamaydi"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Bu ilova ko‘p oynali rejimni qo‘llab-quvvatlamaydi"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gorizontal yo‘nalishda bo‘lish"</string>
@@ -514,7 +514,7 @@
     <string name="keyboard_key_media_stop" msgid="2859963958595908962">"To‘xtatish"</string>
     <string name="keyboard_key_media_next" msgid="1894394911630345607">"Keyingi"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Avvalgi"</string>
-    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Orqaga o‘tkazish"</string>
+    <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Orqaga qaytarish"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Oldinga o‘tkazish"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
@@ -523,7 +523,7 @@
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"End"</string>
     <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
-    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Raqamli tugma: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Raqamli klaviatura (<xliff:g id="NAME">%1$s</xliff:g>)"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Tizim"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Bosh ekran"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"So‘nggi ishlatilganlar"</string>
@@ -563,8 +563,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Klaviatura tugmasini tanlang"</string>
     <string name="preview" msgid="9077832302472282938">"Oldindan ko‘rish"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Fragmentlar qo‘shish uchun torting"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"O‘chirish uchun bu yerga sudrang"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vaqt"</string>
   <string-array name="clock_options">
@@ -583,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Tepaga siljitish"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Chapga siljitish"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"O‘ngga siljitish"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Ilova ko‘p oynali rejimni qo‘llab-quvvatlamaydi"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>-joy, “<xliff:g id="TILE_NAME">%2$s</xliff:g>” tugmasi. Tahrirlash uchun ustiga ikki marta bosing."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi. Qo‘shish uchun ustiga ikki marta bosing."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Joylashuv: <xliff:g id="POSITION">%1$d</xliff:g>. Belgilash uchun ustiga ikki marta bosing."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasini ko‘chirish"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasini o‘chirish"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi endi <xliff:g id="POSITION">%2$d</xliff:g>-joyni egallamoqda"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi o‘chirildi"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi endi <xliff:g id="POSITION">%2$d</xliff:g>-joyni egallanmoqda"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Tezkor sozlamalar muharriri"</string>
 </resources>

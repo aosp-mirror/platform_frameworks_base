@@ -563,8 +563,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Klaviatura Düyməsi Seçin"</string>
     <string name="preview" msgid="9077832302472282938">"Önizləmə"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Xanalar əlavə etmək üçün sürüşdürün"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Silmək üçün bura sürüşdürün"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Redaktə edin"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vaxt"</string>
   <string-array name="clock_options">
@@ -584,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Sola köçürün"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Sağa köçürün"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"Tətbiq çoxsaylı pəncərə ilə işləməyə bilər."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyi, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Redaktə etmək üçün iki dəfə tıklayın."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Əlavə etmək üçün iki dəfə tıklayın."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"<xliff:g id="POSITION">%1$d</xliff:g> mövqeyi. Seçmək üçün iki dəfə tıklayın."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> köçürün"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> silin"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> mövqeyinə əlavə edildi"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> silindi"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> mövqeyinə köçürüldü"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Sürətli ayarlar redaktoru."</string>
 </resources>

@@ -518,10 +518,10 @@
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Avança ràpidament"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Re Pàg"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Av Pàg"</string>
-    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Suprimeix"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Tecla de supressió"</string>
     <string name="keyboard_key_move_home" msgid="2765693292069487486">"Inici"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"Final"</string>
-    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insereix"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Tecla d\'inserció"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Bloqueig de teclat numèric"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Teclat numèric <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Sistema"</string>
@@ -583,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mou a l\'esquerra"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mou a la dreta"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"És possible que l\'aplicació no funcioni amb el Mode multifinestra"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posició <xliff:g id="POSITION">%1$d</xliff:g>, mosaic <xliff:g id="TILE_NAME">%2$s</xliff:g>. Fes doble toc per editar-la."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"Mosaic <xliff:g id="TILE_NAME">%1$s</xliff:g>. Fes doble toc per afegir-lo."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posició <xliff:g id="POSITION">%1$d</xliff:g>. Fes doble toc per seleccionar-la."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Mou el mosaic <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Suprimeix el mosaic <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"El mosaic <xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha afegit a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"El mosaic <xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha suprimit"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"El mosaic <xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha mogut a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de la configuració ràpida."</string>
 </resources>
