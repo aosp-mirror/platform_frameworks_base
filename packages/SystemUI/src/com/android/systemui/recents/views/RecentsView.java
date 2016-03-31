@@ -343,7 +343,7 @@ public class RecentsView extends FrameLayout {
 
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Measure the stack action button within the constraints of the space above the stack
-            Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
+            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect;
             measureChild(mStackActionButton,
                     MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
                     MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
@@ -729,13 +729,15 @@ public class RecentsView extends FrameLayout {
      */
     private void animateBackgroundScrim(float alpha, int duration) {
         Utilities.cancelAnimationWithoutCallbacks(mBackgroundScrimAnimator);
-        int alphaInt = (int) (alpha * 255);
+        // Calculate the absolute alpha to animate from
+        int fromAlpha = (int) ((mBackgroundScrim.getAlpha() / (DEFAULT_SCRIM_ALPHA * 255)) * 255);
+        int toAlpha = (int) (alpha * 255);
         mBackgroundScrimAnimator = ObjectAnimator.ofInt(mBackgroundScrim, Utilities.DRAWABLE_ALPHA,
-                mBackgroundScrim.getAlpha(), alphaInt);
+                fromAlpha, toAlpha);
         mBackgroundScrimAnimator.setDuration(duration);
-        mBackgroundScrimAnimator.setInterpolator(alphaInt > mBackgroundScrim.getAlpha()
-                ? Interpolators.ALPHA_OUT
-                : Interpolators.ALPHA_IN);
+        mBackgroundScrimAnimator.setInterpolator(toAlpha > fromAlpha
+                ? Interpolators.ALPHA_IN
+                : Interpolators.ALPHA_OUT);
         mBackgroundScrimAnimator.start();
     }
 
@@ -747,10 +749,11 @@ public class RecentsView extends FrameLayout {
         int left = isLayoutRtl()
                 ? actionButtonRect.left - mStackActionButton.getPaddingLeft()
                 : actionButtonRect.right + mStackActionButton.getPaddingRight()
-                - mStackActionButton.getMeasuredWidth();
+                        - mStackActionButton.getMeasuredWidth();
         int top = actionButtonRect.top +
                 (actionButtonRect.height() - mStackActionButton.getMeasuredHeight()) / 2;
-        actionButtonRect.offsetTo(left, top);
+        actionButtonRect.set(left, top, left + mStackActionButton.getMeasuredWidth(),
+                top + mStackActionButton.getMeasuredHeight());
         return actionButtonRect;
     }
 }
