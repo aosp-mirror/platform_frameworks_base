@@ -499,17 +499,17 @@
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Kiokoa Betri"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Hupunguza data ya chini chini na utendaji"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Kitufe cha <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
+    <string name="keyboard_key_home" msgid="2243500072071305073">"Mwanzo"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Nyuma"</string>
     <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"Juu"</string>
     <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"Chini"</string>
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Kushoto"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Kulia"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Katikati"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Space"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Sogeza"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Nafasi"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
+    <string name="keyboard_key_backspace" msgid="1559580097512385854">"Nafasinyuma"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Cheza/Sitisha"</string>
     <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Simamisha"</string>
     <string name="keyboard_key_media_next" msgid="1894394911630345607">"Inayofuata"</string>
@@ -518,10 +518,10 @@
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Sogeza mbele Haraka"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"Page Down"</string>
-    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Delete"</string>
-    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Home"</string>
-    <string name="keyboard_key_move_end" msgid="5901174332047975247">"End"</string>
-    <string name="keyboard_key_insert" msgid="8530501581636082614">"Insert"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"Futa"</string>
+    <string name="keyboard_key_move_home" msgid="2765693292069487486">"Mwanzo"</string>
+    <string name="keyboard_key_move_end" msgid="5901174332047975247">"Mwisho"</string>
+    <string name="keyboard_key_insert" msgid="8530501581636082614">"Ingiza"</string>
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Mfumo"</string>
@@ -582,6 +582,14 @@
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Sogeza juu"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Sogeza kushoto"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Sogeza kulia"</string>
-    <!-- no translation found for forced_resizable_info_text (7591061837558867999) -->
-    <skip />
+    <string name="forced_resizable_info_text" msgid="7591061837558867999">"Huenda programu isifanye kazi kwenye madirisha mengi"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gonga mara mbili ili ubadilishe."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gonga mara mbili ili uongeze."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>. Gonga mara mbili ili uchague."</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Hamisha <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Ondoa <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> imeongezwa kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> imeondolewa"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> imehamishiwa kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Kihariri cha Mipangilio ya haraka."</string>
 </resources>

@@ -563,8 +563,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"เลือกปุ่มแป้นพิมพ์"</string>
     <string name="preview" msgid="9077832302472282938">"ดูตัวอย่าง"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ลากเพื่อเพิ่มชิ้นส่วน"</string>
-    <!-- no translation found for drag_to_remove_tiles (3361212377437088062) -->
-    <skip />
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>
     <string name="tuner_time" msgid="6572217313285536011">"เวลา"</string>
   <string-array name="clock_options">
@@ -584,4 +583,13 @@
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"เลื่อนไปทางซ้าย"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"เลื่อนไปทางขวา"</string>
     <string name="forced_resizable_info_text" msgid="7591061837558867999">"แอปอาจทำงานกับหลายหน้าต่างไม่ได้"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g> <xliff:g id="TILE_NAME">%2$s</xliff:g> แตะ 2 ครั้งเพื่อแก้ไข"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> แตะ 2 ครั้งเพื่อเพิ่ม"</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g> แตะ 2 ครั้งเพื่อเลือก"</string>
+    <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"นำ <xliff:g id="TILE_NAME">%1$s</xliff:g> ออก"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"เพิ่ม <xliff:g id="TILE_NAME">%1$s</xliff:g> ลงในตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g> แล้ว"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"นำ <xliff:g id="TILE_NAME">%1$s</xliff:g> ออกแล้ว"</string>
+    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g> ไปยังตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g> แล้ว"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ตัวแก้ไขการตั้งค่าด่วน"</string>
 </resources>
