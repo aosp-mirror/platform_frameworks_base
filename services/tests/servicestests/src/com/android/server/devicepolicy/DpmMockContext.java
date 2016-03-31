@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -172,36 +173,36 @@ public class DpmMockContext extends MockContext {
     }
 
     public static class SettingsForMock {
-        int settingsSecureGetIntForUser(String name, int def, int userHandle) {
+        public int settingsSecureGetIntForUser(String name, int def, int userHandle) {
             return 0;
         }
 
-        void settingsSecurePutIntForUser(String name, int value, int userHandle) {
+        public void settingsSecurePutIntForUser(String name, int value, int userHandle) {
         }
 
-        void settingsSecurePutStringForUser(String name, String value, int userHandle) {
+        public void settingsSecurePutStringForUser(String name, String value, int userHandle) {
         }
 
-        void settingsGlobalPutStringForUser(String name, String value, int userHandle) {
+        public void settingsGlobalPutStringForUser(String name, String value, int userHandle) {
         }
 
-        void settingsSecurePutInt(String name, int value) {
+        public void settingsSecurePutInt(String name, int value) {
         }
 
-        void settingsGlobalPutInt(String name, int value) {
+        public void settingsGlobalPutInt(String name, int value) {
         }
 
-        void settingsSecurePutString(String name, String value) {
+        public void settingsSecurePutString(String name, String value) {
         }
 
-        void settingsGlobalPutString(String name, String value) {
+        public void settingsGlobalPutString(String name, String value) {
         }
 
-        int settingsGlobalGetInt(String name, int def) {
+        public int settingsGlobalGetInt(String name, int value) {
             return 0;
         }
 
-        void securityLogSetLoggingEnabledProperty(boolean enabled) {
+        public void securityLogSetLoggingEnabledProperty(boolean enabled) {
         }
 
         public boolean securityLogGetLoggingEnabledProperty() {
@@ -321,6 +322,8 @@ public class DpmMockContext extends MockContext {
 
         mUserInfos.add(uh);
         when(userManager.getUsers()).thenReturn(mUserInfos);
+        when(userManager.getUsers(anyBoolean())).thenReturn(mUserInfos);
+        when(userManager.isUserRunning(eq(new UserHandle(userId)))).thenReturn(true);
         when(userManager.getUserInfo(anyInt())).thenAnswer(
                 new Answer<UserInfo>() {
                     @Override
