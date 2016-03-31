@@ -860,6 +860,10 @@ class WindowSurfacePlacer {
             mService.mInputConsumer.layout(dw, dh);
         }
 
+        if (mService.mWallpaperInputConsumer != null) {
+            mService.mWallpaperInputConsumer.layout(dw, dh);
+        }
+
         final int N = windows.size();
         int i;
 
