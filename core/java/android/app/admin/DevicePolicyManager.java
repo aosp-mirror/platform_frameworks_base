@@ -2655,6 +2655,43 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Mark a CA certificate as approved by the device user. This means that they have been notified
+     * of the installation, were made aware of the risks, viewed the certificate and still wanted to
+     * keep the certificate on the device.
+     *
+     * Calling with {@param approval} as {@code true} will cancel any ongoing warnings related to
+     * this certificate.
+     *
+     * @hide
+     */
+    public boolean approveCaCert(String alias, int userHandle, boolean approval) {
+        if (mService != null) {
+            try {
+                return mService.approveCaCert(alias, userHandle, approval);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether a CA certificate has been approved by the device user.
+     *
+     * @hide
+     */
+    public boolean isCaCertApproved(String alias, int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.isCaCertApproved(alias, userHandle);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Installs the given certificate as a user CA.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
