@@ -49,7 +49,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see {@link ShortcutManager}.
  */
-public class ShortcutInfo implements Parcelable {
+public final class ShortcutInfo implements Parcelable {
     /* @hide */
     public static final int FLAG_DYNAMIC = 1 << 0;
 
