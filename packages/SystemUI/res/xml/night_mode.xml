@@ -27,10 +27,6 @@
         android:title="@string/when_night_mode_on">
 
         <SwitchPreference
-            android:key="dark_theme"
-            android:title="@string/use_dark_theme" />
-
-        <SwitchPreference
             android:key="adjust_tint"
             android:title="@string/adjust_tint" />
 
@@ -39,9 +35,5 @@
             android:title="@string/adjust_brightness" />
 
     </PreferenceCategory>
-
-    <Preference
-        android:selectable="false"
-        android:summary="@string/night_mode_disclaimer" />
 
 </PreferenceScreen>

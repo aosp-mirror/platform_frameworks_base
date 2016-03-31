@@ -43,7 +43,6 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
     public static final String EXTRA_SHOW_NIGHT_MODE = "show_night_mode";
 
     private static final CharSequence KEY_AUTO = "auto";
-    private static final CharSequence KEY_DARK_THEME = "dark_theme";
     private static final CharSequence KEY_ADJUST_TINT = "adjust_tint";
     private static final CharSequence KEY_ADJUST_BRIGHTNESS = "adjust_brightness";
 
@@ -51,7 +50,6 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
 
     private NightModeController mNightModeController;
     private SwitchPreference mAutoSwitch;
-    private SwitchPreference mDarkTheme;
     private SwitchPreference mAdjustTint;
     private SwitchPreference mAdjustBrightness;
     private UiModeManager mUiModeManager;
@@ -79,8 +77,6 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         addPreferencesFromResource(R.xml.night_mode);
         mAutoSwitch = (SwitchPreference) findPreference(KEY_AUTO);
         mAutoSwitch.setOnPreferenceChangeListener(this);
-        mDarkTheme = (SwitchPreference) findPreference(KEY_DARK_THEME);
-        mDarkTheme.setOnPreferenceChangeListener(this);
         mAdjustTint = (SwitchPreference) findPreference(KEY_ADJUST_TINT);
         mAdjustTint.setOnPreferenceChangeListener(this);
         mAdjustBrightness = (SwitchPreference) findPreference(KEY_ADJUST_BRIGHTNESS);
@@ -111,7 +107,6 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         mNightModeController.addListener(this);
         TunerService.get(getContext()).addTunable(this, Secure.BRIGHTNESS_USE_TWILIGHT,
                 NightModeController.NIGHT_MODE_ADJUST_TINT);
-        mDarkTheme.setChecked(mUiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_AUTO);
         calculateDisabled();
     }
 
@@ -129,12 +124,6 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         if (mAutoSwitch == preference) {
             MetricsLogger.action(getContext(), MetricsEvent.ACTION_TUNER_NIGHT_MODE_AUTO, value);
             mNightModeController.setAuto(value);
-        } else if (mDarkTheme == preference) {
-            MetricsLogger.action(getContext(),
-                    MetricsEvent.ACTION_TUNER_NIGHT_MODE_ADJUST_DARK_THEME, value);
-            mUiModeManager.setNightMode(value ? UiModeManager.MODE_NIGHT_AUTO
-                    : UiModeManager.MODE_NIGHT_NO);
-            postCalculateDisabled();
         } else if (mAdjustTint == preference) {
             MetricsLogger.action(getContext(),
                     MetricsEvent.ACTION_TUNER_NIGHT_MODE_ADJUST_TINT, value);
@@ -163,19 +152,15 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
     }
 
     private void calculateDisabled() {
-        int enabledCount = (mDarkTheme.isChecked() ? 1 : 0)
-                + (mAdjustTint.isChecked() ? 1 : 0)
+        int enabledCount = (mAdjustTint.isChecked() ? 1 : 0)
                 + (mAdjustBrightness.isChecked() ? 1 : 0);
         if (enabledCount == 1) {
-            if (mDarkTheme.isChecked()) {
-                mDarkTheme.setEnabled(false);
-            } else if (mAdjustTint.isChecked()) {
+            if (mAdjustTint.isChecked()) {
                 mAdjustTint.setEnabled(false);
             } else {
                 mAdjustBrightness.setEnabled(false);
             }
         } else {
-            mDarkTheme.setEnabled(true);
             mAdjustTint.setEnabled(true);
             mAdjustBrightness.setEnabled(true);
         }
