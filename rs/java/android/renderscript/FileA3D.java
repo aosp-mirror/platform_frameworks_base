@@ -170,6 +170,7 @@ public class FileA3D extends BaseObj {
     FileA3D(long id, RenderScript rs, InputStream stream) {
         super(id, rs);
         mInputStream = stream;
+        guard.open("destroy");
     }
 
     private void initEntries() {

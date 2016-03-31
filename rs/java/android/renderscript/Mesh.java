@@ -91,6 +91,7 @@ public class Mesh extends BaseObj {
 
     Mesh(long id, RenderScript rs) {
         super(id, rs);
+        guard.open("destroy");
     }
 
     /**
