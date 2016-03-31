@@ -203,7 +203,7 @@ enter, exit, and shared element transitions in your style definition:</p>
 <pre>
 &lt;style name="BaseAppTheme" parent="android:Theme.Material">
   &lt;!-- enable window content transitions -->
-  &lt;item name="android:android:windowActivityTransitions">true&lt;/item>
+  &lt;item name="android:windowActivityTransitions">true&lt;/item>
 
   &lt;!-- specify enter and exit transitions -->
   &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
