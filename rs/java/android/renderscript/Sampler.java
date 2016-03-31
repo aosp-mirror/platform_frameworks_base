@@ -51,6 +51,7 @@ public class Sampler extends BaseObj {
 
     Sampler(long id, RenderScript rs) {
         super(id, rs);
+        guard.open("destroy");
     }
 
     /**
