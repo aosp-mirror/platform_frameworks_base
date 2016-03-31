@@ -18,7 +18,6 @@ next.link=running-app.html
 
 <ol>
   <li><a href="#Studio">Create a Project with Android Studio</a></li>
-  <li><a href="#CommandLine">Create a Project with Command Line Tools</a></li>
 </ol>
 
 <h2>You should also read</h2>
