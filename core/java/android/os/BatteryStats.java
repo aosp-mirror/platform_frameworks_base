@@ -448,19 +448,41 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getForegroundActivityTimer();
         public abstract Timer getBluetoothScanTimer();
 
-        // Time this uid has any processes in the top state.
+        // Note: the following times are disjoint.  They can be added together to find the
+        // total time a uid has had any processes running at all.
+
+        /**
+         * Time this uid has any processes in the top state (or above such as persistent).
+         */
         public static final int PROCESS_STATE_TOP = 0;
-        // Time this uid has any process with a started out bound foreground service.
+        /**
+         * Time this uid has any process with a started out bound foreground service, but
+         * none in the "top" state.
+         */
         public static final int PROCESS_STATE_FOREGROUND_SERVICE = 1;
-        // Time this uid has any process that is top while the device is sleeping.
+        /**
+         * Time this uid has any process that is top while the device is sleeping, but none
+         * in the "foreground service" or better state.
+         */
         public static final int PROCESS_STATE_TOP_SLEEPING = 2;
-        // Time this uid has any process in an active foreground state.
+        /**
+         * Time this uid has any process in an active foreground state, but none in the
+         * "top sleeping" or better state.
+         */
         public static final int PROCESS_STATE_FOREGROUND = 3;
-        // Time this uid has any process in an active background state.
+        /**
+         * Time this uid has any process in an active background state, but none in the
+         * "foreground" or better state.
+         */
         public static final int PROCESS_STATE_BACKGROUND = 4;
-        // Time this uid has any processes running at all.
+        /**
+         * Time this uid has any processes that are sitting around cached, not in one of the
+         * other active states.
+         */
         public static final int PROCESS_STATE_CACHED = 5;
-        // Total number of process states we track.
+        /**
+         * Total number of process states we track.
+         */
         public static final int NUM_PROCESS_STATE = 6;
 
         static final String[] PROCESS_STATE_NAMES = {
