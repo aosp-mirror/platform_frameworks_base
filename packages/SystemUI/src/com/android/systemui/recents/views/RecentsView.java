@@ -59,7 +59,6 @@ import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
-import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
@@ -344,10 +343,10 @@ public class RecentsView extends FrameLayout {
 
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Measure the stack action button within the constraints of the space above the stack
-            Rect actionButtonRect = mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect;
+            Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
             measureChild(mStackActionButton,
-                    MeasureSpec.makeMeasureSpec(actionButtonRect.width(), MeasureSpec.AT_MOST),
-                    MeasureSpec.makeMeasureSpec(actionButtonRect.height(), MeasureSpec.AT_MOST));
+                    MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
         }
 
         setMeasuredDimension(width, height);
@@ -376,16 +375,9 @@ public class RecentsView extends FrameLayout {
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Layout the stack action button such that its drawable is start-aligned with the
             // stack, vertically centered in the available space above the stack
-            Rect actionButtonRect = mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect;
-            int buttonLeft = isLayoutRtl()
-                    ? actionButtonRect.right + mStackActionButton.getPaddingStart()
-                    - mStackActionButton.getMeasuredWidth()
-                    : actionButtonRect.left - mStackActionButton.getPaddingStart();
-            int buttonTop = actionButtonRect.top +
-                    (actionButtonRect.height() - mStackActionButton.getMeasuredHeight()) / 2;
-            mStackActionButton.layout(buttonLeft, buttonTop,
-                    buttonLeft + mStackActionButton.getMeasuredWidth(),
-                    buttonTop + mStackActionButton.getMeasuredHeight());
+            Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
+            mStackActionButton.layout(buttonBounds.left, buttonBounds.top, buttonBounds.right,
+                    buttonBounds.bottom);
         }
 
         if (mAwaitingFirstLayout) {
@@ -478,6 +470,17 @@ public class RecentsView extends FrameLayout {
             updateVisibleDockRegions(new TaskStack.DockState[] {dockState},
                     false /* isDefaultDockState */, -1, true /* animateAlpha */,
                     true /* animateBounds */);
+        }
+        if (mStackActionButton != null) {
+            event.addPostAnimationCallback(new Runnable() {
+                @Override
+                public void run() {
+                    // Move the clear all button to its new position
+                    Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
+                    mStackActionButton.setLeftTopRightBottom(buttonBounds.left, buttonBounds.top,
+                            buttonBounds.right, buttonBounds.bottom);
+                }
+            });
         }
     }
 
@@ -734,5 +737,20 @@ public class RecentsView extends FrameLayout {
                 ? Interpolators.ALPHA_OUT
                 : Interpolators.ALPHA_IN);
         mBackgroundScrimAnimator.start();
+    }
+
+    /**
+     * @return the bounds of the stack action button.
+     */
+    private Rect getStackActionButtonBoundsFromStackLayout() {
+        Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect);
+        int left = isLayoutRtl()
+                ? actionButtonRect.left - mStackActionButton.getPaddingLeft()
+                : actionButtonRect.right + mStackActionButton.getPaddingRight()
+                - mStackActionButton.getMeasuredWidth();
+        int top = actionButtonRect.top +
+                (actionButtonRect.height() - mStackActionButton.getMeasuredHeight()) / 2;
+        actionButtonRect.offsetTo(left, top);
+        return actionButtonRect;
     }
 }

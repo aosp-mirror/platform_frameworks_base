@@ -23,7 +23,7 @@ import com.android.systemui.recents.views.DropTarget;
 /**
  * This event is sent when a user drags in/out of a drop target.
  */
-public class DragDropTargetChangedEvent extends EventBus.Event {
+public class DragDropTargetChangedEvent extends EventBus.AnimatedEvent {
 
     // The task that is currently being dragged
     public final Task task;
