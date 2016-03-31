@@ -843,11 +843,21 @@ public final class TvInputManager {
 
     /**
      * Interface used to receive events from Hardware objects.
+     *
      * @hide
      */
     @SystemApi
     public abstract static class HardwareCallback {
+        /**
+         * This is called when {@link Hardware} is no longer available for the client.
+         */
         public abstract void onReleased();
+
+        /**
+         * This is called when the underlying {@link TvStreamConfig} has been changed.
+         *
+         * @param configs A list of new {@link TvStreamConfig}s.
+         */
         public abstract void onStreamConfigChanged(TvStreamConfig[] configs);
     }
 
@@ -1489,18 +1499,41 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns acquired TvInputManager.Hardware object for given deviceId.
+     * Acquires {@link Hardware} object for the given device ID.
      *
-     * If there are other Hardware object acquired for the same deviceId, calling this method will
-     * preempt the previously acquired object and report {@link HardwareCallback#onReleased} to the
-     * old object.
+     * <p>A subsequent call to this method on the same {@code deviceId} will release the currently
+     * acquired Hardware.
+     *
+     * @param deviceId The device ID to acquire Hardware for.
+     * @param callback A callback to receive updates on Hardware.
+     * @param info The TV input which will use the acquired Hardware.
+     * @return Hardware on success, {@code null} otherwise.
+     *
+     * @removed
+     */
+    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
+    public Hardware acquireTvInputHardware(int deviceId, final HardwareCallback callback,
+            TvInputInfo info) {
+        return acquireTvInputHardware(deviceId, info, callback);
+    }
+
+    /**
+     * Acquires {@link Hardware} object for the given device ID.
+     *
+     * <p>A subsequent call to this method on the same {@code deviceId} will release the currently
+     * acquired Hardware.
+     *
+     * @param deviceId The device ID to acquire Hardware for.
+     * @param callback A callback to receive updates on Hardware.
+     * @param info The TV input which will use the acquired Hardware.
+     * @return Hardware on success, {@code null} otherwise.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
-    public Hardware acquireTvInputHardware(int deviceId, final HardwareCallback callback,
-            TvInputInfo info) {
+    public Hardware acquireTvInputHardware(int deviceId, TvInputInfo info,
+            final HardwareCallback callback) {
         try {
             return new Hardware(
                     mService.acquireTvInputHardware(deviceId, new ITvInputHardwareCallback.Stub() {
@@ -1521,6 +1554,9 @@ public final class TvInputManager {
 
     /**
      * Releases previously acquired hardware object.
+     *
+     * @param deviceId The device ID this Hardware was acquired for
+     * @param hardware Hardware to release.
      *
      * @hide
      */
