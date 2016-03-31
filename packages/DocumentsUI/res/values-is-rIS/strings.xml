@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Eyða „<xliff:g id="NAME">%1$s</xliff:g>“?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Eyða möppunni „<xliff:g id="NAME">%1$s</xliff:g>“ og öllu innihaldi hennar?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="one">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> skrá?</item>
+      <item quantity="other">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> skrám?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="one">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> möppu og innihaldi þeirra?</item>
+      <item quantity="other">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> möppum og innihaldi þeirra?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="one">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> atriði?</item>
+      <item quantity="other">Eyða <xliff:g id="COUNT_1">%1$d</xliff:g> atriðum?</item>
+    </plurals>
 </resources>

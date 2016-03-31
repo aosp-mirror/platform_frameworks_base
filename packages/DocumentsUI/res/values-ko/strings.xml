@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"<xliff:g id="NAME">%1$s</xliff:g>을(를) 삭제하시겠습니까?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\'<xliff:g id="NAME">%1$s</xliff:g>\' 폴더와 폴더에 포함된 콘텐츠를 삭제하시겠습니까?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
+      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">폴더 <xliff:g id="COUNT_1">%1$d</xliff:g>개와 폴더에 포함된 콘텐츠를 삭제하시겠습니까?</item>
+      <item quantity="one">폴더 <xliff:g id="COUNT_0">%1$d</xliff:g>개와 폴더에 포함된 콘텐츠를 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">항목 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
+      <item quantity="one">항목 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
+    </plurals>
 </resources>

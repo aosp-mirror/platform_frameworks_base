@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\"ஐ நீக்கவா?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" கோப்புறையையும் அதன் உள்ளடக்கத்தையும் நீக்கவா?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> கோப்புகளை நீக்கவா?</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> கோப்பை நீக்கவா?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> கோப்புறைகளையும் அவற்றின் உள்ளடக்கத்தையும் நீக்கவா?</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> கோப்புறையையும் அதன் உள்ளடக்கத்தையும் நீக்கவா?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> உருப்படிகளை நீக்கவா?</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> உருப்படியை நீக்கவா?</item>
+    </plurals>
 </resources>

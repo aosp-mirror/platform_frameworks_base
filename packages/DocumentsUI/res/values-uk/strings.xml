@@ -137,7 +137,22 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Видалити файл <xliff:g id="NAME">%1$s</xliff:g>?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Видалити папку \"<xliff:g id="NAME">%1$s</xliff:g>\" та її вміст?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="one">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файл?</item>
+      <item quantity="few">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файли?</item>
+      <item quantity="many">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлів?</item>
+      <item quantity="other">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлу?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="one">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> папку та їх вміст?</item>
+      <item quantity="few">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> папки та їх вміст?</item>
+      <item quantity="many">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> папок та їх вміст?</item>
+      <item quantity="other">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> папки та їх вміст?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="one">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> елемент?</item>
+      <item quantity="few">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> елементи?</item>
+      <item quantity="many">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> елементів?</item>
+      <item quantity="other">Видалити <xliff:g id="COUNT_1">%1$d</xliff:g> елемента?</item>
+    </plurals>
 </resources>

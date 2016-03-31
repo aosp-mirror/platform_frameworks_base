@@ -137,7 +137,22 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Smazat soubor <xliff:g id="NAME">%1$s</xliff:g>?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Smazat složku <xliff:g id="NAME">%1$s</xliff:g> a její obsah?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="few">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory?</item>
+      <item quantity="many">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru?</item>
+      <item quantity="other">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů?</item>
+      <item quantity="one">Smazat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="few">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> složky a jejich obsah?</item>
+      <item quantity="many">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> složky a jejich obsah?</item>
+      <item quantity="other">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> složek a jejich obsah?</item>
+      <item quantity="one">Smazat <xliff:g id="COUNT_0">%1$d</xliff:g> složku a její obsah?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="few">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> položky?</item>
+      <item quantity="many">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> položky?</item>
+      <item quantity="other">Smazat <xliff:g id="COUNT_1">%1$d</xliff:g> položek?</item>
+      <item quantity="one">Smazat <xliff:g id="COUNT_0">%1$d</xliff:g> položku?</item>
+    </plurals>
 </resources>

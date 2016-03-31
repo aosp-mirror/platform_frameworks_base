@@ -111,7 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Error al cambiar el nombre del documento"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Se han convertido algunos archivos"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"¿Permitir que <xliff:g id="APPNAME"><b>^1</b></xliff:g> acceda al directorio <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> (<xliff:g id="STORAGE"><i>^3</i></xliff:g>)?"</string>
-    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"¿Permitir que <xliff:g id="APPNAME"><b>^1</b></xliff:g> acceda a tus datos, incluidos los vídeos y las fotos de <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"¿Permitir que <xliff:g id="APPNAME"><b>^1</b></xliff:g> acceda a tus datos, incluidos los vídeos y las fotos, de <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"No volver a preguntar"</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Denegar"</string>
@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"¿Eliminar <xliff:g id="NAME">%1$s</xliff:g>?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"¿Eliminar la carpeta <xliff:g id="NAME">%1$s</xliff:g> y su contenido?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">¿Eliminar <xliff:g id="COUNT_1">%1$d</xliff:g> archivos?</item>
+      <item quantity="one">¿Eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> archivo?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">¿Eliminar <xliff:g id="COUNT_1">%1$d</xliff:g> carpetas y su contenido?</item>
+      <item quantity="one">¿Eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> carpeta y su contenido?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">¿Eliminar <xliff:g id="COUNT_1">%1$d</xliff:g> elementos?</item>
+      <item quantity="one">¿Eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> elemento?</item>
+    </plurals>
 </resources>

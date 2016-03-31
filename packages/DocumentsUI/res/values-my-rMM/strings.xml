@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\" ကိုဖျက်မလား။"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" ဖိုင်တွဲနှင့် ၎င်းတွင်ပါဝင်သည့် အကြောင်းအရာများကို ဖျက်မလား။"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
+      <item quantity="one">ဖိုင် <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">ဖိုင်တွဲ <xliff:g id="COUNT_1">%1$d</xliff:g> ခုနှင့် ၎င်း၏အကြောင်းအရာများကို ဖျက်မလား။</item>
+      <item quantity="one">ဖိုင်တွဲ <xliff:g id="COUNT_0">%1$d</xliff:g> ခုနှင့် ၎င်း၏အကြောင်းအရာများကို ဖျက်မလား။</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">အကြောင်းအရာ <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
+      <item quantity="one">အကြောင်းအရာ <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်မလား။</item>
+    </plurals>
 </resources>
