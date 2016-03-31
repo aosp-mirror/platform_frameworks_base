@@ -302,6 +302,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.text.StaticLayout",
         "android.util.PathParser",
         "android.view.Display",
+        "com.android.internal.util.VirtualRefBasePtr",
         "com.android.internal.view.animation.NativeInterpolatorFactoryHelper",
         "libcore.icu.ICU",
     };

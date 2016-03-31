@@ -31,6 +31,7 @@ import com.android.io.FolderWrapper;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.RenderAction;
+import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.intensive.setup.ConfigGenerator;
 import com.android.layoutlib.bridge.intensive.setup.LayoutLibTestCallback;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
@@ -52,6 +53,7 @@ import android.util.DisplayMetrics;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -298,6 +300,16 @@ public class Main {
         renderAndVerify("allwidgets.xml", "allwidgets_tab.png", ConfigGenerator.NEXUS_7_2012);
     }
 
+    private static void gc() {
+        // See RuntimeUtil#gc in jlibs (http://jlibs.in/)
+        Object obj = new Object();
+        WeakReference ref = new WeakReference<Object>(obj);
+        obj = null;
+        while(ref.get() != null) {
+            System.gc();
+        }
+    }
+
     @AfterClass
     public static void tearDown() {
         sLayoutLibLog = null;
@@ -305,6 +317,11 @@ public class Main {
         sProjectResources = null;
         sLogger = null;
         sBridge = null;
+
+        gc();
+
+        System.out.println("Objects still linked from the DelegateManager:");
+        DelegateManager.dump(System.out);
     }
 
     /** Test expand_layout.xml */
