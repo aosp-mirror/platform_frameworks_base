@@ -5797,8 +5797,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 transitionCheckNeeded = false;
             } else {
                 // For all other cases, caller must have MANAGE_PROFILE_AND_DEVICE_OWNERS.
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+                enforceCanManageProfileAndDeviceOwners();
             }
 
             final DevicePolicyData policyData = getUserData(userHandle);
@@ -5991,8 +5990,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return;
         }
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+        enforceCanManageProfileAndDeviceOwners();
         if (hasUserSetupCompleted(userHandle) && !isCallerWithSystemUid()) {
             throw new IllegalStateException("Cannot set the profile owner on a user which is "
                     + "already set-up");
@@ -6007,8 +6005,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int callingUid = mInjector.binderGetCallingUid();
         boolean isAdb = callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
         if (!isAdb) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+            enforceCanManageProfileAndDeviceOwners();
         }
 
         final int code = checkSetDeviceOwnerPreCondition(userId, isAdb);
@@ -6664,6 +6661,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin == null) {
+                return false;
+            }
             if (admin.permittedAccessiblityServices == null) {
                 return true;
             }
@@ -6834,6 +6834,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin == null) {
+                return false;
+            }
             if (admin.permittedInputMethods == null) {
                 return true;
             }
@@ -7104,19 +7107,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public Bundle getUserRestrictions(ComponentName who, int userHandle) {
+    public Bundle getUserRestrictions(ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            final ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return activeAdmin.userRestrictions;
+        }
+    }
+
+    @Override
+    public Bundle getUserRestrictionsForUser(ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
         Preconditions.checkNotNull(who, "ComponentName is null");
         enforceFullCrossUsersPermission(userHandle);
+        enforceCanManageProfileAndDeviceOwners();
         synchronized (this) {
             ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(who, userHandle);
             if (activeAdmin == null) {
-                throw new SecurityException("No active admin: " + activeAdmin);
-            }
-            if (activeAdmin.getUid() != mInjector.binderGetCallingUid()) {
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
-                        "Calling uid " + mInjector.binderGetCallingUid() + " neither owns the admin"
-                        + " " + who + " nor has MANAGE_PROFILE_AND_DEVICE_OWNERS permission");
+                return null;
             }
             return activeAdmin.userRestrictions;
         }
@@ -8688,6 +8702,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void enforceCanManageDeviceAdmin() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS,
                 null);
+    }
+
+    private void enforceCanManageProfileAndDeviceOwners() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
     }
 
     @Override
