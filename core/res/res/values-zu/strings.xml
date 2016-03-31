@@ -233,8 +233,10 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Okuqukethwe kufihlwe inqubomgomo"</string>
     <string name="safeMode" msgid="2788228061547930246">"Imodi ephephile"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Uhlelo lwe-Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Okomuntu siqu"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Umsebenzi"</string>
+    <!-- no translation found for user_owner_label (1119010402169916617) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (5289992269827577857) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Oxhumana nabo"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"finyelela koxhumana nabo"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Indawo"</string>
@@ -1045,7 +1047,8 @@
     <string name="no_permissions" msgid="7283357728219338112">"Ayikho imvume edingekayo"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"lokhu kungakudlela imali"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"KULUNGILE"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"I-USB yokushaja"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"I-USB ishaja le divayisi"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"I-USB inikeza amandla kudivayisi enamathiselwe"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"I-USB yokudluliswa kwefayela"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"I-USB yokudluliswa kwesithombe"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"I-USB ye-MIDI"</string>
@@ -1063,8 +1066,10 @@
     <string name="configure_input_methods" msgid="5673193194563164021">"Amanye amakhibhodi"</string>
     <string name="show_ime" msgid="2506087537466597099">"Yigcine kusikrini ngenkathi kusebenza ikhibhodi ephathekayo"</string>
     <string name="hardware" msgid="194658061510127999">"Bonisa ikhibhodi ebonakalayo"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Khetha isendlalelo sekhibhodi"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Thinta ukuze ukhethe isendlalelo sekhibhodi."</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"abahlanganyeli"</u></string>
