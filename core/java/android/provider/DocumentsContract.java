@@ -112,9 +112,8 @@ public final class DocumentsContract {
      * thumbnail should be rotated.
      *
      * @see MediaStore.Images.ImageColumns#ORIENTATION
-     * @hide
      */
-    public static final String EXTRA_ORIENTATION = "android.content.extra.ORIENTATION";
+    public static final String EXTRA_ORIENTATION = "android.provider.extra.ORIENTATION";
 
     /**
      * Overrides the default prompt text in DocumentsUI when set in an intent.
