@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Kas kustutada fail „<xliff:g id="NAME">%1$s</xliff:g>”?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Kas kustutada kaust „<xliff:g id="NAME">%1$s</xliff:g>” ja selle sisu?"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">Kas kustutada <xliff:g id="COUNT_1">%1$d</xliff:g> faili?</item>
+      <item quantity="one">Kas kustutada <xliff:g id="COUNT_0">%1$d</xliff:g> fail?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">Kas kustutada <xliff:g id="COUNT_1">%1$d</xliff:g> kausta ja nende sisu?</item>
+      <item quantity="one">Kas kustutada <xliff:g id="COUNT_0">%1$d</xliff:g> kaust ja selle sisu?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">Kas kustutada <xliff:g id="COUNT_1">%1$d</xliff:g> üksust?</item>
+      <item quantity="one">Kas kustutada <xliff:g id="COUNT_0">%1$d</xliff:g> üksus?</item>
+    </plurals>
 </resources>

@@ -135,11 +135,24 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> נבחרו</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> נבחר</item>
     </plurals>
-    <!-- no translation found for delete_filename_confirmation_message (5312817725577537488) -->
-    <skip />
-    <!-- no translation found for delete_foldername_confirmation_message (5885501832257285329) -->
-    <skip />
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"האם למחוק את \"<xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"האם למחוק את התיקייה \"<xliff:g id="NAME">%1$s</xliff:g>\" ואת התוכן שלה?"</string>
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="two">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים?</item>
+      <item quantity="many">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים?</item>
+      <item quantity="other">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים?</item>
+      <item quantity="one">האם למחוק <xliff:g id="COUNT_0">%1$d</xliff:g> קובץ?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="two">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> תיקיות ואת התוכן שלהן?</item>
+      <item quantity="many">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> תיקיות ואת התוכן שלהן?</item>
+      <item quantity="other">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> תיקיות ואת התוכן שלהן?</item>
+      <item quantity="one">האם למחוק <xliff:g id="COUNT_0">%1$d</xliff:g> תיקייה ואת התוכן שלה?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="two">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> פריטים?</item>
+      <item quantity="many">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> פריטים?</item>
+      <item quantity="other">האם למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> פריטים?</item>
+      <item quantity="one">האם למחוק <xliff:g id="COUNT_0">%1$d</xliff:g> פריט?</item>
+    </plurals>
 </resources>

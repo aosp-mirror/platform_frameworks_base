@@ -121,7 +121,16 @@
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Να διαγραφεί το αρχείο \"<xliff:g id="NAME">%1$s</xliff:g>\";"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Να διαγραφεί ο φάκελος \"<xliff:g id="NAME">%1$s</xliff:g>\" και τα περιεχόμενά του;"</string>
-    <!-- no translation found for delete_files_confirmation_message (8417505791395471802) -->
-    <!-- no translation found for delete_folders_confirmation_message (9185648028213507769) -->
-    <!-- no translation found for delete_items_confirmation_message (5376214433530243459) -->
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">Να διαγραφούν <xliff:g id="COUNT_1">%1$d</xliff:g> αρχεία;</item>
+      <item quantity="one">Να διαγραφεί <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείο;</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">Να διαγραφούν <xliff:g id="COUNT_1">%1$d</xliff:g> φάκελοι και τα περιεχόμενά τους;</item>
+      <item quantity="one">Να διαγραφεί <xliff:g id="COUNT_0">%1$d</xliff:g> φάκελος και τα περιεχόμενά του;</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">Να διαγραφούν <xliff:g id="COUNT_1">%1$d</xliff:g> στοιχεία;</item>
+      <item quantity="one">Να διαγραφεί <xliff:g id="COUNT_0">%1$d</xliff:g> στοιχείο;</item>
+    </plurals>
 </resources>
