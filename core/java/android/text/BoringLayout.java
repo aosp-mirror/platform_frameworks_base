@@ -300,6 +300,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             Metrics fm = metrics;
             if (fm == null) {
                 fm = new Metrics();
+            } else {
+                fm.reset();
             }
 
             TextLine line = TextLine.obtain();
@@ -414,8 +416,6 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         mEllipsizedCount = end - start;
     }
 
-    private static final char FIRST_RIGHT_TO_LEFT = '\u0590';
-
     private String mDirect;
     private Paint mPaint;
 
@@ -429,6 +429,15 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
         @Override public String toString() {
             return super.toString() + " width=" + width;
+        }
+
+        private void reset() {
+            top = 0;
+            bottom = 0;
+            ascent = 0;
+            descent = 0;
+            width = 0;
+            leading = 0;
         }
     }
 }
