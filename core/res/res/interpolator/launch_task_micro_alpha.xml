@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/slide_out_micro.xml
-**
+/*
 ** Copyright 2014, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +17,8 @@
 */
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:zAdjustment="top">
-    <translate android:fromYDelta="0" android:toYDelta="5%p"
-               android:duration="250"
-               android:interpolator="@android:interpolator/fast_out_slow_in"/>
-    <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
-           android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-           android:startOffset="100" android:duration="150"
-           android:interpolator="@android:interpolator/fast_out_slow_in" />
-</set>
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:controlX1="0"
+                  android:controlY1="0"
+                  android:controlX2="0.7"
+                  android:controlY2="1" />
