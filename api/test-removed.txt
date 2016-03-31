@@ -94,6 +94,10 @@ package android.media {
 
 package android.media.tv {
 
+  public final class TvInputManager {
+    method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
+  }
+
   public class TvView extends android.view.ViewGroup {
     method public void requestUnblockContent(android.media.tv.TvContentRating);
   }
