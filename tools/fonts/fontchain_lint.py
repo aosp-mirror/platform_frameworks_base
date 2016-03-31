@@ -177,9 +177,10 @@ def parse_fonts_xml(fonts_xml_path):
 
 def check_emoji_availability():
     emoji_fonts = [font[5] for font in _fallback_chain if 'Zsye' in font[1]]
+    assert len(emoji_fonts) == 1, 'There are %d emoji fonts.' % len(emoji_fonts)
+    emoji_font = emoji_fonts[0]
     emoji_chars = _emoji_properties['Emoji']
-    for emoji_font in emoji_fonts:
-        assert_font_supports_all_of_chars(emoji_font, emoji_chars)
+    assert_font_supports_all_of_chars(emoji_font, emoji_chars)
 
 
 def check_emoji_defaults():
@@ -273,11 +274,12 @@ def main():
     hyphens_dir = path.join(target_out, 'usr', 'hyphen-data')
     check_hyphens(hyphens_dir)
 
-    ucd_path = sys.argv[2]
-    parse_ucd(ucd_path)
-    # Temporarily disable emoji checks for Bug 27785690
-    # check_emoji_availability()
-    # check_emoji_defaults()
+    check_emoji = sys.argv[2]
+    if check_emoji == 'true':
+        ucd_path = sys.argv[3]
+        parse_ucd(ucd_path)
+        check_emoji_availability()
+        check_emoji_defaults()
 
 
 if __name__ == '__main__':
