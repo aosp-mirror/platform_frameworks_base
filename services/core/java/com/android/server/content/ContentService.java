@@ -26,9 +26,9 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
+import android.content.ISyncStatusObserver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ISyncStatusObserver;
 import android.content.PeriodicSync;
 import android.content.SyncAdapterType;
 import android.content.SyncInfo;
@@ -58,18 +58,15 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * {@hide}
@@ -1030,14 +1027,16 @@ public final class ContentService extends IContentService.Stub {
 
         if (uri != null) {
             for (int i = 0; i < packageCache.size();) {
-                final Uri key = packageCache.keyAt(i).second;
-                if (Objects.equals(key, uri)) {
+                final Pair<String, Uri> key = packageCache.keyAt(i);
+                if (key.second != null && key.second.toString().startsWith(uri.toString())) {
+                    Slog.d(TAG, "Invalidating cache for key " + key);
                     packageCache.removeAt(i);
                 } else {
                     i++;
                 }
             }
         } else {
+            Slog.d(TAG, "Invalidating cache for package " + providerPackageName);
             packageCache.clear();
         }
     }
