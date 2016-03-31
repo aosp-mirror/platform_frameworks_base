@@ -1285,6 +1285,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 wallpaper.imageWallpaperPending = false;
                 if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
                     wallpaper.wallpaperId = makeWallpaperIdLocked();
+                    notifyCallbacksLocked(wallpaper);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
