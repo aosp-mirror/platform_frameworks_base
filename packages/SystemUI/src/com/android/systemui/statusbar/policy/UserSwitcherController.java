@@ -654,11 +654,12 @@ public class UserSwitcherController {
     }
 
     private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
-        UserHandle user = UserHandle.of(ActivityManager.getCurrentUser());
-        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, user)
-                && !mUserManager.hasBaseUserRestriction(UserManager.DISALLOW_ADD_USER, user)) {
+        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser());
+        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser())) {
             record.isDisabledByAdmin = true;
-            record.enforcedAdmin = EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+            record.enforcedAdmin = admin;
         } else {
             record.isDisabledByAdmin = false;
             record.enforcedAdmin = null;
