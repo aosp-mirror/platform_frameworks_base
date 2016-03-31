@@ -3835,6 +3835,14 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags" : "users,googleplay,googleio",
     "summary": "Learn how to get new users, using Universal app campaigns directly within the Google Play Developer Console to increase your installs from ads, and find out how your acquisition channels perform.",
   },
+  {
+    "url":"https://www.youtube.com/watch?v=dFrgNiweQDk",
+    "image": "images/distribute/hero-space.jpg",
+    "title": "The Guardian goes galactic with Android and Google Play",
+    "type":"youtube",
+    "tags" : "googleplay,developerstory,featured",
+    "summary": "The Guardian has been testing our new Material Design guidelines and Google Play Developer Console features to get their app ready for space flight. Hear how they optimized their app so that astronauts and space travellers can keep up with the news while in orbit.",
+  },
 ]);
 
 var CAROUSEL_OVERRIDE = {
@@ -3850,8 +3858,15 @@ var CAROUSEL_OVERRIDE = {
     "title": "Android 5.0 Lollipop",
     "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
   },
+  "https://www.youtube.com/watch?v=dFrgNiweQDk": {
+    "url":"https://www.youtube.com/watch?v=dFrgNiweQDk&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-space.jpg",
+    "title": "The Guardian goes galactic with Android and Google Play",
+    "type":"youtube",
+    "summary": "The Guardian has been testing our new Material Design guidelines and Google Play Developer Console features to get their app ready for space flight. Hear how they optimized their app so that astronauts and space travellers can keep up with the news while in orbit.",
+  },
   "http://www.youtube.com/watch?v=Pms0pcyPbAM": {
-    "url":"https://www.youtube.com/watch?v=Pms0pcyPbAM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c]",
+    "url":"https://www.youtube.com/watch?v=Pms0pcyPbAM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-carousel-giftedmom.jpg",
     "title": "Gifted Mom reaches more mothers across Africa with Android",
     "type":"youtube",

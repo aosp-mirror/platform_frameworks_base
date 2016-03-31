@@ -16,37 +16,8 @@ nonavpage=true
   })
 </script>
 
-<section class="dac-expand dac-hero dac-invert" style="background-color:#455A64">
-  <div class="wrap" style="max-width:1100px;margin-top:0">
-    <div class="col-7of16 col-push-9of16" style="padding-left:2em;">
-      <a href="{@docRoot}preview/index.html">
-        <h1 class="dac-hero-title">Android N Developer Preview</h1>
-        <p class="dac-hero-description">
-          Get ready for the next version of Android!
-          <strong>Test your apps</strong> on Nexus and other devices. Support new system
-          behaviors to <strong>save power and memory</strong>.
-          Extend your apps with <strong>multi-window UI</strong>,
-          <strong>direct reply notifications</strong> and more.
-        </p>
-        <a class="dac-hero-cta" href="/preview/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Learn more
-        </a><!--<br>
-        <a class="dac-hero-cta" href="/preview/support.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Update to Developer Preview (final SDK)
-        </a><br>-->
-      </a>
-    </div>
-    <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:0em;padding-right:1.5em;">
-      <a href="{@docRoot}preview/index.html">
-        <img style="" class="dac-hero-image" src="/images/home/n-preview-hero.png"
-             srcset="/images/home/n-preview-hero.png 1x,
-             /images/home/n-preview-hero_2x.png 2x">
-        </a>
-    </div>
-  </div>
-</section>
+<div class="dac-hero-carousel" data-carousel-query="collection:index/secondary/carousel">
+</div>
 
 <div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
@@ -109,8 +80,37 @@ nonavpage=true
        data-maxResults="3"></div>
 </div></section>
 
-<div class="dac-hero-carousel" data-carousel-query="collection:index/secondary/carousel">
-</div>
+<section class="dac-expand dac-hero dac-invert" style="background-color:#455A64">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
+    <div class="col-7of16 col-push-9of16" style="padding-left:2em;">
+      <a href="{@docRoot}preview/index.html">
+        <h1 class="dac-hero-title">Android N Developer Preview</h1>
+        <p class="dac-hero-description">
+          Get ready for the next version of Android!
+          <strong>Test your apps</strong> on Nexus and other devices. Support new system
+          behaviors to <strong>save power and memory</strong>.
+          Extend your apps with <strong>multi-window UI</strong>,
+          <strong>direct reply notifications</strong> and more.
+        </p>
+        <a class="dac-hero-cta" href="/preview/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Learn more
+        </a><!--<br>
+        <a class="dac-hero-cta" href="/preview/support.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Update to Developer Preview
+        </a><br>-->
+      </a>
+    </div>
+    <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:0em;padding-right:1.5em;">
+      <a href="{@docRoot}preview/index.html">
+        <img style="" class="dac-hero-image" src="/images/home/n-preview-hero.png"
+             srcset="/images/home/n-preview-hero.png 1x,
+             /images/home/n-preview-hero_2x.png 2x">
+        </a>
+    </div>
+  </div>
+</section>
 
 <section class="dac-section dac-gray"><div class="wrap">
   <div class="cols"><div class="col-10of12 col-push-1of12">
