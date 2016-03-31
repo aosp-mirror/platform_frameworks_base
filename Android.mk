@@ -251,10 +251,13 @@ LOCAL_SRC_FILES += \
 	core/java/android/print/IPrintDocumentAdapterObserver.aidl \
 	core/java/android/print/IPrintJobStateChangeListener.aidl \
 	core/java/android/print/IPrintServicesChangeListener.aidl \
+	core/java/android/printservice/recommendation/IRecommendationsChangeListener.aidl \
 	core/java/android/print/IPrintManager.aidl \
 	core/java/android/print/IPrintSpooler.aidl \
 	core/java/android/print/IPrintSpoolerCallbacks.aidl \
 	core/java/android/print/IPrintSpoolerClient.aidl \
+	core/java/android/printservice/recommendation/IRecommendationServiceCallbacks.aidl \
+	core/java/android/printservice/recommendation/IRecommendationService.aidl \
 	core/java/android/print/IWriteResultCallback.aidl \
 	core/java/android/printservice/IPrintService.aidl \
 	core/java/android/printservice/IPrintServiceClient.aidl \
@@ -565,6 +568,7 @@ aidl_files := \
 	frameworks/base/core/java/android/print/PrintJobInfo.aidl \
 	frameworks/base/core/java/android/print/PrinterInfo.aidl \
 	frameworks/base/core/java/android/print/PrintJobId.aidl \
+	frameworks/base/core/java/android/printservice/recommendation/RecommendationInfo.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbDevice.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbInterface.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbEndpoint.aidl \

@@ -30,10 +30,13 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.print.PrintManager;
+import android.printservice.recommendation.RecommendationInfo;
+import android.print.PrintServiceRecommendationsLoader;
 import android.print.PrintServicesLoader;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -45,8 +48,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.printspooler.R;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -57,30 +62,37 @@ import java.util.List;
  *         when the item is clicked.</li>
  *     <li>{@link #mDisabledServicesAdapter} for all disabled services. Once clicked the settings page
  *         for this service is opened.</li>
- *     <li>{@link RecommendedServicesAdapter} for a link to all services. If this item is clicked
+ *     <li>{@link #mRecommendedServicesAdapter} for a link to all services. If this item is clicked
  *         the market app is opened to show all print services.</li>
  * </ul>
  */
-public class AddPrinterActivity extends ListActivity implements
-        LoaderManager.LoaderCallbacks<List<PrintServiceInfo>>,
-        AdapterView.OnItemClickListener {
+public class AddPrinterActivity extends ListActivity implements AdapterView.OnItemClickListener {
     private static final String LOG_TAG = "AddPrinterActivity";
 
     /** Ids for the loaders */
     private static final int LOADER_ID_ENABLED_SERVICES = 1;
     private static final int LOADER_ID_DISABLED_SERVICES = 2;
+    private static final int LOADER_ID_RECOMMENDED_SERVICES = 3;
+    private static final int LOADER_ID_ALL_SERVICES = 4;
 
     /**
      * The enabled services list. This is filled from the {@link #LOADER_ID_ENABLED_SERVICES}
-     * loader in {@link #onLoadFinished}.
+     * loader in {@link PrintServiceInfoLoaderCallbacks#onLoadFinished}.
      */
     private EnabledServicesAdapter mEnabledServicesAdapter;
 
     /**
      * The disabled services list. This is filled from the {@link #LOADER_ID_DISABLED_SERVICES}
-     * loader in {@link #onLoadFinished}.
+     * loader in {@link PrintServiceInfoLoaderCallbacks#onLoadFinished}.
      */
     private DisabledServicesAdapter mDisabledServicesAdapter;
+
+    /**
+     * The recommended services list. This is filled from the
+     * {@link #LOADER_ID_RECOMMENDED_SERVICES} loader in
+     * {@link PrintServicePrintServiceRecommendationLoaderCallbacks#onLoadFinished}.
+     */
+    private RecommendedServicesAdapter mRecommendedServicesAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,75 +102,122 @@ public class AddPrinterActivity extends ListActivity implements
 
         mEnabledServicesAdapter = new EnabledServicesAdapter();
         mDisabledServicesAdapter = new DisabledServicesAdapter();
+        mRecommendedServicesAdapter = new RecommendedServicesAdapter();
 
         ArrayList<ActionAdapter> adapterList = new ArrayList<>(3);
         adapterList.add(mEnabledServicesAdapter);
-        adapterList.add(new RecommendedServicesAdapter());
+        adapterList.add(mRecommendedServicesAdapter);
         adapterList.add(mDisabledServicesAdapter);
 
         setListAdapter(new CombinedAdapter(adapterList));
 
         getListView().setOnItemClickListener(this);
 
-        getLoaderManager().initLoader(LOADER_ID_ENABLED_SERVICES, null, this);
-        getLoaderManager().initLoader(LOADER_ID_DISABLED_SERVICES, null, this);
-        // TODO: Load recommended services
+        PrintServiceInfoLoaderCallbacks printServiceLoaderCallbacks =
+                new PrintServiceInfoLoaderCallbacks();
+
+        getLoaderManager().initLoader(LOADER_ID_ENABLED_SERVICES, null, printServiceLoaderCallbacks);
+        getLoaderManager().initLoader(LOADER_ID_DISABLED_SERVICES, null, printServiceLoaderCallbacks);
+        getLoaderManager().initLoader(LOADER_ID_RECOMMENDED_SERVICES, null,
+                new PrintServicePrintServiceRecommendationLoaderCallbacks());
+        getLoaderManager().initLoader(LOADER_ID_ALL_SERVICES, null, printServiceLoaderCallbacks);
     }
 
-    @Override
-    public Loader<List<PrintServiceInfo>> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case LOADER_ID_ENABLED_SERVICES:
-                return new PrintServicesLoader(
-                        (PrintManager) getSystemService(Context.PRINT_SERVICE), this,
-                        PrintManager.ENABLED_SERVICES);
-            case LOADER_ID_DISABLED_SERVICES:
-                return new PrintServicesLoader(
-                        (PrintManager) getSystemService(Context.PRINT_SERVICE), this,
-                        PrintManager.DISABLED_SERVICES);
-            // TODO: Load recommended services
-            default:
-                // not reached
-                return null;
+    /**
+     * Callbacks for the loaders operating on list of {@link PrintServiceInfo print service infos}.
+     */
+    private class PrintServiceInfoLoaderCallbacks implements
+            LoaderManager.LoaderCallbacks<List<PrintServiceInfo>> {
+        @Override
+        public Loader<List<PrintServiceInfo>> onCreateLoader(int id, Bundle args) {
+            switch (id) {
+                case LOADER_ID_ENABLED_SERVICES:
+                    return new PrintServicesLoader(
+                            (PrintManager) getSystemService(Context.PRINT_SERVICE),
+                            AddPrinterActivity.this, PrintManager.ENABLED_SERVICES);
+                case LOADER_ID_DISABLED_SERVICES:
+                    return new PrintServicesLoader(
+                            (PrintManager) getSystemService(Context.PRINT_SERVICE),
+                            AddPrinterActivity.this, PrintManager.DISABLED_SERVICES);
+                case LOADER_ID_ALL_SERVICES:
+                    return new PrintServicesLoader(
+                            (PrintManager) getSystemService(Context.PRINT_SERVICE),
+                            AddPrinterActivity.this, PrintManager.ALL_SERVICES);
+                default:
+                    // not reached
+                    return null;
+            }
+        }
+
+
+        @Override
+        public void onLoadFinished(Loader<List<PrintServiceInfo>> loader,
+                List<PrintServiceInfo> data) {
+            switch (loader.getId()) {
+                case LOADER_ID_ENABLED_SERVICES:
+                    mEnabledServicesAdapter.updateData(data);
+                    break;
+                case LOADER_ID_DISABLED_SERVICES:
+                    mDisabledServicesAdapter.updateData(data);
+                    break;
+                case LOADER_ID_ALL_SERVICES:
+                    mRecommendedServicesAdapter.updateInstalledServices(data);
+                default:
+                    // not reached
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<PrintServiceInfo>> loader) {
+            if (!isFinishing()) {
+                switch (loader.getId()) {
+                    case LOADER_ID_ENABLED_SERVICES:
+                        mEnabledServicesAdapter.updateData(null);
+                        break;
+                    case LOADER_ID_DISABLED_SERVICES:
+                        mDisabledServicesAdapter.updateData(null);
+                        break;
+                    case LOADER_ID_ALL_SERVICES:
+                        mRecommendedServicesAdapter.updateInstalledServices(null);
+                        break;
+                    default:
+                        // not reached
+                }
+            }
+        }
+    }
+
+    /**
+     * Callbacks for the loaders operating on list of {@link RecommendationInfo print service
+     * recommendations}.
+     */
+    private class PrintServicePrintServiceRecommendationLoaderCallbacks implements
+            LoaderManager.LoaderCallbacks<List<RecommendationInfo>> {
+        @Override
+        public Loader<List<RecommendationInfo>> onCreateLoader(int id, Bundle args) {
+            return new PrintServiceRecommendationsLoader(
+                    (PrintManager) getSystemService(Context.PRINT_SERVICE),
+                    AddPrinterActivity.this);
+        }
+
+
+        @Override
+        public void onLoadFinished(Loader<List<RecommendationInfo>> loader,
+                List<RecommendationInfo> data) {
+            mRecommendedServicesAdapter.updateRecommendations(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<RecommendationInfo>> loader) {
+            if (!isFinishing()) {
+                mRecommendedServicesAdapter.updateRecommendations(null);
+            }
         }
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ((ActionAdapter) getListAdapter()).performAction(position);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<PrintServiceInfo>> loader,
-            List<PrintServiceInfo> data) {
-        switch (loader.getId()) {
-            case LOADER_ID_ENABLED_SERVICES:
-                mEnabledServicesAdapter.updateData(data);
-                break;
-            case LOADER_ID_DISABLED_SERVICES:
-                mDisabledServicesAdapter.updateData(data);
-                break;
-            // TODO: Load recommended services
-            default:
-                // not reached
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<PrintServiceInfo>> loader) {
-        if (!isFinishing()) {
-            switch (loader.getId()) {
-                case LOADER_ID_ENABLED_SERVICES:
-                    mEnabledServicesAdapter.updateData(null);
-                    break;
-                case LOADER_ID_DISABLED_SERVICES:
-                    mDisabledServicesAdapter.updateData(null);
-                    break;
-                // TODO: Reset recommended services
-                default:
-                    // not reached
-            }
-        }
     }
 
     /**
@@ -490,28 +549,65 @@ public class AddPrinterActivity extends ListActivity implements
      * Adapter for the recommended services.
      */
     private class RecommendedServicesAdapter extends ActionAdapter {
+        /** Package names of all installed print services */
+        private @NonNull final ArraySet<String> mInstalledServices;
+
+        /** All print service recommendations */
+        private @Nullable List<RecommendationInfo> mRecommendations;
+
+        /**
+         * Sorted print service recommendations for services that are not installed
+         *
+         * @see #filterRecommendations
+         */
+        private @Nullable List<RecommendationInfo> mFilteredRecommendations;
+
+        /**
+         * Create a new adapter.
+         */
+        private RecommendedServicesAdapter() {
+            mInstalledServices = new ArraySet<>();
+        }
+
         @Override
         public int getCount() {
-            return 2;
+            if (mFilteredRecommendations == null) {
+                return 2;
+            } else {
+                return mFilteredRecommendations.size() + 2;
+            }
         }
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 3;
+        }
+
+        /**
+         * @return The position the all services link is at.
+         */
+        private int getAllServicesPos() {
+            return getCount() - 1;
         }
 
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
                 return 0;
-            } else {
+            } else if (getAllServicesPos() == position) {
                 return 1;
+            } else {
+                return 2;
             }
         }
 
         @Override
         public Object getItem(int position) {
-            return null;
+            if (position == 0 || position == getAllServicesPos()) {
+                return null;
+            } else {
+                return mFilteredRecommendations.get(position - 1);
+            }
         }
 
         @Override
@@ -531,11 +627,27 @@ public class AddPrinterActivity extends ListActivity implements
                         .setText(R.string.recommended_services_title);
 
                 return convertView;
-            }
+            } else if (position == getAllServicesPos()) {
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(R.layout.all_print_services_list_item,
+                            parent, false);
+                }
+            } else {
+                RecommendationInfo recommendation = (RecommendationInfo) getItem(position);
 
-            if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.all_print_services_list_item,
-                        parent, false);
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(
+                            R.layout.print_service_recommendations_list_item, parent, false);
+                }
+
+                ((TextView) convertView.findViewById(R.id.title)).setText(recommendation.getName());
+
+                ((TextView) convertView.findViewById(R.id.subtitle)).setText(getResources()
+                        .getQuantityString(R.plurals.print_services_recommendation_subtitle,
+                                recommendation.getNumDiscoveredPrinters(),
+                                recommendation.getNumDiscoveredPrinters()));
+
+                return convertView;
             }
 
             return convertView;
@@ -548,16 +660,107 @@ public class AddPrinterActivity extends ListActivity implements
 
         @Override
         public void performAction(@IntRange(from = 0) int position) {
-            String searchUri = Settings.Secure
-                    .getString(getContentResolver(), Settings.Secure.PRINT_SERVICE_SEARCH_URI);
+            if (position == getAllServicesPos()) {
+                String searchUri = Settings.Secure
+                        .getString(getContentResolver(), Settings.Secure.PRINT_SERVICE_SEARCH_URI);
 
-            if (searchUri != null) {
+                if (searchUri != null) {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri)));
+                    } catch (ActivityNotFoundException e) {
+                        Log.e(LOG_TAG, "Cannot start market", e);
+                    }
+                }
+            } else {
+                RecommendationInfo recommendation = (RecommendationInfo) getItem(position);
+
                 try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri)));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(
+                            R.string.uri_package_details, recommendation.getPackageName()))));
                 } catch (ActivityNotFoundException e) {
                     Log.e(LOG_TAG, "Cannot start market", e);
                 }
             }
+        }
+
+        /**
+         * Filter recommended services.
+         */
+        private void filterRecommendations() {
+            if (mRecommendations == null) {
+                mFilteredRecommendations = null;
+            } else {
+                mFilteredRecommendations = new ArrayList<>();
+
+                // Filter out recommendations for already installed services
+                final int numRecommendations = mRecommendations.size();
+                for (int i = 0; i < numRecommendations; i++) {
+                    RecommendationInfo recommendation = mRecommendations.get(i);
+
+                    if (!mInstalledServices.contains(recommendation.getPackageName())) {
+                        mFilteredRecommendations.add(recommendation);
+                    }
+                }
+            }
+
+            notifyDataSetChanged();
+        }
+
+        /**
+         * Update the installed print services.
+         *
+         * @param services The new set of services
+         */
+        public void updateInstalledServices(List<PrintServiceInfo> services) {
+            mInstalledServices.clear();
+
+            final int numServices = services.size();
+            for (int i = 0; i < numServices; i++) {
+                mInstalledServices.add(services.get(i).getComponentName().getPackageName());
+            }
+
+            filterRecommendations();
+        }
+
+        /**
+         * Update the recommended print services.
+         *
+         * @param recommendations The new set of recommendations
+         */
+        public void updateRecommendations(List<RecommendationInfo> recommendations) {
+            if (recommendations != null) {
+                final Collator collator = Collator.getInstance();
+
+                // Sort recommendations (early conditions are more important)
+                // - higher number of discovered printers first
+                // - single vendor services first
+                // - alphabetically
+                Collections.sort(recommendations,
+                        new Comparator<RecommendationInfo>() {
+                            @Override public int compare(RecommendationInfo o1,
+                                    RecommendationInfo o2) {
+                                if (o1.getNumDiscoveredPrinters() !=
+                                        o2.getNumDiscoveredPrinters()) {
+                                    return o2.getNumDiscoveredPrinters() -
+                                            o1.getNumDiscoveredPrinters();
+                                } else if (o1.recommendsMultiVendorService()
+                                        != o2.recommendsMultiVendorService()) {
+                                    if (o1.recommendsMultiVendorService()) {
+                                        return 1;
+                                    } else {
+                                        return -1;
+                                    }
+                                } else {
+                                    return collator.compare(o1.getName().toString(),
+                                            o2.getName().toString());
+                                }
+                            }
+                        });
+            }
+
+            mRecommendations = recommendations;
+
+            filterRecommendations();
         }
     }
 }

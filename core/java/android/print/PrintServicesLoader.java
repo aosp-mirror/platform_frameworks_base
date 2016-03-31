@@ -22,6 +22,7 @@ import android.content.Loader;
 import android.os.Handler;
 import android.os.Message;
 import android.printservice.PrintServiceInfo;
+import com.android.internal.util.Preconditions;
 
 import java.util.List;
 
@@ -46,13 +47,16 @@ public class PrintServicesLoader extends Loader<List<PrintServiceInfo>> {
     /**
      * Create a new PrintServicesLoader.
      *
+     * @param printManager   The print manager supplying the data
+     * @param context        Context of the using object
      * @param selectionFlags What type of services to load.
      */
     public PrintServicesLoader(@NonNull PrintManager printManager, @NonNull Context context,
             int selectionFlags) {
-        super(context);
-        mPrintManager = printManager;
-        mSelectionFlags = selectionFlags;
+        super(Preconditions.checkNotNull(context));
+        mPrintManager = Preconditions.checkNotNull(printManager);
+        mSelectionFlags = Preconditions.checkFlagsArgument(selectionFlags,
+                PrintManager.ALL_SERVICES);
     }
 
     @Override
