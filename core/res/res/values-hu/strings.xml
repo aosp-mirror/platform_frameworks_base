@@ -233,8 +233,10 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"A tartalom irányelv miatt elrejtve"</string>
     <string name="safeMode" msgid="2788228061547930246">"Biztonsági üzemmód"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android rendszer"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"Személyes"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"Munkahelyi"</string>
+    <!-- no translation found for user_owner_label (1119010402169916617) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (5289992269827577857) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Névjegyek"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"hozzáférés a névjegyekhez"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Helyadatok"</string>
@@ -1045,7 +1047,8 @@
     <string name="no_permissions" msgid="7283357728219338112">"Nincs szükség engedélyre"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ez pénzbe kerülhet Önnek"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB töltéshez"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Az eszköz USB-s töltése"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"A csatlakoztatott eszköz USB-n keresztül való töltése"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB fájlátvitelhez"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB fotóátvitelhez"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI-hez"</string>
@@ -1063,8 +1066,10 @@
     <string name="configure_input_methods" msgid="5673193194563164021">"Más billentyűzetek"</string>
     <string name="show_ime" msgid="2506087537466597099">"Maradjon a képernyőn, amíg a billentyűzet aktív"</string>
     <string name="hardware" msgid="194658061510127999">"Virtuális billentyűzet"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Válasszon billentyűzetkiosztást"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Érintse meg az egyik billentyűzetkiosztás kiválasztásához."</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
+    <skip />
+    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"jelöltek"</u></string>
