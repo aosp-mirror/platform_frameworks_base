@@ -87,10 +87,10 @@ public class WebViewUtilityImpl implements WebViewUtilityInterface {
                             parser.getAttributeValue(null, TAG_AVAILABILITY));
                     boolean isFallback = "true".equals(
                             parser.getAttributeValue(null, TAG_FALLBACK));
-                    WebViewProviderInfo currentProvider =
-                            new WebViewProviderInfo(packageName, description, availableByDefault,
-                                isFallback, readSignatures(parser));
-                    if (currentProvider.isFallbackPackage()) {
+                    WebViewProviderInfo currentProvider = new WebViewProviderInfo(
+                            packageName, description, availableByDefault, isFallback,
+                            readSignatures(parser));
+                    if (currentProvider.isFallback) {
                         numFallbackPackages++;
                         if (numFallbackPackages > 1) {
                             throw new AndroidRuntimeException(
