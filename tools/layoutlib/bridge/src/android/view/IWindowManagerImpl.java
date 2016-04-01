@@ -405,11 +405,13 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public int[] setNewConfiguration(Configuration arg0) throws RemoteException {
         // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
     public Rect getBoundsForNewConfiguration(int stackId) throws RemoteException {
         // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
