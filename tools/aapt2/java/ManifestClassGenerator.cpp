@@ -16,7 +16,7 @@
 
 #include "Source.h"
 #include "java/AnnotationProcessor.h"
-#include "java/ClassDefinitionWriter.h"
+#include "java/ClassDefinition.h"
 #include "java/ManifestClassGenerator.h"
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
@@ -58,8 +58,8 @@ static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Sour
     return result;
 }
 
-static bool writeSymbol(IDiagnostics* diag, ClassDefinitionWriter* outClassDef, const Source& source,
-                        xml::Element* el) {
+static bool writeSymbol(const Source& source, IDiagnostics* diag, xml::Element* el,
+                        ClassDefinition* classDef) {
     xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name");
     if (!attr) {
         diag->error(DiagMessage(source) << "<" << el->name << "> must define 'android:name'");
@@ -72,54 +72,53 @@ static bool writeSymbol(IDiagnostics* diag, ClassDefinitionWriter* outClassDef, 
         return false;
     }
 
-    AnnotationProcessor processor;
-    processor.appendComment(el->comment);
-    outClassDef->addStringMember(result.value(), &processor, attr->value);
+    std::unique_ptr<StringMember> stringMember = util::make_unique<StringMember>(
+            util::utf16ToUtf8(result.value()), util::utf16ToUtf8(attr->value));
+    stringMember->getCommentBuilder()->appendComment(el->comment);
+
+    classDef->addMember(std::move(stringMember));
     return true;
 }
 
-bool ManifestClassGenerator::generate(IDiagnostics* diag, const StringPiece16& package,
-                                      xml::XmlResource* res, std::ostream* out) {
+std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag, xml::XmlResource* res) {
     xml::Element* el = xml::findRootElement(res->root.get());
     if (!el) {
-        return false;
+        diag->error(DiagMessage(res->file.source) << "no root tag defined");
+        return {};
     }
 
     if (el->name != u"manifest" && !el->namespaceUri.empty()) {
         diag->error(DiagMessage(res->file.source) << "no <manifest> root tag defined");
-        return false;
+        return {};
     }
 
-    *out << "package " << package << ";\n\n"
-         << "public final class Manifest {\n";
+    std::unique_ptr<ClassDefinition> permissionClass =
+            util::make_unique<ClassDefinition>("permission", ClassQualifier::Static, false);
+    std::unique_ptr<ClassDefinition> permissionGroupClass =
+            util::make_unique<ClassDefinition>("permission_group", ClassQualifier::Static, false);
 
     bool error = false;
+
     std::vector<xml::Element*> children = el->getChildElements();
-
-    ClassDefinitionWriterOptions classOptions;
-    classOptions.useFinalQualifier = true;
-    classOptions.forceCreationIfEmpty = false;
-
-    // First write out permissions.
-    ClassDefinitionWriter classDef("permission", classOptions);
     for (xml::Element* childEl : children) {
-        if (childEl->namespaceUri.empty() && childEl->name == u"permission") {
-            error |= !writeSymbol(diag, &classDef, res->file.source, childEl);
+        if (childEl->namespaceUri.empty()) {
+            if (childEl->name == u"permission") {
+                error |= !writeSymbol(res->file.source, diag, childEl, permissionClass.get());
+            } else if (childEl->name == u"permission-group") {
+                error |= !writeSymbol(res->file.source, diag, childEl, permissionGroupClass.get());
+            }
         }
     }
-    classDef.writeToStream(out, "  ");
 
-    // Next write out permission groups.
-    classDef = ClassDefinitionWriter("permission_group", classOptions);
-    for (xml::Element* childEl : children) {
-        if (childEl->namespaceUri.empty() && childEl->name == u"permission-group") {
-            error |= !writeSymbol(diag, &classDef, res->file.source, childEl);
-        }
+    if (error) {
+        return {};
     }
-    classDef.writeToStream(out, "  ");
 
-    *out << "}\n";
-    return !error;
+    std::unique_ptr<ClassDefinition> manifestClass =
+            util::make_unique<ClassDefinition>("Manifest", ClassQualifier::None, false);
+    manifestClass->addMember(std::move(permissionClass));
+    manifestClass->addMember(std::move(permissionGroupClass));
+    return manifestClass;
 }
 
 } // namespace aapt

@@ -54,6 +54,7 @@ sources := \
 	Debug.cpp \
 	Flags.cpp \
 	java/AnnotationProcessor.cpp \
+	java/ClassDefinition.cpp \
 	java/JavaClassGenerator.cpp \
 	java/ManifestClassGenerator.cpp \
 	java/ProguardRules.cpp \

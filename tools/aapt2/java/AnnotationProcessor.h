@@ -66,7 +66,7 @@ public:
     /**
      * Writes the comments and annotations to the stream, with the given prefix before each line.
      */
-    void writeToStream(std::ostream* out, const StringPiece& prefix);
+    void writeToStream(std::ostream* out, const StringPiece& prefix) const;
 
 private:
     enum : uint32_t {

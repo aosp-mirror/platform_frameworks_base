@@ -64,7 +64,7 @@ void AnnotationProcessor::appendNewLine() {
     mComment << "\n *";
 }
 
-void AnnotationProcessor::writeToStream(std::ostream* out, const StringPiece& prefix) {
+void AnnotationProcessor::writeToStream(std::ostream* out, const StringPiece& prefix) const {
     if (mHasComments) {
         std::string result = mComment.str();
         for (StringPiece line : util::tokenize<char>(result, '\n')) {
