@@ -378,9 +378,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         mCurrentDate.set(Calendar.MONTH, monthOfYear);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-        mDateChangedListener = callBack;
-
         onDateChanged(false, false);
+
+        mDateChangedListener = callBack;
     }
 
     @Override
