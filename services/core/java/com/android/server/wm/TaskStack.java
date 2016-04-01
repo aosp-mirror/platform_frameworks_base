@@ -128,6 +128,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
     // in which case a second window animation would cause jitter.
     private boolean mFreezeMovementAnimations = false;
 
+    // Temporary storage for the new bounds that should be used after the configuration change.
+    // Will be cleared once the client retrieves the new bounds via getBoundsForNewConfiguration().
+    private final Rect mBoundsAfterRotation = new Rect();
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
@@ -343,28 +347,28 @@ public class TaskStack implements DimLayer.DimLayerUser,
             setBounds(mTmpRect2);
         } else {
             mLastUpdateDisplayInfoRotation = newRotation;
-            updateBoundsAfterRotation();
+            updateBoundsAfterRotation(true);
         }
     }
 
-    void onConfigurationChanged() {
+    boolean onConfigurationChanged() {
         mLastConfigChangedRotation = getDisplayInfo().rotation;
-        updateBoundsAfterRotation();
+        return updateBoundsAfterRotation(false);
     }
 
-    void updateBoundsAfterRotation() {
+    boolean updateBoundsAfterRotation(boolean scheduleResize) {
         if (mLastConfigChangedRotation != mLastUpdateDisplayInfoRotation) {
             // We wait for the rotation values after configuration change and display info. update
             // to be equal before updating the bounds due to rotation change otherwise things might
             // get out of alignment...
-            return;
+            return false;
         }
 
         final int newRotation = getDisplayInfo().rotation;
 
         if (mRotation == newRotation) {
             // Nothing to do here if the rotation didn't change
-            return;
+            return false;
         }
 
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
@@ -373,11 +377,22 @@ public class TaskStack implements DimLayer.DimLayerUser,
             snapDockedStackAfterRotation(mTmpRect2);
         }
 
-        // Post message to inform activity manager of the bounds change simulating
-        // a one-way call. We do this to prevent a deadlock between window manager
-        // lock and activity manager lock been held.
-        mService.mH.obtainMessage(
-                RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mTmpRect2).sendToTarget();
+        if (scheduleResize) {
+            // Post message to inform activity manager of the bounds change simulating
+            // a one-way call. We do this to prevent a deadlock between window manager
+            // lock and activity manager lock been held.
+            mService.mH.obtainMessage(RESIZE_STACK, mStackId,
+                    0 /*allowResizeInDockedMode*/, mTmpRect2).sendToTarget();
+        } else {
+            mBoundsAfterRotation.set(mTmpRect2);
+        }
+
+        return true;
+    }
+
+    void getBoundsForNewConfiguration(Rect outBounds) {
+        outBounds.set(mBoundsAfterRotation);
+        mBoundsAfterRotation.setEmpty();
     }
 
     /**

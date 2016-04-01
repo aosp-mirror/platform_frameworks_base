@@ -18045,6 +18045,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             ActivityRecord starting, boolean initLocale, boolean persistent, int userId) {
         int changes = 0;
 
+        if (mWindowManager != null) {
+            mWindowManager.deferSurfaceLayout();
+        }
         if (values != null) {
             Configuration newConfig = new Configuration(mConfiguration);
             changes = newConfig.updateFrom(values);
@@ -18145,6 +18148,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                             null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 }
             }
+            // Update the configuration with WM first and check if any of the stacks need to be
+            // resized due to the configuration change. If so, resize the stacks now and do any
+            // relaunches if necessary. This way we don't need to relaunch again below in
+            // ensureActivityConfigurationLocked().
+            if (mWindowManager != null) {
+                final int[] resizedStacks = mWindowManager.setNewConfiguration(mConfiguration);
+                if (resizedStacks != null) {
+                    for (int stackId : resizedStacks) {
+                        final Rect newBounds = mWindowManager.getBoundsForNewConfiguration(stackId);
+                        mStackSupervisor.resizeStackLocked(
+                                stackId, newBounds, null, null, false, false);
+                    }
+                }
+            }
         }
 
         boolean kept = true;
@@ -18166,11 +18183,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         !PRESERVE_WINDOWS);
             }
         }
-
-        if (values != null && mWindowManager != null) {
-            mWindowManager.setNewConfiguration(mConfiguration);
+        if (mWindowManager != null) {
+            mWindowManager.continueSurfaceLayout();
         }
-
         return kept;
     }
 
