@@ -5654,10 +5654,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
      * Return if this user is a managed profile of another user. An admin can become the profile
      * owner of a managed profile with {@link #ACTION_PROVISION_MANAGED_PROFILE} and of a managed
-     * user with {@link #ACTION_PROVISION_MANAGED_USER}.
+     * user with {@link #createAndManageUser}
      * @param admin Which profile owner this request is associated with.
      * @return if this user is a managed profile of another user.
      */
