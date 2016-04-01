@@ -16,10 +16,10 @@
 
 package android.hardware.location;
 
+
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.Arrays;
 
@@ -31,9 +31,6 @@ public class ContextHubMessage {
     private int mType;
     private int mVersion;
     private byte[]mData;
-
-    private static final String TAG = "ContextHubMessage";
-
 
     /**
      * Get the message type
@@ -109,11 +106,9 @@ public class ContextHubMessage {
     private ContextHubMessage(Parcel in) {
         mType = in.readInt();
         mVersion = in.readInt();
-        int bufferLength = in.readInt();
-        mData = new byte[bufferLength];
-        in.readByteArray(mData);
+        byte[] byteBuffer = new byte[in.readInt()];
+        in.readByteArray(byteBuffer);
     }
-
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mType);
         out.writeInt(mVersion);
