@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -114,8 +115,8 @@ public final class PrintDocumentInfo implements Parcelable {
      */
     public static final int CONTENT_TYPE_PHOTO = 1;
 
-    private String mName;
-    private int mPageCount;
+    private @NonNull String mName;
+    private @IntRange(from = -1) int mPageCount;
     private int mContentType;
     private long mDataSize;
 
@@ -144,10 +145,11 @@ public final class PrintDocumentInfo implements Parcelable {
      * @param parcel Data from which to initialize.
      */
     private PrintDocumentInfo(Parcel parcel) {
-        mName = parcel.readString();
+        mName = Preconditions.checkStringNotEmpty(parcel.readString());
         mPageCount = parcel.readInt();
+        Preconditions.checkArgument(mPageCount == PAGE_COUNT_UNKNOWN || mPageCount > 0);
         mContentType = parcel.readInt();
-        mDataSize = parcel.readLong();
+        mDataSize = Preconditions.checkArgumentNonnegative(parcel.readLong());
     }
 
     /**
@@ -180,7 +182,7 @@ public final class PrintDocumentInfo implements Parcelable {
      * @see #CONTENT_TYPE_DOCUMENT
      * @see #CONTENT_TYPE_PHOTO
      */
-    public @ContentType int getContentType() {
+    public int getContentType() {
         return mContentType;
     }
 
@@ -262,13 +264,13 @@ public final class PrintDocumentInfo implements Parcelable {
         builder.append("PrintDocumentInfo{");
         builder.append("name=").append(mName);
         builder.append(", pageCount=").append(mPageCount);
-        builder.append(", contentType=").append(contentTyepToString(mContentType));
+        builder.append(", contentType=").append(contentTypeToString(mContentType));
         builder.append(", dataSize=").append(mDataSize);
         builder.append("}");
         return builder.toString();
     }
 
-    private String contentTyepToString(int contentType) {
+    private String contentTypeToString(int contentType) {
         switch (contentType) {
             case CONTENT_TYPE_DOCUMENT: {
                 return "CONTENT_TYPE_DOCUMENT";
