@@ -225,6 +225,9 @@
             granted any application pre-installed on the system image (not just privileged
             apps). -->
         <flag name="preinstalled" value="0x400" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the setup wizard app -->
+        <flag name="setup" value="0x800" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

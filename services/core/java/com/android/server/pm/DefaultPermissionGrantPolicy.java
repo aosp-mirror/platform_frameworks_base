@@ -247,10 +247,8 @@ final class DefaultPermissionGrantPolicy {
             }
 
             // SetupWizard
-            Intent setupIntent = new Intent(Intent.ACTION_MAIN);
-            setupIntent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
-            PackageParser.Package setupPackage = getDefaultSystemHandlerActivityPackageLPr(
-                    setupIntent, userId);
+            PackageParser.Package setupPackage = getSystemPackageLPr(
+                    mService.mSetupWizardPackage);
             if (setupPackage != null
                     && doesPackageSupportRuntimePermissions(setupPackage)) {
                 grantRuntimePermissionsLPw(setupPackage, PHONE_PERMISSIONS, userId);

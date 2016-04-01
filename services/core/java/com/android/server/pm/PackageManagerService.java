@@ -1035,6 +1035,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final @Nullable String mRequiredVerifierPackage;
     final @Nullable String mRequiredInstallerPackage;
+    final @Nullable String mSetupWizardPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
 
@@ -2530,6 +2531,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             mInstallerService = new PackageInstallerService(context, this);
+            mSetupWizardPackage = getSetupWizardPackageName();
 
             final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
             final ComponentName ephemeralInstallerComponent = getEphemeralInstallerLPr();
@@ -9697,6 +9699,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // is granted only if it was already granted.
                 allowed = origPermissions.hasInstallPermission(perm);
             }
+            if (!allowed && (bp.protectionLevel & PermissionInfo.PROTECTION_FLAG_SETUP) != 0
+                    && pkg.packageName.equals(mSetupWizardPackage)) {
+                // If this permission is to be granted to the system setup wizard and
+                // this app is a setup wizard, then it gets the permission.
+                allowed = true;
+            }
         }
         return allowed;
     }
@@ -16617,6 +16625,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
         replacePreferredActivity(getHomeFilter(), IntentFilter.MATCH_CATEGORY_EMPTY,
                 set, comp, userId);
+    }
+
+    private @Nullable String getSetupWizardPackageName() {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
+
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DISABLED_COMPONENTS, UserHandle.myUserId());
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            Slog.e(TAG, "There should probably be exactly one setup wizard; found " + matches.size()
+                    + ": matches=" + matches);
+            return null;
+        }
     }
 
     @Override
