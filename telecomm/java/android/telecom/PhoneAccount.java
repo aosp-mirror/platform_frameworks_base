@@ -170,6 +170,15 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE = 0x100;
 
     /**
+     * Flag indicating that for this {@link PhoneAccount}, emergency video calling is allowed.
+     * <p>
+     * When set, Telecom will allow emergency video calls to be placed.  When not set, Telecom will
+     * convert all outgoing video calls to emergency numbers to audio-only.
+     * @hide
+     */
+    public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 0x200;
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
@@ -730,6 +739,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_PLACE_EMERGENCY_CALLS)) {
             sb.append("PlaceEmerg ");
+        }
+        if (hasCapabilities(CAPABILITY_EMERGENCY_VIDEO_CALLING)) {
+            sb.append("EmergVideo ");
         }
         if (hasCapabilities(CAPABILITY_SIM_SUBSCRIPTION)) {
             sb.append("SimSub ");
