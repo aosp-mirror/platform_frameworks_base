@@ -29,6 +29,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import com.android.documentsui.State.ActionType;
 import com.android.documentsui.model.DocumentInfo;
@@ -70,6 +71,7 @@ public final class Metrics {
     private static final String COUNT_DRAG_N_DROP = "docsui_drag_n_drop";
     private static final String COUNT_SEARCH = "docsui_search";
     private static final String COUNT_MENU_ACTION = "docsui_menu_action";
+    private static final String COUNT_KEYBOARD_ACTION = "docsui_keyboard_action";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -289,6 +291,31 @@ public final class Metrics {
     @Retention(RetentionPolicy.SOURCE)
     public @interface MetricsAction {}
 
+    // Codes representing different keyboard shortcut triggered actions. These are used for
+    // bucketing stats in the COUNT_KEYBOARD_ACTION histogram.
+    // Do not change or rearrange these values, that will break historical data. Only add to the
+    // list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int ACTION_KEYBOARD_OTHER = 1;
+    private static final int ACTION_KEYBOARD_PASTE = 2;
+    private static final int ACTION_KEYBOARD_COPY = 3;
+    private static final int ACTION_KEYBOARD_DELETE = 4;
+    private static final int ACTION_KEYBOARD_SELECT_ALL = 5;
+    private static final int ACTION_KEYBOARD_BACK = 6;
+    private static final int ACTION_KEYBOARD_SWITCH_FOCUS = 7;
+
+    @IntDef(flag = false, value = {
+            ACTION_KEYBOARD_OTHER,
+            ACTION_KEYBOARD_PASTE,
+            ACTION_KEYBOARD_COPY,
+            ACTION_KEYBOARD_DELETE,
+            ACTION_KEYBOARD_SELECT_ALL,
+            ACTION_KEYBOARD_BACK,
+            ACTION_KEYBOARD_SWITCH_FOCUS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KeyboardAction {}
+
     // Codes representing different actions to open the drawer. They are used for bucketing stats in
     // the COUNT_DRAWER_OPENED histogram.
     // Do not change or rearrange these values, that will break historical data. Only add to the
@@ -490,6 +517,39 @@ public final class Metrics {
      */
     public static void logFileOperationCancelled(Context context, @OpType int operationType) {
         logHistogram(context, COUNT_FILEOP_CANCELED, toMetricsOpType(operationType));
+    }
+
+    /**
+     * Logs keyboard shortcut actions. Since keyboard shortcuts have their corresponding menu items,
+     * they are identified by menu item resource id for convenience.
+     * @param context
+     * @param keyCode
+     */
+    public static void logKeyboardAction(Context context, int keyCode) {
+        @KeyboardAction int keyboardAction = ACTION_KEYBOARD_OTHER;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_V:
+                keyboardAction = ACTION_KEYBOARD_PASTE;
+                break;
+            case KeyEvent.KEYCODE_C:
+                keyboardAction = ACTION_KEYBOARD_COPY;
+                break;
+            case KeyEvent.KEYCODE_FORWARD_DEL:
+                keyboardAction = ACTION_KEYBOARD_DELETE;
+                break;
+            case KeyEvent.KEYCODE_A:
+                keyboardAction = ACTION_KEYBOARD_SELECT_ALL;
+                break;
+            case KeyEvent.KEYCODE_DEL:
+                keyboardAction = ACTION_KEYBOARD_BACK;
+                break;
+            case KeyEvent.KEYCODE_TAB:
+                keyboardAction = ACTION_KEYBOARD_SWITCH_FOCUS;
+                break;
+            default:
+                break;
+        }
+        logHistogram(context, COUNT_KEYBOARD_ACTION, keyboardAction);
     }
 
     /**
