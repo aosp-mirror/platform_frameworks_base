@@ -2500,11 +2500,15 @@ public class AccountManagerService
                     userId);
             return;
         }
-
         final int pid = Binder.getCallingPid();
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
+
+        // Check to see if the Password should be included to the caller.
+        String callerPkg = optionsIn.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
+        boolean isPasswordForwardingAllowed = isPermitted(
+                callerPkg, uid, Manifest.permission.GET_PASSWORD_PRIVILEGED);
 
         int usrId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
@@ -2512,9 +2516,15 @@ public class AccountManagerService
             UserAccounts accounts = getUserAccounts(usrId);
             logRecordWithUid(accounts, DebugDbHelper.ACTION_CALLED_START_ACCOUNT_ADD,
                     TABLE_ACCOUNTS, uid);
-            new StartAccountSession(accounts, response, accountType, expectActivityLaunch,
-                    null /* accountName */, false /* authDetailsRequired */,
-                    true /* updateLastAuthenticationTime */) {
+            new StartAccountSession(
+                    accounts,
+                    response,
+                    accountType,
+                    expectActivityLaunch,
+                    null /* accountName */,
+                    false /* authDetailsRequired */,
+                    true /* updateLastAuthenticationTime */,
+                    isPasswordForwardingAllowed) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.startAddAccountSession(this, mAccountType, authTokenType,
@@ -2537,12 +2547,21 @@ public class AccountManagerService
     /** Session that will encrypt the KEY_ACCOUNT_SESSION_BUNDLE in result. */
     private abstract class StartAccountSession extends Session {
 
-        public StartAccountSession(UserAccounts accounts, IAccountManagerResponse response,
-                String accountType, boolean expectActivityLaunch, String accountName,
-                boolean authDetailsRequired, boolean updateLastAuthenticationTime) {
+        private final boolean mIsPasswordForwardingAllowed;
+
+        public StartAccountSession(
+                UserAccounts accounts,
+                IAccountManagerResponse response,
+                String accountType,
+                boolean expectActivityLaunch,
+                String accountName,
+                boolean authDetailsRequired,
+                boolean updateLastAuthenticationTime,
+                boolean isPasswordForwardingAllowed) {
             super(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, accountName, authDetailsRequired,
                     updateLastAuthenticationTime);
+            mIsPasswordForwardingAllowed = isPasswordForwardingAllowed;
         }
 
         @Override
@@ -2555,6 +2574,10 @@ public class AccountManagerService
                 checkKeyIntent(
                         Binder.getCallingUid(),
                         intent);
+                // Omit passwords if the caller isn't permitted to see them.
+                if (!mIsPasswordForwardingAllowed) {
+                    result.remove(AccountManager.KEY_PASSWORD);
+                }
             }
             IAccountManagerResponse response;
             if (mExpectActivityLaunch && result != null
@@ -2901,6 +2924,12 @@ public class AccountManagerService
         }
 
         int userId = UserHandle.getCallingUserId();
+
+        // Check to see if the Password should be included to the caller.
+        String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
+        boolean isPasswordForwardingAllowed = isPermitted(
+                callerPkg, uid, Manifest.permission.GET_PASSWORD_PRIVILEGED);
+
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
@@ -2911,7 +2940,8 @@ public class AccountManagerService
                     expectActivityLaunch,
                     account.name,
                     false /* authDetailsRequired */,
-                    true /* updateLastCredentialTime */) {
+                    true /* updateLastCredentialTime */,
+                    isPasswordForwardingAllowed) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.startUpdateCredentialsSession(this, account, authTokenType,
