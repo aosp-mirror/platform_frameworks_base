@@ -43,6 +43,23 @@ public final class ContextHubManager {
     private Handler mCallbackHandler;
 
     /**
+     * A special context hub identifier meaning any possible hub on the system.
+     */
+    public static final int ANY_HUB       = -1;
+    /**
+     * A constant denoting a message to load a a Nano App
+     */
+    public static final int MSG_LOAD_NANO_APP   = 1;
+    /**
+     * A constant denoting a message to unload a a Nano App
+     */
+    public static final int MSG_UNLOAD_NANO_APP = 2;
+    /**
+     * A constant denoting a message to send a message
+     */
+    public static final int MSG_DATA_SEND       = 3;
+
+    /**
      * An interface to receive asynchronous communication from the context hub.
      */
     public abstract static class Callback {
@@ -52,7 +69,7 @@ public final class ContextHubManager {
          * Callback function called on message receipt from context hub.
          *
          * @param hubHandle Handle (system-wide unique identifier) of the hub of the message.
-         * @param nanoAppHandle Handle (unique identifier) for app instance that sent the message.
+         * @param nanoAppHandle Handle (unique identifier) for the app that sent the message.
          * @param message The context hub message.
          *
          * @see ContextHubMessage
@@ -72,7 +89,7 @@ public final class ContextHubManager {
         try {
             retVal = getBinder().getContextHubHandles();
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch context hub handles : " + e);
+            Log.e(TAG, "Could not fetch context hub handles : " + e);
         }
         return retVal;
     }
@@ -90,7 +107,7 @@ public final class ContextHubManager {
         try {
             retVal = getBinder().getContextHubInfo(hubHandle);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch context hub info :" + e);
+            Log.e(TAG, "Could not fetch context hub info :" + e);
         }
 
         return retVal;
@@ -109,7 +126,6 @@ public final class ContextHubManager {
      */
     public int loadNanoApp(int hubHandle, NanoApp app) {
         int retVal = -1;
-
         if (app == null) {
             return retVal;
         }
@@ -117,7 +133,7 @@ public final class ContextHubManager {
         try {
             retVal = getBinder().loadNanoApp(hubHandle, app);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not load nanoApp :" + e);
+            Log.e(TAG, "Could not fetch load nanoApp :" + e);
         }
 
         return retVal;
@@ -136,7 +152,7 @@ public final class ContextHubManager {
         try {
             retVal = getBinder().unloadNanoApp(nanoAppHandle);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch unload nanoApp :" + e);
+            Log.e(TAG, "Could not fetch unload nanoApp :" + e);
         }
 
         return retVal;
@@ -156,7 +172,7 @@ public final class ContextHubManager {
         try {
             retVal = getBinder().getNanoAppInstanceInfo(nanoAppHandle);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not fetch nanoApp info :" + e);
+            Log.e(TAG, "Could not fetch nanoApp info :" + e);
         }
 
         return retVal;
@@ -177,7 +193,7 @@ public final class ContextHubManager {
         try {
             retVal = getBinder().findNanoAppOnHub(hubHandle, filter);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not query nanoApp instance :" + e);
+            Log.e(TAG, "Could not query nanoApp instance :" + e);
         }
         return retVal;
     }
@@ -196,14 +212,10 @@ public final class ContextHubManager {
     public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage message) {
         int retVal = -1;
 
-        if (message == null || message.getData() == null) {
-            Log.w(TAG, "null ptr");
-            return retVal;
-        }
         try {
             retVal = getBinder().sendMessage(hubHandle, nanoAppHandle, message);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not send message :" + e.toString());
+            Log.e(TAG, "Could not fetch send message :" + e.toString());
         }
 
         return retVal;
@@ -235,7 +247,7 @@ public final class ContextHubManager {
     public int registerCallback(Callback callback, Handler handler) {
         synchronized(this) {
             if (mCallback != null) {
-                Log.w(TAG, "Max number of callbacks reached!");
+                Log.e(TAG, "Max number of callbacks reached!");
                 return -1;
             }
             mCallback = callback;
@@ -256,7 +268,7 @@ public final class ContextHubManager {
     public int unregisterCallback(Callback callback) {
       synchronized(this) {
           if (callback != mCallback) {
-              Log.w(TAG, "Cannot recognize callback!");
+              Log.e(TAG, "Cannot recognize callback!");
               return -1;
           }
 
@@ -299,11 +311,11 @@ public final class ContextHubManager {
             try {
                 getBinder().registerCallback(mClientCallback);
             } catch (RemoteException e) {
-                Log.w(TAG, "Could not register callback:" + e);
+                Log.e(TAG, "Could not register callback:" + e);
             }
 
         } else {
-            Log.w(TAG, "failed to getService");
+            Log.d(TAG, "failed to getService");
         }
     }
 
