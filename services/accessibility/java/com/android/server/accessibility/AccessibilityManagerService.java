@@ -1784,10 +1784,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mEnabledServices.contains(userState.mServiceChangingSoftKeyboardMode);
 
             if (!serviceChangingSoftKeyboardModeIsEnabled) {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
-                        0,
-                        userState.mUserId);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                            0,
+                            userState.mUserId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
                 userState.mSoftKeyboardShowMode = 0;
                 userState.mServiceChangingSoftKeyboardMode = null;
             }
