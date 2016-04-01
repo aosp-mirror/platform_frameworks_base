@@ -62,9 +62,27 @@ public class PipManager {
 
     private static final int MAX_RUNNING_TASKS_COUNT = 10;
 
+    /**
+     * State when there's no PIP.
+     */
     public static final int STATE_NO_PIP = 0;
+    /**
+     * State when PIP is shown with an overlay message on top of it.
+     * This is used as default PIP state.
+     */
     public static final int STATE_PIP_OVERLAY = 1;
+    /**
+     * State when PIP menu dialog is shown.
+     */
     public static final int STATE_PIP_MENU = 2;
+    /**
+     * State when PIP is shown in Recents.
+     */
+    public static final int STATE_PIP_RECENTS = 3;
+    /**
+     * State when PIP is shown in Recents and it's focused to allow an user to control.
+     */
+    public static final int STATE_PIP_RECENTS_FOCUSED = 4;
 
     private static final int TASK_ID_NO_PIP = -1;
     private static final int INVALID_RESOURCE_TYPE = -1;
@@ -90,11 +108,13 @@ public class PipManager {
     private int mSuspendPipResizingReason;
 
     private Context mContext;
+    private PipRecentsOverlayManager mPipRecentsOverlayManager;
     private IActivityManager mActivityManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
+    private List<MediaListener> mMediaListeners = new ArrayList<>();
     private Rect mCurrentPipBounds;
     private Rect mPipBounds;
     private Rect mMenuModePipBounds;
@@ -106,9 +126,6 @@ public class PipManager {
     private ComponentName mPipComponentName;
     private MediaController mPipMediaController;
     private boolean mOnboardingShown;
-
-    private boolean mIsRecentsShown;
-    private boolean mIsPipFocusedInRecent;
 
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
@@ -178,6 +195,7 @@ public class PipManager {
         mOnboardingShown = Prefs.getBoolean(
                 mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
 
+        mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
     }
@@ -231,7 +249,7 @@ public class PipManager {
     /**
      * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
-    public void movePipToFullscreen() {
+    void movePipToFullscreen() {
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -247,8 +265,11 @@ public class PipManager {
      */
     private void showPipOverlay() {
         if (DEBUG) Log.d(TAG, "showPipOverlay()");
-        mState = STATE_PIP_OVERLAY;
-        PipOverlayActivity.showPipOverlay(mContext);
+        Intent intent = new Intent(mContext, PipOverlayActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchStackId(PINNED_STACK_ID);
+        mContext.startActivity(intent, options.toBundle());
     }
 
     /**
@@ -279,8 +300,10 @@ public class PipManager {
      * Resize the Pip to the appropriate size for the input state.
      * @param state In Pip state also used to determine the new size for the Pip.
      */
-    public void resizePinnedStack(int state) {
+    void resizePinnedStack(int state) {
         if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
+        boolean wasRecentsShown =
+                (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED);
         mState = state;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onPipResizeAboutToStart();
@@ -291,7 +314,6 @@ public class PipManager {
                             mSuspendPipResizingReason);
             return;
         }
-        int animationDurationMs = -1;
         switch (mState) {
             case STATE_NO_PIP:
                 mCurrentPipBounds = null;
@@ -300,25 +322,24 @@ public class PipManager {
                 mCurrentPipBounds = mMenuModePipBounds;
                 break;
             case STATE_PIP_OVERLAY:
-                if (mIsRecentsShown) {
-                    if (mCurrentPipBounds == mRecentsFocusedPipBounds
-                            || mCurrentPipBounds == mRecentsFocusedPipBounds) {
-                        animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
-                    }
-                    if (mIsPipFocusedInRecent) {
-                        mCurrentPipBounds = mRecentsFocusedPipBounds;
-                    } else {
-                        mCurrentPipBounds = mRecentsPipBounds;
-                    }
-                } else {
-                    mCurrentPipBounds = mPipBounds;
-                }
+                mCurrentPipBounds = mPipBounds;
+                break;
+            case STATE_PIP_RECENTS:
+                mCurrentPipBounds = mRecentsPipBounds;
+                break;
+            case STATE_PIP_RECENTS_FOCUSED:
+                mCurrentPipBounds = mRecentsFocusedPipBounds;
                 break;
             default:
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
         try {
+            int animationDurationMs = -1;
+            if (wasRecentsShown
+                    && (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED)) {
+                animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
+            }
             mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
                     true, true, true, animationDurationMs);
         } catch (RemoteException e) {
@@ -327,67 +348,18 @@ public class PipManager {
     }
 
     /**
-     * Returns the current PIP bound for activities to sync their UI with PIP.
+     * Returns the default PIP bound.
      */
     public Rect getPipBounds() {
-        return mCurrentPipBounds;
+        return mPipBounds;
     }
 
     /**
-     * Called when Recents is started.
-     * PIPed activity will be resized accordingly and overlay will show available buttons.
+     * Returns the focused PIP bound while Recents is shown.
+     * This is used to place PIP controls in Recents.
      */
-    public void onRecentsStarted() {
-        mIsRecentsShown = true;
-        mIsPipFocusedInRecent = false;
-        if (mState == STATE_NO_PIP) {
-            return;
-        }
-        resizePinnedStack(STATE_PIP_OVERLAY);
-    }
-
-    /**
-     * Called when Recents is stopped.
-     * PIPed activity will be resized accordingly and overlay will hide available buttons.
-     */
-    public void onRecentsStopped() {
-        mIsRecentsShown = false;
-        mIsPipFocusedInRecent = false;
-        if (mState == STATE_NO_PIP) {
-            return;
-        }
-        resizePinnedStack(STATE_PIP_OVERLAY);
-    }
-
-    /**
-     * Returns {@code true} if recents is shown.
-     */
-    boolean isRecentsShown() {
-        return mIsRecentsShown;
-    }
-
-    /**
-     * Called when the PIP view in {@link com.android.systemui.recents.tv.RecentsTvActivity}
-     * is focused.
-     * This only resizes pinned stack so it looks like it's in Recents.
-     * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
-     */
-    public void onPipViewFocusChangedInRecents(boolean hasFocus) {
-        mIsPipFocusedInRecent = hasFocus;
-        if (mState != STATE_PIP_OVERLAY) {
-            Log.w(TAG, "There is no pinned stack to handle focus change.");
-            return;
-        }
-        resizePinnedStack(STATE_PIP_OVERLAY);
-    }
-
-    /**
-     * Returns {@code true} if the PIP view in
-     * {@link com.android.systemui.recents.tv.RecentsTvActivity} is focused in Recents.
-     * This API is valid only when {@link isRecentsShown()} returns {@code true}.
-     */
-    boolean isPipViewFocusdInRecents() {
-        return mIsPipFocusedInRecent;
+    public Rect getRecentsFocusedPipBounds() {
+        return mRecentsFocusedPipBounds;
     }
 
     /**
@@ -396,6 +368,10 @@ public class PipManager {
      */
     private void showPipMenu() {
         if (DEBUG) Log.d(TAG, "showPipMenu()");
+        if (mPipRecentsOverlayManager.isRecentsShown()) {
+            if (DEBUG) Log.d(TAG, "Ignore showing PIP menu");
+            return;
+        }
         mState = STATE_PIP_MENU;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onShowPipMenu();
@@ -405,12 +381,32 @@ public class PipManager {
         mContext.startActivity(intent);
     }
 
+    /**
+     * Adds a {@link Listener} to PipManager.
+     */
     public void addListener(Listener listener) {
         mListeners.add(listener);
     }
 
+    /**
+     * Removes a {@link Listener} from PipManager.
+     */
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
+    }
+
+    /**
+     * Adds a {@link MediaListener} to PipManager.
+     */
+    public void addMediaListener(MediaListener listener) {
+        mMediaListeners.add(listener);
+    }
+
+    /**
+     * Removes a {@link MediaListener} from PipManager.
+     */
+    public void removeMediaListener(MediaListener listener) {
+        mMediaListeners.remove(listener);
     }
 
     private void launchPipOnboardingActivityIfNeeded() {
@@ -485,8 +481,8 @@ public class PipManager {
         }
         if (mPipMediaController != mediaController) {
             mPipMediaController = mediaController;
-            for (int i = mListeners.size() - 1; i >= 0; i--) {
-                mListeners.get(i).onMediaControllerChanged();
+            for (int i = mMediaListeners.size() - 1; i >= 0; i--) {
+                mMediaListeners.get(i).onMediaControllerChanged();
             }
             if (mPipMediaController == null) {
                 mHandler.postDelayed(mClosePipRunnable,
@@ -530,7 +526,7 @@ public class PipManager {
         return PLAYBACK_STATE_UNAVAILABLE;
     }
 
-    TaskStackListener mTaskStackListener = new TaskStackListener() {
+    private TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
             if (mState != STATE_NO_PIP) {
@@ -582,10 +578,10 @@ public class PipManager {
             mMediaSessionManager.addOnActiveSessionsChangedListener(
                     mActiveMediaSessionListener, null);
             updateMediaController(mMediaSessionManager.getActiveSessions(null));
-            if (mIsRecentsShown) {
+            if (mPipRecentsOverlayManager.isRecentsShown()) {
                 // If an activity becomes PIPed again after the fullscreen, the Recents is shown
                 // behind so we need to resize the pinned stack and show the correct overlay.
-                resizePinnedStack(STATE_PIP_OVERLAY);
+                resizePinnedStack(STATE_PIP_RECENTS);
             }
             for (int i = mListeners.size() - 1; i >= 0; i--) {
                 mListeners.get(i).onPipEntered();
@@ -604,7 +600,18 @@ public class PipManager {
             if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
             switch (mState) {
                 case STATE_PIP_OVERLAY:
-                    showPipOverlay();
+                    if (!mPipRecentsOverlayManager.isRecentsShown()) {
+                        showPipOverlay();
+                        break;
+                    } else {
+                        // This happens only if an activity is PIPed after the Recents is shown.
+                        // See {@link PipRecentsOverlayManager.requestFocus} for more details.
+                        resizePinnedStack(mState);
+                        break;
+                    }
+                case STATE_PIP_RECENTS:
+                case STATE_PIP_RECENTS_FOCUSED:
+                    mPipRecentsOverlayManager.addPipRecentsOverlayView();
                     break;
                 case STATE_PIP_MENU:
                     showPipMenu();
@@ -621,7 +628,7 @@ public class PipManager {
          * Invoked when an activity is pinned and PIP manager is set corresponding information.
          * Classes must use this instead of {@link android.app.ITaskStackListener.onActivityPinned}
          * because there's no guarantee for the PIP manager be return relavent information
-         * correctly. (e.g. {@link isPipShown}, {@link getPipBounds})
+         * correctly. (e.g. {@link isPipShown}).
          */
         void onPipEntered();
         /** Invoked when a PIPed activity is closed. */
@@ -632,6 +639,12 @@ public class PipManager {
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */
         void onPipResizeAboutToStart();
+    }
+
+    /**
+     * A listener interface to receive change in PIP's media controller
+     */
+    public interface MediaListener {
         /** Invoked when the MediaController on PIPed activity is changed. */
         void onMediaControllerChanged();
     }
@@ -644,5 +657,12 @@ public class PipManager {
             sPipManager = new PipManager();
         }
         return sPipManager;
+    }
+
+    /**
+     * Gets an instance of {@link PipRecentsOverlayManager}.
+     */
+    public PipRecentsOverlayManager getPipRecentsOverlayManager() {
+        return mPipRecentsOverlayManager;
     }
 }
