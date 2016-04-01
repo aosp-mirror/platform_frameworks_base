@@ -905,10 +905,12 @@ public class AlarmManager {
 
         ListenerWrapper wrapper = null;
         synchronized (AlarmManager.class) {
-            final WeakReference<ListenerWrapper> wrapperRef;
-            wrapperRef = sWrappers.get(listener);
-            if (wrapperRef != null) {
-                wrapper = wrapperRef.get();
+            if (sWrappers != null) {
+                final WeakReference<ListenerWrapper> wrapperRef;
+                wrapperRef = sWrappers.get(listener);
+                if (wrapperRef != null) {
+                    wrapper = wrapperRef.get();
+                }
             }
         }
 
