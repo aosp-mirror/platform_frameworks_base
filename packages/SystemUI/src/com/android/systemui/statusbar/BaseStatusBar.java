@@ -19,7 +19,9 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -347,7 +349,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }, afterKeyguardGone);
                 return true;
             } else {
-                return super.onClickHandler(view, pendingIntent, fillInIntent);
+                return superOnClickHandler(view, pendingIntent, fillInIntent);
             }
         }
 
@@ -384,7 +386,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         private boolean superOnClickHandler(View view, PendingIntent pendingIntent,
                 Intent fillInIntent) {
-            return super.onClickHandler(view, pendingIntent, fillInIntent);
+            return super.onClickHandler(view, pendingIntent, fillInIntent,
+                    StackId.FULLSCREEN_WORKSPACE_STACK_ID);
         }
 
         private boolean handleRemoteInput(View view, PendingIntent pendingIntent, Intent fillInIntent) {
@@ -994,7 +997,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             }
                             TaskStackBuilder.create(mContext)
                                     .addNextIntentWithParentStack(intent)
-                                    .startActivities(null,
+                                    .startActivities(getActivityOptions(),
                                             new UserHandle(UserHandle.getUserId(appUid)));
                             overrideActivityPendingAppTransition(keyguardShowing);
                         } catch (RemoteException e) {
@@ -1744,7 +1747,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         } catch (RemoteException e) {
                         }
                         try {
-                            intent.send();
+                            intent.send(null, 0, null, null, null, null, getActivityOptions());
                         } catch (PendingIntent.CanceledException e) {
                             // the stack trace isn't very helpful here.
                             // Just log the exception message.
@@ -1852,7 +1855,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                                     }
                                 }
                                 try {
-                                    intent.send();
+                                    intent.send(null, 0, null, null, null, null,
+                                            getActivityOptions());
                                 } catch (PendingIntent.CanceledException e) {
                                     // the stack trace isn't very helpful here.
                                     // Just log the exception message.
@@ -1926,6 +1930,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Log.w(TAG, "Error overriding app transition: " + e);
             }
         }
+    }
+
+    protected Bundle getActivityOptions() {
+        // Anything launched from the notification shade should always go into the
+        // fullscreen stack.
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchStackId(StackId.FULLSCREEN_WORKSPACE_STACK_ID);
+        return options.toBundle();
     }
 
     protected void visibilityChanged(boolean visible) {
