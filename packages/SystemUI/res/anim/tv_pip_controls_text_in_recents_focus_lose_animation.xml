@@ -14,11 +14,8 @@
      limitations under the License.
 -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <size
-        android:width="34dp"
-        android:height="34dp" />
-    <solid
-        android:color="#4DFFFFFF" />
-</shape>
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:propertyName="alpha"
+    android:valueTo="0"
+    android:interpolator="@android:interpolator/fast_out_slow_in"
+    android:duration="@integer/recents_tv_pip_focus_anim_duration" />

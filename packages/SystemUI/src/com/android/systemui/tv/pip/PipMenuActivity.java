@@ -20,12 +20,6 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIApplication;
-import com.android.systemui.recents.Recents;
-
-import static android.content.pm.PackageManager.FEATURE_LEANBACK;
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 /**
  * Activity to show the PIP menu to control PIP.
@@ -36,7 +30,6 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private final PipManager mPipManager = PipManager.getInstance();
 
     private PipControlsView mPipControlsView;
-    private boolean mPipMovedToFullscreen;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -47,17 +40,10 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         mPipControlsView = (PipControlsView) findViewById(R.id.pip_controls);
     }
 
-    private void restorePipAndFinish() {
-        if (!mPipMovedToFullscreen) {
-            mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
-        }
-        finish();
-    }
-
     @Override
     public void onPause() {
         super.onPause();
-        restorePipAndFinish();
+        finish();
     }
 
     @Override
@@ -66,11 +52,6 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         mPipManager.removeListener(this);
         mPipManager.resumePipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
-    }
-
-    @Override
-    public void onBackPressed() {
-        restorePipAndFinish();
     }
 
     @Override
@@ -86,31 +67,13 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onMoveToFullscreen() {
-        mPipMovedToFullscreen = true;
         finish();
     }
-
-    @Override
-    public void onMediaControllerChanged() { }
 
     @Override
     public void onPipResizeAboutToStart() {
         finish();
         mPipManager.suspendPipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-        if (mPipManager.isRecentsShown() && !mPipMovedToFullscreen) {
-            SystemUI[] services = ((SystemUIApplication) getApplication()).getServices();
-            for (int i = services.length - 1; i >= 0; i--) {
-                if (services[i] instanceof Recents) {
-                    ((Recents) services[i]).showRecents(false, null);
-                    break;
-                }
-            }
-        }
     }
 }

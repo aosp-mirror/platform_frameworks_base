@@ -35,14 +35,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 public class PipOverlayActivity extends Activity implements PipManager.Listener {
     private static final long SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS = 4000;
 
-    /**
-     * The single instance of PipOverlayActivity to prevent it from restarting.
-     * Note that {@link PipManager} moves the PIPed activity to fullscreen if the activity is
-     * restarted. It's because the activity may be started by the Launcher or an intent again,
-     * but we don't want do so for the PipOverlayActivity.
-     */
-    private static PipOverlayActivity sPipOverlayActivity;
-
     private final PipManager mPipManager = PipManager.getInstance();
     private final Handler mHandler = new Handler();
     private View mGuideOverlayView;
@@ -54,47 +46,17 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         }
     };
 
-    /**
-     * Launches the PIP overlay. This should be only called on the main thread.
-     */
-    public static void showPipOverlay(Context context) {
-        if (sPipOverlayActivity == null) {
-            Intent intent = new Intent(context, PipOverlayActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchStackId(PINNED_STACK_ID);
-            context.startActivity(intent, options.toBundle());
-        }
-    }
-
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.tv_pip_overlay);
         mGuideOverlayView = findViewById(R.id.guide_overlay);
-        mGuideButtonsView = findViewById(R.id.guide_buttons);
-        mGuideButtonPlayPauseImageView = (ImageView) findViewById(R.id.guide_button_play_pause);
         mPipManager.addListener(this);
-
-        sPipOverlayActivity = this;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // TODO: Implement animation for this
-        if (mPipManager.isRecentsShown()) {
-            mGuideOverlayView.setVisibility(View.GONE);
-            if (mPipManager.isPipViewFocusdInRecents()) {
-                mGuideButtonsView.setVisibility(View.GONE);
-            } else {
-                mGuideButtonsView.setVisibility(View.VISIBLE);
-                updateGuideButtonsView();
-            }
-        } else {
-            mGuideOverlayView.setVisibility(View.VISIBLE);
-            mGuideButtonsView.setVisibility(View.GONE);
-        }
         mHandler.removeCallbacks(mHideGuideOverlayRunnable);
         mHandler.postDelayed(mHideGuideOverlayRunnable, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
     }
@@ -109,7 +71,6 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        sPipOverlayActivity = null;
         mHandler.removeCallbacksAndMessages(null);
         mPipManager.removeListener(this);
         mPipManager.resumePipResizing(
@@ -139,33 +100,5 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         finish();
         mPipManager.suspendPipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH);
-    }
-
-    @Override
-    public void onMediaControllerChanged() {
-        updateGuideButtonsView();
-    }
-
-    @Override
-    public void finish() {
-        sPipOverlayActivity = null;
-        super.finish();
-    }
-
-    private void updateGuideButtonsView() {
-        switch (mPipManager.getPlaybackState()) {
-            case PipManager.PLAYBACK_STATE_PLAYING:
-                mGuideButtonPlayPauseImageView.setVisibility(View.VISIBLE);
-                mGuideButtonPlayPauseImageView.setImageResource(R.drawable.ic_pause_white_24dp);
-                break;
-            case PipManager.PLAYBACK_STATE_PAUSED:
-                mGuideButtonPlayPauseImageView.setVisibility(View.VISIBLE);
-                mGuideButtonPlayPauseImageView.setImageResource(
-                        R.drawable.ic_play_arrow_white_24dp);
-                break;
-            case PipManager.PLAYBACK_STATE_UNAVAILABLE:
-                mGuideButtonPlayPauseImageView.setVisibility(View.GONE);
-                break;
-        }
     }
 }
