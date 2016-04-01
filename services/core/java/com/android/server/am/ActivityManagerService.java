@@ -9827,7 +9827,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void updateLockTaskPackages(int userId, String[] packages) {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException("updateLockTaskPackage called from non-system process");
+            enforceCallingPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
+                    "updateLockTaskPackages()");
         }
         synchronized (this) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
