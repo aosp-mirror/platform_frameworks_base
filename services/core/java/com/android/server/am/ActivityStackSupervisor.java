@@ -2738,12 +2738,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
     void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
-        r.mLaunchTaskBehind = false;
         final TaskRecord task = r.task;
-        task.setLastThumbnailLocked(task.stack.screenshotActivitiesLocked(r));
+        final ActivityStack stack = task.stack;
+
+        r.mLaunchTaskBehind = false;
+        task.setLastThumbnailLocked(stack.screenshotActivitiesLocked(r));
         mRecentTasks.addLocked(task);
         mService.notifyTaskStackChangedLocked();
         mWindowManager.setAppVisibility(r.appToken, false);
+
+        // When launching tasks behind, update the last active time of the top task after the new
+        // task has been shown briefly
+        final ActivityRecord top = stack.topActivity();
+        if (top != null) {
+            top.task.touchActiveTime();
+        }
     }
 
     void scheduleLaunchTaskBehindComplete(IBinder token) {
