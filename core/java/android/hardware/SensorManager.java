@@ -884,7 +884,7 @@ public abstract class SensorManager {
      * Used for receiving notifications from the SensorManager when dynamic sensors are connected or
      * disconnected.
      */
-    public static abstract class DynamicSensorConnectionCallback {
+    public static abstract class DynamicSensorCallback {
         /**
          * Called when there is a dynamic sensor being connected to the system.
          *
@@ -902,62 +902,73 @@ public abstract class SensorManager {
 
 
     /**
-     * Add a {@link android.hardware.SensorManager.DynamicSensorConnectionCallback
-     * DynamicSensorConnectionCallback} to receive dynamic sensor connection callbacks. Repeat
+     * Add a {@link android.hardware.SensorManager.DynamicSensorCallback
+     * DynamicSensorCallback} to receive dynamic sensor connection callbacks. Repeat
      * registration with the already registered callback object will have no additional effect.
      *
      * @param callback An object that implements the
-     *        {@link android.hardware.SensorManager.DynamicSensorConnectionCallback
-     *        DynamicSensorConnectionCallback}
+     *        {@link android.hardware.SensorManager.DynamicSensorCallback
+     *        DynamicSensorCallback}
      *        interface for receiving callbacks.
-     * @see #addDynamicSensorCallback(DynamicSensorConnectionCallback, Handler)
+     * @see #addDynamicSensorCallback(DynamicSensorCallback, Handler)
      *
      * @throws IllegalArgumentException when callback is null.
      */
-    public void registerDynamicSensorCallback(DynamicSensorConnectionCallback callback) {
+    public void registerDynamicSensorCallback(DynamicSensorCallback callback) {
         registerDynamicSensorCallback(callback, null);
     }
 
     /**
-     * Add a {@link android.hardware.SensorManager.DynamicSensorConnectionCallback
-     * DynamicSensorConnectionCallback} to receive dynamic sensor connection callbacks. Repeat
+     * Add a {@link android.hardware.SensorManager.DynamicSensorCallback
+     * DynamicSensorCallback} to receive dynamic sensor connection callbacks. Repeat
      * registration with the already registered callback object will have no additional effect.
      *
      * @param callback An object that implements the
-     *        {@link android.hardware.SensorManager.DynamicSensorConnectionCallback
-     *        DynamicSensorConnectionCallback} interface for receiving callbacks.
+     *        {@link android.hardware.SensorManager.DynamicSensorCallback
+     *        DynamicSensorCallback} interface for receiving callbacks.
      * @param handler The {@link android.os.Handler Handler} the {@link
-     *        android.hardware.SensorManager.DynamicSensorConnectionCallback
+     *        android.hardware.SensorManager.DynamicSensorCallback
      *        sensor connection events} will be delivered to.
      *
      * @throws IllegalArgumentException when callback is null.
      */
     public void registerDynamicSensorCallback(
-            DynamicSensorConnectionCallback callback, Handler handler) {
+            DynamicSensorCallback callback, Handler handler) {
         registerDynamicSensorCallbackImpl(callback, handler);
     }
 
     /**
-     * Remove a {@link android.hardware.SensorManager.DynamicSensorConnectionCallback
-     * DynamicSensorConnectionCallback} to stop sending dynamic sensor connection events to that
+     * Remove a {@link android.hardware.SensorManager.DynamicSensorCallback
+     * DynamicSensorCallback} to stop sending dynamic sensor connection events to that
      * callback.
      *
      * @param callback An object that implements the
-     *        {@link android.hardware.SensorManager.DynamicSensorConnectionCallback
-     *        DynamicSensorConnectionCallback}
+     *        {@link android.hardware.SensorManager.DynamicSensorCallback
+     *        DynamicSensorCallback}
      *        interface for receiving callbacks.
      */
-    public void unregisterDynamicSensorCallback(DynamicSensorConnectionCallback callback) {
+    public void unregisterDynamicSensorCallback(DynamicSensorCallback callback) {
         unregisterDynamicSensorCallbackImpl(callback);
+    }
+
+    /**
+     * Tell if dynamic sensor discovery feature is supported by system.
+     *
+     * @return <code>true</code> if dynamic sensor discovery is supported, <code>false</code>
+     * otherwise.
+     */
+    public boolean isDynamicSensorDiscoverySupported() {
+        List<Sensor> sensors = getSensorList(Sensor.TYPE_DYNAMIC_SENSOR_META);
+        return sensors.size() > 0;
     }
 
     /** @hide */
     protected abstract void registerDynamicSensorCallbackImpl(
-            DynamicSensorConnectionCallback callback, Handler handler);
+            DynamicSensorCallback callback, Handler handler);
 
     /** @hide */
     protected abstract void unregisterDynamicSensorCallbackImpl(
-            DynamicSensorConnectionCallback callback);
+            DynamicSensorCallback callback);
 
     /**
      * <p>
