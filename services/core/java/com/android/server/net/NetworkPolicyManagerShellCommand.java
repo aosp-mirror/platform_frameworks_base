@@ -24,7 +24,6 @@ import static com.android.server.net.NetworkPolicyManagerService.TAG;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +34,6 @@ import android.net.NetworkPolicy;
 import android.net.NetworkTemplate;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.util.Log;
@@ -88,12 +86,10 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("    Adds a UID to the whitelist for restrict background usage.");
         pw.println("  add restrict-background-blacklist UID");
         pw.println("    Adds a UID to the blacklist for restrict background usage.");
-        pw.println("  get metered-network ID");
-        pw.println("    Checks whether the given non-mobile network is metered or not.");
         pw.println("  get restrict-background");
         pw.println("    Gets the global restrict background usage status.");
-        pw.println("  list metered-networks [BOOLEAN]");
-        pw.println("    Lists all non-mobile networks and whether they are metered or not.");
+        pw.println("  list wifi-networks [BOOLEAN]");
+        pw.println("    Lists all saved wifi networks and whether they are metered or not.");
         pw.println("    If a boolean argument is passed, filters just the metered (or unmetered)");
         pw.println("    networks.");
         pw.println("  list restrict-background-whitelist");
@@ -105,7 +101,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("  remove restrict-background-blacklist UID");
         pw.println("    Removes a UID from the blacklist for restrict background usage.");
         pw.println("  set metered-network ID BOOLEAN");
-        pw.println("    Toggles whether the given non-mobile network is metered.");
+        pw.println("    Toggles whether the given wi-fi network is metered.");
         pw.println("  set restrict-background BOOLEAN");
         pw.println("    Sets the global restrict background usage status.");
     }
@@ -118,8 +114,6 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
             return -1;
         }
         switch(type) {
-            case "metered-network":
-                return getMeteredWifiNetwork();
             case "restrict-background":
                 return getRestrictBackground();
         }
@@ -152,8 +146,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
             return -1;
         }
         switch(type) {
-            case "metered-networks":
-                return listMeteredWifiNetworks();
+            case "wifi-networks":
+                return listWifiNetworks();
             case "restrict-background-whitelist":
                 return listRestrictBackgroundWhitelist();
             case "restrict-background-blacklist":
@@ -284,7 +278,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int listMeteredWifiNetworks() throws RemoteException {
+    private int listWifiNetworks() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final String arg = getNextArg();
         final Boolean filter = arg == null ? null : Boolean.valueOf(arg);
@@ -295,23 +289,6 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
             pw.print(getNetworkId(policy));
             pw.print(';');
             pw.println(policy.metered);
-        }
-        return 0;
-    }
-
-    private int getMeteredWifiNetwork() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        final String id = getNextArg();
-        if (id == null) {
-            pw.println("Error: didn't specify ID");
-            return -1;
-        }
-        final List<NetworkPolicy> policies = getWifiPolicies();
-        for (NetworkPolicy policy: policies) {
-            if (id.equals(getNetworkId(policy))) {
-                pw.println(policy.metered);
-                return 0;
-            }
         }
         return 0;
     }
