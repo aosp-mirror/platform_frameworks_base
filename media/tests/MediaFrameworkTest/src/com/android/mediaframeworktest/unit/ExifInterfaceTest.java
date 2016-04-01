@@ -61,7 +61,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
     private static final String[] EXIF_TAGS = {
             ExifInterface.TAG_MAKE,
             ExifInterface.TAG_MODEL,
-            ExifInterface.TAG_APERTURE,
+            ExifInterface.TAG_F_NUMBER,
             ExifInterface.TAG_DATETIME,
             ExifInterface.TAG_EXPOSURE_TIME,
             ExifInterface.TAG_FLASH,
@@ -77,7 +77,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
             ExifInterface.TAG_GPS_TIMESTAMP,
             ExifInterface.TAG_IMAGE_LENGTH,
             ExifInterface.TAG_IMAGE_WIDTH,
-            ExifInterface.TAG_ISO,
+            ExifInterface.TAG_ISO_SPEED_RATINGS,
             ExifInterface.TAG_ORIENTATION,
             ExifInterface.TAG_WHITE_BALANCE
     };
@@ -288,7 +288,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
         // Checks values.
         assertStringTag(exifInterface, ExifInterface.TAG_MAKE, expectedValue.make);
         assertStringTag(exifInterface, ExifInterface.TAG_MODEL, expectedValue.model);
-        assertFloatTag(exifInterface, ExifInterface.TAG_APERTURE, expectedValue.aperture);
+        assertFloatTag(exifInterface, ExifInterface.TAG_F_NUMBER, expectedValue.aperture);
         assertStringTag(exifInterface, ExifInterface.TAG_DATETIME, expectedValue.datetime);
         assertFloatTag(exifInterface, ExifInterface.TAG_EXPOSURE_TIME, expectedValue.exposureTime);
         assertFloatTag(exifInterface, ExifInterface.TAG_FLASH, expectedValue.flash);
@@ -308,7 +308,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
         assertStringTag(exifInterface, ExifInterface.TAG_GPS_TIMESTAMP, expectedValue.gpsTimestamp);
         assertIntTag(exifInterface, ExifInterface.TAG_IMAGE_LENGTH, expectedValue.imageLength);
         assertIntTag(exifInterface, ExifInterface.TAG_IMAGE_WIDTH, expectedValue.imageWidth);
-        assertStringTag(exifInterface, ExifInterface.TAG_ISO, expectedValue.iso);
+        assertStringTag(exifInterface, ExifInterface.TAG_ISO_SPEED_RATINGS, expectedValue.iso);
         assertIntTag(exifInterface, ExifInterface.TAG_ORIENTATION, expectedValue.orientation);
         assertIntTag(exifInterface, ExifInterface.TAG_WHITE_BALANCE, expectedValue.whiteBalance);
     }
