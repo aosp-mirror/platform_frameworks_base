@@ -1339,6 +1339,7 @@ public class DirectoryFragment extends Fragment
                     // This has to be handled here instead of in a keyboard shortcut, because
                     // keyboard shortcuts all have to be modified with the 'Ctrl' key.
                     if (mSelectionManager.hasSelection()) {
+                        Metrics.logKeyboardAction(getContext(), keyCode);
                         deleteDocuments(mSelectionManager.getSelection());
                     }
                     // Always handle the key, even if there was nothing to delete. This is a
