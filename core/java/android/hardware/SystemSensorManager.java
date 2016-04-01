@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,7 +76,7 @@ public class SystemSensorManager extends SensorManager {
             new HashMap<TriggerEventListener, TriggerEventQueue>();
 
     // Dynamic Sensor callbacks
-    private HashMap<DynamicSensorConnectionCallback, Handler>
+    private HashMap<DynamicSensorCallback, Handler>
             mDynamicSensorCallbacks = new HashMap<>();
     private BroadcastReceiver mDynamicSensorBroadcastReceiver;
 
@@ -120,7 +120,7 @@ public class SystemSensorManager extends SensorManager {
     @Override
     protected List<Sensor> getFullDynamicSensorList() {
         // only set up broadcast receiver if the application tries to find dynamic sensors or
-        // explicitly register a DynamicSensorConnectionCallback
+        // explicitly register a DynamicSensorCallback
         setupDynamicSensorBroadcastReceiver();
         updateDynamicSensorList();
         return mFullDynamicSensorsList;
@@ -354,9 +354,9 @@ public class SystemSensorManager extends SensorManager {
 
                     Handler mainHandler = new Handler(mContext.getMainLooper());
 
-                    for (Map.Entry<DynamicSensorConnectionCallback, Handler> entry :
+                    for (Map.Entry<DynamicSensorCallback, Handler> entry :
                             mDynamicSensorCallbacks.entrySet()) {
-                        final DynamicSensorConnectionCallback callback = entry.getKey();
+                        final DynamicSensorCallback callback = entry.getKey();
                         Handler handler =
                                 entry.getValue() == null ? mainHandler : entry.getValue();
 
@@ -413,7 +413,7 @@ public class SystemSensorManager extends SensorManager {
 
     /** @hide */
     protected void registerDynamicSensorCallbackImpl(
-            DynamicSensorConnectionCallback callback, Handler handler) {
+            DynamicSensorCallback callback, Handler handler) {
         if (DEBUG_DYNAMIC_SENSOR) {
             Log.i(TAG, "DYNS Register dynamic sensor callback");
         }
@@ -432,7 +432,7 @@ public class SystemSensorManager extends SensorManager {
 
     /** @hide */
     protected void unregisterDynamicSensorCallbackImpl(
-            DynamicSensorConnectionCallback callback) {
+            DynamicSensorCallback callback) {
         if (DEBUG_DYNAMIC_SENSOR) {
             Log.i(TAG, "Removing dynamic sensor listerner");
         }

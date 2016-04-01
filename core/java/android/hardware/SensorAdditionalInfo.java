@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
  * android.hardware.SensorEventCallback#onSensorAdditionalInfo onSensorAdditionalInfo}.
  *
  * @see SensorManager
- * @see SensorEventListener3
+ * @see SensorEventCallback
  * @see Sensor
  *
  */
@@ -106,7 +106,7 @@ public class SensorAdditionalInfo {
      * such as accelerometer, gyro, etc.
      *
      * Payload:
-     *     floatValues[0..11]: First 3 rows of a homogenous matrix in row major order that captures
+     *     floatValues[0..11]: First 3 rows of a homogeneous matrix in row major order that captures
      *     any linear transformation, including rotation, scaling, shear, shift.
      */
     public static final int TYPE_VEC3_CALIBRATION = 0x10002;

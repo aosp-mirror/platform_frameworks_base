@@ -186,7 +186,7 @@ public final class Sensor {
      * @see #TYPE_LINEAR_ACCELERATION
      */
     public static final String STRING_TYPE_LINEAR_ACCELERATION =
-        "android.sensor.linear_acceleration";
+            "android.sensor.linear_acceleration";
 
     /**
      * A constant describing a rotation vector sensor type.
@@ -229,7 +229,7 @@ public final class Sensor {
      * @see #TYPE_AMBIENT_TEMPERATURE
      */
     public static final String STRING_TYPE_AMBIENT_TEMPERATURE =
-        "android.sensor.ambient_temperature";
+            "android.sensor.ambient_temperature";
 
     /**
      * A constant describing an uncalibrated magnetic field sensor type.
@@ -254,7 +254,7 @@ public final class Sensor {
      * @see #TYPE_MAGNETIC_FIELD_UNCALIBRATED
      */
     public static final String STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED =
-        "android.sensor.magnetic_field_uncalibrated";
+            "android.sensor.magnetic_field_uncalibrated";
 
     /**
      * A constant describing an uncalibrated rotation vector sensor type.
@@ -280,7 +280,7 @@ public final class Sensor {
      * @see #TYPE_GAME_ROTATION_VECTOR
      */
     public static final String STRING_TYPE_GAME_ROTATION_VECTOR =
-        "android.sensor.game_rotation_vector";
+            "android.sensor.game_rotation_vector";
 
     /**
      * A constant describing an uncalibrated gyroscope sensor type.
@@ -302,7 +302,7 @@ public final class Sensor {
      * @see #TYPE_GYROSCOPE_UNCALIBRATED
      */
     public static final String STRING_TYPE_GYROSCOPE_UNCALIBRATED =
-        "android.sensor.gyroscope_uncalibrated";
+            "android.sensor.gyroscope_uncalibrated";
 
     /**
      * A constant describing a significant motion trigger sensor.
@@ -324,7 +324,7 @@ public final class Sensor {
      * @see #TYPE_SIGNIFICANT_MOTION
      */
     public static final String STRING_TYPE_SIGNIFICANT_MOTION =
-        "android.sensor.significant_motion";
+            "android.sensor.significant_motion";
 
     /**
      * A constant describing a step detector sensor.
@@ -391,7 +391,7 @@ public final class Sensor {
      * @see #TYPE_GEOMAGNETIC_ROTATION_VECTOR
      */
     public static final String STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR =
-        "android.sensor.geomagnetic_rotation_vector";
+            "android.sensor.geomagnetic_rotation_vector";
 
     /**
      * A constant describing a heart rate monitor.
@@ -431,7 +431,7 @@ public final class Sensor {
      * A constant string describing a wake up tilt detector sensor type.
      *
      * @hide
-     * @see #TYPE_WAKE_UP_TILT_DETECTOR
+     * @see #TYPE_TILT_DETECTOR
      */
     public static final String SENSOR_STRING_TYPE_TILT_DETECTOR =
             "android.sensor.tilt_detector";
@@ -495,7 +495,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_GLANCE_GESTURE = "android.sensor.glance_gesture";
 
-     /**
+    /**
      * A constant describing a pick up sensor.
      *
      * A sensor of this type triggers when the device is picked up regardless of wherever it was
@@ -514,7 +514,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_PICK_UP_GESTURE = "android.sensor.pick_up_gesture";
 
-     /**
+    /**
      * A constant describing a wrist tilt gesture sensor.
      *
      * A sensor of this type triggers when the device face is tilted towards the user.
@@ -553,7 +553,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_DEVICE_ORIENTATION = "android.sensor.device_orientation";
 
-     /**
+    /**
      * A constant describing a pose sensor with 6 degrees of freedom.
      *
      * Similar to {@link #TYPE_ROTATION_VECTOR}, with additional delta
@@ -578,7 +578,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_POSE_6DOF = "android.sensor.pose_6dof";
 
-     /**
+    /**
      * A constant describing a stationary detect sensor.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
@@ -593,7 +593,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_STATIONARY_DETECT = "android.sensor.stationary_detect";
 
-     /**
+    /**
      * A constant describing a motion detect sensor.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
@@ -608,7 +608,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_MOTION_DETECT = "android.sensor.motion_detect";
 
-     /**
+    /**
      * A constant describing a motion detect sensor.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
@@ -705,6 +705,14 @@ public final class Sensor {
     // MASK for LSB fifth bit. Used to know whether the sensor supports data injection or not.
     private static final int DATA_INJECTION_MASK = 0x10;
     private static final int DATA_INJECTION_SHIFT = 4;
+
+    // MASK for dynamic sensor (sensor that added during runtime), bit 6.
+    private static final int DYNAMIC_SENSOR_MASK = 0x20;
+    private static final int DYNAMIC_SENSOR_SHIFT = 5;
+
+    // MASK for indication bit of sensor additional information support (bit 7).
+    private static final int ADDITIONAL_INFO_MASK = 0x40;
+    private static final int ADDITIONAL_INFO_SHIFT = 6;
 
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
@@ -887,10 +895,34 @@ public final class Sensor {
     }
 
     /**
-     * @return The type of this sensor as a string.
+     * @return The UUID of the sensor. If the sensor does not support UUID, the returned value will
+     * be an all zero UUID; if the sensor's combination of type and name is guaranteed to be unique
+     * in system, the return value will be an all "F" UUID.
+     *
+     * @hide
      */
+    @SystemApi
     public UUID getUuid() {
         return mUuid;
+    }
+
+    /**
+     * @return The unique id of sensor. Return value of 0 means this sensor does not support UUID;
+     * return value of -1 means this sensor can be uniquely identified in system by combination of
+     * its type and name.
+     */
+    public int getId() {
+        if (mUuid == ALL_0_UUID) {
+            return 0;
+        } else if (mUuid == ALL_F_UUID) {
+            return -1;
+        } else {
+            int id = Math.abs(mUuid.hashCode()) + 1;
+            if (id <= 0) { // catch corner case when hash is Integer.MIN_VALUE and Integer.MAX_VALUE
+                id = 1;
+            }
+            return id;
+        }
     }
 
     /**
@@ -961,6 +993,26 @@ public final class Sensor {
     }
 
     /**
+     * Returns true if the sensor is a dynamic sensor.
+     *
+     * @return <code>true</code> if the sensor is a dynamic sensor (sensor added at runtime).
+     * @see SensorManager.DynamicSensorCallback
+     */
+    public boolean isDynamicSensor() {
+        return (mFlags & DYNAMIC_SENSOR_MASK) != 0;
+    }
+
+    /**
+     * Returns true if the sensor supports sensor additional information API
+     *
+     * @return <code>true</code> if the sensor supports sensor additional information API
+     * @see SensorAdditionalInfo
+     */
+    public boolean isAdditionalInfoSupported() {
+        return (mFlags & ADDITIONAL_INFO_MASK) != 0;
+    }
+
+    /**
      * Returns true if the sensor supports data injection when the
      * HAL is set to data injection mode.
      *
@@ -985,6 +1037,10 @@ public final class Sensor {
                 + ", type=" + mType + ", maxRange=" + mMaxRange + ", resolution=" + mResolution
                 + ", power=" + mPower + ", minDelay=" + mMinDelay + "}";
     }
+
+    //special UUID hash constant
+    private final static UUID ALL_0_UUID = new UUID(0,0);
+    private final static UUID ALL_F_UUID = new UUID(~0L, ~0L);
 
     /**
      * Sets the Type associated with the sensor.

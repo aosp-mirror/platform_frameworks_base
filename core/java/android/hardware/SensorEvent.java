@@ -18,7 +18,7 @@ package android.hardware;
 
 /**
  * This class represents a {@link android.hardware.Sensor Sensor} event and
- * holds informations such as the sensor's type, the time-stamp, accuracy and of
+ * holds information such as the sensor's type, the time-stamp, accuracy and of
  * course the sensor's {@link SensorEvent#values data}.
  *
  * <p>
@@ -163,7 +163,7 @@ public class SensorEvent {
      * </ul>
      * <p>
      * Typically the output of the gyroscope is integrated over time to
-     * calculate a rotation describing the change of angles over the timestep,
+     * calculate a rotation describing the change of angles over the time step,
      * for example:
      * </p>
      *
@@ -173,7 +173,7 @@ public class SensorEvent {
      *     private float timestamp;
      *
      *     public void onSensorChanged(SensorEvent event) {
-     *          // This timestep's delta rotation to be multiplied by the current rotation
+     *          // This time step's delta rotation to be multiplied by the current rotation
      *          // after computing it from the gyro sample data.
      *          if (timestamp != 0) {
      *              final float dT = (event.timestamp - timestamp) * NS2S;
@@ -192,8 +192,8 @@ public class SensorEvent {
      *                  axisZ /= omegaMagnitude;
      *              }
      *
-     *              // Integrate around this axis with the angular speed by the timestep
-     *              // in order to get a delta rotation from this sample over the timestep
+     *              // Integrate around this axis with the angular speed by the time step
+     *              // in order to get a delta rotation from this sample over the time step
      *              // We will convert this axis-angle representation of the delta rotation
      *              // into a quaternion before turning it into the rotation matrix.
      *              float thetaOverTwo = omegaMagnitude * dT / 2.0f;
@@ -433,9 +433,9 @@ public class SensorEvent {
      * Each field is a component of the estimated hard iron calibration.
      * The values are in micro-Tesla (uT).
      * </p>
-     * <p> Hard iron - These distortions arise due to the magnetized iron, steel or permanenet
+     * <p> Hard iron - These distortions arise due to the magnetized iron, steel or permanent
      * magnets on the device.
-     * Soft iron - These distortions arise due to the interaction with the earth's magentic
+     * Soft iron - These distortions arise due to the interaction with the earth's magnetic
      * field.
      * </p>
      * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR}:</h4>
@@ -508,14 +508,14 @@ public class SensorEvent {
      *
      *
      * <ul>
-     *  <li> values[0]: x*sin(&#952/2) </li>
-     *  <li> values[1]: y*sin(&#952/2) </li>
-     *  <li> values[2]: z*sin(&#952/2) </li>
-     *  <li> values[3]: cos(&#952/2)   </li>
+     * <li> values[0]: x*sin(&#952/2) </li>
+     * <li> values[1]: y*sin(&#952/2) </li>
+     * <li> values[2]: z*sin(&#952/2) </li>
+     * <li> values[3]: cos(&#952/2)   </li>
      *
      *
      * <li> values[4]: Translation along x axis from an arbitrary origin. </li>
-     * li> values[5]: Translation along y axis from an arbitrary origin. </li>
+     * <li> values[5]: Translation along y axis from an arbitrary origin. </li>
      * <li> values[6]: Translation along z axis from an arbitrary origin. </li>
      *
      * <li> values[7]:  Delta quaternion rotation x*sin(&#952/2) </li>
