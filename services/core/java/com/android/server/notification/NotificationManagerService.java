@@ -120,6 +120,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -226,7 +227,7 @@ public class NotificationManagerService extends SystemService {
     private VrManagerInternal mVrManagerInternal;
 
     final IBinder mForegroundToken = new Binder();
-    private WorkerHandler mHandler;
+    private Handler mHandler;
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -572,33 +573,9 @@ public class NotificationManagerService extends SystemService {
         public void clearEffects() {
             synchronized (mNotificationList) {
                 if (DBG) Slog.d(TAG, "clearEffects");
-
-                // sound
-                mSoundNotificationKey = null;
-
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
-                    if (player != null) {
-                        player.stopAsync();
-                    }
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-
-                // vibrate
-                mVibrateNotificationKey = null;
-                identity = Binder.clearCallingIdentity();
-                try {
-                    mVibrator.cancel();
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-
-                // light
-                mLights.clear();
-                updateLightsLocked();
+                clearSoundLocked();
+                clearVibrateLocked();
+                clearLightsLocked();
             }
         }
 
@@ -657,6 +634,36 @@ public class NotificationManagerService extends SystemService {
             }
         }
     };
+
+    private void clearSoundLocked() {
+        mSoundNotificationKey = null;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
+            if (player != null) {
+                player.stopAsync();
+            }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void clearVibrateLocked() {
+        mVibrateNotificationKey = null;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mVibrator.cancel();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void clearLightsLocked() {
+        // light
+        mLights.clear();
+        updateLightsLocked();
+    }
 
     private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -861,6 +868,26 @@ public class NotificationManagerService extends SystemService {
 
     public NotificationManagerService(Context context) {
         super(context);
+    }
+
+    @VisibleForTesting
+    void setAudioManager(AudioManager audioMananger) {
+        mAudioManager = audioMananger;
+    }
+
+    @VisibleForTesting
+    void setVibrator(Vibrator vibrator) {
+        mVibrator = vibrator;
+    }
+
+    @VisibleForTesting
+    void setSystemReady(boolean systemReady) {
+        mSystemReady = systemReady;
+    }
+
+    @VisibleForTesting
+    void setHandler(Handler handler) {
+        mHandler = handler;
     }
 
     @Override
@@ -2492,12 +2519,14 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
-    private void buzzBeepBlinkLocked(NotificationRecord record) {
+    @VisibleForTesting
+    void buzzBeepBlinkLocked(NotificationRecord record) {
         boolean buzz = false;
         boolean beep = false;
         boolean blink = false;
 
         final Notification notification = record.sbn.getNotification();
+        final String key = record.getKey();
 
         // Should this notification make noise, vibe, or use the LED?
         final boolean aboveThreshold = record.getImportance() >= IMPORTANCE_DEFAULT;
@@ -2521,9 +2550,15 @@ public class NotificationManagerService extends SystemService {
         if (disableEffects != null) {
             ZenLog.traceDisableEffects(record, disableEffects);
         }
+
+        // Remember if this notification already owns the notification channels.
+        boolean wasBeep = key != null && key.equals(mSoundNotificationKey);
+        boolean wasBuzz = key != null && key.equals(mVibrateNotificationKey);
+
+        // These are set inside the conditional if the notification is allowed to make noise.
+        boolean hasValidVibrate = false;
+        boolean hasValidSound = false;
         if (disableEffects == null
-                && (!(record.isUpdate
-                    && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                 && (record.getUserId() == UserHandle.USER_ALL ||
                     record.getUserId() == currentUser ||
                     mUserProfiles.isCurrentProfile(record.getUserId()))
@@ -2531,10 +2566,6 @@ public class NotificationManagerService extends SystemService {
                 && mSystemReady
                 && mAudioManager != null) {
             if (DBG) Slog.v(TAG, "Interrupting!");
-
-            sendAccessibilityEvent(notification, record.sbn.getPackageName());
-
-            // sound
 
             // should we use the default notification sound? (indicated either by
             // DEFAULT_SOUND or because notification.sound is pointing at
@@ -2545,8 +2576,6 @@ public class NotificationManagerService extends SystemService {
                                    .equals(notification.sound);
 
             Uri soundUri = null;
-            boolean hasValidSound = false;
-
             if (useDefaultSound) {
                 soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
 
@@ -2559,88 +2588,105 @@ public class NotificationManagerService extends SystemService {
                 hasValidSound = (soundUri != null);
             }
 
-            if (hasValidSound) {
-                boolean looping =
-                        (notification.flags & Notification.FLAG_INSISTENT) != 0;
-                AudioAttributes audioAttributes = audioAttributesForNotification(notification);
-                mSoundNotificationKey = record.getKey();
-                // do not play notifications if stream volume is 0 (typically because
-                // ringer mode is silent) or if there is a user of exclusive audio focus
-                if ((mAudioManager.getStreamVolume(
-                        AudioAttributes.toLegacyStreamType(audioAttributes)) != 0)
-                            && !mAudioManager.isAudioFocusExclusive()) {
-                    final long identity = Binder.clearCallingIdentity();
-                    try {
-                        final IRingtonePlayer player =
-                                mAudioManager.getRingtonePlayer();
-                        if (player != null) {
-                            if (DBG) Slog.v(TAG, "Playing sound " + soundUri
-                                    + " with attributes " + audioAttributes);
-                            player.playAsync(soundUri, record.sbn.getUser(), looping,
-                                    audioAttributes);
-                            beep = true;
-                        }
-                    } catch (RemoteException e) {
-                    } finally {
-                        Binder.restoreCallingIdentity(identity);
-                    }
-                }
-            }
-
-            // vibrate
             // Does the notification want to specify its own vibration?
             final boolean hasCustomVibrate = notification.vibrate != null;
 
             // new in 4.2: if there was supposed to be a sound and we're in vibrate
             // mode, and no other vibration is specified, we fall back to vibration
             final boolean convertSoundToVibration =
-                       !hasCustomVibrate
-                    && hasValidSound
-                    && (mAudioManager.getRingerModeInternal()
-                               == AudioManager.RINGER_MODE_VIBRATE);
+                    !hasCustomVibrate
+                            && hasValidSound
+                            && (mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE);
 
             // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
             final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
 
-            if ((useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
-                    && !(mAudioManager.getRingerModeInternal()
-                            == AudioManager.RINGER_MODE_SILENT)) {
-                mVibrateNotificationKey = record.getKey();
+            hasValidVibrate = useDefaultVibrate || convertSoundToVibration ||
+                    hasCustomVibrate;
 
-                if (useDefaultVibrate || convertSoundToVibration) {
-                    // Escalate privileges so we can use the vibrator even if the
-                    // notifying app does not have the VIBRATE permission.
-                    long identity = Binder.clearCallingIdentity();
-                    try {
-                        mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
-                            useDefaultVibrate ? mDefaultVibrationPattern
-                                : mFallbackVibrationPattern,
-                            ((notification.flags & Notification.FLAG_INSISTENT) != 0)
-                                ? 0: -1, audioAttributesForNotification(notification));
-                        buzz = true;
-                    } finally {
-                        Binder.restoreCallingIdentity(identity);
+            // We can alert, and we're allowed to alert, but if the developer asked us to only do
+            // it once, and we already have, then don't.
+            if (!(record.isUpdate
+                    && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0)) {
+
+                sendAccessibilityEvent(notification, record.sbn.getPackageName());
+
+                if (hasValidSound) {
+                    boolean looping =
+                            (notification.flags & Notification.FLAG_INSISTENT) != 0;
+                    AudioAttributes audioAttributes = audioAttributesForNotification(notification);
+                    mSoundNotificationKey = key;
+                    // do not play notifications if stream volume is 0 (typically because
+                    // ringer mode is silent) or if there is a user of exclusive audio focus
+                    if ((mAudioManager.getStreamVolume(
+                            AudioAttributes.toLegacyStreamType(audioAttributes)) != 0)
+                            && !mAudioManager.isAudioFocusExclusive()) {
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            final IRingtonePlayer player =
+                                    mAudioManager.getRingtonePlayer();
+                            if (player != null) {
+                                if (DBG) Slog.v(TAG, "Playing sound " + soundUri
+                                        + " with attributes " + audioAttributes);
+                                player.playAsync(soundUri, record.sbn.getUser(), looping,
+                                        audioAttributes);
+                                beep = true;
+                            }
+                        } catch (RemoteException e) {
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
                     }
-                } else if (notification.vibrate.length > 1) {
-                    // If you want your own vibration pattern, you need the VIBRATE
-                    // permission
-                    mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
-                            notification.vibrate,
-                        ((notification.flags & Notification.FLAG_INSISTENT) != 0)
-                                ? 0: -1, audioAttributesForNotification(notification));
-                    buzz = true;
+                }
+
+                if (hasValidVibrate && !(mAudioManager.getRingerModeInternal()
+                        == AudioManager.RINGER_MODE_SILENT)) {
+                    mVibrateNotificationKey = key;
+
+                    if (useDefaultVibrate || convertSoundToVibration) {
+                        // Escalate privileges so we can use the vibrator even if the
+                        // notifying app does not have the VIBRATE permission.
+                        long identity = Binder.clearCallingIdentity();
+                        try {
+                            mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                                    useDefaultVibrate ? mDefaultVibrationPattern
+                                            : mFallbackVibrationPattern,
+                                    ((notification.flags & Notification.FLAG_INSISTENT) != 0)
+                                            ? 0: -1, audioAttributesForNotification(notification));
+                            buzz = true;
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                    } else if (notification.vibrate.length > 1) {
+                        // If you want your own vibration pattern, you need the VIBRATE
+                        // permission
+                        mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                                notification.vibrate,
+                                ((notification.flags & Notification.FLAG_INSISTENT) != 0)
+                                        ? 0: -1, audioAttributesForNotification(notification));
+                        buzz = true;
+                    }
                 }
             }
+
+        }
+        // If a notification is updated to remove the actively playing sound or vibrate,
+        // cancel that feedback now
+        if (wasBeep && !hasValidSound) {
+            clearSoundLocked();
+        }
+        if (wasBuzz && !hasValidVibrate) {
+            clearVibrateLocked();
         }
 
         // light
         // release the light
-        boolean wasShowLights = mLights.remove(record.getKey());
+        boolean wasShowLights = mLights.remove(key);
         if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && aboveThreshold
                 && ((record.getSuppressedVisualEffects()
                 & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) == 0)) {
-            mLights.add(record.getKey());
+            mLights.add(key);
             updateLightsLocked();
             if (mUseAttentionLight) {
                 mAttentionLight.pulse();
@@ -2654,7 +2700,7 @@ public class NotificationManagerService extends SystemService {
                     & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0)) {
                 if (DBG) Slog.v(TAG, "Suppressed SystemUI from triggering screen on");
             } else {
-                EventLogTags.writeNotificationAlert(record.getKey(),
+                EventLogTags.writeNotificationAlert(key,
                         buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
                 mHandler.post(mBuzzBeepBlinked);
             }
