@@ -51,7 +51,7 @@ public final class KeyboardShortcutInfo implements Parcelable {
         mLabel = label;
         mIcon = icon;
         mBaseCharacter = MIN_VALUE;
-        checkArgument(keycode > KeyEvent.KEYCODE_UNKNOWN && keycode <= KeyEvent.getMaxKeyCode());
+        checkArgument(keycode >= KeyEvent.KEYCODE_UNKNOWN && keycode <= KeyEvent.getMaxKeyCode());
         mKeycode = keycode;
         mModifiers = modifiers;
     }
