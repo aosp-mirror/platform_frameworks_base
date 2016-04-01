@@ -64,6 +64,7 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.MOVE_FAILED_DEVICE_ADMIN;
@@ -2886,10 +2887,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         return cur;
     }
 
-    PackageInfo generatePackageInfo(PackageParser.Package p, int flags, int userId) {
+    private PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        final PackageSetting ps = (PackageSetting) p.mExtras;
         if (ps == null) {
+            return null;
+        }
+        final PackageParser.Package p = ps.pkg;
+        if (p == null) {
             return null;
         }
 
@@ -2961,14 +2965,28 @@ public class PackageManagerService extends IPackageManager.Stub {
                 false /* requireFullPermission */, false /* checkShell */, "get package info");
         // reader
         synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
+            final boolean matchFactoryOnly = (flags & MATCH_FACTORY_ONLY) != 0;
+            PackageParser.Package p = null;
+            if (matchFactoryOnly) {
+                final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
+                if (ps != null) {
+                    return generatePackageInfo(ps, flags, userId);
+                }
+            }
+            if (p == null) {
+                p = mPackages.get(packageName);
+                if (matchFactoryOnly && !isSystemApp(p)) {
+                    return null;
+                }
+            }
             if (DEBUG_PACKAGE_INFO)
                 Log.v(TAG, "getPackageInfo " + packageName + ": " + p);
             if (p != null) {
-                return generatePackageInfo(p, flags, userId);
+                return generatePackageInfo((PackageSetting)p.mExtras, flags, userId);
             }
-            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
-                return generatePackageInfoFromSettingsLPw(packageName, flags, userId);
+            if (!matchFactoryOnly && (flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                return generatePackageInfo(ps, flags, userId);
             }
         }
         return null;
@@ -3129,8 +3147,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageSetting ps = mSettings.mPackages.get(packageName);
         if (ps != null) {
             if (ps.pkg == null) {
-                PackageInfo pInfo = generatePackageInfoFromSettingsLPw(packageName,
-                        flags, userId);
+                final PackageInfo pInfo = generatePackageInfo(ps, flags, userId);
                 if (pInfo != null) {
                     return pInfo.applicationInfo;
                 }
@@ -3138,31 +3155,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return PackageParser.generateApplicationInfo(ps.pkg, flags,
                     ps.readUserState(userId), userId);
-        }
-        return null;
-    }
-
-    private PackageInfo generatePackageInfoFromSettingsLPw(String packageName, int flags,
-            int userId) {
-        if (!sUserManager.exists(userId)) return null;
-        PackageSetting ps = mSettings.mPackages.get(packageName);
-        if (ps != null) {
-            PackageParser.Package pkg = ps.pkg;
-            if (pkg == null) {
-                if ((flags & MATCH_UNINSTALLED_PACKAGES) == 0) {
-                    return null;
-                }
-                // Only data remains, so we aren't worried about code paths
-                pkg = new PackageParser.Package(packageName);
-                pkg.applicationInfo.packageName = packageName;
-                pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
-                pkg.applicationInfo.privateFlags = ps.pkgPrivateFlags;
-                pkg.applicationInfo.uid = ps.appId;
-                pkg.applicationInfo.initForUser(userId);
-                pkg.applicationInfo.primaryCpuAbi = ps.primaryCpuAbiString;
-                pkg.applicationInfo.secondaryCpuAbi = ps.secondaryCpuAbiString;
-            }
-            return generatePackageInfo(pkg, flags, userId);
         }
         return null;
     }
@@ -5915,11 +5907,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (listUninstalled) {
                 list = new ArrayList<PackageInfo>(mSettings.mPackages.size());
                 for (PackageSetting ps : mSettings.mPackages.values()) {
-                    PackageInfo pi;
+                    final PackageInfo pi;
                     if (ps.pkg != null) {
-                        pi = generatePackageInfo(ps.pkg, flags, userId);
+                        pi = generatePackageInfo(ps, flags, userId);
                     } else {
-                        pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
+                        pi = generatePackageInfo(ps, flags, userId);
                     }
                     if (pi != null) {
                         list.add(pi);
@@ -5928,7 +5920,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 list = new ArrayList<PackageInfo>(mPackages.size());
                 for (PackageParser.Package p : mPackages.values()) {
-                    PackageInfo pi = generatePackageInfo(p, flags, userId);
+                    final PackageInfo pi =
+                            generatePackageInfo((PackageSetting)p.mExtras, flags, userId);
                     if (pi != null) {
                         list.add(pi);
                     }
@@ -5955,11 +5948,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (numMatch == 0) {
             return;
         }
-        PackageInfo pi;
+        final PackageInfo pi;
         if (ps.pkg != null) {
-            pi = generatePackageInfo(ps.pkg, flags, userId);
+            pi = generatePackageInfo(ps, flags, userId);
         } else {
-            pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
+            pi = generatePackageInfo(ps, flags, userId);
         }
         // The above might return null in cases of uninstalled apps or install-state
         // skew across users/profiles.
