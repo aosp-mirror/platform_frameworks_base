@@ -285,6 +285,7 @@ final class TaskRecord {
         mCallingPackage = info.packageName;
         setIntent(_intent, info);
         setMinDimensions(info);
+        touchActiveTime();
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -315,6 +316,7 @@ final class TaskRecord {
         taskType = APPLICATION_ACTIVITY_TYPE;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         lastTaskDescription = _taskDescription;
+        touchActiveTime();
     }
 
     private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
