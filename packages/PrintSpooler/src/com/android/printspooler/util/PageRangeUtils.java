@@ -18,7 +18,9 @@ package com.android.printspooler.util;
 
 import android.print.PageRange;
 import android.print.PrintDocumentInfo;
+import android.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -152,6 +154,167 @@ public final class PageRangeUtils {
         }
 
         return normalRanges;
+    }
+
+    /**
+     * Return the next position after {@code pos} that is not a space character.
+     *
+     * @param s   The string to parse
+     * @param pos The starting position
+     *
+     * @return The position of the first space character
+     */
+    private static int readWhiteSpace(CharSequence s, int pos) {
+        while (pos < s.length() && s.charAt(pos) == ' ') {
+            pos++;
+        }
+
+        return pos;
+    }
+
+    /**
+     * Read a number from a string at a certain position.
+     *
+     * @param s   The string to parse
+     * @param pos The starting position
+     *
+     * @return The position after the number + the number read or null if the number was not found
+     */
+    private static Pair<Integer, Integer> readNumber(CharSequence s, int pos) {
+        Integer result = 0;
+        while (pos < s.length() && s.charAt(pos) >= '0' && s.charAt(pos) <= '9') {
+            // Number cannot start with 0
+            if (result == 0 && s.charAt(pos) == '0') {
+                break;
+            }
+            result = result * 10 + (s.charAt(pos) - '0');
+            // Abort on overflow
+            if (result < 0) {
+                break;
+            }
+            pos++;
+        }
+
+        // 0 is not a valid page number
+        if (result == 0) {
+            return new Pair<>(pos, null);
+        } else {
+            return new Pair<>(pos, result);
+        }
+    }
+
+    /**
+     * Read a single character from a string at a certain position.
+     *
+     * @param s            The string to parse
+     * @param pos          The starting position
+     * @param expectedChar The character to read
+     *
+     * @return The position after the character + the character read or null if the character was
+     *         not found
+     */
+    private static Pair<Integer, Character> readChar(CharSequence s, int pos, char expectedChar) {
+        if (pos < s.length() && s.charAt(pos) == expectedChar) {
+            return new Pair<>(pos + 1, expectedChar);
+        } else {
+            return new Pair<>(pos, null);
+        }
+    }
+
+    /**
+     * Read a page range character from a string at a certain position.
+     *
+     * @param s             The string to parse
+     * @param pos           The starting position
+     * @param maxPageNumber The highest page number to accept.
+     *
+     * @return The position after the page range + the page range read or null if the page range was
+     *         not found
+     */
+    private static Pair<Integer, PageRange> readRange(CharSequence s, int pos, int maxPageNumber) {
+        Pair<Integer, Integer> retInt;
+        Pair<Integer, Character> retChar;
+
+        Character comma;
+        if (pos == 0) {
+            // When we reading the first range, we do not want to have a comma
+            comma = ',';
+        } else {
+            retChar = readChar(s, pos, ',');
+            pos = retChar.first;
+            comma = retChar.second;
+        }
+
+        pos = readWhiteSpace(s, pos);
+
+        retInt = readNumber(s, pos);
+        pos = retInt.first;
+        Integer start = retInt.second;
+
+        pos = readWhiteSpace(s, pos);
+
+        retChar = readChar(s, pos, '-');
+        pos = retChar.first;
+        Character separator = retChar.second;
+
+        pos = readWhiteSpace(s, pos);
+
+        retInt = readNumber(s, pos);
+        pos = retInt.first;
+        Integer end = retInt.second;
+
+        pos = readWhiteSpace(s, pos);
+
+        if (comma != null &&
+                // range, maybe unbounded
+                ((separator != null && (start != null || end != null)) ||
+                        // single page
+                        (separator == null && start != null && end == null))) {
+            if (start == null) {
+                start = 1;
+            }
+
+            if (end == null) {
+                if (separator == null) {
+                    end = start;
+                } else {
+                    end = maxPageNumber;
+                }
+            }
+
+            if (start <= end && start >= 1 && end <= maxPageNumber) {
+                return new Pair<>(pos, new PageRange(start - 1, end - 1));
+            }
+        }
+
+        return new Pair<>(pos, null);
+    }
+
+    /**
+     * Parse a string into an array of page ranges.
+     *
+     * @param s             The string to parse
+     * @param maxPageNumber The highest page number to accept.
+     *
+     * @return The parsed ranges or null if the string could not be parsed.
+     */
+    public static PageRange[] parsePageRanges(CharSequence s, int maxPageNumber) {
+        ArrayList<PageRange> ranges = new ArrayList<>();
+
+        int pos = 0;
+        while (pos < s.length()) {
+            Pair<Integer, PageRange> retRange = readRange(s, pos, maxPageNumber);
+
+            if (retRange.second == null) {
+                ranges.clear();
+                break;
+            }
+
+            ranges.add(retRange.second);
+            pos = retRange.first;
+        }
+
+        return PageRangeUtils.normalize(ranges.toArray(new PageRange[ranges.size()]));
     }
 
     /**

@@ -62,7 +62,6 @@ import android.printservice.PrintServiceInfo;
 import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -117,8 +116,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PrintActivity extends Activity implements RemotePrintDocument.UpdateResultCallbacks,
         PrintErrorFragment.OnActionListener, PageAdapter.ContentCallbacks,
@@ -165,21 +162,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int MIN_COPIES = 1;
     private static final String MIN_COPIES_STRING = String.valueOf(MIN_COPIES);
 
-    private static final Pattern PATTERN_DIGITS = Pattern.compile("[\\d]+");
-
-    private static final Pattern PATTERN_ESCAPE_SPECIAL_CHARS = Pattern.compile(
-            "(?=[]\\[+&|!(){}^\"~*?:\\\\])");
-
-    private static final Pattern PATTERN_PAGE_RANGE = Pattern.compile(
-            "[\\s]*[0-9]+[\\-]?[\\s]*[0-9]*[\\s]*?(([,])"
-                    + "[\\s]*[0-9]+[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*|[\\s]*)+");
-
     private boolean mIsOptionsUiBound = false;
 
     private final PrinterAvailabilityDetector mPrinterAvailabilityDetector =
             new PrinterAvailabilityDetector();
-
-    private final SimpleStringSplitter mStringCommaSplitter = new SimpleStringSplitter(',');
 
     private final OnFocusChangeListener mSelectAllOnFocusListener = new SelectAllOnFocusListener();
 
@@ -1493,9 +1479,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     cancelPrint();
                 }
             } else if (view == mMoreOptionsButton) {
-                // The selected pages is only applied once the user leaves the text field. A click
-                // on this button, does not count as leaving.
-                updateSelectedPagesFromTextField();
+                if (mPageRangeEditText.getError() == null) {
+                    // The selected pages is only applied once the user leaves the text field. A click
+                    // on this button, does not count as leaving.
+                    updateSelectedPagesFromTextField();
+                }
 
                 if (mCurrentPrinter != null) {
                     startAdvancedPrintOptionsActivity(mCurrentPrinter);
@@ -1918,42 +1906,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         if (mRangeOptionsSpinner.getSelectedItemPosition() > 0) {
-            List<PageRange> pageRanges = new ArrayList<>();
-            mStringCommaSplitter.setString(mPageRangeEditText.getText().toString());
+            PrintDocumentInfo info = mPrintedDocument.getDocumentInfo().info;
+            final int pageCount = (info != null) ? getAdjustedPageCount(info) : 0;
 
-            while (mStringCommaSplitter.hasNext()) {
-                String range = mStringCommaSplitter.next().trim();
-                if (TextUtils.isEmpty(range)) {
-                    continue;
-                }
-                final int dashIndex = range.indexOf('-');
-                final int fromIndex;
-                final int toIndex;
-
-                if (dashIndex > 0) {
-                    fromIndex = Integer.parseInt(range.substring(0, dashIndex).trim()) - 1;
-                    // It is possible that the dash is at the end since the input
-                    // verification can has to allow the user to keep entering if
-                    // this would lead to a valid input. So we handle this.
-                    if (dashIndex < range.length() - 1) {
-                        String fromString = range.substring(dashIndex + 1, range.length()).trim();
-                        toIndex = Integer.parseInt(fromString) - 1;
-                    } else {
-                        toIndex = fromIndex;
-                    }
-                } else {
-                    fromIndex = toIndex = Integer.parseInt(range) - 1;
-                }
-
-                PageRange pageRange = new PageRange(Math.min(fromIndex, toIndex),
-                        Math.max(fromIndex, toIndex));
-                pageRanges.add(pageRange);
-            }
-
-            PageRange[] pageRangesArray = new PageRange[pageRanges.size()];
-            pageRanges.toArray(pageRangesArray);
-
-            return PageRangeUtils.normalize(pageRangesArray);
+            return PageRangeUtils.parsePageRanges(mPageRangeEditText.getText(), pageCount);
         }
 
         return PageRange.ALL_PAGES_ARRAY;
@@ -2785,7 +2741,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 editText.setSelection(editText.getText().length());
             }
 
-            if (view == mPageRangeEditText && !hasFocus) {
+            if (view == mPageRangeEditText && !hasFocus && mPageRangeEditText.getError() == null) {
                 updateSelectedPagesFromTextField();
             }
         }
@@ -2805,48 +2761,18 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         @Override
         public void afterTextChanged(Editable editable) {
             final boolean hadErrors = hasErrors();
-            String text = editable.toString();
-
-            if (TextUtils.isEmpty(text)) {
-                if (mPageRangeEditText.getError() == null) {
-                    mPageRangeEditText.setError("");
-                    updateOptionsUi();
-                }
-                return;
-            }
-
-            String escapedText = PATTERN_ESCAPE_SPECIAL_CHARS.matcher(text).replaceAll("////");
-            if (!PATTERN_PAGE_RANGE.matcher(escapedText).matches()) {
-                if (mPageRangeEditText.getError() == null) {
-                    mPageRangeEditText.setError("");
-                    updateOptionsUi();
-                }
-                return;
-            }
 
             PrintDocumentInfo info = mPrintedDocument.getDocumentInfo().info;
             final int pageCount = (info != null) ? getAdjustedPageCount(info) : 0;
+            PageRange[] ranges = PageRangeUtils.parsePageRanges(editable, pageCount);
 
-            // The range
-            Matcher matcher = PATTERN_DIGITS.matcher(text);
-            while (matcher.find()) {
-                String numericString = text.substring(matcher.start(), matcher.end()).trim();
-                if (TextUtils.isEmpty(numericString)) {
-                    continue;
+            if (ranges.length == 0) {
+                if (mPageRangeEditText.getError() == null) {
+                    mPageRangeEditText.setError("");
+                    updateOptionsUi();
                 }
-                final int pageIndex = Integer.parseInt(numericString);
-                if (pageIndex < 1 || pageIndex > pageCount) {
-                    if (mPageRangeEditText.getError() == null) {
-                        mPageRangeEditText.setError("");
-                        updateOptionsUi();
-                    }
-                    return;
-                }
+                return;
             }
-
-            // We intentionally do not catch the case of the from page being
-            // greater than the to page. When computing the requested pages
-            // we just swap them if necessary.
 
             if (mPageRangeEditText.getError() != null) {
                 mPageRangeEditText.setError(null);
