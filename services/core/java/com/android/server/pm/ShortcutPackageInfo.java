@@ -67,10 +67,6 @@ class ShortcutPackageInfo {
         return mIsShadow;
     }
 
-    public boolean isInstalled() {
-        return !mIsShadow;
-    }
-
     public void setShadow(boolean shadow) {
         mIsShadow = shadow;
     }
@@ -79,14 +75,24 @@ class ShortcutPackageInfo {
         return mVersionCode;
     }
 
-    public boolean canRestoreTo(PackageInfo target) {
+    public boolean hasSignatures() {
+        return mSigHashes.size() > 0;
+    }
+
+    public boolean canRestoreTo(ShortcutService s, PackageInfo target) {
+        if (!s.shouldBackupApp(target)) {
+            // "allowBackup" was true when backed up, but now false.
+            Slog.w(TAG, "Can't restore: package no longer allows backup");
+            return false;
+        }
         if (target.versionCode < mVersionCode) {
-            Slog.w(TAG, String.format("Package current version %d < backed up version %d",
+            Slog.w(TAG, String.format(
+                    "Can't restore: package current version %d < backed up version %d",
                     target.versionCode, mVersionCode));
             return false;
         }
         if (!BackupUtils.signaturesMatch(mSigHashes, target)) {
-            Slog.w(TAG, "Package signature mismtach");
+            Slog.w(TAG, "Can't restore: Package signature mismatch");
             return false;
         }
         return true;
@@ -106,6 +112,11 @@ class ShortcutPackageInfo {
     }
 
     public void refresh(ShortcutService s, ShortcutPackageItem pkg) {
+        if (mIsShadow) {
+            s.wtf("Attempted to refresh package info for shadow package " + pkg.getPackageName()
+                    + ", user=" + pkg.getOwnerUserId());
+            return;
+        }
         // Note use mUserId here, rather than userId.
         final PackageInfo pi = s.getPackageInfoWithSignatures(
                 pkg.getPackageName(), pkg.getPackageUserId());
@@ -132,14 +143,16 @@ class ShortcutPackageInfo {
         out.endTag(null, TAG_ROOT);
     }
 
-    public static ShortcutPackageInfo loadFromXml(XmlPullParser parser)
+    public void loadFromXml(XmlPullParser parser, boolean fromBackup)
             throws IOException, XmlPullParserException {
 
         final int versionCode = ShortcutService.parseIntAttribute(parser, ATTR_VERSION);
-        final boolean shadow = ShortcutService.parseBooleanAttribute(parser, ATTR_SHADOW);
+
+        // When restoring from backup, it's always shadow.
+        final boolean shadow =
+                fromBackup || ShortcutService.parseBooleanAttribute(parser, ATTR_SHADOW);
 
         final ArrayList<byte[]> hashes = new ArrayList<>();
-
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -163,7 +176,11 @@ class ShortcutPackageInfo {
             }
             ShortcutService.warnForInvalidTag(depth, tag);
         }
-        return new ShortcutPackageInfo(versionCode, hashes, shadow);
+
+        // Successfully loaded; replace the feilds.
+        mVersionCode = versionCode;
+        mIsShadow = shadow;
+        mSigHashes = hashes;
     }
 
     public void dump(ShortcutService s, PrintWriter pw, String prefix) {
