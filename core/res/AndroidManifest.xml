@@ -845,14 +845,14 @@
     -->
     <permission android:name="android.permission.ACCESS_UCE_PRESENCE_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
-        android:protectionLevel="dangerous"/>
+        android:protectionLevel="signatureOrSystem"/>
 
     <!-- @hide Allows an application to Access UCE-OPTIONS.
          <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.ACCESS_UCE_OPTIONS_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
-        android:protectionLevel="dangerous"/>
+        android:protectionLevel="signatureOrSystem"/>
 
 
 
