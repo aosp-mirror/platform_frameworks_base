@@ -20,12 +20,15 @@ package android.hardware.location;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * @hide
  */
 @SystemApi
 public class NanoAppFilter {
+
+    private static final String TAG = "NanoAppFilter";
 
     // The appId, can be set to APP_ID_ANY
     private long mAppId;
@@ -54,6 +57,10 @@ public class NanoAppFilter {
      * If this flag is set, only versions strictly less than the version specified shall match.
      */
     public static final int FLAGS_VERSION_LESS_THAN   = 4;
+    /**
+     * If this flag is set, only versions strictly equal to the
+     * version specified shall match.
+     */
     public static final int FLAGS_VERSION_STRICTLY_EQUAL = 8;
 
     /**
@@ -117,14 +124,9 @@ public class NanoAppFilter {
      * @return true if this is a match, false otherwise
      */
     public boolean testMatch(NanoAppInstanceInfo info) {
-        if ((mContextHubId == HUB_ANY || info.getContexthubId() == mContextHubId) &&
+        return (mContextHubId == HUB_ANY || info.getContexthubId() == mContextHubId) &&
                 (mAppId == APP_ANY || info.getAppId() == mAppId) &&
-               // (mAppIdVendorMask == VENDOR_ANY) TODO : Expose Vendor mask cleanly
-                (versionsMatch(mVersionRestrictionMask, mAppVersion, info.getAppVersion()))) {
-            return true;
-        } else {
-            return false;
-        }
+                (versionsMatch(mVersionRestrictionMask, mAppVersion, info.getAppVersion()));
     }
 
     public static final Parcelable.Creator<NanoAppFilter> CREATOR
