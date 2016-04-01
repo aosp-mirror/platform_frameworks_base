@@ -421,31 +421,43 @@ nClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong kernelID,
       goto exit;
   }
 
-  fieldIDs = (RsScriptFieldID*)alloca(sizeof(RsScriptFieldID) * numValues);
-  if (fieldIDs == nullptr) {
-      goto exit;
+  if (numValues > 0) {
+      fieldIDs = (RsScriptFieldID*)alloca(sizeof(RsScriptFieldID) * numValues);
+      if (fieldIDs == nullptr) {
+          goto exit;
+      }
+  } else {
+      // numValues == 0
+      // alloca(0) implementation is platform-dependent.
+      fieldIDs = nullptr;
   }
 
   for (size_t i = 0; i < numValues; i++) {
     fieldIDs[i] = (RsScriptFieldID)jFieldIDs[i];
   }
 
-  depClosures = (RsClosure*)alloca(sizeof(RsClosure) * numDependencies);
-  if (depClosures == nullptr) {
-      goto exit;
-  }
+  if (numDependencies > 0) {
+      depClosures = (RsClosure*)alloca(sizeof(RsClosure) * numDependencies);
+      if (depClosures == nullptr) {
+          goto exit;
+      }
 
-  for (size_t i = 0; i < numDependencies; i++) {
-    depClosures[i] = (RsClosure)jDepClosures[i];
-  }
+      for (size_t i = 0; i < numDependencies; i++) {
+          depClosures[i] = (RsClosure)jDepClosures[i];
+      }
 
-  depFieldIDs = (RsScriptFieldID*)alloca(sizeof(RsScriptFieldID) * numDependencies);
-  if (depFieldIDs == nullptr) {
-      goto exit;
-  }
+      depFieldIDs = (RsScriptFieldID*)alloca(sizeof(RsScriptFieldID) * numDependencies);
+      if (depFieldIDs == nullptr) {
+          goto exit;
+      }
 
-  for (size_t i = 0; i < numDependencies; i++) {
-    depFieldIDs[i] = (RsClosure)jDepFieldIDs[i];
+      for (size_t i = 0; i < numDependencies; i++) {
+          depFieldIDs[i] = (RsClosure)jDepFieldIDs[i];
+      }
+  } else {
+      // alloca(0) implementation is platform-dependent.
+      depClosures = nullptr;
+      depFieldIDs = nullptr;
   }
 
   ret = (jlong)(uintptr_t)rsClosureCreate(
@@ -853,7 +865,7 @@ nContextCreateGL(JNIEnv *_env, jobject _this, jlong dev, jint ver, jint sdkVer,
                  jint samplesMin, jint samplesPref, jfloat samplesQ,
                  jint dpi)
 {
-    RsSurfaceConfig sc;
+    RsSurfaceConfig sc = {};
     sc.alphaMin = alphaMin;
     sc.alphaPref = alphaPref;
     sc.colorMin = colorMin;
@@ -1403,8 +1415,8 @@ nAllocationElementData(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
                        jint xoff, jint yoff, jint zoff,
                        jint lod, jint compIdx, jbyteArray data, jint sizeBytes)
 {
-    jint len = _env->GetArrayLength(data);
     if (kLogApi) {
+        jint len = _env->GetArrayLength(data);
         ALOGD("nAllocationElementData, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), comp(%i), len(%i), "
               "sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff, compIdx, len,
               sizeBytes);
@@ -1545,8 +1557,8 @@ nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
                        jint xoff, jint yoff, jint zoff,
                        jint lod, jint compIdx, jbyteArray data, jint sizeBytes)
 {
-    jint len = _env->GetArrayLength(data);
     if (kLogApi) {
+        jint len = _env->GetArrayLength(data);
         ALOGD("nAllocationElementRead, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), comp(%i), len(%i), "
               "sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff, compIdx, len,
               sizeBytes);
