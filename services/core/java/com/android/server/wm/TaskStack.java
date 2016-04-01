@@ -884,6 +884,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
+    boolean isAdjustedForMinimizedDock() {
+        return mMinimizeAmount != 0f;
+    }
+
     private boolean adjustForIME(final WindowState imeWin) {
         final int dockedSide = getDockSide();
         final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
