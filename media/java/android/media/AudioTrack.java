@@ -596,14 +596,14 @@ public class AudioTrack implements AudioRouting
      * AudioTrack player = new AudioTrack.Builder()
      *         .setAudioAttributes(new AudioAttributes.Builder()
      *                  .setUsage(AudioAttributes.USAGE_ALARM)
-     *                  .setContentType(CONTENT_TYPE_MUSIC)
+     *                  .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
      *                  .build())
      *         .setAudioFormat(new AudioFormat.Builder()
      *                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
      *                 .setSampleRate(441000)
      *                 .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
      *                 .build())
-     *         .setBufferSize(minBuffSize)
+     *         .setBufferSizeInBytes(minBuffSize)
      *         .build();
      * </pre>
      * <p>
