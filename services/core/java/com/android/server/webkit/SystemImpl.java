@@ -19,15 +19,22 @@ package com.android.server.webkit;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.content.Context;
+import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.Settings.Global;
 import android.provider.Settings;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
-import android.webkit.WebViewFactory;
 import android.webkit.WebViewFactory.MissingWebViewPackageException;
+import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 
 import com.android.internal.util.XmlUtils;
@@ -42,8 +49,8 @@ import org.xmlpull.v1.XmlPullParserException;
  * Default implementation for the WebView preparation Utility interface.
  * @hide
  */
-public class WebViewUtilityImpl implements WebViewUtilityInterface {
-    private static final String TAG = WebViewUtilityImpl.class.getSimpleName();
+public class SystemImpl implements SystemInterface {
+    private static final String TAG = SystemImpl.class.getSimpleName();
     private static final String TAG_START = "webviewproviders";
     private static final String TAG_WEBVIEW_PROVIDER = "webviewprovider";
     private static final String TAG_PACKAGE_NAME = "packageName";
@@ -158,4 +165,67 @@ public class WebViewUtilityImpl implements WebViewUtilityInterface {
         } catch (RemoteException e) {
         }
     }
+
+    @Override
+    public boolean isFallbackLogicEnabled() {
+        // Note that this is enabled by default (i.e. if the setting hasn't been set).
+        return Settings.Global.getInt(AppGlobals.getInitialApplication().getContentResolver(),
+                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED, 1) == 1;
+    }
+
+    @Override
+    public void enableFallbackLogic(boolean enable) {
+        Settings.Global.putInt(AppGlobals.getInitialApplication().getContentResolver(),
+                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED, enable ? 1 : 0);
+    }
+
+    @Override
+    public void uninstallAndDisablePackageForAllUsers(Context context, String packageName) {
+        context.getPackageManager().deletePackage(packageName,
+                new IPackageDeleteObserver.Stub() {
+            public void packageDeleted(String packageName, int returnCode) {
+                // Ignore returnCode since the deletion could fail, e.g. we might be trying
+                // to delete a non-updated system-package (and we should still disable the
+                // package)
+                enablePackageForAllUsers(context, packageName, false);
+            }
+        }, PackageManager.DELETE_SYSTEM_APP | PackageManager.DELETE_ALL_USERS);
+    }
+
+    @Override
+    public void enablePackageForAllUsers(Context context, String packageName, boolean enable) {
+        UserManager userManager = (UserManager)context.getSystemService(Context.USER_SERVICE);
+        for(UserInfo userInfo : userManager.getUsers()) {
+            enablePackageForUser(packageName, enable, userInfo.id);
+        }
+    }
+
+    @Override
+    public void enablePackageForUser(String packageName, boolean enable, int userId) {
+        try {
+            AppGlobals.getPackageManager().setApplicationEnabledSetting(
+                    packageName,
+                    enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0,
+                    userId, null);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Tried to disable " + packageName + " for user " + userId + ": " + e);
+        }
+    }
+
+    @Override
+    public boolean systemIsDebuggable() {
+        return Build.IS_DEBUGGABLE;
+    }
+
+    @Override
+    public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
+            throws NameNotFoundException {
+        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+        return pm.getPackageInfo(configInfo.packageName, PACKAGE_FLAGS);
+    }
+
+    // flags declaring we want extra info from the package manager for webview providers
+    private final static int PACKAGE_FLAGS = PackageManager.GET_META_DATA
+            | PackageManager.GET_SIGNATURES | PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 }
