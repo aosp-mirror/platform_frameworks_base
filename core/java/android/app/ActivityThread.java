@@ -91,6 +91,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.ThreadedRenderer;
 import android.view.View;
@@ -4632,7 +4633,21 @@ public final class ActivityThread {
             }
 
             if (reportToActivity) {
-                cb.onConfigurationChanged(newConfig);
+                Configuration configToReport = newConfig;
+
+                if (cb instanceof ContextThemeWrapper) {
+                    // ContextThemeWrappers may override the configuration for that context.
+                    // We must check and apply any overrides defined.
+                    ContextThemeWrapper contextThemeWrapper = (ContextThemeWrapper) cb;
+                    final Configuration localOverrideConfig =
+                            contextThemeWrapper.getOverrideConfiguration();
+                    if (localOverrideConfig != null) {
+                        configToReport = new Configuration(newConfig);
+                        configToReport.updateFrom(localOverrideConfig);
+                    }
+                }
+
+                cb.onConfigurationChanged(configToReport);
             }
 
             if (activity != null) {
