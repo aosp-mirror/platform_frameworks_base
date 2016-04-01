@@ -31,8 +31,9 @@ public class LocaleStore {
     private static boolean sFullyInitialized = false;
 
     public static class LocaleInfo {
-        private static final int SUGGESTION_TYPE_NONE = 0x00;
-        private static final int SUGGESTION_TYPE_SIM = 0x01;
+        private static final int SUGGESTION_TYPE_NONE = 0;
+        private static final int SUGGESTION_TYPE_SIM = 1 << 0;
+        private static final int SUGGESTION_TYPE_CFG = 1 << 1;
 
         private final Locale mLocale;
         private final Locale mParent;
@@ -273,6 +274,22 @@ public class LocaleStore {
         final HashSet<String> localizedLocales = new HashSet<>();
         for (String localeId : LocalePicker.getSystemAssetLocales()) {
             LocaleInfo li = new LocaleInfo(localeId);
+            final String country = li.getLocale().getCountry();
+            // All this is to figure out if we should suggest a country
+            if (!country.isEmpty()) {
+                LocaleInfo cachedLocale = null;
+                if (sLocaleCache.containsKey(li.getId())) { // the simple case, e.g. fr-CH
+                    cachedLocale = sLocaleCache.get(li.getId());
+                } else { // e.g. zh-TW localized, zh-Hant-TW in cache
+                    final String langScriptCtry = li.getLangScriptKey() + "-" + country;
+                    if (sLocaleCache.containsKey(langScriptCtry)) {
+                        cachedLocale = sLocaleCache.get(langScriptCtry);
+                    }
+                }
+                if (cachedLocale != null) {
+                    cachedLocale.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CFG;
+                }
+            }
             localizedLocales.add(li.getLangScriptKey());
         }
 
