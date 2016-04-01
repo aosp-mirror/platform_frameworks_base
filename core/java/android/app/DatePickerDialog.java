@@ -58,7 +58,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
      * @param context the parent context
      */
     public DatePickerDialog(@NonNull Context context) {
-        this(context, 0);
+        this(context, 0, null, Calendar.getInstance(), -1, -1, -1);
     }
 
     /**
@@ -70,24 +70,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
      *                   {@code context}'s default alert dialog theme
      */
     public DatePickerDialog(@NonNull Context context, @StyleRes int themeResId) {
-        super(context, resolveDialogTheme(context, themeResId));
-
-        final Context themeContext = getContext();
-        final LayoutInflater inflater = LayoutInflater.from(themeContext);
-        final View view = inflater.inflate(R.layout.date_picker_dialog, null);
-        setView(view);
-
-        setButton(BUTTON_POSITIVE, themeContext.getString(R.string.ok), this);
-        setButton(BUTTON_NEGATIVE, themeContext.getString(R.string.cancel), this);
-        setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
-
-        final Calendar calendar = Calendar.getInstance();
-        final int year = calendar.get(Calendar.YEAR);
-        final int monthOfYear = calendar.get(Calendar.MONTH);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
-        mDatePicker.init(year, monthOfYear, dayOfMonth, this);
-        mDatePicker.setValidationCallback(mValidationCallback);
+        this(context, themeResId, null, Calendar.getInstance(), -1, -1, -1);
     }
 
     /**
@@ -104,7 +87,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
      */
     public DatePickerDialog(@NonNull Context context, @Nullable OnDateSetListener listener,
             int year, int month, int dayOfMonth) {
-        this(context, 0, listener, year, month, dayOfMonth);
+        this(context, 0, listener, null, year, month, dayOfMonth);
     }
 
     /**
@@ -116,16 +99,40 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
      *                   {@code context}'s default alert dialog theme
      * @param listener the listener to call when the user sets the date
      * @param year the initially selected year
-     * @param month the initially selected month (0-11 for compatibility with
-     *              {@link Calendar#MONTH})
+     * @param monthOfYear the initially selected month of the year (0-11 for
+     *                    compatibility with {@link Calendar#MONTH})
      * @param dayOfMonth the initially selected day of month (1-31, depending
      *                   on month)
      */
     public DatePickerDialog(@NonNull Context context, @StyleRes int themeResId,
-            @Nullable OnDateSetListener listener, int year, int month, int dayOfMonth) {
-        this(context, themeResId);
+            @Nullable OnDateSetListener listener, int year, int monthOfYear, int dayOfMonth) {
+        this(context, themeResId, listener, null, year, monthOfYear, dayOfMonth);
+    }
 
-        mDatePicker.updateDate(year, month, dayOfMonth);
+    private DatePickerDialog(@NonNull Context context, @StyleRes int themeResId,
+            @Nullable OnDateSetListener listener, @Nullable Calendar calendar, int year,
+            int monthOfYear, int dayOfMonth) {
+        super(context, resolveDialogTheme(context, themeResId));
+
+        final Context themeContext = getContext();
+        final LayoutInflater inflater = LayoutInflater.from(themeContext);
+        final View view = inflater.inflate(R.layout.date_picker_dialog, null);
+        setView(view);
+
+        setButton(BUTTON_POSITIVE, themeContext.getString(R.string.ok), this);
+        setButton(BUTTON_NEGATIVE, themeContext.getString(R.string.cancel), this);
+        setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
+
+        if (calendar != null) {
+            year = calendar.get(Calendar.YEAR);
+            monthOfYear = calendar.get(Calendar.MONTH);
+            dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        }
+
+        mDatePicker = (DatePicker) view.findViewById(R.id.datePicker);
+        mDatePicker.init(year, monthOfYear, dayOfMonth, this);
+        mDatePicker.setValidationCallback(mValidationCallback);
+
         mDateSetListener = listener;
     }
 
