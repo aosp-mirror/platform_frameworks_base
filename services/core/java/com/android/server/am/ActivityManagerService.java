@@ -20980,6 +20980,36 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mStackSupervisor.setDockedStackMinimized(minimized);
             }
         }
+
+        @Override
+        public void killForegroundAppsForUser(int userHandle) {
+            synchronized (ActivityManagerService.this) {
+                final ArrayList<ProcessRecord> procs = new ArrayList<>();
+                final int NP = mProcessNames.getMap().size();
+                for (int ip = 0; ip < NP; ip++) {
+                    final SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
+                    final int NA = apps.size();
+                    for (int ia = 0; ia < NA; ia++) {
+                        final ProcessRecord app = apps.valueAt(ia);
+                        if (app.persistent) {
+                            // We don't kill persistent processes.
+                            continue;
+                        }
+                        if (app.removed) {
+                            procs.add(app);
+                        } else if (app.userId == userHandle && app.foregroundActivities) {
+                            app.removed = true;
+                            procs.add(app);
+                        }
+                    }
+                }
+
+                final int N = procs.size();
+                for (int i = 0; i < N; i++) {
+                    removeProcessLocked(procs.get(i), false, true, "kill all fg");
+                }
+            }
+        }
     }
 
     private final class SleepTokenImpl extends SleepToken {
