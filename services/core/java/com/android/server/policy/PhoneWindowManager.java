@@ -3107,10 +3107,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return -1;
             }
         } else if (keyCode == KeyEvent.KEYCODE_SLASH && event.isMetaPressed()) {
-            if (down) {
-                if (repeatCount == 0) {
-                    toggleKeyboardShortcutsMenu(event.getDeviceId());
-                }
+            if (down && repeatCount == 0 && !isKeyguardLocked()) {
+                toggleKeyboardShortcutsMenu(event.getDeviceId());
             }
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
             if (down) {
