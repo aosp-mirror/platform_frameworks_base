@@ -185,6 +185,9 @@ final class SearchViewManager implements
         if(mFullBar) {
             Menu menu = mActionBar.getMenu();
             menu.setGroupVisible(R.id.group_hide_when_searching, false);
+        } else {
+            // If search in full-bar mode it will be logged in FilesActivity#onOptionsItemSelected
+            Metrics.logMenuAction(mActionBar.getContext(), R.id.menu_search);
         }
     }
 

@@ -212,19 +212,22 @@ public class FilesActivity extends BaseActivity {
             case R.id.menu_create_dir:
                 assert(canCreateDirectory());
                 showCreateDirectoryDialog();
-                return true;
+                break;
             case R.id.menu_new_window:
                 createNewWindow();
-                return true;
+                break;
             case R.id.menu_paste_from_clipboard:
                 DirectoryFragment dir = getDirectoryFragment();
                 if (dir != null) {
                     dir.pasteFromClipboard();
                 }
-                return true;
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        Metrics.logMenuAction(this, item.getItemId());
+        return true;
     }
 
     private void createNewWindow() {
