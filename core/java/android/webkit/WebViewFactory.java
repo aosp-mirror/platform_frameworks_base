@@ -573,8 +573,12 @@ public final class WebViewFactory {
                 intent.getDataString().substring("package:".length()));
     }
 
-    private static IWebViewUpdateService getUpdateService() {
-        return IWebViewUpdateService.Stub.asInterface(ServiceManager.getService("webviewupdate"));
+    private static String WEBVIEW_UPDATE_SERVICE_NAME = "webviewupdate";
+
+    /** @hide */
+    public static IWebViewUpdateService getUpdateService() {
+        return IWebViewUpdateService.Stub.asInterface(
+                ServiceManager.getService(WEBVIEW_UPDATE_SERVICE_NAME));
     }
 
     private static native boolean nativeReserveAddressSpace(long addressSpaceToReserve);
