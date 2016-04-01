@@ -233,7 +233,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
 
         mDuplexModes = parcel.readInt();
         enforceValidMask(mDuplexModes,
-                (currentMode) -> PrintAttributes.enforceValidColorMode(currentMode));
+                (currentMode) -> PrintAttributes.enforceValidDuplexMode(currentMode));
 
         readDefaults(parcel);
         Preconditions.checkArgument(mMediaSizes.size() > mDefaults[PROPERTY_MEDIA_SIZE]);
