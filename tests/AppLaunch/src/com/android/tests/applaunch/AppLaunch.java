@@ -62,7 +62,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
     private static final String WEARABLE_ACTION_GOOGLE =
             "com.google.android.wearable.action.GOOGLE";
-    private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 7500; //7.5s to allow app to idle
+    private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 60000; //60s to allow app to idle
     private static final int POST_LAUNCH_IDLE_TIMEOUT = 750; //750ms idle for non initial launches
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 2000; //2s between launching apps
 
