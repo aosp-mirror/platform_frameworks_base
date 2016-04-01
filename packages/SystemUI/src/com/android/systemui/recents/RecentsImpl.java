@@ -794,6 +794,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             synchronized (mHeaderBarLock) {
                 int toHeaderWidth = (int) toTransform.rect.width();
                 int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
+                if (toHeaderWidth <= 0 || toHeaderHeight <= 0) {
+                    return null;
+                }
                 boolean disabledInSafeMode = !toTask.isSystemApp && ssp.isInSafeMode();
                 mHeaderBar.onTaskViewSizeChanged((int) toTransform.rect.width(),
                         (int) toTransform.rect.height());
