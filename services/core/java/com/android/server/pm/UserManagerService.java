@@ -467,13 +467,16 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public List<UserInfo> getProfiles(int userId, boolean enabledOnly) {
+        boolean returnFullInfo = true;
         if (userId != UserHandle.getCallingUserId()) {
             checkManageUsersPermission("getting profiles related to user " + userId);
+        } else {
+            returnFullInfo = hasManageUsersPermission();
         }
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mUsersLock) {
-                return getProfilesLU(userId, enabledOnly);
+                return getProfilesLU(userId, enabledOnly, returnFullInfo);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -481,7 +484,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /** Assume permissions already checked and caller's identity cleared */
-    private List<UserInfo> getProfilesLU(int userId, boolean enabledOnly) {
+    private List<UserInfo> getProfilesLU(int userId, boolean enabledOnly, boolean fullInfo) {
         UserInfo user = getUserInfoLU(userId);
         ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
         if (user == null) {
@@ -503,7 +506,14 @@ public class UserManagerService extends IUserManager.Stub {
             if (profile.partial) {
                 continue;
             }
-            users.add(userWithName(profile));
+            UserInfo userInfo = userWithName(profile);
+            // If full info is not required - clear PII data to prevent 3P apps from reading it
+            if (!fullInfo) {
+                userInfo = new UserInfo(userInfo);
+                userInfo.name = null;
+                userInfo.iconPath = null;
+            }
+            users.add(userInfo);
         }
         return users;
     }
