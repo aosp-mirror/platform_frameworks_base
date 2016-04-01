@@ -86,7 +86,4 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
 
     @Override
     public void onPipResizeAboutToStart() { }
-
-    @Override
-    public void onMediaControllerChanged() { }
 }

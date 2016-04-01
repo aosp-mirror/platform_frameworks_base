@@ -16,11 +16,12 @@
 
 package com.android.systemui.tv.pip;
 
-import android.app.Activity;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.view.View;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View.OnFocusChangeListener;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,28 +41,29 @@ import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_UNAVAILABLE;
 /**
  * A view containing PIP controls including fullscreen, close, and media controls.
  */
-public class PipControlsView extends LinearLayout implements PipManager.Listener {
+public class PipControlsView extends LinearLayout {
     /**
      * An interface to listen user action.
      */
-    public interface Listener {
+    public abstract static interface Listener {
         /**
          * Called when an user clicks close PIP button.
          */
-        void onClosed();
-    }
+        public abstract void onClosed();
+    };
 
-    private final PipManager mPipManager = PipManager.getInstance();
     private MediaController mMediaController;
-    private Listener mListener;
 
-    private View mFullButtonView;
-    private View mFullDescriptionView;
-    private View mPlayPauseView;
-    private ImageView mPlayPauseButtonImageView;
-    private TextView mPlayPauseDescriptionTextView;
-    private View mCloseButtonView;
-    private View mCloseDescriptionView;
+    final PipManager mPipManager = PipManager.getInstance();
+    Listener mListener;
+
+    View mFullButtonView;
+    View mFullDescriptionView;
+    View mPlayPauseView;
+    ImageView mPlayPauseButtonImageView;
+    TextView mPlayPauseDescriptionTextView;
+    View mCloseButtonView;
+    View mCloseDescriptionView;
 
     private boolean mHasFocus;
     private OnFocusChangeListener mOnChildFocusChangeListener;
@@ -70,6 +72,13 @@ public class PipControlsView extends LinearLayout implements PipManager.Listener
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             updatePlayPauseView();
+        }
+    };
+
+    private PipManager.MediaListener mPipMediaListener = new PipManager.MediaListener() {
+        @Override
+        public void onMediaControllerChanged() {
+            updateMediaController();
         }
     };
 
@@ -87,6 +96,12 @@ public class PipControlsView extends LinearLayout implements PipManager.Listener
 
     public PipControlsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        LayoutInflater inflater = (LayoutInflater) getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.tv_pip_controls, this);
+
+        setOrientation(LinearLayout.HORIZONTAL);
+        setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
     }
 
     @Override
@@ -161,13 +176,13 @@ public class PipControlsView extends LinearLayout implements PipManager.Listener
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         updateMediaController();
-        mPipManager.addListener(this);
+        mPipManager.addMediaListener(mPipMediaListener);
     }
 
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mPipManager.removeListener(this);
+        mPipManager.removeMediaListener(mPipMediaListener);
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
@@ -230,24 +245,4 @@ public class PipControlsView extends LinearLayout implements PipManager.Listener
     public void setListener(Listener listener) {
         mListener = listener;
     }
-
-    @Override
-    public void onPipEntered() { }
-
-    @Override
-    public void onPipActivityClosed() { }
-
-    @Override
-    public void onShowPipMenu() { }
-
-    @Override
-    public void onMoveToFullscreen() { }
-
-    @Override
-    public void onMediaControllerChanged() {
-        updateMediaController();
-    }
-
-    @Override
-    public void onPipResizeAboutToStart() { }
 }
