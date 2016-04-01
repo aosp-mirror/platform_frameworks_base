@@ -191,6 +191,21 @@ public class Preconditions {
      * Ensures that that the argument numeric value is non-negative.
      *
      * @param value a numeric long value
+     * @return the validated numeric value
+     * @throws IllegalArgumentException if {@code value} was negative
+     */
+    public static long checkArgumentNonnegative(final long value) {
+        if (value < 0) {
+            throw new IllegalArgumentException();
+        }
+
+        return value;
+    }
+
+    /**
+     * Ensures that that the argument numeric value is non-negative.
+     *
+     * @param value a numeric long value
      * @param errorMessage the exception message to use if the check fails
      * @return the validated numeric value
      * @throws IllegalArgumentException if {@code value} was negative
