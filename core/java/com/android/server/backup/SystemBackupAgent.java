@@ -17,9 +17,9 @@
 package com.android.server.backup;
 
 import android.app.IWallpaperManager;
+import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
-import android.app.backup.BackupAgentHelper;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.WallpaperBackupHelper;
@@ -48,6 +48,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String NOTIFICATION_HELPER = "notifications";
     private static final String PERMISSION_HELPER = "permissions";
     private static final String USAGE_STATS_HELPER = "usage_stats";
+    private static final String SHORTCUT_MANAGER_HELPER = "shortcut_manager";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -100,6 +101,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper());
         addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
+        addHelper(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper());
         super.onBackup(oldState, data, newState);
     }
 
@@ -138,6 +140,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper());
         addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
+        addHelper(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper());
 
         try {
             super.onRestore(data, appVersionCode, newState);
