@@ -141,9 +141,9 @@ public class TaskViewThumbnail extends View {
             return;
         }
 
+        int viewWidth = mTaskViewRect.width();
+        int viewHeight = mTaskViewRect.height();
         if (mBitmapShader != null) {
-            int viewWidth = mTaskViewRect.width();
-            int viewHeight = mTaskViewRect.height();
 
             // We are drawing the thumbnail in the same orientation, so just fit the width
             int thumbnailWidth = (int) (mThumbnailRect.width() * mThumbnailScale);
@@ -180,6 +180,9 @@ public class TaskViewThumbnail extends View {
 
                 canvas.restoreToCount(count);
             }
+        } else {
+            canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
+                    mBgFillPaint);
         }
     }
 
@@ -319,11 +322,11 @@ public class TaskViewThumbnail extends View {
         mDisabledInSafeMode = disabledInSafeMode;
         if (t.thumbnail != null) {
             setThumbnail(t.thumbnail, thumbnailInfo);
-            if (t.colorBackground != 0) {
-                mBgFillPaint.setColor(t.colorBackground);
-            }
         } else {
             setThumbnail(null, null);
+        }
+        if (t.colorBackground != 0) {
+            mBgFillPaint.setColor(t.colorBackground);
         }
     }
 
