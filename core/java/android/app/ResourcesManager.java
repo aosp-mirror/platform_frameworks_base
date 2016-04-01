@@ -440,6 +440,11 @@ public class ResourcesManager {
                 compatInfo);
         classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
 
+        if (DEBUG) {
+            Slog.d(TAG, "createBaseActivityResources activity=" + activityToken
+                    + " with key=" + key);
+        }
+
         synchronized (this) {
             final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
                     activityToken);
@@ -651,6 +656,16 @@ public class ResourcesManager {
                 activityResources.overrideConfig.setToDefaults();
             }
 
+            if (DEBUG) {
+                Throwable here = new Throwable();
+                here.fillInStackTrace();
+                Slog.d(TAG, "updating resources override for activity=" + activityToken
+                        + " from oldConfig=" + Configuration.resourceQualifierString(oldConfig)
+                        + " to newConfig="
+                        + Configuration.resourceQualifierString(activityResources.overrideConfig),
+                        here);
+            }
+
             final boolean activityHasOverrideConfig =
                     !activityResources.overrideConfig.equals(Configuration.EMPTY);
 
@@ -692,9 +707,15 @@ public class ResourcesManager {
                         oldKey.mOverlayDirs, oldKey.mLibDirs, oldKey.mDisplayId,
                         rebasedOverrideConfig, oldKey.mCompatInfo);
 
+                if (DEBUG) {
+                    Slog.d(TAG, "rebasing ref=" + resources + " from oldKey=" + oldKey
+                            + " to newKey=" + newKey);
+                }
+
                 ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(newKey);
                 if (resourcesImpl == null) {
                     resourcesImpl = createResourcesImpl(newKey);
+                    mResourceImpls.put(newKey, new WeakReference<>(resourcesImpl));
                 }
 
                 if (resourcesImpl != resources.getImpl()) {
