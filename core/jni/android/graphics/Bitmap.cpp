@@ -251,13 +251,6 @@ SkPixelRef* Bitmap::refPixelRefLocked() {
 
 void Bitmap::reconfigure(const SkImageInfo& info, size_t rowBytes,
         SkColorTable* ctable) {
-    {
-        android::AutoMutex _lock(mLock);
-        if (mPinnedRefCount) {
-            ALOGW("Called reconfigure on a bitmap that is in use! This may"
-                    " cause graphical corruption!");
-        }
-    }
     mPixelRef->reconfigure(info, rowBytes, ctable);
 }
 
