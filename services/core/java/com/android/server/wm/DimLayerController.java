@@ -183,7 +183,12 @@ class DimLayerController {
 
         for (int i = mState.size() - 1; i >= 0; i--) {
             DimLayer.DimLayerUser user = mState.keyAt(i);
-            if (user.isFullscreen()) {
+            DimLayerState state = mState.valueAt(i);
+            // We have to check that we are acutally the shared fullscreen layer
+            // for this path. If we began as non fullscreen and became fullscreen
+            // (e.g. Docked stack closing), then we may not be the shared layer
+            // and we have to make sure we always animate the layer.
+            if (user.isFullscreen() && state.dimLayer == mSharedFullScreenDimLayer) {
                 fullScreen = i;
                 if (mState.valueAt(i).continueDimming) {
                     fullScreenAndDimming = i;
