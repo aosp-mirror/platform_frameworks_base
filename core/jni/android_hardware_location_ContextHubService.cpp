@@ -216,7 +216,7 @@ int add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle, JNIEnv *en
     int appInstanceHandle = generate_id();
 
     if (appInstanceHandle < 0 || !appName || !entry || !name) {
-        ALOGE("Cannot find resources to add app instance %d, %d, %d",
+        ALOGE("Cannot find resources to add app instance %d, %p, %p",
             appInstanceHandle, appName, entry);
 
         free(appName);
@@ -360,8 +360,7 @@ int handle_query_apps_response(char *msg, int msgLen, uint32_t hubHandle) {
 
     memcpy(info, msg, msgLen);
     for (i = 0; i < numApps; i++) {
-        add_app_instance(info, hubHandle, env);
-        info++;
+        add_app_instance(&info[i], hubHandle, env);
     }
 
     free(info);
@@ -438,7 +437,7 @@ int context_hub_callback(uint32_t hubId,
     msgHeader[HEADER_FIELD_MSG_TYPE] = msg->message_type;
 
     if (!sanity_check_cookie(cookie, hubId)) {
-        ALOGW("Incorrect cookie %" PRId32 " for cookie %lu! Bailing",
+        ALOGW("Incorrect cookie %" PRId32 " for cookie %p! Bailing",
               hubId, cookie);
 
         return -1;
