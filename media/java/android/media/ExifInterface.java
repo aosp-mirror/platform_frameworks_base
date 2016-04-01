@@ -235,8 +235,6 @@ public class ExifInterface {
     public static final String TAG_SPECTRAL_SENSITIVITY = "SpectralSensitivity";
     /** Type is int. */
     public static final String TAG_SUBSEC_TIME = "SubSecTime";
-    /** Type is int. @hide */
-    public static final String TAG_SUBSECTIME = "SubSecTime";
     /** Type is int. */
     public static final String TAG_SUBSEC_TIME_DIGITIZED = "SubSecTimeDigitized";
     /** Type is int. */
@@ -447,7 +445,7 @@ public class ExifInterface {
             new ExifTag(TAG_F_NUMBER, 33437),
             new ExifTag(TAG_EXPOSURE_PROGRAM, 34850),
             new ExifTag(TAG_SPECTRAL_SENSITIVITY, 34852),
-            new ExifTag(TAG_ISO, 34855),
+            new ExifTag(TAG_ISO_SPEED_RATINGS, 34855),
             new ExifTag(TAG_OECF, 34856),
             new ExifTag(TAG_EXIF_VERSION, 36864),
             new ExifTag(TAG_DATETIME_ORIGINAL, 36867),
@@ -1161,7 +1159,7 @@ public class ExifInterface {
             if (datetime == null) return -1;
             long msecs = datetime.getTime();
 
-            String subSecs = getAttribute(TAG_SUBSECTIME);
+            String subSecs = getAttribute(TAG_SUBSEC_TIME);
             if (subSecs != null) {
                 try {
                     long sub = Long.valueOf(subSecs);
@@ -1553,7 +1551,7 @@ public class ExifInterface {
         convertToDouble(TAG_EXPOSURE_TIME);
         convertToDouble(TAG_F_NUMBER);
         convertToDouble(TAG_SUBJECT_DISTANCE);
-        convertToInt(TAG_ISO);
+        convertToInt(TAG_ISO_SPEED_RATINGS);
         convertToDouble(TAG_EXPOSURE_BIAS_VALUE);
         convertToInt(TAG_WHITE_BALANCE);
         convertToInt(TAG_LIGHT_SOURCE);
