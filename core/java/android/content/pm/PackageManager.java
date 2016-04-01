@@ -130,6 +130,7 @@ public abstract class PackageManager {
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_SYSTEM_ONLY,
+            MATCH_FACTORY_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -413,6 +414,13 @@ public abstract class PackageManager {
      * with {@link ApplicationInfo#FLAG_SYSTEM}.
      */
     public static final int MATCH_SYSTEM_ONLY = 0x00100000;
+
+    /**
+     * Internal {@link PackageInfo} flag: include only components on the system image.
+     * This will not return information on any unbundled update to system components.
+     * @hide
+     */
+    public static final int MATCH_FACTORY_ONLY = 0x00200000;
 
     /**
      * Internal flag used to indicate that a system component has done their
