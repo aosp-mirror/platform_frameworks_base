@@ -284,6 +284,8 @@ public class BluetoothGattCharacteristic implements Parcelable {
         out.writeInt(mInstance);
         out.writeInt(mProperties);
         out.writeInt(mPermissions);
+        out.writeInt(mKeySize);
+        out.writeInt(mWriteType);
         out.writeTypedList(mDescriptors);
     }
 
@@ -303,6 +305,8 @@ public class BluetoothGattCharacteristic implements Parcelable {
         mInstance = in.readInt();
         mProperties = in.readInt();
         mPermissions = in.readInt();
+        mKeySize = in.readInt();
+        mWriteType = in.readInt();
 
         mDescriptors = new ArrayList<BluetoothGattDescriptor>();
 
