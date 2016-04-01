@@ -245,7 +245,57 @@ public class KeyboardShortcuts {
                         systemGroup.addItem(new KeyboardShortcutInfo(
                                 mContext.getString(R.string.keyboard_shortcut_group_system_recents),
                                 KeyEvent.KEYCODE_TAB, KeyEvent.META_ALT_ON));
+                        systemGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_system_notifications),
+                                KeyEvent.KEYCODE_N, KeyEvent.META_META_ON));
+                        systemGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_system_shortcuts_helper),
+                                KeyEvent.KEYCODE_SLASH, KeyEvent.META_META_ON));
+                        systemGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_system_switch_input),
+                                KeyEvent.KEYCODE_SPACE, KeyEvent.META_META_ON));
                         result.add(systemGroup);
+
+                        KeyboardShortcutGroup applicationGroup = new KeyboardShortcutGroup(
+                                mContext.getString(R.string.keyboard_shortcut_group_applications),
+                                true);
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_assist),
+                                KeyEvent.KEYCODE_UNKNOWN, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_browser),
+                                KeyEvent.KEYCODE_B, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_contacts),
+                                KeyEvent.KEYCODE_C, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_email),
+                                KeyEvent.KEYCODE_E, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_im),
+                                KeyEvent.KEYCODE_T, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_music),
+                                KeyEvent.KEYCODE_P, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_youtube),
+                                KeyEvent.KEYCODE_Y, KeyEvent.META_META_ON));
+                        applicationGroup.addItem(new KeyboardShortcutInfo(
+                                mContext.getString(
+                                        R.string.keyboard_shortcut_group_applications_calendar),
+                                KeyEvent.KEYCODE_L, KeyEvent.META_META_ON));
+                        result.add(applicationGroup);
+
                         showKeyboardShortcutsDialog(result);
                     }
                 }, deviceId);
@@ -354,11 +404,15 @@ public class KeyboardShortcuts {
             return null;
         }
         String displayLabelString;
-        if (info.getKeycode() == KeyEvent.KEYCODE_UNKNOWN) {
+        if (info.getBaseCharacter() > Character.MIN_VALUE) {
             displayLabelString = String.valueOf(info.getBaseCharacter());
         } else if (SPECIAL_CHARACTER_NAMES.get(info.getKeycode()) != null) {
             displayLabelString = SPECIAL_CHARACTER_NAMES.get(info.getKeycode());
         } else {
+            // Special case for shortcuts with no base key or keycode.
+            if (info.getKeycode() == KeyEvent.KEYCODE_UNKNOWN) {
+                return shortcutKeys;
+            }
             // TODO: Have a generic map for when we don't have the device's.
             char displayLabel = mKeyCharacterMap == null
                     ? 0 : mKeyCharacterMap.getDisplayLabel(info.getKeycode());
