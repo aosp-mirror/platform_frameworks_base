@@ -32,6 +32,9 @@
 
     <declare-styleable name="PasswordTextView">
         <attr name="scaledTextSize" format="integer" />
+        <attr name="android:gravity" />
+        <attr name="dotSize" format="dimension" />
+        <attr name="charPadding" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="CarrierText">
