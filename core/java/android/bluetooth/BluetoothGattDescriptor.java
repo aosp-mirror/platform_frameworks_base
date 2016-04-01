@@ -227,6 +227,14 @@ public class BluetoothGattDescriptor implements Parcelable {
     }
 
     /**
+     * Force the instance ID.
+     * @hide
+     */
+    public void setInstanceId(int instanceId) {
+        mInstance = instanceId;
+    }
+
+    /**
      * Returns the permissions for this descriptor.
      *
      * @return Permissions of this descriptor

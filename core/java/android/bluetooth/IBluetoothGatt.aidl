@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.ScanFilter;
@@ -65,26 +66,14 @@ interface IBluetoothGatt {
 
     void registerServer(in ParcelUuid appId, in IBluetoothGattServerCallback callback);
     void unregisterServer(in int serverIf);
-    void serverConnect(in int servertIf, in String address, in boolean isDirect, in int transport);
+    void serverConnect(in int serverIf, in String address, in boolean isDirect, in int transport);
     void serverDisconnect(in int serverIf, in String address);
-    void beginServiceDeclaration(in int serverIf, in int srvcType,
-                            in int srvcInstanceId, in int minHandles,
-                            in ParcelUuid srvcId, boolean advertisePreferred);
-    void addIncludedService(in int serverIf, in int srvcType,
-                            in int srvcInstanceId, in ParcelUuid srvcId);
-    void addCharacteristic(in int serverIf, in ParcelUuid charId,
-                            in int properties, in int permissions);
-    void addDescriptor(in int serverIf, in ParcelUuid descId,
-                            in int permissions);
-    void endServiceDeclaration(in int serverIf);
-    void removeService(in int serverIf, in int srvcType,
-                            in int srvcInstanceId, in ParcelUuid srvcId);
+    void addService(in int serverIf, in BluetoothGattService service);
+    void removeService(in int serverIf, in int handle);
     void clearServices(in int serverIf);
     void sendResponse(in int serverIf, in String address, in int requestId,
                             in int status, in int offset, in byte[] value);
-    void sendNotification(in int serverIf, in String address, in int srvcType,
-                            in int srvcInstanceId, in ParcelUuid srvcId,
-                            in int charInstanceId, in ParcelUuid charId,
+    void sendNotification(in int serverIf, in String address, in int handle,
                             in boolean confirm, in byte[] value);
     void disconnectAll();
     void unregAll();
