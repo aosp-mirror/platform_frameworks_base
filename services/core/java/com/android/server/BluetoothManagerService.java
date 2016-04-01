@@ -92,6 +92,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final int MESSAGE_BLUETOOTH_STATE_CHANGE = 60;
     private static final int MESSAGE_TIMEOUT_BIND = 100;
     private static final int MESSAGE_TIMEOUT_UNBIND = 101;
+    private static final int MESSAGE_GET_NAME_AND_ADDRESS = 200;
     private static final int MESSAGE_USER_SWITCHED = 300;
     private static final int MESSAGE_USER_UNLOCKED = 301;
     private static final int MESSAGE_ADD_PROXY_DELAYED = 400;
@@ -599,8 +600,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             sendEnableMsg(true);
         }
         return true;
-
     }
+
     public boolean enable() {
         if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
             (!checkIfCallerIsForegroundUser())) {
@@ -763,9 +764,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             sendEnableMsg(mQuietEnableExternal);
         } else if (!isNameAndAddressSet()) {
             if (DBG) Slog.d(TAG, "Getting adapter name and address");
-            enable();
-            waitForOnOff(true, false);
-            disable(true);
+            Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
+            mHandler.sendMessage(getMsg);
         }
     }
 
@@ -1076,6 +1076,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private BluetoothServiceConnection mConnection = new BluetoothServiceConnection();
 
     private class BluetoothHandler extends Handler {
+        boolean mGetNameAddressOnly = false;
+
         public BluetoothHandler(Looper looper) {
             super(looper);
         }
@@ -1084,6 +1086,37 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         public void handleMessage(Message msg) {
             if (DBG) Slog.d (TAG, "Message: " + msg.what);
             switch (msg.what) {
+                case MESSAGE_GET_NAME_AND_ADDRESS:
+                    if (DBG) Slog.d(TAG, "MESSAGE_GET_NAME_AND_ADDRESS");
+                    synchronized(mConnection) {
+                        if ((mBluetooth == null) && (!mBinding)) {
+                            if (DBG) Slog.d(TAG, "Binding to service to get name and address");
+                            mGetNameAddressOnly = true;
+                            Message timeoutMsg = mHandler.obtainMessage(MESSAGE_TIMEOUT_BIND);
+                            mHandler.sendMessageDelayed(timeoutMsg, TIMEOUT_BIND_MS);
+                            Intent i = new Intent(IBluetooth.class.getName());
+                            if (!doBind(i, mConnection,
+                                Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                                UserHandle.CURRENT)) {
+                                mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
+                            } else {
+                                mBinding = true;
+                            }
+                        } else if (mBluetooth != null) {
+                            try {
+                                storeNameAndAddress(mBluetooth.getName(),
+                                                    mBluetooth.getAddress());
+                            } catch (RemoteException re) {
+                                Slog.e(TAG, "Unable to grab names", re);
+                            }
+                            if (mGetNameAddressOnly && !mEnable) {
+                                unbindAndFinish();
+                            }
+                            mGetNameAddressOnly = false;
+                        }
+                    }
+                    break;
+
                 case MESSAGE_ENABLE:
                     if (DBG) {
                         Slog.d(TAG, "MESSAGE_ENABLE: mBluetooth = " + mBluetooth);
@@ -1177,6 +1210,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mBluetoothBinder = service;
                         mBluetooth = IBluetooth.Stub.asInterface(service);
 
+                        if (!isNameAndAddressSet()) {
+                            Message getMsg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
+                            mHandler.sendMessage(getMsg);
+                            if (mGetNameAddressOnly) return;
+                        }
+
                         try {
                             boolean enableHciSnoopLog = (Settings.Secure.getInt(mContentResolver,
                                 Settings.Secure.BLUETOOTH_HCI_LOG, 0) == 1);
@@ -1185,15 +1224,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             }
                         } catch (RemoteException e) {
                             Slog.e(TAG,"Unable to call configHciSnoopLog", e);
-                        }
-
-                        if (!isNameAndAddressSet()) {
-                            try {
-                                storeNameAndAddress(mBluetooth.getName(),
-                                                    mBluetooth.getAddress());
-                            } catch (RemoteException re) {
-                                Slog.e(TAG, "Unable to grab names", re);
-                            }
                         }
 
                         //Register callback object
