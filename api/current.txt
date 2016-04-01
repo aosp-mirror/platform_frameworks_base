@@ -61589,14 +61589,6 @@ package javax.security.auth {
     method public abstract boolean isDestroyed();
   }
 
-  public abstract deprecated class Policy {
-    ctor protected Policy();
-    method public abstract java.security.PermissionCollection getPermissions(javax.security.auth.Subject, java.security.CodeSource);
-    method public static javax.security.auth.Policy getPolicy();
-    method public abstract void refresh();
-    method public static void setPolicy(javax.security.auth.Policy);
-  }
-
   public final class PrivateCredentialPermission extends java.security.Permission {
     ctor public PrivateCredentialPermission(java.lang.String, java.lang.String);
     method public java.lang.String getActions();
@@ -61658,43 +61650,6 @@ package javax.security.auth.callback {
 }
 
 package javax.security.auth.login {
-
-  public class AppConfigurationEntry {
-    ctor public AppConfigurationEntry(java.lang.String, javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag, java.util.Map<java.lang.String, ?>);
-    method public javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag getControlFlag();
-    method public java.lang.String getLoginModuleName();
-    method public java.util.Map<java.lang.String, ?> getOptions();
-  }
-
-  public static class AppConfigurationEntry.LoginModuleControlFlag {
-    field public static final javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag OPTIONAL;
-    field public static final javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag REQUIRED;
-    field public static final javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag REQUISITE;
-    field public static final javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag SUFFICIENT;
-  }
-
-  public abstract class Configuration {
-    ctor protected Configuration();
-    method public abstract javax.security.auth.login.AppConfigurationEntry[] getAppConfigurationEntry(java.lang.String);
-    method public static javax.security.auth.login.Configuration getConfiguration();
-    method public static javax.security.auth.login.Configuration getInstance(java.lang.String, javax.security.auth.login.Configuration.Parameters) throws java.security.NoSuchAlgorithmException;
-    method public static javax.security.auth.login.Configuration getInstance(java.lang.String, javax.security.auth.login.Configuration.Parameters, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException;
-    method public static javax.security.auth.login.Configuration getInstance(java.lang.String, javax.security.auth.login.Configuration.Parameters, java.security.Provider) throws java.security.NoSuchAlgorithmException;
-    method public javax.security.auth.login.Configuration.Parameters getParameters();
-    method public java.security.Provider getProvider();
-    method public java.lang.String getType();
-    method public void refresh();
-    method public static void setConfiguration(javax.security.auth.login.Configuration);
-  }
-
-  public static abstract interface Configuration.Parameters {
-  }
-
-  public abstract class ConfigurationSpi {
-    ctor public ConfigurationSpi();
-    method protected abstract javax.security.auth.login.AppConfigurationEntry[] engineGetAppConfigurationEntry(java.lang.String);
-    method protected void engineRefresh();
-  }
 
   public class LoginException extends java.security.GeneralSecurityException {
     ctor public LoginException();
