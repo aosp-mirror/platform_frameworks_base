@@ -148,11 +148,15 @@ public abstract class FragmentTuner {
             MenuItem share = menu.findItem(R.id.menu_share);
             MenuItem delete = menu.findItem(R.id.menu_delete);
             MenuItem rename = menu.findItem(R.id.menu_rename);
+            MenuItem selectAll = menu.findItem(R.id.menu_select_all);
 
             open.setVisible(true);
             share.setVisible(false);
             delete.setVisible(false);
             rename.setVisible(false);
+            selectAll.setVisible(mState.allowMultiple);
+
+            Menus.disableHiddenItems(menu);
         }
 
         @Override
