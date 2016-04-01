@@ -180,7 +180,12 @@ interface IWindowManager
     // caller must call setNewConfiguration() sometime later.
     Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
             IBinder freezeThisOneIfNeeded);
-    void setNewConfiguration(in Configuration config);
+    // Notify window manager of the new configuration. Returns an array of stack ids that's
+    // affected by the update, ActivityManager should resize these stacks.
+    int[] setNewConfiguration(in Configuration config);
+
+    // Retrieves the new bounds after the configuration update evaluated by window manager.
+    Rect getBoundsForNewConfiguration(int stackId);
 
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();
