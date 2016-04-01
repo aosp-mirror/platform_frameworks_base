@@ -116,10 +116,10 @@ public final class TvInputInfo implements Parcelable {
     private final int mType;
     private final boolean mIsHardwareInput;
 
-    // TODO: Remove mLabel and mIconUri when createTvInputInfo() is removed.
-    private String mLabel;
+    // TODO: Remove mIconUri when createTvInputInfo() is removed.
     private Uri mIconUri;
 
+    private final CharSequence mLabel;
     private final int mLabelResId;
     private final Icon mIcon;
     private final Icon mIconStandby;
@@ -161,8 +161,8 @@ public final class TvInputInfo implements Parcelable {
         TvInputInfo info = new TvInputInfo.Builder(context, service)
                 .setHdmiDeviceInfo(hdmiDeviceInfo)
                 .setParentId(parentId)
+                .setLabel(label)
                 .build();
-        info.mLabel = label;
         info.mIconUri = iconUri;
         return info;
     }
@@ -215,8 +215,8 @@ public final class TvInputInfo implements Parcelable {
                     throws XmlPullParserException, IOException {
         TvInputInfo info = new TvInputInfo.Builder(context, service)
                 .setTvInputHardwareInfo(hardwareInfo)
+                .setLabel(label)
                 .build();
-        info.mLabel = label;
         info.mIconUri = iconUri;
         return info;
     }
@@ -247,7 +247,7 @@ public final class TvInputInfo implements Parcelable {
     }
 
     private TvInputInfo(ResolveInfo service, String id, int type, boolean isHardwareInput,
-            int labelResId, Icon icon, Icon iconStandby, Icon iconDisconnected,
+            CharSequence label, int labelResId, Icon icon, Icon iconStandby, Icon iconDisconnected,
             String setupActivity, String settingsActivity, boolean canRecord, int tunerCount,
             HdmiDeviceInfo hdmiDeviceInfo, boolean isConnectedToHdmiSwitch, String parentId,
             Bundle extras) {
@@ -255,6 +255,7 @@ public final class TvInputInfo implements Parcelable {
         mId = id;
         mType = type;
         mIsHardwareInput = isHardwareInput;
+        mLabel = label;
         mLabelResId = labelResId;
         mIcon = icon;
         mIconStandby = iconStandby;
@@ -570,7 +571,7 @@ public final class TvInputInfo implements Parcelable {
         dest.writeString(mId);
         dest.writeInt(mType);
         dest.writeByte(mIsHardwareInput ? (byte) 1 : 0);
-        dest.writeString(mLabel);
+        TextUtils.writeToParcel(mLabel, dest, flags);
         dest.writeParcelable(mIconUri, flags);
         dest.writeInt(mLabelResId);
         dest.writeParcelable(mIcon, flags);
@@ -612,7 +613,7 @@ public final class TvInputInfo implements Parcelable {
         mId = in.readString();
         mType = in.readInt();
         mIsHardwareInput = in.readByte() == 1;
-        mLabel = in.readString();
+        mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mIconUri = in.readParcelable(null);
         mLabelResId = in.readInt();
         mIcon = in.readParcelable(null);
@@ -660,6 +661,7 @@ public final class TvInputInfo implements Parcelable {
 
         private final Context mContext;
         private final ResolveInfo mResolveInfo;
+        private CharSequence mLabel;
         private int mLabelResId;
         private Icon mIcon;
         private Icon mIconStandby;
@@ -746,12 +748,31 @@ public final class TvInputInfo implements Parcelable {
         /**
          * Sets the label.
          *
+         * @param label The text to be used as label.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setLabel(CharSequence label) {
+            if (mLabelResId != 0) {
+                throw new IllegalStateException("Resource ID for label is already set.");
+            }
+            this.mLabel = label;
+            return this;
+        }
+
+        /**
+         * Sets the label.
+         *
          * @param resId The resource ID of the text to use.
          * @return This Builder object to allow for chaining of calls to builder methods.
          * @hide
          */
         @SystemApi
         public Builder setLabel(int resId) {
+            if (mLabel != null) {
+                throw new IllegalStateException("Label text is already set.");
+            }
             this.mLabelResId = resId;
             return this;
         }
@@ -868,8 +889,8 @@ public final class TvInputInfo implements Parcelable {
                 type = TYPE_TUNER;
             }
             parseServiceMetadata(type);
-            return new TvInputInfo(mResolveInfo, id, type, isHardwareInput, mLabelResId, mIcon,
-                    mIconStandby, mIconDisconnected, mSetupActivity, mSettingsActivity,
+            return new TvInputInfo(mResolveInfo, id, type, isHardwareInput, mLabel, mLabelResId,
+                    mIcon, mIconStandby, mIconDisconnected, mSetupActivity, mSettingsActivity,
                     mCanRecord == null ? false : mCanRecord, mTunerCount == null ? 0 : mTunerCount,
                     mHdmiDeviceInfo, isConnectedToHdmiSwitch, mParentId, mExtras);
         }
