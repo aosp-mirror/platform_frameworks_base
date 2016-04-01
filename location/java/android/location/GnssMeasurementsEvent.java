@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.TestApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
@@ -33,29 +34,11 @@ import java.util.Collections;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssMeasurementsEvent implements Parcelable {
-    /**
-     * The status of the GNSS measurements event.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GNSS_LOCATION_DISABLED})
-    public @interface GnssMeasurementsStatus {}
-
-    /**
-     * The system does not support tracking of GNSS Measurements. This status will not change in the
-     * future.
-     */
+    /** @removed */
     public static final int STATUS_NOT_SUPPORTED = 0;
-
-    /**
-     * GNSS Measurements are successfully being tracked, it will receive updates once they are
-     * available.
-     */
+    /** @removed */
     public static final int STATUS_READY = 1;
-
-    /**
-     * GNSS provider or Location is disabled, updates will not be received until they are enabled.
-     */
+    /** @removed */
     public static final int STATUS_GNSS_LOCATION_DISABLED = 2;
 
     private final GnssClock mClock;
@@ -68,6 +51,32 @@ public final class GnssMeasurementsEvent implements Parcelable {
      * {@link LocationManager#registerGnssMeasurementsCallback}.
      */
     public static abstract class Callback {
+        /**
+         * The status of the GNSS measurements event.
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED})
+        public @interface GnssMeasurementsStatus {}
+
+        /**
+         * The system does not support tracking of GNSS Measurements.
+         *
+         * <p>This status will not change in the future.
+         */
+        public static final int STATUS_NOT_SUPPORTED = 0;
+
+        /**
+         * GNSS Measurements are successfully being tracked, it will receive updates once they are
+         * available.
+         */
+        public static final int STATUS_READY = 1;
+
+        /**
+         * GPS provider or Location is disabled, updates will not be received until they are
+         * enabled.
+         */
+        public static final int STATUS_LOCATION_DISABLED = 2;
 
         /**
          * Reports the latest collected GNSS Measurements.
@@ -80,6 +89,10 @@ public final class GnssMeasurementsEvent implements Parcelable {
         public void onStatusChanged(@GnssMeasurementsStatus int status) {}
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public GnssMeasurementsEvent(GnssClock clock, GnssMeasurement[] measurements) {
         if (clock == null) {
             throw new InvalidParameterException("Parameter 'clock' must not be null.");
@@ -94,6 +107,10 @@ public final class GnssMeasurementsEvent implements Parcelable {
         mReadOnlyMeasurements = Collections.unmodifiableCollection(measurementCollection);
     }
 
+    /**
+     * Gets the GNSS receiver clock information associated with the measurements for the current
+     * event.
+     */
     @NonNull
     public GnssClock getClock() {
         return mClock;
