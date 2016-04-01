@@ -2157,7 +2157,7 @@ public class AudioManager {
                                 final RecordConfigChangeCallbackData cbData =
                                         (RecordConfigChangeCallbackData) msg.obj;
                                 if (cbData.mCb != null) {
-                                    cbData.mCb.onRecordConfigChanged(cbData.mConfigs);
+                                    cbData.mCb.onRecordingConfigChanged(cbData.mConfigs);
                                 }
                                 break;
                             default:
@@ -2746,7 +2746,7 @@ public class AudioManager {
          * @param configs array containing the results of
          *      {@link AudioManager#getActiveRecordingConfigurations()}.
          */
-        public void onRecordConfigChanged(AudioRecordingConfiguration[] configs) {}
+        public void onRecordingConfigChanged(AudioRecordingConfiguration[] configs) {}
     }
 
     private static class AudioRecordingCallbackInfo {
