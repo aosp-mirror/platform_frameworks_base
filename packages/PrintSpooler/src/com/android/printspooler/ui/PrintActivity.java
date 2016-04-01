@@ -476,7 +476,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void onPrintDocumentError(String message) {
-        mProgressMessageController.cancel();
+        setState(mProgressMessageController.cancel());
         ensureErrorUiShown(null, PrintErrorFragment.ACTION_RETRY);
 
         setState(STATE_UPDATE_FAILED);
@@ -502,7 +502,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             Log.i(LOG_TAG, "onUpdateCanceled()");
         }
 
-        mProgressMessageController.cancel();
+        setState(mProgressMessageController.cancel());
         ensurePreviewUiShown();
 
         switch (mState) {
@@ -524,7 +524,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             Log.i(LOG_TAG, "onUpdateCompleted()");
         }
 
-        mProgressMessageController.cancel();
+        setState(mProgressMessageController.cancel());
         ensurePreviewUiShown();
 
         // Update the print job with the info for the written document. The page
@@ -572,7 +572,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             Log.i(LOG_TAG, "onUpdateFailed()");
         }
 
-        mProgressMessageController.cancel();
+        setState(mProgressMessageController.cancel());
         ensureErrorUiShown(error, PrintErrorFragment.ACTION_RETRY);
 
         if (mState == STATE_CREATE_FILE_FAILED
@@ -2066,8 +2066,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mSpoolerProvider.destroy();
         }
 
+        setState(mProgressMessageController.cancel());
+
         if (mState != STATE_INITIALIZING) {
-            mProgressMessageController.cancel();
             mPrintedDocument.finish();
             mPrintedDocument.destroy();
             mPrintPreviewController.destroy(new Runnable() {
@@ -2910,29 +2911,50 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         private boolean mPosted;
 
+        /** State before run was executed */
+        private int mPreviousState = -1;
+
         public ProgressMessageController(Context context) {
             mHandler = new Handler(context.getMainLooper(), null, false);
         }
 
         public void post() {
-            if (mPosted) {
+            if (mState == STATE_UPDATE_SLOW) {
+                setState(STATE_UPDATE_SLOW);
+                ensureProgressUiShown();
+                updateOptionsUi();
+
+                return;
+            } else if (mPosted) {
                 return;
             }
+            mPreviousState = -1;
             mPosted = true;
             mHandler.postDelayed(this, PROGRESS_TIMEOUT_MILLIS);
         }
 
-        public void cancel() {
+        private int getStateAfterCancel() {
+            if (mPreviousState == -1) {
+                return mState;
+            } else {
+                return mPreviousState;
+            }
+        }
+
+        public int cancel() {
             if (!mPosted) {
-                return;
+                return getStateAfterCancel();
             }
             mPosted = false;
             mHandler.removeCallbacks(this);
+
+            return getStateAfterCancel();
         }
 
         @Override
         public void run() {
             mPosted = false;
+            mPreviousState = mState;
             setState(STATE_UPDATE_SLOW);
             ensureProgressUiShown();
             updateOptionsUi();
