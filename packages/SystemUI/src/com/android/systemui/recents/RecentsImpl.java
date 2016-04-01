@@ -584,18 +584,24 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Rect systemInsets = new Rect();
         ssp.getStableInsets(systemInsets);
         Rect windowRect = ssp.getWindowRect();
+        // When docked, the nav bar insets are consumed and the activity is measured without insets.
+        // However, the window bounds include the insets, so we need to subtract them here to make
+        // them identical.
+        if (ssp.hasDockedTask()) {
+            windowRect.bottom -= systemInsets.bottom;
+            systemInsets.bottom = 0;
+        }
         calculateWindowStableInsets(systemInsets, windowRect);
         windowRect.offsetTo(0, 0);
 
         TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
-        stackLayout.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
-                mTaskStackBounds);
 
         // Rebind the header bar and draw it for the transition
-        Rect taskStackBounds = new Rect(mTaskStackBounds);
         stackLayout.setSystemInsets(systemInsets);
         if (stack != null) {
-            stackLayout.initialize(windowRect, taskStackBounds,
+            stackLayout.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
+                    mTaskStackBounds);
+            stackLayout.initialize(windowRect, mTaskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
             mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
         }
