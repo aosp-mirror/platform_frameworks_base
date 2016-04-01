@@ -252,6 +252,16 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL = "carrier_wfc_ims_available_bool";
 
     /**
+     * Flag specifying whether WFC over IMS supports the "wifi only" option.  If false, the wifi
+     * calling settings will not include an option for "wifi only".  If true, the wifi calling
+     * settings will include an option for "wifi only"
+     * <p>
+     * By default, it is assumed that WFC supports "wifi only".
+     */
+    public static final String KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL =
+            "carrier_wfc_supports_wifi_only_bool";
+
+    /**
      * Default WFC_IMS_mode 0: WIFI_ONLY
      *                      1: CELLULAR_PREFERRED
      *                      2: WIFI_PREFERRED
@@ -628,6 +638,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
