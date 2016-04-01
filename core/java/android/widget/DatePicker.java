@@ -75,8 +75,6 @@ import java.util.TimeZone;
  */
 @Widget
 public class DatePicker extends FrameLayout {
-    private static final String LOG_TAG = DatePicker.class.getSimpleName();
-
     private static final int MODE_SPINNER = 1;
     private static final int MODE_CALENDAR = 2;
 
