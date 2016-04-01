@@ -3103,12 +3103,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             List<PageRange> rangesToShred = new ArrayList<>();
             PageRange previousRange = null;
 
-            final int pageCount = printJob.getDocumentInfo().getPageCount();
-
             PageRange[] printedPages = printJob.getPages();
             final int rangeCount = printedPages.length;
             for (int i = 0; i < rangeCount; i++) {
-                PageRange range = PageRangeUtils.asAbsoluteRange(printedPages[i], pageCount);
+                PageRange range = printedPages[i];
 
                 if (previousRange == null) {
                     final int startPageIdx = 0;
@@ -3127,11 +3125,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
 
                 if (i == rangeCount - 1) {
-                    final int startPageIdx = range.getEnd() + 1;
-                    final int endPageIdx = printJob.getDocumentInfo().getPageCount() - 1;
-                    if (startPageIdx <= endPageIdx) {
-                        PageRange removedRange = new PageRange(startPageIdx, endPageIdx);
-                        rangesToShred.add(removedRange);
+                    if (range.getEnd() != Integer.MAX_VALUE) {
+                        rangesToShred.add(new PageRange(range.getEnd() + 1, Integer.MAX_VALUE));
                     }
                 }
 
