@@ -244,6 +244,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         setDate(year, monthOfYear, dayOfMonth);
         updateSpinners();
         updateCalendarView();
+
         mOnDateChangedListener = onDateChangedListener;
     }
 
