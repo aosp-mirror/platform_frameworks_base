@@ -22,6 +22,23 @@
 
 namespace aapt {
 
+static ::testing::AssertionResult getManifestClassText(IAaptContext* context, xml::XmlResource* res,
+                                                       std::string* outStr) {
+    std::unique_ptr<ClassDefinition> manifestClass = generateManifestClass(
+            context->getDiagnostics(), res);
+    if (!manifestClass) {
+        return ::testing::AssertionFailure() << "manifestClass == nullptr";
+    }
+
+    std::stringstream out;
+    if (!manifestClass->writeJavaFile(manifestClass.get(), "android", true, &out)) {
+        return ::testing::AssertionFailure() << "failed to write java file";
+    }
+
+    *outStr = out.str();
+    return ::testing::AssertionSuccess();
+}
+
 TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
     std::unique_ptr<xml::XmlResource> manifest = test::buildXmlDom(R"EOF(
@@ -32,11 +49,8 @@ TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
           <permission-group android:name="foo.bar.PERMISSION" />
         </manifest>)EOF");
 
-    std::stringstream out;
-    ManifestClassGenerator generator;
-    ASSERT_TRUE(generator.generate(context->getDiagnostics(), u"android", manifest.get(), &out));
-
-    std::string actual = out.str();
+    std::string actual;
+    ASSERT_TRUE(getManifestClassText(context.get(), manifest.get(), &actual));
 
     const size_t permissionClassPos = actual.find("public static final class permission {");
     const size_t permissionGroupClassPos =
@@ -87,11 +101,8 @@ TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
           <permission android:name="android.permission.SECRET" />
         </manifest>)EOF");
 
-    std::stringstream out;
-    ManifestClassGenerator generator;
-    ASSERT_TRUE(generator.generate(context->getDiagnostics(), u"android", manifest.get(), &out));
-
-    std::string actual = out.str();
+    std::string actual;
+    ASSERT_TRUE(getManifestClassText(context.get(), manifest.get(), &actual));
 
     EXPECT_NE(std::string::npos, actual.find(
 R"EOF(    /**

@@ -762,9 +762,24 @@ public:
             return true;
         }
 
+        std::unique_ptr<ClassDefinition> manifestClass = generateManifestClass(
+                mContext->getDiagnostics(), manifestXml);
+
+        if (!manifestClass) {
+            // Something bad happened, but we already logged it, so exit.
+            return false;
+        }
+
+        if (manifestClass->empty()) {
+            // Empty Manifest class, no need to generate it.
+            return true;
+        }
+
+        const std::string packageUtf8 = util::utf16ToUtf8(mContext->getCompilationPackage());
+
         std::string outPath = mOptions.generateJavaClassPath.value();
-        file::appendPath(&outPath,
-                         file::packageToPath(util::utf16ToUtf8(mContext->getCompilationPackage())));
+        file::appendPath(&outPath, file::packageToPath(packageUtf8));
+
         if (!file::mkdirs(outPath)) {
             mContext->getDiagnostics()->error(
                     DiagMessage() << "failed to create directory '" << outPath << "'");
@@ -780,13 +795,7 @@ public:
             return false;
         }
 
-        ManifestClassGenerator generator;
-        if (!generator.generate(mContext->getDiagnostics(), mContext->getCompilationPackage(),
-                                manifestXml, &fout)) {
-            return false;
-        }
-
-        if (!fout) {
+        if (!ClassDefinition::writeJavaFile(manifestClass.get(), packageUtf8, true, &fout)) {
             mContext->getDiagnostics()->error(
                     DiagMessage() << "failed writing to '" << outPath << "': " << strerror(errno));
             return false;

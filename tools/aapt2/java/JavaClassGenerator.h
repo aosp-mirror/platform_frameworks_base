@@ -28,7 +28,7 @@
 namespace aapt {
 
 class AnnotationProcessor;
-class ClassDefinitionWriter;
+class ClassDefinition;
 
 struct JavaClassGeneratorOptions {
     /*
@@ -70,16 +70,15 @@ public:
     const std::string& getError() const;
 
 private:
-    bool writeEntriesForClass(ClassDefinitionWriter* outClassDef,
-                              const StringPiece16& packageNameToGenerate,
-                              const ResourceTablePackage* package,
-                              const ResourceTableType* type);
+    bool addMembersToTypeClass(const StringPiece16& packageNameToGenerate,
+                               const ResourceTablePackage* package,
+                               const ResourceTableType* type,
+                               ClassDefinition* outTypeClassDef);
 
-    void writeStyleableEntryForClass(ClassDefinitionWriter* outClassDef,
-                                     AnnotationProcessor* processor,
-                                     const StringPiece16& packageNameToGenerate,
-                                     const std::u16string& entryName,
-                                     const Styleable* styleable);
+    void addMembersToStyleableClass(const StringPiece16& packageNameToGenerate,
+                                    const std::u16string& entryName,
+                                    const Styleable* styleable,
+                                    ClassDefinition* outStyleableClassDef);
 
     bool skipSymbol(SymbolState state);
 
