@@ -85,6 +85,7 @@ import com.android.documentsui.Events;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
+import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentsLoader;
 import com.android.documentsui.RootsCache;
@@ -1124,6 +1125,7 @@ public class DirectoryFragment extends Fragment
                     if (Objects.equals(src, dst)) {
                         return false;
                     }
+                    Metrics.logDragNDrop(getContext());
                     copyFromClipData(event.getClipData(), dst);
                     return true;
             }
@@ -1622,6 +1624,9 @@ public class DirectoryFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
         if (!isAdded()) return;
+        if (mSearchMode) {
+            Metrics.logSearch(getContext());
+        }
 
         State state = getDisplayState();
 
