@@ -573,12 +573,26 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void broadcastProfileAvailabilityChanges(UserHandle profileHandle,
             UserHandle parentHandle, boolean inQuietMode) {
-        Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+        Intent intent = new Intent();
+        if (inQuietMode) {
+            intent.setAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        } else {
+            intent.setAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        }
         intent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
         intent.putExtra(Intent.EXTRA_USER, profileHandle);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(intent, parentHandle);
+
+        //TODO: remove once Launcher3 is updated.
+        Intent oldIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+        oldIntent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
+        oldIntent.putExtra(Intent.EXTRA_USER, profileHandle);
+        oldIntent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
+        oldIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcastAsUser(oldIntent, parentHandle);
+
     }
 
     @Override
