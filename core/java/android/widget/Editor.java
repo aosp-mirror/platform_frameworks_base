@@ -3640,6 +3640,9 @@ public class Editor {
             }
 
             if (menu.hasVisibleItems() || mode.getCustomView() != null) {
+                if (mHasSelection && !mTextView.hasTransientState()) {
+                    mTextView.setHasTransientState(true);
+                }
                 return true;
             } else {
                 return false;
