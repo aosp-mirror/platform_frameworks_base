@@ -605,6 +605,10 @@ public class IpManager extends StateMachine {
                 }
             }
             newLp.setDomains(mDhcpResults.domains);
+
+            if (mDhcpResults.mtu != 0) {
+                newLp.setMtu(mDhcpResults.mtu);
+            }
         }
 
         // [4] Add in TCP buffer sizes and HTTP Proxy config, if available.
