@@ -1878,6 +1878,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     private boolean shouldSaveSurface() {
+        if (mWinAnimator.mSurfaceController == null) {
+            // Don't bother if the surface controller is gone for any reason.
+            return false;
+        }
+
         if ((mAttrs.flags & FLAG_SECURE) != 0) {
             // We don't save secure surfaces since their content shouldn't be shown while the app
             // isn't on screen and content might leak through during the transition animation with
@@ -1951,10 +1956,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return;
         }
         mSurfaceSaved = false;
-        setHasSurface(true);
-        mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-            Slog.v(TAG, "Restoring saved surface: " + this);
+        if (mWinAnimator.mSurfaceController != null) {
+            setHasSurface(true);
+            mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                Slog.v(TAG, "Restoring saved surface: " + this);
+            }
+        } else {
+            // mSurfaceController shouldn't be null if mSurfaceSaved was still true at
+            // this point. Even if we destroyed the saved surface because of rotation
+            // or resize, mSurfaceSaved flag should have been cleared. So this is a wtf.
+            Slog.wtf(TAG, "Failed to restore saved surface: surface gone! " + this);
         }
     }
 
