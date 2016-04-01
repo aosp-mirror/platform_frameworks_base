@@ -3401,7 +3401,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (isStackVisibleLocked(DOCKED_STACK_ID)
+        if ((isStackVisibleLocked(DOCKED_STACK_ID)
+                && !mStackIdToStack.get(DOCKED_STACK_ID).isAdjustedForMinimizedDock())
                 || isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
             // We don't let app affect the system orientation when in freeform or docked mode since
             // they don't occupy the entire display and their request can conflict with other apps.
