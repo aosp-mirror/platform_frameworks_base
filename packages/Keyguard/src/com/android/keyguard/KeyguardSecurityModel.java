@@ -77,6 +77,7 @@ public class KeyguardSecurityModel {
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
                 return SecurityMode.Password;
 
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
