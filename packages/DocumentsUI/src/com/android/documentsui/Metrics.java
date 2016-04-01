@@ -69,6 +69,7 @@ public final class Metrics {
     private static final String COUNT_DRAWER_OPENED = "docsui_drawer_opened";
     private static final String COUNT_DRAG_N_DROP = "docsui_drag_n_drop";
     private static final String COUNT_SEARCH = "docsui_search";
+    private static final String COUNT_MENU_ACTION = "docsui_menu_action";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -198,8 +199,71 @@ public final class Metrics {
     @Retention(RetentionPolicy.SOURCE)
     public @interface MetricsOpType {}
 
-    // Codes representing different launch actions. These are used for bucketing stats in the
-    // COUNT_LAUNCH_ACTION histogram.
+    // Codes representing different provider types.  Used for sorting file operations when logging.
+    private static final int PROVIDER_INTRA = 0;
+    private static final int PROVIDER_SYSTEM = 1;
+    private static final int PROVIDER_EXTERNAL = 2;
+
+    @IntDef(flag = false, value = {
+            PROVIDER_INTRA,
+            PROVIDER_SYSTEM,
+            PROVIDER_EXTERNAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Provider {}
+
+
+    // Codes representing different menu actions. These are used for bucketing stats in the
+    // COUNT_MENU_ACTION histogram.
+    // Both regular toolbar menu and action mode menu operations are included.
+    // Do not change or rearrange these values, that will break historical data. Only add to the
+    // list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int ACTION_MENU_OTHER = 1;
+    private static final int ACTION_MENU_GRID = 2;
+    private static final int ACTION_MENU_LIST = 3;
+    private static final int ACTION_MENU_SORT = 4;
+    private static final int ACTION_MENU_SORT_NAME = 5;
+    private static final int ACTION_MENU_SORT_DATE = 6;
+    private static final int ACTION_MENU_SORT_SIZE = 7;
+    private static final int ACTION_MENU_SEARCH = 8;
+    private static final int ACTION_MENU_SHOW_SIZE = 9;
+    private static final int ACTION_MENU_SETTINGS = 10;
+    private static final int ACTION_MENU_COPY_TO = 11;
+    private static final int ACTION_MENU_MOVE_TO = 12;
+    private static final int ACTION_MENU_DELETE = 13;
+    private static final int ACTION_MENU_RENAME = 14;
+    private static final int ACTION_MENU_CREATE_DIR = 15;
+    private static final int ACTION_MENU_SELECT_ALL = 16;
+    private static final int ACTION_MENU_SHARE = 17;
+    private static final int ACTION_MENU_OPEN = 18;
+    private static final int ACTION_MENU_ADVANCED = 19;
+
+    @IntDef(flag = false, value = {
+            ACTION_MENU_OTHER,
+            ACTION_MENU_GRID,
+            ACTION_MENU_LIST,
+            ACTION_MENU_SORT,
+            ACTION_MENU_SORT_NAME,
+            ACTION_MENU_SORT_DATE,
+            ACTION_MENU_SORT_SIZE,
+            ACTION_MENU_SHOW_SIZE,
+            ACTION_MENU_SETTINGS,
+            ACTION_MENU_COPY_TO,
+            ACTION_MENU_MOVE_TO,
+            ACTION_MENU_DELETE,
+            ACTION_MENU_RENAME,
+            ACTION_MENU_CREATE_DIR,
+            ACTION_MENU_SELECT_ALL,
+            ACTION_MENU_SHARE,
+            ACTION_MENU_OPEN,
+            ACTION_MENU_ADVANCED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MenuAction {}
+
+    // Codes representing different menu actions. These are used for bucketing stats in the
+    // COUNT_MENU_ACTION histogram.
     // Do not change or rearrange these values, that will break historical data. Only add to the
     // list.
     // Do not use negative numbers or zero; clearcut only handles positive integers.
@@ -224,19 +288,6 @@ public final class Metrics {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MetricsAction {}
-
-    // Codes representing different provider types.  Used for sorting file operations when logging.
-    private static final int PROVIDER_INTRA = 0;
-    private static final int PROVIDER_SYSTEM = 1;
-    private static final int PROVIDER_EXTERNAL = 2;
-
-    @IntDef(flag = true, value = {
-            PROVIDER_INTRA,
-            PROVIDER_SYSTEM,
-            PROVIDER_EXTERNAL
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Provider {}
 
     // Codes representing different actions to open the drawer. They are used for bucketing stats in
     // the COUNT_DRAWER_OPENED histogram.
@@ -586,6 +637,74 @@ public final class Metrics {
             default:
                 Log.wtf(TAG, "invalid ScopedAccessGrant: " + type);
         }
+    }
+
+    /**
+     * Logs menu action that was selected by user.
+     * @param context
+     * @param id Resource id of the menu item.
+     */
+    public static void logMenuAction(Context context, int id) {
+        @MenuAction int menuAction = ACTION_MENU_OTHER;
+        switch (id) {
+            case R.id.menu_grid:
+                menuAction = ACTION_MENU_GRID;
+                break;
+            case R.id.menu_list:
+                menuAction = ACTION_MENU_LIST;
+                break;
+            case R.id.menu_sort:
+                menuAction = ACTION_MENU_SORT;
+                break;
+            case R.id.menu_sort_name:
+                menuAction = ACTION_MENU_SORT_NAME;
+                break;
+            case R.id.menu_sort_date:
+                menuAction = ACTION_MENU_SORT_DATE;
+                break;
+            case R.id.menu_sort_size:
+                menuAction = ACTION_MENU_SORT_SIZE;
+                break;
+            case R.id.menu_search:
+                menuAction = ACTION_MENU_SEARCH;
+                break;
+            case R.id.menu_file_size:
+                menuAction = ACTION_MENU_SHOW_SIZE;
+                break;
+            case R.id.menu_settings:
+                menuAction = ACTION_MENU_SETTINGS;
+                break;
+            case R.id.menu_copy_to:
+                menuAction = ACTION_MENU_COPY_TO;
+                break;
+            case R.id.menu_move_to:
+                menuAction = ACTION_MENU_MOVE_TO;
+                break;
+            case R.id.menu_delete:
+                menuAction = ACTION_MENU_DELETE;
+                break;
+            case R.id.menu_rename:
+                menuAction = ACTION_MENU_RENAME;
+                break;
+            case R.id.menu_create_dir:
+                menuAction = ACTION_MENU_CREATE_DIR;
+                break;
+            case R.id.menu_select_all:
+                menuAction = ACTION_MENU_SELECT_ALL;
+                break;
+            case R.id.menu_share:
+                menuAction = ACTION_MENU_SHARE;
+                break;
+            case R.id.menu_open:
+                menuAction = ACTION_MENU_OPEN;
+                break;
+            case R.id.menu_advanced:
+                menuAction = ACTION_MENU_ADVANCED;
+                break;
+            default:
+                break;
+        }
+        logHistogram(context, COUNT_MENU_ACTION, menuAction);
     }
 
     /**

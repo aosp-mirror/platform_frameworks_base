@@ -272,6 +272,7 @@ public abstract class BaseActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Metrics.logMenuAction(this, item.getItemId());
 
         switch (item.getItemId()) {
             case android.R.id.home:
