@@ -95,7 +95,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
         return sSystemReady;
     }
-    static boolean sSystemReady = false;
+    static volatile boolean sSystemReady = false;
 
     static public void broadcastStickyIntent(Intent intent, String permission, int userId) {
         broadcastStickyIntent(intent, permission, AppOpsManager.OP_NONE, userId);

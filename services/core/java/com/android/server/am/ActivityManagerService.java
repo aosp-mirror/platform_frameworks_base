@@ -1105,19 +1105,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     ComponentName mTopComponent;
     String mTopAction = Intent.ACTION_MAIN;
     String mTopData;
-    boolean mProcessesReady = false;
-    boolean mSystemReady = false;
-    boolean mBooting = false;
-    boolean mCallFinishBooting = false;
-    boolean mBootAnimationComplete = false;
-    boolean mOnBattery = false;
-    boolean mLaunchWarningShown = false;
+
+    volatile boolean mProcessesReady = false;
+    volatile boolean mSystemReady = false;
+    volatile boolean mOnBattery = false;
+    volatile int mFactoryTest;
+
+    @GuardedBy("this") boolean mBooting = false;
+    @GuardedBy("this") boolean mCallFinishBooting = false;
+    @GuardedBy("this") boolean mBootAnimationComplete = false;
+    @GuardedBy("this") boolean mLaunchWarningShown = false;
+    @GuardedBy("this") boolean mCheckedForSetup = false;
 
     Context mContext;
-
-    int mFactoryTest;
-
-    boolean mCheckedForSetup;
 
     /**
      * The time at which we will allow normal application switches again,
