@@ -600,7 +600,7 @@ public class AudioTrack implements AudioRouting
      *                  .build())
      *         .setAudioFormat(new AudioFormat.Builder()
      *                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-     *                 .setSampleRate(441000)
+     *                 .setSampleRate(44100)
      *                 .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
      *                 .build())
      *         .setBufferSizeInBytes(minBuffSize)
