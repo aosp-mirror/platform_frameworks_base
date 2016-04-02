@@ -425,7 +425,7 @@ class Task implements DimLayer.DimLayerUser {
         if (mFullscreen
                 || !StackId.isTaskResizeableByDockedStack(mStack.mStackId)
                 || displayContent == null
-                || displayContent.getDockedStackLocked() != null) {
+                || displayContent.getDockedStackVisibleForUserLocked() != null) {
             return true;
         }
         return false;
