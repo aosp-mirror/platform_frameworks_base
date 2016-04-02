@@ -24,8 +24,10 @@ import com.android.systemui.recents.events.EventBus;
 public class MultiWindowStateChangedEvent extends EventBus.Event {
 
     public final boolean inMultiWindow;
+    public final boolean hasStackTasks;
 
-    public MultiWindowStateChangedEvent(boolean inMultiWindow) {
+    public MultiWindowStateChangedEvent(boolean inMultiWindow, boolean hasStackTasks) {
         this.inMultiWindow = inMultiWindow;
+        this.hasStackTasks = hasStackTasks;
     }
 }
