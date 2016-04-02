@@ -782,7 +782,12 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            return readUserDataInternal(accounts, account, key);
+            synchronized (accounts.cacheLock) {
+                if (!accountExistsCacheLocked(accounts, account)) {
+                    return null;
+                }
+                return readUserDataInternalLocked(accounts, account, key);
+            }
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -1869,44 +1874,57 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            setUserdataInternal(accounts, account, key, value);
+            synchronized (accounts.cacheLock) {
+                if (!accountExistsCacheLocked(accounts, account)) {
+                    return;
+                }
+                setUserdataInternalLocked(accounts, account, key, value);
+            }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private void setUserdataInternal(UserAccounts accounts, Account account, String key,
+    private boolean accountExistsCacheLocked(UserAccounts accounts, Account account) {
+        if (accounts.accountCache.containsKey(account.type)) {
+            for (Account acc : accounts.accountCache.get(account.type)) {
+                if (acc.name.equals(account.name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void setUserdataInternalLocked(UserAccounts accounts, Account account, String key,
             String value) {
         if (account == null || key == null) {
             return;
         }
-        synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
-            db.beginTransaction();
-            try {
-                long accountId = getAccountIdLocked(db, account);
-                if (accountId < 0) {
+        final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            long accountId = getAccountIdLocked(db, account);
+            if (accountId < 0) {
+                return;
+            }
+            long extrasId = getExtrasIdLocked(db, accountId, key);
+            if (extrasId < 0) {
+                extrasId = insertExtraLocked(db, accountId, key, value);
+                if (extrasId < 0) {
                     return;
                 }
-                long extrasId = getExtrasIdLocked(db, accountId, key);
-                if (extrasId < 0 ) {
-                    extrasId = insertExtraLocked(db, accountId, key, value);
-                    if (extrasId < 0) {
-                        return;
-                    }
-                } else {
-                    ContentValues values = new ContentValues();
-                    values.put(EXTRAS_VALUE, value);
-                    if (1 != db.update(CE_TABLE_EXTRAS, values, EXTRAS_ID + "=" + extrasId, null)) {
-                        return;
-                    }
-
+            } else {
+                ContentValues values = new ContentValues();
+                values.put(EXTRAS_VALUE, value);
+                if (1 != db.update(TABLE_EXTRAS, values, EXTRAS_ID + "=" + extrasId, null)) {
+                    return;
                 }
-                writeUserDataIntoCacheLocked(accounts, db, account, key, value);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
             }
+            writeUserDataIntoCacheLocked(accounts, db, account, key, value);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
@@ -5292,17 +5310,16 @@ public class AccountManagerService
         }
     }
 
-    protected String readUserDataInternal(UserAccounts accounts, Account account, String key) {
-        synchronized (accounts.cacheLock) {
-            HashMap<String, String> userDataForAccount = accounts.userDataCache.get(account);
-            if (userDataForAccount == null) {
-                // need to populate the cache for this account
-                final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
-                userDataForAccount = readUserDataForAccountFromDatabaseLocked(db, account);
-                accounts.userDataCache.put(account, userDataForAccount);
-            }
-            return userDataForAccount.get(key);
+    protected String readUserDataInternalLocked(
+            UserAccounts accounts, Account account, String key) {
+        HashMap<String, String> userDataForAccount = accounts.userDataCache.get(account);
+        if (userDataForAccount == null) {
+            // need to populate the cache for this account
+            final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
+            userDataForAccount = readUserDataForAccountFromDatabaseLocked(db, account);
+            accounts.userDataCache.put(account, userDataForAccount);
         }
+        return userDataForAccount.get(key);
     }
 
     protected HashMap<String, String> readUserDataForAccountFromDatabaseLocked(
