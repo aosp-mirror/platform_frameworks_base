@@ -16,40 +16,58 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivity;
+import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
+import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
 
-    Context mContext;
+    private static final int DEFAULT_ANIMATION_DURATION = 150;
 
-    View mNavBarScrimView;
+    private Context mContext;
 
-    boolean mHasNavBarScrim;
-    boolean mShouldAnimateNavBarScrim;
+    private View mNavBarScrimView;
 
-    int mNavBarScrimEnterDuration;
+    private boolean mHasNavBarScrim;
+    private boolean mShouldAnimateNavBarScrim;
 
-    public SystemBarScrimViews(Activity activity) {
+    private int mNavBarScrimEnterDuration;
+
+    public SystemBarScrimViews(RecentsActivity activity) {
         mContext = activity;
         mNavBarScrimView = activity.findViewById(R.id.nav_bar_scrim);
+        mNavBarScrimView.forceHasOverlappingRendering(false);
         mNavBarScrimEnterDuration = activity.getResources().getInteger(
                 R.integer.recents_nav_bar_scrim_enter_duration);
+    }
+
+    /**
+     * Updates the nav bar scrim.
+     */
+    public void updateNavBarScrim(boolean animateNavBarScrim, boolean hasStackTasks,
+            AnimationProps animation) {
+        prepareEnterRecentsAnimation(isNavBarScrimRequired(hasStackTasks), animateNavBarScrim);
+        if (animateNavBarScrim && animation != null) {
+            animateNavBarScrimVisibility(true, animation);
+        }
     }
 
     /**
      * Prepares the scrim views for animating when entering Recents. This will be called before
      * the first draw, unless we are updating the scrim on configuration change.
      */
-    public void prepareEnterRecentsAnimation(boolean hasNavBarScrim, boolean animateNavBarScrim) {
+    private void prepareEnterRecentsAnimation(boolean hasNavBarScrim, boolean animateNavBarScrim) {
         mHasNavBarScrim = hasNavBarScrim;
         mShouldAnimateNavBarScrim = animateNavBarScrim;
 
@@ -60,7 +78,7 @@ public class SystemBarScrimViews {
     /**
      * Animates the nav bar scrim visibility.
      */
-    public void animateNavBarScrimVisibility(boolean visible, AnimationProps animation) {
+    private void animateNavBarScrimVisibility(boolean visible, AnimationProps animation) {
         int toY = 0;
         if (visible) {
             mNavBarScrimView.setVisibility(View.VISIBLE);
@@ -77,6 +95,14 @@ public class SystemBarScrimViews {
         } else {
             mNavBarScrimView.setTranslationY(toY);
         }
+    }
+
+    /**
+     * @return Whether to show the nav bar scrim.
+     */
+    private boolean isNavBarScrimRequired(boolean hasStackTasks) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        return hasStackTasks && !ssp.hasTransposedNavBar() && !ssp.hasDockedTask();
     }
 
     /**** EventBus events ****/
@@ -101,21 +127,48 @@ public class SystemBarScrimViews {
      */
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         if (mHasNavBarScrim) {
-            AnimationProps animation = new AnimationProps()
-                    .setDuration(AnimationProps.BOUNDS,
-                            TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION)
-                    .setInterpolator(AnimationProps.BOUNDS, Interpolators.FAST_OUT_SLOW_IN);
+            AnimationProps animation = createBoundsAnimation(
+                    TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION);
             animateNavBarScrimVisibility(false, animation);
         }
     }
 
     public final void onBusEvent(DismissAllTaskViewsEvent event) {
         if (mHasNavBarScrim) {
-            AnimationProps animation = new AnimationProps()
-                    .setDuration(AnimationProps.BOUNDS,
-                            TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION)
-                    .setInterpolator(AnimationProps.BOUNDS, Interpolators.FAST_OUT_SLOW_IN);
+            AnimationProps animation = createBoundsAnimation(
+                    TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION);
             animateNavBarScrimVisibility(false, animation);
         }
+    }
+
+    public final void onBusEvent(ConfigurationChangedEvent event) {
+        animateScrimToCurrentNavBarState(event.hasStackTasks);
+    }
+
+    public final void onBusEvent(MultiWindowStateChangedEvent event) {
+        animateScrimToCurrentNavBarState(event.hasStackTasks);
+    }
+
+    /**
+     * Animates the scrim to match the state of the current nav bar.
+     */
+    private void animateScrimToCurrentNavBarState(boolean hasStackTasks) {
+        boolean hasNavBarScrim = isNavBarScrimRequired(hasStackTasks);
+        if (mHasNavBarScrim != hasNavBarScrim) {
+            AnimationProps animation = hasNavBarScrim
+                    ? createBoundsAnimation(DEFAULT_ANIMATION_DURATION)
+                    : AnimationProps.IMMEDIATE;
+            animateNavBarScrimVisibility(hasNavBarScrim, animation);
+        }
+        mHasNavBarScrim = hasNavBarScrim;
+    }
+
+    /**
+     * @return a default animation to aniamte the bounds of the scrim.
+     */
+    private AnimationProps createBoundsAnimation(int duration) {
+        return new AnimationProps()
+                .setDuration(AnimationProps.BOUNDS, duration)
+                .setInterpolator(AnimationProps.BOUNDS, Interpolators.FAST_OUT_SLOW_IN);
     }
 }
