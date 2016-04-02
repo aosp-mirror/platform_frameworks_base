@@ -243,10 +243,6 @@ public class ResolverActivity extends Activity {
             return;
         }
 
-        // Prevent the Resolver window from becoming the top fullscreen window and thus from taking
-        // control of the system bars.
-        getWindow().clearFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR);
-
         final ResolverDrawerLayout rdl = (ResolverDrawerLayout) findViewById(R.id.contentPanel);
         if (rdl != null) {
             rdl.setOnDismissedListener(new ResolverDrawerLayout.OnDismissedListener() {
