@@ -967,13 +967,15 @@ class WindowStateAnimator {
             if (appTransformation != null) {
                 tmpMatrix.postConcat(appTransformation.getMatrix());
             }
+
+            // The translation that applies the position of the window needs to be applied at the
+            // end in case that other translations include scaling. Otherwise the scaling will
+            // affect this translation. But it needs to be set before the screen rotation animation
+            // so the pivot point is at the center of the screen for all windows.
+            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
-            // The translation that applies the position of the window needs to be applied at the
-            // end in case that other translations include scaling. Otherwise the scaling will
-            // affect this translation.
-            tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
 
             //TODO (multidisplay): Magnification is supported only for the default display.
             if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
