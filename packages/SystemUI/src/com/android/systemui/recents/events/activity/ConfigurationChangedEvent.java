@@ -25,9 +25,12 @@ public class ConfigurationChangedEvent extends EventBus.AnimatedEvent {
 
     public final boolean fromMultiWindow;
     public final boolean fromOrientationChange;
+    public final boolean hasStackTasks;
 
-    public ConfigurationChangedEvent(boolean fromMultiWindow, boolean fromOrientationChange) {
+    public ConfigurationChangedEvent(boolean fromMultiWindow, boolean fromOrientationChange,
+            boolean hasStackTasks) {
         this.fromMultiWindow = fromMultiWindow;
         this.fromOrientationChange = fromOrientationChange;
+        this.hasStackTasks = hasStackTasks;
     }
 }

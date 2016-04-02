@@ -537,11 +537,13 @@ public class TaskStackLayoutAlgorithm {
             } else {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex - 1, mMinScrollP, mMaxScrollP);
             }
+            mInitialNormX = null;
         } else if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
             // If there is one stack task, ignore the min/max/initial scroll positions
             mMinScrollP = 0;
             mMaxScrollP = 0;
             mInitialScrollP = 0;
+            mInitialNormX = null;
         } else {
             // Set the max scroll to be the point where the front most task is visible with the
             // stack bottom offset
