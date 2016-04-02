@@ -437,6 +437,15 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate, st
     return generate(packageNameToGenerate, packageNameToGenerate, out);
 }
 
+static void appendJavaDocAnnotations(const std::vector<std::string>& annotations,
+                                     AnnotationProcessor* processor) {
+    for (const std::string& annotation : annotations) {
+        std::string properAnnotation = "@";
+        properAnnotation += annotation;
+        processor->appendComment(properAnnotation);
+    }
+}
+
 bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
                                   const StringPiece16& outPackageName, std::ostream* out) {
 
@@ -477,13 +486,16 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
                     mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic) {
                 // When generating a public R class, we don't want Styleable to be part of the API.
                 // It is only emitted for documentation purposes.
-                AnnotationProcessor* processor = classDef->getCommentBuilder();
-                processor->appendComment("@doconly");
+                classDef->getCommentBuilder()->appendComment("@doconly");
             }
+
+            appendJavaDocAnnotations(mOptions.javadocAnnotations, classDef->getCommentBuilder());
 
             rClass.addMember(std::move(classDef));
         }
     }
+
+    appendJavaDocAnnotations(mOptions.javadocAnnotations, rClass.getCommentBuilder());
 
     if (!ClassDefinition::writeJavaFile(&rClass, util::utf16ToUtf8(outPackageName),
                                         mOptions.useFinal, out)) {
@@ -493,7 +505,5 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
     out->flush();
     return true;
 }
-
-
 
 } // namespace aapt
