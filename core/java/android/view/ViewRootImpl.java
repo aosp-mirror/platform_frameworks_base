@@ -3415,6 +3415,13 @@ public final class ViewRootImpl implements ViewParent,
                         updateConfiguration(config, false);
                     }
 
+                    final boolean framesChanged = !mWinFrame.equals(args.arg1)
+                            || !mPendingOverscanInsets.equals(args.arg5)
+                            || !mPendingContentInsets.equals(args.arg2)
+                            || !mPendingStableInsets.equals(args.arg6)
+                            || !mPendingVisibleInsets.equals(args.arg3)
+                            || !mPendingOutsets.equals(args.arg7);
+
                     mWinFrame.set((Rect) args.arg1);
                     mPendingOverscanInsets.set((Rect) args.arg5);
                     mPendingContentInsets.set((Rect) args.arg2);
@@ -3431,7 +3438,7 @@ public final class ViewRootImpl implements ViewParent,
                         mReportNextDraw = true;
                     }
 
-                    if (mView != null) {
+                    if (mView != null && framesChanged) {
                         forceLayout(mView);
                     }
 
