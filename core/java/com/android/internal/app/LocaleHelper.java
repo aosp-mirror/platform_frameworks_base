@@ -219,7 +219,7 @@ public class LocaleHelper {
         public int compare(LocaleStore.LocaleInfo lhs, LocaleStore.LocaleInfo rhs) {
             // We don't care about the various suggestion types, just "suggested" (!= 0)
             // and "all others" (== 0)
-            if (mCountryMode || (lhs.isSuggested() == rhs.isSuggested())) {
+            if (lhs.isSuggested() == rhs.isSuggested()) {
                 // They are in the same "bucket" (suggested / others), so we compare the text
                 return mCollator.compare(
                         removePrefixForCompare(lhs.getLocale(), lhs.getLabel(mCountryMode)),

@@ -49,6 +49,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private static final int TYPE_HEADER_SUGGESTED = 0;
     private static final int TYPE_HEADER_ALL_OTHERS = 1;
     private static final int TYPE_LOCALE = 2;
+    private static final int MIN_REGIONS_FOR_SUGGESTIONS = 6;
 
     private ArrayList<LocaleStore.LocaleInfo> mLocaleOptions;
     private ArrayList<LocaleStore.LocaleInfo> mOriginalLocaleOptions;
@@ -171,7 +172,15 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     }
 
     private boolean showHeaders() {
-        if (mCountryMode) { // never show suggestions in country mode
+        // We don't want to show suggestions for locales with very few regions
+        // (e.g. Romanian, with 2 regions)
+        // So we put a (somewhat) arbitrary limit.
+        //
+        // The initial idea was to make that limit dependent on the screen height.
+        // But that would mean rotating the screen could make the suggestions disappear,
+        // as the number of countries that fits on the screen would be different in portrait
+        // and landscape mode.
+        if (mCountryMode && mLocaleOptions.size() < MIN_REGIONS_FOR_SUGGESTIONS) {
             return false;
         }
         return mSuggestionCount != 0 && mSuggestionCount != mLocaleOptions.size();
