@@ -5411,7 +5411,11 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_PLAY_SOUND_EFFECT:
-                    onPlaySoundEffect(msg.arg1, msg.arg2);
+                    if (isStreamMute(AudioSystem.STREAM_SYSTEM)) {
+                        Log.d(TAG, "Stream muted, skip playback");
+                    } else {
+                        onPlaySoundEffect(msg.arg1, msg.arg2);
+                    }
                     break;
 
                 case MSG_SET_FORCE_USE:
