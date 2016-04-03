@@ -36,10 +36,10 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import com.android.internal.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -318,6 +318,9 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
      */
     public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 0x00000040;
+
+    /** {@hide} */
+    public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
     /**
      * The event types an {@link AccessibilityService} is interested in.
@@ -687,8 +690,9 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /** {@hide} */
-    public boolean isEncryptionAware() {
-        return mResolveInfo.serviceInfo.directBootAware;
+    public boolean isDirectBootAware() {
+        return ((flags & FLAG_FORCE_DIRECT_BOOT_AWARE) != 0)
+                || mResolveInfo.serviceInfo.directBootAware;
     }
 
     /**
