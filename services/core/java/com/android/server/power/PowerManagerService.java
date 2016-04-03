@@ -538,7 +538,10 @@ public final class PowerManagerService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         synchronized (mLock) {
-            if (phase == PHASE_BOOT_COMPLETED) {
+            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+                incrementBootCount();
+
+            } else if (phase == PHASE_BOOT_COMPLETED) {
                 final long now = SystemClock.uptimeMillis();
                 mBootCompleted = true;
                 mDirty |= DIRTY_BOOT_COMPLETED;
@@ -553,8 +556,6 @@ public final class PowerManagerService extends SystemService
                     }
                 }
                 mBootCompletedRunnables = null;
-
-                incrementBootCount();
             }
         }
     }

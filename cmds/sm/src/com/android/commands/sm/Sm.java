@@ -88,6 +88,8 @@ public final class Sm {
             runForget();
         } else if ("set-emulate-fbe".equals(op)) {
             runSetEmulateFbe();
+        } else if ("get-fbe-mode".equals(op)) {
+            runGetFbeMode();
         } else {
             throw new IllegalArgumentException();
         }
@@ -143,6 +145,16 @@ public final class Sm {
         final boolean emulateFbe = Boolean.parseBoolean(nextArg());
         mSm.setDebugFlags(emulateFbe ? StorageManager.DEBUG_EMULATE_FBE : 0,
                 StorageManager.DEBUG_EMULATE_FBE);
+    }
+
+    public void runGetFbeMode() {
+        if (StorageManager.isFileEncryptedNativeOnly()) {
+            System.out.println("native");
+        } else if (StorageManager.isFileEncryptedEmulatedOnly()) {
+            System.out.println("emulated");
+        } else {
+            System.out.println("none");
+        }
     }
 
     public void runPartition() throws RemoteException {
