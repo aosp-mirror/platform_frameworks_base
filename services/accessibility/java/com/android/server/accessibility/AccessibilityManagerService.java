@@ -1262,7 +1262,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Service service = componentNameToServiceMap.get(componentName);
 
             // Ignore non-encryption-aware services until user is unlocked
-            if (!isUnlocked && !installedService.isEncryptionAware()) {
+            if (!isUnlocked && !installedService.isDirectBootAware()) {
                 Slog.d(LOG_TAG, "Ignoring non-encryption-aware service " + componentName);
                 continue;
             }
