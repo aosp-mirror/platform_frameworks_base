@@ -15511,17 +15511,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Otherwise, reset the permission.
                 final int revokeResult = permissionsState.revokeRuntimePermission(bp, userId);
                 switch (revokeResult) {
-                    case PERMISSION_OPERATION_SUCCESS: {
-                        writeRuntimePermissions = true;
-                    } break;
-
+                    case PERMISSION_OPERATION_SUCCESS:
                     case PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
                         writeRuntimePermissions = true;
                         final int appId = ps.appId;
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED);
+                                killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
                             }
                         });
                     } break;
