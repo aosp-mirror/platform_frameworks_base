@@ -181,22 +181,18 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @param socket An SSL socket which has been connected to a server
      * @param hostname The expected hostname of the remote server
-     * @throws IOException if something goes wrong handshaking with the server
      * @throws SSLPeerUnverifiedException if the server cannot prove its identity
+     * @throws SSLException if SSLSession not created (null)
      *
      * @hide
      */
-    public static void verifyHostname(Socket socket, String hostname) throws IOException {
+    public static void verifyHostname(Socket socket, String hostname) throws SSLException {
         if (!(socket instanceof SSLSocket)) {
             throw new IllegalArgumentException("Attempt to verify non-SSL socket");
         }
 
         if (!isSslCheckRelaxed()) {
-            // The code at the start of OpenSSLSocketImpl.startHandshake()
-            // ensures that the call is idempotent, so we can safely call it.
             SSLSocket ssl = (SSLSocket) socket;
-            ssl.startHandshake();
-
             SSLSession session = ssl.getSession();
             if (session == null) {
                 throw new SSLException("Cannot verify SSL socket without session");
