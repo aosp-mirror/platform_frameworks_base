@@ -78,7 +78,6 @@ public class LauncherAppsService extends SystemService {
 
     @Override
     public void onStart() {
-        Binder.LOG_RUNTIME_EXCEPTION = true;
         publishBinderService(Context.LAUNCHER_APPS_SERVICE, mLauncherAppsImpl);
     }
 
