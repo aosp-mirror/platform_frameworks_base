@@ -908,8 +908,7 @@ public class RequestThreadManager {
                         mFaceDetectMapper.mapResultFaces(result, mLastRequest);
 
                         if (!holder.requestFailed()) {
-                            mDeviceState.setCaptureResult(holder, result,
-                                    CameraDeviceState.NO_CAPTURE_ERROR);
+                            mDeviceState.setCaptureResult(holder, result);
                         }
                     }
                     if (DEBUG) {
