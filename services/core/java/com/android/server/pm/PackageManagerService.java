@@ -76,6 +76,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.PARSE_IS_PRIVILEGED;
 import static android.content.pm.PackageParser.isApkFile;
+import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
@@ -115,6 +116,7 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentFilter.AuthorityEntry;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
@@ -147,6 +149,7 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
+import android.content.pm.PackageParser.IntentInfo;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageStats;
@@ -320,6 +323,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_INTENT_MATCHING = false;
     private static final boolean DEBUG_PACKAGE_SCANNING = false;
     private static final boolean DEBUG_VERIFY = false;
+    private static final boolean DEBUG_FILTERS = false;
 
     // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
     // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
@@ -445,6 +449,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         sBrowserIntent.setData(Uri.parse("http:"));
     }
 
+    /**
+     * The set of all protected actions [i.e. those actions for which a high priority
+     * intent filter is disallowed].
+     */
+    private static final Set<String> PROTECTED_ACTIONS = new ArraySet<>();
+    static {
+        PROTECTED_ACTIONS.add(Intent.ACTION_SEND);
+        PROTECTED_ACTIONS.add(Intent.ACTION_SENDTO);
+        PROTECTED_ACTIONS.add(Intent.ACTION_SEND_MULTIPLE);
+        PROTECTED_ACTIONS.add(Intent.ACTION_VIEW);
+    }
+
     // Compilation reasons.
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT = 1;
@@ -531,6 +547,20 @@ public class PackageManagerService extends IPackageManager.Stub {
      * are package location.
      */
     final private ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
+    /**
+     * Tracks high priority intent filters for protected actions. During boot, certain
+     * filter actions are protected and should never be allowed to have a high priority
+     * intent filter for them. However, there is one, and only one exception -- the
+     * setup wizard. It must be able to define a high priority intent filter for these
+     * actions to ensure there are no escapes from the wizard. We need to delay processing
+     * of these during boot as we need to look at all of the system packages in order
+     * to know which component is the setup wizard.
+     */
+    private final List<PackageParser.ActivityIntentInfo> mProtectedFilters = new ArrayList<>();
+    /**
+     * Whether or not processing protected filters should be deferred.
+     */
+    private boolean mDeferProtectedFilters = true;
 
     /**
      * Tracks existing system packages prior to receiving an OTA. Keys are package name.
@@ -2429,6 +2459,36 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             mExpectingBetter.clear();
 
+            // Resolve protected action filters. Only the setup wizard is allowed to
+            // have a high priority filter for these actions.
+            mSetupWizardPackage = getSetupWizardPackageName();
+            if (mProtectedFilters.size() > 0) {
+                if (DEBUG_FILTERS && mSetupWizardPackage == null) {
+                    Slog.i(TAG, "No setup wizard;"
+                        + " All protected intents capped to priority 0");
+                }
+                for (ActivityIntentInfo filter : mProtectedFilters) {
+                    if (filter.activity.info.packageName.equals(mSetupWizardPackage)) {
+                        if (DEBUG_FILTERS) {
+                            Slog.i(TAG, "Found setup wizard;"
+                                + " allow priority " + filter.getPriority() + ";"
+                                + " package: " + filter.activity.info.packageName
+                                + " activity: " + filter.activity.className
+                                + " priority: " + filter.getPriority());
+                        }
+                        // skip setup wizard; allow it to keep the high priority filter
+                        continue;
+                    }
+                    Slog.w(TAG, "Protected action; cap priority to 0;"
+                            + " package: " + filter.activity.info.packageName
+                            + " activity: " + filter.activity.className
+                            + " origPrio: " + filter.getPriority());
+                    filter.setPriority(0);
+                }
+            }
+            mDeferProtectedFilters = false;
+            mProtectedFilters.clear();
+
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
             updateAllSharedLibrariesLPw();
@@ -2531,7 +2591,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             mInstallerService = new PackageInstallerService(context, this);
-            mSetupWizardPackage = getSetupWizardPackageName();
 
             final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
             final ComponentName ephemeralInstallerComponent = getEphemeralInstallerLPr();
@@ -9762,8 +9821,314 @@ public class PackageManagerService extends IPackageManager.Stub {
             return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
         }
 
+        /**
+         * Finds a privileged activity that matches the specified activity names.
+         */
+        private PackageParser.Activity findMatchingActivity(
+                List<PackageParser.Activity> activityList, ActivityInfo activityInfo) {
+            for (PackageParser.Activity sysActivity : activityList) {
+                if (sysActivity.info.name.equals(activityInfo.name)) {
+                    return sysActivity;
+                }
+                if (sysActivity.info.name.equals(activityInfo.targetActivity)) {
+                    return sysActivity;
+                }
+                if (sysActivity.info.targetActivity != null) {
+                    if (sysActivity.info.targetActivity.equals(activityInfo.name)) {
+                        return sysActivity;
+                    }
+                    if (sysActivity.info.targetActivity.equals(activityInfo.targetActivity)) {
+                        return sysActivity;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public class IterGenerator<E> {
+            public Iterator<E> generate(ActivityIntentInfo info) {
+                return null;
+            }
+        }
+
+        public class ActionIterGenerator extends IterGenerator<String> {
+            @Override
+            public Iterator<String> generate(ActivityIntentInfo info) {
+                return info.actionsIterator();
+            }
+        }
+
+        public class CategoriesIterGenerator extends IterGenerator<String> {
+            @Override
+            public Iterator<String> generate(ActivityIntentInfo info) {
+                return info.categoriesIterator();
+            }
+        }
+
+        public class SchemesIterGenerator extends IterGenerator<String> {
+            @Override
+            public Iterator<String> generate(ActivityIntentInfo info) {
+                return info.schemesIterator();
+            }
+        }
+
+        public class AuthoritiesIterGenerator extends IterGenerator<IntentFilter.AuthorityEntry> {
+            @Override
+            public Iterator<IntentFilter.AuthorityEntry> generate(ActivityIntentInfo info) {
+                return info.authoritiesIterator();
+            }
+        }
+
+        /**
+         * <em>WARNING</em> for performance reasons, the passed in intentList WILL BE
+         * MODIFIED. Do not pass in a list that should not be changed.
+         */
+        private <T> void getIntentListSubset(List<ActivityIntentInfo> intentList,
+                IterGenerator<T> generator, Iterator<T> searchIterator) {
+            // loop through the set of actions; every one must be found in the intent filter
+            while (searchIterator.hasNext()) {
+                // we must have at least one filter in the list to consider a match
+                if (intentList.size() == 0) {
+                    break;
+                }
+
+                final T searchAction = searchIterator.next();
+
+                // loop through the set of intent filters
+                final Iterator<ActivityIntentInfo> intentIter = intentList.iterator();
+                while (intentIter.hasNext()) {
+                    final ActivityIntentInfo intentInfo = intentIter.next();
+                    boolean selectionFound = false;
+
+                    // loop through the intent filter's selection criteria; at least one
+                    // of them must match the searched criteria
+                    final Iterator<T> intentSelectionIter = generator.generate(intentInfo);
+                    while (intentSelectionIter != null && intentSelectionIter.hasNext()) {
+                        final T intentSelection = intentSelectionIter.next();
+                        if (intentSelection != null && intentSelection.equals(searchAction)) {
+                            selectionFound = true;
+                            break;
+                        }
+                    }
+
+                    // the selection criteria wasn't found in this filter's set; this filter
+                    // is not a potential match
+                    if (!selectionFound) {
+                        intentIter.remove();
+                    }
+                }
+            }
+        }
+
+        private boolean isProtectedAction(ActivityIntentInfo filter) {
+            final Iterator<String> actionsIter = filter.actionsIterator();
+            while (actionsIter != null && actionsIter.hasNext()) {
+                final String filterAction = actionsIter.next();
+                if (PROTECTED_ACTIONS.contains(filterAction)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Adjusts the priority of the given intent filter according to policy.
+         * <p>
+         * <ul>
+         * <li>The priority for non privileged applications is capped to '0'</li>
+         * <li>The priority for protected actions on privileged applications is capped to '0'</li>
+         * <li>The priority for unbundled updates to privileged applications is capped to the
+         *      priority defined on the system partition</li>
+         * </ul>
+         * <p>
+         * <em>NOTE:</em> There is one exception. For security reasons, the setup wizard is
+         * allowed to obtain any priority on any action.
+         */
+        private void adjustPriority(
+                List<PackageParser.Activity> systemActivities, ActivityIntentInfo intent) {
+            // nothing to do; priority is fine as-is
+            if (intent.getPriority() <= 0) {
+                return;
+            }
+
+            final ActivityInfo activityInfo = intent.activity.info;
+            final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
+
+            final boolean privilegedApp =
+                    ((applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0);
+            if (!privilegedApp) {
+                // non-privileged applications can never define a priority >0
+                Slog.w(TAG, "Non-privileged app; cap priority to 0;"
+                        + " package: " + applicationInfo.packageName
+                        + " activity: " + intent.activity.className
+                        + " origPrio: " + intent.getPriority());
+                intent.setPriority(0);
+                return;
+            }
+
+            if (systemActivities == null) {
+                // the system package is not disabled; we're parsing the system partition
+                if (isProtectedAction(intent)) {
+                    if (mDeferProtectedFilters) {
+                        // We can't deal with these just yet. No component should ever obtain a
+                        // >0 priority for a protected actions, with ONE exception -- the setup
+                        // wizard. The setup wizard, however, cannot be known until we're able to
+                        // query it for the category CATEGORY_SETUP_WIZARD. Which we can't do
+                        // until all intent filters have been processed. Chicken, meet egg.
+                        // Let the filter temporarily have a high priority and rectify the
+                        // priorities after all system packages have been scanned.
+                        mProtectedFilters.add(intent);
+                        if (DEBUG_FILTERS) {
+                            Slog.i(TAG, "Protected action; save for later;"
+                                    + " package: " + applicationInfo.packageName
+                                    + " activity: " + intent.activity.className
+                                    + " origPrio: " + intent.getPriority());
+                        }
+                        return;
+                    } else {
+                        if (DEBUG_FILTERS && mSetupWizardPackage == null) {
+                            Slog.i(TAG, "No setup wizard;"
+                                + " All protected intents capped to priority 0");
+                        }
+                        if (intent.activity.info.packageName.equals(mSetupWizardPackage)) {
+                            if (DEBUG_FILTERS) {
+                                Slog.i(TAG, "Found setup wizard;"
+                                    + " allow priority " + intent.getPriority() + ";"
+                                    + " package: " + intent.activity.info.packageName
+                                    + " activity: " + intent.activity.className
+                                    + " priority: " + intent.getPriority());
+                            }
+                            // setup wizard gets whatever it wants
+                            return;
+                        }
+                        Slog.w(TAG, "Protected action; cap priority to 0;"
+                                + " package: " + intent.activity.info.packageName
+                                + " activity: " + intent.activity.className
+                                + " origPrio: " + intent.getPriority());
+                        intent.setPriority(0);
+                        return;
+                    }
+                }
+                // privileged apps on the system image get whatever priority they request
+                return;
+            }
+
+            // privileged app unbundled update ... try to find the same activity
+            final PackageParser.Activity foundActivity =
+                    findMatchingActivity(systemActivities, activityInfo);
+            if (foundActivity == null) {
+                // this is a new activity; it cannot obtain >0 priority
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "New activity; cap priority to 0;"
+                            + " package: " + applicationInfo.packageName
+                            + " activity: " + intent.activity.className
+                            + " origPrio: " + intent.getPriority());
+                }
+                intent.setPriority(0);
+                return;
+            }
+
+            // found activity, now check for filter equivalence
+
+            // a shallow copy is enough; we modify the list, not its contents
+            final List<ActivityIntentInfo> intentListCopy =
+                    new ArrayList<>(foundActivity.intents);
+            final List<ActivityIntentInfo> foundFilters = findFilters(intent);
+
+            // find matching action subsets
+            final Iterator<String> actionsIterator = intent.actionsIterator();
+            if (actionsIterator != null) {
+                getIntentListSubset(
+                        intentListCopy, new ActionIterGenerator(), actionsIterator);
+                if (intentListCopy.size() == 0) {
+                    // no more intents to match; we're not equivalent
+                    if (DEBUG_FILTERS) {
+                        Slog.i(TAG, "Mismatched action; cap priority to 0;"
+                                + " package: " + applicationInfo.packageName
+                                + " activity: " + intent.activity.className
+                                + " origPrio: " + intent.getPriority());
+                    }
+                    intent.setPriority(0);
+                    return;
+                }
+            }
+
+            // find matching category subsets
+            final Iterator<String> categoriesIterator = intent.categoriesIterator();
+            if (categoriesIterator != null) {
+                getIntentListSubset(intentListCopy, new CategoriesIterGenerator(),
+                        categoriesIterator);
+                if (intentListCopy.size() == 0) {
+                    // no more intents to match; we're not equivalent
+                    if (DEBUG_FILTERS) {
+                        Slog.i(TAG, "Mismatched category; cap priority to 0;"
+                                + " package: " + applicationInfo.packageName
+                                + " activity: " + intent.activity.className
+                                + " origPrio: " + intent.getPriority());
+                    }
+                    intent.setPriority(0);
+                    return;
+                }
+            }
+
+            // find matching schemes subsets
+            final Iterator<String> schemesIterator = intent.schemesIterator();
+            if (schemesIterator != null) {
+                getIntentListSubset(intentListCopy, new SchemesIterGenerator(),
+                        schemesIterator);
+                if (intentListCopy.size() == 0) {
+                    // no more intents to match; we're not equivalent
+                    if (DEBUG_FILTERS) {
+                        Slog.i(TAG, "Mismatched scheme; cap priority to 0;"
+                                + " package: " + applicationInfo.packageName
+                                + " activity: " + intent.activity.className
+                                + " origPrio: " + intent.getPriority());
+                    }
+                    intent.setPriority(0);
+                    return;
+                }
+            }
+
+            // find matching authorities subsets
+            final Iterator<IntentFilter.AuthorityEntry>
+                    authoritiesIterator = intent.authoritiesIterator();
+            if (authoritiesIterator != null) {
+                getIntentListSubset(intentListCopy,
+                        new AuthoritiesIterGenerator(),
+                        authoritiesIterator);
+                if (intentListCopy.size() == 0) {
+                    // no more intents to match; we're not equivalent
+                    if (DEBUG_FILTERS) {
+                        Slog.i(TAG, "Mismatched authority; cap priority to 0;"
+                                + " package: " + applicationInfo.packageName
+                                + " activity: " + intent.activity.className
+                                + " origPrio: " + intent.getPriority());
+                    }
+                    intent.setPriority(0);
+                    return;
+                }
+            }
+
+            // we found matching filter(s); app gets the max priority of all intents
+            int cappedPriority = 0;
+            for (int i = intentListCopy.size() - 1; i >= 0; --i) {
+                cappedPriority = Math.max(cappedPriority, intentListCopy.get(i).getPriority());
+            }
+            if (intent.getPriority() > cappedPriority) {
+                if (DEBUG_FILTERS) {
+                    Slog.i(TAG, "Found matching filter(s);"
+                            + " cap priority to " + cappedPriority + ";"
+                            + " package: " + applicationInfo.packageName
+                            + " activity: " + intent.activity.className
+                            + " origPrio: " + intent.getPriority());
+                }
+                intent.setPriority(cappedPriority);
+                return;
+            }
+            // all this for nothing; the requested priority was <= what was on the system
+        }
+
         public final void addActivity(PackageParser.Activity a, String type) {
-            final boolean systemApp = a.info.applicationInfo.isSystemApp();
             mActivities.put(a.getComponentName(), a);
             if (DEBUG_SHOW_INFO)
                 Log.v(
@@ -9774,10 +10139,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int NI = a.intents.size();
             for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
-                if (!systemApp && intent.getPriority() > 0 && "activity".equals(type)) {
-                    intent.setPriority(0);
-                    Log.w(TAG, "Package " + a.info.applicationInfo.packageName + " has activity "
-                            + a.className + " with priority > 0, forcing to 0");
+                if ("activity".equals(type)) {
+                    final PackageSetting ps =
+                            mSettings.getDisabledSystemPkgLPr(intent.activity.info.packageName);
+                    final List<PackageParser.Activity> systemActivities =
+                            ps != null && ps.pkg != null ? ps.pkg.activities : null;
+                    adjustPriority(systemActivities, intent);
                 }
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
@@ -9926,18 +10293,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             out.println();
         }
-
-//        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
-//            final Iterator<ResolveInfo> i = resolveInfoList.iterator();
-//            final List<ResolveInfo> retList = Lists.newArrayList();
-//            while (i.hasNext()) {
-//                final ResolveInfo resolveInfo = i.next();
-//                if (isEnabledLP(resolveInfo.activityInfo)) {
-//                    retList.add(resolveInfo);
-//                }
-//            }
-//            return retList;
-//        }
 
         // Keys are String (activity class name), values are Activity.
         private final ArrayMap<ComponentName, PackageParser.Activity> mActivities
@@ -11290,8 +11645,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return the current "allow unknown sources" setting
      */
     private int getUnknownSourcesSettings() {
-        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Global.INSTALL_NON_MARKET_APPS,
+        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
                 -1);
     }
 
@@ -12255,8 +12610,6 @@ public class PackageManagerService extends IPackageManager.Stub {
          * Called after the source arguments are copied. This is used mostly for
          * MoveParams when it needs to read the source file to put it in the
          * destination.
-         *
-         * @return
          */
         int doPostCopy(int uid) {
             return PackageManager.INSTALL_SUCCEEDED;
