@@ -165,15 +165,13 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled() || initiatedByCec) {
+        if (!mService.isControlEnabled() || initiatedByCec || !mAutoTvOff) {
             return;
         }
         switch (standbyAction) {
             case HdmiControlService.STANDBY_SCREEN_OFF:
-                if (mAutoTvOff) {
-                    mService.sendCecCommand(
-                            HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
-                }
+                mService.sendCecCommand(
+                        HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
                 break;
             case HdmiControlService.STANDBY_SHUTDOWN:
                 // ACTION_SHUTDOWN is taken as a signal to power off all the devices.
