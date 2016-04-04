@@ -36,12 +36,13 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
 
         final PrintWriter pw = getOutPrintWriter();
         try {
-            // TODO(gsennton) add command for changing WebView provider
             switch(cmd) {
                 case "enable-redundant-packages":
                     return enableFallbackLogic(false);
                 case "disable-redundant-packages":
                     return enableFallbackLogic(true);
+                case "set-webview-implementation":
+                    return setWebViewImplementation();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -58,6 +59,21 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int setWebViewImplementation() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        String shellChosenPackage = getNextArg();
+        String newPackage = mInterface.changeProviderAndSetting(shellChosenPackage);
+        if (shellChosenPackage.equals(newPackage)) {
+            pw.println("Success");
+            return 0;
+        } else {
+            pw.println(String.format(
+                        "Failed to switch to %s, the WebView implementation is now provided by %s.",
+                        shellChosenPackage, newPackage));
+            return 1;
+        }
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -72,6 +88,8 @@ class WebViewUpdateServiceShellCommand extends ShellCommand {
         pw.println("  disable-redundant-packages");
         pw.println("    Disallow installing and enabling fallback packages when a more-preferred");
         pw.println("    package is available.");
+        pw.println("  set-webview-implementation PACKAGE");
+        pw.println("    Set the WebView implementation to the specified package.");
         pw.println();
     }
 }
