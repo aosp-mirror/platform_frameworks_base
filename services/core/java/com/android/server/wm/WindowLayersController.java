@@ -203,6 +203,12 @@ public class WindowLayersController {
         // the divider sometimes overlaps the app windows.
         layer++;
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
+
+        // If we have a dock divider ensure the Input Method is above it.
+        if (mDockDivider != null && mService.mInputMethodWindow != null) {
+            layer = assignAndIncreaseLayerIfNeeded(mService.mInputMethodWindow, layer);
+        }
+        
         // We know that we will be animating a relaunching window in the near future, which will
         // receive a z-order increase. We want the replaced window to immediately receive the same
         // treatment, e.g. to be above the dock divider.
