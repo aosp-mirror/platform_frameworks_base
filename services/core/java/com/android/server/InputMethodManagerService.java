@@ -125,6 +125,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -452,6 +453,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private AlertDialog.Builder mDialogBuilder;
     private AlertDialog mSwitchingDialog;
     private View mSwitchingDialogTitleView;
+    private Toast mSubtypeSwitchedByShortCutToast;
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
     private LocaleList mLastSystemLocales;
@@ -2952,6 +2954,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             setInputMethodLocked(nextSubtype.mImi.getId(), nextSubtype.mSubtypeId);
+            if (mSubtypeSwitchedByShortCutToast != null) {
+                mSubtypeSwitchedByShortCutToast.cancel();
+                mSubtypeSwitchedByShortCutToast = null;
+            }
+            if ((mImeWindowVis & InputMethodService.IME_VISIBLE) != 0) {
+                // IME window is shown.  The user should be able to visually understand that the
+                // subtype is changed in most of cases.  To avoid UI overlap, we do not show a toast
+                // in this case.
+                return;
+            }
+            final InputMethodInfo newInputMethodInfo = mMethodMap.get(mCurMethodId);
+            if (newInputMethodInfo == null) {
+                return;
+            }
+            final CharSequence toastText = InputMethodUtils.getImeAndSubtypeDisplayName(mContext,
+                    newInputMethodInfo, mCurrentSubtype);
+            if (!TextUtils.isEmpty(toastText)) {
+                mSubtypeSwitchedByShortCutToast = Toast.makeText(mContext, toastText.toString(),
+                        Toast.LENGTH_SHORT);
+                mSubtypeSwitchedByShortCutToast.show();
+            }
         }
     }
 
@@ -3823,6 +3846,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private static String imeWindowStatusToString(final int imeWindowVis) {
+        final StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        if ((imeWindowVis & InputMethodService.IME_ACTIVE) != 0) {
+            sb.append("Active");
+            first = false;
+        }
+        if ((imeWindowVis & InputMethodService.IME_VISIBLE) != 0) {
+            if (!first) {
+                sb.append("|");
+            }
+            sb.append("Visible");
+        }
+        return sb.toString();
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -3870,6 +3909,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             method = mCurMethod;
             p.println("  mCurMethod=" + mCurMethod);
             p.println("  mEnabledSession=" + mEnabledSession);
+            p.println("  mImeWindowVis=" + imeWindowStatusToString(mImeWindowVis));
             p.println("  mShowRequested=" + mShowRequested
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced
