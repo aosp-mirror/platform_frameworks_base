@@ -37,7 +37,7 @@ public class QSTileView extends QSTileBaseView {
     private final int mTileSpacingPx;
     private int mTilePaddingTopPx;
 
-    private TextView mLabel;
+    protected TextView mLabel;
     private ImageView mPadLock;
 
     public QSTileView(Context context, QSIconView icon) {
@@ -81,7 +81,7 @@ public class QSTileView extends QSTileBaseView {
         FontSizeUtils.updateFontSize(mLabel, R.dimen.qs_tile_text_size);
     }
 
-    private void createLabel() {
+    protected void createLabel() {
         final Resources res = mContext.getResources();
         View view = LayoutInflater.from(mContext).inflate(R.layout.qs_tile_label, null);
         mLabel = (TextView) view.findViewById(R.id.tile_label);
