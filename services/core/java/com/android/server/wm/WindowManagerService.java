@@ -4135,6 +4135,14 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i = 0; i < windowsCount; i++) {
                 WindowState win = wtoken.allAppWindows.get(i);
                 if (win == wtoken.startingWindow) {
+                    // Starting window that's exiting will be removed when the animation
+                    // finishes. Mark all relevant flags for that finishExit will proceed
+                    // all the way to actually remove it.
+                    if (!visible && win.isVisibleNow() && wtoken.mAppAnimator.isAnimating()) {
+                        win.mAnimatingExit = true;
+                        win.mRemoveOnExit = true;
+                        win.mWindowRemovalAllowed = true;
+                    }
                     continue;
                 }
 
