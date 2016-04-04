@@ -22,38 +22,45 @@
     android:tag="bigText"
     >
     <include layout="@layout/notification_template_header" />
+
     <LinearLayout
-        android:id="@+id/notification_main_column"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:paddingStart="@dimen/notification_content_margin_start"
-        android:paddingEnd="@dimen/notification_content_margin_end"
-        android:layout_marginTop="@dimen/notification_content_margin_top"
-        android:clipToPadding="false"
-        android:minHeight="@dimen/notification_min_content_height"
-        android:orientation="vertical"
-        >
-        <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_progress" />
-        <com.android.internal.widget.ImageFloatingTextView android:id="@+id/big_text"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="0.5dp"
-            android:paddingBottom="@dimen/notification_content_margin_bottom"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:singleLine="false"
-            android:layout_weight="1"
-            android:gravity="top"
-            android:visibility="gone"
-            />
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:clipToPadding="false"
+            android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/notification_main_column"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:paddingStart="@dimen/notification_content_margin_start"
+            android:paddingEnd="@dimen/notification_content_margin_end"
+            android:clipToPadding="false"
+            android:minHeight="@dimen/notification_min_content_height"
+            android:orientation="vertical"
+            >
+            <include layout="@layout/notification_template_part_line1" />
+            <include layout="@layout/notification_template_progress" />
+            <com.android.internal.widget.ImageFloatingTextView android:id="@+id/big_text"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="0.5dp"
+                android:paddingBottom="@dimen/notification_content_margin_bottom"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:singleLine="false"
+                android:layout_weight="1"
+                android:gravity="top"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
         <ViewStub android:layout="@layout/notification_material_reply_text"
                 android:id="@+id/notification_material_reply_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="-16dp"
-                android:layout_marginEnd="-16dp"
-        />
+                android:layout_height="wrap_content" />
         <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />
