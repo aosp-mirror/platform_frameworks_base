@@ -92,7 +92,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         mAnimating = false;
         mSnapping = false;
         mDismissing = false;
-        setIconLocation(true /* on left */);
+        setIconLocation(true /* on left */, true /* force */);
         if (mListener != null) {
             mListener.onSettingsIconRowReset(this);
         }
@@ -104,6 +104,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     public void setNotificationRowParent(ExpandableNotificationRow parent) {
         mParent = parent;
+        setIconLocation(mOnLeft, true /* force */);
     }
 
     public void setAppName(String appName) {
@@ -183,7 +184,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         if (isIconLocationChange(transX)) {
             setGearAlpha(0f);
         }
-        setIconLocation(transX > 0 /* fromLeft */);
+        setIconLocation(transX > 0 /* fromLeft */, false /* force */);
         mFadeAnimator = ValueAnimator.ofFloat(mGearIcon.getAlpha(), 1);
         mFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -220,12 +221,20 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         mFadeAnimator.start();
     }
 
-    public void setIconLocation(boolean onLeft) {
-        if (onLeft == mOnLeft || mSnapping) {
-            // Same side? Do nothing.
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        setIconLocation(mOnLeft, true /* force */);
+    }
+
+    public void setIconLocation(boolean onLeft, boolean force) {
+        if ((!force && onLeft == mOnLeft) || mSnapping || mParent == null) {
+            // Do nothing
             return;
         }
-        setTranslationX(onLeft ? 0 : (mParent.getWidth() - mHorizSpaceForGear));
+        final boolean isRtl = mParent.isLayoutRtl();
+        final float left = isRtl ? -(mParent.getWidth() - mHorizSpaceForGear) : 0;
+        final float right = isRtl ? 0 : (mParent.getWidth() - mHorizSpaceForGear);
+        setTranslationX(onLeft ? left : right);
         mOnLeft = onLeft;
     }
 
