@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -1213,6 +1214,8 @@ final class AccessibilityController {
             window.type = windowState.mAttrs.type;
             window.layer = windowState.mLayer;
             window.token = windowState.mClient.asBinder();
+            window.title = windowState.mAttrs.getTitle();
+            window.accessibilityIdOfAnchor = windowState.mAttrs.accessibilityIdOfAnchor;
 
             WindowState attachedWindow = windowState.mAttachedWindow;
             if (attachedWindow != null) {
@@ -1283,6 +1286,12 @@ final class AccessibilityController {
             }
             if (oldWindow.childTokens != null && newWindow.childTokens != null
                     && !oldWindow.childTokens.equals(newWindow.childTokens)) {
+                return true;
+            }
+            if (!TextUtils.equals(oldWindow.title, newWindow.title)) {
+                return true;
+            }
+            if (oldWindow.accessibilityIdOfAnchor != newWindow.accessibilityIdOfAnchor) {
                 return true;
             }
             return false;
