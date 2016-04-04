@@ -2593,7 +2593,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             y = mAttrs.y;
         }
 
-        if (nonFullscreenTask) {
+        if (nonFullscreenTask && !layoutInParentFrame()) {
             // Make sure window fits in containing frame since it is in a non-fullscreen task as
             // required by {@link Gravity#apply} call.
             w = Math.min(w, pw);
