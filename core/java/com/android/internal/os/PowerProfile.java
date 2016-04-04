@@ -85,6 +85,7 @@ public class PowerProfile {
     public static final String POWER_WIFI_CONTROLLER_IDLE = "wifi.controller.idle";
     public static final String POWER_WIFI_CONTROLLER_RX = "wifi.controller.rx";
     public static final String POWER_WIFI_CONTROLLER_TX = "wifi.controller.tx";
+    public static final String POWER_WIFI_CONTROLLER_TX_LEVELS = "wifi.controller.tx_levels";
     public static final String POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE = "wifi.controller.voltage";
 
     public static final String POWER_BLUETOOTH_CONTROLLER_IDLE = "bluetooth.controller.idle";
@@ -287,9 +288,15 @@ public class PowerProfile {
         };
 
         for (int i = 0; i < configResIds.length; i++) {
+            String key = configResIdKeys[i];
+            // if we already have some of these parameters in power_profile.xml, ignore the
+            // value in config.xml
+            if ((sPowerMap.containsKey(key) && (Double) sPowerMap.get(key) > 0)) {
+                continue;
+            }
             int value = resources.getInteger(configResIds[i]);
             if (value > 0) {
-                sPowerMap.put(configResIdKeys[i], (double) value);
+                sPowerMap.put(key, (double) value);
             }
         }
     }
