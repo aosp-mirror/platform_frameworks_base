@@ -2025,11 +2025,20 @@ public abstract class CameraMetadata<TKey> {
      * produced in response to a capture request submitted
      * while in HDR mode.</p>
      * <p>Since substantial post-processing is generally needed to
-     * produce an HDR image, only YUV and JPEG outputs are
-     * supported for LIMITED/FULL device HDR captures, and only
-     * JPEG outputs are supported for LEGACY HDR
-     * captures. Using a RAW output for HDR capture is not
+     * produce an HDR image, only YUV, PRIVATE, and JPEG
+     * outputs are supported for LIMITED/FULL device HDR
+     * captures, and only JPEG outputs are supported for LEGACY
+     * HDR captures. Using a RAW output for HDR capture is not
      * supported.</p>
+     * <p>Some devices may also support always-on HDR, which
+     * applies HDR processing at full frame rate.  For these
+     * devices, intents other than STILL_CAPTURE will also
+     * produce an HDR output with no frame rate impact compared
+     * to normal operation, though the quality may be lower
+     * than for STILL_CAPTURE intents.</p>
+     * <p>If SCENE_MODE_HDR is used with unsupported output types
+     * or capture intents, the images captured will be as if
+     * the SCENE_MODE was not enabled at all.</p>
      *
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_SCENE_MODE
