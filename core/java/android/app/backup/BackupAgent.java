@@ -427,23 +427,31 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     /**
-     * Tells the application agent that the backup data size exceeded current transport quota.
-     * Later calls to {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
-     * and {@link #onFullBackup(FullBackupDataOutput)} could use this information
-     * to reduce backup size under the limit.
-     * However, the quota can change, so do not assume that the value passed in here is absolute,
-     * similarly all subsequent backups should not be restricted to this size.
-     * This callback will be invoked before data has been put onto the wire in a preflight check,
-     * so it is relatively inexpensive to hit your quota.
-     * Apps that hit quota repeatedly without dealing with it can be subject to having their backup
-     * schedule reduced.
-     * The {@code quotaBytes} is a loose guideline b/c of metadata added by the backupmanager
-     * so apps should be more aggressive in trimming their backup set.
+     * Notification that the application's current backup operation causes it to exceed
+     * the maximum size permitted by the transport.  The ongoing backup operation is
+     * halted and rolled back: any data that had been stored by a previous backup operation
+     * is still intact.  Typically the quota-exceeded state will be detected before any data
+     * is actually transmitted over the network.
      *
-     * @param backupDataBytes Expected or already processed amount of data.
-     *                        Could be less than total backup size if backup process was interrupted
-     *                        before finish of processing all backup data.
-     * @param quotaBytes Current amount of backup data that is allowed for the app.
+     * <p>The {@code quotaBytes} value is the total data size currently permitted for this
+     * application.  If desired, the application can use this as a hint for determining
+     * how much data to store.  For example, a messaging application might choose to
+     * store only the newest messages, dropping enough older content to stay under
+     * the quota.
+     *
+     * <p class="note">Note that the maximum quota for the application can change over
+     * time.  In particular, in the future the quota may grow.  Applications that adapt
+     * to the quota when deciding what data to store should be aware of this and implement
+     * their data storage mechanisms in a way that can take advantage of additional
+     * quota.
+     *
+     * @param backupDataBytes The amount of data measured while initializing the backup
+     *    operation, if the total exceeds the app's alloted quota.  If initial measurement
+     *    suggested that the data would fit but then too much data was actually submitted
+     *    as part of the operation, then this value is the amount of data that had been
+     *    streamed into the transport at the time the quota was reached.
+     * @param quotaBytes The maximum data size that the transport currently permits
+     *    this application to store as a backup.
      */
     public void onQuotaExceeded(long backupDataBytes, long quotaBytes) {
     }
