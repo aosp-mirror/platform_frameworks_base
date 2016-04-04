@@ -36,8 +36,7 @@ import java.util.List;
  * Accessibility services with the
  * {@link android.R.styleable#AccessibilityService_canPerformGestures} property can dispatch
  * gestures. This class describes those gestures. Gestures are made up of one or more strokes.
- * Gestures are immutable; use the {@code create} methods to get common gesture, or a
- * {@code Builder} to create a new one.
+ * Gestures are immutable once built.
  * <p>
  * Spatial dimensions throughout are in screen pixels. Time is measured in milliseconds.
  */
