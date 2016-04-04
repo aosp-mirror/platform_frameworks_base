@@ -21,7 +21,6 @@ import org.hamcrest.Matcher;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
-import android.support.test.espresso.action.GeneralClickAction;
 import android.support.test.espresso.action.MotionEvents;
 import android.support.test.espresso.action.MotionEvents.DownResultHolder;
 import android.support.test.espresso.action.Press;
@@ -34,7 +33,7 @@ import android.view.ViewConfiguration;
  * ViewAction for performing an click on View by a mouse.
  */
 public final class MouseClickAction implements ViewAction {
-    private final GeneralClickAction mGeneralClickAction;
+    private final ViewClickAction mViewClickAction;
     @MouseUiController.MouseButton
     private final int mButton;
 
@@ -100,30 +99,22 @@ public final class MouseClickAction implements ViewAction {
      */
     public MouseClickAction(Tapper tapper, CoordinatesProvider coordinatesProvider,
             @MouseUiController.MouseButton int button) {
-        mGeneralClickAction = new GeneralClickAction(tapper, coordinatesProvider, Press.PINPOINT);
+        mViewClickAction = new ViewClickAction(tapper, coordinatesProvider, Press.PINPOINT);
         mButton = button;
     }
 
     @Override
     public Matcher<View> getConstraints() {
-        return mGeneralClickAction.getConstraints();
+        return mViewClickAction.getConstraints();
     }
 
     @Override
     public String getDescription() {
-        return mGeneralClickAction.getDescription();
+        return mViewClickAction.getDescription();
     }
 
     @Override
     public void perform(UiController uiController, View view) {
-        mGeneralClickAction.perform(new MouseUiController(uiController, mButton), view);
-        long doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
-        if (0 < doubleTapTimeout) {
-            // Wait to avoid false gesture detection. Without this wait, consecutive clicks can be
-            // detected as a triple click. e.g. 2 double clicks are detected as a triple click and
-            // a single click because espresso isn't aware of triple click detection logic, which
-            // is TextView specific gesture.
-            uiController.loopMainThreadForAtLeast(doubleTapTimeout);
-        }
+        mViewClickAction.perform(new MouseUiController(uiController, mButton), view);
     }
 }
