@@ -1,7 +1,10 @@
-page.title=Features
-page.metaDescription=Learn about the Android Studio features.
-page.tags="studio", "android studio", "sdk"
+page.title=Android Studio Features
 page.image=images/cards/card-studio-modules_crop_2x.png
+page.metaDescription=A quick look at Android Studio features that make your work faster.
+page.tags=studio, tools, sdk
+meta.tags="studio"
+
+
 @jd:body
 
 <div id="qv-wrapper">

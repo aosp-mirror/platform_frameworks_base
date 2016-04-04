@@ -4,20 +4,29 @@ page.title=NDK Downloads
 
 @jd:body
 
-<div id="tos" style="display:none;width:760px;height:0;margin:0 auto">
 
-<div id="download" class="ndk" style="
-z-index: 99;
-width: 720px;
-position: absolute;
-margin: -70px 0;
-padding: 14px;
-background: white;
-border: 1px solid #999;
-box-shadow: -10px 10px 50px #888;
--moz-box-shadow: -10px 10px 50px #888;
--webkit-box-shadow: -10px 10px 50px #888;">
-<p>Before installing the Android NDK, you must agree to the following terms and conditions.</p>
+<!-- start studio download modal -->
+<div data-modal="ndk_tos" class="dac-modal" id="ndk_tos">
+  <div class="dac-modal-container">
+    <div class="dac-modal-window">
+      <header class="dac-modal-header">
+        <div class="dac-modal-header-actions">
+          <button class="dac-modal-header-close" data-modal-toggle></button>
+        </div>
+        <section class="dac-swap-section dac-active dac-down">
+          <h2 class="norule dac-modal-header-title" id="tos-header">Download the Android NDK</h2>
+        </section>
+      </header>
+      <section class="dac-swap-section dac-active dac-left">
+          <section class="dac-modal-content">
+            <fieldset class="dac-form-fieldset">
+              <div class="cols">
+                <div class="col-2of2 tos-leftCol">
+                  <p class="sdk-terms-intro">Before installing the Android
+                  NDK,
+                  you must agree to the following terms
+                  and conditions.</p>
+                </div>
 <div class="sdk-terms" style="width:auto" onfocus="this.blur()">
 <h2 class="norule">Terms and Conditions</h2>
 This is the Android Software Development Kit License Agreement
@@ -295,17 +304,20 @@ Notwithstanding this, you agree that Google shall still be allowed to apply for 
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
-<p><a href="" class="dac-button dac-raised dac-primary disabled ndk" id="downloadForRealz" onclick="return onDownloadNdkForRealz(this);"></a></p>
+<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
 </div>
 
-
-
-</div>
-</div>
-
- <div id="qv-wrapper">
-
+                </div>
+              </div>
+            </fieldset>
+          </section>
+        </form>
+      </section>
+    </div>
   </div>
+</div>
+<!-- end ndk_tos modal -->
+
 
   <p>Select, from the table above, the NDK package for your development platform. For information
   about the changes in the newest version of the NDK, see <a href="#rel">Release Notes</a>. For

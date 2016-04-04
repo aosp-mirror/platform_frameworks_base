@@ -1,6 +1,6 @@
 page.title=Android Studio Overview
 page.image=images/cards/card-android-studio-overview_16x9_2x.jpg
-page.metaDescription=Learn about the official IDE for Android.
+page.metaDescription=The basics of working with Android Studio, from projects to build and performance.
 page.tags=studio,sdk,tools,firstapp
 @jd:body
 

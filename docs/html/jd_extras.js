@@ -17,6 +17,28 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
  /* TODO Remove standard resources from here, such as below
  */
   {
+    "title":"Writing More Code by Writing Less Code with Android Studio Live Templates",
+    "titleFriendly":"",
+    "summary":"Unless you’re getting paid by the keystroke, no one wants to write repetitive boilerplate code.",
+    "url":"https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
+    "group":"",
+    "keywords": [],
+    "tags": ['studio'],
+    "image":"https://cdn-images-1.medium.com/max/800/1*JkrYXGs1AxZAbK0sCLrJAQ.gif",
+    "type":"medium"
+  },
+  {
+    "title":"How Often Should You Update Android Studio?",
+    "titleFriendly":"",
+    "summary":"One of the beauties of Android Studio is how quickly is evolves and improves.",
+    "url":"https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
+    "group":"",
+    "keywords": [],
+    "tags": ['studio'],
+    "image":"https://cdn-images-1.medium.com/max/2000/1*chMiA9mGa_FBUOoesHHk3Q.png",
+    "type":"medium"
+  },
+  {
     "title":"Measure your app’s user acquisition channels",
     "titleFriendly":"",
     "summary":"Get details on how to use the Developer Console User Acquisitions reports to discover where your users come from.",
