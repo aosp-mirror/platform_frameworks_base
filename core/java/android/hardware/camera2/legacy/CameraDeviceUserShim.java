@@ -480,19 +480,15 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
         }
 
-        ArrayList<Surface> surfaces = null;
+        SparseArray<Surface> surfaces = null;
         synchronized(mConfigureLock) {
             if (!mConfiguring) {
                 String err = "Cannot end configure, no configuration change in progress.";
                 Log.e(TAG, err);
                 throw new ServiceSpecificException(ICameraService.ERROR_INVALID_OPERATION, err);
             }
-            int numSurfaces = mSurfaces.size();
-            if (numSurfaces > 0) {
-                surfaces = new ArrayList<>();
-                for (int i = 0; i < numSurfaces; ++i) {
-                    surfaces.add(mSurfaces.valueAt(i));
-                }
+            if (mSurfaces != null) {
+                surfaces = mSurfaces.clone();
             }
             mConfiguring = false;
         }
