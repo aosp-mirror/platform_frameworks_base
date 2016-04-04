@@ -37,22 +37,26 @@ import java.lang.annotation.RetentionPolicy;
 public final class Outline {
     private static final float RADIUS_UNDEFINED = Float.NEGATIVE_INFINITY;
 
-    private static final int MODE_EMPTY = 0;
-    private static final int MODE_RECT = 1;
-    private static final int MODE_CONVEX_PATH = 2;
+    /** @hide */
+    public static final int MODE_EMPTY = 0;
+    /** @hide */
+    public static final int MODE_ROUND_RECT = 1;
+    /** @hide */
+    public static final int MODE_CONVEX_PATH = 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = false,
             value = {
                     MODE_EMPTY,
-                    MODE_RECT,
+                    MODE_ROUND_RECT,
                     MODE_CONVEX_PATH,
             })
     public @interface Mode {}
 
+    /** @hide */
     @Mode
-    private int mMode = MODE_EMPTY;
+    public int mMode = MODE_EMPTY;
 
     /** @hide */
     public final Path mPath = new Path();
@@ -176,7 +180,7 @@ public final class Outline {
             return;
         }
 
-        mMode = MODE_RECT;
+        mMode = MODE_ROUND_RECT;
         mRect.set(left, top, right, bottom);
         mRadius = radius;
         mPath.rewind();
@@ -199,7 +203,7 @@ public final class Outline {
      *         bounds, or {@code false} if no outline bounds are set
      */
     public boolean getRect(@NonNull Rect outRect) {
-        if (mMode != MODE_RECT) {
+        if (mMode != MODE_ROUND_RECT) {
             return false;
         }
         outRect.set(mRect);
@@ -270,7 +274,7 @@ public final class Outline {
      * Offsets the Outline by (dx,dy)
      */
     public void offset(int dx, int dy) {
-        if (mMode == MODE_RECT) {
+        if (mMode == MODE_ROUND_RECT) {
             mRect.offset(dx, dy);
         } else if (mMode == MODE_CONVEX_PATH) {
             mPath.offset(dx, dy);

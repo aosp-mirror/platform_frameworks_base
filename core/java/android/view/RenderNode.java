@@ -307,18 +307,22 @@ public class RenderNode {
      *
      * Deep copies the data into native to simplify reference ownership.
      */
-    public boolean setOutline(Outline outline) {
+    public boolean setOutline(@Nullable Outline outline) {
         if (outline == null) {
             return nSetOutlineNone(mNativeRenderNode);
-        } else if (outline.isEmpty()) {
-            return nSetOutlineEmpty(mNativeRenderNode);
-        } else if (outline.mRect != null) {
-            return nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
-                    outline.mRect.right, outline.mRect.bottom, outline.mRadius, outline.mAlpha);
-        } else if (outline.mPath != null) {
-            return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath,
-                    outline.mAlpha);
         }
+
+        switch(outline.mMode) {
+            case Outline.MODE_EMPTY:
+                return nSetOutlineEmpty(mNativeRenderNode);
+            case Outline.MODE_ROUND_RECT:
+                return nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
+                        outline.mRect.right, outline.mRect.bottom, outline.mRadius, outline.mAlpha);
+            case Outline.MODE_CONVEX_PATH:
+                return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath,
+                        outline.mAlpha);
+        }
+
         throw new IllegalArgumentException("Unrecognized outline?");
     }
 
