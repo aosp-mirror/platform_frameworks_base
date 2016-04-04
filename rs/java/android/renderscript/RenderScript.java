@@ -1031,7 +1031,6 @@ public class RenderScript {
 
 
 
-    long     mDev;
     long     mContext;
     private boolean mDestroyed = false;
 
@@ -1426,8 +1425,8 @@ public class RenderScript {
 
         RenderScript rs = new RenderScript(ctx);
 
-        rs.mDev = rs.nDeviceCreate();
-        rs.mContext = rs.nContextCreate(rs.mDev, flags, sdkVersion, ct.mID);
+        long device = rs.nDeviceCreate();
+        rs.mContext = rs.nContextCreate(device, flags, sdkVersion, ct.mID);
         rs.mContextType = ct;
         rs.mContextFlags = flags;
         rs.mContextSdkVersion = sdkVersion;
@@ -1635,9 +1634,6 @@ public class RenderScript {
             }
 
             nContextDestroy();
-
-            nDeviceDestroy(mDev);
-            mDev = 0;
         }
     }
 
