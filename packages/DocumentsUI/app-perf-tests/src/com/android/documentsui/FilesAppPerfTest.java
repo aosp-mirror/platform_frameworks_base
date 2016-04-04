@@ -17,6 +17,8 @@
 package com.android.documentsui;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -91,12 +93,15 @@ public class FilesAppPerfTest extends InstrumentationTestCase {
     }
 
     private void killProviders() throws Exception {
-        final PackageManager pm = getInstrumentation().getContext().getPackageManager();
+        final Context context = getInstrumentation().getContext();
+        final PackageManager pm = context.getPackageManager();
+        final ActivityManager am = (ActivityManager) context.getSystemService(
+                Context.ACTIVITY_SERVICE);
         final Intent intent = new Intent(DocumentsContract.PROVIDER_INTERFACE);
         final List<ResolveInfo> providers = pm.queryIntentContentProviders(intent, 0);
         for (ResolveInfo info : providers) {
             final String packageName = info.providerInfo.packageName;
-            mDevice.executeShellCommand("am force-stop " + packageName);
+            am.killBackgroundProcesses(packageName);
         }
     }
 }
