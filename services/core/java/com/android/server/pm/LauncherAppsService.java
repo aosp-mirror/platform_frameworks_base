@@ -60,6 +60,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,6 +120,21 @@ public class LauncherAppsService extends SystemService {
         @VisibleForTesting
         int injectBinderCallingUid() {
             return getCallingUid();
+        }
+
+        final int injectCallingUserId() {
+            return UserHandle.getUserId(injectBinderCallingUid());
+        }
+
+        @VisibleForTesting
+        long injectClearCallingIdentity() {
+            return Binder.clearCallingIdentity();
+        }
+
+        // Injection point.
+        @VisibleForTesting
+        void injectRestoreCallingIdentity(long token) {
+            Binder.restoreCallingIdentity(token);
         }
 
         private int getCallingUserId() {
@@ -197,14 +213,13 @@ public class LauncherAppsService extends SystemService {
         /**
          * Checks if the caller is in the same group as the userToCheck.
          */
-        @VisibleForTesting // We override it in unit tests
-        void ensureInUserProfiles(UserHandle userToCheck, String message) {
-            final int callingUserId = UserHandle.getCallingUserId();
+        private void ensureInUserProfiles(UserHandle userToCheck, String message) {
+            final int callingUserId = injectCallingUserId();
             final int targetUserId = userToCheck.getIdentifier();
 
             if (targetUserId == callingUserId) return;
 
-            long ident = Binder.clearCallingIdentity();
+            long ident = injectClearCallingIdentity();
             try {
                 UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
                 UserInfo targetUserInfo = mUm.getUserInfo(targetUserId);
@@ -214,7 +229,7 @@ public class LauncherAppsService extends SystemService {
                     throw new SecurityException(message);
                 }
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                injectRestoreCallingIdentity(ident);
             }
         }
 
@@ -239,12 +254,12 @@ public class LauncherAppsService extends SystemService {
          * Checks if the user is enabled.
          */
         private boolean isUserEnabled(UserHandle user) {
-            long ident = Binder.clearCallingIdentity();
+            long ident = injectClearCallingIdentity();
             try {
                 UserInfo targetUserInfo = mUm.getUserInfo(user.getIdentifier());
                 return targetUserInfo != null && targetUserInfo.isEnabled();
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                injectRestoreCallingIdentity(ident);
             }
         }
 
@@ -345,6 +360,9 @@ public class LauncherAppsService extends SystemService {
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
                 String packageName, ComponentName componentName, int flags, UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
+            if (!isUserEnabled(user)) {
+                return new ParceledListSlice<>(new ArrayList(0));
+            }
 
             return new ParceledListSlice<>(
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
@@ -356,6 +374,9 @@ public class LauncherAppsService extends SystemService {
         public ParceledListSlice getShortcutInfo(String callingPackage, String packageName,
                 List<String> ids, UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
+            if (!isUserEnabled(user)) {
+                return new ParceledListSlice<>(new ArrayList(0));
+            }
 
             return new ParceledListSlice<>(
                     mShortcutServiceInternal.getShortcutInfo(getCallingUserId(),
@@ -366,6 +387,10 @@ public class LauncherAppsService extends SystemService {
         public void pinShortcuts(String callingPackage, String packageName, List<String> ids,
                 UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
+            if (!isUserEnabled(user)) {
+                throw new IllegalStateException("Cannot pin shortcuts for disabled profile "
+                        + user);
+            }
 
             mShortcutServiceInternal.pinShortcuts(getCallingUserId(),
                     callingPackage, packageName, ids, user.getIdentifier());
@@ -375,6 +400,9 @@ public class LauncherAppsService extends SystemService {
         public int getShortcutIconResId(String callingPackage, ShortcutInfo shortcut,
                 UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
+            if (!isUserEnabled(user)) {
+                return 0;
+            }
 
             return mShortcutServiceInternal.getShortcutIconResId(getCallingUserId(),
                     callingPackage, shortcut, user.getIdentifier());
@@ -384,6 +412,9 @@ public class LauncherAppsService extends SystemService {
         public ParcelFileDescriptor getShortcutIconFd(String callingPackage, ShortcutInfo shortcut,
                 UserHandle user) {
             ensureShortcutPermission(callingPackage, user);
+            if (!isUserEnabled(user)) {
+                return null;
+            }
 
             return mShortcutServiceInternal.getShortcutIconFd(getCallingUserId(),
                     callingPackage, shortcut, user.getIdentifier());
@@ -401,6 +432,11 @@ public class LauncherAppsService extends SystemService {
                 Rect sourceBounds, Bundle startActivityOptions, UserHandle user) {
             verifyCallingPackage(callingPackage);
             ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
+
+            if (!isUserEnabled(user)) {
+                throw new IllegalStateException("Cannot start a shortcut for disabled profile "
+                        + user);
+            }
 
             // Even without the permission, pinned shortcuts are always launchable.
             if (!mShortcutServiceInternal.isPinnedByCaller(getCallingUserId(),
@@ -530,13 +566,13 @@ public class LauncherAppsService extends SystemService {
 
         /** Checks if user is a profile of or same as listeningUser.
          * and the user is enabled. */
-        boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser,
+        private boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser,
                 String debugMsg) {
             if (user.getIdentifier() == listeningUser.getIdentifier()) {
                 if (DEBUG) Log.d(TAG, "Delivering msg to same user " + debugMsg);
                 return true;
             }
-            long ident = Binder.clearCallingIdentity();
+            long ident = injectClearCallingIdentity();
             try {
                 UserInfo userInfo = mUm.getUserInfo(user.getIdentifier());
                 UserInfo listeningUserInfo = mUm.getUserInfo(listeningUser.getIdentifier());
@@ -557,7 +593,7 @@ public class LauncherAppsService extends SystemService {
                     return true;
                 }
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                injectRestoreCallingIdentity(ident);
             }
         }
 
