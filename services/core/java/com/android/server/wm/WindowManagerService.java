@@ -4292,9 +4292,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.appDied = false;
                 wtoken.removeAllWindows();
             } else if (visible) {
-                mOpeningApps.add(wtoken);
+                if (!mAppTransition.isTransitionSet() && mAppTransition.isReady()) {
+                    // Add the app mOpeningApps if transition is unset but ready. This means
+                    // we're doing a screen freeze, and the unfreeze will wait for all opening
+                    // apps to be ready.
+                    mOpeningApps.add(wtoken);
+                }
                 wtoken.startingMoved = false;
-
                 // If the token is currently hidden (should be the common case), or has been
                 // stopped, then we need to set up to wait for its windows to be ready.
                 if (wtoken.hidden || wtoken.mAppStopped) {
@@ -4338,6 +4342,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 wtoken.inPendingTransaction = true;
                 if (visible) {
+                    mOpeningApps.add(wtoken);
                     wtoken.mEnteringAnimation = true;
                 } else {
                     mClosingApps.add(wtoken);
