@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,6 +32,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.tv.animations.DismissAnimationsHolder;
+import com.android.systemui.recents.tv.animations.RecentsRowFocusAnimationHolder;
 import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
 import com.android.systemui.recents.model.Task;
 
@@ -44,6 +46,7 @@ public class TaskCardView extends LinearLayout {
 
     private ViewFocusAnimator mViewFocusAnimator;
     private DismissAnimationsHolder mDismissAnimationsHolder;
+    private RecentsRowFocusAnimationHolder mRecentsRowFocusAnimationHolder;
 
     public TaskCardView(Context context) {
         this(context, null);
@@ -65,6 +68,8 @@ public class TaskCardView extends LinearLayout {
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
         mDismissAnimationsHolder = new DismissAnimationsHolder(this);
+        View title = findViewById(R.id.card_info_field);
+        mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, title);
     }
 
     public void init(Task task) {
@@ -191,6 +196,10 @@ public class TaskCardView extends LinearLayout {
 
     public void startDismissTaskAnimation(Animator.AnimatorListener listener) {
         mDismissAnimationsHolder.startDismissAnimation(listener);
+    }
+
+    public RecentsRowFocusAnimationHolder getRecentsRowFocusAnimationHolder() {
+        return mRecentsRowFocusAnimationHolder;
     }
 
     @Override

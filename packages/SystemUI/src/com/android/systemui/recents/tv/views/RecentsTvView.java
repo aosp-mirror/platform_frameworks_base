@@ -37,6 +37,7 @@ import com.android.systemui.recents.events.component.RecentsVisibilityChangedEve
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.tv.animations.RecentsRowFocusAnimationHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ public class RecentsTvView extends FrameLayout {
     private TaskStack mStack;
     private TaskStackHorizontalGridView mTaskStackHorizontalView;
     private View mEmptyView;
+    private RecentsRowFocusAnimationHolder mEmptyViewFocusAnimationHolder;
     private boolean mAwaitingFirstLayout = true;
     private Rect mSystemInsets = new Rect();
     private RecentsTvTransitionHelper mTransitionHelper;
@@ -77,6 +79,8 @@ public class RecentsTvView extends FrameLayout {
         LayoutInflater inflater = LayoutInflater.from(context);
         mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
+        mEmptyViewFocusAnimationHolder = new RecentsRowFocusAnimationHolder(mEmptyView, null);
+
         mHandler = new Handler();
         mTransitionHelper = new RecentsTvTransitionHelper(mContext, mHandler);
     }
@@ -93,7 +97,6 @@ public class RecentsTvView extends FrameLayout {
             mTaskStackHorizontalView = (TaskStackHorizontalGridView) findViewById(R.id.task_list);
             mTaskStackHorizontalView.setStack(stack);
         }
-
 
         if (stack.getStackTaskCount() > 0) {
             hideEmptyView();
@@ -134,18 +137,24 @@ public class RecentsTvView extends FrameLayout {
     public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
         if (mTaskStackHorizontalView != null) {
             // Iterate the stack views and try and find the given task.
-            List<TaskCardView> taskViews = mTaskStackHorizontalView.getTaskViews();
-            int taskViewCount = taskViews.size();
-            for (int j = 0; j < taskViewCount; j++) {
-                TaskCardView tv = taskViews.get(j);
-                if (tv.getTask() == task) {
-                    SystemServicesProxy ssp = Recents.getSystemServices();
-                    ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
-                    return true;
-                }
+            if (mTaskStackHorizontalView.getChildViewForTask(task) != null) {
+                SystemServicesProxy ssp = Recents.getSystemServices();
+                ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+                return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Starts the focus change animation.
+     */
+    public void startRecentsRowFocusAnimation(boolean hasFocus) {
+        if (mEmptyView.getVisibility() == View.VISIBLE) {
+            mEmptyViewFocusAnimationHolder.getFocusChangeAnimator(hasFocus).start();
+        } else {
+            mTaskStackHorizontalView.startRecentsRowFocusAnimation(hasFocus);
+        }
     }
 
     /**
@@ -153,14 +162,15 @@ public class RecentsTvView extends FrameLayout {
      */
     public void showEmptyView() {
         mEmptyView.setVisibility(View.VISIBLE);
-        mEmptyView.bringToFront();
+        mTaskStackHorizontalView.setVisibility(View.GONE);
     }
 
     /**
      * Shows the task stack and hides the empty view.
      */
     public void hideEmptyView() {
-        mEmptyView.setVisibility(View.INVISIBLE);
+        mEmptyView.setVisibility(View.GONE);
+        mTaskStackHorizontalView.setVisibility(View.VISIBLE);
     }
 
     /**
