@@ -295,9 +295,7 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mLastShowInputRequested;
     int mCandidatesVisibility;
     CompletionInfo[] mCurCompletions;
-    
-    boolean mShowInputForced;
-    
+
     boolean mFullscreenApplied;
     boolean mIsFullscreen;
     View mExtractView;
@@ -422,7 +420,6 @@ public class InputMethodService extends AbstractInputMethodService {
             boolean wasVis = isInputViewShown();
             mShowInputFlags = 0;
             mShowInputRequested = false;
-            mShowInputForced = false;
             doHideWindow();
             clearInsetOfPreviousIme();
             if (resultReceiver != null) {
@@ -439,8 +436,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "showSoftInput()");
             boolean wasVis = isInputViewShown();
-            mShowInputFlags = 0;
-            if (onShowInputRequested(flags, false)) {
+            if (dispatchOnShowInputRequested(flags, false)) {
                 try {
                     showWindow(true);
                 } catch (BadTokenException e) {
@@ -817,8 +813,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mInitialized = false;
         mWindowCreated = false;
         mShowInputRequested = false;
-        mShowInputForced = false;
-        
+        mShowInputFlags = 0;
+
         mThemeAttrs = obtainStyledAttributes(android.R.styleable.InputMethodService);
         mRootView = mInflater.inflate(
                 com.android.internal.R.layout.input_method, null);
@@ -888,7 +884,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @Override public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        
+
         boolean visible = mWindowVisible;
         int showFlags = mShowInputFlags;
         boolean showingInput = mShowInputRequested;
@@ -903,7 +899,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (visible) {
             if (showingInput) {
                 // If we were last showing the soft keyboard, try to do so again.
-                if (onShowInputRequested(showFlags, true)) {
+                if (dispatchOnShowInputRequested(showFlags, true)) {
                     showWindow(true);
                     if (completions != null) {
                         mCurCompletions = completions;
@@ -1540,20 +1536,41 @@ public class InputMethodService extends AbstractInputMethodService {
                 return false;
             }
         }
-        if ((flags&InputMethod.SHOW_FORCED) != 0) {
-            mShowInputForced = true;
-        }
         return true;
     }
-    
+
+    /**
+     * A utility method to call {{@link #onShowInputRequested(int, boolean)}} and update internal
+     * states depending on its result.  Since {@link #onShowInputRequested(int, boolean)} is
+     * exposed to IME authors as an overridable public method without {@code @CallSuper}, we have
+     * to have this method to ensure that those internal states are always updated no matter how
+     * {@link #onShowInputRequested(int, boolean)} is overridden by the IME author.
+     * @param flags Provides additional information about the show request,
+     * as per {@link InputMethod#showSoftInput InputMethod.showSoftInput()}.
+     * @param configChange This is true if we are re-showing due to a
+     * configuration change.
+     * @return Returns true to indicate that the window should be shown.
+     * @see #onShowInputRequested(int, boolean)
+     */
+    private boolean dispatchOnShowInputRequested(int flags, boolean configChange) {
+        final boolean result = onShowInputRequested(flags, configChange);
+        if (result) {
+            mShowInputFlags = flags;
+        } else {
+            mShowInputFlags = 0;
+        }
+        return result;
+    }
+
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
                 + " mWindowAdded=" + mWindowAdded
                 + " mWindowCreated=" + mWindowCreated
                 + " mWindowVisible=" + mWindowVisible
-                + " mInputStarted=" + mInputStarted);
-        
+                + " mInputStarted=" + mInputStarted
+                + " mShowInputFlags=" + mShowInputFlags);
+
         if (mInShowWindow) {
             Log.w(TAG, "Re-entrance in to showWindow");
             return;
@@ -2573,7 +2590,6 @@ public class InputMethodService extends AbstractInputMethodService {
         
         p.println("  mShowInputRequested=" + mShowInputRequested
                 + " mLastShowInputRequested=" + mLastShowInputRequested
-                + " mShowInputForced=" + mShowInputForced
                 + " mShowInputFlags=0x" + Integer.toHexString(mShowInputFlags));
         p.println("  mCandidatesVisibility=" + mCandidatesVisibility
                 + " mFullscreenApplied=" + mFullscreenApplied
