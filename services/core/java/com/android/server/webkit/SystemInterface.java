@@ -16,22 +16,35 @@
 
 package com.android.server.webkit;
 
-import android.webkit.WebViewProviderInfo;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.webkit.WebViewProviderInfo;
 
 /**
- * Utility interface for the WebViewUpdateService.
+ * System interface for the WebViewUpdateService.
  * This interface provides a way to test the WebView preparation mechanism - during normal use this
  * interface is implemented using calls to the Android framework, but by providing an alternative
  * implementation we can test the WebView preparation logic without reaching other framework code.
+ *
  * @hide
  */
-public interface WebViewUtilityInterface {
+public interface SystemInterface {
     public WebViewProviderInfo[] getWebViewPackages();
     public int onWebViewProviderChanged(PackageInfo packageInfo);
 
     public String getUserChosenWebViewProvider(Context context);
     public void updateUserSetting(Context context, String newProviderName);
     public void killPackageDependents(String packageName);
+
+    public boolean isFallbackLogicEnabled();
+    public void enableFallbackLogic(boolean enable);
+
+    public void uninstallAndDisablePackageForAllUsers(Context context, String packageName);
+    public void enablePackageForAllUsers(Context context, String packageName, boolean enable);
+    public void enablePackageForUser(String packageName, boolean enable, int userId);
+
+    public boolean systemIsDebuggable();
+    public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
+            throws NameNotFoundException;
 }

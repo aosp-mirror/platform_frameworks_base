@@ -21,7 +21,6 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -559,18 +558,6 @@ public final class WebViewFactory {
             Log.v(LOGTAG, "loaded with relro file");
         }
         return result;
-    }
-
-    /**
-     * Returns whether the entire package from an ACTION_PACKAGE_CHANGED intent was changed (rather
-     * than just one of its components).
-     * @hide
-     */
-    public static boolean entirePackageChanged(Intent intent) {
-        String[] componentList =
-            intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-        return Arrays.asList(componentList).contains(
-                intent.getDataString().substring("package:".length()));
     }
 
     private static String WEBVIEW_UPDATE_SERVICE_NAME = "webviewupdate";
