@@ -134,8 +134,8 @@ final class AccessibilityIterators {
 
         @Override
         public int[] following(int offset) {
-            final int textLegth = mText.length();
-            if (textLegth <= 0) {
+            final int textLength = mText.length();
+            if (textLength <= 0) {
                 return null;
             }
             if (offset >= mText.length()) {
@@ -163,8 +163,8 @@ final class AccessibilityIterators {
 
         @Override
         public int[] preceding(int offset) {
-            final int textLegth = mText.length();
-            if (textLegth <= 0) {
+            final int textLength = mText.length();
+            if (textLength <= 0) {
                 return null;
             }
             if (offset <= 0) {
@@ -181,8 +181,13 @@ final class AccessibilityIterators {
             final int pageHeight = mTempRect.height() - mView.getTotalPaddingTop()
                     - mView.getTotalPaddingBottom();
             final int previousPageEndY = currentLineTop - pageHeight;
-            final int currentPageStartLine = (previousPageEndY > 0) ?
-                     mLayout.getLineForVertical(previousPageEndY) + 1 : 0;
+            int currentPageStartLine = (previousPageEndY > 0) ?
+                     mLayout.getLineForVertical(previousPageEndY) : 0;
+            // If we're at the end of text, we're at the end of the current line rather than the
+            // start of the next line, so we should move up one fewer lines than we would otherwise.
+            if (end == mText.length() && (currentPageStartLine < currentLine)) {
+                currentPageStartLine += 1;
+            }
 
             final int start = getLineEdgeIndex(currentPageStartLine, DIRECTION_START);
 
