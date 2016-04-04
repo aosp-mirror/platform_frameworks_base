@@ -957,9 +957,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
                     (int) (minimizeAmount * topInset + (1 - minimizeAmount) * mBounds.bottom);
         } else if (dockSide == DOCKED_LEFT) {
             mTmpAdjustedBounds.set(mBounds);
+            final int width = mBounds.width();
             mTmpAdjustedBounds.right =
                     (int) (minimizeAmount * mDockedStackMinimizeThickness
                             + (1 - minimizeAmount) * mBounds.right);
+            mTmpAdjustedBounds.left = mTmpAdjustedBounds.right - width;
         } else if (dockSide == DOCKED_RIGHT) {
             mTmpAdjustedBounds.set(mBounds);
             mTmpAdjustedBounds.left =
