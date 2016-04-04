@@ -44,6 +44,7 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.InstrumentationInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -96,6 +97,7 @@ public class Am extends BaseCommand {
     private static final int STACK_BOUNDS_INSET = 10;
 
     private IActivityManager mAm;
+    private IPackageManager mPm;
 
     private int mStartFlags = 0;
     private boolean mWaitOption = false;
@@ -224,7 +226,8 @@ public class Am extends BaseCommand {
                 "    --receiver-permission <PERMISSION>: Require receiver to hold permission.\n" +
                 "\n" +
                 "am instrument: start an Instrumentation.  Typically this target <COMPONENT>\n" +
-                "  is the form <TEST_PACKAGE>/<RUNNER_CLASS>.  Options are:\n" +
+                "  is the form <TEST_PACKAGE>/<RUNNER_CLASS> or only <TEST_PACKAGE> if there \n" +
+                "  is only one instrumentation.  Options are:\n" +
                 "    -r: print raw results (otherwise decode REPORT_KEY_STREAMRESULT).  Use with\n" +
                 "        [-e perf true] to generate raw output for performance measurements.\n" +
                 "    -e <NAME> <VALUE>: set argument <NAME> to <VALUE>.  For test runners a\n" +
@@ -371,6 +374,12 @@ public class Am extends BaseCommand {
         if (mAm == null) {
             System.err.println(NO_SYSTEM_ERROR_CODE);
             throw new AndroidException("Can't connect to activity manager; is the system running?");
+        }
+
+        mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        if (mPm == null) {
+            System.err.println(NO_SYSTEM_ERROR_CODE);
+            throw new AndroidException("Can't connect to package manager; is the system running?");
         }
 
         String op = nextArgRequired();
@@ -570,13 +579,7 @@ public class Am extends BaseCommand {
                 if (intent.getComponent() != null) {
                     packageName = intent.getComponent().getPackageName();
                 } else {
-                    IPackageManager pm = IPackageManager.Stub.asInterface(
-                            ServiceManager.getService("package"));
-                    if (pm == null) {
-                        System.err.println("Error: Package manager not running; aborting");
-                        return;
-                    }
-                    List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0,
+                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
                             mUserId).getList();
                     if (activities == null || activities.size() <= 0) {
                         System.err.println("Error: Intent does not match any activities: "
@@ -813,8 +816,44 @@ public class Am extends BaseCommand {
         }
 
         String cnArg = nextArgRequired();
-        ComponentName cn = ComponentName.unflattenFromString(cnArg);
-        if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
+
+        ComponentName cn;
+        if (cnArg.contains("/")) {
+            cn = ComponentName.unflattenFromString(cnArg);
+            if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
+        } else {
+            List<InstrumentationInfo> infos = mPm.queryInstrumentation(null, 0).getList();
+
+            final int numInfos = infos == null ? 0: infos.size();
+            List<ComponentName> cns = new ArrayList<>();
+            for (int i = 0; i < numInfos; i++) {
+                InstrumentationInfo info = infos.get(i);
+
+                ComponentName c = new ComponentName(info.packageName, info.name);
+                if (cnArg.equals(info.packageName)) {
+                    cns.add(c);
+                }
+            }
+
+            if (cns.size() == 0) {
+                throw new IllegalArgumentException("No instrumentation found for: " + cnArg);
+            } else if (cns.size() == 1) {
+                cn = cns.get(0);
+            } else {
+                StringBuilder cnsStr = new StringBuilder();
+                final int numCns = cns.size();
+                for (int i = 0; i < numCns; i++) {
+                    cnsStr.append(cns.get(i).flattenToString());
+                    cnsStr.append(", ");
+                }
+
+                // Remove last ", "
+                cnsStr.setLength(cnsStr.length() - 2);
+
+                throw new IllegalArgumentException("Found multiple instrumentations: "
+                        + cnsStr.toString());
+            }
+        }
 
         InstrumentationWatcher watcher = null;
         UiAutomationConnection connection = null;
