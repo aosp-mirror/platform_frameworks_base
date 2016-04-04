@@ -320,4 +320,15 @@ public class NanoAppInstanceInfo {
             return new NanoAppInstanceInfo[size];
         }
     };
+
+    @Override
+    public String toString() {
+        String retVal = "handle : " + mHandle;
+        retVal += ", Id : 0x" + Long.toHexString(mAppId);
+        retVal += ", Version : " + mAppVersion;
+        retVal += ", Name : " + mName;
+        retVal += ", Publisher : " + mPublisher;
+
+        return retVal;
+    }
 }

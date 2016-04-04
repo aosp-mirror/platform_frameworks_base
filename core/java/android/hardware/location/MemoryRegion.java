@@ -79,6 +79,33 @@ public class MemoryRegion implements Parcelable{
     }
 
     @Override
+    public String toString() {
+        String mask = "";
+
+        if (isReadable()) {
+            mask += "r";
+        } else {
+            mask += "-";
+        }
+
+        if (isWritable()) {
+            mask += "w";
+        } else {
+            mask += "-";
+        }
+
+        if (isExecutable()) {
+            mask += "x";
+        } else {
+            mask += "-";
+        }
+
+        String retVal = "[ " + mSizeBytesFree + "/ " + mSizeBytes + " ] : " + mask;
+
+        return retVal;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
