@@ -974,6 +974,7 @@ public class CameraDeviceImpl extends CameraDevice
 
             if (mRemoteDevice != null) {
                 mRemoteDevice.disconnect();
+                mRemoteDevice.unlinkToDeath(this, /*flags*/0);
             }
 
             // Only want to fire the onClosed callback once;
