@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -106,6 +108,24 @@ public final class WebViewDelegate {
                     + " is not a DisplayList canvas");
         }
         ((DisplayListCanvas) canvas).callDrawGLFunction2(nativeDrawGLFunctor);
+    }
+
+    /**
+     * Set the Runnable callback the DrawGlFunction functor is detached and free to be destroyed.
+     * This will replace the previous callback, if any.
+     *
+     * @param view The view to set the callback. Should be the view where onDraw inserted
+     *        DrawGLFunctor.
+     * @param callback The new callback to set on the view.
+     * @throws IllegalArgumentException if view is null.
+     * @return The previous callback on this view.
+     */
+    public Runnable setDrawGlFunctionDetachedCallback(
+        @NonNull View view, @Nullable Runnable callback) {
+        if (view == null) {
+            throw new IllegalArgumentException("View cannot be null");
+        }
+        return view.setRenderNodeDetachedCallback(callback);
     }
 
     /**
