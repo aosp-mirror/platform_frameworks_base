@@ -50,7 +50,7 @@ public class MediaBrowserUtils {
             startIndex1 = 0;
             endIndex1 = Integer.MAX_VALUE;
         } else {
-            startIndex1 = pageSize1 * (page1 - 1);
+            startIndex1 = pageSize1 * page1;
             endIndex1 = startIndex1 + pageSize1 - 1;
         }
 
@@ -58,7 +58,7 @@ public class MediaBrowserUtils {
             startIndex2 = 0;
             endIndex2 = Integer.MAX_VALUE;
         } else {
-            startIndex2 = pageSize2 * (page2 - 1);
+            startIndex2 = pageSize2 * page2;
             endIndex2 = startIndex2 + pageSize2 - 1;
         }
 
