@@ -28,6 +28,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,7 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -51,6 +52,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG_INTENT_EXTRAS = "intent-extras";
     private static final String TAG_EXTRAS = "extras";
     private static final String TAG_SHORTCUT = "shortcut";
+    private static final String TAG_CATEGORIES = "categories";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_DYNAMIC_COUNT = "dynamic-count";
@@ -66,6 +68,11 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_ICON_RES = "icon-res";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
+
+    private static final String NAME_CATEGORIES = "categories";
+
+    private static final String TAG_STRING_ARRAY_XMLUTILS = "string-array";
+    private static final String ATTR_NAME_XMLUTILS = "name";
 
     /**
      * All the shortcuts from the package, keyed on IDs.
@@ -305,7 +312,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      * and return true.  Otherwise just return false.
      */
     public boolean tryApiCall(@NonNull ShortcutService s) {
-        if (getApiCallCount(s) >= s.mMaxDailyUpdates) {
+        if (getApiCallCount(s) >= s.mMaxUpdatesPerInterval) {
             return false;
         }
         mApiCallCount++;
@@ -485,6 +492,16 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
         }
 
+        {
+            final List<String> cat = si.getCategories();
+            if (cat != null && cat.size() > 0) {
+                out.startTag(null, TAG_CATEGORIES);
+                XmlUtils.writeStringArrayXml(cat.toArray(new String[cat.size()]),
+                        NAME_CATEGORIES, out);
+                out.endTag(null, TAG_CATEGORIES);
+            }
+        }
+
         ShortcutService.writeTagExtra(out, TAG_INTENT_EXTRAS,
                 si.getIntentPersistableExtras());
         ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
@@ -550,6 +567,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         int flags;
         int iconRes;
         String bitmapPath;
+        String[] categories = null;
 
         id = ShortcutService.parseStringAttribute(parser, ATTR_ID);
         activityComponent = ShortcutService.parseComponentNameAttribute(parser,
@@ -583,11 +601,21 @@ class ShortcutPackage extends ShortcutPackageItem {
                 case TAG_EXTRAS:
                     extras = PersistableBundle.restoreFromXml(parser);
                     continue;
+                case TAG_CATEGORIES:
+                    // This just contains string-array.
+                    continue;
+                case TAG_STRING_ARRAY_XMLUTILS:
+                    if (NAME_CATEGORIES.equals(ShortcutService.parseStringAttribute(parser,
+                            ATTR_NAME_XMLUTILS))) {
+                        categories = XmlUtils.readThisStringArrayXml(parser, TAG_STRING_ARRAY_XMLUTILS, null);
+                    }
+                    continue;
             }
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
         return new ShortcutInfo(
-                userId, id, packageName, activityComponent, /* icon =*/ null, title, text, intent,
+                userId, id, packageName, activityComponent, /* icon =*/ null, title, text,
+                (categories == null ? null : Arrays.asList(categories)), intent,
                 intentPersistableExtras, weight, extras, lastChangedTimestamp, flags,
                 iconRes, bitmapPath);
     }

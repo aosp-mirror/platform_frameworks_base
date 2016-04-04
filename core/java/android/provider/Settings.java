@@ -7793,13 +7793,13 @@ public final class Settings {
          * ShortcutManager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
-         * "reset_interval_sec=86400,max_daily_updates=5"
+         * "reset_interval_sec=86400,max_updates_per_interval=1"
          *
          * The following keys are supported:
          *
          * <pre>
          * reset_interval_sec              (long)
-         * max_daily_updates               (int)
+         * max_updates_per_interval        (int)
          * max_icon_dimension_dp           (int, DP)
          * max_icon_dimension_dp_lowram    (int, DP)
          * max_shortcuts                   (int)

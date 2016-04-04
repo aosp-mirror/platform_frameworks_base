@@ -216,7 +216,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         String injectShortcutManagerConstants() {
             return ConfigConstants.KEY_RESET_INTERVAL_SEC + "=" + (INTERVAL / 1000) + ","
                     + ConfigConstants.KEY_MAX_SHORTCUTS + "=" + MAX_SHORTCUTS + ","
-                    + ConfigConstants.KEY_MAX_DAILY_UPDATES + "=" + MAX_DAILY_UPDATES + ","
+                    + ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL + "="
+                    + MAX_UPDATES_PER_INTERVAL + ","
                     + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP + "=" + MAX_ICON_DIMENSION + ","
                     + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM + "="
                     + MAX_ICON_DIMENSION_LOWRAM + ","
@@ -465,7 +466,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private static final int MAX_SHORTCUTS = 10;
 
-    private static final int MAX_DAILY_UPDATES = 3;
+    private static final int MAX_UPDATES_PER_INTERVAL = 3;
 
     private static final int MAX_ICON_DIMENSION = 128;
 
@@ -1074,7 +1075,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         assertResetTimes(START_TIME + INTERVAL, START_TIME + 2 * INTERVAL);
 
-        // Advance further; 4 days since start.
+        // Advance further; 4 hours since start.
         mInjectedCurrentTimeLillis = START_TIME + 4 * INTERVAL + 50;
 
         assertResetTimes(START_TIME + 4 * INTERVAL, START_TIME + 5 * INTERVAL);
@@ -1111,14 +1112,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.updateConfigurationLocked(
                 ConfigConstants.KEY_RESET_INTERVAL_SEC + "=123,"
                         + ConfigConstants.KEY_MAX_SHORTCUTS + "=4,"
-                        + ConfigConstants.KEY_MAX_DAILY_UPDATES + "=5,"
+                        + ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL + "=5,"
                         + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP + "=100,"
                         + ConfigConstants.KEY_MAX_ICON_DIMENSION_DP_LOWRAM + "=50,"
                         + ConfigConstants.KEY_ICON_FORMAT + "=WEBP,"
                         + ConfigConstants.KEY_ICON_QUALITY + "=75");
         assertEquals(123000, mService.getResetIntervalForTest());
         assertEquals(4, mService.getMaxDynamicShortcutsForTest());
-        assertEquals(5, mService.getMaxDailyUpdatesForTest());
+        assertEquals(5, mService.getMaxUpdatesPerIntervalForTest());
         assertEquals(100, mService.getMaxIconDimensionForTest());
         assertEquals(CompressFormat.WEBP, mService.getIconPersistFormatForTest());
         assertEquals(75, mService.getIconPersistQualityForTest());
@@ -1134,8 +1135,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(ShortcutService.DEFAULT_MAX_SHORTCUTS_PER_APP,
                 mService.getMaxDynamicShortcutsForTest());
 
-        assertEquals(ShortcutService.DEFAULT_MAX_DAILY_UPDATES,
-                mService.getMaxDailyUpdatesForTest());
+        assertEquals(ShortcutService.DEFAULT_MAX_UPDATES_PER_INTERVAL,
+                mService.getMaxUpdatesPerIntervalForTest());
 
         assertEquals(50, mService.getMaxIconDimensionForTest());
 
@@ -1154,7 +1155,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     /** Test for {@link android.content.pm.ShortcutManager#getRemainingCallCount()} */
     public void testGetRemainingCallCount() {
-        assertEquals(MAX_DAILY_UPDATES, mManager.getRemainingCallCount());
+        assertEquals(MAX_UPDATES_PER_INTERVAL, mManager.getRemainingCallCount());
     }
 
     /** Test for {@link android.content.pm.ShortcutManager#getRateLimitResetTime()} */
@@ -1241,61 +1242,71 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 mManager.getDynamicShortcuts()),
                 "shortcut1");
 
-        assertTrue(mManager.addDynamicShortcut(si2));
+        assertTrue(mManager.addDynamicShortcuts(list(si2, si3)));
         assertEquals(1, mManager.getRemainingCallCount());
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut1", "shortcut2");
+                "shortcut1", "shortcut2", "shortcut3");
 
-        // Add with the same ID
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("shortcut1")));
+        // This should not crash.  It'll still consume the quota.
+        assertTrue(mManager.addDynamicShortcuts(list()));
         assertEquals(0, mManager.getRemainingCallCount());
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut1", "shortcut2");
+                "shortcut1", "shortcut2", "shortcut3");
+
+        mInjectedCurrentTimeLillis += INTERVAL; // reset
+
+        // Add with the same ID
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("shortcut1"))));
+        assertEquals(2, mManager.getRemainingCallCount());
+        assertShortcutIds(assertAllNotKeyFieldsOnly(
+                mManager.getDynamicShortcuts()),
+                "shortcut1", "shortcut2", "shortcut3");
 
         // TODO Check max number
 
         // TODO Check fields.
 
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
-            assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+            assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
         });
     }
 
-    public void testDeleteDynamicShortcut() {
+    public void testDeleteDynamicShortcuts() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
         final ShortcutInfo si2 = makeShortcut("shortcut2");
         final ShortcutInfo si3 = makeShortcut("shortcut3");
+        final ShortcutInfo si4 = makeShortcut("shortcut4");
 
-        assertTrue(mManager.setDynamicShortcuts(list(si1, si2, si3)));
+        assertTrue(mManager.setDynamicShortcuts(list(si1, si2, si3, si4)));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut1", "shortcut2", "shortcut3");
+                "shortcut1", "shortcut2", "shortcut3", "shortcut4");
 
         assertEquals(2, mManager.getRemainingCallCount());
 
-        mManager.deleteDynamicShortcut("shortcut1");
+        mManager.removeDynamicShortcuts(list("shortcut1"));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut2", "shortcut3");
+                "shortcut2", "shortcut3", "shortcut4");
 
-        mManager.deleteDynamicShortcut("shortcut1");
+        mManager.removeDynamicShortcuts(list("shortcut1"));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut2", "shortcut3");
+                "shortcut2", "shortcut3", "shortcut4");
 
-        mManager.deleteDynamicShortcut("shortcutXXX");
+        mManager.removeDynamicShortcuts(list("shortcutXXX"));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut2", "shortcut3");
+                "shortcut2", "shortcut3", "shortcut4");
 
-        mManager.deleteDynamicShortcut("shortcut2");
+        mManager.removeDynamicShortcuts(list("shortcut2", "shortcut4"));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
                 "shortcut3");
 
-        mManager.deleteDynamicShortcut("shortcut3");
+        mManager.removeDynamicShortcuts(list("shortcut3"));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()));
 
@@ -1315,7 +1326,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         assertEquals(2, mManager.getRemainingCallCount());
 
-        mManager.deleteAllDynamicShortcuts();
+        mManager.removeAllDynamicShortcuts();
         assertEquals(0, mManager.getDynamicShortcuts().size());
         assertEquals(2, mManager.getRemainingCallCount());
 
@@ -1383,7 +1394,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(0, mManager.getRemainingCallCount());
         assertEquals(START_TIME + INTERVAL * 2, mManager.getRateLimitResetTime());
 
-        // 4 days later...
+        // 4 hours later...
         mInjectedCurrentTimeLillis = START_TIME + 4 * INTERVAL;
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
         assertEquals(2, mManager.getRemainingCallCount());
@@ -1791,13 +1802,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                     getCallingUser());
         });
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
-            mManager.deleteDynamicShortcut("s1");
-            mManager.deleteDynamicShortcut("s2");
+            mManager.removeDynamicShortcuts(list("s1"));
+            mManager.removeDynamicShortcuts(list("s2"));
         });
         runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
-            mManager.deleteDynamicShortcut("s1");
-            mManager.deleteDynamicShortcut("s3");
-            mManager.deleteDynamicShortcut("s5");
+            mManager.removeDynamicShortcuts(list("s1"));
+            mManager.removeDynamicShortcuts(list("s3"));
+            mManager.removeDynamicShortcuts(list("s5"));
         });
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
             assertShortcutIds(assertAllDynamic(
@@ -2089,7 +2100,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Delete some.
         setCaller(CALLING_PACKAGE_1);
         assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
-        mManager.deleteDynamicShortcut("s2");
+        mManager.removeDynamicShortcuts(list("s2"));
         assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
 
         dumpsysOnLogcat();
@@ -2154,19 +2165,19 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Delete some.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
-            mManager.deleteDynamicShortcut("s2");
+            mManager.removeDynamicShortcuts(list("s2"));
             assertShortcutIds(mManager.getPinnedShortcuts(), "s2");
         });
 
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertShortcutIds(mManager.getPinnedShortcuts(), "s3", "s4");
-            mManager.deleteDynamicShortcut("s3");
+            mManager.removeDynamicShortcuts(list("s3"));
             assertShortcutIds(mManager.getPinnedShortcuts(), "s3", "s4");
         });
 
         runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
             assertShortcutIds(mManager.getPinnedShortcuts() /* none */);
-            mManager.deleteDynamicShortcut("s2");
+            mManager.removeDynamicShortcuts(list("s2"));
             assertShortcutIds(mManager.getPinnedShortcuts() /* none */);
         });
 
@@ -2218,7 +2229,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Delete some.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertShortcutIds(mManager.getPinnedShortcuts(), "s3");
-            mManager.deleteDynamicShortcut("s3");
+            mManager.removeDynamicShortcuts(list("s3"));
             assertShortcutIds(mManager.getPinnedShortcuts(), "s3");
         });
 
@@ -2226,8 +2237,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertShortcutIds(mManager.getPinnedShortcuts(), "s1", "s2");
-            mManager.deleteDynamicShortcut("s1");
-            mManager.deleteDynamicShortcut("s3");
+            mManager.removeDynamicShortcuts(list("s1"));
+            mManager.removeDynamicShortcuts(list("s3"));
             assertShortcutIds(mManager.getPinnedShortcuts(), "s1", "s2");
         });
 
@@ -2336,13 +2347,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Delete all dynamic.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
 
             assertEquals(0, mManager.getDynamicShortcuts().size());
             assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s1", "s2", "s3");
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
 
             assertEquals(0, mManager.getDynamicShortcuts().size());
             assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s2", "s1");
@@ -2377,7 +2388,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         });
         // Re-publish s1.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+            assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
             assertShortcutIds(assertAllDynamic(mManager.getDynamicShortcuts()), "s1");
             assertShortcutIds(assertAllPinned(mManager.getPinnedShortcuts()), "s1", "s2", "s3");
@@ -2979,7 +2990,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Just to make it complicated, delete some.
         setCaller(CALLING_PACKAGE_1);
-        mManager.deleteDynamicShortcut("s2");
+        mManager.removeDynamicShortcuts(list("s2"));
 
         // intent and check.
         setCaller(LAUNCHER_1);
@@ -3051,11 +3062,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 any(UserHandle.class)
         );
 
-        // Test for addDynamicShortcut.
+        // Test for addDynamicShortcuts.
         reset(c0);
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
-            dumpsysOnLogcat("before addDynamicShortcut");
-            assertTrue(mManager.addDynamicShortcut(makeShortcut("s4")));
+            dumpsysOnLogcat("before addDynamicShortcuts");
+            assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s4"))));
         });
 
         waitOnMainThread();
@@ -3071,7 +3082,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Test for remove
         reset(c0);
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
-            mManager.deleteDynamicShortcut("s1");
+            mManager.removeDynamicShortcuts(list("s1"));
         });
 
         waitOnMainThread();
@@ -3104,7 +3115,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Test for deleteAll
         reset(c0);
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
         });
 
         waitOnMainThread();
@@ -3178,7 +3189,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            mManager.deleteDynamicShortcut("x");
+            mManager.removeDynamicShortcuts(list());
         });
         waitOnMainThread();
 
@@ -3195,7 +3206,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
-            mManager.deleteDynamicShortcut("x");
+            mManager.removeDynamicShortcuts(list());
         });
         waitOnMainThread();
 
@@ -3213,7 +3224,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            mManager.deleteDynamicShortcut("x");
+            mManager.removeDynamicShortcuts(list());
         });
         waitOnMainThread();
 
@@ -3233,7 +3244,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            mManager.deleteDynamicShortcut("x");
+            mManager.removeDynamicShortcuts(list());
         });
         waitOnMainThread();
 
@@ -3253,7 +3264,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
-            mManager.deleteDynamicShortcut("x");
+            mManager.removeDynamicShortcuts(list());
         });
         waitOnMainThread();
 
@@ -3477,16 +3488,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Remove all dynamic shortcuts; now all shortcuts are just pinned.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
         });
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
         });
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
-            mManager.deleteAllDynamicShortcuts();
+            mManager.removeAllDynamicShortcuts();
         });
 
 
@@ -4009,22 +4020,22 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     public void testHandlePackageDelete() {
         setCaller(CALLING_PACKAGE_1, USER_0);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
         setCaller(CALLING_PACKAGE_2, USER_0);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
         setCaller(CALLING_PACKAGE_3, USER_0);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
         setCaller(CALLING_PACKAGE_1, USER_10);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
         setCaller(CALLING_PACKAGE_2, USER_10);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
         setCaller(CALLING_PACKAGE_3, USER_10);
-        assertTrue(mManager.addDynamicShortcut(makeShortcut("s1")));
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
 
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
@@ -4980,6 +4991,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setTitle("title")
                 .setText("text")
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setWeight(123)
                 .setExtras(pb)
                 .build();
@@ -4995,6 +5007,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals("content://a.b.c/", si.getIcon().getUriString());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
+        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5016,6 +5029,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(Icon.createWithContentUri("content://a.b.c/"))
                 .setTitle("title")
                 .setText("text")
+                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
@@ -5034,6 +5048,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals("content://a.b.c/", si.getIcon().getUriString());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
+        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5051,6 +5066,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
+        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5058,7 +5074,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
         assertEquals(null, si.getBitmapPath());
-        assertEquals(0, si.getIconResourceId());
+
+        assertEquals(456, si.getIconResourceId());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
 
@@ -5068,13 +5085,15 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
+        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(123, si.getWeight());
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
         assertEquals(null, si.getBitmapPath());
-        assertEquals(0, si.getIconResourceId());
+
+        assertEquals(456, si.getIconResourceId());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
@@ -5084,13 +5103,56 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals(null, si.getTitle());
         assertEquals(null, si.getText());
+        assertEquals(null, si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(0, si.getWeight());
         assertEquals(null, si.getExtras());
 
         assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_KEY_FIELDS_ONLY, si.getFlags());
         assertEquals(null, si.getBitmapPath());
-        assertEquals(0, si.getIconResourceId());
+
+        assertEquals(456, si.getIconResourceId());
+    }
+
+    public void testShortcutInfoClone_minimum() {
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(getTestContext())
+                .setId("id")
+                .setTitle("title")
+                .setIntent(makeIntent("action", ShortcutActivity.class))
+                .build();
+        ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals("title", si.getTitle());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals(null, si.getCategories());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals("title", si.getTitle());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals(null, si.getCategories());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals("title", si.getTitle());
+        assertEquals(null, si.getIntent());
+        assertEquals(null, si.getCategories());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
+
+        assertEquals(getTestContext().getPackageName(), si.getPackageName());
+        assertEquals("id", si.getId());
+        assertEquals(null, si.getTitle());
+        assertEquals(null, si.getIntent());
+        assertEquals(null, si.getCategories());
     }
 
     public void testShortcutInfoCopyNonNullFieldsFrom() throws InterruptedException {
@@ -5102,6 +5164,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(Icon.createWithContentUri("content://a.b.c/"))
                 .setTitle("title")
                 .setText("text")
+                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
@@ -5115,38 +5178,57 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setActivityComponent(new ComponentName("x", "y")).build());
+        assertEquals("text", si.getText());
         assertEquals(new ComponentName("x", "y"), si.getActivityComponent());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setIcon(Icon.createWithContentUri("content://x.y.z/")).build());
+        assertEquals("text", si.getText());
         assertEquals("content://x.y.z/", si.getIcon().getUriString());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setTitle("xyz").build());
+        assertEquals("text", si.getText());
         assertEquals("xyz", si.getTitle());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setText("xxx").build());
+        assertEquals(123, si.getWeight());
         assertEquals("xxx", si.getText());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setCategories(list()).build());
+        assertEquals("text", si.getText());
+        assertEquals(list(), si.getCategories());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
+                .setCategories(list("x")).build());
+        assertEquals("text", si.getText());
+        assertEquals(list("x"), si.getCategories());
+
+        si = sorig.clone(/* flags=*/ 0);
+        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setIntent(makeIntent("action2", ShortcutActivity.class)).build());
+        assertEquals("text", si.getText());
         assertEquals("action2", si.getIntent().getAction());
         assertEquals(null, si.getIntent().getStringExtra("key"));
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setIntent(makeIntent("action3", ShortcutActivity.class, "key", "x")).build());
+        assertEquals("text", si.getText());
         assertEquals("action3", si.getIntent().getAction());
         assertEquals("x", si.getIntent().getStringExtra("key"));
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setWeight(999).build());
+        assertEquals("text", si.getText());
         assertEquals(999, si.getWeight());
 
 
@@ -5156,7 +5238,10 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setExtras(pb2).build());
+        assertEquals("text", si.getText());
         assertEquals(99, si.getExtras().getInt("x"));
+
+        // Make sure the timestamp gets updated too.
 
         final long timestamp = si.getLastChangedTimestamp();
         Thread.sleep(2);
@@ -5181,12 +5266,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(bmp32x32)
                 .setTitle("title")
                 .setText("text")
+                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
                 .build();
 
-        mManager.addDynamicShortcut(sorig);
+        mManager.addDynamicShortcuts(list(sorig));
 
         Thread.sleep(2);
         final long now = System.currentTimeMillis();
@@ -5207,6 +5293,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
+        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
@@ -5232,12 +5319,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setIcon(bmp32x32)
                 .setTitle("title")
                 .setText("text")
+                .setCategories(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setWeight(123)
                 .setExtras(pb)
                 .build();
 
-        mManager.addDynamicShortcut(sorig);
+        mManager.addDynamicShortcuts(list(sorig));
 
         // Dynamic shortcuts won't be backed up, so we need to pin it.
         setCaller(LAUNCHER_1, USER_0);
@@ -5245,6 +5333,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Do backup & restore.
         backupAndRestore();
+
+        mService.handleUnlockUser(USER_0); // Load user-0.
 
         ShortcutInfo si;
         si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
@@ -5255,6 +5345,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
+        assertEquals(list(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getWeight());
