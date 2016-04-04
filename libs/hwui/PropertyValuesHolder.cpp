@@ -53,7 +53,7 @@ void GroupPropertyValuesHolder::setFraction(float fraction) {
     } else {
         animatedValue = mStartValue * (1 - fraction) + mEndValue * fraction;
     }
-    mGroup->setPropertyValue(mPropertyId, animatedValue);
+    mGroup->mutateProperties()->setPropertyValue(mPropertyId, animatedValue);
 }
 
 inline U8CPU lerp(U8CPU fromValue, U8CPU toValue, float fraction) {
@@ -72,7 +72,7 @@ SkColor FullPathColorPropertyValuesHolder::interpolateColors(SkColor fromColor, 
 
 void FullPathColorPropertyValuesHolder::setFraction(float fraction) {
     SkColor animatedValue = interpolateColors(mStartValue, mEndValue, fraction);
-    mFullPath->setColorPropertyValue(mPropertyId, animatedValue);
+    mFullPath->mutateProperties()->setColorPropertyValue(mPropertyId, animatedValue);
 }
 
 void FullPathPropertyValuesHolder::setFraction(float fraction) {
@@ -82,17 +82,17 @@ void FullPathPropertyValuesHolder::setFraction(float fraction) {
     } else {
         animatedValue = mStartValue * (1 - fraction) + mEndValue * fraction;
     }
-    mFullPath->setPropertyValue(mPropertyId, animatedValue);
+    mFullPath->mutateProperties()->setPropertyValue(mPropertyId, animatedValue);
 }
 
 void PathDataPropertyValuesHolder::setFraction(float fraction) {
     VectorDrawableUtils::interpolatePaths(&mPathData, mStartValue, mEndValue, fraction);
-    mPath->setPathData(mPathData);
+    mPath->mutateProperties()->setData(mPathData);
 }
 
 void RootAlphaPropertyValuesHolder::setFraction(float fraction) {
     float animatedValue = mStartValue * (1 - fraction) + mEndValue * fraction;
-    mTree->setRootAlpha(animatedValue);
+    mTree->mutateProperties()->setRootAlpha(animatedValue);
 }
 
 } // namepace uirenderer

@@ -1416,6 +1416,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 Log.d(LOGTAG, "on finished called from native");
             }
             mStarted = false;
+            // Invalidate in the end of the animation to make sure the data in
+            // RT thread is synced back to UI thread.
+            invalidateOwningView();
             if (mListener != null) {
                 mListener.onAnimationEnd(null);
             }

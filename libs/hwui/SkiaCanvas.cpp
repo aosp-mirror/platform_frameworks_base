@@ -747,11 +747,7 @@ void SkiaCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& chu
 }
 
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
-    const SkBitmap& bitmap = vectorDrawable->getBitmapUpdateIfDirty();
-    SkRect bounds = vectorDrawable->getBounds();
-    drawBitmap(bitmap, 0, 0, bitmap.width(), bitmap.height(),
-            bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom,
-            vectorDrawable->getPaint());
+    vectorDrawable->drawStaging(this);
 }
 
 // ----------------------------------------------------------------------------

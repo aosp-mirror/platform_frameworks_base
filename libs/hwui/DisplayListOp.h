@@ -1110,15 +1110,14 @@ private:
 
 class DrawVectorDrawableOp : public DrawOp {
 public:
-    DrawVectorDrawableOp(VectorDrawableRoot* tree)
-            : DrawOp(nullptr), mTree(tree) {}
+    DrawVectorDrawableOp(VectorDrawableRoot* tree, const SkRect& bounds)
+            : DrawOp(nullptr), mTree(tree), mDst(bounds) {}
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
         const SkBitmap& bitmap = mTree->getBitmapUpdateIfDirty();
         SkPaint* paint = mTree->getPaint();
-        const SkRect bounds = mTree->getBounds();
         renderer.drawBitmap(&bitmap, Rect(0, 0, bitmap.width(), bitmap.height()),
-                bounds, paint);
+                mDst, paint);
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
@@ -1129,6 +1128,7 @@ public:
 
 private:
     VectorDrawableRoot* mTree;
+    SkRect mDst;
 
 };
 
