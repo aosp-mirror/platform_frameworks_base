@@ -122,7 +122,7 @@ public class RootsCache {
     /**
      * Gather roots from all known storage providers.
      */
-    public void updateAsync() {
+    public void updateAsync(boolean forceRefreshAll) {
 
         // NOTE: This method is called when the UI language changes.
         // For that reason we update our RecentsRoot to reflect
@@ -139,14 +139,15 @@ public class RootsCache {
                 | Root.FLAG_SUPPORTS_CREATE));
         assert(mRecentsRoot.availableBytes == -1);
 
-        new UpdateTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new UpdateTask(forceRefreshAll, null)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
      * Gather roots from storage providers belonging to given package name.
      */
     public void updatePackageAsync(String packageName) {
-        new UpdateTask(packageName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new UpdateTask(false, packageName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -223,37 +224,28 @@ public class RootsCache {
     }
 
     private class UpdateTask extends AsyncTask<Void, Void, Void> {
+        private final boolean mForceRefreshAll;
         private final String mForceRefreshPackage;
 
         private final Multimap<String, RootInfo> mTaskRoots = ArrayListMultimap.create();
         private final HashSet<String> mTaskStoppedAuthorities = new HashSet<>();
 
         /**
-         * Update all roots.
+         * Create task to update roots cache.
+         *
+         * @param forceRefreshAll when true, all previously cached values for
+         *            all packages should be ignored.
+         * @param forceRefreshPackage when non-null, all previously cached
+         *            values for this specific package should be ignored.
          */
-        public UpdateTask() {
-            this(null);
-        }
-
-        /**
-         * Force update roots belonging to given package name. Other roots will
-         * be copied from cached {@link #mRoots} values.
-         */
-        public UpdateTask(String forceRefreshPackage) {
+        public UpdateTask(boolean forceRefreshAll, String forceRefreshPackage) {
+            mForceRefreshAll = forceRefreshAll;
             mForceRefreshPackage = forceRefreshPackage;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             final long start = SystemClock.elapsedRealtime();
-
-            if (mForceRefreshPackage != null) {
-                // We must have previously cached values to fill in non-matching
-                // packages, so wait around for successful first load.
-                if (!waitForFirstLoad()) {
-                    return null;
-                }
-            }
 
             mTaskRoots.put(mRecentsRoot.authority, mRecentsRoot);
 
@@ -300,7 +292,8 @@ public class RootsCache {
                 return;
             }
 
-            final boolean forceRefresh = Objects.equals(mForceRefreshPackage, info.packageName);
+            final boolean forceRefresh = mForceRefreshAll
+                    || Objects.equals(info.packageName, mForceRefreshPackage);
             mTaskRoots.putAll(info.authority, loadRootsForAuthority(mContext.getContentResolver(),
                     info.authority, forceRefresh));
         }
