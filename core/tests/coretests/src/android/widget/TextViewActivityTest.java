@@ -675,4 +675,26 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         assertFloatingToolbarContainsItem(
                 getActivity().getString(com.android.internal.R.string.copy));
     }
+
+    @SmallTest
+    public void testTransientState() throws Exception {
+        final String text = "abc def";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
+        assertFalse(textView.hasTransientState());
+
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('b')));
+        // hasTransientState should return true when user generated selection is active.
+        assertTrue(textView.hasTransientState());
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.indexOf('d')));
+        // hasTransientState should return false as the selection has been cleared.
+        assertFalse(textView.hasTransientState());
+        textView.post(
+                () -> Selection.setSelection((Spannable) textView.getText(), 0, text.length()));
+        getInstrumentation().waitForIdleSync();
+        // hasTransientState should return false when selection is created by API.
+        assertFalse(textView.hasTransientState());
+    }
 }
