@@ -1184,25 +1184,14 @@ public class Preference implements Comparable<Preference> {
     
     /**
      * Called when the Preference hierarchy has been attached to the
-     * {@link PreferenceActivity} or {@link PreferenceFragment}. This can
-     * also be called when this Preference has been attached to a group
-     * that was already attached to the {@link PreferenceActivity} or
-     * {@link PreferenceFragment}.
+     * {@link PreferenceActivity}. This can also be called when this
+     * Preference has been attached to a group that was already attached
+     * to the {@link PreferenceActivity}.
      */
     protected void onAttachedToActivity() {
         // At this point, the hierarchy that this preference is in is connected
         // with all other preferences.
         registerDependency();
-    }
-
-    /**
-     * Called when the Preference hierarchy has been detached from the
-     * {@link PreferenceActivity} or {@link PreferenceFragment}. This can
-     * also be called when this Preference has been removed from a group
-     * that was already attached to the {@link PreferenceActivity} or
-     * {@link PreferenceFragment}.
-     */
-    protected void onDetachedFromActivity() {
     }
 
     private void registerDependency() {
