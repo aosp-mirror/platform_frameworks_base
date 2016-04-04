@@ -18,9 +18,6 @@
     <!-- Title of the documents application [CHAR LIMIT=32] -->
     <string name="app_label">Documents</string>
 
-    <!-- Title of the standalone files activity. [CHAR LIMIT=32] -->
-    <string name="files_label">Files</string>
-
     <!-- Title of the standalone downloads activity. [CHAR LIMIT=32] -->
     <string name="downloads_label">Downloads</string>
 

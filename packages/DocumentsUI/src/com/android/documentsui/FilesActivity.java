@@ -180,7 +180,10 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     public String getDrawerTitle() {
-        return getResources().getString(R.string.downloads_label);
+        Intent intent = getIntent();
+        return (intent != null && intent.hasExtra(Intent.EXTRA_TITLE))
+                ? intent.getStringExtra(Intent.EXTRA_TITLE)
+                : getTitle().toString();
     }
 
     @Override

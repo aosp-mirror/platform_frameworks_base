@@ -17,8 +17,8 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.State.ACTION_OPEN_TREE;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -319,7 +319,8 @@ public class RootsFragment extends Fragment {
             for (final RootInfo root : roots) {
                 final RootItem item = new RootItem(root);
 
-                if (root.isHome() && Shared.isHomeRootHidden(context)) {
+                if (root.isHome() &&
+                        !Shared.shouldShowDocumentsRoot(context, ((Activity) context).getIntent())) {
                     continue;
                 } else if (root.isLibrary()) {
                     if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");

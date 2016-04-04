@@ -19,10 +19,9 @@ package com.android.documentsui;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.EXTRA_BENCHMARK;
 import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
-import static com.android.documentsui.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.State.MODE_GRID;
 
 import android.app.Activity;
@@ -37,14 +36,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.MessageQueue;
 import android.os.MessageQueue.IdleHandler;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -228,8 +225,7 @@ public abstract class BaseActivity extends Activity
         includeState(state);
 
         // Advanced roots are shown by deafult without menu option if forced by config or intent.
-        state.showAdvanced = getResources().getBoolean(R.bool.advanced_roots_shown)
-                || intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+        state.showAdvanced = Shared.shouldShowDeviceRoot(this, intent);
         // Menu option is shown for whitelisted intents if advanced roots are not shown by default.
         state.showAdvancedOption = !state.showAdvanced &&
                 (state.action == ACTION_OPEN ||
@@ -478,11 +474,11 @@ public abstract class BaseActivity extends Activity
      * Method can be overridden if the change of the behavior of the the child activity is needed.
      */
     public Uri getDefaultRoot() {
-        return Shared.isHomeRootHidden(this)
-                ? DocumentsContract.buildRootUri("com.android.providers.downloads.documents",
-                        "downloads")
-                : DocumentsContract.buildHomeUri();
-            }
+        return Shared.shouldShowDocumentsRoot(this, getIntent())
+                ? DocumentsContract.buildHomeUri()
+                : DocumentsContract.buildRootUri(
+                        "com.android.providers.downloads.documents", "downloads");
+    }
 
     void setDisplayAdvancedDevices(boolean display) {
         mState.showAdvanced = display;
