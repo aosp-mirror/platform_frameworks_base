@@ -1693,6 +1693,14 @@ public interface WindowManager extends ViewManager {
          */
         public long userActivityTimeout = -1;
 
+        /**
+         * For windows with an anchor (e.g. PopupWindow), keeps track of the View that anchors the
+         * window.
+         *
+         * @hide
+         */
+        public int accessibilityIdOfAnchor = -1;
+
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
@@ -1799,6 +1807,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(surfaceInsets.bottom);
             out.writeInt(hasManualSurfaceInsets ? 1 : 0);
             out.writeInt(needsMenuKey);
+            out.writeInt(accessibilityIdOfAnchor);
         }
 
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1849,6 +1858,7 @@ public interface WindowManager extends ViewManager {
             surfaceInsets.bottom = in.readInt();
             hasManualSurfaceInsets = in.readInt() != 0;
             needsMenuKey = in.readInt();
+            accessibilityIdOfAnchor = in.readInt();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1887,6 +1897,8 @@ public interface WindowManager extends ViewManager {
         public static final int NEEDS_MENU_KEY_CHANGED = 1 << 22;
         /** {@hide} */
         public static final int PREFERRED_DISPLAY_MODE_ID = 1 << 23;
+        /** {@hide} */
+        public static final int ACCESSIBILITY_ANCHOR_CHANGED = 1 << 24;
         /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
@@ -2046,6 +2058,11 @@ public interface WindowManager extends ViewManager {
             if (needsMenuKey != o.needsMenuKey) {
                 needsMenuKey = o.needsMenuKey;
                 changes |= NEEDS_MENU_KEY_CHANGED;
+            }
+
+            if (accessibilityIdOfAnchor != o.accessibilityIdOfAnchor) {
+                accessibilityIdOfAnchor = o.accessibilityIdOfAnchor;
+                changes |= ACCESSIBILITY_ANCHOR_CHANGED;
             }
 
             return changes;

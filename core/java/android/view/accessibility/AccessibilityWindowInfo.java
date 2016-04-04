@@ -89,11 +89,33 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private int mParentId = UNDEFINED;
     private final Rect mBoundsInScreen = new Rect();
     private LongArray mChildIds;
+    private CharSequence mTitle;
+    private int mAnchorId = UNDEFINED;
 
     private int mConnectionId = UNDEFINED;
 
     private AccessibilityWindowInfo() {
         /* do nothing - hide constructor */
+    }
+
+    /**
+     * Gets the title of the window.
+     *
+     * @return The title.
+     */
+    public CharSequence getTitle() {
+        return mTitle;
+    }
+
+    /**
+     * Sets the title of the window.
+     *
+     * @param title The title.
+     *
+     * @hide
+     */
+    public void setTitle(CharSequence title) {
+        mTitle = title;
     }
 
     /**
@@ -159,9 +181,35 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     /**
-     * Gets the parent window if such.
+     * Sets the anchor node's ID.
      *
-     * @return The parent window.
+     * @param anchorId The anchor's accessibility id in its window.
+     *
+     * @hide
+     */
+    public void setAnchorId(int anchorId) {
+        mAnchorId = anchorId;
+    }
+
+    /**
+     * Gets the node that anchors this window to another.
+     *
+     * @return The anchor node, or {@code null} if none exists.
+     */
+    public AccessibilityNodeInfo getAnchor() {
+        if ((mConnectionId == UNDEFINED) || (mAnchorId == UNDEFINED) || (mParentId == UNDEFINED)) {
+            return null;
+        }
+
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
+                mParentId, mAnchorId, true, 0);
+    }
+
+    /**
+     * Gets the parent window.
+     *
+     * @return The parent window, or {@code null} if none exists.
      */
     public AccessibilityWindowInfo getParent() {
         if (mConnectionId == UNDEFINED || mParentId == UNDEFINED) {
@@ -370,6 +418,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
         infoClone.mId = info.mId;
         infoClone.mParentId = info.mParentId;
         infoClone.mBoundsInScreen.set(info.mBoundsInScreen);
+        infoClone.mTitle = info.mTitle;
+        infoClone.mAnchorId = info.mAnchorId;
 
         if (info.mChildIds != null && info.mChildIds.size() > 0) {
             if (infoClone.mChildIds == null) {
@@ -410,6 +460,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
         parcel.writeInt(mId);
         parcel.writeInt(mParentId);
         mBoundsInScreen.writeToParcel(parcel, flags);
+        parcel.writeCharSequence(mTitle);
+        parcel.writeInt(mAnchorId);
 
         final LongArray childIds = mChildIds;
         if (childIds == null) {
@@ -432,6 +484,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mId = parcel.readInt();
         mParentId = parcel.readInt();
         mBoundsInScreen.readFromParcel(parcel);
+        mTitle = parcel.readCharSequence();
+        mAnchorId = parcel.readInt();
 
         final int childCount = parcel.readInt();
         if (childCount > 0) {
@@ -471,6 +525,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("AccessibilityWindowInfo[");
+        builder.append("title=").append(mTitle);
         builder.append("id=").append(mId);
         builder.append(", type=").append(typeToString(mType));
         builder.append(", layer=").append(mLayer);
@@ -494,6 +549,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
             builder.append(']');
         } else {
             builder.append(", hasParent=").append(mParentId != UNDEFINED);
+            builder.append(", isAnchored=").append(mAnchorId != UNDEFINED);
             builder.append(", hasChildren=").append(mChildIds != null
                     && mChildIds.size() > 0);
         }
@@ -515,6 +571,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
             mChildIds.clear();
         }
         mConnectionId = UNDEFINED;
+        mAnchorId = UNDEFINED;
+        mTitle = null;
     }
 
     /**
