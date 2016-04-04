@@ -265,11 +265,7 @@ public class PipManager {
      */
     private void showPipOverlay() {
         if (DEBUG) Log.d(TAG, "showPipOverlay()");
-        Intent intent = new Intent(mContext, PipOverlayActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchStackId(PINNED_STACK_ID);
-        mContext.startActivity(intent, options.toBundle());
+        PipOverlayActivity.showPipOverlay(mContext);
     }
 
     /**
@@ -635,7 +631,7 @@ public class PipManager {
         void onPipActivityClosed();
         /** Invoked when the PIP menu gets shown. */
         void onShowPipMenu();
-        /** Invoked when the PIPed activity is returned back to the fullscreen. */
+        /** Invoked when the PIPed activity is about to return back to the fullscreen. */
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */
         void onPipResizeAboutToStart();
