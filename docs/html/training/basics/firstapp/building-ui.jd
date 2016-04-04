@@ -90,7 +90,7 @@ file.
 <li>Remove the {@code android:padding} attributes and the {@code tools:context} attribute.
 </ol>
 
-</p>The result looks like this:</p>
+<p>The result looks like this:</p>
 
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
