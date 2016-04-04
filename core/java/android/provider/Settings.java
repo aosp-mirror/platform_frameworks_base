@@ -1569,9 +1569,8 @@ public final class Settings {
      * @return true if the calling app can draw on top of other apps, false otherwise.
      */
     public static boolean canDrawOverlays(Context context) {
-        int uid = Binder.getCallingUid();
-        return Settings.isCallingPackageAllowedToDrawOverlays(context, uid, Settings
-                .getPackageNameForUid(context, uid), false);
+        return Settings.isCallingPackageAllowedToDrawOverlays(context, Process.myUid(),
+                context.getOpPackageName(), false);
     }
 
     /**
@@ -3885,9 +3884,8 @@ public final class Settings {
          * @return true if the calling app can write to system settings, false otherwise
          */
         public static boolean canWrite(Context context) {
-            int uid = Binder.getCallingUid();
-            return isCallingPackageAllowedToWriteSettings(context, uid, getPackageNameForUid(
-                    context, uid), false);
+            return isCallingPackageAllowedToWriteSettings(context, Process.myUid(),
+                    context.getOpPackageName(), false);
         }
     }
 
