@@ -112,20 +112,26 @@ public class Utils {
     }
 
     public static String getBatteryStatus(Resources res, Intent batteryChangedIntent) {
-        final Intent intent = batteryChangedIntent;
+        return Utils.getBatteryStatus(res, batteryChangedIntent, false);
+    }
 
-        int plugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+    public static String getBatteryStatus(Resources res, Intent batteryChangedIntent,
+            boolean shortString) {
+        int plugType = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+        int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
                 BatteryManager.BATTERY_STATUS_UNKNOWN);
         String statusString;
         if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
             int resId;
             if (plugType == BatteryManager.BATTERY_PLUGGED_AC) {
-                resId = R.string.battery_info_status_charging_ac;
+                resId = shortString ? R.string.battery_info_status_charging_ac_short
+                        : R.string.battery_info_status_charging_ac;
             } else if (plugType == BatteryManager.BATTERY_PLUGGED_USB) {
-                resId = R.string.battery_info_status_charging_usb;
+                resId = shortString ? R.string.battery_info_status_charging_usb_short
+                        : R.string.battery_info_status_charging_usb;
             } else if (plugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
-                resId = R.string.battery_info_status_charging_wireless;
+                resId = shortString ? R.string.battery_info_status_charging_wireless_short
+                        : R.string.battery_info_status_charging_wireless;
             } else {
                 resId = R.string.battery_info_status_charging;
             }

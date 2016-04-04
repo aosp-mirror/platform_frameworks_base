@@ -25,6 +25,7 @@ import android.os.BatteryStats.HistoryItem;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.util.SparseIntArray;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.settingslib.graph.UsageView;
@@ -95,6 +96,11 @@ public class BatteryInfo {
     }
 
     public static void getBatteryInfo(final Context context, final Callback callback) {
+        BatteryInfo.getBatteryInfo(context, callback, false);
+    }
+
+    public static void getBatteryInfo(final Context context, final Callback callback,
+            boolean shortString) {
         new AsyncTask<Void, Void, BatteryStats>() {
             @Override
             protected BatteryStats doInBackground(Void... params) {
@@ -109,14 +115,20 @@ public class BatteryInfo {
                 Intent batteryBroadcast = context.registerReceiver(null,
                         new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 BatteryInfo batteryInfo = BatteryInfo.getBatteryInfo(context,
-                        batteryBroadcast, batteryStats, elapsedRealtimeUs);
+                        batteryBroadcast, batteryStats, elapsedRealtimeUs, shortString);
                 callback.onBatteryInfoLoaded(batteryInfo);
             }
         }.execute();
     }
 
     public static BatteryInfo getBatteryInfo(Context context, Intent batteryBroadcast,
-            BatteryStats stats, long elapsedRealtimeUs) {
+                                             BatteryStats stats, long elapsedRealtimeUs) {
+        return BatteryInfo.getBatteryInfo(context, batteryBroadcast, stats, elapsedRealtimeUs,
+                false);
+    }
+
+    public static BatteryInfo getBatteryInfo(Context context, Intent batteryBroadcast,
+            BatteryStats stats, long elapsedRealtimeUs, boolean shortString) {
         BatteryInfo info = new BatteryInfo();
         info.mStats = stats;
         info.mBatteryLevel = Utils.getBatteryLevel(batteryBroadcast);
@@ -129,9 +141,13 @@ public class BatteryInfo {
                 info.remainingTimeUs = drainTime;
                 String timeString = Formatter.formatShortElapsedTime(context,
                         drainTime / 1000);
-                info.remainingLabel = resources.getString(R.string.power_remaining_duration_only,
+                info.remainingLabel = resources.getString(
+                        shortString ? R.string.power_remaining_duration_only_short
+                                : R.string.power_remaining_duration_only,
                         timeString);
-                info.mChargeLabelString = resources.getString(R.string.power_discharging_duration,
+                info.mChargeLabelString = resources.getString(
+                        shortString ? R.string.power_discharging_duration_short
+                                : R.string.power_discharging_duration,
                         info.batteryPercentString, timeString);
             } else {
                 info.remainingLabel = null;
@@ -140,7 +156,7 @@ public class BatteryInfo {
         } else {
             final long chargeTime = stats.computeChargeTimeRemaining(elapsedRealtimeUs);
             final String statusLabel = Utils.getBatteryStatus(
-                    resources, batteryBroadcast);
+                    resources, batteryBroadcast, shortString);
             final int status = batteryBroadcast.getIntExtra(BatteryManager.EXTRA_STATUS,
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             if (chargeTime > 0 && status != BatteryManager.BATTERY_STATUS_FULL) {
@@ -151,13 +167,17 @@ public class BatteryInfo {
                 int plugType = batteryBroadcast.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
                 int resId;
                 if (plugType == BatteryManager.BATTERY_PLUGGED_AC) {
-                    resId = R.string.power_charging_duration_ac;
+                    resId = shortString ? R.string.power_charging_duration_ac_short
+                            : R.string.power_charging_duration_ac;
                 } else if (plugType == BatteryManager.BATTERY_PLUGGED_USB) {
-                    resId = R.string.power_charging_duration_usb;
+                    resId = shortString ? R.string.power_charging_duration_usb_short
+                            : R.string.power_charging_duration_usb;
                 } else if (plugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
-                    resId = R.string.power_charging_duration_wireless;
+                    resId = shortString ? R.string.power_charging_duration_wireless_short
+                            : R.string.power_charging_duration_wireless;
                 } else {
-                    resId = R.string.power_charging_duration;
+                    resId = shortString ? R.string.power_charging_duration_short
+                            : R.string.power_charging_duration;
                 }
                 info.remainingLabel = resources.getString(R.string.power_remaining_duration_only,
                         timeString);

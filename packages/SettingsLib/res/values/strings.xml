@@ -733,9 +733,16 @@
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging/discharging -->
     <string name="power_remaining_duration_only">Approx. <xliff:g id="time">%1$s</xliff:g> left</string>
 
+    <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
+    <string name="power_remaining_duration_only_short"><xliff:g id="time">%1$s</xliff:g> left</string>
+
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
     <string name="power_discharging_duration"><xliff:g id="level">%1$s</xliff:g>
         - approx. <xliff:g id="time">%2$s</xliff:g> left</string>
+
+    <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
+    <string name="power_discharging_duration_short"><xliff:g id="level">%1$s</xliff:g>
+        - <xliff:g id="time">%2$s</xliff:g> left</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> -
@@ -743,15 +750,27 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> -
             <xliff:g id="time">%2$s</xliff:g> until full</string>
+    <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
+    <string name="power_charging_duration_short"><xliff:g id="level">%1$s</xliff:g> -
+        <xliff:g id="time">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_ac"><xliff:g id="level">%1$s</xliff:g> -
             <xliff:g id="time">%2$s</xliff:g> until full on AC</string>
+    <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
+    <string name="power_charging_duration_ac_short"><xliff:g id="level">%1$s</xliff:g> -
+        <xliff:g id="time">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_usb"><xliff:g id="level">%1$s</xliff:g> -
             <xliff:g id="time">%2$s</xliff:g> until full over USB</string>
+    <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
+    <string name="power_charging_duration_usb_short"><xliff:g id="level">%1$s</xliff:g> -
+        <xliff:g id="time">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration_wireless"><xliff:g id="level">%1$s</xliff:g> -
             <xliff:g id="time">%2$s</xliff:g> until full from wireless</string>
+    <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
+    <string name="power_charging_duration_wireless_short"><xliff:g id="level">%1$s</xliff:g> -
+        <xliff:g id="time">%2$s</xliff:g></string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -759,10 +778,16 @@
     <string name="battery_info_status_charging">Charging</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging on AC.  -->
     <string name="battery_info_status_charging_ac">Charging on AC</string>
+    <!-- [CHAR_LIMIT=20] Battery short status label when charing on AC -->
+    <string name="battery_info_status_charging_ac_short">Charging</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging over USB.  -->
     <string name="battery_info_status_charging_usb">Charging over USB</string>
+    <!-- [CHAR_LIMIT=20] Battery short status label when charging over USB. -->
+    <string name="battery_info_status_charging_usb_short">Charging</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging over a wireless connection.  -->
     <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
+    <!-- [CHAR_LIMIT=20] Battery short status label when charging wirelessly. -->
+    <string name="battery_info_status_charging_wireless_short">Charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
