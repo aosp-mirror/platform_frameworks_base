@@ -459,7 +459,7 @@ public class TaskViewHeader extends FrameLayout
         if (!mTitleView.getText().toString().equals(t.title)) {
             mTitleView.setText(t.title);
         }
-        mTitleView.setContentDescription(t.contentDescription);
+        mTitleView.setContentDescription(t.titleDescription);
         mTitleView.setTextColor(t.useLightOnPrimaryColor ?
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
         if (!t.isDockable && ssp.hasDockedTask()) {
@@ -501,6 +501,7 @@ public class TaskViewHeader extends FrameLayout
 
         // In accessibility, a single click on the focused app info button will show it
         if (touchExplorationEnabled) {
+            mIconView.setContentDescription(t.appInfoDescription);
             mIconView.setOnClickListener(this);
         }
     }

@@ -132,6 +132,8 @@ public class RecentsTaskLoadPlan {
         SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         String dismissDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_will_be_dismissed);
+        String appInfoDescFormat = mContext.getString(
+                R.string.accessibility_recents_item_open_app_info);
         long lastStackActiveTime = Prefs.getLong(mContext,
                 Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
         if (RecentsDebugFlags.Static.EnableMockTasks) {
@@ -188,8 +190,9 @@ public class RecentsTaskLoadPlan {
             // Load the title, icon, and color
             ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
-            String contentDescription = loader.getAndUpdateContentDescription(taskKey, res);
-            String dismissDescription = String.format(dismissDescFormat, contentDescription);
+            String titleDescription = loader.getAndUpdateContentDescription(taskKey, res);
+            String dismissDescription = String.format(dismissDescFormat, titleDescription);
+            String appInfoDescription = String.format(appInfoDescFormat, titleDescription);
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
@@ -201,9 +204,9 @@ public class RecentsTaskLoadPlan {
 
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
-                    thumbnail, title, contentDescription, dismissDescription, activityColor,
-                    backgroundColor, isLaunchTarget, isStackTask, isSystemApp, t.isDockable,
-                    t.bounds, t.taskDescription);
+                    thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
+                    activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
+                    t.isDockable, t.bounds, t.taskDescription);
 
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);

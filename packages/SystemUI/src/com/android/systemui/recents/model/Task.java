@@ -134,9 +134,11 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public String title;
     @ViewDebug.ExportedProperty(category="recents")
-    public String contentDescription;
+    public String titleDescription;
     @ViewDebug.ExportedProperty(category="recents")
     public String dismissDescription;
+    @ViewDebug.ExportedProperty(category="recents")
+    public String appInfoDescription;
     @ViewDebug.ExportedProperty(category="recents")
     public int colorPrimary;
     @ViewDebug.ExportedProperty(category="recents")
@@ -174,8 +176,8 @@ public class Task {
     }
 
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
-                Bitmap thumbnail, String title, String contentDescription,
-                String dismissDescription, int colorPrimary, int colorBackground,
+                Bitmap thumbnail, String title, String titleDescription, String dismissDescription,
+                String appInfoDescription, int colorPrimary, int colorBackground,
                 boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
                 boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
@@ -186,8 +188,9 @@ public class Task {
         this.icon = icon;
         this.thumbnail = thumbnail;
         this.title = title;
-        this.contentDescription = contentDescription;
+        this.titleDescription = titleDescription;
         this.dismissDescription = dismissDescription;
+        this.appInfoDescription = appInfoDescription;
         this.colorPrimary = hasAffiliationGroupColor ? affiliationColor : colorPrimary;
         this.colorBackground = colorBackground;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
@@ -211,8 +214,9 @@ public class Task {
         this.icon = o.icon;
         this.thumbnail = o.thumbnail;
         this.title = o.title;
-        this.contentDescription = o.contentDescription;
+        this.titleDescription = o.titleDescription;
         this.dismissDescription = o.dismissDescription;
+        this.appInfoDescription = o.appInfoDescription;
         this.colorPrimary = o.colorPrimary;
         this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;

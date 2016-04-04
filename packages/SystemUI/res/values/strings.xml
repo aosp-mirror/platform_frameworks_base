@@ -417,6 +417,8 @@
     <string name="accessibility_recents_item_dismissed"><xliff:g id="app" example="Calendar">%s</xliff:g> dismissed.</string>
     <!-- Content description to tell the user all applications has been removed from recents -->
     <string name="accessibility_recents_all_items_dismissed">All recent applications dismissed.</string>
+    <!-- Content description to tell the user that this button will open application info for an application in recents -->
+    <string name="accessibility_recents_item_open_app_info">Open <xliff:g id="app" example="Calendar">%s</xliff:g> application info.</string>
     <!-- Content description to tell the user an application has been launched from recents -->
     <string name="accessibility_recents_item_launched">Starting <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
     <!-- Content description of individual recents task. -->
