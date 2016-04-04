@@ -110,6 +110,16 @@ struct ReplayStateStruct : public PlaybackStateStruct {
 };
 
 /**
+ * Functor that can be used for objects with data in both UI thread and RT to keep the data
+ * in sync. This functor, when added to DisplayList, will be call during DisplayList sync.
+ */
+struct PushStagingFunctor {
+    PushStagingFunctor() {}
+    virtual ~PushStagingFunctor() {}
+    virtual void operator ()() {}
+};
+
+/**
  * Data structure that holds the list of commands used in display list stream
  */
 class DisplayList {
@@ -142,6 +152,7 @@ public:
 
     const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
     const LsaVector<Functor*>& getFunctors() const { return functors; }
+    const LsaVector<PushStagingFunctor*>& getPushStagingFunctors() { return pushStagingFunctors; }
 
     size_t addChild(NodeOpType* childOp);
 
@@ -182,6 +193,11 @@ private:
 
     // List of functors
     LsaVector<Functor*> functors;
+
+    // List of functors that need to be notified of pushStaging. Note that this list gets nothing
+    // but a callback during sync DisplayList, unlike the list of functors defined above, which
+    // gets special treatment exclusive for webview.
+    LsaVector<PushStagingFunctor*> pushStagingFunctors;
 
     bool hasDrawOps; // only used if !HWUI_NEW_OPS
 
