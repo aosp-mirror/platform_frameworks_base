@@ -825,5 +825,7 @@
     <!-- Description for a custom screen zoom level. This shows the requested display
          density in raw pixels per inch rather than using a relative description. [CHAR LIMIT=24] -->
     <string name="screen_zoom_summary_custom">Custom (<xliff:g id="densityDpi" example="160">%d</xliff:g>)</string>
+    <!-- Label for Help and feedback menu item -->
+    <string name="help_feedback_label">Help &amp; feedback</string>
 
 </resources>
