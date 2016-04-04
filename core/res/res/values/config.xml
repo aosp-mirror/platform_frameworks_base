@@ -2507,4 +2507,7 @@
     <!-- True if the device requires AppWidgetService even if it does not have
          the PackageManager.FEATURE_APP_WIDGETS feature -->
     <bool name="config_enableAppWidgetService">false</bool>
+
+    <!-- True if the device supports Sustained Performance Mode-->
+    <bool name="config_sustainedPerformanceModeSupported">false</bool>
 </resources>

@@ -2542,4 +2542,6 @@
 
   <java-symbol type="id" name="textSpacerNoTitle" />
   <java-symbol type="id" name="titleDividerNoCustom" />
+
+  <java-symbol type="bool" name="config_sustainedPerformanceModeSupported" />
 </resources>
