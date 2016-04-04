@@ -3491,6 +3491,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             reportedWindow.setLayer(window.layer);
             reportedWindow.setFocused(window.focused);
             reportedWindow.setBoundsInScreen(window.boundsInScreen);
+            reportedWindow.setTitle(window.title);
+            reportedWindow.setAnchorId(window.accessibilityIdOfAnchor);
 
             final int parentId = findWindowIdLocked(window.parentToken);
             if (parentId >= 0) {
