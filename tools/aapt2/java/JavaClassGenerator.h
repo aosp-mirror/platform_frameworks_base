@@ -44,6 +44,11 @@ struct JavaClassGeneratorOptions {
     };
 
     SymbolTypes types = SymbolTypes::kAll;
+
+    /**
+     * A list of JavaDoc annotations to add to the comments of all generated classes.
+     */
+    std::vector<std::string> javadocAnnotations;
 };
 
 /*

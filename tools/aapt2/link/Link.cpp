@@ -66,6 +66,7 @@ struct LinkOptions {
     bool staticLib = false;
     bool noStaticLibPackages = false;
     bool generateNonFinalIds = false;
+    std::vector<std::string> javadocAnnotations;
     bool outputToDirectory = false;
     bool autoAddOverlay = false;
     bool doNotCompressAnything = false;
@@ -775,6 +776,13 @@ public:
             return true;
         }
 
+        // Add any JavaDoc annotations to the generated class.
+        for (const std::string& annotation : mOptions.javadocAnnotations) {
+            std::string properAnnotation = "@";
+            properAnnotation += annotation;
+            manifestClass->getCommentBuilder()->appendComment(properAnnotation);
+        }
+
         const std::string packageUtf8 = util::utf16ToUtf8(mContext->getCompilationPackage());
 
         std::string outPath = mOptions.generateJavaClassPath.value();
@@ -1292,6 +1300,7 @@ public:
         if (mOptions.generateJavaClassPath) {
             JavaClassGeneratorOptions options;
             options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+            options.javadocAnnotations = mOptions.javadocAnnotations;
 
             if (mOptions.staticLib || mOptions.generateNonFinalIds) {
                 options.useFinal = false;
@@ -1432,6 +1441,8 @@ int link(const std::vector<StringPiece>& args) {
                           &customJavaPackage)
             .optionalFlagList("--extra-packages", "Generate the same R.java but with different "
                               "package names", &extraJavaPackages)
+            .optionalFlagList("--add-javadoc-annotation", "Adds a JavaDoc annotation to all "
+                            "generated Java classes", &options.javadocAnnotations)
             .optionalSwitch("--auto-add-overlay", "Allows the addition of new resources in "
                             "overlays without <add-resource> tags", &options.autoAddOverlay)
             .optionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml",
