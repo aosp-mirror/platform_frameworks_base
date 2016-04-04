@@ -240,10 +240,12 @@ import java.util.List;
  *   <li>{@link #getMovementGranularity()} - Sets the granularity at which a view's text
  *       was traversed.</li>
  *   <li>{@link #getText()} -  The text of the source's sub-tree.</li>
- *   <li>{@link #getFromIndex()} - The start of the next/previous text at the specified granularity
- *           - inclusive.</li>
- *   <li>{@link #getToIndex()} - The end of the next/previous text at the specified granularity
- *           - exclusive.</li>
+ *   <li>{@link #getFromIndex()} - The start the text that was skipped over in this movement.
+ *       This is the starting point when moving forward through the text, but not when moving
+ *       back.</li>
+ *   <li>{@link #getToIndex()} - The end of the text that was skipped over in this movement.
+ *       This is the ending point when moving forward through the text, but not when moving
+ *       back.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #getContentDescription()} - The content description of the source.</li>
