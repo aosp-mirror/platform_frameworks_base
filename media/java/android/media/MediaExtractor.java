@@ -275,16 +275,23 @@ final public class MediaExtractor {
                     return initDataMap.get(schemeUuid);
                 }
             };
-        } else if (formatMap.containsKey("crypto-key")) {
-            ByteBuffer buf = (ByteBuffer) formatMap.get("crypto-key");
-            buf.rewind();
-            final byte[] data = new byte[buf.remaining()];
-            buf.get(data);
-            return new DrmInitData() {
-                public SchemeInitData get(UUID schemeUuid) {
-                    return new DrmInitData.SchemeInitData("webm", data);
+        } else {
+            int numTracks = getTrackCount();
+            for (int i = 0; i < numTracks; ++i) {
+                Map<String, Object> trackFormatMap = getTrackFormatNative(i);
+                if (!trackFormatMap.containsKey("crypto-key")) {
+                    continue;
                 }
-            };
+                ByteBuffer buf = (ByteBuffer) trackFormatMap.get("crypto-key");
+                buf.rewind();
+                final byte[] data = new byte[buf.remaining()];
+                buf.get(data);
+                return new DrmInitData() {
+                    public SchemeInitData get(UUID schemeUuid) {
+                        return new DrmInitData.SchemeInitData("webm", data);
+                    }
+                };
+            }
         }
         return null;
     }
