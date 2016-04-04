@@ -8289,14 +8289,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     newSelEnd = Selection.getSelectionEnd(buf);
                 }
 
-                if (newSelStart == newSelEnd && hasTransientState()) {
-                    setHasTransientState(false);
-                } else if (newSelStart != newSelEnd && !hasTransientState()) {
-                    setHasTransientState(true);
-                }
-
                 if (mEditor != null) {
                     mEditor.refreshTextActionMode();
+                    if (!hasSelection() && mEditor.mTextActionMode == null && hasTransientState()) {
+                        // User generated selection has been removed.
+                        setHasTransientState(false);
+                    }
                 }
                 onSelectionChanged(newSelStart, newSelEnd);
             }
