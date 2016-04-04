@@ -71,11 +71,11 @@ page.keywords=preview,security,network
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 ...
-&lt;app ...&gt;
+&lt;application ...&gt;
     &lt;meta-data android:name="android.security.net.config"
                android:resource="@xml/network_security_config" /&gt;
     ...
-&lt;/app&gt;
+&lt;/application&gt;
 </pre>
 
 <h2 id="CustomTrust">Customizing Trusted CAs</h2>
