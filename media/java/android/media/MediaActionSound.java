@@ -45,8 +45,7 @@ public class MediaActionSound {
     private static final int NUM_MEDIA_SOUND_STREAMS = 1;
 
     private SoundPool mSoundPool;
-    private int[]     mSoundIds;
-    private int       mSoundIdToPlay;
+    private SoundState[] mSounds;
 
     private static final String[] SOUND_FILES = {
         "/system/media/audio/ui/camera_click.ogg",
@@ -88,22 +87,57 @@ public class MediaActionSound {
      */
     public static final int STOP_VIDEO_RECORDING  = 3;
 
-    private static final int SOUND_NOT_LOADED = -1;
+    /**
+     * States for SoundState.
+     * STATE_NOT_LOADED             : sample not loaded
+     * STATE_LOADING                : sample being loaded: waiting for load completion callback
+     * STATE_LOADING_PLAY_REQUESTED : sample being loaded and playback request received
+     * STATE_LOADED                 : sample loaded, ready for playback
+     */
+    private static final int STATE_NOT_LOADED             = 0;
+    private static final int STATE_LOADING                = 1;
+    private static final int STATE_LOADING_PLAY_REQUESTED = 2;
+    private static final int STATE_LOADED                 = 3;
 
+    private class SoundState {
+        public final int name;
+        public int id;
+        public int state;
+
+        public SoundState(int name) {
+            this.name = name;
+            id = 0; // 0 is an invalid sample ID.
+            state = STATE_NOT_LOADED;
+        }
+    }
     /**
      * Construct a new MediaActionSound instance. Only a single instance is
      * needed for playing any platform media action sound; you do not need a
      * separate instance for each sound type.
      */
     public MediaActionSound() {
-        mSoundPool = new SoundPool(NUM_MEDIA_SOUND_STREAMS,
-                AudioManager.STREAM_SYSTEM_ENFORCED, 0);
+        mSoundPool = new SoundPool.Builder()
+                .setMaxStreams(NUM_MEDIA_SOUND_STREAMS)
+                .setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build())
+                .build();
         mSoundPool.setOnLoadCompleteListener(mLoadCompleteListener);
-        mSoundIds = new int[SOUND_FILES.length];
-        for (int i = 0; i < mSoundIds.length; i++) {
-            mSoundIds[i] = SOUND_NOT_LOADED;
+        mSounds = new SoundState[SOUND_FILES.length];
+        for (int i = 0; i < mSounds.length; i++) {
+            mSounds[i] = new SoundState(i);
         }
-        mSoundIdToPlay = SOUND_NOT_LOADED;
+    }
+
+    private int loadSound(SoundState sound) {
+        int id = mSoundPool.load(SOUND_FILES[sound.name], 1);
+        if (id > 0) {
+            sound.state = STATE_LOADING;
+            sound.id = id;
+        }
+        return id;
     }
 
     /**
@@ -118,13 +152,22 @@ public class MediaActionSound {
      * @see #START_VIDEO_RECORDING
      * @see #STOP_VIDEO_RECORDING
      */
-    public synchronized void load(int soundName) {
+    public void load(int soundName) {
         if (soundName < 0 || soundName >= SOUND_FILES.length) {
             throw new RuntimeException("Unknown sound requested: " + soundName);
         }
-        if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
-            mSoundIds[soundName] =
-                    mSoundPool.load(SOUND_FILES[soundName], 1);
+        SoundState sound = mSounds[soundName];
+        synchronized (sound) {
+            switch (sound.state) {
+            case STATE_NOT_LOADED:
+                if (loadSound(sound) <= 0) {
+                    Log.e(TAG, "load() error loading sound: " + soundName);
+                }
+                break;
+            default:
+                Log.e(TAG, "load() called in wrong state: " + sound + " for sound: "+ soundName);
+                break;
+            }
         }
     }
 
@@ -159,16 +202,31 @@ public class MediaActionSound {
      * @see #START_VIDEO_RECORDING
      * @see #STOP_VIDEO_RECORDING
      */
-    public synchronized void play(int soundName) {
+    public void play(int soundName) {
         if (soundName < 0 || soundName >= SOUND_FILES.length) {
             throw new RuntimeException("Unknown sound requested: " + soundName);
         }
-        if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
-            mSoundIdToPlay =
-                    mSoundPool.load(SOUND_FILES[soundName], 1);
-            mSoundIds[soundName] = mSoundIdToPlay;
-        } else {
-            mSoundPool.play(mSoundIds[soundName], 1.0f, 1.0f, 0, 0, 1.0f);
+        SoundState sound = mSounds[soundName];
+        synchronized (sound) {
+            switch (sound.state) {
+            case STATE_NOT_LOADED:
+                loadSound(sound);
+                if (loadSound(sound) <= 0) {
+                    Log.e(TAG, "play() error loading sound: " + soundName);
+                    break;
+                }
+                // FALL THROUGH
+
+            case STATE_LOADING:
+                sound.state = STATE_LOADING_PLAY_REQUESTED;
+                break;
+            case STATE_LOADED:
+                mSoundPool.play(sound.id, 1.0f, 1.0f, 0, 0, 1.0f);
+                break;
+            default:
+                Log.e(TAG, "play() called in wrong state: " + sound.state + " for sound: "+ soundName);
+                break;
+            }
         }
     }
 
@@ -176,14 +234,37 @@ public class MediaActionSound {
             new SoundPool.OnLoadCompleteListener() {
         public void onLoadComplete(SoundPool soundPool,
                 int sampleId, int status) {
-            if (status == 0) {
-                if (mSoundIdToPlay == sampleId) {
-                    soundPool.play(sampleId, 1.0f, 1.0f, 0, 0, 1.0f);
-                    mSoundIdToPlay = SOUND_NOT_LOADED;
+            for (SoundState sound : mSounds) {
+                if (sound.id != sampleId) {
+                    continue;
                 }
-            } else {
-                Log.e(TAG, "Unable to load sound for playback (status: " +
-                        status + ")");
+                int playSoundId = 0;
+                synchronized (sound) {
+                    if (status != 0) {
+                        sound.state = STATE_NOT_LOADED;
+                        sound.id = 0;
+                        Log.e(TAG, "OnLoadCompleteListener() error: " + status +
+                                " loading sound: "+ sound.name);
+                        return;
+                    }
+                    switch (sound.state) {
+                    case STATE_LOADING:
+                        sound.state = STATE_LOADED;
+                        break;
+                    case STATE_LOADING_PLAY_REQUESTED:
+                        playSoundId = sound.id;
+                        sound.state = STATE_LOADED;
+                        break;
+                    default:
+                        Log.e(TAG, "OnLoadCompleteListener() called in wrong state: "
+                                + sound.state + " for sound: "+ sound.name);
+                        break;
+                    }
+                }
+                if (playSoundId != 0) {
+                    soundPool.play(playSoundId, 1.0f, 1.0f, 0, 0, 1.0f);
+                }
+                break;
             }
         }
     };
@@ -195,6 +276,12 @@ public class MediaActionSound {
      */
     public void release() {
         if (mSoundPool != null) {
+            for (SoundState sound : mSounds) {
+                synchronized (sound) {
+                    sound.state = STATE_NOT_LOADED;
+                    sound.id = 0;
+                }
+            }
             mSoundPool.release();
             mSoundPool = null;
         }
