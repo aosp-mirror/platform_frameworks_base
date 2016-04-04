@@ -17,15 +17,10 @@
 package android.widget.espresso;
 
 import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
-
-import org.hamcrest.core.Is;
-import org.hamcrest.core.IsInstanceOf;
-
 import android.graphics.Rect;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
-import android.support.test.espresso.action.GeneralClickAction;
 import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.util.HumanReadables;
@@ -55,7 +50,7 @@ public final class TextViewActions {
      */
     public static ViewAction clickOnTextAtIndex(int index) {
         return actionWithAssertions(
-                new GeneralClickAction(Tap.SINGLE, new TextCoordinates(index), Press.FINGER));
+                new ViewClickAction(Tap.SINGLE, new TextCoordinates(index), Press.FINGER));
     }
 
     /**
@@ -101,7 +96,7 @@ public final class TextViewActions {
      */
     public static ViewAction doubleClickOnTextAtIndex(int index) {
         return actionWithAssertions(
-                new GeneralClickAction(Tap.DOUBLE, new TextCoordinates(index), Press.FINGER));
+                new ViewClickAction(Tap.DOUBLE, new TextCoordinates(index), Press.FINGER));
     }
 
     /**
@@ -131,7 +126,7 @@ public final class TextViewActions {
      */
     public static ViewAction longPressOnTextAtIndex(int index) {
         return actionWithAssertions(
-                new GeneralClickAction(Tap.LONG, new TextCoordinates(index), Press.FINGER));
+                new ViewClickAction(Tap.LONG, new TextCoordinates(index), Press.FINGER));
     }
 
     /**
