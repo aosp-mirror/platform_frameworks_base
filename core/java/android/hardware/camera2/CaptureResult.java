@@ -3373,7 +3373,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
     /**
      * <p>Maximum raw value output by sensor for this frame.</p>
-     * <p>Since the android.sensor.blackLevel may change for different
+     * <p>Since the {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} may change for different
      * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}), the white
      * level will change accordingly. This key is similar to
      * {@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}, but specifies the camera device
@@ -3385,6 +3385,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * &gt;= 0</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
      * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
      * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
      * @see CaptureRequest#SENSOR_SENSITIVITY
