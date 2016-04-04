@@ -31,6 +31,7 @@ import android.service.quicksettings.TileService;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.DrawableIcon;
+import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
@@ -79,7 +80,7 @@ public class TileQueryHelper {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            addTile(spec, state);
+                            addTile(spec, null, state, true);
                             mListener.onTilesChanged(mTiles);
                         }
                     });
@@ -103,28 +104,33 @@ public class TileQueryHelper {
         mListener = listener;
     }
 
-    private void addTile(String spec, QSTile.State state) {
+    private void addTile(String spec, CharSequence appLabel, State state, boolean isSystem) {
         if (mSpecs.contains(spec)) {
             return;
         }
         TileInfo info = new TileInfo();
         info.state = state;
         info.spec = spec;
+        info.appLabel = appLabel;
+        info.isSystem = isSystem;
         mTiles.add(info);
         mSpecs.add(spec);
     }
 
-    private void addTile(String spec, Drawable drawable, CharSequence label, Context context) {
+    private void addTile(String spec, Drawable drawable, CharSequence label, CharSequence appLabel,
+            Context context) {
         QSTile.State state = new QSTile.State();
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);
-        addTile(spec, state);
+        addTile(spec, appLabel, state, false);
     }
 
     public static class TileInfo {
         public String spec;
+        public CharSequence appLabel;
         public QSTile.State state;
+        public boolean isSystem;
     }
 
     private class QueryTilesTask extends AsyncTask<Void, Void, Collection<TileInfo>> {
@@ -147,7 +153,8 @@ public class TileQueryHelper {
                     icon.setTint(mContext.getColor(android.R.color.white));
                 }
                 CharSequence label = info.serviceInfo.loadLabel(pm);
-                addTile(spec, icon, label != null ? label.toString() : "null", mContext);
+                final CharSequence appLabel = info.serviceInfo.applicationInfo.loadLabel(pm);
+                addTile(spec, icon, label != null ? label.toString() : "null", appLabel, mContext);
             }
             return tiles;
         }
