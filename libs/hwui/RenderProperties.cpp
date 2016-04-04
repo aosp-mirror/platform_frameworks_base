@@ -155,6 +155,23 @@ void RenderProperties::debugOutputProperties(const int level) const {
         ALOGD("%*s(ClipRect %d, %d, %d, %d)", level * 2, "",
                 (int)clipRect.left, (int)clipRect.top, (int)clipRect.right, (int)clipRect.bottom);
     }
+
+    if (getRevealClip().willClip()) {
+        Rect bounds;
+        getRevealClip().getBounds(&bounds);
+        ALOGD("%*s(Clip to reveal clip with bounds %.2f %.2f %.2f %.2f)", level * 2, "",
+                RECT_ARGS(bounds));
+    }
+
+    auto& outline = mPrimitiveFields.mOutline;
+    if (outline.getShouldClip()) {
+        if (outline.isEmpty()) {
+            ALOGD("%*s(Clip to empty outline)", level * 2, "");
+        } else if (outline.willClip()) {
+            ALOGD("%*s(Clip to outline with bounds %.2f %.2f %.2f %.2f)", level * 2, "",
+                    RECT_ARGS(outline.getBounds()));
+        }
+    }
 }
 
 void RenderProperties::updateMatrix() {
