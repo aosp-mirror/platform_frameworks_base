@@ -423,21 +423,13 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_offset(long nPath, float dx, float dy, long dst_path) {
+    /*package*/ static void native_offset(long nPath, float dx, float dy) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
-        // could be null if the int is 0;
-        Path_Delegate dstDelegate = sManager.getDelegate(dst_path);
-
-        pathDelegate.offset(dx, dy, dstDelegate);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_offset(long nPath, float dx, float dy) {
-        native_offset(nPath, dx, dy, 0);
+        pathDelegate.offset(dx, dy);
     }
 
     @LayoutlibDelegate
@@ -860,21 +852,14 @@ public final class Path_Delegate {
      *
      * @param dx  The amount in the X direction to offset the entire path
      * @param dy  The amount in the Y direction to offset the entire path
-     * @param dst The translated path is written here. If this is null, then
-     *            the original path is modified.
      */
-    public void offset(float dx, float dy, Path_Delegate dst) {
+    public void offset(float dx, float dy) {
         GeneralPath newPath = new GeneralPath();
 
         PathIterator iterator = mPath.getPathIterator(new AffineTransform(0, 0, dx, 0, 0, dy));
 
         newPath.append(iterator, false /*connect*/);
-
-        if (dst != null) {
-            dst.mPath = newPath;
-        } else {
-            mPath = newPath;
-        }
+        mPath = newPath;
     }
 
     /**
