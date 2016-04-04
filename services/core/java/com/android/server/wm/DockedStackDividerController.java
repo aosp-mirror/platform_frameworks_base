@@ -243,6 +243,9 @@ public class DockedStackDividerController implements DimLayerUser {
             }
         }
         mDockedStackListeners.finishBroadcast();
+        if (!exists) {
+            setMinimizedDockedStack(false);
+        }
     }
 
     void notifyDockedStackMinimizedChanged(boolean minimizedDock, long animDuration) {
@@ -263,6 +266,7 @@ public class DockedStackDividerController implements DimLayerUser {
         notifyDockedDividerVisibilityChanged(wasVisible());
         notifyDockedStackExistsChanged(
                 mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID) != null);
+        notifyDockedStackMinimizedChanged(mMinimizedDock, 0 /* animDuration */);
     }
 
     void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
@@ -338,12 +342,13 @@ public class DockedStackDividerController implements DimLayerUser {
      * @param animate Whether to animate the change.
      */
     private void setMinimizedDockedStack(boolean minimizedDock, boolean animate) {
-        if (minimizedDock == mMinimizedDock
+        final boolean wasMinimized = mMinimizedDock;
+        mMinimizedDock = minimizedDock;
+        if (minimizedDock == wasMinimized
                 || mDisplayContent.getDockedStackVisibleForUserLocked() == null) {
             return;
         }
 
-        mMinimizedDock = minimizedDock;
         mAnimatingForIme = false;
         if (minimizedDock) {
             if (animate) {
@@ -369,13 +374,13 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private void setMinimizedDockedStack(boolean minimized) {
         final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
+        notifyDockedStackMinimizedChanged(minimized, 0);
         if (stack == null) {
             return;
         }
         if (stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f)) {
             mService.mWindowPlacerLocked.performSurfacePlacement();
         }
-        notifyDockedStackMinimizedChanged(minimized, 0);
     }
 
     private boolean isAnimationMaximizing() {

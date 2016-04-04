@@ -97,6 +97,9 @@ public class Divider extends SystemUI {
                 if (mVisible != visible) {
                     mVisible = visible;
                     mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+
+                    // Update state because animations won't finish.
+                    mView.setMinimizedDockStack(mMinimized);
                 }
             }
         });

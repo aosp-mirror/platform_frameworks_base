@@ -134,6 +134,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
     private GestureDetector mGestureDetector;
+    private boolean mDockedStackMinimized;
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -538,6 +539,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     : mBackground.getWidth());
             mBackground.setScaleX(MINIMIZE_DOCK_SCALE);
         }
+        mDockedStackMinimized = minimized;
     }
 
     public void setMinimizedDockStack(boolean minimized, long animDuration) {
@@ -566,6 +568,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(animDuration)
                 .start();
+        mDockedStackMinimized = minimized;
     }
 
     private void resetBackground() {
@@ -883,7 +886,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     public final void onBusEvent(UndockingTaskEvent undockingTaskEvent) {
         int dockSide = mWindowManagerProxy.getDockSide();
-        if (dockSide != WindowManager.DOCKED_INVALID) {
+        if (dockSide != WindowManager.DOCKED_INVALID && !mDockedStackMinimized) {
             startDragging(false /* animate */, false /* touching */);
             SnapTarget target = dockSideTopLeft(dockSide)
                     ? mSnapAlgorithm.getDismissEndTarget()
