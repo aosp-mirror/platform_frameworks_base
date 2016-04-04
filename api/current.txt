@@ -47680,6 +47680,7 @@ package java.lang {
     method public static int compare(boolean, boolean);
     method public int compareTo(java.lang.Boolean);
     method public static boolean getBoolean(java.lang.String);
+    method public static int hashCode(boolean);
     method public static boolean parseBoolean(java.lang.String);
     method public static java.lang.String toString(boolean);
     method public static java.lang.Boolean valueOf(boolean);
@@ -47697,6 +47698,7 @@ package java.lang {
     method public static java.lang.Byte decode(java.lang.String) throws java.lang.NumberFormatException;
     method public double doubleValue();
     method public float floatValue();
+    method public static int hashCode(byte);
     method public int intValue();
     method public long longValue();
     method public static byte parseByte(java.lang.String, int) throws java.lang.NumberFormatException;
@@ -47705,6 +47707,7 @@ package java.lang {
     method public static java.lang.Byte valueOf(byte);
     method public static java.lang.Byte valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Byte valueOf(java.lang.String) throws java.lang.NumberFormatException;
+    field public static final int BYTES = 1; // 0x1
     field public static final byte MAX_VALUE = 127; // 0x7f
     field public static final byte MIN_VALUE = -128; // 0xffffff80
     field public static final int SIZE = 8; // 0x8
@@ -47742,6 +47745,7 @@ package java.lang {
     method public static int getNumericValue(int);
     method public static int getType(char);
     method public static int getType(int);
+    method public static int hashCode(char);
     method public static char highSurrogate(int);
     method public static boolean isAlphabetic(int);
     method public static boolean isBmpCodePoint(int);
@@ -47802,6 +47806,7 @@ package java.lang {
     method public static char toUpperCase(char);
     method public static int toUpperCase(int);
     method public static java.lang.Character valueOf(char);
+    field public static final int BYTES = 2; // 0x2
     field public static final byte COMBINING_SPACING_MARK = 8; // 0x8
     field public static final byte CONNECTOR_PUNCTUATION = 23; // 0x17
     field public static final byte CONTROL = 15; // 0xf
@@ -48428,6 +48433,7 @@ package java.lang {
     method public static int floatToIntBits(float);
     method public static int floatToRawIntBits(float);
     method public float floatValue();
+    method public static int hashCode(float);
     method public static float intBitsToFloat(int);
     method public int intValue();
     method public static boolean isFinite(float);
@@ -48436,11 +48442,15 @@ package java.lang {
     method public static boolean isNaN(float);
     method public boolean isNaN();
     method public long longValue();
+    method public static float max(float, float);
+    method public static float min(float, float);
     method public static float parseFloat(java.lang.String) throws java.lang.NumberFormatException;
+    method public static float sum(float, float);
     method public static java.lang.String toHexString(float);
     method public static java.lang.String toString(float);
     method public static java.lang.Float valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Float valueOf(float);
+    field public static final int BYTES = 4; // 0x4
     field public static final int MAX_EXPONENT = 127; // 0x7f
     field public static final float MAX_VALUE = 3.4028235E38f;
     field public static final int MIN_EXPONENT = -126; // 0xffffff82
@@ -48620,6 +48630,7 @@ package java.lang {
     method public static java.lang.Long valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Long valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Long valueOf(long);
+    field public static final int BYTES = 8; // 0x8
     field public static final long MAX_VALUE = 9223372036854775807L; // 0x7fffffffffffffffL
     field public static final long MIN_VALUE = -9223372036854775808L; // 0x8000000000000000L
     field public static final int SIZE = 64; // 0x40
@@ -48953,6 +48964,7 @@ package java.lang {
     method public static java.lang.Short decode(java.lang.String) throws java.lang.NumberFormatException;
     method public double doubleValue();
     method public float floatValue();
+    method public static int hashCode(short);
     method public int intValue();
     method public long longValue();
     method public static short parseShort(java.lang.String, int) throws java.lang.NumberFormatException;
@@ -48962,6 +48974,7 @@ package java.lang {
     method public static java.lang.Short valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Short valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Short valueOf(short);
+    field public static final int BYTES = 2; // 0x2
     field public static final short MAX_VALUE = 32767; // 0x7fff
     field public static final short MIN_VALUE = -32768; // 0xffff8000
     field public static final int SIZE = 16; // 0x10
