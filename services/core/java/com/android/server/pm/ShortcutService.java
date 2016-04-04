@@ -2159,6 +2159,9 @@ public class ShortcutService extends IShortcutService.Stub {
                     case "refresh-default-launcher":
                         handleRefreshDefaultLauncher();
                         break;
+                    case "unload-user":
+                        handleUnloadUser();
+                        break;
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -2195,6 +2198,10 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println();
             pw.println("cmd shortcut refresh-default-launcher [--user USER_ID]");
             pw.println("    Refresh the cached default launcher");
+            pw.println();
+            pw.println("cmd shortcut unload-user [--user USER_ID]");
+            pw.println("    Unload a user from the memory");
+            pw.println("    (This should not affect any observable behavior)");
             pw.println();
         }
 
@@ -2266,6 +2273,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
             clearLauncher();
             showLauncher();
+        }
+
+        private void handleUnloadUser() throws CommandException {
+            parseOptions(/* takeUser =*/ true);
+
+            ShortcutService.this.handleCleanupUser(mUserId);
         }
     }
 
