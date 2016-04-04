@@ -191,17 +191,13 @@ public class WindowLayersController {
     }
 
     private void adjustSpecialWindows() {
-        int layer = mHighestApplicationLayer + 1;
+        int layer = mHighestApplicationLayer + WINDOW_LAYER_MULTIPLIER;
         // For pinned and docked stack window, we want to make them above other windows also when
         // these windows are animating.
         while (!mDockedWindows.isEmpty()) {
             layer = assignAndIncreaseLayerIfNeeded(mDockedWindows.remove(), layer);
         }
 
-        // Leave some space here so the dim layer while dismissing docked/fullscreen stack has space
-        // below the divider but above the app windows. It needs to be below the divider in because
-        // the divider sometimes overlaps the app windows.
-        layer++;
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
 
         // If we have a dock divider ensure the Input Method is above it.
@@ -224,11 +220,12 @@ public class WindowLayersController {
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
         if (win != null) {
             assignAnimLayer(win, layer);
-            layer++;
+            // Make sure we leave space inbetween normal windows for dims and such.
+            layer += WINDOW_LAYER_MULTIPLIER;
         }
         return layer;
     }
-    
+
     private void assignAnimLayer(WindowState w, int layer) {
         w.mLayer = layer;
         w.mWinAnimator.mAnimLayer = w.mLayer + w.getAnimLayerAdjustment() +
