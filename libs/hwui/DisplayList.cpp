@@ -45,6 +45,7 @@ DisplayList::DisplayList()
         , regions(stdAllocator)
         , referenceHolders(stdAllocator)
         , functors(stdAllocator)
+        , pushStagingFunctors(stdAllocator)
         , hasDrawOps(false) {
 }
 
