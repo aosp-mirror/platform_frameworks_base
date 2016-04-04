@@ -1031,6 +1031,16 @@ public final class PowerManager {
     }
 
     /**
+     * Returns True if the device supports Sustained Performance Mode.
+     * Applications Should check if the device supports this mode, before
+     * using {@link #SUSTAINED_PERFORMANCE_WAKE_LOCK}.
+     */
+    public boolean isSustainedPerformanceModeSupported() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sustainedPerformanceModeSupported);
+    }
+
+    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
