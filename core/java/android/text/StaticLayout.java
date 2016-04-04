@@ -1132,22 +1132,12 @@ public class StaticLayout extends Layout {
 
     @Override
     public int getLineTop(int line) {
-        int top = mLines[mColumns * line + TOP];
-        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount &&
-                line != mLineCount) {
-            top += getBottomPadding();
-        }
-        return top;
+        return mLines[mColumns * line + TOP];
     }
 
     @Override
     public int getLineDescent(int line) {
-        int descent = mLines[mColumns * line + DESCENT];
-        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount - 1 && // -1 intended
-                line != mLineCount) {
-            descent += getBottomPadding();
-        }
-        return descent;
+        return mLines[mColumns * line + DESCENT];
     }
 
     @Override

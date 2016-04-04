@@ -183,8 +183,10 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
         if (includepad) {
             spacing = metrics.bottom - metrics.top;
+            mDesc = metrics.bottom;
         } else {
             spacing = metrics.descent - metrics.ascent;
+            mDesc = metrics.descent;
         }
 
         mBottom = spacing;
@@ -208,8 +210,6 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             mTopPadding = metrics.top - metrics.ascent;
             mBottomPadding = metrics.bottom - metrics.descent;
         }
-
-        mDesc = spacing + mBottomPadding + (includepad ? metrics.top : metrics.ascent);
     }
 
     /**
