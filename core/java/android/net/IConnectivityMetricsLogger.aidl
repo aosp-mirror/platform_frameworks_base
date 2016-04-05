@@ -16,15 +16,28 @@
 
 package android.net;
 
+import android.app.PendingIntent;
 import android.net.ConnectivityMetricsEvent;
-import android.net.IConnectivityMetricsLoggerSubscriber;
 
 /** {@hide} */
 interface IConnectivityMetricsLogger {
 
-    void logEvent(in ConnectivityMetricsEvent event);
-    void logEvents(in ConnectivityMetricsEvent[] events);
+    /**
+     * @return 0 on success
+     *        <0 if error happened
+     *        >0 timestamp after which new events will be accepted
+     */
+    long logEvent(in ConnectivityMetricsEvent event);
+    long logEvents(in ConnectivityMetricsEvent[] events);
 
-    boolean subscribe(in IConnectivityMetricsLoggerSubscriber subscriber);
-    void unsubscribe(in IConnectivityMetricsLoggerSubscriber subscriber);
+    /**
+     * @param reference of the last event previously returned. The function will return
+     *                  events following it.
+     *                  If 0 then all events will be returned.
+     *                  After the function call it will contain reference of the last event.
+     */
+    ConnectivityMetricsEvent[] getEvents(inout ConnectivityMetricsEvent.Reference reference);
+
+    boolean register(in PendingIntent newEventsIntent);
+    void unregister(in PendingIntent newEventsIntent);
 }
