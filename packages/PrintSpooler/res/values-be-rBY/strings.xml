@@ -74,6 +74,12 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Рэкамендаваныя службы"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Адключаныя службы"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Усе службы"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="one">Усталюйце, каб знайсці <xliff:g id="COUNT_1">%1$s</xliff:g> прынтар</item>
+      <item quantity="few">Усталюйце, каб знайсці <xliff:g id="COUNT_1">%1$s</xliff:g> прынтары</item>
+      <item quantity="many">Усталюйце, каб знайсці <xliff:g id="COUNT_1">%1$s</xliff:g> прынтараў</item>
+      <item quantity="other">Усталюйце, каб знайсці <xliff:g id="COUNT_1">%1$s</xliff:g> прынтара</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Друк <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Скасоўваецца <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Памылка друку <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

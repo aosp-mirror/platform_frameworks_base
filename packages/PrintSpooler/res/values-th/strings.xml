@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"บริการที่แนะนำ"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"บริการที่ปิดใช้"</string>
     <string name="all_services_title" msgid="5578662754874906455">"บริการทั้งหมด"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">ติดตั้งเพื่อค้นหาเครื่องพิมพ์ <xliff:g id="COUNT_1">%1$s</xliff:g> เครื่อง</item>
+      <item quantity="one">ติดตั้งเพื่อค้นหาเครื่องพิมพ์ <xliff:g id="COUNT_0">%1$s</xliff:g> เครื่อง</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"กำลังพิมพ์ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"กำลังยกเลิก <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"ข้อผิดพลาดเครื่องพิมพ์ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

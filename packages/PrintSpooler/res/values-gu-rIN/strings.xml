@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"ભલામણ કરેલી સેવાઓ"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"અક્ષમ કરેલી સેવાઓ"</string>
     <string name="all_services_title" msgid="5578662754874906455">"બધી સેવાઓ"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g> પ્રિન્ટરની શોધ કરવા માટે ઇન્સ્ટૉલ કરો</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> પ્રિન્ટરની શોધ કરવા માટે ઇન્સ્ટૉલ કરો</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> છાપી રહ્યાં છે"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ને રદ કરી રહ્યું છે"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"પ્રિન્ટર ભૂલ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
