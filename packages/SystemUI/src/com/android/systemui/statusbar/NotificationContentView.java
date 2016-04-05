@@ -604,7 +604,7 @@ public class NotificationContentView extends FrameLayout {
             }
             int expandedVisualType = getVisualTypeForHeight(height);
             int collapsedVisualType = getVisualTypeForHeight(
-                    mContainingNotification.getMinExpandHeight());
+                    mContainingNotification.getCollapsedHeight());
             return mTransformationStartVisibleType == collapsedVisualType
                     ? expandedVisualType
                     : collapsedVisualType;
