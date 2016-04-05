@@ -108,6 +108,6 @@ CHECK_EMOJI := true
 endif
 
 .PHONY: fontchain_lint
-fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml
+fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml $(PRODUCT_OUT)/system.img
 	PYTHONPATH=$$PYTHONPATH:external/fonttools/Lib \
 	python $(FONTCHAIN_LINTER) $(TARGET_OUT) $(CHECK_EMOJI) external/unicode
