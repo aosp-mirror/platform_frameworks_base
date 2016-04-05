@@ -1373,7 +1373,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // needs to sit above the dock divider, so it doesn't get cut in half. We make the dock
         // divider be a target for IME, so this relationship can occur naturally.
         if (fl == 0 || fl == (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)
-                || type == TYPE_APPLICATION_STARTING) {
+                || type == TYPE_APPLICATION_STARTING || type == TYPE_DOCK_DIVIDER) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.i(TAG_WM, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
                 if (!w.isVisibleOrAdding()) {
