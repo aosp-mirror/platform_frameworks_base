@@ -233,10 +233,8 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Konten disembunyikan menurut kebijakan"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode aman"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
-    <!-- no translation found for user_owner_label (1119010402169916617) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (5289992269827577857) -->
-    <skip />
+    <string name="user_owner_label" msgid="1119010402169916617">"Beralih ke Pribadi"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"Beralih ke Kantor"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontak"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"mengakses kontak"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
@@ -1047,8 +1045,8 @@
     <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ini mungkin tidak gratis"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Oke"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Mengisi daya perangkat ini melalui USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Menyuplai daya melalui USB ke perangkat yang terpasang"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Isi daya perangkat ini melalui USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Suplai daya melalui USB ke perangkat yang terpasang"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB untuk transfer file"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB untuk transfer foto"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB untuk MIDI"</string>
@@ -1063,13 +1061,10 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"BAGIKAN"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"TOLAK"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ubah keyboard"</string>
-    <string name="configure_input_methods" msgid="5673193194563164021">"Keyboard lainnya"</string>
     <string name="show_ime" msgid="2506087537466597099">"Pertahankan di layar jika keyboard fisik masih aktif"</string>
     <string name="hardware" msgid="194658061510127999">"Tampilkan keyboard virtual"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Mengonfigurasi keyboard fisik"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Ketuk untuk memilih bahasa dan tata letak"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
