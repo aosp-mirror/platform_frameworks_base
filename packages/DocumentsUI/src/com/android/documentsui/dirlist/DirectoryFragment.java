@@ -106,6 +106,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -1063,8 +1064,19 @@ public class DirectoryFragment extends Fragment
     }
 
     public void selectAllFiles() {
+        // Exclude disabled files
+        List<String> enabled = new ArrayList<String>();
+        for (String id : mAdapter.getModelIds()) {
+            Cursor cursor = getModel().getItem(id);
+            String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+            if (isDocumentEnabled(docMimeType, docFlags)) {
+                enabled.add(id);
+            }
+        }
+
         // Only select things currently visible in the adapter.
-        boolean changed = mSelectionManager.setItemsSelected(mAdapter.getModelIds(), true);
+        boolean changed = mSelectionManager.setItemsSelected(enabled, true);
         if (changed) {
             updateDisplayState();
         }
