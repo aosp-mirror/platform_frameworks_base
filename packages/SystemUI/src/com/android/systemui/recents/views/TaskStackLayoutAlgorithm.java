@@ -39,6 +39,7 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -108,6 +109,8 @@ class Range {
  * more prominently in the stack.
  */
 public class TaskStackLayoutAlgorithm {
+
+    private static final String TAG = "TaskStackLayoutAlgorithm";
 
     // The distribution of view bounds alpha
     // XXX: This is a hack because you can currently set the max alpha to be > 1f
@@ -684,7 +687,6 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
-     *
      * Returns the current stack state.
      */
     public StackState getStackState() {
@@ -1156,5 +1158,45 @@ public class TaskStackLayoutAlgorithm {
                 true /* ignoreSingleTaskCase */, true /* forceUpdate */);
         mBackOfStackTransform.visible = true;
         mFrontOfStackTransform.visible = true;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.print(TAG);
+        writer.write(" numStackTasks="); writer.write(mNumStackTasks);
+        writer.println();
+
+        writer.print(innerPrefix);
+        writer.print("insets="); writer.print(Utilities.dumpRect(mSystemInsets));
+        writer.print(" stack="); writer.print(Utilities.dumpRect(mStackRect));
+        writer.print(" task="); writer.print(Utilities.dumpRect(mTaskRect));
+        writer.print(" freeform="); writer.print(Utilities.dumpRect(mFreeformRect));
+        writer.print(" actionButton="); writer.print(Utilities.dumpRect(mStackActionButtonRect));
+        writer.println();
+
+        writer.print(innerPrefix);
+        writer.print("minScroll="); writer.print(mMinScrollP);
+        writer.print(" maxScroll="); writer.print(mMaxScrollP);
+        writer.print(" initialScroll="); writer.print(mInitialScrollP);
+        writer.println();
+
+        writer.print(innerPrefix);
+        writer.print("focusState="); writer.print(mFocusState);
+        writer.println();
+
+        if (mTaskIndexOverrideMap.size() > 0) {
+            for (int i = mTaskIndexOverrideMap.size() - 1; i >= 0; i--) {
+                int taskId = mTaskIndexOverrideMap.keyAt(i);
+                float x = mTaskIndexMap.get(taskId);
+                float overrideX = mTaskIndexOverrideMap.get(taskId, 0f);
+
+                writer.print(innerPrefix);
+                writer.print("taskId= "); writer.print(taskId);
+                writer.print(" x= "); writer.print(x);
+                writer.print(" overrideX= "); writer.print(overrideX);
+                writer.println();
+            }
+        }
     }
 }

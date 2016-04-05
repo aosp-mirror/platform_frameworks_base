@@ -74,6 +74,8 @@ import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecC
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +84,8 @@ import java.util.List;
  * to their SpaceNode bounds.
  */
 public class RecentsView extends FrameLayout {
+
+    private static final String TAG = "RecentsView";
 
     private static final int DOCK_AREA_OVERLAY_TRANSITION_DURATION = 135;
     private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
@@ -757,5 +761,23 @@ public class RecentsView extends FrameLayout {
         actionButtonRect.set(left, top, left + mStackActionButton.getMeasuredWidth(),
                 top + mStackActionButton.getMeasuredHeight());
         return actionButtonRect;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+        String id = Integer.toHexString(System.identityHashCode(this));
+
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" awaitingFirstLayout="); writer.print(mAwaitingFirstLayout ? "Y" : "N");
+        writer.print(" insets="); writer.print(Utilities.dumpRect(mSystemInsets));
+        writer.print(" [0x"); writer.print(id); writer.print("]");
+        writer.println();
+
+        if (mStack != null) {
+            mStack.dump(innerPrefix, writer);
+        }
+        if (mTaskStackView != null) {
+            mTaskStackView.dump(innerPrefix, writer);
+        }
     }
 }

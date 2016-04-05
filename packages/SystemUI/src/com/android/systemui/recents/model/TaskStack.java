@@ -55,6 +55,7 @@ import com.android.systemui.recents.views.AnimationProps;
 import com.android.systemui.recents.views.DropTarget;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -207,6 +208,8 @@ class FilteredTaskList {
  * The task stack contains a list of multiple tasks.
  */
 public class TaskStack {
+
+    private static final String TAG = "TaskStack";
 
     /** Task stack callbacks */
     public interface TaskStackCallbacks {
@@ -725,7 +728,9 @@ public class TaskStack {
     /** Finds the task with the specified task id. */
     public Task findTaskWithId(int taskId) {
         ArrayList<Task> tasks = computeAllTasksList();
-        for (Task task : tasks) {
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
             if (task.key.id == taskId) {
                 return task;
             }
@@ -880,7 +885,10 @@ public class TaskStack {
         ArraySet<ComponentName> existingComponents = new ArraySet<>();
         ArraySet<ComponentName> removedComponents = new ArraySet<>();
         ArrayList<Task.TaskKey> taskKeys = getTaskKeys();
-        for (Task.TaskKey t : taskKeys) {
+        int taskKeyCount = taskKeys.size();
+        for (int i = 0; i < taskKeyCount; i++) {
+            Task.TaskKey t = taskKeys.get(i);
+
             // Skip if this doesn't apply to the current user
             if (t.userId != userId) continue;
 
@@ -903,8 +911,10 @@ public class TaskStack {
     @Override
     public String toString() {
         String str = "Stack Tasks (" + mStackTaskList.size() + "):\n";
-        for (Task t : mStackTaskList.getTasks()) {
-            str += "    " + t.toString() + "\n";
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            str += "    " + tasks.get(i).toString() + "\n";
         }
         return str;
     }
@@ -920,5 +930,18 @@ public class TaskStack {
             map.put(task.key, task);
         }
         return map;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" numStackTasks="); writer.print(mStackTaskList.size());
+        writer.println();
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            tasks.get(i).dump(innerPrefix, writer);
+        }
     }
 }

@@ -243,4 +243,14 @@ public class Utilities {
     public static float dpToPx(Resources res, float dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
     }
+
+    /**
+     * Returns a lightweight dump of a rect.
+     */
+    public static String dumpRect(Rect r) {
+        if (r == null) {
+            return "N:0,0-0,0";
+        }
+        return r.left + "," + r.top + "-" + r.right + "," + r.bottom;
+    }
 }
