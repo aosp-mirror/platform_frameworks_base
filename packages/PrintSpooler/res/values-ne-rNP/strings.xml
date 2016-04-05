@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"सिफारिस गरिएका सेवाहरू"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"असक्षम गरिएका सेवाहरू"</string>
     <string name="all_services_title" msgid="5578662754874906455">"सबै सेवाहरू"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> प्रिन्टरहरू पत्ता लगाउनका लागि स्थापना गर्नुहोस्</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> प्रिन्टर पत्ता लगाउनका लागि स्थापना गर्नुहोस्</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"प्रिन्ट गरिँदै <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"रद्द गरिँदै <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिन्टर त्रुटि <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

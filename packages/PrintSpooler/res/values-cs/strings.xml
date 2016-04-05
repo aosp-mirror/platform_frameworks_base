@@ -74,6 +74,12 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Doporučené služby"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Deaktivované služby"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Všechny služby"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="few">Instalací objevíte <xliff:g id="COUNT_1">%1$s</xliff:g> tiskárny</item>
+      <item quantity="many">Instalací objevíte <xliff:g id="COUNT_1">%1$s</xliff:g> tiskárny</item>
+      <item quantity="other">Instalací objevíte <xliff:g id="COUNT_1">%1$s</xliff:g> tiskáren</item>
+      <item quantity="one">Instalací objevíte <xliff:g id="COUNT_0">%1$s</xliff:g> tiskárnu</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Tisk úlohy <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Rušení úlohy <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Chyba tiskárny u úlohy <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

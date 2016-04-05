@@ -76,6 +76,14 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"الخدمات الموصى بها"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"الخدمات المعطَّلة"</string>
     <string name="all_services_title" msgid="5578662754874906455">"جميع الخدمات"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="zero">التثبيت لاستكشاف <xliff:g id="COUNT_1">%1$s</xliff:g> طابعات</item>
+      <item quantity="two">التثبيت لاستكشاف طابعتين (<xliff:g id="COUNT_1">%1$s</xliff:g>)</item>
+      <item quantity="few">التثبيت لاستكشاف <xliff:g id="COUNT_1">%1$s</xliff:g> طابعات</item>
+      <item quantity="many">التثبيت لاستكشاف <xliff:g id="COUNT_1">%1$s</xliff:g> طابعة</item>
+      <item quantity="other">التثبيت لاستكشاف <xliff:g id="COUNT_1">%1$s</xliff:g> طابعات</item>
+      <item quantity="one">التثبيت لاستكشاف <xliff:g id="COUNT_0">%1$s</xliff:g> طابعة</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"جارٍ طباعة <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"جارٍ إلغاء <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"خطا في الطابعة <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

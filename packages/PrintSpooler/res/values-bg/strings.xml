@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Препоръчителни услуги"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Деактивирани услуги"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Всички услуги"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">Инсталирайте, за да бъдат открити <xliff:g id="COUNT_1">%1$s</xliff:g> принтера</item>
+      <item quantity="one">Инсталирайте, за да бъде открит <xliff:g id="COUNT_0">%1$s</xliff:g> принтер</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"„<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>“ се отпечатва"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"„<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>“ се анулира"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Грешка в принтера при „<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>“"</string>

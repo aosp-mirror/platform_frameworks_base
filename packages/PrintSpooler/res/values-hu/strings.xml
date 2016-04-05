@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Javasolt szolgáltatások"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Letiltott szolgáltatások"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Minden szolgáltatás"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">Telepítés <xliff:g id="COUNT_1">%1$s</xliff:g> nyomtató felfedezéséhez</item>
+      <item quantity="one">Telepítés <xliff:g id="COUNT_0">%1$s</xliff:g> nyomtató felfedezéséhez</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"A(z) <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> nyomtatása"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"A(z) <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> törlése"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Nyomtatási hiba: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

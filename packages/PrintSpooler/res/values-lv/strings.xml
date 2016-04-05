@@ -73,6 +73,11 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Ieteiktie pakalpojumi"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Atspējotie pakalpojumi"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Visi pakalpojumi"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="zero">Instalējiet, lai atklātu <xliff:g id="COUNT_1">%1$s</xliff:g> printerus</item>
+      <item quantity="one">Instalējiet, lai atklātu <xliff:g id="COUNT_1">%1$s</xliff:g> printeri</item>
+      <item quantity="other">Instalējiet, lai atklātu <xliff:g id="COUNT_1">%1$s</xliff:g> printerus</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Notiek darba <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> drukāšana…"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Pārtrauc drukas darbu <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>…"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Printera kļūda ar darbu <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

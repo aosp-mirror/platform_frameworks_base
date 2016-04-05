@@ -73,6 +73,11 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Servicii recomandate"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Servicii dezactivate"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Toate serviciile"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="few">Instalați pentru a descoperi <xliff:g id="COUNT_1">%1$s</xliff:g> imprimante</item>
+      <item quantity="other">Instalați pentru a descoperi <xliff:g id="COUNT_1">%1$s</xliff:g> de imprimante</item>
+      <item quantity="one">Instalați pentru a descoperi <xliff:g id="COUNT_0">%1$s</xliff:g> imprimantă</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Se printează <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Se anulează <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Eroare de printare: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
