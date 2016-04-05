@@ -45,7 +45,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -81,6 +80,8 @@ import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.N;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -171,7 +172,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final Interpolator mShowInterpolator;
     private final Interpolator mHideInterpolator;
     private final int mBarEnterExitDuration;
-    private final boolean mForceWindowDrawsStatusBarBackground;
+    final boolean mForceWindowDrawsStatusBarBackground;
     private final int mSemiTransparentStatusBarColor;
 
     private final BackgroundFallback mBackgroundFallback = new BackgroundFallback();
@@ -236,7 +237,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         mBarEnterExitDuration = context.getResources().getInteger(
                 R.integer.dock_enter_exit_duration);
         mForceWindowDrawsStatusBarBackground = context.getResources().getBoolean(
-                R.bool.config_forceWindowDrawsStatusBarBackground);
+                R.bool.config_forceWindowDrawsStatusBarBackground)
+                && context.getApplicationInfo().targetSdkVersion >= N;
         mSemiTransparentStatusBarColor = context.getResources().getColor(
                 R.color.system_bar_background_semi_transparent, null /* theme */);
 
@@ -2210,7 +2212,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         public void onDestroyActionMode(ActionMode mode) {
             mWrapped.onDestroyActionMode(mode);
             final boolean isMncApp = mContext.getApplicationInfo().targetSdkVersion
-                    >= Build.VERSION_CODES.M;
+                    >= M;
             final boolean isPrimary;
             final boolean isFloating;
             if (isMncApp) {
