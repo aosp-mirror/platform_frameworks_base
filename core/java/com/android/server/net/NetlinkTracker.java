@@ -102,6 +102,19 @@ public class NetlinkTracker extends BaseNetworkObserver {
     }
 
     @Override
+    public void interfaceRemoved(String iface) {
+        maybeLog("interfaceRemoved", iface);
+        if (mInterfaceName.equals(iface)) {
+            // Our interface was removed. Clear our LinkProperties and tell our owner that they are
+            // now empty. Note that from the moment that the interface is removed, any further
+            // interface-specific messages (e.g., RTM_DELADDR) will not reach us, because the netd
+            // code that parses them will not be able to resolve the ifindex to an interface name.
+            clearLinkProperties();
+            mCallback.update();
+        }
+    }
+
+    @Override
     public void addressUpdated(String iface, LinkAddress address) {
         if (mInterfaceName.equals(iface)) {
             maybeLog("addressUpdated", iface, address);

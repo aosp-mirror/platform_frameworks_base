@@ -302,6 +302,7 @@ public class IpManager extends StateMachine {
                 }) {
             @Override
             public void interfaceAdded(String iface) {
+                super.interfaceAdded(iface);
                 if (mClatInterfaceName.equals(iface)) {
                     mCallback.on464XlatChange(true);
                 }
@@ -309,6 +310,7 @@ public class IpManager extends StateMachine {
 
             @Override
             public void interfaceRemoved(String iface) {
+                super.interfaceRemoved(iface);
                 if (mClatInterfaceName.equals(iface)) {
                     mCallback.on464XlatChange(false);
                 }
