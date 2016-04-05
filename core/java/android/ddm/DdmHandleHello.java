@@ -136,12 +136,14 @@ public class DdmHandleHello extends ChunkHandler {
         }
         String vmFlags = "CheckJNI="
             + (vmRuntime.isCheckJniEnabled() ? "true" : "false");
+        boolean isNativeDebuggable = vmRuntime.isNativeDebuggable();
 
         ByteBuffer out = ByteBuffer.allocate(28
                             + vmIdent.length() * 2
                             + appName.length() * 2
                             + instructionSetDescription.length() * 2
-                            + vmFlags.length() * 2);
+                            + vmFlags.length() * 2
+                            + 1);
         out.order(ChunkHandler.CHUNK_ORDER);
         out.putInt(DdmServer.CLIENT_PROTOCOL_VERSION);
         out.putInt(android.os.Process.myPid());
@@ -154,6 +156,7 @@ public class DdmHandleHello extends ChunkHandler {
         putString(out, instructionSetDescription);
         out.putInt(vmFlags.length());
         putString(out, vmFlags);
+        out.put((byte)(isNativeDebuggable ? 1 : 0));
 
         Chunk reply = new Chunk(CHUNK_HELO, out);
 
