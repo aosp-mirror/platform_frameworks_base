@@ -221,7 +221,7 @@ public final class PowerManager {
     /**
      * Wake lock level: Enables Sustained Performance Mode.
      * <p>
-     * This is used by Gaming and VR applications to ensure the device provides
+     * This is used by Gaming and VR applications to ensure the device
      * will provide consistent performance over a large amount of time.
      * </p>
      */
