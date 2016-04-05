@@ -404,7 +404,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
 
     @Override
     public int getUnfocusedMonthDateColor() {
-        return mFocusedMonthDateColor;
+        return mUnfocusedMonthDateColor;
     }
 
     @Override
