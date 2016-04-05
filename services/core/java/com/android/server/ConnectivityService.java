@@ -371,8 +371,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private int mNetTransitionWakeLockTimeout;
     private final PowerManager.WakeLock mPendingIntentWakeLock;
 
-    private InetAddress mDefaultDns;
-
     // used in DBG mode to track inet condition reports
     private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
     private ArrayList mInetLog;
@@ -643,19 +641,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 String name = new String("android-").concat(id);
                 SystemProperties.set("net.hostname", name);
             }
-        }
-
-        // read our default dns server ip
-        String dns = Settings.Global.getString(context.getContentResolver(),
-                Settings.Global.DEFAULT_DNS_SERVER);
-        if (dns == null || dns.length() == 0) {
-            dns = context.getResources().getString(
-                    com.android.internal.R.string.config_default_dns_server);
-        }
-        try {
-            mDefaultDns = NetworkUtils.numericToInetAddress(dns);
-        } catch (IllegalArgumentException e) {
-            loge("Error setting defaultDns using " + dns);
         }
 
         mReleasePendingIntentDelayMs = Settings.Secure.getInt(context.getContentResolver(),
@@ -4152,14 +4137,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 //        }
         updateTcpBufferSizes(networkAgent);
 
-        // TODO: deprecate and remove mDefaultDns when we can do so safely. See http://b/18327075
-        // In L, we used it only when the network had Internet access but provided no DNS servers.
-        // For now, just disable it, and if disabling it doesn't break things, remove it.
-        // final boolean useDefaultDns = networkAgent.networkCapabilities.hasCapability(
-        //        NET_CAPABILITY_INTERNET);
-        final boolean useDefaultDns = false;
         final boolean flushDns = updateRoutes(newLp, oldLp, netId);
-        updateDnses(newLp, oldLp, netId, flushDns, useDefaultDns);
+        updateDnses(newLp, oldLp, netId, flushDns);
 
         updateClat(newLp, oldLp, networkAgent);
         if (isDefaultNetwork(networkAgent)) {
@@ -4263,16 +4242,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId,
-                             boolean flush, boolean useDefaultDns) {
+                             boolean flush) {
         if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
             Collection<InetAddress> dnses = newLp.getDnsServers();
-            if (dnses.size() == 0 && mDefaultDns != null && useDefaultDns) {
-                dnses = new ArrayList();
-                dnses.add(mDefaultDns);
-                if (DBG) {
-                    loge("no dns provided for netId " + netId + ", so using defaults");
-                }
-            }
             if (DBG) log("Setting Dns servers for network " + netId + " to " + dnses);
             try {
                 mNetd.setDnsServersForNetwork(netId, NetworkUtils.makeStrings(dnses),
