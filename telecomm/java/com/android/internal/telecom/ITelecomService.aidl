@@ -246,12 +246,6 @@ interface ITelecomService {
     boolean setDefaultDialer(in String packageName);
 
     /**
-    * @see TelecomServiceImpl#launchManageBlockedNumbersActivity
-    **/
-    // TODO: Delete this.
-    void launchManageBlockedNumbersActivity(in String callingPackageName);
-
-    /**
     * @see TelecomServiceImpl#createManageBlockedNumbersIntent
     **/
     Intent createManageBlockedNumbersIntent();
