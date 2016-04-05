@@ -226,6 +226,7 @@ public class ApfFilter {
         private static final int ICMP6_4_BYTE_LIFETIME_OFFSET = 4;
         private static final int ICMP6_4_BYTE_LIFETIME_LEN = 4;
 
+        // Note: mPacket's position() cannot be assumed to be reset.
         private final ByteBuffer mPacket;
         // List of binary ranges that include the whole packet except the lifetimes.
         // Pairs consist of offset and length.
@@ -379,17 +380,12 @@ public class ApfFilter {
 
         // Ignoring lifetimes (which may change) does {@code packet} match this RA?
         boolean matches(byte[] packet, int length) {
-            if (length != mPacket.limit()) return false;
-            ByteBuffer a = ByteBuffer.wrap(packet);
-            ByteBuffer b = mPacket;
+            if (length != mPacket.capacity()) return false;
+            byte[] referencePacket = mPacket.array();
             for (Pair<Integer, Integer> nonLifetime : mNonLifetimes) {
-                a.clear();
-                b.clear();
-                a.position(nonLifetime.first);
-                b.position(nonLifetime.first);
-                a.limit(nonLifetime.first + nonLifetime.second);
-                b.limit(nonLifetime.first + nonLifetime.second);
-                if (a.compareTo(b) != 0) return false;
+                for (int i = nonLifetime.first; i < (nonLifetime.first + nonLifetime.second); i++) {
+                    if (packet[i] != referencePacket[i]) return false;
+                }
             }
             return true;
         }
@@ -441,7 +437,7 @@ public class ApfFilter {
             String nextFilterLabel = "Ra" + getUniqueNumberLocked();
             // Skip if packet is not the right size
             gen.addLoadFromMemory(Register.R0, gen.PACKET_SIZE_MEMORY_SLOT);
-            gen.addJumpIfR0NotEquals(mPacket.limit(), nextFilterLabel);
+            gen.addJumpIfR0NotEquals(mPacket.capacity(), nextFilterLabel);
             int filterLifetime = (int)(currentLifetime() / FRACTION_OF_LIFETIME_TO_FILTER);
             // Skip filter if expired
             gen.addLoadFromMemory(Register.R0, gen.FILTER_AGE_MEMORY_SLOT);
