@@ -1863,9 +1863,9 @@ public class Editor {
         if (hasSelection) {
             hideInsertionPointCursorController();
             if (mTextActionMode == null) {
-                if (mRestartActionModeOnNextRefresh || mTextView.isInExtractedMode()) {
+                if (mRestartActionModeOnNextRefresh) {
                     // To avoid distraction, newly start action mode only when selection action
-                    // mode is being restarted or in full screen extracted mode.
+                    // mode is being restarted.
                     startSelectionActionMode();
                 }
             } else if (selectionController == null || !selectionController.isActive()) {
