@@ -123,6 +123,17 @@ public class SystemUIApplication extends Application {
         startServicesIfNeeded(SERVICES);
     }
 
+    /**
+     * Ensures that all the Secondary user SystemUI services are running. If they are already
+     * running, this is a no-op. This is needed to conditinally start all the services, as we only
+     * need to have it in the main process.
+     *
+     * <p>This method must only be called from the main thread.</p>
+     */
+    void startSecondaryUserServicesIfNeeded() {
+        startServicesIfNeeded(SERVICES_PER_USER);
+    }
+
     private void startServicesIfNeeded(Class<?>[] services) {
         if (mServicesStarted) {
             return;

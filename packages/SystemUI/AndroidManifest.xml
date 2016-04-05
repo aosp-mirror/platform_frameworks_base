@@ -184,6 +184,14 @@
             android:exported="true"
             />
 
+        <!-- Recents depends on every user having their own SystemUI process, so on user switch,
+             ensure that the process is created by starting this service.
+             -->
+        <service android:name="SystemUISecondaryUserService"
+            android:exported="true"
+            android:permission="com.android.systemui.permission.SELF" />
+
+
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
         <service android:name=".screenshot.TakeScreenshotService"
