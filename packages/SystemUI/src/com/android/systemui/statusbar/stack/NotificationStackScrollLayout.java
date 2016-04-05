@@ -926,7 +926,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int positionInLinearLayout = getPositionInLinearLayout(v);
 
         int targetScroll = positionInLinearLayout + expandableView.getActualHeight() +
-                mBottomInset - getHeight() + getTopPadding();
+                getImeInset() - getHeight() + getTopPadding();
         if (mOwnScrollY < targetScroll) {
             mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
             mDontReportNextOverScroll = true;
@@ -936,8 +936,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mBottomInset = Math.max(0, insets.getSystemWindowInsetBottom()
-                - (getRootView().getHeight() - getHeight()));
+        mBottomInset = insets.getSystemWindowInsetBottom();
 
         int range = getScrollRange();
         if (mOwnScrollY > range) {
@@ -1506,23 +1505,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private int getScrollRange() {
-        int scrollRange = 0;
-        ExpandableView firstChild = (ExpandableView) getFirstChildNotGone();
-        if (firstChild != null) {
-            int contentHeight = getContentHeight();
-            scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize
-                    + mBottomStackSlowDownHeight);
-            if (scrollRange > 0) {
-                int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
-                // We want to at least be able collapse the first item and not ending in a weird
-                // end state.
-                scrollRange = Math.max(scrollRange, firstChildMaxExpandHeight
-                        - firstChild.getMinHeight());
-            }
-        }
-        int imeOverlap = Math.max(0,
-                getContentHeight() - (getHeight() - mBottomInset));
-        return scrollRange + imeOverlap;
+        int contentHeight = getContentHeight();
+        int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize
+                + mBottomStackSlowDownHeight);
+        int imeInset = getImeInset();
+        scrollRange += Math.min(imeInset, Math.max(0,
+                getContentHeight() - (getHeight() - imeInset)));
+        return scrollRange;
+    }
+
+    private int getImeInset() {
+        return Math.max(0, mBottomInset - (getRootView().getHeight() - getHeight()));
     }
 
     /**
