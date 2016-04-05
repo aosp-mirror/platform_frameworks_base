@@ -1847,11 +1847,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                                             .getIdentifier();
                                     if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
                                             && mKeyguardManager.isDeviceLocked(userId)) {
-                                        // Show work challenge, do not run pendingintent and
-                                        // remove notification
-                                        startWorkChallenge(userId, intent.getIntentSender(),
-                                                notificationKey);
-                                        return;
+                                        if (startWorkChallengeIfNecessary(userId,
+                                                intent.getIntentSender(), notificationKey)) {
+                                            // Show work challenge, do not run pendingintent and
+                                            // remove notification
+                                            return;
+                                        }
                                     }
                                 }
                                 try {
@@ -1889,21 +1890,25 @@ public abstract class BaseStatusBar extends SystemUI implements
             }, afterKeyguardGone);
         }
 
-        public void startWorkChallenge(int userId, IntentSender intendSender,
+        public boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
                 String notificationKey) {
+            final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
+                    null, userId);
+            if (newIntent == null) {
+                return false;
+            }
             final Intent callBackIntent = new Intent(
                     WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION);
             callBackIntent.putExtra(Intent.EXTRA_INTENT, intendSender);
             callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
             callBackIntent.setPackage(mContext.getPackageName());
 
-            final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
-                    null, userId);
             newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             newIntent.putExtra(Intent.EXTRA_INTENT, PendingIntent
                     .getBroadcast(mContext, 0, callBackIntent, 0).getIntentSender());
             mContext.startActivity(newIntent);
+            return true;
         }
 
         public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
