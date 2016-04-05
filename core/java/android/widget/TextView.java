@@ -330,10 +330,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mCurTextColor;
     private int mCurHintTextColor;
     private boolean mFreezesText;
-    private boolean mDispatchTemporaryDetach;
-
-    /** Whether this view is temporarily detached from the parent view. */
-    boolean mTemporaryDetach;
 
     private Editable.Factory mEditableFactory = Editable.Factory.getInstance();
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
@@ -5406,8 +5402,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mTemporaryDetach = false;
-
         if (mEditor != null) mEditor.onAttachedToWindow();
 
         if (mPreDrawListenerDetached) {
@@ -8366,40 +8360,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    public void dispatchFinishTemporaryDetach() {
-        mDispatchTemporaryDetach = true;
-        super.dispatchFinishTemporaryDetach();
-        mDispatchTemporaryDetach = false;
-    }
-
-    @Override
-    public void onStartTemporaryDetach() {
-        super.onStartTemporaryDetach();
-        // Only track when onStartTemporaryDetach() is called directly,
-        // usually because this instance is an editable field in a list
-        if (!mDispatchTemporaryDetach) mTemporaryDetach = true;
-
-        // Tell the editor that we are temporarily detached. It can use this to preserve
-        // selection state as needed.
-        if (mEditor != null) mEditor.mTemporaryDetach = true;
-    }
-
-    @Override
-    public void onFinishTemporaryDetach() {
-        super.onFinishTemporaryDetach();
-        // Only track when onStartTemporaryDetach() is called directly,
-        // usually because this instance is an editable field in a list
-        if (!mDispatchTemporaryDetach) mTemporaryDetach = false;
-        if (mEditor != null) mEditor.mTemporaryDetach = false;
-    }
-
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
-        if (mTemporaryDetach) {
+        if (isTemporarilyDetached()) {
             // If we are temporarily in the detach state, then do nothing.
             super.onFocusChanged(focused, direction, previouslyFocusedRect);
             return;
