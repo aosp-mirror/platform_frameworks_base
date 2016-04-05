@@ -16915,7 +16915,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         } else if (cache != null) {
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-            if (layerType == LAYER_TYPE_NONE) {
+            if (layerType == LAYER_TYPE_NONE || mLayerPaint == null) {
                 // no layer paint, use temporary paint to draw bitmap
                 Paint cachePaint = parent.mCachePaint;
                 if (cachePaint == null) {
@@ -16927,13 +16927,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
             } else {
                 // use layer paint to draw the bitmap, merging the two alphas, but also restore
-                int layerPaintAlpha = mLayerPaint != null ? mLayerPaint.getAlpha() : 255;
-                if (mLayerPaint == null && alpha < 1) {
-                    mLayerPaint = new Paint();
+                int layerPaintAlpha = mLayerPaint.getAlpha();
+                if (alpha < 1) {
                     mLayerPaint.setAlpha((int) (alpha * layerPaintAlpha));
                 }
                 canvas.drawBitmap(cache, 0.0f, 0.0f, mLayerPaint);
-                if (mLayerPaint != null) {
+                if (alpha < 1) {
                     mLayerPaint.setAlpha(layerPaintAlpha);
                 }
             }
