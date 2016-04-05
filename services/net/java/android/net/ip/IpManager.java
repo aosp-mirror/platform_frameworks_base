@@ -302,6 +302,7 @@ public class IpManager extends StateMachine {
                 }) {
             @Override
             public void interfaceAdded(String iface) {
+                super.interfaceAdded(iface);
                 if (mClatInterfaceName.equals(iface)) {
                     mCallback.setNeighborDiscoveryOffload(false);
                 }
@@ -309,6 +310,7 @@ public class IpManager extends StateMachine {
 
             @Override
             public void interfaceRemoved(String iface) {
+                super.interfaceRemoved(iface);
                 if (mClatInterfaceName.equals(iface)) {
                     // TODO: consider sending a message to the IpManager main
                     // StateMachine thread, in case "NDO enabled" state becomes
