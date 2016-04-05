@@ -144,7 +144,9 @@ final class PbapClientProfile implements LocalBluetoothProfile {
                     return true;
                 }
             }
-            mService.disconnect(device);
+            for (BluetoothDevice src : srcs) {
+                mService.disconnect(device);
+            }
         }
         Log.d(TAG,"PBAPClientProfile attempting to connect to " + device.getAddress());
 
