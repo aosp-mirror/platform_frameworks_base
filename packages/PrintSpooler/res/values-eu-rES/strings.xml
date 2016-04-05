@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Gomendatutako zerbitzuak"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Desgaitutako zerbitzuak"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Zerbitzu guztiak"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">Instalatu <xliff:g id="COUNT_1">%1$s</xliff:g> inprimagailu aurkitzeko</item>
+      <item quantity="one">Instalatu <xliff:g id="COUNT_0">%1$s</xliff:g> inprimagailu aurkitzeko</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> inprimatzen"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> bertan behera uzten"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Errorea <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> inprimatzean"</string>

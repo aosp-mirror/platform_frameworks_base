@@ -74,6 +74,12 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Odporúčané služby"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Zakázané služby"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Všetky služby"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="few">Nainštalujte a objavte <xliff:g id="COUNT_1">%1$s</xliff:g> tlačiarne</item>
+      <item quantity="many">Nainštalujte a objavte <xliff:g id="COUNT_1">%1$s</xliff:g> tlačiarne</item>
+      <item quantity="other">Nainštalujte a objavte <xliff:g id="COUNT_1">%1$s</xliff:g> tlačiarní</item>
+      <item quantity="one">Nainštalujte a objavte <xliff:g id="COUNT_0">%1$s</xliff:g> tlačiareň</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Prebieha tlač úlohy <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Prebieha zrušenie úlohy <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Chyba tlačiarne – úloha <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

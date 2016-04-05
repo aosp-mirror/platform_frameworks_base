@@ -74,6 +74,12 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Rekomenduojamos paslaugos"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Išjungtos paslaugos"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Visos paslaugos"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="one">Įdiekite, kad būtų rastas <xliff:g id="COUNT_1">%1$s</xliff:g> spausdintuvas</item>
+      <item quantity="few">Įdiekite, kad būtų rasti <xliff:g id="COUNT_1">%1$s</xliff:g> spausdintuvai</item>
+      <item quantity="many">Įdiekite, kad būtų rasta <xliff:g id="COUNT_1">%1$s</xliff:g> spausdintuvo</item>
+      <item quantity="other">Įdiekite, kad būtų rasta <xliff:g id="COUNT_1">%1$s</xliff:g> spausdintuvų</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Spausdinama: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Atšaukiama: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Spausdintuvo klaida: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"නිර්දේශිත සේවා"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"අබල කළ සේවා"</string>
     <string name="all_services_title" msgid="5578662754874906455">"සියලු සේවා"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="one">මුද්‍රණ යන්ත්‍ර <xliff:g id="COUNT_1">%1$s</xliff:g>ක් සොයා ගැනීමට ස්ථාපනය කරන්න</item>
+      <item quantity="other">මුද්‍රණ යන්ත්‍ර <xliff:g id="COUNT_1">%1$s</xliff:g>ක් සොයා ගැනීමට ස්ථාපනය කරන්න</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> මුද්‍රණය වේ"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"අවලංගු කෙරේ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"මුද්‍රණ දෝෂය <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

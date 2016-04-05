@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"推薦服務"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"已停用的服務"</string>
     <string name="all_services_title" msgid="5578662754874906455">"所有服務"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">安裝即可使用 <xliff:g id="COUNT_1">%1$s</xliff:g> 部印表機</item>
+      <item quantity="one">安裝即可使用 <xliff:g id="COUNT_0">%1$s</xliff:g> 部印表機</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"正在列印 <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"正在取消 <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"打印機錯誤：<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
