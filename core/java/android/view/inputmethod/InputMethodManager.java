@@ -1348,7 +1348,7 @@ public final class InputMethodManager {
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "onViewDetachedFromWindow: view=" + dumpViewInfo(view)
                     + " mServedView=" + dumpViewInfo(mServedView));
-            if (mServedView == view && view.hasWindowFocus()) {
+            if (mServedView == view) {
                 mNextServedView = null;
                 scheduleCheckFocusLocked(view);
             }
