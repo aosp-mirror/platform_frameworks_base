@@ -208,7 +208,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     @Override
     public void show() {
         if (!tryShow()) {
-            throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
+            throw new IllegalStateException("StandardMenuPopup cannot be used without an anchor");
         }
     }
 
@@ -273,7 +273,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
             mOnDismissListener = null;
 
             // Close this menu popup to make room for the submenu popup.
-            dismiss();
+            mMenu.close(false /* closeAllMenus */);
 
             // Show the new sub-menu popup at the same location as this popup.
             if (subPopup.tryShow(mXOffset, mYOffset)) {
