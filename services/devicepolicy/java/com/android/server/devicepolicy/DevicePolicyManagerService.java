@@ -3010,7 +3010,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ArrayList<ActiveAdmin> admins = new ArrayList<ActiveAdmin>();
             for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
                 DevicePolicyData policy = getUserData(userInfo.id);
-                if (!isManagedProfile(userInfo.id)) {
+                if (!userInfo.isManagedProfile()) {
                     admins.addAll(policy.mAdminList);
                 } else {
                     // For managed profiles, we always include the policies set on the parent
