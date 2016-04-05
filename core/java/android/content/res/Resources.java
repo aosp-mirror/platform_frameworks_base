@@ -714,12 +714,11 @@ public class Resources {
      * the resource ID passed here is an alias to another Drawable resource.
      * This means that if the density configuration of the alias resource
      * is different than the actual resource, the density of the returned
-     * Drawable would be incorrect, resulting in bad scaling.  To work
-     * around this, you can instead retrieve the Drawable through
-     * {@link TypedArray#getDrawable TypedArray.getDrawable}.  Use
-     * {@link android.content.Context#obtainStyledAttributes(int[])
-     * Context.obtainStyledAttributes} with
-     * an array containing the resource ID of interest to create the TypedArray.</p>
+     * Drawable would be incorrect, resulting in bad scaling. To work
+     * around this, you can instead manually resolve the aliased reference
+     * by using {@link #getValue(int, TypedValue, boolean)} and passing
+     * {@code true} for {@code resolveRefs}. The resulting
+     * {@link TypedValue#resourceId} value may be passed to this method.</p>
      *
      * <p class="note"><strong>Note:</strong> To obtain a themed drawable, use
      * {@link android.content.Context#getDrawable(int) Context.getDrawable(int)}
