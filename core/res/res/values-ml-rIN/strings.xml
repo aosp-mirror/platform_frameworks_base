@@ -233,10 +233,8 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"നയം അനുസരിച്ച് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="safeMode" msgid="2788228061547930246">"സുരക്ഷിത മോഡ്"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
-    <!-- no translation found for user_owner_label (1119010402169916617) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (5289992269827577857) -->
-    <skip />
+    <string name="user_owner_label" msgid="1119010402169916617">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
@@ -1063,13 +1061,10 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"പങ്കിടുക"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"നിരസിക്കുക"</string>
     <string name="select_input_method" msgid="8547250819326693584">"കീബോഡ് മാറ്റുക"</string>
-    <string name="configure_input_methods" msgid="5673193194563164021">"മറ്റ് കീബോർഡുകൾ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
     <string name="hardware" msgid="194658061510127999">"വെർച്വൽ കീബോർഡ് കാണിക്കുക"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ഫിസിക്കൽ കീബോർഡ് കോൺഫിഗർ ചെയ്യുക"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"കാൻഡിഡേറ്റുകൾ"</u></string>

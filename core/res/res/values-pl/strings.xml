@@ -237,10 +237,8 @@
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Treść ukryta z powodu zasad"</string>
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
     <string name="android_system_label" msgid="6577375335728551336">"System Android"</string>
-    <!-- no translation found for user_owner_label (1119010402169916617) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (5289992269827577857) -->
-    <skip />
+    <string name="user_owner_label" msgid="1119010402169916617">"Włącz profil osobisty"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"Włącz profil do pracy"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostęp do kontaktów"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokalizacja"</string>
@@ -1079,13 +1077,10 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"UDOSTĘPNIJ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ODRZUĆ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmień klawiaturę"</string>
-    <string name="configure_input_methods" msgid="5673193194563164021">"Inne klawiatury"</string>
     <string name="show_ime" msgid="2506087537466597099">"Pozostaw na ekranie, gdy aktywna jest klawiatura fizyczna"</string>
     <string name="hardware" msgid="194658061510127999">"Pokaż klawiaturę wirtualną"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (597189518763083494) -->
-    <skip />
-    <!-- no translation found for select_keyboard_layout_notification_message (8084622969903004900) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Skonfiguruj klawiaturę fizyczną"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Kliknij, by wybrać język i układ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandydaci"</u></string>
