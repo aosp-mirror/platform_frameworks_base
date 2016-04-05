@@ -278,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Запусціць апрацоўшчыкі WebView у ізаляваным працэсе."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Рэалізацыя WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Наладзіць рэалізацыю WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Гэты элемент больш не даступны для выбару. Паспрабуйце яшчэ раз."</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Гэты варыянт больш не даступны. Паспрабуйце яшчэ раз."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Перайсці на шыфраванне файлаў"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Пераход..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Шыфраванне файлаў ужо дзейнічае"</string>
