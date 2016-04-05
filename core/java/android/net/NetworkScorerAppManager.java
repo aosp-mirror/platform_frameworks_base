@@ -19,11 +19,9 @@ package android.net;
 import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
@@ -69,12 +67,32 @@ public final class NetworkScorerAppManager {
          */
         public final String mConfigurationActivityClassName;
 
+        /**
+         * Optional class name of the scoring service we can bind to. Null if none is set.
+         */
+        public final String mScoringServiceClassName;
+
         public NetworkScorerAppData(String packageName, int packageUid, CharSequence scorerName,
-                @Nullable String configurationActivityClassName) {
+                @Nullable String configurationActivityClassName,
+                @Nullable String scoringServiceClassName) {
             mScorerName = scorerName;
             mPackageName = packageName;
             mPackageUid = packageUid;
             mConfigurationActivityClassName = configurationActivityClassName;
+            mScoringServiceClassName = scoringServiceClassName;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("NetworkScorerAppData{");
+            sb.append("mPackageName='").append(mPackageName).append('\'');
+            sb.append(", mPackageUid=").append(mPackageUid);
+            sb.append(", mScorerName=").append(mScorerName);
+            sb.append(", mConfigurationActivityClassName='").append(mConfigurationActivityClassName)
+                    .append('\'');
+            sb.append(", mScoringServiceClassName='").append(mScoringServiceClassName).append('\'');
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -128,18 +146,27 @@ public final class NetworkScorerAppManager {
             Intent intent = new Intent(NetworkScoreManager.ACTION_CUSTOM_ENABLE);
             intent.setPackage(receiverInfo.packageName);
             List<ResolveInfo> configActivities = pm.queryIntentActivities(intent, 0 /* flags */);
-            if (!configActivities.isEmpty()) {
+            if (configActivities != null && !configActivities.isEmpty()) {
                 ActivityInfo activityInfo = configActivities.get(0).activityInfo;
                 if (activityInfo != null) {
                     configurationActivityClassName = activityInfo.name;
                 }
             }
 
+            // Find the scoring service class we can bind to, if any.
+            String scoringServiceClassName = null;
+            Intent serviceIntent = new Intent(NetworkScoreManager.ACTION_SCORE_NETWORKS);
+            serviceIntent.setPackage(receiverInfo.packageName);
+            ResolveInfo resolveServiceInfo = pm.resolveService(serviceIntent, 0 /* flags */);
+            if (resolveServiceInfo != null && resolveServiceInfo.serviceInfo != null) {
+                scoringServiceClassName = resolveServiceInfo.serviceInfo.name;
+            }
+
             // NOTE: loadLabel will attempt to load the receiver's label and fall back to the
             // app label if none is present.
             scorers.add(new NetworkScorerAppData(receiverInfo.packageName,
                     receiverInfo.applicationInfo.uid, receiverInfo.loadLabel(pm),
-                    configurationActivityClassName));
+                    configurationActivityClassName, scoringServiceClassName));
         }
 
         return scorers;
