@@ -41,15 +41,20 @@ namespace aapt {
 namespace test {
 
 struct DummyDiagnosticsImpl : public IDiagnostics {
-    void error(const DiagMessage& message) override {
-        DiagMessageActual actual = message.build();
-        std::cerr << actual.source << ": error: " << actual.message << "." << std::endl;
+    void log(Level level, DiagMessageActual& actualMsg) override {
+        switch (level) {
+        case Level::Note:
+            return;
+
+        case Level::Warn:
+            std::cerr << actualMsg.source << ": warn: " << actualMsg.message << "." << std::endl;
+            break;
+
+        case Level::Error:
+            std::cerr << actualMsg.source << ": error: " << actualMsg.message << "." << std::endl;
+            break;
+        }
     }
-    void warn(const DiagMessage& message) override {
-        DiagMessageActual actual = message.build();
-        std::cerr << actual.source << ": warn: " << actual.message << "." << std::endl;
-    }
-    void note(const DiagMessage& message) override {}
 };
 
 inline IDiagnostics* getDiagnostics() {

@@ -21,6 +21,7 @@
 #include "util/StringPiece.h"
 #include "util/Util.h"
 
+#include <android-base/macros.h>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -46,7 +47,11 @@ public:
     DiagMessage(const Source& src) : mSource(src) {
     }
 
-    template <typename T> DiagMessage& operator<<(const T& value) {
+    DiagMessage(size_t line) : mSource(Source().withLine(line)) {
+    }
+
+    template <typename T>
+    DiagMessage& operator<<(const T& value) {
         mMessage << value;
         return *this;
     }
@@ -59,36 +64,82 @@ public:
 struct IDiagnostics {
     virtual ~IDiagnostics() = default;
 
-    virtual void error(const DiagMessage& message) = 0;
-    virtual void warn(const DiagMessage& message) = 0;
-    virtual void note(const DiagMessage& message) = 0;
+    enum class Level {
+        Note,
+        Warn,
+        Error
+    };
+
+    virtual void log(Level level, DiagMessageActual& actualMsg) = 0;
+
+    virtual void error(const DiagMessage& message) {
+        DiagMessageActual actual = message.build();
+        log(Level::Error, actual);
+    }
+
+    virtual void warn(const DiagMessage& message) {
+        DiagMessageActual actual = message.build();
+        log(Level::Warn, actual);
+    }
+
+    virtual void note(const DiagMessage& message) {
+        DiagMessageActual actual = message.build();
+        log(Level::Note, actual);
+    }
 };
 
-struct StdErrDiagnostics : public IDiagnostics {
+class StdErrDiagnostics : public IDiagnostics {
+public:
+    StdErrDiagnostics() = default;
+
+    void log(Level level, DiagMessageActual& actualMsg) override {
+        const char* tag;
+
+        switch (level) {
+        case Level::Error:
+            mNumErrors++;
+            if (mNumErrors > 20) {
+                return;
+            }
+            tag = "error";
+            break;
+
+        case Level::Warn:
+            tag = "warn";
+            break;
+
+        case Level::Note:
+            tag = "note";
+            break;
+        }
+
+        if (!actualMsg.source.path.empty()) {
+            std::cerr << actualMsg.source << ": ";
+        }
+        std::cerr << tag << ": " << actualMsg.message << "." << std::endl;
+    }
+
+private:
     size_t mNumErrors = 0;
 
-    void emit(const DiagMessage& msg, const char* tag) {
-        DiagMessageActual actual = msg.build();
-        if (!actual.source.path.empty()) {
-            std::cerr << actual.source << ": ";
-        }
-        std::cerr << tag << actual.message << "." << std::endl;
+    DISALLOW_COPY_AND_ASSIGN(StdErrDiagnostics);
+};
+
+class SourcePathDiagnostics : public IDiagnostics {
+public:
+    SourcePathDiagnostics(const Source& src, IDiagnostics* diag) : mSource(src), mDiag(diag) {
     }
 
-    void error(const DiagMessage& msg) override {
-        if (mNumErrors < 20) {
-            emit(msg, "error: ");
-        }
-        mNumErrors++;
+    void log(Level level, DiagMessageActual& actualMsg) override {
+        actualMsg.source.path = mSource.path;
+        mDiag->log(level, actualMsg);
     }
 
-    void warn(const DiagMessage& msg) override {
-        emit(msg, "warn: ");
-    }
+private:
+    Source mSource;
+    IDiagnostics* mDiag;
 
-    void note(const DiagMessage& msg) override {
-        emit(msg, "note: ");
-    }
+    DISALLOW_COPY_AND_ASSIGN(SourcePathDiagnostics);
 };
 
 } // namespace aapt
