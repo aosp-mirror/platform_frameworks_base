@@ -30,6 +30,7 @@ import com.android.ide.common.resources.configuration.FolderConfiguration;
 import com.android.io.FolderWrapper;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.impl.RenderAction;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.intensive.setup.ConfigGenerator;
@@ -564,7 +565,7 @@ public class Main {
                         sFrameworkRepo.getConfiguredResources(config),
                         themeName, isProjectTheme);
 
-        return new SessionParams(
+        SessionParams sessionParams = new SessionParams(
                 layoutParser,
                 renderingMode,
                 null /*used for caching*/,
@@ -574,6 +575,8 @@ public class Main {
                 0,
                 targetSdk,
                 getLayoutLog());
+        sessionParams.setFlag(RenderParamsFlags.FLAG_DO_NOT_RENDER_ON_CREATE, true);
+        return sessionParams;
     }
 
     private static LayoutLog getLayoutLog() {
