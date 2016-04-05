@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
+import android.annotation.TestApi;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -973,6 +974,15 @@ public class Toolbar extends ViewGroup {
     public void setNavigationOnClickListener(OnClickListener listener) {
         ensureNavButtonView();
         mNavButtonView.setOnClickListener(listener);
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public View getNavigationView() {
+        return mNavButtonView;
     }
 
     /**
