@@ -348,6 +348,8 @@
     <protected-broadcast android:name="android.app.action.DEVICE_OWNER_CHANGED" />
 
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_AVAILABLE" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNAVAILABLE" />
 
     <!-- Added in N -->
     <protected-broadcast android:name="android.intent.action.ANR" />

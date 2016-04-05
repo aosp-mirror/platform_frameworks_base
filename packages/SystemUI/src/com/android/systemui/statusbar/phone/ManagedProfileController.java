@@ -113,7 +113,8 @@ public class ManagedProfileController {
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-            filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+            filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+            filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
             mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, null);
         } else {
             mContext.unregisterReceiver(mReceiver);
