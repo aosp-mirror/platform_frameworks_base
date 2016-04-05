@@ -515,7 +515,7 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     public void testGetPrintServices() throws Exception {
         List<PrintServiceInfo> printServices = mIPrintManager.getPrintServices(
                 PrintManager.ALL_SERVICES, mUserId);
-        assertTrue(printServices.size() >= 2);
+        assertTrue(printServices.size() >= 1);
 
         printServices = mIPrintManager.getPrintServices(0, mUserId);
         assertEquals(printServices, null);
