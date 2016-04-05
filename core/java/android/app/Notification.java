@@ -5394,6 +5394,7 @@ public class Notification implements Parcelable
         private static final int FLAG_HINT_SHOW_BACKGROUND_ONLY = 1 << 2;
         private static final int FLAG_START_SCROLL_BOTTOM = 1 << 3;
         private static final int FLAG_HINT_AVOID_BACKGROUND_CLIPPING = 1 << 4;
+        private static final int FLAG_BIG_PICTURE_AMBIENT = 1 << 5;
         private static final int FLAG_HINT_CONTENT_INTENT_LAUNCHES_ACTIVITY = 1 << 6;
 
         // Default value for flags integer
@@ -5959,6 +5960,29 @@ public class Notification implements Parcelable
          */
         public int getHintScreenTimeout() {
             return mHintScreenTimeout;
+        }
+
+        /**
+         * Set a hint that this notification's {@link BigPictureStyle} (if present) should be
+         * converted to low-bit and displayed in ambient mode, especially useful for barcodes and
+         * qr codes, as well as other simple black-and-white tickets.
+         * @param hintAmbientBigPicture {@code true} to enable converstion and ambient.
+         * @return this object for method chaining
+         */
+        public WearableExtender setHintAmbientBigPicture(boolean hintAmbientBigPicture) {
+            setFlag(FLAG_BIG_PICTURE_AMBIENT, hintAmbientBigPicture);
+            return this;
+        }
+
+        /**
+         * Get a hint that this notification's {@link BigPictureStyle} (if present) should be
+         * converted to low-bit and displayed in ambient mode, especially useful for barcodes and
+         * qr codes, as well as other simple black-and-white tickets.
+         * @return {@code true} if it should be displayed in ambient, false otherwise
+         * otherwise. The default value is {@code false} if this was never set.
+         */
+        public boolean getHintAmbientBigPicture() {
+            return (mFlags & FLAG_BIG_PICTURE_AMBIENT) != 0;
         }
 
         /**
