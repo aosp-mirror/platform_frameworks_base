@@ -6094,7 +6094,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         int bottom = wf.bottom - cr.bottom;
                         frame.union(left, top, right, bottom);
                         ws.getVisibleBounds(stackBounds);
-                        if (!frame.intersect(stackBounds)) {
+                        if (!Rect.intersects(frame, stackBounds)) {
                             // Set frame empty if there's no intersection.
                             frame.setEmpty();
                         }
