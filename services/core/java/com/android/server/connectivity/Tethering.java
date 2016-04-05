@@ -1211,6 +1211,11 @@ public class Tethering extends BaseNetworkObserver {
                     Log.e(TAG, "Error Tethering: " + e.toString());
                     setLastError(ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR);
 
+                    try {
+                        mNMService.untetherInterface(mIfaceName);
+                    } catch (Exception ee) {
+                        Log.e(TAG, "Error untethering after failure!" + ee.toString());
+                    }
                     transitionTo(mInitialState);
                     return;
                 }
