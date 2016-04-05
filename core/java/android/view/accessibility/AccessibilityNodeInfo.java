@@ -328,36 +328,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     // Action arguments
 
     /**
-     * Argument for specifying index of {@link android.text.style.ClickableSpan} the click action is
-     * related to.
-     * <p>
-     * <strong>Type:</strong> int<br>
-     * <strong>Actions:</strong>
-     * {@link AccessibilityAction#ACTION_CLICK}
-     * </p>
-     *
-     * @see AccessibilityAction#ACTION_CLICK
-     */
-    public static final String ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT =
-            "android.view.accessibility.action.ARGUMENT_CLICK_SPAN_INDEX_INT";
-
-    /**
-     * Argument for specifying index of character in the text which contains
-     * {@link android.text.style.ClickableSpan} the click action is
-     * related to. If there is more than one {@link android.text.style.ClickableSpan} assigned for
-     * the range the character is in only the first span would be clicked.
-     * <p>
-     * <strong>Type:</strong> int<br>
-     * <strong>Actions:</strong>
-     * {@link AccessibilityAction#ACTION_CLICK}
-     * </p>
-     *
-     * @see AccessibilityAction#ACTION_CLICK
-     */
-    public static final String ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT =
-            "android.view.accessibility.action.ARGUMENT_CLICK_CHARACTER_INDEX_INT";
-
-    /**
      * Argument for which movement granularity to be used when traversing the node text.
      * <p>
      * <strong>Type:</strong> int<br>
@@ -3391,33 +3361,6 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Action that clicks on the node info.
-         *
-         * <p>
-         * If a specific {@link android.text.style.ClickableSpan} within node's text content is
-         * supposed to be clicked, then one of {@link #ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT} or
-         * {@link #ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT} arguments should be specified.
-         * If both arguments are set {@link #ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT} would
-         * be ignored.<br>
-         *
-         * {@link #ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT} specifies index of corresponding
-         * {@link android.text.style.ClickableSpan} in {@link android.text.SpannableString}.<br>
-         *
-         * {@link #ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT} specifies index of character
-         * that could contain one or more spans.
-         * </p>
-         *
-         * <p>
-         * <strong>Optional arguments:</strong>
-         * {@link #ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT},
-         * {@link #ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT}<br>
-         * <strong>Example:</strong> Perform click on 3rd {@link android.text.style.ClickableSpan}
-         * inside {@link android.text.SpannableString} in node's text.
-         * <code><pre><p>
-         *   Bundle arguments = new Bundle();
-         *   arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT, 3);
-         *   info.performAction(AccessibilityAction.ACTION_CLICK.getId(), arguments);
-         * </code></pre></p>
-         * </p>
          */
         public static final AccessibilityAction ACTION_CLICK =
                 new AccessibilityAction(

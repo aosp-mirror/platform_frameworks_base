@@ -9247,52 +9247,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean performAccessibilityActionClick(Bundle arguments) {
         boolean handled = false;
-        boolean processed = false;
 
         if (!isEnabled()) {
             return false;
         }
 
-        if (arguments != null && arguments.containsKey(
-                AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT)) {
-            int spanIndex = arguments.getInt(
-                    AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT, -1);
-            if (spanIndex >= 0 && hasSpannableText()) {
-                ClickableSpan[] spans = ((Spannable) mText).getSpans(0,
-                        mText.length(), ClickableSpan.class);
-                if (spans != null && spans.length > spanIndex && spans[spanIndex] != null) {
-                    // Simulate View.onTouchEvent for an ACTION_UP event
-                    if (isFocusable() && !isFocused()) {
-                        requestFocus();
-                    }
-                    spans[spanIndex].onClick(this);
-                    handled = true;
-                }
-            }
-            processed = true;
-        }
-
-        if (!processed && arguments != null &&  arguments.containsKey(
-                AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT)) {
-            int characterIndex = arguments.getInt(
-                    AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT, -1);
-            if (characterIndex >= 0 && hasSpannableText()) {
-                ClickableSpan[] spans = ((Spannable) mText).getSpans(characterIndex,
-                        characterIndex, ClickableSpan.class);
-                // click only on the first span to keep parity with onTouch() implementation
-                if (spans != null && spans.length > 0 && spans[0] != null) {
-                    // Simulate View.onTouchEvent for an ACTION_UP event
-                    if (isFocusable() && !isFocused()) {
-                        requestFocus();
-                    }
-                    spans[0].onClick(this);
-                    handled = true;
-                }
-            }
-            processed = true;
-        }
-
-        if (!processed && (isClickable() || isLongClickable())) {
+        if (isClickable() || isLongClickable()) {
             // Simulate View.onTouchEvent for an ACTION_UP event
             if (isFocusable() && !isFocused()) {
                 requestFocus();
