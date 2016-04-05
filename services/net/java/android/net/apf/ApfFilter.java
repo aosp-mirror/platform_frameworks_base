@@ -147,10 +147,11 @@ public class ApfFilter {
     private boolean mMulticastFilter;
 
     private ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
-            IpManager.Callback ipManagerCallback) {
+            IpManager.Callback ipManagerCallback, boolean multicastFilter) {
         mApfCapabilities = apfCapabilities;
         mIpManagerCallback = ipManagerCallback;
         mNetworkInterface = networkInterface;
+        mMulticastFilter = multicastFilter;
 
         maybeStartFilter();
     }
@@ -752,7 +753,8 @@ public class ApfFilter {
      * filtering using APF programs.
      */
     public static ApfFilter maybeCreate(ApfCapabilities apfCapabilities,
-            NetworkInterface networkInterface, IpManager.Callback ipManagerCallback) {
+            NetworkInterface networkInterface, IpManager.Callback ipManagerCallback,
+            boolean multicastFilter) {
         if (apfCapabilities == null || networkInterface == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
         if (apfCapabilities.maximumApfProgramSize < 512) {
@@ -768,7 +770,7 @@ public class ApfFilter {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }
-        return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback);
+        return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback, multicastFilter);
     }
 
     public synchronized void shutdown() {
