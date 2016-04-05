@@ -177,9 +177,9 @@ public class RenderScriptGL extends RenderScript {
 
         mWidth = 0;
         mHeight = 0;
-        mDev = nDeviceCreate();
+        long device = nDeviceCreate();
         int dpi = ctx.getResources().getDisplayMetrics().densityDpi;
-        mContext = nContextCreateGL(mDev, 0, sdkVersion,
+        mContext = nContextCreateGL(device, 0, sdkVersion,
                                     mSurfaceConfig.mColorMin, mSurfaceConfig.mColorPref,
                                     mSurfaceConfig.mAlphaMin, mSurfaceConfig.mAlphaPref,
                                     mSurfaceConfig.mDepthMin, mSurfaceConfig.mDepthPref,
