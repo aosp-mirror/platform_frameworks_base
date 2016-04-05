@@ -2434,6 +2434,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *           11111111                PFLAG3_POINTER_ICON_MASK
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
+     *        1                          PFLAG3_TEMPORARY_DETACH
      * |-------|-------|-------|-------|
      */
 
@@ -2666,6 +2667,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * in PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE is valid.
      */
     private static final int PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED = 0x1000000;
+
+    /**
+     * Flag indicating that the view is temporarily detached from the parent view.
+     *
+     * @see #onStartTemporaryDetach()
+     * @see #onFinishTemporaryDetach()
+     */
+    static final int PFLAG3_TEMPORARY_DETACH = 0x2000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -9736,9 +9745,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @hide
+     * @return {@code true} when the View is in the state between {@link #onStartTemporaryDetach()}
+     * and {@link #onFinishTemporaryDetach()}.
      */
+    public final boolean isTemporarilyDetached() {
+        return (mPrivateFlags3 & PFLAG3_TEMPORARY_DETACH) != 0;
+    }
+
+    /**
+     * Dispatch {@link #onStartTemporaryDetach()} to this View and its direct children if this is
+     * a container View.
+     */
+    @CallSuper
     public void dispatchStartTemporaryDetach() {
+        mPrivateFlags3 |= PFLAG3_TEMPORARY_DETACH;
         onStartTemporaryDetach();
     }
 
@@ -9754,10 +9774,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @hide
+     * Dispatch {@link #onFinishTemporaryDetach()} to this View and its direct children if this is
+     * a container View.
      */
+    @CallSuper
     public void dispatchFinishTemporaryDetach() {
         onFinishTemporaryDetach();
+        mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
     }
 
     /**
@@ -15188,6 +15211,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void onDetachedFromWindowInternal() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
         mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
+        mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
 
         removeUnsetPressCallback();
         removeLongPressCallback();

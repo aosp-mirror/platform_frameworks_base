@@ -218,7 +218,6 @@ public class Editor {
     boolean mShowSoftInputOnFocus = true;
     private boolean mPreserveSelection;
     private boolean mRestartActionModeOnNextRefresh;
-    boolean mTemporaryDetach;
 
     boolean mIsBeingLongClicked;
 
@@ -367,7 +366,6 @@ public class Editor {
             showError();
             mShowErrorAfterAttach = false;
         }
-        mTemporaryDetach = false;
 
         final ViewTreeObserver observer = mTextView.getViewTreeObserver();
         // No need to create the controller.
@@ -429,7 +427,6 @@ public class Editor {
 
         hideCursorAndSpanControllers();
         stopTextActionModeWithPreservingSelection();
-        mTemporaryDetach = false;
     }
 
     private void discardTextDisplayLists() {
@@ -1212,7 +1209,7 @@ public class Editor {
                 stopTextActionModeWithPreservingSelection();
             } else {
                 hideCursorAndSpanControllers();
-                if (mTemporaryDetach) {
+                if (mTextView.isTemporarilyDetached()) {
                     stopTextActionModeWithPreservingSelection();
                 } else {
                     stopTextActionMode();
