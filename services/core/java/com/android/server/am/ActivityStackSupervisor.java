@@ -1984,6 +1984,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mTmpConfigs.clear();
         mTmpInsetBounds.clear();
         final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
+        final Rect insetBounds = tempTaskInsetBounds != null ? tempTaskInsetBounds : taskBounds;
         for (int i = tasks.size() - 1; i >= 0; i--) {
             final TaskRecord task = tasks.get(i);
             if (task.isResizeable()) {
@@ -1995,9 +1997,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     fitWithinBounds(tempRect2, bounds);
                     task.updateOverrideConfiguration(tempRect2);
                 } else {
-                    task.updateOverrideConfiguration(
-                            tempTaskBounds != null ? tempTaskBounds : bounds,
-                            tempTaskInsetBounds != null ? tempTaskInsetBounds : bounds);
+                    task.updateOverrideConfiguration(taskBounds, insetBounds);
                 }
             }
 
