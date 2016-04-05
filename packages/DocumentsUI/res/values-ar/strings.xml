@@ -139,6 +139,7 @@
     <string name="rename_error" msgid="4203041674883412606">"أخفقت إعادة تسمية المستند."</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"تم تحويل بعض الملفات"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"هل تريد منح التطبيق <xliff:g id="APPNAME"><b>^1</b></xliff:g> حق الوصول إلى الدليل <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> على <xliff:g id="STORAGE"><i>^3</i></xliff:g>؟"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"هل تريد تمكين <xliff:g id="APPNAME"><b>^1</b></xliff:g> من الدخول إلى دليل <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>؟"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"هل تريد منح <xliff:g id="APPNAME"><b>^1</b></xliff:g> حق الوصول إلى بياناتك، بما في ذلك الصور ومقاطع الفيديو على <xliff:g id="STORAGE"><i>^2</i></xliff:g>؟"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"عدم السؤال مرة أخرى"</string>
     <string name="allow" msgid="7225948811296386551">"السماح"</string>
