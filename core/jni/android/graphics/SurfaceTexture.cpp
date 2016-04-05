@@ -65,12 +65,12 @@ static bool isProtectedContext() {
     EGLContext ctx = eglGetCurrentContext();
 
     if (dpy == EGL_NO_DISPLAY) {
-        ALOGE("isProtectedSurface: invalid current EGLDisplay");
+        ALOGI("isProtectedSurface: invalid current EGLDisplay");
         return false;
     }
 
     if (ctx == EGL_NO_CONTEXT) {
-        ALOGE("isProtectedSurface: invalid current EGLContext");
+        ALOGI("isProtectedSurface: invalid current EGLContext");
         return false;
     }
 
