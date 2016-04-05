@@ -84,17 +84,8 @@ public class ContentObserverController extends StateController {
             boolean havePendingUris = false;
             // If there is a previous job associated with the new job, propagate over
             // any pending content URI trigger reports.
-            if (lastJob != null && lastJob.contentObserverJobInstance != null
-                    && lastJob.contentObserverJobInstance
-                    != taskStatus.contentObserverJobInstance
-                    && lastJob.contentObserverJobInstance.mChangedAuthorities != null) {
+            if (taskStatus.contentObserverJobInstance.mChangedAuthorities != null) {
                 havePendingUris = true;
-                taskStatus.contentObserverJobInstance.mChangedAuthorities
-                        = lastJob.contentObserverJobInstance.mChangedAuthorities;
-                taskStatus.contentObserverJobInstance.mChangedUris
-                        = lastJob.contentObserverJobInstance.mChangedUris;
-                lastJob.contentObserverJobInstance.mChangedAuthorities = null;
-                lastJob.contentObserverJobInstance.mChangedUris = null;
             }
             // If we have previously reported changed authorities/uris, then we failed
             // to complete the job with them so will re-record them to report again.
@@ -138,15 +129,34 @@ public class ContentObserverController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
+            boolean forUpdate) {
         if (taskStatus.hasContentTriggerConstraint()) {
-            if (!forUpdate) {
-                // We won't do this reset if being called for an update, because
-                // we know it will be immediately followed by maybeStartTrackingJobLocked...
-                // and we don't want to lose any content changes in-between.
-                if (taskStatus.contentObserverJobInstance != null) {
-                    taskStatus.contentObserverJobInstance.detach();
-                    taskStatus.contentObserverJobInstance = null;
+            if (taskStatus.contentObserverJobInstance != null) {
+                if (incomingJob != null && taskStatus.contentObserverJobInstance != null
+                        && taskStatus.contentObserverJobInstance.mChangedAuthorities != null) {
+                    // We are stopping this job, but it is going to be replaced by this given
+                    // incoming job.  We want to propagate our state over to it, so we don't
+                    // lose any content changes that had happend since the last one started.
+                    // If there is a previous job associated with the new job, propagate over
+                    // any pending content URI trigger reports.
+                    if (incomingJob.contentObserverJobInstance == null) {
+                        incomingJob.contentObserverJobInstance = new JobInstance(incomingJob);
+                    }
+                    incomingJob.contentObserverJobInstance.mChangedAuthorities
+                            = taskStatus.contentObserverJobInstance.mChangedAuthorities;
+                    incomingJob.contentObserverJobInstance.mChangedUris
+                            = taskStatus.contentObserverJobInstance.mChangedUris;
+                    taskStatus.contentObserverJobInstance.mChangedAuthorities = null;
+                    taskStatus.contentObserverJobInstance.mChangedUris = null;
+                } else {
+                    // We won't do this reset if being called for an update, because
+                    // we know it will be immediately followed by maybeStartTrackingJobLocked...
+                    // and we don't want to lose any content changes in-between.
+                    if (taskStatus.contentObserverJobInstance != null) {
+                        taskStatus.contentObserverJobInstance.detach();
+                        taskStatus.contentObserverJobInstance = null;
+                    }
                 }
             }
             mTrackedTasks.remove(taskStatus);
