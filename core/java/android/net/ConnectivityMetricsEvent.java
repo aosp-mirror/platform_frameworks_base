@@ -78,4 +78,42 @@ public final class ConnectivityMetricsEvent implements Parcelable {
         return String.format("ConnectivityMetricsEvent(%d, %d, %d)", timestamp,
                 componentTag, eventTag);
     }
+
+    /** {@hide} */
+    public static class Reference implements Parcelable {
+
+        public long value;
+
+        public Reference(long ref) {
+            this.value = ref;
+        }
+
+        /** Implement the Parcelable interface */
+        public static final Parcelable.Creator<Reference> CREATOR
+                = new Parcelable.Creator<Reference> (){
+            public Reference createFromParcel(Parcel source) {
+                return new Reference(source.readLong());
+            }
+
+            public Reference[] newArray(int size) {
+                return new Reference[size];
+            }
+        };
+
+        /** Implement the Parcelable interface */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(value);
+        }
+
+        public void readFromParcel(Parcel in) {
+            value = in.readLong();
+        }
+    }
 }
