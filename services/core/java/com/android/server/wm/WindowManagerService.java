@@ -2586,7 +2586,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     try {
 
-                        win.applyGravityAndUpdateFrame();
+                        win.applyGravityAndUpdateFrame(win.mContainingFrame, win.mDisplayFrame);
                         win.mWinAnimator.computeShownFrameLocked();
 
                         win.mWinAnimator.setSurfaceBoundariesLocked(false);
