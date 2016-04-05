@@ -1673,7 +1673,7 @@ public class ListView extends AbsListView {
                     focusLayoutRestoreView = findFocus();
                     if (focusLayoutRestoreView != null) {
                         // Tell it we are going to mess with it.
-                        focusLayoutRestoreView.onStartTemporaryDetach();
+                        focusLayoutRestoreView.dispatchStartTemporaryDetach();
                     }
                 }
                 requestFocus();
@@ -1850,7 +1850,7 @@ public class ListView extends AbsListView {
             // our view hierarchy.
             if (focusLayoutRestoreView != null
                     && focusLayoutRestoreView.getWindowToken() != null) {
-                focusLayoutRestoreView.onFinishTemporaryDetach();
+                focusLayoutRestoreView.dispatchFinishTemporaryDetach();
             }
             
             mLayoutMode = LAYOUT_NORMAL;
