@@ -2043,8 +2043,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             resizeStackUncheckedLocked(stack, dockedBounds, tempDockedTaskBounds,
                     tempDockedTaskInsetBounds);
 
-            if (stack.mFullscreen) {
-                // The dock stack went fullscreen which is kinda like dismissing it.
+            // TODO: Checking for isAttached might not be needed as if the user passes in null
+            // dockedBounds then they want the docked stack to be dismissed.
+            if (stack.mFullscreen || (dockedBounds == null && !stack.isAttached())) {
+                // The dock stack either was dismissed or went fullscreen, which is kinda the same.
                 // In this case we make all other static stacks fullscreen and move all
                 // docked stack tasks to the fullscreen stack.
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
@@ -2069,18 +2071,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
-                if (dockedBounds != null) {
-                    mWindowManager.getStackDockedModeBounds(
-                            HOME_STACK_ID, tempRect, true /* ignoreVisibility */);
-                }
+                mWindowManager.getStackDockedModeBounds(
+                        HOME_STACK_ID, tempRect, true /* ignoreVisibility */);
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                    if (StackId.isResizeableByDockedStack(i)) {
-                        ActivityStack otherStack = getStack(i);
-                        if (otherStack != null) {
-                            resizeStackLocked(i, dockedBounds != null ? tempRect : null,
-                                    tempOtherTaskBounds, tempOtherTaskInsetBounds, preserveWindows,
-                                    true /* allowResizeInDockedMode */);
-                        }
+                    if (StackId.isResizeableByDockedStack(i) && getStack(i) != null) {
+                        resizeStackLocked(i, tempRect, tempOtherTaskBounds,
+                                tempOtherTaskInsetBounds, preserveWindows,
+                                true /* allowResizeInDockedMode */);
                     }
                 }
             }
