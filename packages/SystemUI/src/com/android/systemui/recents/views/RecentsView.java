@@ -367,8 +367,10 @@ public class RecentsView extends FrameLayout {
             int topBottomInsets = mSystemInsets.top + mSystemInsets.bottom;
             int childWidth = mEmptyView.getMeasuredWidth();
             int childHeight = mEmptyView.getMeasuredHeight();
-            int childLeft = left + Math.max(0, (right - left - leftRightInsets - childWidth)) / 2;
-            int childTop = top + Math.max(0, (bottom - top - topBottomInsets - childHeight)) / 2;
+            int childLeft = left + mSystemInsets.left +
+                    Math.max(0, (right - left - leftRightInsets - childWidth)) / 2;
+            int childTop = top + mSystemInsets.top +
+                    Math.max(0, (bottom - top - topBottomInsets - childHeight)) / 2;
             mEmptyView.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
         }
 
