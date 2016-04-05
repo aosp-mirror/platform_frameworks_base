@@ -2185,9 +2185,6 @@ public class DevicePolicyManager {
      * Force a new device unlock password (the password needed to access the entire device, not for
      * individual accounts) on the user. This takes effect immediately.
      * <p>
-     * Calling this from a managed profile that shares the password with the owner profile will
-     * throw a security exception.
-     * <p>
      * <em>Note: This API has been limited as of {@link android.os.Build.VERSION_CODES#N} for
      * device admins that are not device owner and not profile owner.
      * The password can now only be changed if there is currently no password set.  Device owner
@@ -2201,10 +2198,10 @@ public class DevicePolicyManager {
      * case the currently active quality will be increased to match.
      * <p>
      * Calling with a null or empty password will clear any existing PIN, pattern or password if the
-     * current password constraints allow it. <em>Note: This will not
-     * work in {@link android.os.Build.VERSION_CODES#N} and later for device admins that are not
-     * device owner and not profile owner.  Once set, the password cannot be changed to null or
-     * empty, except by device owner or profile owner.</em>
+     * current password constraints allow it. <em>Note: This will not work in
+     * {@link android.os.Build.VERSION_CODES#N} and later for managed profiles, or for device admins
+     * that are not device owner or profile owner.  Once set, the password cannot be changed to null
+     * or empty except by these admins.</em>
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call this method; if it has
