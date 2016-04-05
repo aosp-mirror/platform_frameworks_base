@@ -42,10 +42,10 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.FactoryTest;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -59,6 +59,7 @@ import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -73,6 +74,29 @@ import java.util.List;
  */
 public final class ContentService extends IContentService.Stub {
     private static final String TAG = "ContentService";
+
+    public static class Lifecycle extends SystemService {
+        private ContentService mContentService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            final boolean factoryTest = (FactoryTest
+                    .getMode() == FactoryTest.FACTORY_TEST_LOW_LEVEL);
+            mContentService = new ContentService(getContext(), factoryTest);
+            publishBinderService(ContentResolver.CONTENT_SERVICE_NAME, mContentService);
+        }
+
+        @Override
+        public void onCleanupUser(int userHandle) {
+            synchronized (mContentService.mCache) {
+                mContentService.mCache.remove(userHandle);
+            }
+        }
+    }
 
     private Context mContext;
     private boolean mFactoryTest;
@@ -94,12 +118,18 @@ public final class ContentService extends IContentService.Stub {
     private BroadcastReceiver mCacheReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final Uri data = intent.getData();
-            if (data != null) {
-                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        UserHandle.USER_NULL);
-                final String packageName = data.getSchemeSpecificPart();
-                invalidateCacheLocked(userId, packageName, null);
+            synchronized (mCache) {
+                if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                    mCache.clear();
+                } else {
+                    final Uri data = intent.getData();
+                    if (data != null) {
+                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                                UserHandle.USER_NULL);
+                        final String packageName = data.getSchemeSpecificPart();
+                        invalidateCacheLocked(userId, packageName, null);
+                    }
+                }
             }
         }
     };
@@ -227,6 +257,11 @@ public final class ContentService extends IContentService.Stub {
         packageFilter.addDataScheme("package");
         mContext.registerReceiverAsUser(mCacheReceiver, UserHandle.ALL,
                 packageFilter, null, null);
+
+        final IntentFilter localeFilter = new IntentFilter();
+        localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        mContext.registerReceiverAsUser(mCacheReceiver, UserHandle.ALL,
+                localeFilter, null, null);
     }
 
     public void systemReady() {
@@ -1078,12 +1113,6 @@ public final class ContentService extends IContentService.Stub {
                     providerPackageName);
             return cache.get(fullKey);
         }
-    }
-
-    public static ContentService main(Context context, boolean factoryTest) {
-        ContentService service = new ContentService(context, factoryTest);
-        ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
-        return service;
     }
 
     /**

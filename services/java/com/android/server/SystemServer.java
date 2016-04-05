@@ -157,6 +157,8 @@ public final class SystemServer {
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_BLUETOOTH_SERVICE_CLASS =
             "com.google.android.clockwork.bluetooth.WearBluetoothService";
+    private static final String CONTENT_SERVICE_CLASS =
+            "com.android.server.content.ContentService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -574,8 +576,7 @@ public final class SystemServer {
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             traceBeginAndSlog("StartContentService");
-            contentService = ContentService.main(context,
-                    mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL);
+            mSystemServiceManager.startService(CONTENT_SERVICE_CLASS);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             traceBeginAndSlog("InstallSystemProviders");
@@ -1324,7 +1325,7 @@ public final class SystemServer {
                     reportWtf("starting System UI", e);
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "MakeMountServiceReady");
+                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "MakeNetworkScoreReady");
                 try {
                     if (networkScoreF != null) networkScoreF.systemReady();
                 } catch (Throwable e) {
