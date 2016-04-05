@@ -430,9 +430,11 @@ public class CalendarView extends FrameLayout {
      * Sets whether to show the week number.
      *
      * @param showWeekNumber True to show the week number.
+     * @deprecated No longer used by Material-style CalendarView.
      *
      * @attr ref android.R.styleable#CalendarView_showWeekNumber
      */
+    @Deprecated
     public void setShowWeekNumber(boolean showWeekNumber) {
         mDelegate.setShowWeekNumber(showWeekNumber);
     }
@@ -441,9 +443,11 @@ public class CalendarView extends FrameLayout {
      * Gets whether to show the week number.
      *
      * @return True if showing the week number.
+     * @deprecated No longer used by Material-style CalendarView.
      *
      * @attr ref android.R.styleable#CalendarView_showWeekNumber
      */
+    @Deprecated
     public boolean getShowWeekNumber() {
         return mDelegate.getShowWeekNumber();
     }
