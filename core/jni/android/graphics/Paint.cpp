@@ -768,6 +768,22 @@ namespace PaintGlue {
         return false;
     }
 
+    // Returns true if the given string is exact one pair of regional indicators.
+    static bool isFlag(const jchar* str, size_t length) {
+        const jchar RI_LEAD_SURROGATE = 0xD83C;
+        const jchar RI_TRAIL_SURROGATE_MIN = 0xDDE6;
+        const jchar RI_TRAIL_SURROGATE_MAX = 0xDDFF;
+
+        if (length != 4) {
+            return false;
+        }
+        if (str[0] != RI_LEAD_SURROGATE || str[2] != RI_LEAD_SURROGATE) {
+            return false;
+        }
+        return RI_TRAIL_SURROGATE_MIN <= str[1] && str[1] <= RI_TRAIL_SURROGATE_MAX &&
+            RI_TRAIL_SURROGATE_MIN <= str[3] && str[3] <= RI_TRAIL_SURROGATE_MAX;
+    }
+
     static jboolean hasGlyph(JNIEnv *env, jclass, jlong paintHandle, jlong typefaceHandle,
             jint bidiFlags, jstring string) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -817,7 +833,26 @@ namespace PaintGlue {
             // in joining scripts, such as Arabic and Mongolian.
             return false;
         }
-        return nGlyphs > 0 && !layoutContainsNotdef(layout);
+
+        if (nGlyphs == 0 || layoutContainsNotdef(layout)) {
+            return false;  // The collection doesn't have a glyph.
+        }
+
+        if (nChars == 2 && isFlag(str.get(), str.size())) {
+            // Some font may have a special glyph for unsupported regional indicator pairs.
+            // To return false for this case, need to compare the glyph id with the one of ZZ
+            // since ZZ is reserved for unknown or invalid territory.
+            // U+1F1FF (REGIONAL INDICATOR SYMBOL LETTER Z) is \uD83C\uDDFF in UTF16.
+            static const jchar ZZ_FLAG_STR[] = { 0xD83C, 0xDDFF, 0xD83C, 0xDDFF };
+            Layout zzLayout;
+            MinikinUtils::doLayout(&zzLayout, paint, bidiFlags, typeface, ZZ_FLAG_STR, 0, 4, 4);
+            if (zzLayout.nGlyphs() != 1 || layoutContainsNotdef(zzLayout)) {
+                // The font collection doesn't have a glyph for unknown flag. Just return true.
+                return true;
+            }
+            return zzLayout.getGlyphId(0) != layout.getGlyphId(0);
+        }
+        return true;
     }
 
     static jfloat doRunAdvance(const Paint* paint, Typeface* typeface, const jchar buf[],
