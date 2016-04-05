@@ -349,21 +349,21 @@ public class FilesActivity extends BaseActivity {
             case KeyEvent.KEYCODE_A:
                 dir = getDirectoryFragment();
                 if (dir != null) {
-                    Metrics.logKeyboardAction(this, keyCode);
+                    Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_SELECT_ALL);
                     dir.selectAllFiles();
                 }
                 return true;
             case KeyEvent.KEYCODE_C:
                 dir = getDirectoryFragment();
                 if (dir != null) {
-                    Metrics.logKeyboardAction(this, keyCode);
+                    Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_COPY);
                     dir.copySelectedToClipboard();
                 }
                 return true;
             case KeyEvent.KEYCODE_V:
                 dir = getDirectoryFragment();
                 if (dir != null) {
-                    Metrics.logKeyboardAction(this, keyCode);
+                    Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_PASTE);
                     dir.pasteFromClipboard();
                 }
                 return true;

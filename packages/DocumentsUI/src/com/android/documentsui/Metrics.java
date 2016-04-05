@@ -296,13 +296,13 @@ public final class Metrics {
     // Do not change or rearrange these values, that will break historical data. Only add to the
     // list.
     // Do not use negative numbers or zero; clearcut only handles positive integers.
-    private static final int ACTION_KEYBOARD_OTHER = 1;
-    private static final int ACTION_KEYBOARD_PASTE = 2;
-    private static final int ACTION_KEYBOARD_COPY = 3;
-    private static final int ACTION_KEYBOARD_DELETE = 4;
-    private static final int ACTION_KEYBOARD_SELECT_ALL = 5;
-    private static final int ACTION_KEYBOARD_BACK = 6;
-    private static final int ACTION_KEYBOARD_SWITCH_FOCUS = 7;
+    public static final int ACTION_KEYBOARD_OTHER = 1;
+    public static final int ACTION_KEYBOARD_PASTE = 2;
+    public static final int ACTION_KEYBOARD_COPY = 3;
+    public static final int ACTION_KEYBOARD_DELETE = 4;
+    public static final int ACTION_KEYBOARD_SELECT_ALL = 5;
+    public static final int ACTION_KEYBOARD_BACK = 6;
+    public static final int ACTION_KEYBOARD_SWITCH_FOCUS = 7;
 
     @IntDef(flag = false, value = {
             ACTION_KEYBOARD_OTHER,
@@ -525,31 +525,8 @@ public final class Metrics {
      * @param context
      * @param keyCode
      */
-    public static void logKeyboardAction(Context context, int keyCode) {
-        @KeyboardAction int keyboardAction = ACTION_KEYBOARD_OTHER;
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_V:
-                keyboardAction = ACTION_KEYBOARD_PASTE;
-                break;
-            case KeyEvent.KEYCODE_C:
-                keyboardAction = ACTION_KEYBOARD_COPY;
-                break;
-            case KeyEvent.KEYCODE_FORWARD_DEL:
-                keyboardAction = ACTION_KEYBOARD_DELETE;
-                break;
-            case KeyEvent.KEYCODE_A:
-                keyboardAction = ACTION_KEYBOARD_SELECT_ALL;
-                break;
-            case KeyEvent.KEYCODE_DEL:
-                keyboardAction = ACTION_KEYBOARD_BACK;
-                break;
-            case KeyEvent.KEYCODE_TAB:
-                keyboardAction = ACTION_KEYBOARD_SWITCH_FOCUS;
-                break;
-            default:
-                break;
-        }
-        logHistogram(context, COUNT_KEYBOARD_ACTION, keyboardAction);
+    public static void logKeyboardAction(Context context, @KeyboardAction int action) {
+        logHistogram(context, COUNT_KEYBOARD_ACTION, action);
     }
 
     /**
