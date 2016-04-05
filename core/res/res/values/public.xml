@@ -2716,6 +2716,8 @@
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
+    <public type="style" name="Widget.Material.CompoundButton.Switch" />
+    <public type="style" name="Widget.Material.Light.CompoundButton.Switch" />
 
     <public type="id" name="accessibilityActionSetProgress" />
     <public type="id" name="icon_frame" />
