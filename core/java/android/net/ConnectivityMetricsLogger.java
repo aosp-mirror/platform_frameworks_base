@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -28,13 +29,23 @@ public class ConnectivityMetricsLogger {
     public static final String CONNECTIVITY_METRICS_LOGGER_SERVICE = "connectivity_metrics_logger";
 
     // Component Tags
-    public static final int COMPONENT_TAG_CONNECTIVITY = 1;
-    public static final int COMPONENT_TAG_BLUETOOTH = 2;
-    public static final int COMPONENT_TAG_WIFI = 3;
-    public static final int COMPONENT_TAG_TELECOM = 4;
-    public static final int COMPONENT_TAG_TELEPHONY = 5;
+    public static final int COMPONENT_TAG_CONNECTIVITY = 0;
+    public static final int COMPONENT_TAG_BLUETOOTH = 1;
+    public static final int COMPONENT_TAG_WIFI = 2;
+    public static final int COMPONENT_TAG_TELECOM = 3;
+    public static final int COMPONENT_TAG_TELEPHONY = 4;
+
+    public static final int NUMBER_OF_COMPONENTS = 5;
+
+    // Event Tag
+    public static final int TAG_SKIPPED_EVENTS = -1;
+
+    public static final String DATA_KEY_EVENTS_COUNT = "count";
 
     private IConnectivityMetricsLogger mService;
+
+    private long mServiceUnblockedTimestampMillis = 0;
+    private int mNumSkippedEvents = 0;
 
     public ConnectivityMetricsLogger() {
         mService = IConnectivityMetricsLogger.Stub.asInterface(ServiceManager.getService(
@@ -46,12 +57,51 @@ public class ConnectivityMetricsLogger {
             if (DBG) {
                 Log.d(TAG, "logEvent(" + componentTag + "," + eventTag + ") Service not ready");
             }
-        } else {
-            try {
-                mService.logEvent(new ConnectivityMetricsEvent(timestamp, componentTag, eventTag, data));
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error logging event " + e.getMessage());
+            return;
+        }
+
+        if (mServiceUnblockedTimestampMillis > 0) {
+            if (System.currentTimeMillis() < mServiceUnblockedTimestampMillis) {
+                // Service is throttling events.
+                // Don't send new events because they will be dropped.
+                mNumSkippedEvents++;
+                return;
             }
+        }
+
+        ConnectivityMetricsEvent skippedEventsEvent = null;
+        if (mNumSkippedEvents > 0) {
+            // Log number of skipped events
+            Bundle b = new Bundle();
+            b.putInt(DATA_KEY_EVENTS_COUNT, mNumSkippedEvents);
+            skippedEventsEvent = new ConnectivityMetricsEvent(mServiceUnblockedTimestampMillis,
+                    componentTag, TAG_SKIPPED_EVENTS, b);
+
+            mServiceUnblockedTimestampMillis = 0;
+        }
+
+        ConnectivityMetricsEvent event = new ConnectivityMetricsEvent(timestamp, componentTag,
+                eventTag, data);
+
+        try {
+            long result;
+            if (skippedEventsEvent == null) {
+                result = mService.logEvent(event);
+            } else {
+                result = mService.logEvents(new ConnectivityMetricsEvent[]
+                        {skippedEventsEvent, event});
+            }
+
+            if (result == 0) {
+                mNumSkippedEvents = 0;
+            } else {
+                mNumSkippedEvents++;
+                if (result > 0) { // events are throttled
+                    mServiceUnblockedTimestampMillis = result;
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error logging event " + e.getMessage());
         }
     }
 }
