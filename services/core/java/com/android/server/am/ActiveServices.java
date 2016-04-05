@@ -343,6 +343,25 @@ public final class ActiveServices {
             return null;
         }
 
+        if (!r.startRequested) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                // Before going further -- if this app is not allowed to run in the
+                // background, then at this point we aren't going to let it period.
+                final int allowed = mAm.checkAllowBackgroundLocked(
+                        r.appInfo.uid, r.packageName, callingPid, true);
+                if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
+                    Slog.w(TAG, "Background start not allowed: service "
+                            + service + " to " + r.name.flattenToShortString()
+                            + " from pid=" + callingPid + " uid=" + callingUid
+                            + " pkg=" + callingPackage);
+                    return null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
                 callingUid, r.packageName, service, service.getFlags(), null, r.userId);
 
@@ -1274,23 +1293,6 @@ public final class ActiveServices {
                 }
                 r = smap.mServicesByName.get(name);
                 if (r == null && createIfNeeded) {
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        // Before going further -- if this app is not allowed to run in the
-                        // background, then at this point we aren't going to let it period.
-                        final int allowed = mAm.checkAllowBackgroundLocked(
-                                sInfo.applicationInfo.uid, sInfo.packageName, callingPid, true);
-                        if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
-                            Slog.w(TAG, "Background execution not allowed: service "
-                                    + service + " to " + name.flattenToShortString()
-                                    + " from pid=" + callingPid + " uid=" + callingUid
-                                    + " pkg=" + callingPackage);
-                            return null;
-                        }
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-
                     Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     ServiceRestarter res = new ServiceRestarter();
