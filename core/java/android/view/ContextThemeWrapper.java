@@ -101,6 +101,15 @@ public class ContextThemeWrapper extends ContextWrapper {
         mOverrideConfiguration = new Configuration(overrideConfiguration);
     }
 
+    /**
+     * Used by ActivityThread to apply the overridden configuration to onConfigurationChange
+     * callbacks.
+     * @hide
+     */
+    public Configuration getOverrideConfiguration() {
+        return mOverrideConfiguration;
+    }
+
     @Override
     public AssetManager getAssets() {
         // Ensure we're returning assets with the correct configuration.
