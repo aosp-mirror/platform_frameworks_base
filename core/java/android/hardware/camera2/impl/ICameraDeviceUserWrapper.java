@@ -31,6 +31,7 @@ import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.SubmitInfo;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Surface;
 
@@ -51,6 +52,10 @@ public class ICameraDeviceUserWrapper {
             throw new NullPointerException("Remote device may not be null");
         }
         mRemoteDevice = remoteDevice;
+    }
+
+    public void unlinkToDeath(IBinder.DeathRecipient recipient, int flags) {
+        mRemoteDevice.asBinder().unlinkToDeath(recipient, flags);
     }
 
     public void disconnect()  {
