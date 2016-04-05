@@ -69,6 +69,7 @@ public:
     void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect);
     void endFrame(const Rect& repaintRect);
     WARN_UNUSED_RESULT OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height);
+    void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer);
     void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect);
     void endLayer();
     WARN_UNUSED_RESULT OffscreenBuffer* copyToLayer(const Rect& area);

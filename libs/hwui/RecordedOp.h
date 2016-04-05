@@ -501,22 +501,20 @@ struct CopyFromLayerOp : RecordedOp {
  * when creating/tracking a SkPaint* during defer isn't worth the bother.
  */
 struct LayerOp : RecordedOp {
-    // Records a one-use (saveLayer) layer for drawing. Once drawn, the layer will be destroyed.
+    // Records a one-use (saveLayer) layer for drawing.
     LayerOp(BASE_PARAMS, OffscreenBuffer** layerHandle)
             : SUPER_PAINTLESS(LayerOp)
             , layerHandle(layerHandle)
             , alpha(paint ? paint->getAlpha() / 255.0f : 1.0f)
             , mode(PaintUtils::getXfermodeDirect(paint))
-            , colorFilter(paint ? paint->getColorFilter() : nullptr)
-            , destroy(true) {}
+            , colorFilter(paint ? paint->getColorFilter() : nullptr) {}
 
     LayerOp(RenderNode& node)
             : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), nullptr, nullptr)
             , layerHandle(node.getLayerHandle())
             , alpha(node.properties().layerProperties().alpha() / 255.0f)
             , mode(node.properties().layerProperties().xferMode())
-            , colorFilter(node.properties().layerProperties().colorFilter())
-            , destroy(false) {}
+            , colorFilter(node.properties().layerProperties().colorFilter()) {}
 
     // Records a handle to the Layer object, since the Layer itself won't be
     // constructed until after this operation is constructed.
@@ -527,9 +525,6 @@ struct LayerOp : RecordedOp {
     // pointer to object owned by either LayerProperties, or a recorded Paint object in a
     // BeginLayerOp. Lives longer than LayerOp in either case, so no skia ref counting is used.
     SkColorFilter* colorFilter;
-
-    // whether to destroy the layer, once rendered
-    const bool destroy;
 };
 
 }; // namespace uirenderer

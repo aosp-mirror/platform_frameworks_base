@@ -37,6 +37,10 @@ OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t h
     return buffer;
 }
 
+void BakedOpRenderer::recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) {
+    mRenderState.layerPool().putOrDelete(offscreenBuffer);
+}
+
 void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
