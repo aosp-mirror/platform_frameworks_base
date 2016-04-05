@@ -500,6 +500,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (mRemovingUserIds.get(profile.id)) {
                 continue;
             }
+            if (profile.partial) {
+                continue;
+            }
             users.add(userWithName(profile));
         }
         return users;
