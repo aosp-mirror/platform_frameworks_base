@@ -744,8 +744,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public int[] startListening(IAppWidgetHost callbacks, String callingPackage,
-            int hostId, List<RemoteViews> updatedViews) {
+    public ParceledListSlice<RemoteViews> startListening(IAppWidgetHost callbacks,
+            String callingPackage, int hostId, int[] appWidgetIds, int[] updatedIds) {
         final int userId = UserHandle.getCallingUserId();
 
         if (DEBUG) {
@@ -762,21 +762,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // sure the caller can only access hosts it owns.
             HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);
             Host host = lookupOrAddHostLocked(id);
-
             host.callbacks = callbacks;
 
-            updatedViews.clear();
-
-            ArrayList<Widget> instances = host.widgets;
-            int N = instances.size();
-            int[] updatedIds = new int[N];
+            int N = appWidgetIds.length;
+            ArrayList<RemoteViews> outViews = new ArrayList<>(N);
+            RemoteViews rv;
+            int added = 0;
             for (int i = 0; i < N; i++) {
-                Widget widget = instances.get(i);
-                updatedIds[i] = widget.appWidgetId;
-                updatedViews.add(cloneIfLocalBinder(widget.getEffectiveViewsLocked()));
+                rv = host.getPendingViewsForId(appWidgetIds[i]);
+                if (rv != null) {
+                    updatedIds[added] = appWidgetIds[i];
+                    outViews.add(rv);
+                    added++;
+                }
             }
-
-            return updatedIds;
+            return new ParceledListSlice<>(outViews);
         }
     }
 
@@ -1884,6 +1884,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) {
+        long requestTime = SystemClock.uptimeMillis();
+        if (widget != null) {
+            widget.lastUpdateTime = requestTime;
+        }
         if (widget == null || widget.provider == null || widget.provider.zombie
                 || widget.host.callbacks == null || widget.host.zombie) {
             return;
@@ -1893,6 +1897,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         args.arg1 = widget.host;
         args.arg2 = widget.host.callbacks;
         args.arg3 = updateViews;
+        args.arg4 = requestTime;
         args.argi1 = widget.appWidgetId;
 
         mCallbackHandler.obtainMessage(
@@ -1901,9 +1906,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void handleNotifyUpdateAppWidget(Host host, IAppWidgetHost callbacks,
-            int appWidgetId, RemoteViews views) {
+            int appWidgetId, RemoteViews views, long requestTime) {
         try {
             callbacks.updateAppWidget(appWidgetId, views);
+            host.lastWidgetUpdateTime = requestTime;
         } catch (RemoteException re) {
             synchronized (mLock) {
                 Slog.e(TAG, "Widget host dead: " + host.id, re);
@@ -3400,10 +3406,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     Host host = (Host) args.arg1;
                     IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
                     RemoteViews views = (RemoteViews) args.arg3;
+                    long requestTime = (Long) args.arg4;
                     final int appWidgetId = args.argi1;
                     args.recycle();
 
-                    handleNotifyUpdateAppWidget(host, callbacks, appWidgetId, views);
+                    handleNotifyUpdateAppWidget(host, callbacks, appWidgetId, views, requestTime);
                 } break;
 
                 case MSG_NOTIFY_PROVIDER_CHANGED: {
@@ -3771,6 +3778,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
         int tag = TAG_UNDEFINED; // for use while saving state (the index)
+        long lastWidgetUpdateTime; // last time we were successfully able to send an update.
 
         public int getUserId() {
             return UserHandle.getUserId(id.uid);
@@ -3790,6 +3798,23 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
             return false;
+        }
+
+        /**
+         * Returns the RemoveViews for the provided widget id if an update is pending
+         * for that widget.
+         */
+        public RemoteViews getPendingViewsForId(int appWidgetId) {
+            long updateTime = lastWidgetUpdateTime;
+            int N = widgets.size();
+            for (int i = 0; i < N; i++) {
+                Widget widget = widgets.get(i);
+                if (widget.appWidgetId == appWidgetId
+                        && widget.lastUpdateTime > updateTime) {
+                    return cloneIfLocalBinder(widget.getEffectiveViewsLocked());
+                }
+            }
+            return null;
         }
 
         @Override
@@ -3862,6 +3887,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         RemoteViews maskedViews;
         Bundle options;
         Host host;
+        long lastUpdateTime;
 
         @Override
         public String toString() {
