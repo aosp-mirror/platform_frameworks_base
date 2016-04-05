@@ -4134,8 +4134,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 //        }
         updateTcpBufferSizes(networkAgent);
 
-        final boolean flushDns = updateRoutes(newLp, oldLp, netId);
-        updateDnses(newLp, oldLp, netId, flushDns);
+        updateRoutes(newLp, oldLp, netId);
+        updateDnses(newLp, oldLp, netId);
 
         updateClat(newLp, oldLp, networkAgent);
         if (isDefaultNetwork(networkAgent)) {
@@ -4238,30 +4238,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return !routeDiff.added.isEmpty() || !routeDiff.removed.isEmpty();
     }
 
-    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId,
-                             boolean flush) {
-        if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
-            Collection<InetAddress> dnses = newLp.getDnsServers();
-            if (DBG) log("Setting Dns servers for network " + netId + " to " + dnses);
-            try {
-                mNetd.setDnsServersForNetwork(netId, NetworkUtils.makeStrings(dnses),
-                    newLp.getDomains());
-            } catch (Exception e) {
-                loge("Exception in setDnsServersForNetwork: " + e);
-            }
-            final NetworkAgentInfo defaultNai = getDefaultNetwork();
-            if (defaultNai != null && defaultNai.network.netId == netId) {
-                setDefaultDnsSystemProperties(dnses);
-            }
-            flushVmDnsCache();
-        } else if (flush) {
-            try {
-                mNetd.flushNetworkDnsCache(netId);
-            } catch (Exception e) {
-                loge("Exception in flushNetworkDnsCache: " + e);
-            }
-            flushVmDnsCache();
+    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId) {
+        if (oldLp != null && newLp.isIdenticalDnses(oldLp)) {
+            return;  // no updating necessary
         }
+
+        Collection<InetAddress> dnses = newLp.getDnsServers();
+        if (DBG) log("Setting Dns servers for network " + netId + " to " + dnses);
+        try {
+            mNetd.setDnsServersForNetwork(
+                    netId, NetworkUtils.makeStrings(dnses), newLp.getDomains());
+        } catch (Exception e) {
+            loge("Exception in setDnsServersForNetwork: " + e);
+        }
+        final NetworkAgentInfo defaultNai = getDefaultNetwork();
+        if (defaultNai != null && defaultNai.network.netId == netId) {
+            setDefaultDnsSystemProperties(dnses);
+        }
+        flushVmDnsCache();
     }
 
     private void setDefaultDnsSystemProperties(Collection<InetAddress> dnses) {
