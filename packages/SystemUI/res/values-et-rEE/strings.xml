@@ -168,6 +168,8 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Rakendusest <xliff:g id="APP">%s</xliff:g> loobumine."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Loobusite rakendusest <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Kõikidest hiljutistest rakendustest on loobutud"</string>
+    <!-- no translation found for accessibility_recents_item_open_app_info (5107479759905883540) -->
+    <skip />
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Rakenduse <xliff:g id="APP">%s</xliff:g> käivitamine."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g>, <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Märguandest on loobutud."</string>
@@ -528,6 +530,18 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Avaekraan"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Hiljutised"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Tagasi"</string>
+    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Märguanded"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Klaviatuuri otseteed"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Sisestusmeetodi vahetamine"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Rakendused"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Abi"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Brauser"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontaktid"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-post"</string>
+    <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"IM (kiirsuhtlus)"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Muusika"</string>
+    <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Kalender"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Kuva koos helitugevuse juhtnuppudega"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Mitte segada"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Helitugevuse nuppude otsetee"</string>
