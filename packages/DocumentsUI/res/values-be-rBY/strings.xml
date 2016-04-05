@@ -125,6 +125,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Не атрымалася перайменаваць дакумент"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Некаторыя файлы былі сканвертаваныя"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Даць праграме <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да дырэкторыі <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> у <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Даць праграме <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да дырэкторыі <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Даць <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да вашых даных, у тым ліку фатаграфій і відэа, на <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Больш не пытацца"</string>
     <string name="allow" msgid="7225948811296386551">"Дазволіць"</string>

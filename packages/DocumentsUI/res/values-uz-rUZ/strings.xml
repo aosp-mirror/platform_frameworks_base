@@ -110,7 +110,8 @@
     <string name="menu_rename" msgid="7678802479104285353">"Qayta nomlash"</string>
     <string name="rename_error" msgid="4203041674883412606">"Hujjatni qayta nomlab bo‘lmadi"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Bir nechta fayllar o‘girildi"</string>
-    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ilovasining <xliff:g id="STORAGE"><i>^3</i></xliff:g> xotirasidagi “<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>” jildiga kirishiga ruxsat berilsinmi?"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ilovasiga <xliff:g id="STORAGE"><i>^3</i></xliff:g> xotirasidagi “<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>” jildidan foydalanishiga ruxsat berilsinmi?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ilovasiga “<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>” jildidan foydalanishiga ruxsat berilsinmi?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ilovasiga <xliff:g id="STORAGE"><i>^2</i></xliff:g> xotirasidagi ma’lumotlardan, jumladan, rasmlar va videolardan foydalanishiga ruxsat berilsinmi?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Boshqa so‘ralmasin"</string>
     <string name="allow" msgid="7225948811296386551">"Ruxsat berish"</string>

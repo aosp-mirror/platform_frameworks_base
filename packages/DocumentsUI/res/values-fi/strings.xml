@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Dokumentin nimen muuttaminen epäonnistui."</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Joitakin tiedostoja muunnettiin."</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Myönnetäänkö sovellukselle <xliff:g id="APPNAME"><b>^1</b></xliff:g> sijainnissa <xliff:g id="STORAGE"><i>^3</i></xliff:g> olevan hakemiston <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> käyttöoikeus?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Saako <xliff:g id="APPNAME"><b>^1</b></xliff:g> käyttää hakemistoa <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Myönnetäänkö sovellukselle <xliff:g id="APPNAME"><b>^1</b></xliff:g> sijainnissa <xliff:g id="STORAGE"><i>^2</i></xliff:g> olevien tietojesi, mukaan lukien valokuviesi ja videoidesi, käyttöoikeus?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Älä kysy uudestaan"</string>
     <string name="allow" msgid="7225948811296386551">"Salli"</string>

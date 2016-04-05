@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"نام سند تغییر نکرد"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"بعضی از فایل‌ها تبدیل شدند"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه داده شود به فهرست راهنمای <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> در <xliff:g id="STORAGE"><i>^3</i></xliff:g> دسترسی داشته باشد؟"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه دسترسی به دایرکتوری <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> داده شود؟"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"به <xliff:g id="APPNAME"><b>^1</b></xliff:g> اجازه می‌دهید به داده‌هایتان دسترسی پیدا کند، از جمله عکس‌ها و ویدیوهایتان در <xliff:g id="STORAGE"><i>^2</i></xliff:g>؟"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"دوباره سؤال نشود"</string>
     <string name="allow" msgid="7225948811296386551">"ارزیابی‌شده"</string>

@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Riemërtimi i dokumentit dështoi"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Disa skedarë u konvertuan"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Jepi aplikacionit <xliff:g id="APPNAME"><b>^1</b></xliff:g> qasje te direktoria <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> në <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"T\'i jepet aplikacionit <xliff:g id="APPNAME"><b>^1</b></xliff:g> qasje te direktoria <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"T\'i jepet aplikacionit <xliff:g id="APPNAME"><b>^1</b></xliff:g> qasje te të dhënat, duke përfshirë fotografitë dhe videot, në <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Mos pyet përsëri"</string>
     <string name="allow" msgid="7225948811296386551">"Lejo"</string>

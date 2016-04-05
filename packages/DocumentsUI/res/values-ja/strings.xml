@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"ドキュメントの名前を変更できませんでした"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"一部のファイルが変換されました"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"「<xliff:g id="STORAGE"><i>^3</i></xliff:g>」の「<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>」ディレクトリに「<xliff:g id="APPNAME"><b>^1</b></xliff:g>」へのアクセスを許可しますか？"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"「<xliff:g id="APPNAME"><b>^1</b></xliff:g>」アプリに「<xliff:g id="DIRECTORY"><i>^2</i></xliff:g>」ディレクトリへのアクセスを許可しますか？"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="STORAGE"><i>^2</i></xliff:g>の写真や動画などのデータへのアクセスを「<xliff:g id="APPNAME"><b>^1</b></xliff:g>」に許可しますか？"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"今後表示しない"</string>
     <string name="allow" msgid="7225948811296386551">"許可"</string>
