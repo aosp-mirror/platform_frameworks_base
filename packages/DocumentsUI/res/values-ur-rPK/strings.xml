@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"دستاویز کا نام تبدیل کرنے میں ناکام"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"کچھ فائلوں کو تبدیل کیا گیا تھا"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> کو <xliff:g id="STORAGE"><i>^3</i></xliff:g> پر <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> ڈائرکٹری تک رسائی عطا کریں؟"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> کو <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> ڈائرکٹری تک رسائی دیں؟"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> کو اپنے ڈیٹا بشمول <xliff:g id="STORAGE"><i>^2</i></xliff:g> پر موجود تصاویر اور ویڈیوز تک رسائی عطا کریں؟"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"دوبارہ نہ پوچھیں"</string>
     <string name="allow" msgid="7225948811296386551">"اجازت دیں"</string>

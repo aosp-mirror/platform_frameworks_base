@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Не успеа да се преименува документот"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Некои датотеки беа конвертирани"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Овозможете пристап на <xliff:g id="APPNAME"><b>^1</b></xliff:g> до директориумот <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> на <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Овозможете пристап на <xliff:g id="APPNAME"><b>^1</b></xliff:g> до директориумот <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Да се овозможи пристап на <xliff:g id="APPNAME"><b>^1</b></xliff:g> до вашите податоци, вклучувајќи фотографии и видеа, на <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Не прашувај повторно"</string>
     <string name="allow" msgid="7225948811296386551">"Дозволи"</string>

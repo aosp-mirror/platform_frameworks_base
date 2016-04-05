@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Non se puido cambiar o nome do documento"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Convertéronse algúns ficheiros"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Queres outorgar acceso a <xliff:g id="APPNAME"><b>^1</b></xliff:g> ao directorio <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> no almacenamento de <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Queres darlle acceso a <xliff:g id="APPNAME"><b>^1</b></xliff:g> ao directorio <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Queres darlle acceso a <xliff:g id="APPNAME"><b>^1</b></xliff:g> aos teus datos almacenados en <xliff:g id="STORAGE"><i>^2</i></xliff:g>, incluídos vídeos e fotos?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Non preguntar de novo"</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>

@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Документтин аталышы өзгөртүлбөй калды"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Айрым файлдардын форматы өзгөртүлдү"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> колдонмосуна <xliff:g id="STORAGE"><i>^3</i></xliff:g> түзмөгүндөгү <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> папканы пайдалануу мүмкүнчүлүгү берилсинби?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> колдонмосуна <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> каталогун пайдалануу мүмкүнчүлүгү берилсинби?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> колдонмосуна <xliff:g id="STORAGE"><i>^2</i></xliff:g> түзмөгүндөгү дайындарыңыз, сүрөттөрүңүз жана видеолоруңузду пайдалануу мүмкүнчүлүгү берилсинби?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Экинчи суралбасын"</string>
     <string name="allow" msgid="7225948811296386551">"Уруксат берүү"</string>
@@ -130,7 +131,7 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> куржун мазмуну менен жок кылынсынбы?</item>
     </plurals>
     <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> нерсе жок кылынчынбы?</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> нерсе жок кылынчынбы?</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> нерсе жок кылынсынбы?</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> нерсе жок кылынсынбы?</item>
     </plurals>
 </resources>
