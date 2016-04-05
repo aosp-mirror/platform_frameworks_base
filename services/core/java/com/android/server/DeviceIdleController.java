@@ -198,6 +198,7 @@ public class DeviceIdleController extends SystemService
     private long mNextIdleDelay;
     private long mNextLightIdleDelay;
     private long mNextLightAlarmTime;
+    private long mNextSensingTimeoutAlarmTime;
     private long mCurIdleBudget;
     private long mMaintenanceStartTime;
 
@@ -335,6 +336,18 @@ public class DeviceIdleController extends SystemService
         public void onAlarm() {
             synchronized (DeviceIdleController.this) {
                 stepLightIdleStateLocked("s:alarm");
+            }
+        }
+    };
+
+    private final AlarmManager.OnAlarmListener mSensingTimeoutAlarmListener
+            = new AlarmManager.OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            if (mState == STATE_SENSING) {
+                synchronized (DeviceIdleController.this) {
+                    becomeInactiveIfAppropriateLocked();
+                }
             }
         }
     };
@@ -924,6 +937,11 @@ public class DeviceIdleController extends SystemService
     @Override
     public void onAnyMotionResult(int result) {
         if (DEBUG) Slog.d(TAG, "onAnyMotionResult(" + result + ")");
+        if (result != AnyMotionDetector.RESULT_UNKNOWN) {
+            synchronized (this) {
+                cancelSensingTimeoutAlarmLocked();
+            }
+        }
         if (result == AnyMotionDetector.RESULT_MOVED) {
             if (DEBUG) Slog.d(TAG, "RESULT_MOVED received.");
             synchronized (this) {
@@ -1746,6 +1764,7 @@ public class DeviceIdleController extends SystemService
         mNextIdleDelay = 0;
         mNextLightIdleDelay = 0;
         cancelAlarmLocked();
+        cancelSensingTimeoutAlarmLocked();
         cancelLocatingLocked();
         stopMonitoringMotionLocked();
         mAnyMotionDetector.stop();
@@ -1866,15 +1885,16 @@ public class DeviceIdleController extends SystemService
                 mState = STATE_SENSING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
                 EventLogTags.writeDeviceIdle(mState, reason);
-                scheduleAlarmLocked(mConstants.SENSING_TIMEOUT, false);
+                scheduleSensingTimeoutAlarmLocked(mConstants.SENSING_TIMEOUT);
                 cancelLocatingLocked();
-                mAnyMotionDetector.checkForAnyMotion();
                 mNotMoving = false;
                 mLocated = false;
                 mLastGenericLocation = null;
                 mLastGpsLocation = null;
+                mAnyMotionDetector.checkForAnyMotion();
                 break;
             case STATE_SENSING:
+                cancelSensingTimeoutAlarmLocked();
                 mState = STATE_LOCATING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_SENSING to STATE_LOCATING.");
                 EventLogTags.writeDeviceIdle(mState, reason);
@@ -2161,6 +2181,13 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    void cancelSensingTimeoutAlarmLocked() {
+        if (mNextSensingTimeoutAlarmTime != 0) {
+            mNextSensingTimeoutAlarmTime = 0;
+            mAlarmManager.cancel(mSensingTimeoutAlarmListener);
+        }
+    }
+
     void scheduleAlarmLocked(long delay, boolean idleUntil) {
         if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
         if (mMotionSensor == null) {
@@ -2192,6 +2219,13 @@ public class DeviceIdleController extends SystemService
         mNextLightAlarmTime = SystemClock.elapsedRealtime() + delay;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 mNextLightAlarmTime, "DeviceIdleController.light", mLightAlarmListener, mHandler);
+    }
+
+    void scheduleSensingTimeoutAlarmLocked(long delay) {
+        if (DEBUG) Slog.d(TAG, "scheduleSensingAlarmLocked(" + delay + ")");
+        mNextSensingTimeoutAlarmTime = SystemClock.elapsedRealtime() + delay;
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, mNextSensingTimeoutAlarmTime,
+            "DeviceIdleController.sensing", mSensingTimeoutAlarmListener, mHandler);
     }
 
     private static int[] buildAppIdArray(ArrayMap<String, Integer> systemApps,
