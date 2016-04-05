@@ -38,8 +38,8 @@ public class ContextHubService extends IContextHubService.Stub {
 
 
     public static final int ANY_HUB             = -1;
-    public static final int MSG_LOAD_NANO_APP   = 5;
-    public static final int MSG_UNLOAD_NANO_APP = 2;
+    public static final int MSG_LOAD_NANO_APP   = 3;
+    public static final int MSG_UNLOAD_NANO_APP = 4;
 
     private static final String PRE_LOADED_GENERIC_UNKNOWN = "Preloaded app, unknown";
     private static final String PRE_LOADED_APP_NAME = PRE_LOADED_GENERIC_UNKNOWN;

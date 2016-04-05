@@ -33,7 +33,7 @@
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
 
-//static constexpr int OS_APP_ID=-1;
+static constexpr int OS_APP_ID=-1;
 
 static constexpr int MIN_APP_ID=1;
 static constexpr int MAX_APP_ID=128;
@@ -142,6 +142,14 @@ static int set_os_app_as_destination(hub_message_t *msg, int hubHandle) {
     } else {
         ALOGD("%s: Hub information is null for hubHandle %d", __FUNCTION__, hubHandle);
         return -1;
+    }
+}
+
+static int get_hub_id_for_hub_handle(int hubHandle) {
+    if (hubHandle < 0 || hubHandle >= db.hubInfo.numHubs) {
+      return -1;
+    } else {
+      return db.hubInfo.hubs[hubHandle].hub_id;
     }
 }
 
@@ -616,7 +624,6 @@ static jobjectArray nativeInitialize(JNIEnv *env, jobject instance)
 
 static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
                               jbyteArray data_) {
-    hub_message_t msg;
     jint retVal = -1; // Default to failure
 
     jint *header = env->GetIntArrayElements(header_, 0);
@@ -624,16 +631,30 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
     jbyte *data = env->GetByteArrayElements(data_, 0);
     int dataBufferLength = env->GetArrayLength(data_);
 
+
     if (numHeaderElements >= MSG_HEADER_SIZE) {
-        if (set_dest_app(&msg, header[HEADER_FIELD_APP_INSTANCE]) == 0) {
-          msg.message_type = header[HEADER_FIELD_MSG_TYPE];
-          msg.message_len = dataBufferLength;
-          msg.message = data;
-          retVal = db.hubInfo.contextHubModule->send_message(
-                  get_hub_id_for_app_instance(header[HEADER_FIELD_APP_INSTANCE]),
-                  &msg);
+        int setAddressSuccess;
+        int hubId;
+        hub_message_t msg;
+
+        if (header[HEADER_FIELD_APP_INSTANCE] == OS_APP_ID) {
+            setAddressSuccess = (set_os_app_as_destination(&msg, header[HEADER_FIELD_HUB_HANDLE]) == 0);
+            hubId = get_hub_id_for_hub_handle(header[HEADER_FIELD_HUB_HANDLE]);
         } else {
-          ALOGD("Could not find app instance %d", header[HEADER_FIELD_APP_INSTANCE]);
+            setAddressSuccess = (set_dest_app(&msg, header[HEADER_FIELD_APP_INSTANCE]) == 0);
+            hubId = get_hub_id_for_app_instance(header[HEADER_FIELD_APP_INSTANCE]);
+        }
+
+        if (setAddressSuccess && hubId >= 0) {
+            msg.message_type = header[HEADER_FIELD_MSG_TYPE];
+            msg.message_len = dataBufferLength;
+            msg.message = data;
+            retVal = db.hubInfo.contextHubModule->send_message(hubId, &msg);
+        } else {
+          ALOGD("Could not find app instance %d on hubHandle %d, setAddress %d",
+                header[HEADER_FIELD_APP_INSTANCE],
+                header[HEADER_FIELD_HUB_HANDLE],
+                setAddressSuccess);
         }
     } else {
         ALOGD("Malformed header len");
