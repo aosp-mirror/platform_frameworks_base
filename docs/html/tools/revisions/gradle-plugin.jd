@@ -3,42 +3,249 @@ page.title=Android Plugin for Gradle Release Notes
 @jd:body
 
 <div id="qv-wrapper">
-<div id="qv">
+  <div id="qv">
+    <h2>
+      In this document
+    </h2>
 
-  <h2>See also</h2>
-  <ol>
-     <li><a href="{@docRoot}sdk/installing/studio-build.html">Build System Overview</a></li>
-     <li><a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a></li>
-  </ol>
+    <ol>
+      <li>
+        <a href="#updating-plugin">Updating the Android Plugin for Gradle
+        Version</a>
+      </li>
 
+      <li>
+        <a href="#updating-gradle">Updating the Gradle Version</a>
+      </li>
+
+      <li>
+        <a href="#revisions">Revisions</a>
+      </li>
+    </ol>
+
+    <h2>
+      See also
+    </h2>
+
+    <ol>
+      <li>
+        <a href="{@docRoot}sdk/installing/studio-build.html">Build System
+        Overview</a>
+      </li>
+
+      <li>
+        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android
+        Plugin for Gradle</a>
+      </li>
+    </ol>
+  </div>
 </div>
-</div>
 
+<p>
+  The Android build system uses the Android Plugin for Gradle to support
+  building Android applications with the <a href=
+  "http://www.gradle.org/">Gradle</a> build toolkit. The plugin runs
+  independent of Android Studio so the plugin and the Gradle build system can
+  be updated independently of Android Studio.
+</p>
 
-<p>The Android build system uses the Android Plugin for Gradle to support building Android
-applications with the <a href="http://www.gradle.org/">Gradle</a> build toolkit. The plugin runs
-independent of Android Studio so the plugin and the Gradle build system can be updated
-independently of Android Studio.</p>
+<h2 id="updating-plugin">
+  Updating the Android Plugin for Gradle
+</h2>
 
-<p class="note"><strong>Note:</strong> When you update Android Studio or open a project in a
-previous version of Android Studio, Android Studio prompts you to automatically update the plugin
-and Gradle to the latest available versions. You can choose to accept these updates based
-on your project's build requirements. </p>
+<p>
+  When you update Android Studio, you may receive a prompt to automatically
+  update the Android Plugin for Gradle to the latest available version. You
+  can choose to accept the update or manually specify a version based on
+  your project's build requirements.
+</p>
 
+<p>
+  You can specify the <a href=
+  "{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for
+  Gradle</a> version in either the <strong>File</strong> &gt; <strong>Project
+  Structure</strong> &gt; <strong>Project</strong> menu in Android Studio, or
+  the top-level <code>build.gradle</code> file. The plugin version applies to
+  all modules built in that Android Studio project. The following example sets
+  the Android Plugin for Gradle to version 2.0.0 from the
+  <code>build.gradle</code> file:
+</p>
 
-<h2 id="revisions">Revisions</h2>
+<pre>
+buildscript {
+  ...
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.0.0'
+  }
+}
+</pre>
+<p class="caution">
+  <strong>Caution:</strong> You should not use dynamic dependencies in version
+  numbers, such as <code>'com.android.tools.build:gradle:2.+'</code>. Using
+  this feature can cause unexpected version updates and difficulty resolving
+  version differences.
+</p>
 
-<p>The sections below provide notes about successive releases of
-the Android Plugin for Gradle, as denoted by revision number. To determine what revision of the
-plugin you are using, check the version declaration in the project-level
-<strong>build.gradle</strong> file. </p>
+<p>
+  If the specified plugin version has not been downloaded, Gradle downloads it
+  the next time you build your project or click <strong>Tools</strong> &gt;
+  <strong>Android</strong> &gt; <strong>Sync Project with Gradle Files</strong>
+  from the Android Studio main menu.
+</p>
 
-<p>For a summary of known issues in Android Plugin for Gradle, see <a
-href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
+<h2 id="updating-gradle">
+  Updating Gradle
+</h2>
+
+<p>
+  When you update Android Studio, you may receive a prompt to automatically
+  update Gradle to the latest available version. You can choose to accept the
+  update or manually specify a version based on your project's build
+  requirements.
+</p>
+
+<p>
+  You can specify the Gradle version in either the <strong>File</strong> &gt;
+  <strong>Project Structure</strong> &gt; <strong>Project</strong> menu in
+  Android Studio, or by editing the Gradle distribution reference in the
+  <code>gradle/wrapper/gradle-wrapper.properties</code> file. The following
+  example sets the Gradle version to 2.10 in the
+  <code>gradle-wrapper.properties</code> file.
+</p>
+
+<pre>
+...
+distributionUrl = https\://services.gradle.org/distributions/gradle-2.10-all.zip
+...
+</pre>
+
+<h2 id="revisions">
+  Revisions
+</h2>
+
+<p>
+  For a summary of known issues in Android Plugin for Gradle, visit the
+  <a class="external-link" href="http://tools.android.com/knownissues">Android
+  Tools Project Site</a>.
+</p>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 2.0.0</a> <em>(March 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.10 or higher.
+        </li>
+
+        <li>
+          <a href="{@docRoot}tools/revisions/build-tools.html">Build Tools 21.1.1</a>
+          or higher.
+        </li>
+      </ul>
+    </dd>
+
+    <dt>New:</dt>
+    <dd>
+      <ul>
+        <li>Enables <a href=
+        "{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a> by
+        supporting bytecode injection, and pushing code and resource updates to a
+        running app on the emulator or a physical device.
+        </li>
+
+        <li>Added support for incremental builds, even when the app isn’t running.
+        Full build times are improved by pushing incremental changes through the
+        <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> to the
+        connected device.
+        </li>
+
+        <li>Added <code>maxProcessCount</code> to control how many slave dex processes can
+        be spawned concurrently. The following code, in the module-level
+        <code>build.gradle</code> file, sets the maximum number of concurrent processes
+        to 4:
+<pre>
+android {
+  ...
+  dexOptions {
+  maxProcessCount = 4
+  }
+}
+</pre>
+        </li>
+
+        <li>Added an experimental code shrinker to support pre-dexing and reduce re-dexing
+        of dependencies, which are not supported with Proguard. This improves the build
+        speed of your debug build variant. Because the experimental shrinker does not
+        support optimization and obfuscation, you should enable Proguard for your
+        release builds. To enable the experimental shrinker for your debug builds, add
+        the following to your module-level <code>build.gradle</code> file:
+
+<pre>
+android {
+  ...
+  buildTypes {
+    debug {
+      minifyEnabed true
+      useProguard false
+    }
+    release {
+      minifyEnabed true
+      useProguard true // this is a default setting
+    }
+  }
+}
+</pre>
+        </li>
+
+        <li>Added logging support and improved performance for the resource shrinker.
+        The resource shrinker now logs all of its operations into a <code>resources.txt</code>
+        file located in the same folder as the Proguard log files.
+        </li>
+      </ul>
+    </dd>
+
+    <dt>Changed behavior:</dt>
+    <dd>
+      <ul>
+        <li>When <code>minSdkVersion</code> is set to 18 or higher, APK signing uses
+        SHA256.
+        </li>
+
+        <li>DSA and ECDSA keys can now sign APK packages.
+
+          <p class="note">
+            <strong>Note:</strong> The <a href=
+            "{@docRoot}training/articles/keystore.html">Android keystore</a> provider no
+            longer supports <a href=
+            "{@docRoot}about/versions/marshmallow/android-6.0-changes.html#behavior-keystore">
+            DSA keys on Android 6.0</a> (API level 23) and higher.
+          </p>
+
+        </li>
+      </ul>
+    </dd>
+
+    <dt>Fixed issues:</dt>
+    <dd>
+      <ul>
+        <li>Fixed an issue that caused duplicate AAR dependencies in both
+        the test and main build configurations.
+        </li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.5.0</a> <em>(November 2015)</em>
   </p>
 
@@ -546,9 +753,6 @@ android {
   </div>
 </div>
 
-
-
-
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
@@ -578,46 +782,3 @@ android {
     </dd>
   </div>
 </div>
-
-
-
-
-<h2>Updating the Android Plugin for Gradle Version</h2>
-<p>The Android Plugin for Gradle version is specified in the
-<strong>File &gt; Project Structure &gt; Project</strong> menu and the project-level
-<code>build.gradle</code> file. The plugin version applies to all modules built in that
-Android Studio project. This example sets the Android Plugin for Gradle to version 1.1.0 from the <code>build.gradle</code> file:
-<pre>
-...
-     dependencies {
-         classpath 'com.android.tools.build:gradle:1.1.0'
-     }
-...
-</pre>
-
-
-<p class="caution"><strong>Caution:</strong> You should not use dynamic dependencies (+) in
-version numbers. Using this feature can cause unexpected version updates and difficulty
-resolving version differences. </p>
-
-<p>If you're building with Gradle but not using Android Studio, the build process downloads the
-latest Android Plugin for Gradle when it runs. </p>
-
-
-
-<h2>Updating the Gradle Version </h2>
-
-<p>Android Studio requires Gradle version 2.2.1 or later. To view and
-update the Gradle version, edit the Gradle distribution reference in the
-<code>gradle/wrapper/gradle-wrapper.properties</code> file. This example sets the
-Gradle version to 2.2.1.</p>
-
-<pre>
-...
-distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip
-...
-</pre>
-
-<p>For more details about the supported Android Plugin for Gradle properties and syntax, click
-the link to the
-<a href="{@docRoot}tools/building/plugin-for-gradle.html">Plugin Language Reference</a>.</p>
