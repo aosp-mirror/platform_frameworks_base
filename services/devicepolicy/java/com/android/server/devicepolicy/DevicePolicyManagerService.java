@@ -3740,32 +3740,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int callingUid = mInjector.binderGetCallingUid();
         final int userHandle = mInjector.userHandleGetCallingUserId();
 
-        if (getCredentialOwner(userHandle, /* parent */ false) != userHandle) {
-            throw new SecurityException("You can not change password for this profile because"
-                    + " it shares the password with the owner profile");
-        }
-
         String password = passwordOrNull != null ? passwordOrNull : "";
+
+        // Password resetting to empty/null is not allowed for managed profiles.
+        if (TextUtils.isEmpty(password)) {
+            enforceNotManagedProfile(userHandle, "clear the active password");
+        }
 
         int quality;
         synchronized (this) {
-            // If caller has PO (or DO), it can clear the password, so see if that's the case
-            // first.
+            // If caller has PO (or DO) it can change the password, so see if that's the case first.
             ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
                     null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
             if (admin == null) {
                 // Otherwise, make sure the caller has any active admin with the right policy.
                 admin = getActiveAdminForCallerLocked(null,
                         DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
-            }
 
-            final ComponentName adminComponent = admin.info.getComponent();
-
-            // As of N, only profile owners and device owners can reset the password.
-            if (!(isProfileOwner(adminComponent, userHandle)
-                    || isDeviceOwner(adminComponent, userHandle))) {
                 final boolean preN = getTargetSdk(admin.info.getPackageName(), userHandle)
                         <= android.os.Build.VERSION_CODES.M;
+
                 // As of N, password resetting to empty/null is not allowed anymore.
                 // TODO Should we allow DO/PO to set an empty password?
                 if (TextUtils.isEmpty(password)) {
@@ -3894,6 +3888,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
         try {
+            if (isManagedProfile(userHandle)) {
+                mLockPatternUtils.setSeparateProfileChallengeEnabled(userHandle, true);
+            }
             if (!TextUtils.isEmpty(password)) {
                 mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
             } else {
