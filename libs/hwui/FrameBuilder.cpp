@@ -522,7 +522,10 @@ static bool hasMergeableClip(const BakedOpState& state) {
 void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
-    bakedState->setupOpacity(op.paint);
+
+    if (op.bitmap->isOpaque()) {
+        bakedState->setupOpacity(op.paint);
+    }
 
     // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
     // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
