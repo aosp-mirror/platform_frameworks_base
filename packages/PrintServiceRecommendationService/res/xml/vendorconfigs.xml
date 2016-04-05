@@ -46,7 +46,7 @@
 
     <vendor>
         <name>@string/plugin_vendor_canon</name>
-        <package>com.xerox.printservice</package>
+        <package>jp.co.canon.android.printservice.plugin</package>
         <mdns-names>
             <mdns-name>Canon</mdns-name>
         </mdns-names>
@@ -54,7 +54,7 @@
 
     <vendor>
         <name>@string/plugin_vendor_xerox</name>
-        <package>jp.co.canon.android.printservice.plugin</package>
+        <package>com.xerox.printservice</package>
         <mdns-names>
             <mdns-name>Xerox</mdns-name>
         </mdns-names>
