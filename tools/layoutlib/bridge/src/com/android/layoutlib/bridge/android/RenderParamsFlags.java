@@ -53,6 +53,12 @@ public final class RenderParamsFlags {
      */
     public static final Key<Boolean> FLAG_KEY_XML_FILE_PARSER_SUPPORT =
             new Key<Boolean>("xmlFileParser", Boolean.class);
+    /**
+     * To tell LayoutLib to not render when creating a new session. This allows controlling when the first
+     * layout rendering will happen.
+     */
+    public static final Key<Boolean> FLAG_DO_NOT_RENDER_ON_CREATE =
+            new Key<Boolean>("doNotRenderOnCreate", Boolean.class);
 
     // Disallow instances.
     private RenderParamsFlags() {}
