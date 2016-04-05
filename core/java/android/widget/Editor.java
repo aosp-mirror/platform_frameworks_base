@@ -1781,6 +1781,18 @@ public class Editor {
         if (translate) canvas.translate(0, -cursorOffsetVertical);
     }
 
+    void invalidateHandlesAndActionMode() {
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.invalidateHandles();
+        }
+        if (mInsertionPointCursorController != null) {
+            mInsertionPointCursorController.invalidateHandle();
+        }
+        if (mTextActionMode != null) {
+            mTextActionMode.invalidate();
+        }
+    }
+
     /**
      * Invalidates all the sub-display lists that overlap the specified character range
      */
@@ -4107,6 +4119,14 @@ public class Editor {
             setMeasuredDimension(getPreferredWidth(), getPreferredHeight());
         }
 
+        @Override
+        public void invalidate() {
+            super.invalidate();
+            if (isShowing()) {
+                positionAtCursorOffset(getCurrentCursorOffset(), true);
+            }
+        };
+
         private int getPreferredWidth() {
             return Math.max(mDrawable.getIntrinsicWidth(), mMinSize);
         }
@@ -4173,7 +4193,12 @@ public class Editor {
             return mTextView.getOffsetAtCoordinate(line, x);
         }
 
-        protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
+        /**
+         * @param offset Cursor offset. Must be in [-1, length].
+         * @param forceUpdatePosition whether to force update the position.  This should be true
+         * when If the parent has been scrolled, for example.
+         */
+        protected void positionAtCursorOffset(int offset, boolean forceUpdatePosition) {
             // A HandleView relies on the layout, which may be nulled by external methods
             Layout layout = mTextView.getLayout();
             if (layout == null) {
@@ -4184,7 +4209,7 @@ public class Editor {
             layout = mTextView.getLayout();
 
             boolean offsetChanged = offset != mPreviousOffset;
-            if (offsetChanged || parentScrolled) {
+            if (offsetChanged || forceUpdatePosition) {
                 if (offsetChanged) {
                     updateSelection(offset);
                     addPositionToTouchUpFilter(offset);
@@ -4785,13 +4810,9 @@ public class Editor {
             mPrevX = x;
         }
 
-        /**
-         * @param offset Cursor offset. Must be in [-1, length].
-         * @param parentScrolled If the parent has been scrolled or not.
-         */
         @Override
-        protected void positionAtCursorOffset(int offset, boolean parentScrolled) {
-            super.positionAtCursorOffset(offset, parentScrolled);
+        protected void positionAtCursorOffset(int offset, boolean forceUpdatePosition) {
+            super.positionAtCursorOffset(offset, forceUpdatePosition);
             mInWord = (offset != -1) && !getWordIteratorWithText().isBoundary(offset);
         }
 
@@ -5015,6 +5036,12 @@ public class Editor {
         @Override
         public boolean isActive() {
             return mHandle != null && mHandle.isShowing();
+        }
+
+        public void invalidateHandle() {
+            if (mHandle != null) {
+                mHandle.invalidate();
+            }
         }
     }
 
@@ -5419,6 +5446,15 @@ public class Editor {
         @Override
         public boolean isActive() {
             return mStartHandle != null && mStartHandle.isShowing();
+        }
+
+        public void invalidateHandles() {
+            if (mStartHandle != null) {
+                mStartHandle.invalidate();
+            }
+            if (mEndHandle != null) {
+                mEndHandle.invalidate();
+            }
         }
     }
 
