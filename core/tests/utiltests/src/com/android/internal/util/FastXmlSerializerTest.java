@@ -16,16 +16,32 @@
 
 package com.android.internal.util;
 
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
+import android.util.Xml;
+
 import junit.framework.TestCase;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for {@link FastXmlSerializer}
  */
+@SmallTest
 public class FastXmlSerializerTest extends TestCase {
+    private static final String TAG = "FastXmlSerializerTest";
+
+    private static final boolean ENABLE_DUMP = false; // DO NOT SUBMIT WITH TRUE.
+
+    private static final String ROOT_TAG = "root";
+    private static final String ATTR = "attr";
+
     public void testEmptyText() throws Exception {
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -43,5 +59,94 @@ public class FastXmlSerializerTest extends TestCase {
 
         assertEquals("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<string name=\"meow\"></string>\n", stream.toString());
+    }
+
+    private boolean checkPreserved(String description, String str) {
+        boolean ok = true;
+        byte[] data;
+        try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            final XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(baos, StandardCharsets.UTF_16.name());
+            out.startDocument(null, true);
+
+            out.startTag(null, ROOT_TAG);
+            out.attribute(null, ATTR, str);
+            out.text(str);
+            out.endTag(null, ROOT_TAG);
+
+            out.endDocument();
+            baos.flush();
+            data = baos.toByteArray();
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to serialize: " + description, e);
+            return false;
+        }
+
+        if (ENABLE_DUMP) {
+            Log.d(TAG, "Dump:");
+            Log.d(TAG, new String(data));
+        }
+
+        try (final ByteArrayInputStream baos = new ByteArrayInputStream(data)) {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(baos, StandardCharsets.UTF_16.name());
+
+            int type;
+            String tag = null;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type == XmlPullParser.START_TAG) {
+                    tag = parser.getName();
+                    if (ROOT_TAG.equals(tag)) {
+                        String read = parser.getAttributeValue(null, ATTR);
+                        if (!str.equals(read)) {
+                            Log.e(TAG, "Attribute not preserved: " + description
+                                    + " input=\"" + str + "\", but read=\"" + read + "\"");
+                            ok = false;
+                        }
+                    }
+                }
+                if (type == XmlPullParser.TEXT && ROOT_TAG.equals(tag)) {
+                    String read = parser.getText();
+                    if (!str.equals(parser.getText())) {
+                        Log.e(TAG, "Text not preserved: " + description
+                                + " input=\"" + str + "\", but read=\"" + read + "\"");
+                        ok = false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to parse: " + description, e);
+            return false;
+        }
+        return ok;
+    }
+
+    private boolean check(String description, String str) throws Exception {
+        boolean ok = false;
+        ok |= checkPreserved(description, str);
+        ok |= checkPreserved(description + " wrapped with spaces" ,"  " + str + "  ");
+        return ok;
+    }
+
+    @LargeTest
+    public void testAllCharacters() throws Exception {
+        boolean ok = true;
+        for (int i = 0; i < 0xffff; i++) {
+            if (0xd800 <= i && i <= 0xdfff) {
+                // Surrogate pair characters.
+                continue;
+            }
+            ok &= check("char: " + i, String.valueOf((char) i));
+        }
+        // Dangling surrogate pairs. We can't preserve them.
+        assertFalse(check("+ud800", "\ud800"));
+        assertFalse(check("+udc00", "\udc00"));
+
+        for (int i = 0xd800; i < 0xdc00; i ++) {
+            for (int j = 0xdc00; j < 0xe000; j++) {
+                ok &= check("char: " + i, String.valueOf((char) i) + String.valueOf((char) j));
+            }
+        }
+        assertTrue("Some tests failed.  See logcat for details.", ok);
     }
 }
