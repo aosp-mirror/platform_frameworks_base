@@ -298,7 +298,6 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
     class AvoidOverdrawBitmapsTestRenderer : public TestRendererBase {
     public:
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
-            EXPECT_LT(mIndex++, 2) << "Should be two bitmaps";
             switch(mIndex++) {
             case 0:
                 EXPECT_EQ(opaqueBitmap.pixelRef(), op.bitmap->pixelRef());
@@ -331,7 +330,7 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
 
     AvoidOverdrawBitmapsTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(2, renderer.getIndex()) << "Expect exactly one op";
+    EXPECT_EQ(2, renderer.getIndex()) << "Expect exactly two ops";
 }
 
 RENDERTHREAD_TEST(FrameBuilder, clippedMerging) {
