@@ -164,7 +164,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 onUserStopped(userId);
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 reloadWidgetsMaskedStateForGroup(userId);
-            } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED.equals(action)) {
+            } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABLE.equals(action)
+                    || Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE.equals(action)) {
                 synchronized (mLock) {
                     reloadWidgetsMaskedState(userId);
                 }
@@ -288,7 +289,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 userFilter, null, null);
 
         IntentFilter offModeFilter = new IntentFilter();
-        offModeFilter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+        offModeFilter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        offModeFilter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
                 offModeFilter, null, null);
 

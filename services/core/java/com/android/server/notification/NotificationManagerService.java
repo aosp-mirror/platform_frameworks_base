@@ -771,10 +771,9 @@ public class NotificationManagerService extends SystemService {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, 0, 0, true, userHandle,
                             REASON_USER_STOPPED, null);
                 }
-            } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED)) {
-                boolean inQuietMode = intent.getBooleanExtra(Intent.EXTRA_QUIET_MODE, false);
+            } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                if (inQuietMode && userHandle >= 0) {
+                if (userHandle >= 0) {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, 0, 0, true, userHandle,
                             REASON_PROFILE_TURNED_OFF, null);
                 }
@@ -1008,7 +1007,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         getContext().registerReceiver(mIntentReceiver, filter);
 
         IntentFilter pkgFilter = new IntentFilter();
