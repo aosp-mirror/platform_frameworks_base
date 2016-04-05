@@ -3056,15 +3056,29 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MANAGED_PROFILE_UNLOCKED =
             "android.intent.action.MANAGED_PROFILE_UNLOCKED";
 
+    /** @hide */
+    public static final String ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED =
+            "android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED";
+
     /**
-     * Broadcast sent to the primary user when an associated managed profile's availability has
-     * changed. This includes when the user toggles the profile's quiet mode. Carries an extra
+     * Broadcast sent to the primary user when an associated managed profile has become available.
+     * Currently this includes when the user disables quiet mode for the profile. Carries an extra
      * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,
      * this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the new state
      * of quiet mode. This is only sent to registered receivers, not manifest receivers.
      */
-    public static final String ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED =
-            "android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED";
+    public static final String ACTION_MANAGED_PROFILE_AVAILABLE =
+            "android.intent.action.MANAGED_PROFILE_AVAILABLE";
+
+    /**
+     * Broadcast sent to the primary user when an associated managed profile has become unavailable.
+     * Currently this includes when the user enables quiet mode for the profile. Carries an extra
+     * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,
+     * this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the new state
+     * of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     */
+    public static final String ACTION_MANAGED_PROFILE_UNAVAILABLE =
+            "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
 
     /**
      * Sent when the user taps on the clock widget in the system's "quick settings" area.
@@ -4165,6 +4179,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Optional boolean extra indicating whether quiet mode has been switched on or off.
+     * When a profile goes into quiet mode, all apps in the profile are killed and the
+     * profile user is stopped. Widgets originating from the profile are masked, and app
+     * launcher icons are grayed out.
      */
     public static final String EXTRA_QUIET_MODE = "android.intent.extra.QUIET_MODE";
 
