@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"권장 서비스"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"사용 중지된 서비스"</string>
     <string name="all_services_title" msgid="5578662754874906455">"모든 서비스"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>개 프린터를 표시하려면 설치하세요.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>개 프린터를 표시하려면 설치하세요.</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> 인쇄 중"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> 취소 중"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"프린터 오류: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

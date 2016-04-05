@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"ശുപാർശ ചെയ്യപ്പെടുന്ന സേവനങ്ങൾ"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"പ്രവർത്തനരഹിതമാക്കിയ സേവനങ്ങൾ"</string>
     <string name="all_services_title" msgid="5578662754874906455">"എല്ലാ സേവനങ്ങളും"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> പ്രിന്ററുകൾ കണ്ടെത്തുന്നതിന് ഇൻസ്റ്റാൾ ചെയ്യുക</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> പ്രിന്റർ കണ്ടെത്തുന്നതിന് ഇൻസ്റ്റാൾ ചെയ്യുക</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> പ്രിന്റുചെയ്യുന്നു"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> റദ്ദാക്കുന്നു"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"പ്രിന്റർ പിശക് <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"பரிந்துரைக்கப்படும் அச்சுப் பொறிகள்"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"முடக்கப்பட்ட அச்சுப் பொறிகள்"</string>
     <string name="all_services_title" msgid="5578662754874906455">"எல்லா அச்சுப் பொறிகளும்"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> பிரிண்டர்களைக் கண்டறிய, நிறுவவும்</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> பிரிண்டரைக் கண்டறிய, நிறுவவும்</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ஐ அச்சிடுகிறது"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ஐ ரத்துசெய்கிறது"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"பிரிண்டர் பிழை <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

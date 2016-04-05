@@ -72,6 +72,10 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"რეკომენდებული სერვისები"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"გათიშული სერვისები"</string>
     <string name="all_services_title" msgid="5578662754874906455">"ყველა სერვისი"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other">დააინსტალირეთ <xliff:g id="COUNT_1">%1$s</xliff:g> პრინტერის აღმოსაჩენად</item>
+      <item quantity="one">დააინსტალირეთ <xliff:g id="COUNT_0">%1$s</xliff:g> პრინტერის აღმოსაჩენად</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"იბეჭდება <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"მიმდინარეობს <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>-ის გაუქმება"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"ბეჭდვის შეცდომა <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

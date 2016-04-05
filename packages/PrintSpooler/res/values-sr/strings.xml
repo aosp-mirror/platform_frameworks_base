@@ -73,6 +73,11 @@
     <string name="recommended_services_title" msgid="3799434882937956924">"Препоручене услуге"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Онемогућене услуге"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Све услуге"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="one">Инсталирајте да бисте открили <xliff:g id="COUNT_1">%1$s</xliff:g> штампач</item>
+      <item quantity="few">Инсталирајте да бисте открили <xliff:g id="COUNT_1">%1$s</xliff:g> штампача</item>
+      <item quantity="other">Инсталирајте да бисте открили <xliff:g id="COUNT_1">%1$s</xliff:g> штампача</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Штампа се <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Отказује се <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Грешка штампача <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
