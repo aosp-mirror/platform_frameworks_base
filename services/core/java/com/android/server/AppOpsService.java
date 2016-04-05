@@ -1046,7 +1046,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             op.duration = 0;
             final int switchCode = AppOpsManager.opToSwitch(code);
             UidState uidState = ops.uidState;
-            if (uidState.opModes != null) {
+            // If there is a non-default per UID policy (we set UID op mode only if
+            // non-default) it takes over, otherwise use the per package policy.
+            if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
                 final int uidMode = uidState.opModes.get(switchCode);
                 if (uidMode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code "
@@ -1055,13 +1057,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                     op.rejectTime = System.currentTimeMillis();
                     return uidMode;
                 }
-            }
-            final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
-            if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
-                if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code "
-                        + switchCode + " (" + code + ") uid " + uid + " package " + packageName);
-                op.rejectTime = System.currentTimeMillis();
-                return switchOp.mode;
+            } else {
+                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
+                if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
+                    if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code "
+                            + switchCode + " (" + code + ") uid " + uid + " package "
+                            + packageName);
+                    op.rejectTime = System.currentTimeMillis();
+                    return switchOp.mode;
+                }
             }
             if (DEBUG) Log.d(TAG, "noteOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName);
