@@ -267,6 +267,34 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
+     * Renders the given view hierarchy to the passed canvas and returns the result of the render
+     * operation.
+     * @param canvas an optional canvas to render the views to. If null, only the measure and
+     * layout steps will be executed.
+     */
+    private static Result render(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
+            @Nullable Canvas canvas, int width, int height) {
+        // measure again with the size we need
+        // This must always be done before the call to layout
+        measureView(viewRoot, null /*measuredView*/,
+                width, MeasureSpec.EXACTLY,
+                height, MeasureSpec.EXACTLY);
+
+        // now do the layout.
+        viewRoot.layout(0, 0, width, height);
+        handleScrolling(context, viewRoot);
+
+        if (canvas == null) {
+            return SUCCESS.createResult();
+        }
+
+        AttachInfo_Accessor.dispatchOnPreDraw(viewRoot);
+        viewRoot.draw(canvas);
+
+        return SUCCESS.createResult();
+    }
+
+    /**
      * Renders the scene.
      * <p>
      * {@link #acquire(long)} must have been called before this.
@@ -367,24 +395,12 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 }
             }
 
-            // measure again with the size we need
-            // This must always be done before the call to layout
-            measureView(mViewRoot, null /*measuredView*/,
-                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
-                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
-
-            // now do the layout.
-            mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
-
-            handleScrolling(mViewRoot);
-
+            Result renderResult = SUCCESS.createResult();
             if (params.isLayoutOnly()) {
                 // delete the canvas and image to reset them on the next full rendering
                 mImage = null;
                 mCanvas = null;
             } else {
-                AttachInfo_Accessor.dispatchOnPreDraw(mViewRoot);
-
                 // draw the views
                 // create the BufferedImage into which the layout will be rendered.
                 boolean newImage = false;
@@ -446,6 +462,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 if (mElapsedFrameTimeNanos >= 0) {
                     long initialTime = System_Delegate.nanoTime();
                     if (!mFirstFrameExecuted) {
+                        // We need to run an initial draw call to initialize the animations
+                        render(getContext(), mViewRoot, mCanvas, 0, 0);
+
                         // The first frame will initialize the animations
                         Choreographer_Delegate.doFrame(initialTime);
                         mFirstFrameExecuted = true;
@@ -453,14 +472,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // Second frame will move the animations
                     Choreographer_Delegate.doFrame(initialTime + mElapsedFrameTimeNanos);
                 }
-                mViewRoot.draw(mCanvas);
+                renderResult = render(getContext(), mViewRoot, mCanvas, mMeasuredScreenWidth,
+                        mMeasuredScreenHeight);
             }
 
             mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
                     false);
 
             // success!
-            return SUCCESS.createResult();
+            return renderResult;
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -488,7 +508,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @return the measured width/height if measuredView is non-null, null otherwise.
      */
     @SuppressWarnings("deprecation")  // For the use of Pair
-    private Pair<Integer, Integer> measureView(ViewGroup viewToMeasure, View measuredView,
+    private static Pair<Integer, Integer> measureView(ViewGroup viewToMeasure, View measuredView,
             int width, int widthMode, int height, int heightMode) {
         int w_spec = MeasureSpec.makeMeasureSpec(width, widthMode);
         int h_spec = MeasureSpec.makeMeasureSpec(height, heightMode);
@@ -1061,8 +1081,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * the component supports nested scrolling attempt that first, then use the unconsumed scroll
      * part to scroll the content in the component.
      */
-    private void handleScrolling(View view) {
-        BridgeContext context = getContext();
+    private static void handleScrolling(BridgeContext context, View view) {
         int scrollPosX = context.getScrollXPos(view);
         int scrollPosY = context.getScrollYPos(view);
         if (scrollPosX != 0 || scrollPosY != 0) {
@@ -1080,7 +1099,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 }
             }
             if (scrollPosX != 0 || scrollPosY != 0) {
-                view.scrollBy(scrollPosX, scrollPosY);
+                view.scrollTo(scrollPosX, scrollPosY);
             }
         }
 
@@ -1090,7 +1109,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         ViewGroup group = (ViewGroup) view;
         for (int i = 0; i < group.getChildCount(); i++) {
             View child = group.getChildAt(i);
-            handleScrolling(child);
+            handleScrolling(context, child);
         }
     }
 

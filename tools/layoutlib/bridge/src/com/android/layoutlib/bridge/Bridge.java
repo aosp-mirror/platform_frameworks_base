@@ -24,6 +24,7 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.layoutlib.bridge.util.DynamicIdMap;
@@ -408,7 +409,9 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     /**
      * Starts a layout session by inflating and rendering it. The method returns a
      * {@link RenderSession} on which further actions can be taken.
-     *
+     * <p/>
+     * If {@link SessionParams} includes the {@link RenderParamsFlags#FLAG_DO_NOT_RENDER_ON_CREATE},
+     * this method will only inflate the layout but will NOT render it.
      * @param params the {@link SessionParams} object with all the information necessary to create
      *           the scene.
      * @return a new {@link RenderSession} object that contains the result of the layout.
@@ -424,7 +427,10 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 lastResult = scene.init(params.getTimeout());
                 if (lastResult.isSuccess()) {
                     lastResult = scene.inflate();
-                    if (lastResult.isSuccess()) {
+
+                    boolean doNotRenderOnCreate = Boolean.TRUE.equals(
+                            params.getFlag(RenderParamsFlags.FLAG_DO_NOT_RENDER_ON_CREATE));
+                    if (lastResult.isSuccess() && !doNotRenderOnCreate) {
                         lastResult = scene.render(true /*freshRender*/);
                     }
                 }
