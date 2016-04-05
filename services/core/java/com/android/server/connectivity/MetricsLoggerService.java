@@ -18,18 +18,21 @@ package com.android.server.connectivity;
 
 import com.android.server.SystemService;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityMetricsEvent;
 import android.net.ConnectivityMetricsLogger;
 import android.net.IConnectivityMetricsLogger;
-import android.net.IConnectivityMetricsLoggerSubscriber;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.ArrayMap;
+import android.os.Binder;
+import android.os.Parcel;
+import android.text.format.DateUtils;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.List;
 
 /** {@hide} */
 public class MetricsLoggerService extends SystemService {
@@ -43,26 +46,79 @@ public class MetricsLoggerService extends SystemService {
 
     @Override
     public void onStart() {
+        resetThrottlingCounters(System.currentTimeMillis());
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
+            if (DBG) Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
             publishBinderService(ConnectivityMetricsLogger.CONNECTIVITY_METRICS_LOGGER_SERVICE,
                     mBinder);
         }
     }
 
-    private final int MAX_NUMBER_OF_EVENTS = 100;
-    private final int MAX_TIME_OFFSET = 15*60*1000; // 15 minutes
-    private final List<ConnectivityMetricsEvent> mEvents = new ArrayList<>();
-    private long mLastSentEventTimeMillis = System.currentTimeMillis();
+    // TODO: read from system property
+    private final int MAX_NUMBER_OF_EVENTS = 1000;
 
-    private final void enforceConnectivityInternalPermission() {
+    // TODO: read from system property
+    private final int EVENTS_NOTIFICATION_THRESHOLD = 300;
+
+    // TODO: read from system property
+    private final int THROTTLING_TIME_INTERVAL_MILLIS = 60 * 60 * 1000; // 1 hour
+
+    // TODO: read from system property
+    private final int THROTTLING_MAX_NUMBER_OF_MESSAGES_PER_COMPONENT = 1000;
+
+    private int mEventCounter = 0;
+
+    /**
+     * Reference of the last event in the list of cached events.
+     *
+     * When client of this service retrieves events by calling getEvents, it is passing
+     * ConnectivityMetricsEvent.Reference object. After getEvents returns, that object will
+     * contain this reference. The client can save it and use next time it calls getEvents.
+     * This way only new events will be returned.
+     */
+    private long mLastEventReference = 0;
+
+    private final int mThrottlingCounters[] =
+            new int[ConnectivityMetricsLogger.NUMBER_OF_COMPONENTS];
+
+    private long mThrottlingIntervalBoundaryMillis;
+
+    private final ArrayDeque<ConnectivityMetricsEvent> mEvents = new ArrayDeque<>();
+
+    private void enforceConnectivityInternalPermission() {
         getContext().enforceCallingPermission(
                 android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "MetricsLoggerService");
+    }
+
+    private void enforceDumpPermission() {
+        getContext().enforceCallingPermission(
+                android.Manifest.permission.DUMP,
+                "MetricsLoggerService");
+    }
+
+    private void resetThrottlingCounters(long currentTimeMillis) {
+        for (int i = 0; i < mThrottlingCounters.length; i++) {
+            mThrottlingCounters[i] = 0;
+        }
+        mThrottlingIntervalBoundaryMillis =
+                currentTimeMillis + THROTTLING_TIME_INTERVAL_MILLIS;
+    }
+
+    private void addEvent(ConnectivityMetricsEvent e) {
+        if (VDBG) {
+            Log.v(TAG, "writeEvent(" + e.toString() + ")");
+        }
+
+        while (mEvents.size() >= MAX_NUMBER_OF_EVENTS) {
+            mEvents.removeFirst();
+        }
+
+        mEvents.addLast(e);
     }
 
     /**
@@ -70,107 +126,227 @@ public class MetricsLoggerService extends SystemService {
      */
     private final IConnectivityMetricsLogger.Stub mBinder = new IConnectivityMetricsLogger.Stub() {
 
-        private final ArrayMap<IConnectivityMetricsLoggerSubscriber,
-                IBinder.DeathRecipient> mSubscribers = new ArrayMap<>();
+        private final ArrayList<PendingIntent> mPendingIntents = new ArrayList<>();
 
-
-        private ConnectivityMetricsEvent[] prepareEventsToSendIfReady() {
-            ConnectivityMetricsEvent[] eventsToSend = null;
-            final long currentTimeMillis = System.currentTimeMillis();
-            final long timeOffset = currentTimeMillis - mLastSentEventTimeMillis;
-            if (timeOffset >= MAX_TIME_OFFSET
-                    || timeOffset < 0 // system time has changed
-                    || mEvents.size() >= MAX_NUMBER_OF_EVENTS) {
-                // batch events
-                mLastSentEventTimeMillis = currentTimeMillis;
-                eventsToSend = new ConnectivityMetricsEvent[mEvents.size()];
-                mEvents.toArray(eventsToSend);
-                mEvents.clear();
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump ConnectivityMetricsLoggerService " +
+                        "from from pid=" + Binder.getCallingPid() + ", uid=" +
+                        Binder.getCallingUid());
+                return;
             }
-            return eventsToSend;
-        }
 
-        private void maybeSendEventsToSubscribers(ConnectivityMetricsEvent[] eventsToSend) {
-            if (eventsToSend == null || eventsToSend.length == 0) return;
-            synchronized (mSubscribers) {
-                for (IConnectivityMetricsLoggerSubscriber s : mSubscribers.keySet()) {
-                    try {
-                        s.onEvents(eventsToSend);
-                    } catch (RemoteException ex) {
-                        Log.e(TAG, "RemoteException " + ex);
-                    }
-                }
-            }
-        }
+            boolean dumpSerializedSize = false;
+            boolean dumpEvents = false;
+            for (String arg : args) {
+                switch (arg) {
+                    case "--events":
+                        dumpEvents = true;
+                        break;
 
-        public void logEvent(ConnectivityMetricsEvent event) {
-            ConnectivityMetricsEvent[] events = new ConnectivityMetricsEvent[]{event};
-            logEvents(events);
-        }
+                    case "--size":
+                        dumpSerializedSize = true;
+                        break;
 
-        public void logEvents(ConnectivityMetricsEvent[] events) {
-            enforceConnectivityInternalPermission();
-            ConnectivityMetricsEvent[] eventsToSend;
-
-            if (VDBG) {
-                for (ConnectivityMetricsEvent e : events) {
-                    Log.v(TAG, "writeEvent(" + e.toString() + ")");
+                    case "--all":
+                        dumpEvents = true;
+                        dumpSerializedSize = true;
+                        break;
                 }
             }
 
             synchronized (mEvents) {
-                for (ConnectivityMetricsEvent e : events) {
-                    mEvents.add(e);
+                pw.println("Number of events: " + mEvents.size());
+                pw.println("Time span: " +
+                        DateUtils.formatElapsedTime(
+                                (System.currentTimeMillis() - mEvents.peekFirst().timestamp)
+                                        / 1000));
+
+                if (dumpSerializedSize) {
+                    long dataSize = 0;
+                    Parcel p = Parcel.obtain();
+                    for (ConnectivityMetricsEvent e : mEvents) {
+                        dataSize += 16; // timestamp and 2 stamps
+
+                        p.writeParcelable(e.data, 0);
+                    }
+                    dataSize += p.dataSize();
+                    p.recycle();
+                    pw.println("Serialized data size: " + dataSize);
                 }
 
-                eventsToSend = prepareEventsToSendIfReady();
+                if (dumpEvents) {
+                    pw.println();
+                    pw.println("Events:");
+                    for (ConnectivityMetricsEvent e : mEvents) {
+                        pw.println(e.toString());
+                    }
+                }
             }
 
-            maybeSendEventsToSubscribers(eventsToSend);
+            if (!mPendingIntents.isEmpty()) {
+                pw.println();
+                pw.println("Pending intents:");
+                for (PendingIntent pi : mPendingIntents) {
+                    pw.println(pi.toString());
+                }
+            }
         }
 
-        public boolean subscribe(IConnectivityMetricsLoggerSubscriber subscriber) {
-            enforceConnectivityInternalPermission();
-            if (VDBG) Log.v(TAG, "subscribe");
+        public long logEvent(ConnectivityMetricsEvent event) {
+            ConnectivityMetricsEvent[] events = new ConnectivityMetricsEvent[]{event};
+            return logEvents(events);
+        }
 
-            synchronized (mSubscribers) {
-                if (mSubscribers.containsKey(subscriber)) {
-                    Log.e(TAG, "subscriber is already subscribed");
-                    return false;
+        /**
+         * @param events
+         *
+         * Note: All events must belong to the same component.
+         *
+         * @return 0 on success
+         *        <0 if error happened
+         *        >0 timestamp after which new events will be accepted
+         */
+        public long logEvents(ConnectivityMetricsEvent[] events) {
+            enforceConnectivityInternalPermission();
+
+            if (events == null || events.length == 0) {
+                Log.wtf(TAG, "No events passed to logEvents()");
+                return -1;
+            }
+
+            int componentTag = events[0].componentTag;
+            if (componentTag < 0 ||
+                    componentTag >= ConnectivityMetricsLogger.NUMBER_OF_COMPONENTS) {
+                Log.wtf(TAG, "Unexpected tag: " + componentTag);
+                return -1;
+            }
+
+            synchronized (mThrottlingCounters) {
+                long currentTimeMillis = System.currentTimeMillis();
+                if (currentTimeMillis > mThrottlingIntervalBoundaryMillis) {
+                    resetThrottlingCounters(currentTimeMillis);
                 }
-                final IConnectivityMetricsLoggerSubscriber s = subscriber;
-                IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
-                    @Override
-                    public void binderDied() {
-                        if (VDBG) Log.v(TAG, "subscriber died");
-                        synchronized (mSubscribers) {
-                            mSubscribers.remove(s);
+
+                mThrottlingCounters[componentTag] += events.length;
+
+                if (mThrottlingCounters[componentTag] >
+                        THROTTLING_MAX_NUMBER_OF_MESSAGES_PER_COMPONENT) {
+                    Log.w(TAG, "Too many events from #" + componentTag +
+                            ". Block until " + mThrottlingIntervalBoundaryMillis);
+
+                    return mThrottlingIntervalBoundaryMillis;
+                }
+            }
+
+            boolean sendPendingIntents = false;
+
+            synchronized (mEvents) {
+                for (ConnectivityMetricsEvent e : events) {
+                    if (e.componentTag != componentTag) {
+                        Log.wtf(TAG, "Unexpected tag: " + e.componentTag);
+                        return -1;
+                    }
+
+                    addEvent(e);
+                }
+
+                mLastEventReference += events.length;
+
+                mEventCounter += events.length;
+                if (mEventCounter >= EVENTS_NOTIFICATION_THRESHOLD) {
+                    mEventCounter = 0;
+                    sendPendingIntents = true;
+                }
+            }
+
+            if (sendPendingIntents) {
+                synchronized (mPendingIntents) {
+                    for (PendingIntent pi : mPendingIntents) {
+                        if (VDBG) Log.v(TAG, "Send pending intent");
+                        try {
+                            pi.send(getContext(), 0, null, null, null);
+                        } catch (PendingIntent.CanceledException e) {
+                            Log.e(TAG, "Pending intent canceled: " + pi);
+                            mPendingIntents.remove(pi);
                         }
                     }
-                };
-
-                try {
-                    subscriber.asBinder().linkToDeath(dr, 0);
-                    mSubscribers.put(subscriber, dr);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "subscribe failed: " + e);
-                    return false;
                 }
+            }
+
+            return 0;
+        }
+
+        /**
+         * Retrieve events
+         *
+         * @param reference of the last event previously returned. The function will return
+         *                  events following it.
+         *                  If 0 then all events will be returned.
+         *                  After the function call it will contain reference of the
+         *                  last returned event.
+         * @return events
+         */
+        public ConnectivityMetricsEvent[] getEvents(ConnectivityMetricsEvent.Reference reference) {
+            enforceDumpPermission();
+            long ref = reference.value;
+            if (VDBG) Log.v(TAG, "getEvents(" + ref + ")");
+
+            ConnectivityMetricsEvent[] result;
+            synchronized (mEvents) {
+                if (ref > mLastEventReference) {
+                    Log.e(TAG, "Invalid reference");
+                    reference.value = mLastEventReference;
+                    return null;
+                }
+                if (ref < mLastEventReference - mEvents.size()) {
+                    ref = mLastEventReference - mEvents.size();
+                }
+
+                int numEventsToSkip =
+                        mEvents.size() // Total number of events
+                        - (int)(mLastEventReference - ref); // Number of events to return
+
+                result = new ConnectivityMetricsEvent[mEvents.size() - numEventsToSkip];
+                int i = 0;
+                for (ConnectivityMetricsEvent e : mEvents) {
+                    if (numEventsToSkip > 0) {
+                        numEventsToSkip--;
+                    } else {
+                        result[i++] = e;
+                    }
+                }
+            }
+
+            reference.value = mLastEventReference;
+
+            return result;
+        }
+
+        public boolean register(PendingIntent newEventsIntent) {
+            enforceDumpPermission();
+            if (VDBG) Log.v(TAG, "register(" + newEventsIntent + ")");
+
+            synchronized (mPendingIntents) {
+                if (mPendingIntents.remove(newEventsIntent)) {
+                    Log.w(TAG, "Replacing registered pending intent");
+                }
+                mPendingIntents.add(newEventsIntent);
             }
 
             return true;
         }
 
-        public void unsubscribe(IConnectivityMetricsLoggerSubscriber subscriber) {
-            enforceConnectivityInternalPermission();
-            if (VDBG) Log.v(TAG, "unsubscribe");
-            synchronized (mSubscribers) {
-                IBinder.DeathRecipient dr = mSubscribers.remove(subscriber);
-                if (dr == null) {
-                    Log.e(TAG, "subscriber is not subscribed");
-                    return;
+        public void unregister(PendingIntent newEventsIntent) {
+            enforceDumpPermission();
+            if (VDBG) Log.v(TAG, "unregister(" + newEventsIntent + ")");
+
+            synchronized (mPendingIntents) {
+                if (!mPendingIntents.remove(newEventsIntent)) {
+                    Log.e(TAG, "Pending intent is not registered");
                 }
-                subscriber.asBinder().unlinkToDeath(dr, 0);
             }
         }
     };
