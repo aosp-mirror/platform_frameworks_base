@@ -470,7 +470,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if(mExpandedWhenPinned) {
             return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
         } else if (atLeastMinHeight) {
-            return Math.max(getMinHeight(), mHeadsUpHeight);
+            return Math.max(getCollapsedHeight(), mHeadsUpHeight);
         } else {
             return mHeadsUpHeight;
         }
@@ -1040,12 +1040,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             } else if (isExpanded()) {
                 return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
             } else {
-                return Math.max(getMinHeight(), mHeadsUpHeight);
+                return Math.max(getCollapsedHeight(), mHeadsUpHeight);
             }
         } else if (isExpanded()) {
             return getMaxExpandHeight();
         } else {
-            return getMinHeight();
+            return getCollapsedHeight();
         }
     }
 
@@ -1301,9 +1301,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
-    public int getMinExpandHeight() {
+    public int getCollapsedHeight() {
         if (mIsSummaryWithChildren && !mShowingPublic) {
-            return mChildrenContainer.getMinExpandHeight();
+            return mChildrenContainer.getCollapsedHeight();
         }
         return getMinHeight();
     }
