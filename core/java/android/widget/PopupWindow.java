@@ -1495,7 +1495,7 @@ public class PopupWindow {
      *
      * @param anchor the view on which the popup window must be anchored
      * @param outParams the layout parameters used to display the drop down
-     * @param xOffset absolute horizontal offset from the top of the anchor
+     * @param xOffset absolute horizontal offset from the left of the anchor
      * @param yOffset absolute vertical offset from the top of the anchor
      * @param gravity horizontal gravity specifying popup alignment
      * @return true if the popup is translated upwards to fit on screen
@@ -1524,6 +1524,8 @@ public class PopupWindow {
 
         // Let the window manager know to align the top to y.
         outParams.gravity = Gravity.LEFT | Gravity.TOP;
+        outParams.width = width;
+        outParams.height = height;
 
         final int[] screenLocation = mTmpScreenLocation;
         anchor.getLocationOnScreen(screenLocation);
@@ -1531,100 +1533,154 @@ public class PopupWindow {
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
-        boolean onTop = false;
+        // First, attempt to fit the popup vertically without resizing.
+        final boolean fitsVertical = tryFitVertical(outParams, yOffset, height,
+                anchorHeight, drawingLocation[1], screenLocation[1], displayFrame.top,
+                displayFrame.bottom, false);
 
-        final View root = anchor.getRootView();
-        final int screenY = screenLocation[1] + anchorHeight + yOffset;
-        final boolean tooFarDown = screenY + height > displayFrame.bottom;
-        final boolean tooFarRight = outParams.x + width > root.getWidth();
-        if (tooFarDown || tooFarRight) {
-            // If the popup extends beyond the visible area, try to scroll the
-            // parent so that it is fully visible.
-            if (mAllowScrollingAnchorParent) {
-                final int scrollX = anchor.getScrollX();
-                final int scrollY = anchor.getScrollY();
-                final Rect r = new Rect(scrollX, scrollY, scrollX + width + xOffset,
-                        scrollY + height + anchorHeight + yOffset);
-                anchor.requestRectangleOnScreen(r, true);
-            }
+        // Next, attempt to fit the popup horizontally without resizing.
+        final boolean fitsHorizontal = tryFitHorizontal(outParams, xOffset, width,
+                anchorWidth, drawingLocation[0], screenLocation[0], displayFrame.left,
+                displayFrame.right, false);
 
-            // Update for the new anchor position.
-            anchor.getLocationInWindow(drawingLocation);
-            outParams.x = drawingLocation[0] + xOffset;
-            outParams.y = drawingLocation[1] + anchorHeight + yOffset;
+        // If the popup still doesn't fit, attempt to scroll the parent.
+        if (!fitsVertical || !fitsHorizontal) {
+            final int scrollX = anchor.getScrollX();
+            final int scrollY = anchor.getScrollY();
+            final Rect r = new Rect(scrollX, scrollY, scrollX + width + xOffset,
+                    scrollY + height + anchorHeight + yOffset);
+            if (mAllowScrollingAnchorParent && anchor.requestRectangleOnScreen(r, true)) {
+                // Reset for the new anchor position.
+                anchor.getLocationInWindow(drawingLocation);
+                outParams.x = drawingLocation[0] + xOffset;
+                outParams.y = drawingLocation[1] + anchorHeight + yOffset;
 
-            // Preserve the gravity adjustment.
-            if (hgrav == Gravity.RIGHT) {
-                outParams.x -= width - anchorWidth;
-            }
-
-            final int newScreenY = screenLocation[1] + anchorHeight + yOffset;
-            final boolean stillTooFarDown = newScreenY + height > displayFrame.bottom;
-            if (stillTooFarDown) {
-                // If the popup is still too far down, re-evaluate the space
-                // available and decide whether the pop-up will go above or
-                // below the anchor.
-                anchor.getLocationOnScreen(screenLocation);
-
-                final int below = displayFrame.bottom - screenLocation[1] - anchorHeight - yOffset;
-                final int above = screenLocation[1] - displayFrame.top + yOffset;
-                onTop = above > below;
-
-                if (onTop) {
-                    // Move everything up.
-                    if (mOverlapAnchor) {
-                        yOffset += anchorHeight;
-                    }
-                    outParams.y = drawingLocation[1] - height + yOffset;
+                // Preserve the gravity adjustment.
+                if (hgrav == Gravity.RIGHT) {
+                    outParams.x -= width - anchorWidth;
                 }
             }
+
+            // Try to fit the popup again and allowing resizing.
+            tryFitVertical(outParams, yOffset, height, anchorHeight, drawingLocation[1],
+                    screenLocation[1], displayFrame.top, displayFrame.bottom, mClipToScreen);
+            tryFitHorizontal(outParams, xOffset, width, anchorWidth, drawingLocation[0],
+                    screenLocation[0], displayFrame.left, displayFrame.right, mClipToScreen);
         }
 
-        if (mClipToScreen) {
-            // Use screen coordinates for comparison against display frame.
-            final int winOffsetX = screenLocation[0] - drawingLocation[0];
-            final int winOffsetY = screenLocation[1] - drawingLocation[1];
-            outParams.x += winOffsetX;
-            outParams.y += winOffsetY;
+        // Return whether the popup's top edge is above the anchor's top edge.
+        return outParams.y < drawingLocation[1];
+    }
 
-            final int right = outParams.x + width;
-            if (right > displayFrame.right) {
-                // The popup is too far right, move it back in.
-                outParams.x -= right - displayFrame.right;
-            }
-
-            if (outParams.x < displayFrame.left) {
-                // The popup is too far left, move it back in and clip if it's
-                // still too large.
-                outParams.x = displayFrame.left;
-
-                final int displayFrameWidth = displayFrame.width();
-                width = Math.min(width, displayFrameWidth);
-            }
-
-            final int bottom = outParams.y + height;
-            if (bottom > displayFrame.bottom) {
-                // The popup is too far down, move it back in.
-                outParams.y -= bottom - displayFrame.bottom;
-            }
-
-            if (outParams.y < displayFrame.top) {
-                // The popup is too far up, move it back in and clip if
-                // it's still too large.
-                outParams.y = displayFrame.top;
-
-                final int displayFrameHeight = displayFrame.height();
-                height = Math.min(height, displayFrameHeight);
-            }
-
-            outParams.x -= winOffsetX;
-            outParams.y -= winOffsetY;
+    private boolean tryFitVertical(@NonNull LayoutParams outParams, int yOffset, int height,
+            int anchorHeight, int drawingLocationY, int screenLocationY, int displayFrameTop,
+            int displayFrameBottom, boolean allowResize) {
+        final int anchorTopInScreen = screenLocationY + anchorHeight + yOffset;
+        final int spaceBelow = displayFrameBottom - anchorTopInScreen;
+        if (height <= spaceBelow) {
+            return true;
         }
 
-        outParams.width = width;
+        final int spaceAbove = displayFrameTop + anchorTopInScreen - anchorHeight;
+        if (height <= spaceAbove) {
+            // Move everything up.
+            if (mOverlapAnchor) {
+                yOffset += anchorHeight;
+            }
+            outParams.y = drawingLocationY - height + yOffset;
+
+            return true;
+        }
+
+        if (positionInDisplayVertical(outParams, height, drawingLocationY, screenLocationY,
+                displayFrameTop, displayFrameBottom, allowResize)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean positionInDisplayVertical(@NonNull LayoutParams outParams, int height,
+            int drawingLocationY, int screenLocationY, int displayFrameTop, int displayFrameBottom,
+            boolean canResize) {
+        boolean fitsInDisplay = true;
+
+        final int winOffsetY = screenLocationY - drawingLocationY;
+        outParams.y += winOffsetY;
         outParams.height = height;
 
-        return onTop;
+        final int bottom = outParams.y + height;
+        if (bottom > displayFrameBottom) {
+            // The popup is too far down, move it back in.
+            outParams.y -= bottom - displayFrameBottom;
+        }
+
+        if (outParams.y < displayFrameTop) {
+            // The popup is too far up, move it back in and clip if
+            // it's still too large.
+            outParams.y = displayFrameTop;
+
+            final int displayFrameHeight = displayFrameBottom - displayFrameTop;
+            if (canResize && height > displayFrameHeight) {
+                outParams.height = displayFrameHeight;
+            } else {
+                fitsInDisplay = false;
+            }
+        }
+
+        outParams.y -= winOffsetY;
+
+        return fitsInDisplay;
+    }
+
+    private boolean tryFitHorizontal(@NonNull LayoutParams outParams, int xOffset, int width,
+            int anchorWidth, int drawingLocationX, int screenLocationX, int displayFrameLeft,
+            int displayFrameRight, boolean allowResize) {
+        final int anchorLeftInScreen = screenLocationX + xOffset;
+        final int spaceRight = displayFrameRight - anchorLeftInScreen;
+        if (width <= spaceRight) {
+            return true;
+        }
+
+        if (positionInDisplayHorizontal(outParams, width, drawingLocationX, screenLocationX,
+                displayFrameLeft, displayFrameRight, allowResize)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean positionInDisplayHorizontal(@NonNull LayoutParams outParams, int width,
+            int drawingLocationX, int screenLocationX, int displayFrameLeft, int displayFrameRight,
+            boolean canResize) {
+        boolean fitsInDisplay = true;
+
+        // Use screen coordinates for comparison against display frame.
+        final int winOffsetX = screenLocationX - drawingLocationX;
+        outParams.x += winOffsetX;
+
+        final int right = outParams.x + width;
+        if (right > displayFrameRight) {
+            // The popup is too far right, move it back in.
+            outParams.x -= right - displayFrameRight;
+        }
+
+        if (outParams.x < displayFrameLeft) {
+            // The popup is too far left, move it back in and clip if it's
+            // still too large.
+            outParams.x = displayFrameLeft;
+
+            final int displayFrameWidth = displayFrameRight - displayFrameLeft;
+            if (canResize && width > displayFrameWidth) {
+                outParams.width = displayFrameWidth;
+            } else {
+                fitsInDisplay = false;
+            }
+        }
+
+        outParams.x -= winOffsetX;
+
+        return fitsInDisplay;
     }
 
     /**
