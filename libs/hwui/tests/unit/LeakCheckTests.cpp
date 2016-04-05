@@ -30,6 +30,25 @@ const LayerUpdateQueue sEmptyLayerUpdateQueue;
 const FrameBuilder::LightGeometry sLightGeometery = { {100, 100, 100}, 50};
 const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 
+RENDERTHREAD_TEST(LeakCheck, saveLayer_overdrawRejection) {
+    auto node = TestUtils::createNode(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(0, 0, 100, 100, 128, SaveFlags::ClipToLayer);
+        canvas.drawRect(0, 0, 100, 100, SkPaint());
+        canvas.restore();
+
+        // opaque draw, rejects saveLayer beneath
+        canvas.drawRect(0, 0, 100, 100, SkPaint());
+    });
+    RenderState& renderState = renderThread.renderState();
+    Caches& caches = Caches::getInstance();
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+            TestUtils::createSyncedNodeList(node), sLightGeometery, Caches::getInstance());
+    BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
+    frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
+}
+
 RENDERTHREAD_TEST(LeakCheck, saveLayerUnclipped_simple) {
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {

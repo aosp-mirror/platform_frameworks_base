@@ -49,8 +49,11 @@ class TestRendererBase {
 public:
     virtual ~TestRendererBase() {}
     virtual OffscreenBuffer* startTemporaryLayer(uint32_t, uint32_t) {
-        ADD_FAILURE() << "Layer creation not expected in this test";
+        ADD_FAILURE() << "Temporary layers not expected in this test";
         return nullptr;
+    }
+    virtual void recycleTemporaryLayer(OffscreenBuffer*) {
+        ADD_FAILURE() << "Temporary layers not expected in this test";
     }
     virtual void startRepaintLayer(OffscreenBuffer*, const Rect& repaintRect) {
         ADD_FAILURE() << "Layer repaint not expected in this test";
@@ -710,6 +713,10 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_simple) {
             EXPECT_EQ(Rect(200, 200), state.computedState.clipRect());
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
+        void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
+            EXPECT_EQ(4, mIndex++);
+            EXPECT_EQ(nullptr, offscreenBuffer);
+        }
     };
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
@@ -722,7 +729,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_simple) {
             TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
     SaveLayerSimpleTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(4, renderer.getIndex());
+    EXPECT_EQ(5, renderer.getIndex());
 }
 
 RENDERTHREAD_TEST(FrameBuilder, saveLayer_nested) {
@@ -774,6 +781,15 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_nested) {
                 EXPECT_EQ(Rect(800, 800), op.unmappedBounds); // outer layer
             } else { ADD_FAILURE(); }
         }
+        void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
+            const int index = mIndex++;
+            // order isn't important, but we need to see both
+            if (index == 10) {
+                EXPECT_EQ((OffscreenBuffer*)0x400, offscreenBuffer);
+            } else if (index == 11) {
+                EXPECT_EQ((OffscreenBuffer*)0x800, offscreenBuffer);
+            } else { ADD_FAILURE(); }
+        }
     };
 
     auto node = TestUtils::createNode(0, 0, 800, 800,
@@ -794,7 +810,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_nested) {
             TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
     SaveLayerNestedTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(10, renderer.getIndex());
+    EXPECT_EQ(12, renderer.getIndex());
 }
 
 RENDERTHREAD_TEST(FrameBuilder, saveLayer_contentRejection) {
@@ -1009,9 +1025,14 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_complex) {
         }
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(9, mIndex++);
+            EXPECT_EQ((OffscreenBuffer*)0xabcd, *op.layerHandle);
         }
         void endFrame(const Rect& repaintRect) override {
             EXPECT_EQ(11, mIndex++);
+        }
+        void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
+            EXPECT_EQ(12, mIndex++);
+            EXPECT_EQ((OffscreenBuffer*)0xabcd, offscreenBuffer);
         }
     };
 
@@ -1029,7 +1050,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_complex) {
             TestUtils::createSyncedNodeList(node), sLightGeometry, Caches::getInstance());
     SaveLayerUnclippedComplexTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(12, renderer.getIndex());
+    EXPECT_EQ(13, renderer.getIndex());
 }
 
 RENDERTHREAD_TEST(FrameBuilder, hwLayer_simple) {
@@ -1151,6 +1172,9 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
         void endFrame(const Rect& repaintRect) override {
             EXPECT_EQ(12, mIndex++);
         }
+        void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
+            EXPECT_EQ(13, mIndex++);
+        }
     };
 
     auto child = TestUtils::createNode(50, 50, 150, 150,
@@ -1188,7 +1212,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
             syncedList, sLightGeometry, Caches::getInstance());
     HwLayerComplexTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(13, renderer.getIndex());
+    EXPECT_EQ(14, renderer.getIndex());
 
     // clean up layer pointers, so we can safely destruct RenderNodes
     *(child->getLayerHandle()) = nullptr;
@@ -1592,6 +1616,9 @@ RENDERTHREAD_TEST(FrameBuilder, shadowSaveLayer) {
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(4, mIndex++);
         }
+        void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
+            EXPECT_EQ(5, mIndex++);
+        }
     };
 
     auto parent = TestUtils::createNode(0, 0, 200, 200,
@@ -1610,7 +1637,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowSaveLayer) {
             (FrameBuilder::LightGeometry) {{ 100, 100, 100 }, 50}, Caches::getInstance());
     ShadowSaveLayerTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(5, renderer.getIndex());
+    EXPECT_EQ(6, renderer.getIndex());
 }
 
 RENDERTHREAD_TEST(FrameBuilder, shadowHwLayer) {
@@ -1839,6 +1866,9 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(3, mIndex++);
         }
+        void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
+            EXPECT_EQ(4, mIndex++);
+        }
     private:
         SaveLayerAlphaData* mOutData;
     };
@@ -1864,7 +1894,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
 
     // assert, since output won't be valid if we haven't seen a save layer triggered
-    ASSERT_EQ(4, renderer.getIndex()) << "Test must trigger saveLayer alpha behavior.";
+    ASSERT_EQ(5, renderer.getIndex()) << "Test must trigger saveLayer alpha behavior.";
 }
 
 RENDERTHREAD_TEST(FrameBuilder, renderPropSaveLayerAlphaClipBig) {

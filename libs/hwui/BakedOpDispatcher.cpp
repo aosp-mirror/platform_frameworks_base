@@ -809,10 +809,6 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
                         Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
                 .build();
         renderer.renderGlop(state, glop);
-
-        if (op.destroy) {
-            renderer.renderState().layerPool().putOrDelete(buffer);
-        }
     }
 }
 
