@@ -29,6 +29,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -43,6 +44,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.BidiFormatter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -588,8 +590,8 @@ public class Notification implements Parcelable
     private static final int COLOR_INVALID = 1;
 
     /**
-     * Sphere of visibility of this notification, which affects how and when the SystemUI reveals 
-     * the notification's presence and contents in untrusted situations (namely, on the secure 
+     * Sphere of visibility of this notification, which affects how and when the SystemUI reveals
+     * the notification's presence and contents in untrusted situations (namely, on the secure
      * lockscreen).
      *
      * The default level, {@link #VISIBILITY_PRIVATE}, behaves exactly as notifications have always
@@ -2227,7 +2229,8 @@ public class Notification implements Parcelable
                         Log.d(TAG, "Unknown style class: " + templateClass);
                     } else {
                         try {
-                            final Constructor<? extends Style> ctor = styleClass.getConstructor();
+                            final Constructor<? extends Style> ctor =
+                                    styleClass.getDeclaredConstructor();
                             ctor.setAccessible(true);
                             final Style style = ctor.newInstance();
                             style.restoreFromExtras(mN.extras);
@@ -3126,6 +3129,18 @@ public class Notification implements Parcelable
          * @param hasProgress whether the progress bar should be shown and set
          */
         private RemoteViews applyStandardTemplate(int resId, boolean hasProgress) {
+            final Bundle ex = mN.extras;
+
+            CharSequence title = processLegacyText(ex.getCharSequence(EXTRA_TITLE));
+            CharSequence text = processLegacyText(ex.getCharSequence(EXTRA_TEXT));
+            return applyStandardTemplate(resId, hasProgress, title, text);
+        }
+
+        /**
+         * @param hasProgress whether the progress bar should be shown and set
+         */
+        private RemoteViews applyStandardTemplate(int resId, boolean hasProgress,
+                CharSequence title, CharSequence text) {
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -3134,17 +3149,15 @@ public class Notification implements Parcelable
 
             bindNotificationHeader(contentView);
             bindLargeIcon(contentView);
-            if (ex.getCharSequence(EXTRA_TITLE) != null) {
+            if (title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
-                contentView.setTextViewText(R.id.title,
-                        processLegacyText(ex.getCharSequence(EXTRA_TITLE)));
+                contentView.setTextViewText(R.id.title, title);
             }
             boolean showProgress = handleProgressBar(hasProgress, contentView, ex);
-            if (ex.getCharSequence(EXTRA_TEXT) != null) {
+            if (text != null) {
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
                         : com.android.internal.R.id.text;
-                contentView.setTextViewText(textId, processLegacyText(
-                        ex.getCharSequence(EXTRA_TEXT)));
+                contentView.setTextViewText(textId, text);
                 contentView.setViewVisibility(textId, View.VISIBLE);
             }
 
@@ -3747,6 +3760,10 @@ public class Notification implements Parcelable
 
         private int getInboxLayoutResource() {
             return R.layout.notification_template_material_inbox;
+        }
+
+        private int getMessagingLayoutResource() {
+            return R.layout.notification_template_material_messaging;
         }
 
         private int getActionLayoutResource() {
@@ -4375,11 +4392,98 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
-            // TODO handset to write implementation
-            RemoteViews contentView = getStandardView(mBuilder.getBigTextLayoutResource());
+        @Override
+        public RemoteViews makeContentView() {
+            Message m = findLatestIncomingMessage();
+            CharSequence title = mConversationTitle != null
+                    ? mConversationTitle
+                    : (m == null) ? null : m.mSender;
+            CharSequence text = (m == null)
+                    ? null
+                    : mConversationTitle != null ? makeMessageLine(m) : m.mText;
 
+            return mBuilder.applyStandardTemplate(mBuilder.getBaseLayoutResource(),
+                    false /* hasProgress */,
+                    title,
+                    text);
+        }
+
+        private Message findLatestIncomingMessage() {
+            for (int i = mMessages.size() - 1; i >= 0; i--) {
+                Message m = mMessages.get(i);
+                // Incoming messages have a non-empty sender.
+                if (!TextUtils.isEmpty(m.mSender)) {
+                    return m;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeBigContentView() {
+            CharSequence title = !TextUtils.isEmpty(super.mBigContentTitle)
+                    ? super.mBigContentTitle
+                    : mConversationTitle;
+            boolean hasTitle = !TextUtils.isEmpty(title);
+
+            RemoteViews contentView = mBuilder.applyStandardTemplate(
+                    mBuilder.getMessagingLayoutResource(),
+                    false /* hasProgress */,
+                    title,
+                    null /* text */);
+
+            int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
+                    R.id.inbox_text4, R.id.inbox_text5, R.id.inbox_text6};
+
+            // Make sure all rows are gone in case we reuse a view.
+            for (int rowId : rowIds) {
+                contentView.setViewVisibility(rowId, View.GONE);
+            }
+
+            int i=0;
+            int titlePadding = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_messaging_spacing);
+            contentView.setViewLayoutMarginBottom(R.id.line1, hasTitle ? titlePadding : 0);
+            contentView.setInt(R.id.notification_messaging, "setNumIndentLines",
+                    mBuilder.mN.mLargeIcon == null ? 0 : (hasTitle ? 1 : 2));
+
+            int firstMessage = Math.max(0, mMessages.size() - rowIds.length);
+            while (firstMessage + i < mMessages.size() && i < rowIds.length) {
+                Message m = mMessages.get(firstMessage + i);
+                int rowId = rowIds[i];
+
+                contentView.setViewVisibility(rowId, View.VISIBLE);
+                contentView.setTextViewText(rowId, makeMessageLine(m));
+
+                i++;
+            }
             return contentView;
+        }
+
+        private CharSequence makeMessageLine(Message m) {
+            BidiFormatter bidi = BidiFormatter.getInstance();
+            SpannableStringBuilder sb = new SpannableStringBuilder();
+            if (TextUtils.isEmpty(m.mSender)) {
+                CharSequence replyName = mUserDisplayName == null ? "" : mUserDisplayName;
+                sb.append(bidi.unicodeWrap(replyName),
+                        makeFontColorSpan(mBuilder.resolveContrastColor()),
+                        0 /* flags */);
+            } else {
+                sb.append(bidi.unicodeWrap(m.mSender),
+                        makeFontColorSpan(Color.BLACK),
+                        0 /* flags */);
+            }
+            CharSequence text = m.mText == null ? "" : m.mText;
+            sb.append("  ").append(bidi.unicodeWrap(text));
+            return sb;
+        }
+
+        private static TextAppearanceSpan makeFontColorSpan(int color) {
+            return new TextAppearanceSpan(null, 0, 0,
+                    ColorStateList.valueOf(color), null);
         }
 
         public static final class Message implements Parcelable {
