@@ -100,10 +100,6 @@ public class IpManager extends StateMachine {
         public void onProvisioningSuccess(LinkProperties newLp) {}
         public void onProvisioningFailure(LinkProperties newLp) {}
 
-        // This is called whenever 464xlat is being enabled or disabled (i.e.
-        // started or stopped).
-        public void on464XlatChange(boolean enabled) {}
-
         // Invoked on LinkProperties changes.
         public void onLinkPropertiesChange(LinkProperties newLp) {}
 
@@ -120,6 +116,10 @@ public class IpManager extends StateMachine {
         // If multicast filtering cannot be accomplished with APF, this function will be called to
         // actuate multicast filtering using another means.
         public void setFallbackMulticastFilter(boolean enabled) {}
+
+        // Enabled/disable Neighbor Discover offload functionality. This is
+        // called, for example, whenever 464xlat is being started or stopped.
+        public void setNeighborDiscoveryOffload(boolean enable) {}
     }
 
     public static class WaitForProvisioningCallback extends Callback {
@@ -303,14 +303,17 @@ public class IpManager extends StateMachine {
             @Override
             public void interfaceAdded(String iface) {
                 if (mClatInterfaceName.equals(iface)) {
-                    mCallback.on464XlatChange(true);
+                    mCallback.setNeighborDiscoveryOffload(false);
                 }
             }
 
             @Override
             public void interfaceRemoved(String iface) {
                 if (mClatInterfaceName.equals(iface)) {
-                    mCallback.on464XlatChange(false);
+                    // TODO: consider sending a message to the IpManager main
+                    // StateMachine thread, in case "NDO enabled" state becomes
+                    // tied to more things that 464xlat operation.
+                    mCallback.setNeighborDiscoveryOffload(true);
                 }
             }
         };
