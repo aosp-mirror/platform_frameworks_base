@@ -116,6 +116,10 @@ public class IpManager extends StateMachine {
 
         // Install an APF program to filter incoming packets.
         public void installPacketFilter(byte[] filter) {}
+
+        // If multicast filtering cannot be accomplished with APF, this function will be called to
+        // actuate multicast filtering using another means.
+        public void setFallbackMulticastFilter(boolean enabled) {}
     }
 
     public static class WaitForProvisioningCallback extends Callback {
@@ -222,6 +226,7 @@ public class IpManager extends StateMachine {
     private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 5;
     private static final int CMD_UPDATE_TCP_BUFFER_SIZES = 6;
     private static final int CMD_UPDATE_HTTP_PROXY = 7;
+    private static final int CMD_SET_MULTICAST_FILTER = 8;
 
     private static final int MAX_LOG_RECORDS = 1000;
 
@@ -258,6 +263,7 @@ public class IpManager extends StateMachine {
     private String mTcpBufferSizes;
     private ProxyInfo mHttpProxy;
     private ApfFilter mApfFilter;
+    private boolean mMulticastFiltering;
 
     /**
      * Member variables accessed both from within the StateMachine thread
@@ -388,6 +394,14 @@ public class IpManager extends StateMachine {
      */
     public void setHttpProxy(ProxyInfo proxyInfo) {
         sendMessage(CMD_UPDATE_HTTP_PROXY, proxyInfo);
+    }
+
+    /**
+     * Enable or disable the multicast filter.  Attempts to use APF to accomplish the filtering,
+     * if not, Callback.setFallbackMulticastFilter() is called.
+     */
+    public void setMulticastFilter(boolean enabled) {
+        sendMessage(CMD_SET_MULTICAST_FILTER, enabled);
     }
 
     public LinkProperties getLinkProperties() {
@@ -729,6 +743,10 @@ public class IpManager extends StateMachine {
                     handleLinkPropertiesUpdate(NO_CALLBACKS);
                     break;
 
+                case CMD_SET_MULTICAST_FILTER:
+                    mMulticastFiltering = (boolean) msg.obj;
+                    break;
+
                 case DhcpClient.CMD_ON_QUIT:
                     // Everything is already stopped.
                     Log.e(mTag, "Unexpected CMD_ON_QUIT (already stopped).");
@@ -769,7 +787,10 @@ public class IpManager extends StateMachine {
         @Override
         public void enter() {
             mApfFilter = ApfFilter.maybeCreate(mConfiguration.mApfCapabilities, mNetworkInterface,
-                    mCallback);
+                    mCallback, mMulticastFiltering);
+            // TODO: investigate the effects of any multicast filtering racing/interfering with the
+            // rest of this IP configuration startup.
+            if (mApfFilter == null) mCallback.setFallbackMulticastFilter(mMulticastFiltering);
             // Set privacy extensions.
             try {
                 mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
@@ -881,6 +902,16 @@ public class IpManager extends StateMachine {
                     // This cannot possibly change provisioning state.
                     handleLinkPropertiesUpdate(SEND_CALLBACKS);
                     break;
+
+                case CMD_SET_MULTICAST_FILTER: {
+                    mMulticastFiltering = (boolean) msg.obj;
+                    if (mApfFilter != null) {
+                        mApfFilter.setMulticastFilter(mMulticastFiltering);
+                    } else {
+                        mCallback.setFallbackMulticastFilter(mMulticastFiltering);
+                    }
+                    break;
+                }
 
                 case DhcpClient.CMD_PRE_DHCP_ACTION:
                     if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
