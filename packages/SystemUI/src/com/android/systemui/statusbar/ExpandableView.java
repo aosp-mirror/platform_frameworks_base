@@ -153,11 +153,11 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
-     * @return The minimum height this child chan be expanded to. Note that this might be different
-     * than {@link #getMinHeight()} because some elements can't be collapsed by an expand gesture
-     * to it's absolute minimal height
+     * @return The collapsed height of this view. Note that this might be different
+     * than {@link #getMinHeight()} because some elements like groups may have different sizes when
+     * they are system expanded.
      */
-    public int getMinExpandHeight() {
+    public int getCollapsedHeight() {
         return getHeight();
     }
 

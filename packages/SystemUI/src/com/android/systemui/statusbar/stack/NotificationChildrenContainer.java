@@ -592,7 +592,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public float getGroupExpandFraction() {
         int visibleChildrenExpandedHeight = getVisibleChildrenExpandHeight();
-        int minExpandHeight = getMinExpandHeight();
+        int minExpandHeight = getCollapsedHeight();
         float factor = (mActualHeight - minExpandHeight)
                 / (float) (visibleChildrenExpandedHeight - minExpandHeight);
         return Math.max(0.0f, Math.min(1.0f, factor));
@@ -618,11 +618,14 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     public int getMinHeight() {
-        return getIntrinsicHeight(NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
+        return getMinHeight(NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
     }
 
-    public int getMinExpandHeight() {
-        int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* forceCollapsed */);
+    public int getCollapsedHeight() {
+        return getMinHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */));
+    }
+
+    private int getMinHeight(int maxAllowedVisibleChildren) {
         int minExpandHeight = mNotificationHeaderHeight;
         int visibleChildren = 0;
         boolean firstChild = true;
