@@ -15456,8 +15456,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
 
                     for (int oomIndex=0; oomIndex<oomPss.length; oomIndex++) {
-                        if (oomAdj <= DUMP_MEM_OOM_ADJ[oomIndex]
-                                || oomIndex == (oomPss.length-1)) {
+                        if (oomIndex == (oomPss.length - 1)
+                                || (oomAdj >= DUMP_MEM_OOM_ADJ[oomIndex]
+                                        && oomAdj < DUMP_MEM_OOM_ADJ[oomIndex + 1])) {
                             oomPss[oomIndex] += myTotalPss;
                             oomSwapPss[oomIndex] += myTotalSwapPss;
                             if (oomProcs[oomIndex] == null) {
