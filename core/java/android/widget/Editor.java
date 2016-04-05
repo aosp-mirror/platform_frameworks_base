@@ -4875,11 +4875,12 @@ public class Editor {
 
         @Override
         protected int getOffsetAtCoordinate(@NonNull Layout layout, int line, float x) {
-            final int primaryOffset = layout.getOffsetForHorizontal(line, x, true);
+            final float localX = mTextView.convertToLocalHorizontalCoordinate(x);
+            final int primaryOffset = layout.getOffsetForHorizontal(line, localX, true);
             if (!layout.isLevelBoundary(primaryOffset)) {
                 return primaryOffset;
             }
-            final int secondaryOffset = layout.getOffsetForHorizontal(line, x, false);
+            final int secondaryOffset = layout.getOffsetForHorizontal(line, localX, false);
             final int currentOffset = getCurrentCursorOffset();
             final int primaryDiff = Math.abs(primaryOffset - currentOffset);
             final int secondaryDiff = Math.abs(secondaryOffset - currentOffset);
