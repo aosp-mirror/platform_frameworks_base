@@ -86,6 +86,7 @@ public:
      */
     template <typename StaticDispatcher, typename Renderer>
     void replayBakedOps(Renderer& renderer) {
+        std::vector<OffscreenBuffer*> temporaryLayers;
         finishDefer();
         /**
          * Defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
@@ -129,6 +130,7 @@ public:
             } else if (!layer.empty()) {
                 // save layer - skip entire layer if empty (in which case, LayerOp has null layer).
                 layer.offscreenBuffer = renderer.startTemporaryLayer(layer.width, layer.height);
+                temporaryLayers.push_back(layer.offscreenBuffer);
                 GL_CHECKPOINT(MODERATE);
                 layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
                 GL_CHECKPOINT(MODERATE);
@@ -144,6 +146,10 @@ public:
             fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
             GL_CHECKPOINT(MODERATE);
             renderer.endFrame(fbo0.repaintRect);
+        }
+
+        for (auto& temporaryLayer : temporaryLayers) {
+            renderer.recycleTemporaryLayer(temporaryLayer);
         }
     }
 

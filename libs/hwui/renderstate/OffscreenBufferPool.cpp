@@ -127,7 +127,7 @@ int OffscreenBufferPool::Entry::compare(const Entry& lhs, const Entry& rhs) {
 }
 
 void OffscreenBufferPool::clear() {
-    for (auto entry : mPool) {
+    for (auto& entry : mPool) {
         delete entry.layer;
     }
     mPool.clear();
