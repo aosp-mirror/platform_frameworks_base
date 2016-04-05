@@ -1369,11 +1369,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int fl = w.mAttrs.flags
                 & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
         final int type = w.mAttrs.type;
-        // The dock divider has to sit above the application windows and so does the IME. IME also
-        // needs to sit above the dock divider, so it doesn't get cut in half. We make the dock
-        // divider be a target for IME, so this relationship can occur naturally.
         if (fl == 0 || fl == (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)
-                || type == TYPE_APPLICATION_STARTING || type == TYPE_DOCK_DIVIDER) {
+                || type == TYPE_APPLICATION_STARTING) {
             if (DEBUG_INPUT_METHOD) {
                 Slog.i(TAG_WM, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
                 if (!w.isVisibleOrAdding()) {
