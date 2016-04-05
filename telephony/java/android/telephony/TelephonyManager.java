@@ -3550,7 +3550,7 @@ public class TelephonyManager {
      * @return the response of ISIM Authetification, or null if not available
      * @hide
      * @deprecated
-     * @see getIccSimChallengeResponse with appType=PhoneConstants.APPTYPE_ISIM
+     * @see getIccAuthentication with appType=PhoneConstants.APPTYPE_ISIM
      */
     public String getIsimChallengeResponse(String nonce){
         try {
@@ -3566,21 +3566,60 @@ public class TelephonyManager {
         }
     }
 
+    // ICC SIM Application Types
+    public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
+    public static final int APPTYPE_USIM = PhoneConstants.APPTYPE_USIM;
+    public static final int APPTYPE_RUIM = PhoneConstants.APPTYPE_RUIM;
+    public static final int APPTYPE_CSIM = PhoneConstants.APPTYPE_CSIM;
+    public static final int APPTYPE_ISIM = PhoneConstants.APPTYPE_ISIM;
+    // authContext (parameter P2) when doing SIM challenge,
+    // per 3GPP TS 31.102 (Section 7.1.2)
+    public static final int AUTHTYPE_EAP_SIM = PhoneConstants.AUTH_CONTEXT_EAP_SIM;
+    public static final int AUTHTYPE_EAP_AKA = PhoneConstants.AUTH_CONTEXT_EAP_AKA;
+
     /**
-     * Returns the response of SIM Authentication through RIL.
-     * Returns null if the Authentication hasn't been successful
-     * @param subId subscription ID to be queried
-     * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
-     * @param data authentication challenge data
-     * @return the response of SIM Authentication, or null if not available
-     * @hide
+     * Returns the response of authentication for the default subscription.
+     * Returns null if the authentication hasn't been successful
+     *
+     * <p>Requires that the calling app has carrier privileges or READ_PRIVILEGED_PHONE_STATE
+     * permission.
+     *
+     * @param appType the icc application type, like {@link #APPTYPE_USIM}
+     * @param authType the authentication type, {@link #AUTHTYPE_EAP_AKA} or
+     * {@link #AUTHTYPE_EAP_SIM}
+     * @param data authentication challenge data, base64 encoded.
+     * See 3GPP TS 31.102 7.1.2 for more details.
+     * @return the response of authentication, or null if not available
+     *
+     * @see #hasCarrierPrivileges
      */
-    public String getIccSimChallengeResponse(int subId, int appType, String data) {
+    public String getIccAuthentication(int appType, int authType, String data) {
+        return getIccAuthentication(getDefaultSubscription(), appType, authType, data);
+    }
+
+    /**
+     * Returns the response of USIM Authentication for specified subId.
+     * Returns null if the authentication hasn't been successful
+     *
+     * <p>Requires that the calling app has carrier privileges.
+     *
+     * @param subId subscription ID used for authentication
+     * @param appType the icc application type, like {@link #APPTYPE_USIM}
+     * @param authType the authentication type, {@link #AUTHTYPE_EAP_AKA} or
+     * {@link #AUTHTYPE_EAP_SIM}
+     * @param data authentication challenge data, base64 encoded.
+     * See 3GPP TS 31.102 7.1.2 for more details.
+     * @return the response of authentication, or null if not available
+     *
+     * @see #hasCarrierPrivileges
+     */
+
+    public String getIccAuthentication(int subId, int appType, int authType, String data) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIccSimChallengeResponse(subId, appType, data);
+            return info.getIccSimChallengeResponse(subId, appType, authType, data);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3599,9 +3638,10 @@ public class TelephonyManager {
      * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
      * @param data authentication challenge data
      * @return the response of SIM Authentication, or null if not available
+     * @hide
      */
     public String getIccSimChallengeResponse(int appType, String data) {
-        return getIccSimChallengeResponse(getDefaultSubscription(), appType, data);
+        return getIccAuthentication(getDefaultSubscription(), appType, AUTHTYPE_EAP_SIM, data);
     }
 
     /**

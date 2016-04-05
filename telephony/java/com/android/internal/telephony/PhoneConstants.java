@@ -202,4 +202,10 @@ public class PhoneConstants {
     public static final int AUDIO_OUTPUT_ENABLE_SPEAKER = 0;
     public static final int AUDIO_OUTPUT_DISABLE_SPEAKER = 1;
     public static final int AUDIO_OUTPUT_DEFAULT = AUDIO_OUTPUT_ENABLE_SPEAKER;
+
+    // authContext (parameter P2) when doing SIM challenge,
+    // per 3GPP TS 31.102 (Section 7.1.2)
+    public static final int AUTH_CONTEXT_EAP_SIM = 128;
+    public static final int AUTH_CONTEXT_EAP_AKA = 129;
+    public static final int AUTH_CONTEXT_UNDEFINED = -1;
 }
