@@ -2805,6 +2805,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         && getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null) {
                     throw new IllegalArgumentException("Admin is already added");
                 }
+                if (policy.mRemovingAdmins.contains(adminReceiver)) {
+                    throw new IllegalArgumentException(
+                            "Trying to set an admin which is being removed");
+                }
                 ActiveAdmin newAdmin = new ActiveAdmin(info, /* parent */ false);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
