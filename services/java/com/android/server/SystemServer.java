@@ -1424,6 +1424,12 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     reportWtf("Notifying MmsService running", e);
                 }
+
+                try {
+                    if (networkScoreF != null) networkScoreF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying NetworkScoreService running", e);
+                }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         });
