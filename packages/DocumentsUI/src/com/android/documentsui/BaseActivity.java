@@ -636,12 +636,12 @@ public abstract class BaseActivity extends Activity
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_TAB) {
-            Metrics.logKeyboardAction(this, keyCode);
+            Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_SWITCH_FOCUS);
             // Tab toggles focus on the navigation drawer.
             toggleNavDrawerFocus();
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DEL) {
-            Metrics.logKeyboardAction(this, keyCode);
+            Metrics.logKeyboardAction(this, Metrics.ACTION_KEYBOARD_BACK);
             popDir();
             return true;
         }
