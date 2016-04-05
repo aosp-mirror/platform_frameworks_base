@@ -251,7 +251,7 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/building/manifest-merge.html">
         <span class="en">Manifest Merging</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/building/multidex.html">
-        <span class="en">Apps Over 65K Methods</span></a></li>
+        <span class="en">Apps Over 64K Methods</span></a></li>
       </ul>
   </li><!-- end of build system -->
 
