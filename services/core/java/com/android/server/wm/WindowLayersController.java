@@ -199,6 +199,12 @@ public class WindowLayersController {
         }
 
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
+
+        if (mDockDivider != null && mDockDivider.isVisibleLw()
+                && mService.mInputMethodWindow != null) {
+            layer = assignAndIncreaseLayerIfNeeded(mService.mInputMethodWindow, layer);
+        }
+
         // We know that we will be animating a relaunching window in the near future, which will
         // receive a z-order increase. We want the replaced window to immediately receive the same
         // treatment, e.g. to be above the dock divider.
@@ -212,7 +218,7 @@ public class WindowLayersController {
     }
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
-        if (win != null) {
+        if (win != null && layer > win.mLayer) {
             assignAnimLayer(win, layer);
             // Make sure we leave space inbetween normal windows for dims and such.
             layer += WINDOW_LAYER_MULTIPLIER;
