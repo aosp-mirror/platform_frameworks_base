@@ -118,6 +118,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Neizdevās pārdēvēt dokumentu"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Daži faili tika pārveidoti."</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Vai atļaut lietotnei <xliff:g id="APPNAME"><b>^1</b></xliff:g> piekļūt direktorijam <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> šajā krātuvē: <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Vai piešķirt lietotnei <xliff:g id="APPNAME"><b>^1</b></xliff:g> piekļuvi direktorijam <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Vai atļaut lietotnei <xliff:g id="APPNAME"><b>^1</b></xliff:g> piekļūt jūsu datiem, tostarp fotoattēliem un videoklipiem, šajā krātuvē: <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Turpmāk vairs nejautāt"</string>
     <string name="allow" msgid="7225948811296386551">"Atļaut"</string>

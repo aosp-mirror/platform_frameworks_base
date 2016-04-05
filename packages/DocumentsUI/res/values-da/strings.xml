@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"Dokumentet kunne ikke omdøbes"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Nogle filer er konverteret"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Vil du give <xliff:g id="APPNAME"><b>^1</b></xliff:g> adgang til mappen <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> på <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Vil du give <xliff:g id="APPNAME"><b>^1</b></xliff:g> adgang til indekset <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Vil du give <xliff:g id="APPNAME"><b>^1</b></xliff:g> adgang til dine data, herunder billeder og videoer på <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Spørg ikke igen"</string>
     <string name="allow" msgid="7225948811296386551">"Tillad"</string>

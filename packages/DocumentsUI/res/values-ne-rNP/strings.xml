@@ -111,6 +111,7 @@
     <string name="rename_error" msgid="4203041674883412606">"कागजात पुन: नामाकरण गर्न असफल भयो"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"केही फाइलहरू परिवर्तन गरिएका थिए"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> लाई <xliff:g id="STORAGE"><i>^3</i></xliff:g> मा भएको <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> निर्देशिकामा पहुँच गर्न अनुमति दिने हो?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> लाई <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> निर्देशिकामाथि पहुँच गर्न अनुमति प्रदान गर्ने हो?"</string>
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> लाई <xliff:g id="STORAGE"><i>^2</i></xliff:g> मा भएका तस्बिर र भिडियोहरू लगायत तपाईँको डेटामा पहुँच गर्नका लागि अनुमति दिने हो?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"फेरि नसोध्नुहोस्"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दिनुहोस्"</string>
