@@ -807,26 +807,31 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mContentInsets.setEmpty();
             mVisibleInsets.setEmpty();
         } else {
-            // Using mContentInsets as a temp rect. It is safe because we're setting it below.
-            getDisplayContent().getLogicalDisplayRect(mContentInsets);
+            getDisplayContent().getLogicalDisplayRect(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
-            boolean overrideRightInset = !fullscreenTask && mFrame.right > mContentInsets.right;
-            boolean overrideBottomInset = !fullscreenTask && mFrame.bottom > mContentInsets.bottom;
+            boolean overrideRightInset = !fullscreenTask && mFrame.right > mTmpRect.right;
+            boolean overrideBottomInset = !fullscreenTask && mFrame.bottom > mTmpRect.bottom;
             mContentInsets.set(mContentFrame.left - frame.left,
                     mContentFrame.top - frame.top,
-                    overrideRightInset ? 0 : frame.right - mContentFrame.right,
-                    overrideBottomInset ? 0 : frame.bottom - mContentFrame.bottom);
+                    overrideRightInset ? mTmpRect.right - mContentFrame.right
+                            : frame.right - mContentFrame.right,
+                    overrideBottomInset ? mTmpRect.bottom - mContentFrame.bottom
+                            : frame.bottom - mContentFrame.bottom);
 
             mVisibleInsets.set(mVisibleFrame.left - frame.left,
                     mVisibleFrame.top - frame.top,
-                    overrideRightInset ? 0 : frame.right - mVisibleFrame.right,
-                    overrideBottomInset ? 0 : frame.bottom - mVisibleFrame.bottom);
+                    overrideRightInset ? mTmpRect.right - mVisibleFrame.right
+                            : frame.right - mVisibleFrame.right,
+                    overrideBottomInset ? mTmpRect.bottom - mVisibleFrame.bottom
+                            : frame.bottom - mVisibleFrame.bottom);
 
             mStableInsets.set(Math.max(mStableFrame.left - frame.left, 0),
                     Math.max(mStableFrame.top - frame.top, 0),
-                    overrideRightInset ? 0 : Math.max(frame.right - mStableFrame.right, 0),
-                    overrideBottomInset ? 0 :  Math.max(frame.bottom - mStableFrame.bottom, 0));
+                    overrideRightInset ? Math.max(mTmpRect.right - mStableFrame.right, 0)
+                            : Math.max(frame.right - mStableFrame.right, 0),
+                    overrideBottomInset ? Math.max(mTmpRect.bottom - mStableFrame.bottom, 0)
+                            :  Math.max(frame.bottom - mStableFrame.bottom, 0));
         }
 
         if (!mInsetFrame.isEmpty()) {
