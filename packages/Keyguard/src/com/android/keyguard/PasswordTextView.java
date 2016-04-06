@@ -33,6 +33,7 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -81,6 +82,7 @@ public class PasswordTextView extends View {
      * The raw text size, will be multiplied by the scaled density when drawn
      */
     private final int mTextHeightRaw;
+    private final int mGravity;
     private ArrayList<CharState> mTextChars = new ArrayList<>();
     private String mText = "";
     private Stack<CharState> mCharPool = new Stack<>();
@@ -118,6 +120,12 @@ public class PasswordTextView extends View {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PasswordTextView);
         try {
             mTextHeightRaw = a.getInt(R.styleable.PasswordTextView_scaledTextSize, 0);
+            mGravity = a.getInt(R.styleable.PasswordTextView_android_gravity, Gravity.CENTER);
+            mDotSize = a.getDimensionPixelSize(R.styleable.PasswordTextView_dotSize,
+                    getContext().getResources().getDimensionPixelSize(R.dimen.password_dot_size));
+            mCharPadding = a.getDimensionPixelSize(R.styleable.PasswordTextView_charPadding,
+                    getContext().getResources().getDimensionPixelSize(
+                            R.dimen.password_char_padding));
         } finally {
             a.recycle();
         }
@@ -125,9 +133,6 @@ public class PasswordTextView extends View {
         mDrawPaint.setTextAlign(Paint.Align.CENTER);
         mDrawPaint.setColor(0xffffffff);
         mDrawPaint.setTypeface(Typeface.create("sans-serif-light", 0));
-        mDotSize = getContext().getResources().getDimensionPixelSize(R.dimen.password_dot_size);
-        mCharPadding = getContext().getResources().getDimensionPixelSize(R.dimen
-                .password_char_padding);
         mShowPassword = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.TEXT_SHOW_PASSWORD, 1) == 1;
         mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
@@ -142,11 +147,23 @@ public class PasswordTextView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         float totalDrawingWidth = getDrawingWidth();
-        float currentDrawPosition = getWidth() / 2 - totalDrawingWidth / 2;
+        float currentDrawPosition;
+        if ((mGravity & Gravity.START) != 0) {
+            if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                currentDrawPosition = getWidth() - getPaddingRight() - totalDrawingWidth;
+            } else {
+                currentDrawPosition = getPaddingLeft();
+            }
+        } else {
+            currentDrawPosition = getWidth() / 2 - totalDrawingWidth / 2;
+        }
         int length = mTextChars.size();
         Rect bounds = getCharBounds();
         int charHeight = (bounds.bottom - bounds.top);
-        float yPosition = getHeight() / 2;
+        float yPosition =
+                (getHeight() - getPaddingBottom() - getPaddingTop()) / 2 + getPaddingTop();
+        canvas.clipRect(getPaddingLeft(), getPaddingTop(),
+                getWidth()-getPaddingRight(), getHeight()-getPaddingBottom());
         float charLength = bounds.right - bounds.left;
         for (int i = 0; i < length; i++) {
             CharState charState = mTextChars.get(i);
