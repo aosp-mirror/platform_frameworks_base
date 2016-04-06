@@ -724,9 +724,7 @@ class AppErrors {
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
             if (mService.canShowErrorDialogs() && !crashSilenced) {
-                Dialog d = new AppErrorDialog(mContext, mService, data);
-                d.show();
-                proc.crashDialog = d;
+                proc.crashDialog = new AppErrorDialog(mContext, mService, data);
             } else {
                 // The device is asleep, so just pretend that the user
                 // saw a crash dialog and hit "force quit".
@@ -734,6 +732,10 @@ class AppErrors {
                     res.set(AppErrorDialog.CANT_SHOW);
                 }
             }
+        }
+        // If we've created a crash dialog, show it without the lock held
+        if(data.proc.crashDialog != null) {
+            data.proc.crashDialog.show();
         }
     }
 
@@ -924,6 +926,7 @@ class AppErrors {
     }
 
     void handleShowAnrUi(Message msg) {
+        Dialog d = null;
         synchronized (mService) {
             HashMap<String, Object> data = (HashMap<String, Object>) msg.obj;
             ProcessRecord proc = (ProcessRecord)data.get("app");
@@ -944,10 +947,9 @@ class AppErrors {
                     null, false, false, MY_PID, Process.SYSTEM_UID, 0 /* TODO: Verify */);
 
             if (mService.canShowErrorDialogs()) {
-                Dialog d = new AppNotRespondingDialog(mService,
+                d = new AppNotRespondingDialog(mService,
                         mContext, proc, (ActivityRecord)data.get("activity"),
                         msg.arg1 != 0);
-                d.show();
                 proc.anrDialog = d;
             } else {
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
@@ -955,6 +957,10 @@ class AppErrors {
                 // Just kill the app if there is no dialog to be shown.
                 mService.killAppAtUsersRequest(proc, null);
             }
+        }
+        // If we've created a crash dialog, show it without the lock held
+        if (d != null) {
+            d.show();
         }
     }
 
