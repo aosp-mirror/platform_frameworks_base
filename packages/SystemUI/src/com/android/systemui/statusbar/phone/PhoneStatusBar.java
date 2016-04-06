@@ -755,7 +755,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller = (NotificationStackScrollLayout) mStatusBarWindow.findViewById(
                 R.id.notification_stack_scroller);
         mStackScroller.setLongPressListener(getNotificationLongClicker());
-        mStackScroller.setGearDisplayedListener(getGearDisplayedListener());
         mStackScroller.setPhoneStatusBar(this);
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setHeadsUpManager(mHeadsUpManager);
