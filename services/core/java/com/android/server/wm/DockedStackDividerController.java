@@ -76,8 +76,8 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
-    private final int mDividerWindowWidth;
-    private final int mDividerInsets;
+    private int mDividerWindowWidth;
+    private int mDividerInsets;
     private boolean mResizing;
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
@@ -105,14 +105,23 @@ public class DockedStackDividerController implements DimLayerUser {
         mService = service;
         mDisplayContent = displayContent;
         final Context context = service.mContext;
-        mDividerWindowWidth = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_thickness);
-        mDividerInsets = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_insets);
         mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId(),
                 "DockedStackDim");
         mMinimizedDockInterpolator = AnimationUtils.loadInterpolator(
                 context, android.R.interpolator.fast_out_slow_in);
+        loadDimens();
+    }
+
+    private void loadDimens() {
+        final Context context = mService.mContext;
+        mDividerWindowWidth = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_thickness);
+        mDividerInsets = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_insets);
+    }
+
+    void onConfigurationChanged() {
+        loadDimens();
     }
 
     boolean isResizing() {

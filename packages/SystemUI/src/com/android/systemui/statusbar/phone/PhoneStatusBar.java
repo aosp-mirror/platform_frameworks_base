@@ -3303,10 +3303,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected void loadDimens() {
         final Resources res = mContext.getResources();
 
+        int oldBarHeight = mNaturalBarHeight;
         mNaturalBarHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
-
-        mMaxAllowedKeyguardNotifications = res.getInteger(R.integer.keyguard_max_notification_count);
+        if (mStatusBarWindowManager != null && mNaturalBarHeight != oldBarHeight) {
+            mStatusBarWindowManager.setBarHeight(mNaturalBarHeight);
+        }
+        mMaxAllowedKeyguardNotifications = res.getInteger(
+                R.integer.keyguard_max_notification_count);
 
         if (DEBUG) Log.v(TAG, "updateResources");
     }
