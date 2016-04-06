@@ -490,24 +490,19 @@ public class DirectoryFragment extends Fragment
         @Override
         public void onSelectionChanged() {
             mSelectionManager.getSelection(mSelected);
-            TypedValue color = new TypedValue();
             if (mSelected.size() > 0) {
                 if (DEBUG) Log.d(TAG, "Maybe starting action mode.");
                 if (mActionMode == null) {
                     if (DEBUG) Log.d(TAG, "Yeah. Starting action mode.");
                     mActionMode = getActivity().startActionMode(this);
                 }
-                getActivity().getTheme().resolveAttribute(R.attr.colorActionMode, color, true);
                 updateActionMenu();
             } else {
                 if (DEBUG) Log.d(TAG, "Finishing action mode.");
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
-                getActivity().getTheme().resolveAttribute(
-                    android.R.attr.colorPrimaryDark, color, true);
             }
-            getActivity().getWindow().setStatusBarColor(color.data);
 
             if (mActionMode != null) {
                 final String title = Shared.getQuantityString(getActivity(),
