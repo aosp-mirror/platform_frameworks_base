@@ -2897,9 +2897,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void scheduleSendRankingUpdate() {
-        mHandler.removeMessages(MESSAGE_SEND_RANKING_UPDATE);
-        Message m = Message.obtain(mHandler, MESSAGE_SEND_RANKING_UPDATE);
-        mHandler.sendMessage(m);
+        if (!mHandler.hasMessages(MESSAGE_SEND_RANKING_UPDATE)) {
+            Message m = Message.obtain(mHandler, MESSAGE_SEND_RANKING_UPDATE);
+            mHandler.sendMessage(m);
+        }
     }
 
     private void handleSendRankingUpdate() {
