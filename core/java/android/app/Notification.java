@@ -174,6 +174,9 @@ public class Notification implements Parcelable
      *   <li>Notification of an ongoing countdown timer should be stamped with the timer's end time.
      * </ul>
      *
+     * For apps targeting {@link android.os.Build.VERSION_CODES#N} and above, this time is not shown
+     * anymore by default and must be opted into by using
+     * {@link android.app.Notification.Builder#setShowWhen(boolean)}
      */
     public long when;
 
@@ -2135,7 +2138,9 @@ public class Notification implements Parcelable
 
             if (toAdopt == null) {
                 mN = new Notification();
-                mN.extras.putBoolean(EXTRA_SHOW_WHEN, true);
+                if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                    mN.extras.putBoolean(EXTRA_SHOW_WHEN, true);
+                }
                 mN.priority = PRIORITY_DEFAULT;
                 mN.visibility = VISIBILITY_PRIVATE;
             } else {
@@ -2185,8 +2190,10 @@ public class Notification implements Parcelable
 
         /**
          * Add a timestamp pertaining to the notification (usually the time the event occurred).
-         * It will be shown in the notification content view by default; use
-         * {@link #setShowWhen(boolean) setShowWhen} to control this.
+         *
+         * For apps targeting {@link android.os.Build.VERSION_CODES#N} and above, this time is not
+         * shown anymore by default and must be opted into by using
+         * {@link android.app.Notification.Builder#setShowWhen(boolean)}
          *
          * @see Notification#when
          */
@@ -2198,6 +2205,8 @@ public class Notification implements Parcelable
         /**
          * Control whether the timestamp set with {@link #setWhen(long) setWhen} is shown
          * in the content view.
+         * For apps targeting {@link android.os.Build.VERSION_CODES#N} and above, this defaults to
+         * {@code false}. For earlier apps, the default is {@code true}.
          */
         public Builder setShowWhen(boolean show) {
             mN.extras.putBoolean(EXTRA_SHOW_WHEN, show);
