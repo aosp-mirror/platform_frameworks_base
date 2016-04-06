@@ -52,7 +52,7 @@ interface IContentService {
      *     USER_CURRENT are properly interpreted.
      */
     void notifyChange(in Uri uri, IContentObserver observer,
-            boolean observerWantsSelfNotifications, boolean syncToNetwork,
+            boolean observerWantsSelfNotifications, int flags,
             int userHandle);
 
     void requestSync(in Account account, String authority, in Bundle extras);

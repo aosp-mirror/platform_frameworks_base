@@ -304,7 +304,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
             if (toCancel != null) {
-                cancelJobImpl(toCancel);
+                cancelJobImpl(toCancel, jobStatus);
             }
             startTrackingJob(jobStatus, toCancel);
         }
@@ -331,7 +331,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
         for (int i=0; i<jobsForUser.size(); i++) {
             JobStatus toRemove = jobsForUser.get(i);
-            cancelJobImpl(toRemove);
+            cancelJobImpl(toRemove, null);
         }
     }
 
@@ -360,7 +360,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 } catch (RemoteException e) {
                 }
             }
-            cancelJobImpl(toRemove);
+            cancelJobImpl(toRemove, null);
         }
     }
 
@@ -377,13 +377,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
             toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
         }
         if (toCancel != null) {
-            cancelJobImpl(toCancel);
+            cancelJobImpl(toCancel, null);
         }
     }
 
-    private void cancelJobImpl(JobStatus cancelled) {
+    private void cancelJobImpl(JobStatus cancelled, JobStatus incomingJob) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
-        stopTrackingJob(cancelled, true /* writeBack */);
+        stopTrackingJob(cancelled, incomingJob, true /* writeBack */);
         synchronized (mLock) {
             // Remove from pending queue.
             mPendingJobs.remove(cancelled);
@@ -549,7 +549,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 for (int i = 0; i < mControllers.size(); i++) {
                     StateController controller = mControllers.get(i);
                     if (update) {
-                        controller.maybeStopTrackingJobLocked(jobStatus, true);
+                        controller.maybeStopTrackingJobLocked(jobStatus, null, true);
                     }
                     controller.maybeStartTrackingJobLocked(jobStatus, lastJob);
                 }
@@ -561,14 +561,15 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * Called when we want to remove a JobStatus object that we've finished executing. Returns the
      * object removed.
      */
-    private boolean stopTrackingJob(JobStatus jobStatus, boolean writeBack) {
+    private boolean stopTrackingJob(JobStatus jobStatus, JobStatus incomingJob,
+            boolean writeBack) {
         synchronized (mLock) {
             // Remove from store as well as controllers.
             final boolean removed = mJobs.remove(jobStatus, writeBack);
             if (removed && mReadyToRock) {
                 for (int i=0; i<mControllers.size(); i++) {
                     StateController controller = mControllers.get(i);
-                    controller.maybeStopTrackingJobLocked(jobStatus, false);
+                    controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
                 }
             }
             return removed;
@@ -696,7 +697,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
         // Do not write back immediately if this is a periodic job. The job may get lost if system
         // shuts down before it is added back.
-        if (!stopTrackingJob(jobStatus, !jobStatus.getJob().isPeriodic())) {
+        if (!stopTrackingJob(jobStatus, null, !jobStatus.getJob().isPeriodic())) {
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
@@ -780,7 +781,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
                     break;
                 case MSG_STOP_JOB:
-                    cancelJobImpl((JobStatus)message.obj);
+                    cancelJobImpl((JobStatus)message.obj, null);
                     break;
             }
             maybeRunPendingJobsH();

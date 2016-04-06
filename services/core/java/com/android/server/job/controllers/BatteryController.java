@@ -87,7 +87,7 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
         if (taskStatus.hasChargingConstraint()) {
             mTrackedTasks.remove(taskStatus);
         }

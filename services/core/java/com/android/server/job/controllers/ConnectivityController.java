@@ -101,7 +101,7 @@ public class ConnectivityController extends StateController implements
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob, boolean forUpdate) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
             mTrackedJobs.remove(jobStatus);
             if (mTrackedJobs.isEmpty()) {
