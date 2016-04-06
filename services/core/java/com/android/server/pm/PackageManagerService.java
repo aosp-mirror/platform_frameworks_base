@@ -7020,6 +7020,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Log.i(TAG, "Extracting app " + curr + " of " + total + ": " + pkg.packageName);
             }
 
+            if (!isFirstBoot()) {
+                try {
+                    ActivityManagerNative.getDefault().showBootMessage(
+                            mContext.getResources().getString(R.string.android_upgrading_apk,
+                                    curr, total), true);
+                } catch (RemoteException e) {
+                }
+            }
+
             if (PackageDexOptimizer.canOptimizePackage(pkg)) {
                 // If the cache was pruned, any compiled odex files will likely be out of date
                 // and would have to be patched (would be SELF_PATCHOAT, which is deprecated).
