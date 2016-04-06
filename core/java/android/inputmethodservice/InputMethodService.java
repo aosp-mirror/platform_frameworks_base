@@ -717,7 +717,11 @@ public class InputMethodService extends AbstractInputMethodService {
                 mShowImeWithHardKeyboard = Settings.Secure.getInt(mService.getContentResolver(),
                         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0 ?
                         ShowImeWithHardKeyboardType.TRUE : ShowImeWithHardKeyboardType.FALSE;
-                mService.updateInputViewShown();
+                // In Android M and prior, state change of
+                // Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD has triggered
+                // #onConfigurationChanged().  For compatibility reasons, we reset the internal
+                // state as if configuration was changed.
+                mService.resetStateForNewConfiguration();
             }
         }
 
@@ -884,7 +888,10 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @Override public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        resetStateForNewConfiguration();
+    }
 
+    private void resetStateForNewConfiguration() {
         boolean visible = mWindowVisible;
         int showFlags = mShowInputFlags;
         boolean showingInput = mShowInputRequested;
