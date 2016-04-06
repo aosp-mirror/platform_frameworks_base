@@ -1096,13 +1096,19 @@ public class PackageParser {
         pkg.mSignatures = null;
         pkg.mSigningKeys = null;
 
-        collectCertificates(pkg, new File(pkg.baseCodePath), pkg.applicationInfo.flags, parseFlags);
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
+        try {
+            collectCertificates(
+                    pkg, new File(pkg.baseCodePath), pkg.applicationInfo.flags, parseFlags);
 
-        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
-            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                collectCertificates(pkg, new File(pkg.splitCodePaths[i]), pkg.splitFlags[i],
-                        parseFlags);
+            if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+                for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                    collectCertificates(
+                            pkg, new File(pkg.splitCodePaths[i]), pkg.splitFlags[i], parseFlags);
+                }
             }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
@@ -1118,6 +1124,7 @@ public class PackageParser {
             Certificate[][] allSignersCerts = null;
             Signature[] signatures = null;
             try {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyV2");
                 allSignersCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
                 signatures = convertToSignatures(allSignersCerts);
                 // APK verified using APK Signature Scheme v2.
@@ -1130,6 +1137,8 @@ public class PackageParser {
                         "Failed to collect certificates from " + apkPath
                                 + " using APK Signature Scheme v2",
                         e);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
             if (verified) {
@@ -1186,7 +1195,7 @@ public class PackageParser {
             }
 
             // APK's integrity needs to be verified using JAR signature scheme.
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "buildVerifyList");
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyV1");
             final List<ZipEntry> toVerify = new ArrayList<>();
             toVerify.add(manifestEntry);
 
@@ -1208,7 +1217,6 @@ public class PackageParser {
                     toVerify.add(entry);
                 }
             }
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             if (!codeFound && requireCode) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
@@ -1218,7 +1226,6 @@ public class PackageParser {
             // Verify that entries are signed consistently with the first entry
             // we encountered. Note that for splits, certificates may have
             // already been populated during an earlier parse of a base APK.
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyEntries");
             for (ZipEntry entry : toVerify) {
                 final Certificate[][] entryCerts = loadCertificates(jarFile, entry);
                 if (ArrayUtils.isEmpty(entryCerts)) {
@@ -1300,7 +1307,12 @@ public class PackageParser {
             if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
                 // TODO: factor signature related items out of Package object
                 final Package tempPkg = new Package(null);
-                collectCertificates(tempPkg, apkFile, 0 /*apkFlags*/, 0 /*flags*/);
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
+                try {
+                    collectCertificates(tempPkg, apkFile, 0 /*apkFlags*/, 0 /*flags*/);
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
                 signatures = tempPkg.mSignatures;
             } else {
                 signatures = null;
@@ -5531,7 +5543,7 @@ public class PackageParser {
         return pi;
     }
 
-    public final static class Instrumentation extends Component {
+    public final static class Instrumentation extends Component<IntentInfo> {
         public final InstrumentationInfo info;
 
         public Instrumentation(final ParsePackageItemArgs args, final InstrumentationInfo _info) {

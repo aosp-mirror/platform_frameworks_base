@@ -14251,14 +14251,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
             PackageParser.collectCertificates(pkg, parseFlags);
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);
             return;
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
         // Get rid of all references to package scan path via parser.
