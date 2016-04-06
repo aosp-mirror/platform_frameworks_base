@@ -101,16 +101,6 @@ public abstract class BaseActivity extends Activity
     @CallSuper
     @Override
     public void onCreate(Bundle icicle) {
-        // This flag is being set here as a result of the bug. When the flag was set in the
-        // styles.xml keyboard was messing the layout of dialogs (create dir, rename).
-        // Attempts were made to keep the flag in the main theme and to override it in the dialog
-        // layout xml or to create separate style for dialog and assign it in styles.xml.
-        // None of this brought successful results.
-        // Setting the flag works here most probably because of the timing when it is set. Also the
-        // setting might not affect the dialogs that are created in new windows or it affects them
-        // in the different way that having this in the style.
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
         // Record the time when onCreate is invoked for metric.
         mStartTime = new Date().getTime();
 
@@ -140,7 +130,6 @@ public abstract class BaseActivity extends Activity
         mSearchManager = new SearchViewManager(this, icicle);
 
         DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
-        Display.adjustToolbar(toolbar, this);
         setActionBar(toolbar);
         mNavigator = new NavigationView(
                 mDrawer,

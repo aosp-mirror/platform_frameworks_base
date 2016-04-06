@@ -84,7 +84,7 @@ abstract class DrawerController implements DrawerListener {
 
         View drawer = activity.findViewById(R.id.drawer_roots);
         Toolbar toolbar = (Toolbar) activity.findViewById(R.id.roots_toolbar);
-        Display.adjustToolbar(toolbar, activity);
+
         drawer.getLayoutParams().width = calculateDrawerWidth(activity);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
