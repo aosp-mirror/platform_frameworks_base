@@ -110,6 +110,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
+import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7005,10 +7006,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
         }
 
+        UsageStatsManager usageMgr =
+                (UsageStatsManager) mContext.getSystemService(Context.USAGE_STATS_SERVICE);
+
         int curr = 0;
         int total = pkgs.size();
         for (PackageParser.Package pkg : pkgs) {
             curr++;
+
+            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, "Skipping update of of non-optimizable app " + pkg.packageName);
+                }
+                continue;
+            }
+
+            if (!causeFirstBoot && usageMgr.isAppInactive(pkg.packageName)) {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, "Skipping update of of idle app " + pkg.packageName);
+                }
+                continue;
+            }
 
             if (DEBUG_DEXOPT) {
                 Log.i(TAG, "Extracting app " + curr + " of " + total + ": " + pkg.packageName);
@@ -7023,16 +7041,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if (PackageDexOptimizer.canOptimizePackage(pkg)) {
-                // If the cache was pruned, any compiled odex files will likely be out of date
-                // and would have to be patched (would be SELF_PATCHOAT, which is deprecated).
-                // Instead, force the extraction in this case.
-                performDexOpt(pkg.packageName,
-                        null /* instructionSet */,
-                        false /* checkProfiles */,
-                        causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
-                        false /* force */);
-            }
+            performDexOpt(pkg.packageName,
+                    null /* instructionSet */,
+                    false /* checkProfiles */,
+                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
+                    false /* force */);
         }
     }
 
